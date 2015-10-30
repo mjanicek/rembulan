@@ -13,6 +13,7 @@
   <modules>
     <module>rembulan-core</module>
     <module>rembulan-parser</module>
+    <module>rembulan-tests</module>
   </modules>
 
 </project>
