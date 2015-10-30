@@ -8,7 +8,7 @@ public abstract class Value {
 		}
 		else {
 			if (o instanceof Number) {
-				return RawOperators.toString((Number) o);
+				return Conversions.numberToLuaFormatString((Number) o);
 			}
 			else {
 				return o.toString();

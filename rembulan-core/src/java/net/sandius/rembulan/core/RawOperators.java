@@ -8,21 +8,6 @@ public abstract class RawOperators {
 		// not to be instantiated
 	}
 
-	public static String toString(Number n) {
-		Check.notNull(n);
-
-		if (isFloatingPoint(n)) {
-			double v = n.doubleValue();
-			if (Double.isNaN(v)) return "nan";
-			else if (v == Double.POSITIVE_INFINITY) return "inf";
-			else if (v == Double.NEGATIVE_INFINITY) return "-inf";
-			else return Double.toString(v);  // TODO: check that the format matches that of Lua
-		}
-		else {
-			return Long.toString(n.longValue());
-		}
-	}
-
 	public static boolean isFloatingPoint(Number n) {
 		return n instanceof Double || n instanceof Float;
 	}
