@@ -1,5 +1,20 @@
 package net.sandius.rembulan.core;
 
+/*
+ * Mappings between types:
+ *
+ * Lua            Java (Rembulan)
+ * --------------------------------
+ * nil            null pointer
+ * boolean        java.lang.Boolean
+ * lightuserdata  any class other than these mentioned
+ * number         java.lang.Number; java.lang.Long for integers, java.lang.Double for floats
+ * string         java.lang.String
+ * table          net.sandius.rembulan.core.Table
+ * function       net.sandius.rembulan.core.Function
+ * userdata       net.sandius.rembulan.core.Userdata
+ * thread         net.sandius.rembulan.core.Coroutine
+ */
 public enum LuaType {
 
 	NIL (0, "nil"),
