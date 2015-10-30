@@ -18,32 +18,26 @@ public abstract class Conversions {
 		return (double) l == n.doubleValue() && l != Long.MAX_VALUE ? l : null;
 	}
 
-	public static Number stringToNumber(String s) throws NumberFormatException {
+	public static double stringToDouble(String s) throws NumberFormatException {
 		Check.notNull(s);
 
 		try {
-			return Long.parseLong(s);
+			return Double.parseDouble(s);
 		}
 		catch (NumberFormatException e0) {
-			// it's not a long
+			// might be missing the trailing exponent for hex floating point constants
 			try {
-				return Double.parseDouble(s);
+				return Double.parseDouble(s + "p0");
 			}
 			catch (NumberFormatException e1) {
-				// might be missing the trailing exponent for hex floating point constants
-				try {
-					return Double.parseDouble(s + "p0");
-				}
-				catch (NumberFormatException e2) {
-					throw new NumberFormatException("Not a number: " + s);
-				}
+				throw new NumberFormatException("Not a number: " + s);
 			}
 		}
 	}
 
 	public static Number stringAsNumber(String s) {
 		try {
-			return stringToNumber(s);
+			return stringToDouble(s);
 		}
 		catch (NumberFormatException e) {
 			return null;
