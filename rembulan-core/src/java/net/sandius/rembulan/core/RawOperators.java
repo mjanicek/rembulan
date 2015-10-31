@@ -65,7 +65,7 @@ public abstract class RawOperators {
 		else {
 			long x = a.longValue();
 			long y = b.longValue();
-			if (y == 0) throw new IllegalArgumentException("attempt to perform 'n%0");
+			if (y == 0) throw new IllegalArgumentException("attempt to perform 'n%0'");
 			else return x - y * (long) Math.floor((double) x / (double) y);
 		}
 	}
