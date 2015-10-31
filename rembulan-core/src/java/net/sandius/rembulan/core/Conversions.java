@@ -27,7 +27,7 @@ public abstract class Conversions {
 		catch (NumberFormatException e0) {
 			// might be missing the trailing exponent for hex floating point constants
 			try {
-				return Double.parseDouble(s + "p0");
+				return Double.parseDouble(s.trim() + "p0");
 			}
 			catch (NumberFormatException e1) {
 				throw new NumberFormatException("Not a number: " + s);
