@@ -2,6 +2,8 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
+import java.math.BigDecimal;
+
 public abstract class RawOperators {
 
 	private RawOperators() {
@@ -9,7 +11,7 @@ public abstract class RawOperators {
 	}
 
 	public static boolean isFloatingPoint(Number n) {
-		return n instanceof Double || n instanceof Float;
+		return n instanceof Double || n instanceof Float || n instanceof BigDecimal;
 	}
 
 	public static boolean isNaN(Object o) {
