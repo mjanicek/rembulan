@@ -293,7 +293,7 @@ public class PrototypeLoader {
 		loadConstants(f);
 		loadNestedPrototypes(f);
 		loadUpvalues(f);
-		loadDebugInfo(f);
+		loadDebugInfo(f);  // TODO: add support for debug-stripped chunks
 
 		// TODO: add check here, for debugging purposes, I believe
 		// see ldebug.c
