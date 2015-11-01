@@ -9,6 +9,8 @@ import java.util.ArrayList;
 
 public class Prototype {
 
+	// TODO: split into required and optional debug part
+
 	/* constants used by the function */
 	private final ReadOnlyArray<Object> consts;
 
