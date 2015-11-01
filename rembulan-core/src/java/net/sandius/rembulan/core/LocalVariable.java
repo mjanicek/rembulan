@@ -53,4 +53,22 @@ public class LocalVariable {
 		return variableName + " " + beginPC + "-" + endPC;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		LocalVariable that = (LocalVariable) o;
+
+		return beginPC == that.beginPC && endPC == that.endPC && variableName.equals(that.variableName);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = variableName.hashCode();
+		result = 31 * result + beginPC;
+		result = 31 * result + endPC;
+		return result;
+	}
+
 }
