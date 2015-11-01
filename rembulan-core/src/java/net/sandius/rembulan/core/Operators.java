@@ -34,12 +34,7 @@ public class Operators {
 	}
 
 	private static Object callHandler(Object handler, Object[] args) {
-		if (handler instanceof Function) {
-			throw new UnsupportedOperationException("not implemented");  // TODO
-		}
-		else {
-			return trim(call(handler, args));
-		}
+		return trim(call(handler, args));
 	}
 
 	private static Object callHandler(Object handler, Object o) {
@@ -311,16 +306,20 @@ public class Operators {
 		}
 	}
 
-	public static Object call(Object func, Object[] args) {
-		assert (!(func instanceof Function));
-
-		Object handler = Metatables.getMetamethod(func, Metatables.MT_CALL);
-
-		if (handler != null) {
-			return callHandler(handler, func, args);
+	public static Object call(Object tgt, Object[] args) {
+		if (tgt instanceof Function) {
+			Function f = (Function) tgt;
+			return f.invoke(args);
 		}
 		else {
-			throw new IllegalOperationAttemptException("call", LuaType.typeOf(func).name);
+			Object handler = Metatables.getMetamethod(tgt, Metatables.MT_CALL);
+
+			if (handler != null) {
+				return callHandler(handler, tgt, args);
+			}
+			else {
+				throw new IllegalOperationAttemptException("call", LuaType.typeOf(tgt).name);
+			}
 		}
 	}
 
