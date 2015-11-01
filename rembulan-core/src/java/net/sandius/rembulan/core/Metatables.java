@@ -34,7 +34,7 @@ public class Metatables {
 
 
 	public static Table getMetatable(Object o) {
-		if (o != null && o instanceof LuaObject) {
+		if (o instanceof LuaObject) {
 			return ((LuaObject) o).getMetatable();
 		}
 		else {
