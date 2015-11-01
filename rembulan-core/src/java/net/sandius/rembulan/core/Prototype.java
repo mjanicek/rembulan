@@ -209,6 +209,9 @@ public class Prototype {
 		// FIXME: ugly! is there a point in having this even?
 		public Builder(Prototype proto) {
 			this.constants = new ArrayList<Object>();
+			for (Object c : proto.consts) {
+				constants.add(c);
+			}
 
 			this.p = new ArrayList<Prototype.Builder>();
 			for (Prototype pp : proto.p) {
