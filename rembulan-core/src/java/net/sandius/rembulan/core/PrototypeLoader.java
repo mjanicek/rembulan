@@ -202,41 +202,39 @@ public class PrototypeLoader {
 		return Double.longBitsToDouble(loadInt64());
 	}
 
+	public Object loadConstant() throws IOException {
+		byte tag = is.readByte();
+		switch (tag) {
+			case LUA_TNIL:     return null;
+			case LUA_TBOOLEAN: return loadBoolean();
+			case LUA_TINT:     return loadInt32();
+
+			case LUA_TNUMINT:  return loadInteger();
+			case LUA_TNUMFLT:  return loadFloat();
+
+			case LUA_TSHRSTR:  return loadString();
+			case LUA_TLNGSTR:  return loadString();  // TODO: is this correct?
+
+			default: throw new IllegalStateException("Illegal constant type: " + tag);
+		}
+	}
+
 	/**
 	 * Load a list of constants from a binary chunk
 	 * @param f the function prototype
 	 * @throws IOException if an i/o exception occurs
 	 */
 	void loadConstants(Prototype.Builder f) throws IOException {
+		// load constants
 		int n = loadInt32();
-
 		for (int i = 0; i < n; i++) {
-			Object v;
-
-			byte tpe = is.readByte();
-			switch (tpe) {
-				case LUA_TNIL:     v = null; break;
-				case LUA_TBOOLEAN: v = loadBoolean(); break;
-				case LUA_TINT:     v = loadInt32(); break;
-
-				case LUA_TNUMINT:  v = loadInteger(); break;
-				case LUA_TNUMFLT:  v = loadFloat(); break;
-
-				case LUA_TSHRSTR:  v = loadString(); break;
-				case LUA_TLNGSTR:  v = loadString(); break;  // TODO: is this correct?
-
-				default: throw new IllegalStateException("Illegal constant type: " + tpe);
-			}
-
-			f.constants.add(v);
+			f.constants.add(loadConstant());
 		}
 
 		// load nested prototypes
-
 		n = loadInt32();
 		for (int i = 0; i < n; i++) {
-			Prototype p = loadFunction(f.source);
-			f.p.add(new Prototype.Builder(p));
+			f.p.add(loadFunction(f.source));
 		}
 	}
 
