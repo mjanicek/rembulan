@@ -225,14 +225,14 @@ public class PrototypeLoader {
 	 * @throws IOException if an i/o exception occurs
 	 */
 	void loadConstants(Prototype.Builder f) throws IOException {
-		// load constants
 		int n = loadInt32();
 		for (int i = 0; i < n; i++) {
 			f.constants.add(loadConstant());
 		}
+	}
 
-		// load nested prototypes
-		n = loadInt32();
+	void loadNestedPrototypes(Prototype.Builder f) throws IOException {
+		int n = loadInt32();
 		for (int i = 0; i < n; i++) {
 			f.p.add(loadFunction(f.source));
 		}
@@ -289,6 +289,7 @@ public class PrototypeLoader {
 		f.maxstacksize = is.readUnsignedByte();
 		f.code.set(loadInt32Array());
 		loadConstants(f);
+		loadNestedPrototypes(f);
 		loadUpvalues(f);
 		loadDebug(f);
 
