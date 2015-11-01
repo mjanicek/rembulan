@@ -72,19 +72,42 @@ public class Prototype {
 		this.numparams = numparams;
 		this.is_vararg = is_vararg;
 		this.maxstacksize = maxstacksize;
+
+		for (Object o : this.consts) {
+			if (!isValidConstant(o)) {
+				throw new IllegalArgumentException("Not a valid constant: " + o);
+			}
+		}
 	}
 
-	public static Prototype newEmptyPrototype(int n_upvalues) {
-		return new Prototype(
-				new ReadOnlyArray<Object>(new Object[0]),
-				IntVector.wrap(new int[0]),
-				new ReadOnlyArray<Prototype>(new Prototype[0]),
-				IntVector.wrap(new int[0]),
-				new ReadOnlyArray<LocalVariable>(new LocalVariable[0]),
-				new ReadOnlyArray<Upvalue.Desc>(new Upvalue.Desc[n_upvalues]),
-				null,
-				0, 0, 0, false, 0);
+	public static boolean isValidConstant(Object o) {
+		LuaType tpe = LuaType.typeOf(o);
+		switch (tpe) {
+			case NIL:
+			case BOOLEAN:
+			case NUMBER:
+			case STRING:
+				return true;
+			default:
+				return false;
+		}
 	}
+
+//	public static Prototype newEmptyPrototype(int n_upvalues) {
+//		return new Prototype(
+//				new ReadOnlyArray<Object>(new Object[0]),
+//				IntVector.wrap(new int[0]),
+//				new ReadOnlyArray<Prototype>(new Prototype[0]),
+//				IntVector.wrap(new int[0]),
+//				new ReadOnlyArray<LocalVariable>(new LocalVariable[0]),
+//				new ReadOnlyArray<Upvalue.Desc>(new Upvalue.Desc[n_upvalues]),
+//				null,
+//				0, 0, 0, false, 0);
+//	}
+
+//	public static Prototype newEmptyPrototype() {
+//		return Prototype.newEmptyPrototype(0);
+//	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -123,10 +146,6 @@ public class Prototype {
 		result = 31 * result + (is_vararg ? 1 : 0);
 		result = 31 * result + maxstacksize;
 		return result;
-	}
-
-	public static Prototype newEmptyPrototype() {
-		return Prototype.newEmptyPrototype(0);
 	}
 
 	public ReadOnlyArray<Object> getConstants() {
