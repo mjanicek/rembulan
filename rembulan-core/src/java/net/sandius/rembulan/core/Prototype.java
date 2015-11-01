@@ -187,7 +187,7 @@ public class Prototype {
 
 		public IntVector lineinfo;
 
-		public final ArrayList<LocalVariable.Builder> locvars;
+		public final ArrayList<LocalVariable> locvars;
 		public final ArrayList<Upvalue.Desc.Builder> upvalues;
 
 		public String source;
@@ -202,7 +202,7 @@ public class Prototype {
 			this.code = null;
 			this.p = new ArrayList<Prototype>();
 			this.lineinfo = null;
-			this.locvars = new ArrayList<LocalVariable.Builder>();
+			this.locvars = new ArrayList<LocalVariable>();
 			this.upvalues = new ArrayList<Upvalue.Desc.Builder>();
 		}
 
@@ -220,9 +220,9 @@ public class Prototype {
 
 			this.lineinfo = proto.lineinfo;
 
-			this.locvars = new ArrayList<LocalVariable.Builder>();
+			this.locvars = new ArrayList<LocalVariable>();
 			for (LocalVariable lv : proto.locvars) {
-				this.locvars.add(new LocalVariable.Builder(lv.variableName, lv.beginPC, lv.endPC));
+				this.locvars.add(lv);
 			}
 
 			this.upvalues = new ArrayList<Upvalue.Desc.Builder>();
@@ -256,7 +256,7 @@ public class Prototype {
 
 			LocalVariable[] lvs0 = new LocalVariable[this.locvars.size()];
 			for (int i = 0; i < this.locvars.size(); i++) {
-				lvs0[i] = this.locvars.get(i).build();
+				lvs0[i] = this.locvars.get(i);
 			}
 			ReadOnlyArray<LocalVariable> lvs = new ReadOnlyArray<LocalVariable>(lvs0);
 

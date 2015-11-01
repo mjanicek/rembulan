@@ -254,7 +254,7 @@ public class PrototypeLoader {
 	 * @param f the function Prototype
 	 * @throws IOException if there is an i/o exception
 	 */
-	void loadDebug(Prototype.Builder f) throws IOException {
+	void loadDebugInfo(Prototype.Builder f) throws IOException {
 		f.source = loadString();
 		f.lineinfo = loadIntVector();
 
@@ -263,7 +263,7 @@ public class PrototypeLoader {
 			String varname = loadString();
 			int startpc = loadInt32();
 			int endpc = loadInt32();
-			f.locvars.add(new LocalVariable.Builder(varname, startpc, endpc));
+			f.locvars.add(new LocalVariable(varname, startpc, endpc));
 		}
 
 		n = loadInt32();
@@ -293,7 +293,7 @@ public class PrototypeLoader {
 		loadConstants(f);
 		loadNestedPrototypes(f);
 		loadUpvalues(f);
-		loadDebug(f);
+		loadDebugInfo(f);
 
 		// TODO: add check here, for debugging purposes, I believe
 		// see ldebug.c

@@ -22,7 +22,6 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.GenericBuilder;
 
 /**
  * Data class to hold debug information relating to local variables for a {@link Prototype}
@@ -52,25 +51,6 @@ public class LocalVariable {
 	
 	public String tojstring() {
 		return variableName + " " + beginPC + "-" + endPC;
-	}
-
-	public static class Builder implements GenericBuilder<LocalVariable> {
-
-		public String varname;
-		public int startpc;
-		public int endpc;
-
-		public Builder(String varname, int startpc, int endpc) {
-			this.varname = varname;
-			this.startpc = startpc;
-			this.endpc = endpc;
-		}
-
-		@Override
-		public LocalVariable build() {
-			return new LocalVariable(varname, startpc, endpc);
-		}
-
 	}
 
 }
