@@ -12,11 +12,16 @@ public class IntVector {
 		this.values = values;
 	}
 
+	public static IntVector wrap(int[] array) {
+		Check.notNull(array);
+		return new IntVector(array);
+	}
+
 	public static IntVector copyFrom(int[] array) {
 		Check.notNull(array);
 		int[] values = new int[array.length];
 		System.arraycopy(array, 0, values, 0, array.length);
-		return new IntVector(values);
+		return wrap(values);
 	}
 
 	@Override
