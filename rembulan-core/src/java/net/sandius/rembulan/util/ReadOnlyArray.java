@@ -2,6 +2,7 @@ package net.sandius.rembulan.util;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,6 +23,21 @@ public class ReadOnlyArray<T> implements Iterable<T> {
 		while (it.hasNext()) {
 			this.values[i++] = it.next();
 		}
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		ReadOnlyArray<?> that = (ReadOnlyArray<?>) o;
+
+		return Arrays.deepEquals(this.values, that.values);
+	}
+
+	@Override
+	public int hashCode() {
+		return Arrays.deepHashCode(values);
 	}
 
 	public T get(int idx) {
