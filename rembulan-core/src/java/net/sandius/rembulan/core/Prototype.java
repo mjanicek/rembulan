@@ -34,7 +34,7 @@ public class Prototype {
 
 	private final int numparams;
 
-	private final int is_vararg;
+	private final boolean is_vararg;
 
 	private final int maxstacksize;
 
@@ -49,7 +49,7 @@ public class Prototype {
 			int linedefined,
 			int lastlinedefined,
 			int numparams,
-			int is_vararg,
+			boolean is_vararg,
 			int maxstacksize) {
 
 		Check.notNull(consts);
@@ -83,7 +83,7 @@ public class Prototype {
 				new ReadOnlyArray<LocalVariable>(new LocalVariable[0]),
 				new ReadOnlyArray<Upvalue.Desc>(new Upvalue.Desc[n_upvalues]),
 				null,
-				0, 0, 0, 0, 0);
+				0, 0, 0, false, 0);
 	}
 
 	public static Prototype newEmptyPrototype() {
@@ -153,7 +153,7 @@ public class Prototype {
 	}
 
 	public boolean isVararg() {
-		return is_vararg != 0;
+		return is_vararg;
 	}
 
 	public int getMaximumStackSize() {
@@ -194,7 +194,7 @@ public class Prototype {
 		public int linedefined;
 		public int lastlinedefined;
 		public int numparams;
-		public int is_vararg;
+		public boolean is_vararg;
 		public int maxstacksize;
 
 		public Builder() {

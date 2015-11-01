@@ -51,6 +51,12 @@ public class PrototypeLoader {
 	public static final int LUA_TTHREAD			= 8;
 	public static final int LUA_TVALUE          = 9;
 
+	public static final int LUA_TSHRSTR = LUA_TSTRING | (0 << 4);  // short strings
+	public static final int LUA_TLNGSTR = LUA_TSTRING | (1 << 4);  // long strings
+
+	public static final int LUA_TNUMFLT = LUA_TNUMBER | (0 << 4);  // float numbers
+	public static final int LUA_TNUMINT = LUA_TNUMBER | (1 << 4);  // integer numbers
+
 	/** The character encoding to use for file encoding.  Null means the default encoding */
 	public static String encoding = null;
 
@@ -65,8 +71,8 @@ public class PrototypeLoader {
 	public static final String SOURCE_BINARY_STRING = "binary string";
 
 
-	/** for header of binary files -- this is Lua 5.2 */
-	public static final int LUAC_VERSION		= 0x52;
+	/** for header of binary files -- this is Lua 5.3 */
+	public static final int LUAC_VERSION		= 0x53;
 
 	/** for header of binary files -- this is the official format */
 	public static final int LUAC_FORMAT		= 0;
@@ -97,67 +103,88 @@ public class PrototypeLoader {
 	private static final Upvalue.Desc[]  NOUPVALDESCS = {};
 	private static final int[]       NOINTS      = {};
 
-	/** Read buffer */
-	private byte[] buf = new byte[512];
-
-	/** Load a 4-byte int value from the input stream
-	 * @return the int value loaded.
-	 **/
-	int loadInt() throws IOException {
-		is.readFully(buf,0,4);
-		return luacLittleEndian?
-				(buf[3] << 24) | ((0xff & buf[2]) << 16) | ((0xff & buf[1]) << 8) | (0xff & buf[0]):
-				(buf[0] << 24) | ((0xff & buf[1]) << 16) | ((0xff & buf[2]) << 8) | (0xff & buf[3]);
+	int bytesToInt(byte a, byte b, byte c, byte d) {
+		return luacLittleEndian
+				? (d << 24) | ((0xff & c) << 16) | ((0xff & b) << 8) | (0xff & a)
+				: (a << 24) | ((0xff & b) << 16) | ((0xff & c) << 8) | (0xff & d);
 	}
 
-	/** Load an array of int values from the input stream
+	/**
+	 * Load a signed 32-bit integer from the input stream.
+	 *
+	 * @return the int value loaded.
+	 */
+	int loadInt32() throws IOException {
+		byte[] buf = new byte[4];
+		is.readFully(buf, 0, 4);
+		return bytesToInt(buf[0], buf[1], buf[2], buf[3]);
+	}
+
+	/**
+	 * Load a signed 64-bit integer from the input stream.
+	 *
+	 * @return the long value loaded.
+	 */
+	long loadInt64() throws IOException {
+		int u = loadInt32();
+		int v = loadInt32();
+
+		long a, b;
+		if (luacLittleEndian) {
+			a = u;
+			b = v;
+		}
+		else {
+			b = u;
+			a = v;
+		}
+
+		return (b << 32) | (a & 0xffffffffL);
+	}
+
+	/**
+	 * Load an array of signed 32-bit integers from the input stream.
+	 *
 	 * @return the array of int values loaded.
-	 **/
-	int[] loadIntArray() throws IOException {
-		int n = loadInt();
-		if ( n == 0 )
+	 */
+	int[] loadInt32Array() throws IOException {
+		int n = loadInt32();
+		if (n == 0) {
 			return NOINTS;
+		}
 
 		// read all data at once
 		int m = n << 2;
-		if ( buf.length < m )
-			buf = new byte[m];
-		is.readFully(buf,0,m);
+		byte[] buf = new byte[m];
+		is.readFully(buf, 0, m);
+
 		int[] array = new int[n];
-		for ( int i=0, j=0; i<n; ++i, j+=4 )
-			array[i] = luacLittleEndian?
-					(buf[j+3] << 24) | ((0xff & buf[j+2]) << 16) | ((0xff & buf[j+1]) << 8) | (0xff & buf[j+0]):
-					(buf[j+0] << 24) | ((0xff & buf[j+1]) << 16) | ((0xff & buf[j+2]) << 8) | (0xff & buf[j+3]);
+		for (int i = 0; i < n; i++) {
+			int j = i << 2;
+			array[i] = bytesToInt(buf[j + 0], buf[j + 1], buf[j + 2], buf[j + 3]);
+		}
 
 		return array;
 	}
 
-	/** Load a long  value from the input stream
-	 * @return the long value loaded.
-	 **/
-	long loadInt64() throws IOException {
-		int a,b;
-		if ( this.luacLittleEndian ) {
-			a = loadInt();
-			b = loadInt();
-		} else {
-			b = loadInt();
-			a = loadInt();
-		}
-		return (((long)b)<<32) | (((long)a)&0xffffffffL);
+	boolean loadBoolean() throws IOException {
+		return is.readUnsignedByte() != 0;
 	}
 
-	/** Load a lua string value from the input stream.
+	/** Load a string from the input stream.
+	 *
 	 * @return the string value loaded.
-	 **/
+	 */
 	String loadString() throws IOException {
-		int size = this.luacSizeofSizeT == 8 ? (int) loadInt64() : loadInt();
+		int size = this.luacSizeofSizeT == 8 ? (int) loadInt64() : loadInt32();
 		if (size == 0) {
 			return null;
 		}
 
 		byte[] bytes = new byte[size];
 		is.readFully(bytes, 0, size);
+
+		assert (bytes[size - 1] == 0);  // we can ignore the last byte
 
 		char[] chars = new char[size - 1];
 		for (int i = 0; i < chars.length; i++) {
@@ -167,42 +194,12 @@ public class PrototypeLoader {
 		return String.valueOf(chars);
 	}
 
-	/**
-	 * Convert bits in a long value to a number.
-	 * @param bits long value containing the bits
-	 * @return {@link Long} or {@link Double} whose value corresponds to the bits provided.
-	 */
-	public static Number longBitsToLuaNumber( long bits ) {
-		if ( ( bits & ( ( 1L << 63 ) - 1 ) ) == 0L ) {
-			return 0L;
-		}
-
-		int e = (int)((bits >> 52) & 0x7ffL) - 1023;
-
-		if ( e >= 0 && e < 31 ) {
-			long f = bits & 0xFFFFFFFFFFFFFL;
-			int shift = 52 - e;
-			long intPrecMask = ( 1L << shift ) - 1;
-			if ( ( f & intPrecMask ) == 0 ) {
-				int intValue = (int)( f >> shift ) | ( 1 << e );
-				return Long.valueOf( ( ( bits >> 63 ) != 0 ) ? -intValue : intValue );
-			}
-		}
-
-		return Double.longBitsToDouble(bits);
+	public long loadInteger() throws IOException {
+		return loadInt64();
 	}
 
-	/**
-	 * Load a number from a binary chunk
-	 * @return the {@link Number} loaded
-	 * @throws IOException if an i/o exception occurs
-	 */
-	Number loadNumber() throws IOException {
-		if ( luacNumberFormat == NUMBER_FORMAT_INTS_ONLY ) {
-			return loadInt();
-		} else {
-			return longBitsToLuaNumber( loadInt64() );
-		}
+	public double loadFloat() throws IOException {
+		return Double.longBitsToDouble(loadInt64());
 	}
 
 	/**
@@ -211,50 +208,42 @@ public class PrototypeLoader {
 	 * @throws IOException if an i/o exception occurs
 	 */
 	void loadConstants(Prototype.Builder f) throws IOException {
-		int n = loadInt();
+		int n = loadInt32();
 
 		for (int i = 0; i < n; i++) {
 			Object v;
 
-			switch (is.readByte()) {
-				case LUA_TNIL:
-					v = null;
-					break;
-				case LUA_TBOOLEAN:
-					v = (0 != is.readUnsignedByte() ? Boolean.TRUE : Boolean.FALSE);
-					break;
-				case LUA_TINT:
-					v = Integer.valueOf(loadInt());
-					break;
-				case LUA_TNUMBER:
-					v = loadNumber();
-					break;
-				case LUA_TSTRING:
-					v = loadString();
-					break;
-				default:
-					throw new IllegalStateException("bad constant");
+			byte tpe = is.readByte();
+			switch (tpe) {
+				case LUA_TNIL:     v = null; break;
+				case LUA_TBOOLEAN: v = loadBoolean(); break;
+				case LUA_TINT:     v = loadInt32(); break;
+
+				case LUA_TNUMINT:  v = loadInteger(); break;
+				case LUA_TNUMFLT:  v = loadFloat(); break;
+
+				case LUA_TSHRSTR:  v = loadString(); break;
+				case LUA_TLNGSTR:  v = loadString(); break;  // TODO: is this correct?
+
+				default: throw new IllegalStateException("Illegal constant type: " + tpe);
 			}
 
 			f.constants.add(v);
 		}
 
-		n = loadInt();
-		Prototype[] protos = n > 0 ? new Prototype[n] : NOPROTOS;
-		for (int i = 0; i < n; i++)
-			protos[i] = loadFunction(f.source);
+		// load nested prototypes
 
-		f.p.clear();
-		for (Prototype proto : protos) {
-			f.p.add(new Prototype.Builder(proto));
+		n = loadInt32();
+		for (int i = 0; i < n; i++) {
+			Prototype p = loadFunction(f.source);
+			f.p.add(new Prototype.Builder(p));
 		}
 	}
 
-
 	void loadUpvalues(Prototype.Builder f) throws IOException {
-		int n = loadInt();
+		int n = loadInt32();
 		for (int i = 0; i < n; i++) {
-			boolean instack = is.readByte() != 0;
+			boolean instack = loadBoolean();
 			int idx = ((int) is.readByte()) & 0xff;
 			f.upvalues.add(new Upvalue.Desc.Builder(null, instack, idx));
 		}
@@ -267,17 +256,17 @@ public class PrototypeLoader {
 	 */
 	void loadDebug(Prototype.Builder f) throws IOException {
 		f.source = loadString();
-		f.lineinfo.set(loadIntArray());
+		f.lineinfo.set(loadInt32Array());
 
-		int n = loadInt();
+		int n = loadInt32();
 		for (int i = 0; i < n; i++) {
 			String varname = loadString();
-			int startpc = loadInt();
-			int endpc = loadInt();
+			int startpc = loadInt32();
+			int endpc = loadInt32();
 			f.locvars.add(new LocalVariable.Builder(varname, startpc, endpc));
 		}
 
-		n = loadInt();
+		n = loadInt32();
 		for (int i = 0; i < n; i++) {
 			f.upvalues.get(i).name = loadString();
 		}
@@ -295,12 +284,12 @@ public class PrototypeLoader {
 //		f.source = loadString();
 //		if ( f.source == null )
 //			f.source = p;
-		f.linedefined = loadInt();
-		f.lastlinedefined = loadInt();
+		f.linedefined = loadInt32();
+		f.lastlinedefined = loadInt32();
 		f.numparams = is.readUnsignedByte();
-		f.is_vararg = is.readUnsignedByte();
+		f.is_vararg = loadBoolean();
 		f.maxstacksize = is.readUnsignedByte();
-		f.code.set(loadIntArray());
+		f.code.set(loadInt32Array());
 		loadConstants(f);
 		loadUpvalues(f);
 		loadDebug(f);
@@ -334,11 +323,11 @@ public class PrototypeLoader {
 	/**
 	 * Load input stream as a lua binary chunk if the first 4 bytes are the lua binary signature.
 	 * @param stream InputStream to read, after having read the first byte already
-	 * @param chunkname Name to apply to the loaded chunk
+	 * @param chunkName Name to apply to the loaded chunk
 	 * @return {@link Prototype} that was loaded, or null if the first 4 bytes were not the lua signature.
 	 * @throws IOException if an IOException occurs
 	 */
-	public Prototype undump(InputStream stream, String chunkname) throws IOException {
+	public Prototype undump(InputStream stream, String chunkName) throws IOException {
 
 		// check rest of signature
 		if (stream.read() != LUA_SIGNATURE[0]
@@ -349,8 +338,8 @@ public class PrototypeLoader {
 		}
 
 		// load file as a compiled chunk
-		String sname = getSourceName(chunkname);
-		PrototypeLoader s = new PrototypeLoader(stream, sname);
+		String sourceName = getSourceName(chunkName);
+		PrototypeLoader s = new PrototypeLoader(stream, sourceName);
 		s.loadHeader();
 
 		// check format
@@ -362,7 +351,7 @@ public class PrototypeLoader {
 			default:
 				throw new CompatibilityException("unsupported int size");
 		}
-		return s.loadFunction(sname);
+		return s.loadFunction(sourceName);
 	}
 
 	/**
@@ -371,16 +360,19 @@ public class PrototypeLoader {
 	 * @return source file name
 	 */
 	public static String getSourceName(String name) {
-		String sname = name;
-		if (name.startsWith("@") || name.startsWith("=")) sname = name.substring(1);
-		else if (name.startsWith("\033")) sname = SOURCE_BINARY_STRING;
-		return sname;
+		if (name.startsWith("@") || name.startsWith("=")) {
+			name = name.substring(1);
+		}
+		else if (name.startsWith("\033")) {
+			name = SOURCE_BINARY_STRING;
+		}
+		return name;
 	}
 
 	/** Private constructor for create a load state */
 	private PrototypeLoader(InputStream stream, String name) {
 		this.name = name;
-		this.is = new DataInputStream( stream );
+		this.is = new DataInputStream(stream);
 	}
 
 	private PrototypeLoader() {
