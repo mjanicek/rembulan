@@ -209,7 +209,6 @@ public class PrototypeLoader {
 		switch (tag) {
 			case LUA_TNIL:     return null;
 			case LUA_TBOOLEAN: return loadBoolean();
-			case LUA_TINT:     return loadInt32();
 
 			case LUA_TNUMINT:  return loadInteger();
 			case LUA_TNUMFLT:  return loadFloat();
