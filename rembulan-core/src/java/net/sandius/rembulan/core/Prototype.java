@@ -300,36 +300,18 @@ public class Prototype {
 
 		@Override
 		public Prototype build() {
-			Object[] cs0 = new Object[this.constants.size()];
-			for (int i = 0; i < this.constants.size(); i++) {
-				cs0[i] = this.constants.get(i);
-			}
-			ReadOnlyArray<Object> consts = new ReadOnlyArray<Object>(cs0);
-
-			Prototype[] ps0 = new Prototype[this.p.size()];
-			for (int i = 0; i < this.p.size(); i++) {
-				ps0[i] = this.p.get(i);
-			}
-			ReadOnlyArray<Prototype> ps = new ReadOnlyArray<Prototype>(ps0);
-
-			LocalVariable[] lvs0 = new LocalVariable[this.locvars.size()];
-			for (int i = 0; i < this.locvars.size(); i++) {
-				lvs0[i] = this.locvars.get(i);
-			}
-			ReadOnlyArray<LocalVariable> lvs = new ReadOnlyArray<LocalVariable>(lvs0);
-
 			Upvalue.Desc[] uvs0 = new Upvalue.Desc[this.upvalues.size()];
 			for (int i = 0; i < this.upvalues.size(); i++) {
 				uvs0[i] = this.upvalues.get(i).build();
 			}
-			ReadOnlyArray<Upvalue.Desc> uvs = new ReadOnlyArray<Upvalue.Desc>(uvs0);
+			ReadOnlyArray<Upvalue.Desc> uvs = ReadOnlyArray.wrap(uvs0);
 
 			return new Prototype(
-					consts,
+					ReadOnlyArray.fromCollection(Object.class, constants),
 					code,
-					ps,
+					ReadOnlyArray.fromCollection(Prototype.class, p),
 					lineinfo,
-					lvs,
+					ReadOnlyArray.fromCollection(LocalVariable.class, locvars),
 					uvs,
 					source,
 					linedefined,

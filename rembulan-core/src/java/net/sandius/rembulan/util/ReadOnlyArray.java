@@ -11,18 +11,33 @@ public class ReadOnlyArray<T> implements Iterable<T> {
 
 	protected final T[] values;
 
-	public ReadOnlyArray(T[] values) {
+	private ReadOnlyArray(T[] values) {
 		this.values = values;
 	}
 
-	public ReadOnlyArray(Class<T> clazz, Collection<T> values) {
-		this.values = (T[]) Array.newInstance(clazz, values.size());
+	public static <T> ReadOnlyArray<T> wrap(T[] values) {
+		return new ReadOnlyArray<T>(values);
+	}
 
-		Iterator<T> it = values.iterator();
+	public static <T> ReadOnlyArray<T> copyFrom(T[] values) {
+		Check.notNull(values);
+		return wrap(Arrays.copyOf(values, values.length));
+	}
+
+	public static <T> ReadOnlyArray<T> fromCollection(Class<T> clazz, Collection<T> c) {
+		Check.notNull(clazz);
+		Check.notNull(c);
+
+		@SuppressWarnings("unchecked")
+		T[] values = (T[]) Array.newInstance(clazz, c.size());
+
+		Iterator<T> it = c.iterator();
 		int i = 0;
 		while (it.hasNext()) {
-			this.values[i++] = it.next();
+			values[i++] = it.next();
 		}
+
+		return wrap(values);
 	}
 
 	@Override
