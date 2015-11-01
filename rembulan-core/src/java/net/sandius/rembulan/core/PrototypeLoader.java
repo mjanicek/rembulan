@@ -22,6 +22,8 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.util.IntVector;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -147,10 +149,10 @@ public class PrototypeLoader {
 	 *
 	 * @return the array of int values loaded.
 	 */
-	int[] loadInt32Array() throws IOException {
+	IntVector loadIntVector() throws IOException {
 		int n = loadInt32();
 		if (n == 0) {
-			return NOINTS;
+			return IntVector.EMPTY;
 		}
 
 		// read all data at once
@@ -164,7 +166,7 @@ public class PrototypeLoader {
 			array[i] = bytesToInt(buf[j + 0], buf[j + 1], buf[j + 2], buf[j + 3]);
 		}
 
-		return array;
+		return IntVector.wrap(array);
 	}
 
 	boolean loadBoolean() throws IOException {
@@ -254,7 +256,7 @@ public class PrototypeLoader {
 	 */
 	void loadDebug(Prototype.Builder f) throws IOException {
 		f.source = loadString();
-		f.lineinfo.set(loadInt32Array());
+		f.lineinfo = loadIntVector();
 
 		int n = loadInt32();
 		for (int i = 0; i < n; i++) {
@@ -287,7 +289,7 @@ public class PrototypeLoader {
 		f.numparams = is.readUnsignedByte();
 		f.is_vararg = loadBoolean();
 		f.maxstacksize = is.readUnsignedByte();
-		f.code.set(loadInt32Array());
+		f.code = loadIntVector();
 		loadConstants(f);
 		loadNestedPrototypes(f);
 		loadUpvalues(f);

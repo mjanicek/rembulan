@@ -182,10 +182,10 @@ public class Prototype {
 
 	public static class Builder implements GenericBuilder<Prototype> {
 		public final ArrayList<Object> constants;
-		public final IntVector.Builder code;
+		public IntVector code;
 		public final ArrayList<Prototype> p;
 
-		public final IntVector.Builder lineinfo;
+		public IntVector lineinfo;
 
 		public final ArrayList<LocalVariable.Builder> locvars;
 		public final ArrayList<Upvalue.Desc.Builder> upvalues;
@@ -199,9 +199,9 @@ public class Prototype {
 
 		public Builder() {
 			this.constants = new ArrayList<Object>();
-			this.code = IntVector.newBuilder();
+			this.code = null;
 			this.p = new ArrayList<Prototype>();
-			this.lineinfo = IntVector.newBuilder();;
+			this.lineinfo = null;
 			this.locvars = new ArrayList<LocalVariable.Builder>();
 			this.upvalues = new ArrayList<Upvalue.Desc.Builder>();
 		}
@@ -218,7 +218,7 @@ public class Prototype {
 				this.p.add(pp);
 			}
 
-			this.lineinfo = IntVector.newBuilder().set(proto.lineinfo.copyToNewArray());
+			this.lineinfo = proto.lineinfo;
 
 			this.locvars = new ArrayList<LocalVariable.Builder>();
 			for (LocalVariable lv : proto.locvars) {
@@ -230,8 +230,7 @@ public class Prototype {
 				this.upvalues.add(new Upvalue.Desc.Builder(uv.name, uv.inStack, uv.index));
 			}
 
-			this.code = IntVector.newBuilder();
-			this.code.set(proto.code);
+			this.code = proto.code;
 
 			this.source = proto.source;
 			this.linedefined = proto.linedefined;
@@ -269,9 +268,9 @@ public class Prototype {
 
 			return new Prototype(
 					consts,
-					code.build(),
+					code,
 					ps,
-					lineinfo.build(),
+					lineinfo,
 					lvs,
 					uvs,
 					source,

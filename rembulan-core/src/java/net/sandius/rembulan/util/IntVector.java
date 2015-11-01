@@ -6,6 +6,8 @@ import java.util.Arrays;
 // an immutable vector of ints
 public class IntVector {
 
+	public static final IntVector EMPTY = IntVector.wrap(new int[0]);
+
 	private final int[] values;
 
 	private IntVector(int[] values) {
