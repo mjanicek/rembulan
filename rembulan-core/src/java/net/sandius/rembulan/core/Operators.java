@@ -270,6 +270,10 @@ public class Operators {
 
 		Object handler = Metatables.getMetamethod(table, Metatables.MT_INDEX);
 
+		if (handler == null && table instanceof Table) {
+			return null;
+		}
+
 		if (handler instanceof Function) {
 			return callHandler(handler, table, key);  // TODO: should we trim to single value?
 		}
@@ -294,6 +298,12 @@ public class Operators {
 		}
 
 		Object handler = Metatables.getMetamethod(table, Metatables.MT_NEWINDEX);
+
+		if (handler == null && table instanceof Table) {
+			Table t = (Table) table;
+			t.rawset(key, value);
+			return;
+		}
 
 		if (handler instanceof Function) {
 			callHandler(handler, table, key, value);  // TODO: is it ok that we're ignoring the result?
