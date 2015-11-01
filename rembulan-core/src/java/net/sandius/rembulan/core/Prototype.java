@@ -183,7 +183,7 @@ public class Prototype {
 	public static class Builder implements GenericBuilder<Prototype> {
 		public final ArrayList<Object> constants;
 		public final IntVector.Builder code;
-		public final ArrayList<Builder> p;
+		public final ArrayList<Prototype> p;
 
 		public final IntVector.Builder lineinfo;
 
@@ -200,7 +200,7 @@ public class Prototype {
 		public Builder() {
 			this.constants = new ArrayList<Object>();
 			this.code = IntVector.newBuilder();
-			this.p = new ArrayList<Prototype.Builder>();
+			this.p = new ArrayList<Prototype>();
 			this.lineinfo = IntVector.newBuilder();;
 			this.locvars = new ArrayList<LocalVariable.Builder>();
 			this.upvalues = new ArrayList<Upvalue.Desc.Builder>();
@@ -213,9 +213,9 @@ public class Prototype {
 				constants.add(c);
 			}
 
-			this.p = new ArrayList<Prototype.Builder>();
+			this.p = new ArrayList<Prototype>();
 			for (Prototype pp : proto.p) {
-				this.p.add(new Builder(pp));
+				this.p.add(pp);
 			}
 
 			this.lineinfo = IntVector.newBuilder().set(proto.lineinfo.copyToNewArray());
@@ -251,7 +251,7 @@ public class Prototype {
 
 			Prototype[] ps0 = new Prototype[this.p.size()];
 			for (int i = 0; i < this.p.size(); i++) {
-				ps0[i] = this.p.get(i).build();
+				ps0[i] = this.p.get(i);
 			}
 			ReadOnlyArray<Prototype> ps = new ReadOnlyArray<Prototype>(ps0);
 
