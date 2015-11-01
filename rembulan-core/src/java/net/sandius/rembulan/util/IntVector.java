@@ -25,6 +25,12 @@ public class IntVector {
 		return wrap(values);
 	}
 
+	public int[] copyToNewArray() {
+		int[] cp = new int[values.length];
+		System.arraycopy(values, 0, cp, 0, values.length);
+		return cp;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -83,6 +89,16 @@ public class IntVector {
 				append(v);
 			}
 			return this;
+		}
+
+		public Builder set(int[] vs) {
+			Check.notNull(vs);
+			return clear().append(vs);
+		}
+
+		public Builder set(IntVector vs) {
+			Check.notNull(vs);
+			return clear().append(vs.copyToNewArray());
 		}
 
 		@Override
