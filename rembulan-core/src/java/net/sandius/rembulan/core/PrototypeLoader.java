@@ -101,7 +101,7 @@ public class PrototypeLoader {
 	private byte[] buf = new byte[512];
 
 	/** Load a 4-byte int value from the input stream
-	 * @return the int value laoded.
+	 * @return the int value loaded.
 	 **/
 	int loadInt() throws IOException {
 		is.readFully(buf,0,4);
@@ -111,7 +111,7 @@ public class PrototypeLoader {
 	}
 
 	/** Load an array of int values from the input stream
-	 * @return the array of int values laoded.
+	 * @return the array of int values loaded.
 	 **/
 	int[] loadIntArray() throws IOException {
 		int n = loadInt();
@@ -133,7 +133,7 @@ public class PrototypeLoader {
 	}
 
 	/** Load a long  value from the input stream
-	 * @return the long value laoded.
+	 * @return the long value loaded.
 	 **/
 	long loadInt64() throws IOException {
 		int a,b;
