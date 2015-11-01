@@ -86,6 +86,45 @@ public class Prototype {
 				0, 0, 0, false, 0);
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		Prototype prototype = (Prototype) o;
+
+		if (linedefined != prototype.linedefined) return false;
+		if (lastlinedefined != prototype.lastlinedefined) return false;
+		if (numparams != prototype.numparams) return false;
+		if (is_vararg != prototype.is_vararg) return false;
+		if (maxstacksize != prototype.maxstacksize) return false;
+		if (!consts.equals(prototype.consts)) return false;
+		if (!code.equals(prototype.code)) return false;
+		if (!p.equals(prototype.p)) return false;
+		if (lineinfo != null ? !lineinfo.equals(prototype.lineinfo) : prototype.lineinfo != null)
+			return false;
+		if (!locvars.equals(prototype.locvars)) return false;
+		if (!upvalues.equals(prototype.upvalues)) return false;
+		return source.equals(prototype.source);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = consts.hashCode();
+		result = 31 * result + code.hashCode();
+		result = 31 * result + p.hashCode();
+		result = 31 * result + (lineinfo != null ? lineinfo.hashCode() : 0);
+		result = 31 * result + locvars.hashCode();
+		result = 31 * result + upvalues.hashCode();
+		result = 31 * result + source.hashCode();
+		result = 31 * result + linedefined;
+		result = 31 * result + lastlinedefined;
+		result = 31 * result + numparams;
+		result = 31 * result + (is_vararg ? 1 : 0);
+		result = 31 * result + maxstacksize;
+		return result;
+	}
+
 	public static Prototype newEmptyPrototype() {
 		return Prototype.newEmptyPrototype(0);
 	}
