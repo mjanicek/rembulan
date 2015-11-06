@@ -23,6 +23,13 @@
   </properties>
 
   <dependencies>
+
+    <dependency>
+        <groupId>org.ow2.asm</groupId>
+        <artifactId>asm</artifactId>
+        <version>5.0.4</version>
+    </dependency>
+
   </dependencies>
 
   <build>
