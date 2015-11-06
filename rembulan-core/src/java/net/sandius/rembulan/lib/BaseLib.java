@@ -44,10 +44,7 @@ public class BaseLib {
 
 		@Override
 		public Object[] invoke(Object[] args) {
-			if (args == null || args.length == 0) {
-				throw new IllegalArgumentException("bad argument #1: value expected");
-			}
-
+			Check.numOfArgs(args, 1);
 			return new Object[] { LuaType.typeOf(args[0]).name };
 		}
 
@@ -57,10 +54,7 @@ public class BaseLib {
 
 		@Override
 		public Object[] invoke(Object[] args) {
-			if (args == null || args.length == 0) {
-				throw new IllegalArgumentException("bad argument #1: value expected");
-			}
-
+			Check.numOfArgs(args, 1);
 			return new Object[] { Value.toString(args[0]) };
 		}
 	}

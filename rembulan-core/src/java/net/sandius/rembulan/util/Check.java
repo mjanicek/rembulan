@@ -12,4 +12,12 @@ public abstract class Check {
 		}
 	}
 
+	public static void numOfArgs(Object[] args, int num) {
+		Check.notNull(args);
+
+		if (args.length < num) {
+			throw new IllegalArgumentException("bad argument #" + (args.length + 1) + ": value expected");
+		}
+	}
+
 }
