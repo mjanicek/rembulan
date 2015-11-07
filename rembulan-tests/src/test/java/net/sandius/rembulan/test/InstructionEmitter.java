@@ -28,6 +28,11 @@ public interface InstructionEmitter {
 	void l_SHL(int a, int b, int c);
 	void l_SHR(int a, int b, int c);
 
+	void l_UNM(int a, int b);
+	void l_BNOT(int a, int b);
+	void l_NOT(int a, int b);
+	void l_LEN(int a, int b);
+
 	void l_RETURN(int a, int b);
 
 

@@ -257,6 +257,11 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			case OpCode.SHL:   ie.l_SHL(a, b, c); break;
 			case OpCode.SHR:   ie.l_SHR(a, b, c); break;
 
+			case OpCode.UNM:   ie.l_UNM(a, b); break;
+			case OpCode.BNOT:   ie.l_BNOT(a, b); break;
+			case OpCode.NOT:   ie.l_NOT(a, b); break;
+			case OpCode.LEN:   ie.l_LEN(a, b); break;
+
 			case OpCode.RETURN: ie.l_RETURN(a, b); break;
 
 			default: throw new UnsupportedOperationException("Unsupported opcode: " + oc);
@@ -414,6 +419,26 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	@Override
 	public void l_SHR(int a, int b, int c) {
 		l_binOp("shr", a, b, c);
+	}
+
+	@Override
+	public void l_UNM(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_BNOT(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_NOT(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_LEN(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
 	}
 
 	@Override
