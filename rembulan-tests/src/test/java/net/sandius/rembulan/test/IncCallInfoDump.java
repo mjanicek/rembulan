@@ -3,6 +3,7 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
+import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
 
 public class IncCallInfoDump implements Opcodes {
@@ -20,14 +21,10 @@ public class IncCallInfoDump implements Opcodes {
 			Integer.valueOf(1)
 	};
 
-	private static Type arrayTypeFor(Class<?> clazz) {
-		return Type.getType("[" + Type.getType(clazz).getDescriptor());
-	}
-
-	private static Type REGISTERS_TYPE = arrayTypeFor(Object.class);
+	private static Type REGISTERS_TYPE = ASMUtils.arrayTypeFor(Object.class);
 
 	public IncCallInfoDump(String className) {
-		this.thisType = Type.getType("L" + className.replace(".", "/") + ";");
+		this.thisType = ASMUtils.typeForClassName(className);
 
 		// luapc-to-jvmpc mapping
 		this.l_pc = new Label[3];  // got 3 instructions in total
