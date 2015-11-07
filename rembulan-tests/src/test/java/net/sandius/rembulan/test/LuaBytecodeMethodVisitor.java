@@ -16,7 +16,17 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor {
 
 	private final int numRegs;
 
-	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, Object[] constants, int numRegs) {
+	private Label l_first;
+	private Label l_last;
+	private Label l_default;
+	private Label l_save_and_yield;
+
+	private final int numInstrs;
+	private Label[] l_pc;
+	private Label[] l_pc_end;
+	private Label[] l_pc_preempt;
+
+	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, Object[] constants, int numInstrs, int numRegs) {
 		super(ASM5);
 		Check.notNull(cv);
 		Check.notNull(thisType);
@@ -24,16 +34,97 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor {
 		this.thisType = thisType;
 		this.constants = constants;
 		this.numRegs = numRegs;
+		this.numInstrs = numInstrs;
 
 		mv = cv.visitMethod(ACC_PUBLIC, "resume", "()V", null, null);
 	}
 
 	public void begin() {
 		mv.visitCode();
+
+		l_first = new Label();
+		l_last = new Label();
+		l_save_and_yield = new Label();
+		l_default = new Label();
+
+		// luapc-to-jvmpc mapping
+		l_pc = new Label[numInstrs];
+		l_pc_end = new Label[numInstrs];
+		l_pc_preempt = new Label[numInstrs];
+		for (int i = 0; i < l_pc.length; i++) {
+			l_pc[i] = new Label();
+			l_pc_end[i] = new Label();
+			l_pc_preempt[i] = new Label();
+		}
+
+		luaCodeBegin();
 	}
 
 	public void end() {
+		luaCodeEnd();
+
+		mv.visitLabel(l_last);
+
+		mv.visitLocalVariable("this", thisType.getDescriptor(), null, l_first, l_last, 0);
+
+		// registers
+		for (int i = 0; i < numRegs; i++) {
+			mv.visitLocalVariable("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_first, l_last, i + 1);
+		}
+
+		mv.visitMaxs(numRegs + 1, numRegs + 1);
+
 		mv.visitEnd();
+	}
+
+	public void luaCodeBegin() {
+		preamble();
+	}
+
+	public void luaCodeEnd() {
+
+		// save registers and yield
+		visitLabel(l_save_and_yield);
+		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+		saveRegisters();
+		yield();
+
+		// error branch
+		visitLabel(l_default);
+		visitLineNumber(2, l_default);
+		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+		visitTypeInsn(NEW, Type.getInternalName(IllegalStateException.class));
+		visitInsn(DUP);
+		visitMethodInsn(INVOKESPECIAL, Type.getInternalName(IllegalStateException.class), "<init>", "()V", false);
+		visitInsn(ATHROW);
+	}
+
+	public void preamble() {
+
+//			for (int i = 0; i < 3; i++) {
+//				lmv.visitTryCatchBlock(l_pc[i], l_pc_end[i], l_pc_preempt[i], Type.getInternalName(Yield.class));
+//			}
+
+		mv.visitLabel(l_first);
+		mv.visitLineNumber(2, l_first);
+
+		loadRegisters();
+
+		Object[] regTypes = new Object[numRegs];
+		for (int i = 0; i < regTypes.length; i++) {
+			regTypes[i] = Type.getInternalName(Object.class);
+		}
+
+		mv.visitFrame(Opcodes.F_APPEND, numRegs, regTypes, 0, null);
+
+		// branch according to the program counter
+		preambleSwitch();
+	}
+
+	private void preambleSwitch() {
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
+		mv.visitTableSwitchInsn(0, 2, l_default, l_pc);
 	}
 
 	private void pushInt(int i) {
@@ -94,6 +185,27 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor {
 		mv.visitVarInsn(ALOAD, 0);
 		pushInt(pc);
 		mv.visitFieldInsn(PUTFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
+	}
+
+	private void checkPreempt(int pc) {
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitMethodInsn(INVOKEVIRTUAL, thisType.getInternalName(), "shouldPreempt", "()Z", false);
+		mv.visitJumpInsn(IFEQ, l_pc[pc]);  // continue with pc == 1
+
+		savePc(pc);
+		mv.visitJumpInsn(GOTO, l_save_and_yield);
+	}
+
+
+	public void atPc(int pc, int lineNumber) {
+		if (pc > 0) {
+			mv.visitLabel(l_pc_end[pc - 1]);
+			checkPreempt(pc);
+		}
+
+		mv.visitLabel(l_pc[pc]);
+		if (lineNumber > 0) mv.visitLineNumber(lineNumber, l_pc[pc]);
+		mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 	}
 
 	public void yield() {
