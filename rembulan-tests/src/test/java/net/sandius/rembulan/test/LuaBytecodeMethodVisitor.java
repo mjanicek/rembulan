@@ -8,7 +8,7 @@ import org.objectweb.asm.*;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class LuaBytecodeMethodVisitor extends MethodVisitor {
+public class LuaBytecodeMethodVisitor extends MethodVisitor implements InstructionEmitter {
 
 	private static Type REGISTERS_TYPE = ASMUtils.arrayTypeFor(Object.class);
 
@@ -27,6 +27,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor {
 	private Label[] l_pc_end;
 	private Label[] l_pc_preempt;
 
+	protected InstructionEmitter ie;
+
 	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, Object[] constants, int numInstrs, int numRegs) {
 		super(ASM5);
 		Check.notNull(cv);
@@ -36,6 +38,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor {
 		this.constants = constants;
 		this.numRegs = numRegs;
 		this.numInstrs = numInstrs;
+
+		ie = this;
 
 		mv = cv.visitMethod(ACC_PUBLIC, "resume", "()V", null, null);
 	}
@@ -225,14 +229,46 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor {
 		int sbx = OpCode.arg_sBx(i);
 
 		switch (oc) {
-			case OpCode.LOADK:  l_LOADK(a, bx); break;
-			case OpCode.ADD:    l_ADD(a, b, c); break;
-			case OpCode.RETURN: l_RETURN(a, b); break;
+
+			case OpCode.MOVE:     ie.l_MOVE(a, b); break;
+			case OpCode.LOADK:    ie.l_LOADK(a, bx); break;
+			//case OpCode.LOADKX:   ie.l_LOADKX(extra);  break;
+			case OpCode.LOADBOOL: ie.l_LOADBOOL(a, b, c); break;
+			case OpCode.LOADNIL:  ie.l_LOADNIL(a, b); break;
+			case OpCode.GETUPVAL: ie.l_GETUPVAL(a, b); break;
+			case OpCode.GETTABUP: ie.l_GETTABUP(a, b, c); break;
+			case OpCode.GETTABLE: ie.l_GETTABLE(a, b, c); break;
+			case OpCode.SETTABUP: ie.l_SETTABUP(a, b, c); break;
+			case OpCode.SETUPVAL: ie.l_SETUPVAL(a, b); break;
+			case OpCode.SETTABLE: ie.l_SETTABLE(a, b, c); break;
+			case OpCode.NEWTABLE: ie.l_NEWTABLE(a, b, c); break;
+			case OpCode.SELF:     ie.l_SELF(a, b, c); break;
+			
+			case OpCode.ADD:   ie.l_ADD(a, b, c); break;
+			case OpCode.SUB:   ie.l_SUB(a, b, c); break;
+			case OpCode.MUL:   ie.l_MUL(a, b, c); break;
+			case OpCode.MOD:   ie.l_MOD(a, b, c); break;
+			case OpCode.POW:   ie.l_POW(a, b, c); break;
+			case OpCode.DIV:   ie.l_DIV(a, b, c); break;
+			case OpCode.IDIV:  ie.l_IDIV(a, b, c); break;
+			case OpCode.BAND:  ie.l_BAND(a, b, c); break;
+			case OpCode.BOR:   ie.l_BOR(a, b, c); break;
+			case OpCode.BXOR:  ie.l_BXOR(a, b, c); break;
+			case OpCode.SHL:   ie.l_SHL(a, b, c); break;
+			case OpCode.SHR:   ie.l_SHR(a, b, c); break;
+
+			case OpCode.RETURN: ie.l_RETURN(a, b); break;
 
 			default: throw new UnsupportedOperationException("Unsupported opcode: " + oc);
 		}
 	}
 
+	@Override
+	public void l_MOVE(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
 	public void l_LOADK(int dest, int idx) {
 		Object c = constants[-idx - 1];
 
@@ -262,14 +298,125 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor {
 		mv.visitVarInsn(ASTORE, dest + 1);
 	}
 
-	public void l_ADD(int dest, int left, int right) {
+	@Override
+	public void l_LOADBOOL(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_LOADNIL(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_GETUPVAL(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_GETTABUP(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_GETTABLE(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_SETTABUP(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_SETUPVAL(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_SETTABLE(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_NEWTABLE(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_SELF(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	private void l_binOp(String method, int dest, int left, int right) {
 		// TODO: swap these?
 		mv.visitVarInsn(ALOAD, left + 1);
 		mv.visitVarInsn(ALOAD, right + 1);
-		mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Operators.class), "add", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+		mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Operators.class), method, "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
 		mv.visitVarInsn(ASTORE, dest + 1);
 	}
 
+	@Override
+	public void l_ADD(int a, int b, int c) {
+		l_binOp("add", a, b, c);
+	}
+
+	@Override
+	public void l_SUB(int a, int b, int c) {
+		l_binOp("sub", a, b, c);
+	}
+
+	@Override
+	public void l_MUL(int a, int b, int c) {
+		l_binOp("mul", a, b, c);
+	}
+
+	@Override
+	public void l_MOD(int a, int b, int c) {
+		l_binOp("mod", a, b, c);
+	}
+
+	@Override
+	public void l_POW(int a, int b, int c) {
+		l_binOp("pow", a, b, c);
+	}
+
+	@Override
+	public void l_DIV(int a, int b, int c) {
+		l_binOp("div", a, b, c);
+	}
+
+	@Override
+	public void l_IDIV(int a, int b, int c) {
+		l_binOp("idiv", a, b, c);
+	}
+
+	@Override
+	public void l_BAND(int a, int b, int c) {
+		l_binOp("band", a, b, c);
+	}
+
+	@Override
+	public void l_BOR(int a, int b, int c) {
+		l_binOp("bor", a, b, c);
+	}
+
+	@Override
+	public void l_BXOR(int a, int b, int c) {
+		l_binOp("bxor", a, b, c);
+	}
+
+	@Override
+	public void l_SHL(int a, int b, int c) {
+		l_binOp("shl", a, b, c);
+	}
+
+	@Override
+	public void l_SHR(int a, int b, int c) {
+		l_binOp("shr", a, b, c);
+	}
+
+	@Override
 	public void l_RETURN(int a, int b) {
 		// FIXME: adjusting stack top
 		mv.visitVarInsn(ALOAD, 0);
