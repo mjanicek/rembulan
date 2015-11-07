@@ -3,13 +3,11 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
-import net.sandius.rembulan.core.Yield;
 import org.objectweb.asm.*;
 
 public class IncCallInfoDump implements Opcodes {
 
-	private final String internalName;
-	private final String descriptor;
+	private final Type thisType;
 
 	private final int numRegs = 3;
 
@@ -29,8 +27,7 @@ public class IncCallInfoDump implements Opcodes {
 	private static Type REGISTERS_TYPE = arrayTypeFor(Object.class);
 
 	public IncCallInfoDump(String className) {
-		this.internalName = className.replace('.', '/');
-		this.descriptor = "L" + internalName + ";";
+		this.thisType = Type.getType("L" + className.replace(".", "/") + ";");
 
 		// luapc-to-jvmpc mapping
 		this.l_pc = new Label[3];  // got 3 instructions in total
@@ -112,14 +109,14 @@ public class IncCallInfoDump implements Opcodes {
 		// FIXME: adjusting stack top
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitInsn(ICONST_1);
-		mv.visitFieldInsn(PUTFIELD, internalName, "top", Type.INT_TYPE.getDescriptor());
+		mv.visitFieldInsn(PUTFIELD, thisType.getInternalName(), "top", Type.INT_TYPE.getDescriptor());
 
 		mv.visitInsn(RETURN);  // end; TODO: signal a return!
 	}
 
 	private void emitPreambleSwitch(MethodVisitor mv, Label l_default) {
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, internalName, "pc", Type.INT_TYPE.getDescriptor());
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
 		mv.visitTableSwitchInsn(0, 2, l_default, l_pc);
 	}
 
@@ -139,13 +136,13 @@ public class IncCallInfoDump implements Opcodes {
 		// TODO: must contain frame!!
 		mv.visitVarInsn(ALOAD, 0);
 		emitPushIntConst(mv, pc);
-		mv.visitFieldInsn(PUTFIELD, internalName, "pc", Type.INT_TYPE.getDescriptor());
+		mv.visitFieldInsn(PUTFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
 		mv.visitJumpInsn(GOTO, label);  // jump
 	}
 
 	private void emitCheckPreempt(MethodVisitor mv, int pc, Label[] l_pc, Label l_save_and_yield) {
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitMethodInsn(INVOKEVIRTUAL, internalName, "shouldPreempt", "()Z", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, thisType.getInternalName(), "shouldPreempt", "()Z", false);
 		mv.visitJumpInsn(IFEQ, l_pc[pc]);  // continue with pc == 1
 		emitSavePcAndJump(mv, pc, l_save_and_yield);
 	}
@@ -153,7 +150,7 @@ public class IncCallInfoDump implements Opcodes {
 	private void emitLoadRegisters(MethodVisitor mv) {
 		// load registers into local variables
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, internalName, "reg", REGISTERS_TYPE.getDescriptor());
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "reg", REGISTERS_TYPE.getDescriptor());
 		for (int i = 0; i < numRegs; i++) {
 			// reg[i] -> local var i+1
 			mv.visitInsn(DUP);
@@ -166,7 +163,7 @@ public class IncCallInfoDump implements Opcodes {
 
 	private void emitSaveRegisters(MethodVisitor mv) {
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, internalName, "reg", REGISTERS_TYPE.getDescriptor());
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "reg", REGISTERS_TYPE.getDescriptor());
 		for (int i = 0; i < numRegs; i++) {
 			mv.visitInsn(DUP);
 			emitPushIntConst(mv, i);
@@ -178,7 +175,7 @@ public class IncCallInfoDump implements Opcodes {
 
 	private void emitYield(MethodVisitor mv) {
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitMethodInsn(INVOKEVIRTUAL, internalName, "preempt", "()V", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, thisType.getInternalName(), "preempt", "()V", false);
 	}
 
 	public byte[] dump() throws Exception {
@@ -188,7 +185,7 @@ public class IncCallInfoDump implements Opcodes {
 		MethodVisitor mv;
 		AnnotationVisitor av0;
 
-		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, internalName, null, Type.getInternalName(CallInfo.class), null);
+		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(CallInfo.class), null);
 
 		cw.visitSource("inc.lua", null);
 
@@ -208,7 +205,7 @@ public class IncCallInfoDump implements Opcodes {
 			mv.visitInsn(RETURN);
 			Label l2 = new Label();
 			mv.visitLabel(l2);
-			mv.visitLocalVariable("this", descriptor, null, l0, l2, 0);
+			mv.visitLocalVariable("this", thisType.getDescriptor(), null, l0, l2, 0);
 			mv.visitLocalVariable("context", Type.getDescriptor(PreemptionContext.class), null, l0, l2, 1);
 			mv.visitLocalVariable("max", Type.INT_TYPE.getDescriptor(), null, l0, l2, 2);
 			mv.visitMaxs(3, 3);
@@ -270,7 +267,7 @@ public class IncCallInfoDump implements Opcodes {
 			Label l_last = new Label();
 			mv.visitLabel(l_last);
 
-			mv.visitLocalVariable("this", descriptor, null, l_first, l_last, 0);
+			mv.visitLocalVariable("this", thisType.getDescriptor(), null, l_first, l_last, 0);
 
 			// registers
 			for (int i = 0; i < numRegs; i++) {
