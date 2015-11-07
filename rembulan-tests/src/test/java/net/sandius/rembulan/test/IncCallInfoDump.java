@@ -22,6 +22,12 @@ public class IncCallInfoDump implements Opcodes {
 			Integer.valueOf(1)
 	};
 
+	private static Type arrayTypeFor(Class<?> clazz) {
+		return Type.getType("[" + Type.getType(clazz).getDescriptor());
+	}
+
+	private static Type REGISTERS_TYPE = arrayTypeFor(Object.class);
+
 	public IncCallInfoDump(String className) {
 		this.internalName = className.replace('.', '/');
 		this.descriptor = "L" + internalName + ";";
@@ -147,7 +153,7 @@ public class IncCallInfoDump implements Opcodes {
 	private void emitLoadRegisters(MethodVisitor mv) {
 		// load registers into local variables
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, internalName, "reg", "[Ljava/lang/Object;");
+		mv.visitFieldInsn(GETFIELD, internalName, "reg", REGISTERS_TYPE.getDescriptor());
 		for (int i = 0; i < numRegs; i++) {
 			// reg[i] -> local var i+1
 			mv.visitInsn(DUP);
@@ -160,7 +166,7 @@ public class IncCallInfoDump implements Opcodes {
 
 	private void emitSaveRegisters(MethodVisitor mv) {
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, internalName, "reg", "[Ljava/lang/Object;");
+		mv.visitFieldInsn(GETFIELD, internalName, "reg", REGISTERS_TYPE.getDescriptor());
 		for (int i = 0; i < numRegs; i++) {
 			mv.visitInsn(DUP);
 			emitPushIntConst(mv, i);
