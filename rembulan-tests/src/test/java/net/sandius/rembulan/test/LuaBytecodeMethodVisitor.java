@@ -1,5 +1,6 @@
 package net.sandius.rembulan.test;
 
+import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.asm.ASMUtils;
@@ -211,6 +212,25 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor {
 	public void yield() {
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitMethodInsn(INVOKEVIRTUAL, thisType.getInternalName(), "preempt", "()V", false);
+	}
+
+	public void instruction(int i) {
+		int oc = OpCode.opCode(i);
+
+		int a = OpCode.arg_A(i);
+		int b = OpCode.arg_B(i);
+		int c = OpCode.arg_C(i);
+		int ax = OpCode.arg_Ax(i);
+		int bx = OpCode.arg_Bx(i);
+		int sbx = OpCode.arg_sBx(i);
+
+		switch (oc) {
+			case OpCode.LOADK:  l_LOADK(a, bx); break;
+			case OpCode.ADD:    l_ADD(a, b, c); break;
+			case OpCode.RETURN: l_RETURN(a, b); break;
+
+			default: throw new UnsupportedOperationException("Unsupported opcode: " + oc);
+		}
 	}
 
 	public void l_LOADK(int dest, int idx) {

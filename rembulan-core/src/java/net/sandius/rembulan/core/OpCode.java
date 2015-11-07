@@ -66,4 +66,55 @@ public class OpCode {
 	public static final int EXTRAARG = 46;    /** Ax	extra (larger) argument for previous opcode	*/
 
 
+	public static final int SIZE_C		= 9;
+	public static final int SIZE_B		= 9;
+	public static final int SIZE_Bx		= (SIZE_C + SIZE_B);
+	public static final int SIZE_A		= 8;
+	public static final int SIZE_Ax		= (SIZE_C + SIZE_B + SIZE_A);
+
+	public static final int SIZE_OP		= 6;
+
+	public static final int POS_OP		= 0;
+	public static final int POS_A		= (POS_OP + SIZE_OP);
+	public static final int POS_C		= (POS_A + SIZE_A);
+	public static final int POS_B		= (POS_C + SIZE_C);
+	public static final int POS_Bx		= POS_C;
+	public static final int POS_Ax		= POS_A;
+
+	public static final int MAX_OP          = ((1<<SIZE_OP)-1);
+	public static final int MAXARG_A        = ((1<<SIZE_A)-1);
+	public static final int MAXARG_B        = ((1<<SIZE_B)-1);
+	public static final int MAXARG_C        = ((1<<SIZE_C)-1);
+	public static final int MAXARG_Bx       = ((1<<SIZE_Bx)-1);
+	public static final int MAXARG_sBx      = (MAXARG_Bx>>1);     	/* `sBx' is signed */
+	public static final int MAXARG_Ax       = ((1<<SIZE_Ax)-1);
+
+	public static int opCode(int insn) {
+		return (insn >> POS_OP) & MAX_OP;
+	}
+
+	public static int arg_A(int insn) {
+		return (insn >> POS_A) & MAXARG_A;
+	}
+
+	public static int arg_Ax(int insn) {
+		return (insn >> POS_Ax) & MAXARG_Ax;
+	}
+
+	public static int arg_B(int insn) {
+		return (insn >> POS_B) & MAXARG_B;
+	}
+
+	public static int arg_C(int insn) {
+		return (insn >> POS_C) & MAXARG_C;
+	}
+
+	public static int arg_Bx(int insn) {
+		return (insn >> POS_Bx) & MAXARG_Bx;
+	}
+
+	public static int arg_sBx(int insn) {
+		return ((insn >> POS_Bx) & MAXARG_Bx) - MAXARG_sBx;
+	}
+
 }
