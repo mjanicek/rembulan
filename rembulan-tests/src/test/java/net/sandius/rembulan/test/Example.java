@@ -16,7 +16,7 @@ public class Example extends Function {
 		CallInfo ci = new ExCallInfo(null, 5);
 		ci.push(args);
 
-		ci.resume();
+//		ci.resume();
 
 		return new Object[] {Operators.add(args[0], args[1])};
 	}

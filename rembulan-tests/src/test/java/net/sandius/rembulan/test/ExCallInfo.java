@@ -1,6 +1,7 @@
 package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.CallInfo;
+import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Yield;
@@ -12,7 +13,7 @@ public class ExCallInfo extends CallInfo {
 	}
 
 	@Override
-	public void resume() {
+	public void resume() throws ControlThrowable {
 		// preamble: load previously-saved state
 		Object u = reg[0];
 		Object v = reg[1];
@@ -23,17 +24,17 @@ public class ExCallInfo extends CallInfo {
 					v = 1;
 					checkPreempt();
 				}
-				catch (Yield yld) {
+				catch (ControlThrowable yld) {
 					pc = 1; reg[0] = u; reg[1] = v; throw yld;
 				}
 
 			case 1:
-				try {
+//				try {
 					u = Operators.add(u, v);
-				}
-				catch (Yield yld) {
-					pc = 2; reg[0] = u; reg[1] = v; throw yld;
-				}
+//				}
+//				catch (ControlThrowable yld) {
+//					pc = 2; reg[0] = u; reg[1] = v; throw yld;
+//				}
 
 			case 2:
 				top = 1;

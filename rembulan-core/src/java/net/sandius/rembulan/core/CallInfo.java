@@ -25,7 +25,7 @@ public abstract class CallInfo {
 		top += args.length;
 	}
 
-	protected void checkPreempt() {
+	protected void checkPreempt() throws ControlThrowable {
 		if (shouldPreempt()) preempt();
 	}
 
@@ -33,10 +33,10 @@ public abstract class CallInfo {
 		return context.preempt();
 	}
 
-	protected void preempt() {
+	protected void preempt() throws ControlThrowable {
 		throw Yield.INSTANCE;
 	}
 
-	public abstract void resume();
+	public abstract void resume() throws ControlThrowable;
 
 }
