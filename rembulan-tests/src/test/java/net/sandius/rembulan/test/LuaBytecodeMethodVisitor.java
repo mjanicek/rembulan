@@ -127,8 +127,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	private void preambleSwitch() {
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
+		loadPc();
 		mv.visitTableSwitchInsn(0, 2, l_default, l_pc);
 	}
 
@@ -160,36 +159,64 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitLdcInsn(s);
 	}
 
+	private void pushBasePlus(int offset) {
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "base", "I");
+		if (offset > 0) {
+			pushInt(offset);
+			mv.visitInsn(IADD);
+		}
+	}
+
+	private void loadRegister(int idx) {
+		Check.nonNegative(idx);
+
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", "Lnet/sandius/rembulan/core/ObjectStack;");
+		pushBasePlus(idx);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "net/sandius/rembulan/core/ObjectStack", "get", "(I)Ljava/lang/Object;", false);
+		mv.visitVarInsn(ASTORE, idx + 1);
+	}
+
+	private void saveRegister(int idx) {
+		Check.nonNegative(idx);
+
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", "Lnet/sandius/rembulan/core/ObjectStack;");
+		pushBasePlus(idx);
+		mv.visitVarInsn(ALOAD, idx + 1);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "net/sandius/rembulan/core/ObjectStack", "set", "(ILjava/lang/Object;)V", false);
+	}
+
 	public void loadRegisters() {
 		// load registers into local variables
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "reg", REGISTERS_TYPE.getDescriptor());
 		for (int i = 0; i < numRegs; i++) {
-			// reg[i] -> local var i+1
-			mv.visitInsn(DUP);
-			pushInt(i);
-			mv.visitInsn(AALOAD);
-			mv.visitVarInsn(ASTORE, i + 1);  // lv[i+1] := reg[i]
+			loadRegister(i);
 		}
-		mv.visitInsn(POP);
 	}
 
 	public void saveRegisters() {
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "reg", REGISTERS_TYPE.getDescriptor());
 		for (int i = 0; i < numRegs; i++) {
-			mv.visitInsn(DUP);
-			pushInt(i);
-			mv.visitVarInsn(ALOAD, i + 1);
-			mv.visitInsn(AASTORE);  // reg[i] := lv[i+1]
+			saveRegister(i);
 		}
-		mv.visitInsn(POP);
+	}
+
+	public void loadPc() {
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
 	}
 
 	public void savePc(int pc) {
 		mv.visitVarInsn(ALOAD, 0);
 		pushInt(pc);
 		mv.visitFieldInsn(PUTFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
+	}
+
+	public void setTop(int to) {
+		mv.visitVarInsn(ALOAD, 0);
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", "Lnet/sandius/rembulan/core/ObjectStack;");
+		pushBasePlus(to);
+		mv.visitMethodInsn(INVOKEVIRTUAL, "net/sandius/rembulan/core/ObjectStack", "setTop", "(I)V", false);
 	}
 
 	private void checkPreempt(int pc) {
@@ -443,10 +470,12 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	@Override
 	public void l_RETURN(int a, int b) {
+
+
+		saveRegisters();
+
 		// FIXME: adjusting stack top
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitInsn(ICONST_1);
-		mv.visitFieldInsn(PUTFIELD, thisType.getInternalName(), "top", Type.INT_TYPE.getDescriptor());
+		setTop(1);
 
 		mv.visitInsn(RETURN);  // end; TODO: signal a return!
 	}

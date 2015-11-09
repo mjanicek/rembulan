@@ -8,9 +8,9 @@ object IncWrapper {
 
   private lazy val incClazz = incClazzForName("net.sandius.rembulan.test.IncCallInfo")
 
-  def newInc(ctx: PreemptionContext): CallInfo = {
-    val constructor = incClazz.getConstructor(classOf[PreemptionContext], Integer.TYPE)
-    constructor.newInstance(ctx, Int.box(10)).asInstanceOf[CallInfo]
+  def newInc(ctx: PreemptionContext, objectStack: ObjectStack): CallInfo = {
+    val constructor = incClazz.getConstructor(classOf[PreemptionContext], classOf[ObjectStack], Integer.TYPE)
+    constructor.newInstance(ctx, objectStack, Int.box(0)).asInstanceOf[CallInfo]
   }
 
 }

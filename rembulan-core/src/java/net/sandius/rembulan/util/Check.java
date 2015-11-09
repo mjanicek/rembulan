@@ -20,4 +20,22 @@ public abstract class Check {
 		}
 	}
 
+	public static void inRange(int n, int min, int max) {
+		if (n < min && n > max) {
+			throw new IllegalArgumentException("integer " + n + " out of range: [" + min + ", " + max + "]");
+		}
+	}
+
+	public static void nonNegative(int n) {
+		if (n < 0) {
+			throw new IllegalArgumentException("integer " + n + " must be non-negative");
+		}
+	}
+
+	public static void positive(int n) {
+		if (n < 1) {
+			throw new IllegalArgumentException("integer " + n + " must be positive");
+		}
+	}
+
 }

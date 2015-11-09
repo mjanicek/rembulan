@@ -13,8 +13,8 @@ public class Example extends Function {
 
 	@Override
 	public Object[] invoke(Object[] args) {
-		CallInfo ci = new ExCallInfo(null, 5);
-		ci.push(args);
+//		CallInfo ci = new ExCallInfo(null, 5);
+//		ci.push(args);
 
 //		ci.resume();
 
@@ -22,9 +22,10 @@ public class Example extends Function {
 	}
 
 	public CallInfo newCallInfo(PreemptionContext context, Object[] args) {
-		CallInfo ci = new ExCallInfo(context, 5);
-		ci.push(args);
-		return ci;
+		throw new UnsupportedOperationException();
+//		CallInfo ci = new ExCallInfo(context, 5);
+//		ci.push(args);
+//		return ci;
 	}
 
 }
