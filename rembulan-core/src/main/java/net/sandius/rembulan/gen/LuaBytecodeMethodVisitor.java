@@ -35,21 +35,6 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	protected InstructionEmitter ie;
 
-	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, Object[] constants, int numInstrs, int numRegs) {
-		super(ASM5);
-		Check.notNull(cv);
-		Check.notNull(thisType);
-
-		this.thisType = thisType;
-		this.constants = constants;
-		this.numRegs = numRegs;
-		this.numInstrs = numInstrs;
-
-		ie = this;
-
-		mv = cv.visitMethod(ACC_PUBLIC, "resume", "()V", null, null);
-	}
-
 	public static void emitConstructor(ClassVisitor cv, Type thisType) {
 		Type ctorType = Type.getMethodType(
 				Type.VOID_TYPE,
@@ -76,6 +61,21 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitLocalVariable("base", Type.INT_TYPE.getDescriptor(), null, l_begin, l_end, 3);
 		mv.visitMaxs(4, 4);
 		mv.visitEnd();
+	}
+
+	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, Object[] constants, int numInstrs, int numRegs) {
+		super(ASM5);
+		Check.notNull(cv);
+		Check.notNull(thisType);
+
+		this.thisType = thisType;
+		this.constants = constants;
+		this.numRegs = numRegs;
+		this.numInstrs = numInstrs;
+
+		ie = this;
+
+		mv = cv.visitMethod(ACC_PUBLIC, "resume", "()V", null, null);
 	}
 
 	public void begin() {
