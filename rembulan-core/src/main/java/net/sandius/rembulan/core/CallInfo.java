@@ -22,15 +22,6 @@ public abstract class CallInfo {
 		this.pc = 0;
 	}
 
-	public void push(Object[] args) {
-		Check.notNull(args);
-		objectStack.push(args);
-	}
-
-//	protected void checkPreempt() throws ControlThrowable {
-//		if (context.shouldPreemptNow()) throw Preempted.INSTANCE;
-//	}
-
 	public abstract void resume() throws ControlThrowable;
 
 }
