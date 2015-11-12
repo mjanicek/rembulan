@@ -1,4 +1,4 @@
-package net.sandius.rembulan.test;
+package net.sandius.rembulan.gen;
 
 public interface InstructionEmitter {
 

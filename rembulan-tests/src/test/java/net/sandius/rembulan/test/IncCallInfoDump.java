@@ -3,6 +3,7 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.LuaCallInfo;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.PreemptionContext;
+import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
 

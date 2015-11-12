@@ -1,4 +1,4 @@
-package net.sandius.rembulan.test;
+package net.sandius.rembulan.gen;
 
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.OpCode;
