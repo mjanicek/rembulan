@@ -126,7 +126,23 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		emitPreemptHandlers();
 		emitSaveRegistersAndThrowBranch();
 
-		// error branch
+		emitErrorBranch();
+	}
+
+	// save registers and yield
+	// pc must be saved by now
+	// control throwable is on the stack top
+	public void emitSaveRegistersAndThrowBranch() {
+		visitLabel(l_save_and_yield);
+		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
+//		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+		saveRegisters();
+//		preempted();
+		visitInsn(ATHROW);
+	}
+
+	// error branch
+	public void emitErrorBranch() {
 		visitLabel(l_default);
 		visitLineNumber(2, l_default);
 		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
@@ -136,17 +152,6 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitInsn(ATHROW);
 	}
 
-	// pc must be saved by now
-	// control throwable is on the stack top
-	public void emitSaveRegistersAndThrowBranch() {
-		// save registers and yield
-		visitLabel(l_save_and_yield);
-		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
-//		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-		saveRegisters();
-//		preempted();
-		visitInsn(ATHROW);
-	}
 
 	public void preemptHandler(int pc) {
 		visitLabel(l_pc_preempt_handler[pc]);
