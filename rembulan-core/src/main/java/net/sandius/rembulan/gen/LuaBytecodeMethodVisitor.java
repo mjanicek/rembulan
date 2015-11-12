@@ -123,15 +123,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void luaCodeEnd() {
 		visitLabel(l_pc_end[numInstrs - 1]);
 
-		preemptHandlers();
-
-		// save registers and yield
-		visitLabel(l_save_and_yield);
-		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
-//		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-		saveRegisters();
-//		preempted();
-		rethrow();
+		emitPreemptHandlers();
+		emitSaveRegistersAndThrowBranch();
 
 		// error branch
 		visitLabel(l_default);
@@ -143,6 +136,18 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitInsn(ATHROW);
 	}
 
+	// pc must be saved by now
+	// control throwable is on the stack top
+	public void emitSaveRegistersAndThrowBranch() {
+		// save registers and yield
+		visitLabel(l_save_and_yield);
+		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
+//		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+		saveRegisters();
+//		preempted();
+		visitInsn(ATHROW);
+	}
+
 	public void preemptHandler(int pc) {
 		visitLabel(l_pc_preempt_handler[pc]);
 		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
@@ -150,7 +155,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitJumpInsn(GOTO, l_save_and_yield);
 	}
 
-	public void preemptHandlers() {
+	public void emitPreemptHandlers() {
 		for (int i = 0; i < numInstrs; i++) {
 			preemptHandler(i);
 		}
@@ -297,9 +302,9 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitFieldInsn(GETSTATIC, Type.getInternalName(Preempted.class), "INSTANCE", Type.getDescriptor(Preempted.class));
 	}
 
-	public void rethrow() {
-		mv.visitInsn(ATHROW);
-	}
+//	public void rethrow() {
+//		mv.visitInsn(ATHROW);
+//	}
 
 //	public void preempted() {
 //		pushPreemptThrowable();
