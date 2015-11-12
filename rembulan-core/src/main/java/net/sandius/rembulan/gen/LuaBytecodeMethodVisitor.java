@@ -49,7 +49,14 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	public static void emitConstructor(ClassVisitor cv, Type thisType) {
-		MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "<init>", "(Lnet/sandius/rembulan/core/PreemptionContext;Lnet/sandius/rembulan/core/ObjectStack;I)V", null, null);
+		Type ctorType = Type.getMethodType(
+				Type.VOID_TYPE,
+				Type.getType(PreemptionContext.class),
+				Type.getType(ObjectStack.class),
+				Type.INT_TYPE
+		);
+
+		MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "<init>", ctorType.getDescriptor(), null, null);
 		mv.visitCode();
 		Label l_begin = new Label();
 		mv.visitLabel(l_begin);
@@ -57,7 +64,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitVarInsn(ALOAD, 2);
 		mv.visitVarInsn(ILOAD, 3);
-		mv.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(LuaCallInfo.class), "<init>", "(Lnet/sandius/rembulan/core/PreemptionContext;Lnet/sandius/rembulan/core/ObjectStack;I)V", false);
+		mv.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(LuaCallInfo.class), "<init>", ctorType.getDescriptor(), false);
 		mv.visitInsn(RETURN);
 		Label l_end = new Label();
 		mv.visitLabel(l_end);
