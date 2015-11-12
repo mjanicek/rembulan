@@ -15,6 +15,7 @@ import static org.objectweb.asm.Opcodes.*;
 public class LuaBytecodeMethodVisitor extends MethodVisitor implements InstructionEmitter {
 
 	private static Type REGISTERS_TYPE = ASMUtils.arrayTypeFor(Object.class);
+	private static final int REGISTER_OFFSET = 1;
 
 	private final Type thisType;
 	private final Object[] constants;
@@ -106,7 +107,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 		// registers
 		for (int i = 0; i < numRegs; i++) {
-			mv.visitLocalVariable("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_first, l_last, i + 1);
+			mv.visitLocalVariable("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_first, l_last, REGISTER_OFFSET + i);
 		}
 
 		mv.visitMaxs(numRegs + 1, numRegs + 1);
@@ -207,7 +208,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", Type.getDescriptor(ObjectStack.class));
 		pushBasePlus(idx);
 		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "get", "(I)Ljava/lang/Object;", false);
-		mv.visitVarInsn(ASTORE, idx + 1);
+		mv.visitVarInsn(ASTORE, REGISTER_OFFSET + idx);
 	}
 
 	private void saveRegister(int idx) {
@@ -216,7 +217,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", Type.getDescriptor(ObjectStack.class));
 		pushBasePlus(idx);
-		mv.visitVarInsn(ALOAD, idx + 1);
+		mv.visitVarInsn(ALOAD, REGISTER_OFFSET + idx);
 		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "set", "(ILjava/lang/Object;)V", false);
 	}
 
