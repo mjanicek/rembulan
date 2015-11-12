@@ -27,17 +27,9 @@ public abstract class CallInfo {
 		objectStack.push(args);
 	}
 
-	protected void checkPreempt() throws ControlThrowable {
-		if (shouldPreempt()) preempt();
-	}
-
-	protected boolean shouldPreempt() {
-		return context.preempt();
-	}
-
-	protected void preempt() throws ControlThrowable {
-		throw Yield.INSTANCE;
-	}
+//	protected void checkPreempt() throws ControlThrowable {
+//		if (context.shouldPreemptNow()) throw Preempted.INSTANCE;
+//	}
 
 	public abstract void resume() throws ControlThrowable;
 

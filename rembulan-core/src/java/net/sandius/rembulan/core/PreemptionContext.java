@@ -2,7 +2,7 @@ package net.sandius.rembulan.core;
 
 public abstract class PreemptionContext {
 
-	public abstract boolean preempt();
+	public abstract boolean shouldPreemptNow();
 
 	public static class Const extends PreemptionContext {
 
@@ -13,7 +13,7 @@ public abstract class PreemptionContext {
 		}
 
 		@Override
-		public boolean preempt() {
+		public boolean shouldPreemptNow() {
 			return value;
 		}
 

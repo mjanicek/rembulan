@@ -1,7 +1,10 @@
 package net.sandius.rembulan.test;
 
+import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Operators;
+import net.sandius.rembulan.core.PreemptionContext;
+import net.sandius.rembulan.core.Preempted;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
@@ -92,7 +95,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitLabel(l_save_and_yield);
 		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		saveRegisters();
-		yield();
+		preempted();
 
 		// error branch
 		visitLabel(l_default);
@@ -172,9 +175,9 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		Check.nonNegative(idx);
 
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", "Lnet/sandius/rembulan/core/ObjectStack;");
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", Type.getDescriptor(ObjectStack.class));
 		pushBasePlus(idx);
-		mv.visitMethodInsn(INVOKEVIRTUAL, "net/sandius/rembulan/core/ObjectStack", "get", "(I)Ljava/lang/Object;", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "get", "(I)Ljava/lang/Object;", false);
 		mv.visitVarInsn(ASTORE, idx + 1);
 	}
 
@@ -182,10 +185,10 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		Check.nonNegative(idx);
 
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", "Lnet/sandius/rembulan/core/ObjectStack;");
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", Type.getDescriptor(ObjectStack.class));
 		pushBasePlus(idx);
 		mv.visitVarInsn(ALOAD, idx + 1);
-		mv.visitMethodInsn(INVOKEVIRTUAL, "net/sandius/rembulan/core/ObjectStack", "set", "(ILjava/lang/Object;)V", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "set", "(ILjava/lang/Object;)V", false);
 	}
 
 	public void loadRegisters() {
@@ -214,14 +217,15 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	public void setTop(int to) {
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", "Lnet/sandius/rembulan/core/ObjectStack;");
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", Type.getDescriptor(ObjectStack.class));
 		pushBasePlus(to);
-		mv.visitMethodInsn(INVOKEVIRTUAL, "net/sandius/rembulan/core/ObjectStack", "setTop", "(I)V", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "setTop", "(I)V", false);
 	}
 
 	private void checkPreempt(int pc) {
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitMethodInsn(INVOKEVIRTUAL, thisType.getInternalName(), "shouldPreempt", "()Z", false);
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "context", Type.getDescriptor(PreemptionContext.class));
+		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(PreemptionContext.class), "shouldPreemptNow", "()Z", false);
 		mv.visitJumpInsn(IFEQ, l_pc[pc]);  // continue with pc == 1
 
 		savePc(pc);
@@ -240,9 +244,9 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 	}
 
-	public void yield() {
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitMethodInsn(INVOKEVIRTUAL, thisType.getInternalName(), "preempt", "()V", false);
+	public void preempted() {
+		mv.visitFieldInsn(GETSTATIC, Type.getInternalName(Preempted.class), "INSTANCE", Type.getDescriptor(Preempted.class));
+		mv.visitInsn(ATHROW);
 	}
 
 	public void instruction(int i) {
