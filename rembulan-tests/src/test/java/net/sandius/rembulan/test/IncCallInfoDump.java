@@ -1,6 +1,5 @@
 package net.sandius.rembulan.test;
 
-import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.LuaCallInfo;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.PreemptionContext;
