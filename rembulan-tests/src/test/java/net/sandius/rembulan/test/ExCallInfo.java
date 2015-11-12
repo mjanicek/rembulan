@@ -3,6 +3,7 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ObjectStack;
+import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Preempted;
 
@@ -18,14 +19,12 @@ public class ExCallInfo extends CallInfo {
 		Object u = objectStack.get(base + 0);
 		Object v = objectStack.get(base + 1);
 
-		throw Preempted.INSTANCE;
-
-/*
 		switch (pc) {
 			case 0:
 				try {
 					v = 1;
-					checkPreempt();
+					throw Preempted.INSTANCE;
+//					checkPreempt();
 				}
 				catch (ControlThrowable yld) {
 					pc = 1;
@@ -49,7 +48,6 @@ public class ExCallInfo extends CallInfo {
 			default:
 				throw new IllegalStateException();
 		}
-*/
 	}
 
 }

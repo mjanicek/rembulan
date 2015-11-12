@@ -1,5 +1,6 @@
 package net.sandius.rembulan.gen;
 
+import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.LuaCallInfo;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.OpCode;
@@ -28,9 +29,9 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	private Label l_save_and_yield;
 
 	private final int numInstrs;
-	private Label[] l_pc;
+	private Label[] l_pc_begin;
 	private Label[] l_pc_end;
-	private Label[] l_pc_preempt;
+	private Label[] l_pc_preempt_handler;
 
 	protected InstructionEmitter ie;
 
@@ -86,13 +87,13 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		l_default = new Label();
 
 		// luapc-to-jvmpc mapping
-		l_pc = new Label[numInstrs];
+		l_pc_begin = new Label[numInstrs];
 		l_pc_end = new Label[numInstrs];
-		l_pc_preempt = new Label[numInstrs];
-		for (int i = 0; i < l_pc.length; i++) {
-			l_pc[i] = new Label();
+		l_pc_preempt_handler = new Label[numInstrs];
+		for (int i = 0; i < l_pc_begin.length; i++) {
+			l_pc_begin[i] = new Label();
 			l_pc_end[i] = new Label();
-			l_pc_preempt[i] = new Label();
+			l_pc_preempt_handler[i] = new Label();
 		}
 
 		luaCodeBegin();
@@ -120,12 +121,17 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	public void luaCodeEnd() {
+		visitLabel(l_pc_end[numInstrs - 1]);
+
+		preemptHandlers();
 
 		// save registers and yield
 		visitLabel(l_save_and_yield);
-		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
+//		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		saveRegisters();
-		preempted();
+//		preempted();
+		rethrow();
 
 		// error branch
 		visitLabel(l_default);
@@ -137,11 +143,24 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitInsn(ATHROW);
 	}
 
+	public void preemptHandler(int pc) {
+		visitLabel(l_pc_preempt_handler[pc]);
+		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
+		savePc(pc);
+		visitJumpInsn(GOTO, l_save_and_yield);
+	}
+
+	public void preemptHandlers() {
+		for (int i = 0; i < numInstrs; i++) {
+			preemptHandler(i);
+		}
+	}
+
 	public void preamble() {
 
-//			for (int i = 0; i < 3; i++) {
-//				lmv.visitTryCatchBlock(l_pc[i], l_pc_end[i], l_pc_preempt[i], Type.getInternalName(Yield.class));
-//			}
+		for (int i = 0; i < numInstrs; i++) {
+			mv.visitTryCatchBlock(l_pc_begin[i], l_pc_end[i], l_pc_preempt_handler[i], Type.getInternalName(ControlThrowable.class));
+		}
 
 		mv.visitLabel(l_first);
 		mv.visitLineNumber(2, l_first);
@@ -161,7 +180,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	private void preambleSwitch() {
 		loadPc();
-		mv.visitTableSwitchInsn(0, 2, l_default, l_pc);
+		mv.visitTableSwitchInsn(0, 2, l_default, l_pc_begin);
 	}
 
 	private void pushInt(int i) {
@@ -252,32 +271,40 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "setTop", "(I)V", false);
 	}
 
-	private void checkPreempt(int pc) {
+	private void checkPreemptFromHere(int pc) {
 		mv.visitVarInsn(ALOAD, 0);
 		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "context", Type.getDescriptor(PreemptionContext.class));
 		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(PreemptionContext.class), "shouldPreemptNow", "()Z", false);
-		mv.visitJumpInsn(IFEQ, l_pc[pc]);  // continue with pc == 1
+		mv.visitJumpInsn(IFEQ, l_pc_begin[pc]);  // continue with pc + 1
 
-		savePc(pc);
-		mv.visitJumpInsn(GOTO, l_save_and_yield);
+		pushPreemptThrowable();
+		visitJumpInsn(GOTO, l_pc_preempt_handler[pc]);
 	}
 
 
 	public void atPc(int pc, int lineNumber) {
 		if (pc > 0) {
 			mv.visitLabel(l_pc_end[pc - 1]);
-			checkPreempt(pc);
+			checkPreemptFromHere(pc);
 		}
 
-		mv.visitLabel(l_pc[pc]);
-		if (lineNumber > 0) mv.visitLineNumber(lineNumber, l_pc[pc]);
+		mv.visitLabel(l_pc_begin[pc]);
+		if (lineNumber > 0) mv.visitLineNumber(lineNumber, l_pc_begin[pc]);
 		mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 	}
 
-	public void preempted() {
+	public void pushPreemptThrowable() {
 		mv.visitFieldInsn(GETSTATIC, Type.getInternalName(Preempted.class), "INSTANCE", Type.getDescriptor(Preempted.class));
+	}
+
+	public void rethrow() {
 		mv.visitInsn(ATHROW);
 	}
+
+//	public void preempted() {
+//		pushPreemptThrowable();
+//		rethrow();
+//	}
 
 	public void instruction(int i) {
 		int oc = OpCode.opCode(i);
