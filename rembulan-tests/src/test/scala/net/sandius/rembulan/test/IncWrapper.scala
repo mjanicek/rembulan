@@ -6,11 +6,11 @@ object IncWrapper {
 
   def incClazzForName(name: String) = ByteArrayLoader.defineClass(name, new IncCallInfoDump(name).dump())
 
-  private lazy val incClazz = incClazzForName("net.sandius.rembulan.test.IncCallInfo")
+  private lazy val incClazz = incClazzForName("net.sandius.rembulan.test.IncFunction")
 
-  def newInc(ctx: LuaState, objectStack: ObjectStack): CallInfo = {
-    val constructor = incClazz.getConstructor(classOf[LuaState], classOf[ObjectStack], Integer.TYPE)
-    constructor.newInstance(ctx, objectStack, Int.box(0)).asInstanceOf[CallInfo]
+  def newInc(state: LuaState): Function = {
+    val constructor = incClazz.getConstructor(classOf[LuaState], Integer.TYPE)
+    constructor.newInstance(state, Int.box(0)).asInstanceOf[Function]
   }
 
 }

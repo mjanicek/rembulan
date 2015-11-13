@@ -2,8 +2,10 @@ package net.sandius.rembulan.core;
 
 public abstract class LuaState {
 
+	private static final ThreadLocal<LuaState> current = new ThreadLocal<LuaState>();
+
 	public static LuaState getCurrentState() {
-		return DUMMY_STATE;
+		return current.get();
 	}
 
 	public abstract Table nilMetatable();
@@ -13,55 +15,6 @@ public abstract class LuaState {
 	public abstract Table functionMetatable();
 	public abstract Table threadMetatable();
 	public abstract Table lightuserdataMetatable();
-
-	private static final LuaState DUMMY_STATE = new LuaState() {
-
-		@Override
-		public Table nilMetatable() {
-			return null;
-		}
-
-		@Override
-		public Table booleanMetatable() {
-			return null;
-		}
-
-		@Override
-		public Table numberMetatable() {
-			return null;
-		}
-
-		@Override
-		public Table stringMetatable() {
-			return null;
-		}
-
-		@Override
-		public Table functionMetatable() {
-			return null;
-		}
-
-		@Override
-		public Table threadMetatable() {
-			return null;
-		}
-
-		@Override
-		public Table lightuserdataMetatable() {
-			return null;
-		}
-
-		@Override
-		public boolean shouldPreemptNow() {
-			return true;
-		}
-
-		@Override
-		public Coroutine getCurrentCoroutine() {
-			throw new UnsupportedOperationException();
-		}
-
-	};
 
 	public abstract boolean shouldPreemptNow();
 
