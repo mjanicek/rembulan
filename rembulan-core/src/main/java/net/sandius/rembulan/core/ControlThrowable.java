@@ -7,4 +7,6 @@ public abstract class ControlThrowable extends Throwable {
 		return this;
 	}
 
+	public abstract void push(CallInfo ci);
+
 }

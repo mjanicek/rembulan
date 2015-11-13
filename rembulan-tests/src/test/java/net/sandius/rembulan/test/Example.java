@@ -3,6 +3,7 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.Preempted;
 import net.sandius.rembulan.core.PreemptionContext;
@@ -10,24 +11,24 @@ import net.sandius.rembulan.core.PreemptionContext;
 public class Example extends Function {
 
 	@Override
-	public void resume(CallInfo ci) throws ControlThrowable {
+	public void resume(PreemptionContext context, ObjectStack objectStack, int base, int returnBase, int pc) throws ControlThrowable {
 		// preamble: load previously-saved state
-		Object u = ci.objectStack.get(ci.base + 0);
-		Object v = ci.objectStack.get(ci.base + 1);
+		Object u = objectStack.get(base + 0);
+		Object v = objectStack.get(base + 1);
 
-		switch (ci.pc) {
+		switch (pc) {
 			case 0:
 				try {
 					v = 1;
-					throw Preempted.INSTANCE;
+					throw Preempted.newInstance();
 //					checkPreempt();
 				}
 				catch (ControlThrowable yld) {
-					ci.pc = 1;
-					ci.objectStack.set(ci.base + 0, u);
-					ci.objectStack.set(ci.base + 1, v);
+					pc = 1;
+					objectStack.set(base + 0, u);
+					objectStack.set(base + 1, v);
 
-					CallInfo pci = new CallInfo(ci.context, this, ci.objectStack, ci.base, 1);
+					yld.push(new CallInfo(context, this, objectStack, base, returnBase, pc));
 
 					throw yld;
 				}
@@ -41,7 +42,7 @@ public class Example extends Function {
 //				}
 
 			case 2:
-				ci.objectStack.setTop(1);
+				objectStack.setTop(1);
 				return;
 
 			default:
