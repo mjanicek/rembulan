@@ -8,7 +8,7 @@ import net.sandius.rembulan.util.Check;
 import java.io.PrintStream;
 
 public class BaseLib {
-
+/*
 	public static final Print PRINT = new Print(System.out);
 	public static final Type TYPE = new Type();
 	public static final ToString TOSTRING = new ToString();
@@ -58,5 +58,5 @@ public class BaseLib {
 			return new Object[] { Value.toString(args[0]) };
 		}
 	}
-
+*/
 }

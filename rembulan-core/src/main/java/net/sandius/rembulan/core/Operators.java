@@ -319,7 +319,8 @@ public class Operators {
 	public static Object call(Object tgt, Object[] args) {
 		if (tgt instanceof Function) {
 			Function f = (Function) tgt;
-			return f.invoke(args);
+			throw new UnsupportedOperationException();
+//			return f.invoke(args);
 		}
 		else {
 			Object handler = Metatables.getMetamethod(tgt, Metatables.MT_CALL);

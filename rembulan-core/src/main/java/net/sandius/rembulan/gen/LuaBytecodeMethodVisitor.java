@@ -1,7 +1,7 @@
 package net.sandius.rembulan.gen;
 
+import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.LuaCallInfo;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Operators;
@@ -51,7 +51,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitVarInsn(ALOAD, 1);
 		mv.visitVarInsn(ALOAD, 2);
 		mv.visitVarInsn(ILOAD, 3);
-		mv.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(LuaCallInfo.class), "<init>", ctorType.getDescriptor(), false);
+		mv.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(CallInfo.class), "<init>", ctorType.getDescriptor(), false);
 		mv.visitInsn(RETURN);
 		Label l_end = new Label();
 		mv.visitLabel(l_end);

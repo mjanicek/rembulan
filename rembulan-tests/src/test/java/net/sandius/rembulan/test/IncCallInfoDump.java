@@ -1,8 +1,6 @@
 package net.sandius.rembulan.test;
 
-import net.sandius.rembulan.core.LuaCallInfo;
-import net.sandius.rembulan.core.ObjectStack;
-import net.sandius.rembulan.core.PreemptionContext;
+import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
@@ -26,7 +24,7 @@ public class IncCallInfoDump implements Opcodes {
 		MethodVisitor mv;
 		AnnotationVisitor av0;
 
-		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(LuaCallInfo.class), null);
+		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(CallInfo.class), null);
 
 		cw.visitSource("inc.lua", null);
 
