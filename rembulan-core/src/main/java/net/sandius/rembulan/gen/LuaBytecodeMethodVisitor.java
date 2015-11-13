@@ -2,10 +2,10 @@ package net.sandius.rembulan.gen;
 
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Operators;
-import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Preempted;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.asm.ASMUtils;
@@ -38,7 +38,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public static void emitConstructor(ClassVisitor cv, Type thisType) {
 		Type ctorType = Type.getMethodType(
 				Type.VOID_TYPE,
-				Type.getType(PreemptionContext.class),
+				Type.getType(LuaState.class),
 				Type.getType(ObjectStack.class),
 				Type.INT_TYPE
 		);
@@ -56,7 +56,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		Label l_end = new Label();
 		mv.visitLabel(l_end);
 		mv.visitLocalVariable("this", thisType.getDescriptor(), null, l_begin, l_end, 0);
-		mv.visitLocalVariable("context", Type.getDescriptor(PreemptionContext.class), null, l_begin, l_end, 1);
+		mv.visitLocalVariable("context", Type.getDescriptor(LuaState.class), null, l_begin, l_end, 1);
 		mv.visitLocalVariable("objectStack", Type.getDescriptor(ObjectStack.class), null, l_begin, l_end, 2);
 		mv.visitLocalVariable("base", Type.INT_TYPE.getDescriptor(), null, l_begin, l_end, 3);
 		mv.visitMaxs(4, 4);
@@ -146,7 +146,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitLabel(l_default);
 		visitLineNumber(2, l_default);
 		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
-		visitTypeInsn(NEW, Type.getInternalName(IllegalStateException.class));
+		visitTypeInsn(NEW, Type.getInternalName(IllegalStateException.class));  // TODO: use a more precise exception
 		visitInsn(DUP);
 		visitMethodInsn(INVOKESPECIAL, Type.getInternalName(IllegalStateException.class), "<init>", "()V", false);
 		visitInsn(ATHROW);
@@ -283,8 +283,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	private void checkPreemptFromHere(int pc) {
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "context", Type.getDescriptor(PreemptionContext.class));
-		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(PreemptionContext.class), "shouldPreemptNow", "()Z", false);
+		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "context", Type.getDescriptor(LuaState.class));
+		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(LuaState.class), "shouldPreemptNow", "()Z", false);
 		mv.visitJumpInsn(IFEQ, l_pc_begin[pc]);  // continue with pc + 1
 
 		pushPreemptThrowable();

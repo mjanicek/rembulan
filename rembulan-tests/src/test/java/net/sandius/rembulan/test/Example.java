@@ -2,19 +2,25 @@ package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.Preempted;
-import net.sandius.rembulan.core.PreemptionContext;
 
 public class Example extends Function {
 
 	@Override
-	public void resume(PreemptionContext context, ObjectStack objectStack, int base, int returnBase, int pc) throws ControlThrowable {
+	public void resume(Coroutine coroutine, int base, int returnBase, int pc) throws ControlThrowable {
 		// preamble: load previously-saved state
-		Object u = objectStack.get(base + 0);
-		Object v = objectStack.get(base + 1);
+
+		Object u, v;
+
+		{
+			ObjectStack os = coroutine.getObjectStack();
+			u = os.get(base + 0);
+			v = os.get(base + 1);
+		}
 
 		switch (pc) {
 			case 0:
@@ -25,10 +31,15 @@ public class Example extends Function {
 				}
 				catch (ControlThrowable yld) {
 					pc = 1;
-					objectStack.set(base + 0, u);
-					objectStack.set(base + 1, v);
 
-					yld.push(new CallInfo(context, this, objectStack, base, returnBase, pc));
+					// save registers to the object stack
+					{
+						ObjectStack os = coroutine.getObjectStack();
+						os.set(base + 0, u);
+						os.set(base + 1, v);
+					}
+
+					yld.push(new CallInfo(this, base, returnBase, pc));
 
 					throw yld;
 				}
@@ -42,7 +53,10 @@ public class Example extends Function {
 //				}
 
 			case 2:
-				objectStack.setTop(1);
+				{
+					ObjectStack os = coroutine.getObjectStack();
+					os.setTop(1);
+				}
 				return;
 
 			default:

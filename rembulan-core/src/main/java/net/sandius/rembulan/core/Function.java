@@ -4,10 +4,10 @@ public abstract class Function {
 
 //	public abstract Object[] invoke(Object[] args);
 
-	public abstract void resume(PreemptionContext context, ObjectStack objectStack, int base, int returnBase, int pc) throws ControlThrowable;
+	public abstract void resume(Coroutine coroutine, int base, int returnBase, int pc) throws ControlThrowable;
 
-	public void resume(CallInfo ci) throws ControlThrowable {
-		resume(ci.context, ci.objectStack, ci.base, ci.returnAddr, ci.pc);
+	public void resume(Coroutine coroutine, CallInfo ci) throws ControlThrowable {
+		resume(coroutine, ci.base, ci.returnAddr, ci.pc);
 	}
 
 	@Override

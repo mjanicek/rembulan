@@ -38,7 +38,7 @@ public class Metatables {
 			return ((LuaObject) o).getMetatable();
 		}
 		else {
-			LuaState lst = LuaState.getCurrent();
+			LuaState lst = LuaState.getCurrentState();
 			LuaType tpe = LuaType.typeOf(o);
 			switch (tpe) {
 				case NIL: return lst.nilMetatable();

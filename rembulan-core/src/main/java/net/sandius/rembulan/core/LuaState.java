@@ -2,6 +2,10 @@ package net.sandius.rembulan.core;
 
 public abstract class LuaState {
 
+	public static LuaState getCurrentState() {
+		return DUMMY_STATE;
+	}
+
 	public abstract Table nilMetatable();
 	public abstract Table booleanMetatable();
 	public abstract Table numberMetatable();
@@ -47,10 +51,20 @@ public abstract class LuaState {
 			return null;
 		}
 
+		@Override
+		public boolean shouldPreemptNow() {
+			return true;
+		}
+
+		@Override
+		public Coroutine getCurrentCoroutine() {
+			throw new UnsupportedOperationException();
+		}
+
 	};
 
-	public static LuaState getCurrent() {
-		return DUMMY_STATE;
-	}
+	public abstract boolean shouldPreemptNow();
+
+	public abstract Coroutine getCurrentCoroutine();
 
 }
