@@ -23,7 +23,7 @@ public class IncCallInfoDump implements Opcodes {
 	public byte[] dump() throws Exception {
 
 		ClassWriter cw = new ClassWriter(0);
-		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
+		ClassVisitor cv = cw; // new TraceClassVisitor(cw, new PrintWriter(System.out));
 		FieldVisitor fv;
 		MethodVisitor mv;
 		AnnotationVisitor av0;
