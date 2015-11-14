@@ -2,6 +2,8 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.Iterator;
+
 public class Preempted extends ControlThrowable {
 
 //	public static final Preempted INSTANCE = new Preempted();
@@ -29,6 +31,29 @@ public class Preempted extends ControlThrowable {
 		}
 
 		callStack[top++] = ci;
+	}
+
+	@Override
+	public Iterator<CallInfo> frameIterator() {
+		return new Iterator<CallInfo>() {
+
+			private int idx = 0;
+
+			@Override
+			public boolean hasNext() {
+				return idx < top;
+			}
+
+			@Override
+			public CallInfo next() {
+				return callStack[idx++];
+			}
+
+			@Override
+			public void remove() {
+				throw new UnsupportedOperationException();
+			}
+		};
 	}
 
 }

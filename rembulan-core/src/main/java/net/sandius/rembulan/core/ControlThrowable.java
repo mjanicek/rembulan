@@ -1,5 +1,7 @@
 package net.sandius.rembulan.core;
 
+import java.util.Iterator;
+
 public abstract class ControlThrowable extends Throwable {
 
 	@Override
@@ -8,5 +10,7 @@ public abstract class ControlThrowable extends Throwable {
 	}
 
 	public abstract void push(CallInfo ci);
+
+	public abstract Iterator<CallInfo> frameIterator();
 
 }
