@@ -2,6 +2,8 @@ package net.sandius.rembulan.gen;
 
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Coroutine;
+import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.OpCode;
@@ -16,7 +18,13 @@ import static org.objectweb.asm.Opcodes.*;
 public class LuaBytecodeMethodVisitor extends MethodVisitor implements InstructionEmitter {
 
 	private static Type REGISTERS_TYPE = ASMUtils.arrayTypeFor(Object.class);
-	private static final int REGISTER_OFFSET = 1;
+	private static final int REGISTER_OFFSET = 5;
+
+	private static final int LVAR_THIS = 0;
+	private static final int LVAR_COROUTINE = 1;
+	private static final int LVAR_BASE = 2;
+	private static final int LVAR_RETURN_BASE = 3;
+	private static final int LVAR_PC = 4;
 
 	private final Type thisType;
 	private final Object[] constants;
@@ -37,10 +45,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	public static void emitConstructor(ClassVisitor cv, Type thisType) {
 		Type ctorType = Type.getMethodType(
-				Type.VOID_TYPE,
-				Type.getType(LuaState.class),
-				Type.getType(ObjectStack.class),
-				Type.INT_TYPE
+				Type.VOID_TYPE
 		);
 
 		MethodVisitor mv = cv.visitMethod(ACC_PUBLIC, "<init>", ctorType.getDescriptor(), null, null);
@@ -48,18 +53,12 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		Label l_begin = new Label();
 		mv.visitLabel(l_begin);
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitVarInsn(ALOAD, 1);
-		mv.visitVarInsn(ALOAD, 2);
-		mv.visitVarInsn(ILOAD, 3);
-		mv.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(CallInfo.class), "<init>", ctorType.getDescriptor(), false);
+		mv.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(Function.class), "<init>", ctorType.getDescriptor(), false);
 		mv.visitInsn(RETURN);
 		Label l_end = new Label();
 		mv.visitLabel(l_end);
 		mv.visitLocalVariable("this", thisType.getDescriptor(), null, l_begin, l_end, 0);
-		mv.visitLocalVariable("context", Type.getDescriptor(LuaState.class), null, l_begin, l_end, 1);
-		mv.visitLocalVariable("objectStack", Type.getDescriptor(ObjectStack.class), null, l_begin, l_end, 2);
-		mv.visitLocalVariable("base", Type.INT_TYPE.getDescriptor(), null, l_begin, l_end, 3);
-		mv.visitMaxs(4, 4);
+		mv.visitMaxs(1, 1);
 		mv.visitEnd();
 	}
 
@@ -75,7 +74,17 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 		ie = this;
 
-		mv = cv.visitMethod(ACC_PUBLIC, "resume", "()V", null, null);
+		Type resumeType = Type.getMethodType(
+				Type.VOID_TYPE,
+				Type.getType(Coroutine.class),
+				Type.INT_TYPE,
+				Type.INT_TYPE,
+				Type.INT_TYPE
+		);
+
+		mv = cv.visitMethod(ACC_PUBLIC, "resume", resumeType.getDescriptor(),
+				null,
+				new String[] { Type.getInternalName(ControlThrowable.class) });
 	}
 
 	public void begin() {
@@ -104,14 +113,18 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 		mv.visitLabel(l_last);
 
-		mv.visitLocalVariable("this", thisType.getDescriptor(), null, l_first, l_last, 0);
+		mv.visitLocalVariable("this", thisType.getDescriptor(), null, l_first, l_last, LVAR_THIS);
+		mv.visitLocalVariable("coroutine", Type.getDescriptor(Coroutine.class), null, l_first, l_last, LVAR_COROUTINE);
+		mv.visitLocalVariable("base", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_BASE);
+		mv.visitLocalVariable("returnBase", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_RETURN_BASE);
+		mv.visitLocalVariable("pc", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_PC);
 
 		// registers
 		for (int i = 0; i < numRegs; i++) {
 			mv.visitLocalVariable("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_first, l_last, REGISTER_OFFSET + i);
 		}
 
-		mv.visitMaxs(numRegs + 1, numRegs + 1);
+		mv.visitMaxs(numRegs + 5, REGISTER_OFFSET + numRegs);
 
 		mv.visitEnd();
 	}
@@ -135,9 +148,25 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void emitSaveRegistersAndThrowBranch() {
 		visitLabel(l_save_and_yield);
 		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
-//		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 		saveRegisters();
-//		preempted();
+		pushCallInfoAndThrow();
+	}
+
+	private void constructCallInfo() {
+		visitTypeInsn(NEW, Type.getInternalName(CallInfo.class));
+		visitInsn(DUP);
+		visitVarInsn(ALOAD, LVAR_THIS);
+		visitVarInsn(ILOAD, LVAR_BASE);
+		visitVarInsn(ILOAD, LVAR_RETURN_BASE);
+		loadPc();
+		visitMethodInsn(INVOKESPECIAL, Type.getInternalName(CallInfo.class), "<init>", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Function.class), Type.INT_TYPE, Type.INT_TYPE, Type.INT_TYPE), false);
+	}
+
+	private void pushCallInfoAndThrow() {
+		// control throwable is on the stack top
+		visitInsn(DUP);
+		constructCallInfo();
+		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ControlThrowable.class), "push", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(CallInfo.class)), false);
 		visitInsn(ATHROW);
 	}
 
@@ -160,6 +189,12 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitJumpInsn(GOTO, l_save_and_yield);
 	}
 
+	public void declarePreemptHandlers() {
+		for (int i = 0; i < numInstrs; i++) {
+			mv.visitTryCatchBlock(l_pc_begin[i], l_pc_end[i], l_pc_preempt_handler[i], Type.getInternalName(ControlThrowable.class));
+		}
+	}
+
 	public void emitPreemptHandlers() {
 		for (int i = 0; i < numInstrs; i++) {
 			preemptHandler(i);
@@ -167,10 +202,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	public void preamble() {
-
-		for (int i = 0; i < numInstrs; i++) {
-			mv.visitTryCatchBlock(l_pc_begin[i], l_pc_end[i], l_pc_preempt_handler[i], Type.getInternalName(ControlThrowable.class));
-		}
+		declarePreemptHandlers();
 
 		mv.visitLabel(l_first);
 		mv.visitLineNumber(2, l_first);
@@ -191,6 +223,22 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	private void preambleSwitch() {
 		loadPc();
 		mv.visitTableSwitchInsn(0, 2, l_default, l_pc_begin);
+	}
+
+	private void pushThis() {
+		visitVarInsn(ALOAD, LVAR_THIS);
+	}
+
+	private void pushCoroutine() {
+		visitVarInsn(ALOAD, LVAR_COROUTINE);
+	}
+
+	private void pushRegister(int idx) {
+		visitVarInsn(ALOAD, REGISTER_OFFSET + idx);
+	}
+
+	private void pushIntoRegister(int idx) {
+		visitVarInsn(ASTORE, REGISTER_OFFSET + idx);
 	}
 
 	private void pushInt(int i) {
@@ -222,32 +270,35 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	private void pushBasePlus(int offset) {
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "base", "I");
+//		pushThis();
+		visitVarInsn(ILOAD, LVAR_BASE);
 		if (offset > 0) {
 			pushInt(offset);
 			mv.visitInsn(IADD);
 		}
 	}
 
+	private void pushObjectStack() {
+		pushCoroutine();
+		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Coroutine.class), "getObjectStack", Type.getMethodDescriptor(Type.getType(ObjectStack.class)), false);
+	}
+
 	private void loadRegister(int idx) {
 		Check.nonNegative(idx);
 
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", Type.getDescriptor(ObjectStack.class));
+		pushObjectStack();
 		pushBasePlus(idx);
-		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "get", "(I)Ljava/lang/Object;", false);
-		mv.visitVarInsn(ASTORE, REGISTER_OFFSET + idx);
+		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "get", Type.getMethodDescriptor(Type.getType(Object.class), Type.INT_TYPE), false);
+		visitVarInsn(ASTORE, REGISTER_OFFSET + idx);
 	}
 
 	private void saveRegister(int idx) {
 		Check.nonNegative(idx);
 
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", Type.getDescriptor(ObjectStack.class));
+		pushObjectStack();
 		pushBasePlus(idx);
-		mv.visitVarInsn(ALOAD, REGISTER_OFFSET + idx);
-		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "set", "(ILjava/lang/Object;)V", false);
+		pushRegister(idx);
+		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), false);
 	}
 
 	public void loadRegisters() {
@@ -264,27 +315,25 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	public void loadPc() {
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
+		visitVarInsn(ILOAD, LVAR_PC);
 	}
 
 	public void savePc(int pc) {
-		mv.visitVarInsn(ALOAD, 0);
 		pushInt(pc);
-		mv.visitFieldInsn(PUTFIELD, thisType.getInternalName(), "pc", Type.INT_TYPE.getDescriptor());
+		visitVarInsn(ISTORE, LVAR_PC);
 	}
 
 	public void setTop(int to) {
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "objectStack", Type.getDescriptor(ObjectStack.class));
+		pushObjectStack();
 		pushBasePlus(to);
-		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "setTop", "(I)V", false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "setTop", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE), false);
 	}
 
 	private void checkPreemptFromHere(int pc) {
-		mv.visitVarInsn(ALOAD, 0);
-		mv.visitFieldInsn(GETFIELD, thisType.getInternalName(), "context", Type.getDescriptor(LuaState.class));
-		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(LuaState.class), "shouldPreemptNow", "()Z", false);
+		pushCoroutine();
+		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Coroutine.class), "getOwnerState", Type.getMethodDescriptor(Type.getType(LuaState.class)), false);
+		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(LuaState.class), "shouldPreemptNow", Type.getMethodDescriptor(Type.BOOLEAN_TYPE), false);
+
 		mv.visitJumpInsn(IFEQ, l_pc_begin[pc]);  // continue with pc + 1
 
 		pushPreemptThrowable();
@@ -304,7 +353,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	public void pushPreemptThrowable() {
-		mv.visitFieldInsn(GETSTATIC, Type.getInternalName(Preempted.class), "INSTANCE", Type.getDescriptor(Preempted.class));
+		visitMethodInsn(INVOKESTATIC, Type.getInternalName(Preempted.class), "newInstance", Type.getMethodDescriptor(Type.getType(Preempted.class)), false);
 	}
 
 //	public void rethrow() {
@@ -398,7 +447,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			throw new IllegalArgumentException("Unsupported constant type: " + c.getClass());
 		}
 
-		mv.visitVarInsn(ASTORE, dest + 1);
+		pushIntoRegister(dest);
 	}
 
 	@Override
@@ -453,10 +502,10 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	private void l_binOp(String method, int dest, int left, int right) {
 		// TODO: swap these?
-		mv.visitVarInsn(ALOAD, left + 1);
-		mv.visitVarInsn(ALOAD, right + 1);
-		mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Operators.class), method, "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
-		mv.visitVarInsn(ASTORE, dest + 1);
+		pushRegister(left);
+		pushRegister(right);
+		visitMethodInsn(INVOKESTATIC, Type.getInternalName(Operators.class), method, "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
+		pushIntoRegister(dest);
 	}
 
 	@Override

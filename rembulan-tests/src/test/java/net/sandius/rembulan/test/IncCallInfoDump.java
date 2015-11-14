@@ -1,9 +1,12 @@
 package net.sandius.rembulan.test;
 
-import net.sandius.rembulan.core.CallInfo;
+import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
+import org.objectweb.asm.util.TraceClassVisitor;
+
+import java.io.PrintWriter;
 
 public class IncCallInfoDump implements Opcodes {
 
@@ -20,18 +23,19 @@ public class IncCallInfoDump implements Opcodes {
 	public byte[] dump() throws Exception {
 
 		ClassWriter cw = new ClassWriter(0);
+		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		FieldVisitor fv;
 		MethodVisitor mv;
 		AnnotationVisitor av0;
 
-		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(CallInfo.class), null);
+		cv.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Function.class), null);
 
-		cw.visitSource("inc.lua", null);
+		cv.visitSource("inc.lua", null);
 
-		LuaBytecodeMethodVisitor.emitConstructor(cw, thisType);
+		LuaBytecodeMethodVisitor.emitConstructor(cv, thisType);
 
 		{
-			LuaBytecodeMethodVisitor lmv = new LuaBytecodeMethodVisitor(cw, thisType, constants, 3, 3);
+			LuaBytecodeMethodVisitor lmv = new LuaBytecodeMethodVisitor(cv, thisType, constants, 3, 3);
 			lmv.begin();
 
 			lmv.atPc(0, 2);
@@ -45,7 +49,7 @@ public class IncCallInfoDump implements Opcodes {
 
 			lmv.end();
 		}
-		cw.visitEnd();
+		cv.visitEnd();
 
 		return cw.toByteArray();
 	}

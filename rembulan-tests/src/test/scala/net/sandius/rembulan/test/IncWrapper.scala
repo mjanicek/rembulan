@@ -8,9 +8,6 @@ object IncWrapper {
 
   private lazy val incClazz = incClazzForName("net.sandius.rembulan.test.IncFunction")
 
-  def newInc(state: LuaState): Function = {
-    val constructor = incClazz.getConstructor(classOf[LuaState], Integer.TYPE)
-    constructor.newInstance(state, Int.box(0)).asInstanceOf[Function]
-  }
+  def newInc(): Function = incClazz.getConstructor().newInstance().asInstanceOf[Function]
 
 }

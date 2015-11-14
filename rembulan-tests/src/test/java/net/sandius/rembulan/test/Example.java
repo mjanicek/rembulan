@@ -16,6 +16,8 @@ public class Example extends Function {
 
 		Object u, v;
 
+		coroutine.getOwnerState().shouldPreemptNow();
+
 		{
 			ObjectStack os = coroutine.getObjectStack();
 			u = os.get(base + 0);
