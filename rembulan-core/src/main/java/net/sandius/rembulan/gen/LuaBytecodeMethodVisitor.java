@@ -10,6 +10,7 @@ import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.Preempted;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.ReadOnlyArray;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
 
@@ -27,7 +28,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	private static final int LVAR_PC = 4;
 
 	private final Type thisType;
-	private final Object[] constants;
+	private final ReadOnlyArray<Object> constants;
 
 	private final int numRegs;
 
@@ -62,7 +63,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitEnd();
 	}
 
-	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, Object[] constants, int numInstrs, int numRegs) {
+	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, ReadOnlyArray<Object> constants, int numInstrs, int numRegs) {
 		super(ASM5);
 		Check.notNull(cv);
 		Check.notNull(thisType);
@@ -422,7 +423,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	@Override
 	public void l_LOADK(int dest, int idx) {
-		Object c = constants[-idx - 1];
+		Object c = constants.get(-idx - 1);
 
 		if (c instanceof Integer) {
 			pushInt((Integer) c);

@@ -2,6 +2,7 @@ package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
+import net.sandius.rembulan.util.ReadOnlyArray;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
 import org.objectweb.asm.util.TraceClassVisitor;
@@ -12,9 +13,9 @@ public class IncCallInfoDump implements Opcodes {
 
 	private final Type thisType;
 
-	private final Object[] constants = new Object[] {
-			Integer.valueOf(1)
-	};
+	private final ReadOnlyArray<Object> constants = ReadOnlyArray.copyFrom(new Object[] {
+			1
+	});
 
 	public IncCallInfoDump(String className) {
 		this.thisType = ASMUtils.typeForClassName(className);
