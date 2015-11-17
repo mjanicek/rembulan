@@ -85,7 +85,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 		mv = cv.visitMethod(ACC_PUBLIC, "resume", resumeType.getDescriptor(),
 				null,
-				new String[] { Type.getInternalName(ControlThrowable.class) });
+				new String[]{Type.getInternalName(ControlThrowable.class)});
 	}
 
 	public void begin() {
@@ -136,6 +136,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	public void luaCodeEnd() {
 		visitLabel(l_pc_end[numInstrs - 1]);
+		visitInsn(NOP);
 
 		emitPreemptHandlers();
 		emitSaveRegistersAndThrowBranch();
@@ -423,7 +424,9 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	@Override
 	public void l_LOADK(int dest, int idx) {
-		Object c = constants.get(-idx - 1);
+		System.err.println("LOADK " + dest + " " + idx);
+//		Object c = constants.get(OpCode.indexK(idx));
+		Object c = constants.get(-idx);
 
 		if (c instanceof Integer) {
 			pushInt((Integer) c);

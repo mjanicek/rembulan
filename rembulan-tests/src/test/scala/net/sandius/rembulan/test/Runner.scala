@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.core.{Coroutine, ControlThrowable}
+import net.sandius.rembulan.core.{PrototypeCompiler, LuaCPrototypeLoader, Coroutine, ControlThrowable}
 import net.sandius.rembulan.{core => lua}
 
 object Runner {
@@ -19,12 +19,24 @@ object Runner {
   }
 
   def main(args: Array[String]): Unit = {
-    val st = DummyLuaState.newDummy(true)
-    val inc = IncWrapper.newInc()
-    val coro = st.getCurrentCoroutine
-    coro.getObjectStack.push(Array(Int.box(41)))
+//    val luacPath = System.getProperty("pathToLuaC")
+    val luacPath = "/Users/sandius/bin/luac53"
+    require (luacPath != null)
 
-    Runner.res(coro, inc)
+    val ploader = new LuaCPrototypeLoader(luacPath)
+
+    val proto = ploader.load("local y = 2\nreturn y + 40", "fortytwo.lua")
+
+    val name = "lua.tmp.FortyTwo"
+
+    val bytecode = PrototypeCompiler.compile(proto, name)
+    val clazz = ByteArrayLoader.defineClass(name, bytecode)
+    val func = clazz.getConstructor().newInstance().asInstanceOf[lua.Function]
+
+    val st = DummyLuaState.newDummy(true)
+    val coro = st.getCurrentCoroutine
+
+    Runner.res(coro, func)
   }
 
 }

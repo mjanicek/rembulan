@@ -5,6 +5,9 @@ import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
+import org.objectweb.asm.util.TraceClassVisitor;
+
+import java.io.PrintWriter;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -17,7 +20,8 @@ public class PrototypeCompiler {
 		Type thisType = ASMUtils.typeForClassName(className);
 
 		ClassWriter cw = new ClassWriter(0);
-		ClassVisitor cv = cw; // new TraceClassVisitor(cw, new PrintWriter(System.out));
+//		ClassVisitor cv = cw; // new TraceClassVisitor(cw, new PrintWriter(System.out));
+		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
 		FieldVisitor fv;
 		MethodVisitor mv;
 		AnnotationVisitor av0;
@@ -31,11 +35,11 @@ public class PrototypeCompiler {
 		// function body
 		IntVector code = proto.getCode();
 
-		LuaBytecodeMethodVisitor lmv = new LuaBytecodeMethodVisitor(cv, thisType, proto.getConstants(), 3, 3);
+		LuaBytecodeMethodVisitor lmv = new LuaBytecodeMethodVisitor(cv, thisType, proto.getConstants(), proto.getCode().length(), proto.getMaximumStackSize());
 		lmv.begin();
 
 		for (int i = 0; i < code.length(); i++) {
-			lmv.atPc(i, proto.getLineAtPC(i + 1));
+			lmv.atPc(i, proto.getLineAtPC(i));
 			lmv.instruction(code.get(i));
 		}
 

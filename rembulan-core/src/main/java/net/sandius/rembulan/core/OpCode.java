@@ -117,4 +117,11 @@ public class OpCode {
 		return ((insn >> POS_Bx) & MAXARG_Bx) - MAXARG_sBx;
 	}
 
+	/** this bit 1 means constant (0 means register) */
+	public static final int BITRK = 1 << (SIZE_B - 1);
+
+	public static int indexK(int r) {
+		return r & ~BITRK;
+	}
+
 }
