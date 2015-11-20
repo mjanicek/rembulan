@@ -120,6 +120,10 @@ public class OpCode {
 	/** this bit 1 means constant (0 means register) */
 	public static final int BITRK = 1 << (SIZE_B - 1);
 
+	public static boolean isK(int x) {
+		return 0 != (x & BITRK);
+	}
+
 	public static int indexK(int r) {
 		return r & ~BITRK;
 	}

@@ -83,14 +83,6 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 				Type.INT_TYPE
 		);
 
-		mv = cv.visitMethod(ACC_PUBLIC, "resume", resumeType.getDescriptor(),
-				null,
-				new String[]{Type.getInternalName(ControlThrowable.class)});
-	}
-
-	public void begin() {
-		mv.visitCode();
-
 		l_first = new Label();
 		l_last = new Label();
 		l_save_and_yield = new Label();
@@ -106,6 +98,18 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			l_pc_preempt_handler[i] = new Label();
 		}
 
+		mv = cv.visitMethod(ACC_PUBLIC, "resume", resumeType.getDescriptor(),
+				null,
+				new String[] { Type.getInternalName(ControlThrowable.class) });
+	}
+
+	public void begin() {
+		visitParameter("coroutine", 0);
+		visitParameter("base", 0);
+		visitParameter("returnBase", 0);
+		visitParameter("pc", 0);
+
+		visitCode();
 		luaCodeBegin();
 	}
 
@@ -114,20 +118,30 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 		mv.visitLabel(l_last);
 
-		mv.visitLocalVariable("this", thisType.getDescriptor(), null, l_first, l_last, LVAR_THIS);
-		mv.visitLocalVariable("coroutine", Type.getDescriptor(Coroutine.class), null, l_first, l_last, LVAR_COROUTINE);
-		mv.visitLocalVariable("base", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_BASE);
-		mv.visitLocalVariable("returnBase", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_RETURN_BASE);
-		mv.visitLocalVariable("pc", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_PC);
+		visitLocalVariable("this", thisType.getDescriptor(), null, l_first, l_last, LVAR_THIS);
+		visitLocalVariable("coroutine", Type.getDescriptor(Coroutine.class), null, l_first, l_last, LVAR_COROUTINE);
+		visitLocalVariable("base", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_BASE);
+		visitLocalVariable("returnBase", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_RETURN_BASE);
+		visitLocalVariable("pc", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_PC);
 
 		// registers
 		for (int i = 0; i < numRegs; i++) {
-			mv.visitLocalVariable("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_first, l_last, REGISTER_OFFSET + i);
+			visitLocalVariable("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_first, l_last, REGISTER_OFFSET + i);
 		}
 
-		mv.visitMaxs(numRegs + 5, REGISTER_OFFSET + numRegs);
+		visitMaxs(numRegs + 5, REGISTER_OFFSET + numRegs);
 
-		mv.visitEnd();
+		visitEnd();
+
+		System.err.println("Begin: " + l_first.getOffset());
+		System.err.println("Save-and-yield: " + l_save_and_yield.getOffset());
+		System.err.println("Error branch: " + l_default.getOffset());
+		System.err.println("End: " + l_last.getOffset());
+
+		for (int i = 0; i < numInstrs; i++) {
+			System.err.println("Handler for pc=" + i + ": [" + l_pc_begin[i].getOffset() + ", " + l_pc_end[i].getOffset() + ") -> " + l_pc_preempt_handler[i].getOffset());
+		}
+
 	}
 
 	public void luaCodeBegin() {
@@ -136,7 +150,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	public void luaCodeEnd() {
 		visitLabel(l_pc_end[numInstrs - 1]);
-		visitInsn(NOP);
+
+//		visitInsn(NOP);
 
 		emitPreemptHandlers();
 		emitSaveRegistersAndThrowBranch();
@@ -186,14 +201,18 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	public void preemptHandler(int pc) {
 		visitLabel(l_pc_preempt_handler[pc]);
-		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
+		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) });
 		savePc(pc);
 		visitJumpInsn(GOTO, l_save_and_yield);
 	}
 
+	public void declarePreemptHandler(int pc) {
+		visitTryCatchBlock(l_pc_begin[pc], l_pc_end[pc], l_pc_preempt_handler[pc], Type.getInternalName(ControlThrowable.class));
+	}
+
 	public void declarePreemptHandlers() {
 		for (int i = 0; i < numInstrs; i++) {
-			mv.visitTryCatchBlock(l_pc_begin[i], l_pc_end[i], l_pc_preempt_handler[i], Type.getInternalName(ControlThrowable.class));
+			declarePreemptHandler(i);
 		}
 	}
 
@@ -206,8 +225,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void preamble() {
 		declarePreemptHandlers();
 
-		mv.visitLabel(l_first);
-		mv.visitLineNumber(2, l_first);
+		visitLabel(l_first);
+		visitLineNumber(2, l_first);
 
 		loadRegisters();
 
@@ -216,7 +235,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			regTypes[i] = Type.getInternalName(Object.class);
 		}
 
-		mv.visitFrame(Opcodes.F_APPEND, numRegs, regTypes, 0, null);
+		visitFrame(Opcodes.F_APPEND, numRegs, regTypes, 0, null);
 
 		// branch according to the program counter
 		preambleSwitch();
@@ -224,7 +243,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	private void preambleSwitch() {
 		loadPc();
-		mv.visitTableSwitchInsn(0, 2, l_default, l_pc_begin);
+		mv.visitTableSwitchInsn(0, numInstrs - 1, l_default, l_pc_begin);
 	}
 
 	private void pushThis() {
@@ -349,6 +368,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			checkPreemptFromHere(pc);
 		}
 
+//		declarePreemptHandler(pc);
+
 		mv.visitLabel(l_pc_begin[pc]);
 		if (lineNumber > 0) mv.visitLineNumber(lineNumber, l_pc_begin[pc]);
 		mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
@@ -366,6 +387,33 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 //		pushPreemptThrowable();
 //		rethrow();
 //	}
+
+	public void pushConstant(int idx) {
+		Object c = constants.get(idx);
+
+		if (c instanceof Integer) {
+			pushInt((Integer) c);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+		}
+		else if (c instanceof Long) {
+			pushLong((Long) c);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
+		}
+		else if (c instanceof Float) {
+			pushFloat((Float) c);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
+		}
+		else if (c instanceof Double) {
+			pushDouble((Double) c);
+			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
+		}
+		else if (c instanceof String) {
+			pushString((String) c);
+		}
+		else {
+			throw new IllegalArgumentException("Unsupported constant type: " + c.getClass());
+		}
+	}
 
 	public void instruction(int i) {
 		int oc = OpCode.opCode(i);
@@ -426,31 +474,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void l_LOADK(int dest, int idx) {
 		System.err.println("LOADK " + dest + " " + idx);
 //		Object c = constants.get(OpCode.indexK(idx));
-		Object c = constants.get(-idx);
-
-		if (c instanceof Integer) {
-			pushInt((Integer) c);
-			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
-		}
-		else if (c instanceof Long) {
-			pushLong((Long) c);
-			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
-		}
-		else if (c instanceof Float) {
-			pushFloat((Float) c);
-			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
-		}
-		else if (c instanceof Double) {
-			pushDouble((Double) c);
-			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
-		}
-		else if (c instanceof String) {
-			pushString((String) c);
-		}
-		else {
-			throw new IllegalArgumentException("Unsupported constant type: " + c.getClass());
-		}
-
+//		Object c = constants.get(-idx);
+		pushConstant(0);  // FIXME
 		pushIntoRegister(dest);
 	}
 
@@ -505,9 +530,10 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	private void l_binOp(String method, int dest, int left, int right) {
+		System.err.println("BINOP(" + method + ") " + dest + " " + left + " " + right);
 		// TODO: swap these?
-		pushRegister(left);
-		pushRegister(right);
+		if (OpCode.isK(left)) pushConstant(OpCode.indexK(left)); else pushRegister(left);
+		if (OpCode.isK(right)) pushConstant(OpCode.indexK((byte) right)); else pushRegister(right);
 		visitMethodInsn(INVOKESTATIC, Type.getInternalName(Operators.class), method, "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
 		pushIntoRegister(dest);
 	}

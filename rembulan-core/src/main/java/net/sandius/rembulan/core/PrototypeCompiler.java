@@ -19,12 +19,9 @@ public class PrototypeCompiler {
 
 		Type thisType = ASMUtils.typeForClassName(className);
 
-		ClassWriter cw = new ClassWriter(0);
-//		ClassVisitor cv = cw; // new TraceClassVisitor(cw, new PrintWriter(System.out));
-		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-		FieldVisitor fv;
-		MethodVisitor mv;
-		AnnotationVisitor av0;
+		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+		ClassVisitor cv = cw; // new TraceClassVisitor(cw, new PrintWriter(System.out));
+//		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.err));
 
 		cv.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Function.class), null);
 		cv.visitSource(proto.getSource(), null);

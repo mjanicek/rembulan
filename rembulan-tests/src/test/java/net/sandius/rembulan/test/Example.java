@@ -10,6 +10,10 @@ import net.sandius.rembulan.core.Preempted;
 
 public class Example extends Function {
 
+	public Example() {
+		super();
+	}
+
 	@Override
 	public void resume(Coroutine coroutine, int base, int returnBase, int pc) throws ControlThrowable {
 		// preamble: load previously-saved state
