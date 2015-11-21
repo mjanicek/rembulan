@@ -499,9 +499,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	@Override
 	public void l_LOADK(int dest, int idx) {
 		System.err.println("LOADK " + dest + " " + idx);
-//		Object c = constants.get(OpCode.indexK(idx));
-//		Object c = constants.get(-idx);
-		pushConstant(0);  // FIXME
+		pushConstant(OpCode.indexK(idx));
 		pushIntoRegister(dest);
 	}
 
