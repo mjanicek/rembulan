@@ -33,7 +33,32 @@ public interface InstructionEmitter {
 	void l_NOT(int a, int b);
 	void l_LEN(int a, int b);
 
+	void l_CONCAT(int a, int b, int c);
+
+	void l_JMP(int sbx);
+	void l_EQ(int a, int b, int c);
+	void l_LT(int a, int b, int c);
+	void l_LE(int a, int b, int c);
+
+	void l_TEST(int a, int c);
+	void l_TESTSET(int a, int b, int c);
+
+	void l_CALL(int a, int b, int c);
+	void l_TAILCALL(int a, int b, int c);
 	void l_RETURN(int a, int b);
 
+	void l_FORLOOP(int a, int sbx);
+	void l_FORPREP(int a, int sbx);
+
+	void l_TFORCALL(int a, int c);
+	void l_TFORLOOP(int a, int sbx);
+
+	void l_SETLIST(int a, int b, int c);
+
+	void l_CLOSURE(int a, int bx);
+
+	void l_VARARG(int a, int b);
+
+	void l_EXTRAARG(int ax);
 
 }

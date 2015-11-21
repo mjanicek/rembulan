@@ -459,8 +459,34 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			case OpCode.NOT:   ie.l_NOT(a, b); break;
 			case OpCode.LEN:   ie.l_LEN(a, b); break;
 
-			case OpCode.RETURN: ie.l_RETURN(a, b); break;
+			case OpCode.CONCAT:  ie.l_CONCAT(a, b, c); break;
 
+			case OpCode.JMP:  ie.l_JMP(sbx); break;
+			case OpCode.EQ:   ie.l_EQ(a, b, c); break;
+			case OpCode.LT:   ie.l_LT(a, b, c); break;
+			case OpCode.LE:   ie.l_LE(a, b, c); break;
+
+			case OpCode.TEST:     ie.l_TEST(a, c); break;
+			case OpCode.TESTSET:  ie.l_TESTSET(a, b, c); break;
+
+			case OpCode.CALL:      ie.l_CALL(a, b, c); break;
+			case OpCode.TAILCALL:  ie.l_TAILCALL(a, b, c); break;
+			case OpCode.RETURN:    ie.l_RETURN(a, b); break;
+
+			case OpCode.FORLOOP:  ie.l_FORLOOP(a, sbx); break;
+			case OpCode.FORPREP:  ie.l_FORPREP(a, sbx); break;
+		
+			case OpCode.TFORCALL:  ie.l_TFORCALL(a, c); break;
+			case OpCode.TFORLOOP:  ie.l_TFORLOOP(a, sbx); break;
+		
+			case OpCode.SETLIST:  ie.l_SETLIST(a, b, c); break;
+		
+			case OpCode.CLOSURE:  ie.l_CLOSURE(a, bx); break;
+		
+			case OpCode.VARARG:  ie.l_VARARG(a, b); break;
+		
+			case OpCode.EXTRAARG:  ie.l_EXTRAARG(ax); break;
+			
 			default: throw new UnsupportedOperationException("Unsupported opcode: " + oc);
 		}
 	}
@@ -619,6 +645,53 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	@Override
+	public void l_CONCAT(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_JMP(int sbx) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_EQ(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_LT(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_LE(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+
+	@Override
+	public void l_TEST(int a, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_TESTSET(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+
+	@Override
+	public void l_CALL(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_TAILCALL(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
 	public void l_RETURN(int a, int b) {
 
 
@@ -628,6 +701,46 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		setTop(1);
 
 		mv.visitInsn(RETURN);  // end; TODO: signal a return!
+	}
+
+	@Override
+	public void l_FORLOOP(int a, int sbx) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_FORPREP(int a, int sbx) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_TFORCALL(int a, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_TFORLOOP(int a, int sbx) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_SETLIST(int a, int b, int c) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_CLOSURE(int a, int bx) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_VARARG(int a, int b) {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	@Override
+	public void l_EXTRAARG(int ax) {
+		throw new UnsupportedOperationException("not implemented");
 	}
 
 }
