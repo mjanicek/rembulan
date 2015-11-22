@@ -4,10 +4,13 @@ import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.asm.ASMUtils;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.util.TraceClassVisitor;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,13 +41,13 @@ public class PrototypeClassLoader extends ClassLoader {
 		return (Class<Function>) cl;
 	}
 
-	protected byte[] compile(Prototype prototype, String className) {
+	protected byte[] compile(final Prototype prototype, final String className) {
 		Check.notNull(prototype);
 		Check.notNull(className);
 
-		Type thisType = ASMUtils.typeForClassName(className);
+		final Type thisType = ASMUtils.typeForClassName(className);
 
-		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+		ClassWriter cw = new ClassWriter(0); //ClassWriter.COMPUTE_FRAMES);
 
 		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Function.class), null);
 		cw.visitSource(prototype.getSource(), null);
@@ -55,9 +58,23 @@ public class PrototypeClassLoader extends ClassLoader {
 		// function body
 		IntVector code = prototype.getCode();
 
-		LuaBytecodeMethodVisitor lmv = new LuaBytecodeMethodVisitor(cw, thisType, prototype.getConstants(), prototype.getCode().length(), prototype.getMaximumStackSize());
+		LuaBytecodeMethodVisitor lmv = new LuaBytecodeMethodVisitor(
+				cw,
+				thisType,
+				prototype.getConstants(),
+				prototype.getNestedPrototypes(),
+				new PrototypeToClassMap() {
+					@Override
+					public String classNameFor(int idx) {
+						return className + "$" + (idx + 1);
+					}
+				},
+				prototype.getCode().length() - 1,  // ignoring the last return instruction
+				prototype.getMaximumStackSize()
+		);
+
 		lmv.begin();
-		for (int i = 0; i < code.length(); i++) {
+		for (int i = 0; i < code.length() - 1; i++) {  // ignoring the last return instruction
 			lmv.atPc(i, prototype.getLineAtPC(i));
 			lmv.instruction(code.get(i));
 		}
@@ -82,6 +99,13 @@ public class PrototypeClassLoader extends ClassLoader {
 
 			// compile prototype into Java bytecode
 			byte[] javaClassBytes = compile(prototype, name);
+
+			{
+				// print the class structure for debugging
+				ClassReader reader = new ClassReader(javaClassBytes);
+				ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.err));
+				reader.accept(cv, 0);
+			}
 
 			// load the compiled class
 			cp = defineCompiledLuaFunction(name, javaClassBytes);

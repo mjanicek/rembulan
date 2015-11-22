@@ -9,6 +9,9 @@ import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.Preempted;
+import net.sandius.rembulan.core.Prototype;
+import net.sandius.rembulan.core.PrototypePrinter;
+import net.sandius.rembulan.core.PrototypeToClassMap;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 import net.sandius.rembulan.util.asm.ASMUtils;
@@ -29,6 +32,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	private final Type thisType;
 	private final ReadOnlyArray<Object> constants;
+	private final ReadOnlyArray<Prototype> nestedPrototypes;
+	private final PrototypeToClassMap prototypeToClassMap;
 
 	private final int numRegs;
 
@@ -63,13 +68,15 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitEnd();
 	}
 
-	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, ReadOnlyArray<Object> constants, int numInstrs, int numRegs) {
+	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> nestedPrototypes, PrototypeToClassMap prototypeToClassMap, int numInstrs, int numRegs) {
 		super(ASM5);
 		Check.notNull(cv);
 		Check.notNull(thisType);
 
 		this.thisType = thisType;
 		this.constants = constants;
+		this.nestedPrototypes = nestedPrototypes;
+		this.prototypeToClassMap = prototypeToClassMap;
 		this.numRegs = numRegs;
 		this.numInstrs = numInstrs;
 
@@ -129,7 +136,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			visitLocalVariable("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_first, l_last, REGISTER_OFFSET + i);
 		}
 
-		visitMaxs(numRegs + 5, REGISTER_OFFSET + numRegs);
+		visitMaxs(numRegs + 6, REGISTER_OFFSET + numRegs);
 
 		visitEnd();
 
@@ -493,7 +500,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	@Override
 	public void l_MOVE(int a, int b) {
-		throw new UnsupportedOperationException("not implemented");
+		pushRegister(b);
+		pushIntoRegister(a);
 	}
 
 	@Override
@@ -681,7 +689,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	@Override
 	public void l_CALL(int a, int b, int c) {
-		throw new UnsupportedOperationException("not implemented");
+		// TODO
+		visitInsn(NOP);
 	}
 
 	@Override
@@ -728,7 +737,21 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	@Override
 	public void l_CLOSURE(int a, int bx) {
-		throw new UnsupportedOperationException("not implemented");
+		System.err.println("CLOSURE " + a + " " + bx);
+
+		String className = prototypeToClassMap.classNameFor(bx);
+
+		System.err.println("this is prototype #" + bx + ", corresponding to " + className);
+
+		Type functionType = ASMUtils.typeForClassName(className);
+
+		// instantiate the closure
+		visitTypeInsn(NEW, functionType.getInternalName());
+		visitInsn(DUP);
+		// TODO: upvalues
+		visitMethodInsn(INVOKESPECIAL, functionType.getInternalName(), "<init>", Type.getMethodDescriptor(Type.VOID_TYPE), false);
+
+		pushIntoRegister(a);
 	}
 
 	@Override

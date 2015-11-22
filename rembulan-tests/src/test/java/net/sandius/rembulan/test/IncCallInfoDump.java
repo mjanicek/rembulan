@@ -36,7 +36,7 @@ public class IncCallInfoDump implements Opcodes {
 		LuaBytecodeMethodVisitor.emitConstructor(cv, thisType);
 
 		{
-			LuaBytecodeMethodVisitor lmv = new LuaBytecodeMethodVisitor(cv, thisType, constants, 4, 2);
+			LuaBytecodeMethodVisitor lmv = new LuaBytecodeMethodVisitor(cv, thisType, constants, null, null, 4, 2);
 			lmv.begin();
 
 			lmv.atPc(0, 1);
