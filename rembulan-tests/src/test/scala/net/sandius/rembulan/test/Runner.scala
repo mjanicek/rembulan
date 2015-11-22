@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.core.{PrototypeCompiler, LuaCPrototypeLoader, Coroutine, ControlThrowable}
+import net.sandius.rembulan.core._
 import net.sandius.rembulan.{core => lua}
 
 object Runner {
@@ -25,7 +25,18 @@ object Runner {
 
     val ploader = new LuaCPrototypeLoader(luacPath)
 
-    val proto = ploader.load("local y = 2\nreturn y + 40", "fortytwo.lua")
+    val program =
+      """local f = function ()
+        |    return 4
+        |end
+        |return -1 + f() + 39
+      """.stripMargin
+
+    System.err.println(program)
+
+    val proto = ploader.load(program, "fortytwo.lua")
+
+    PrototypePrinter.print(proto, System.err)
 
     val name = "lua.tmp.FortyTwo"
 

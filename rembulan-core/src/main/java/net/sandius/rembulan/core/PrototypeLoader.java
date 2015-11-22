@@ -333,11 +333,6 @@ public class PrototypeLoader {
 	public Prototype loadFunction(String p) throws IOException {
 		Prototype.Builder f = new Prototype.Builder();
 
-		boolean isClosure = loadBoolean();
-		// TODO: require true
-		System.err.println("isClosure: " + (isClosure ? "true" : "false"));
-
-
 ////		this.L.push(f);
 		f.source = loadString();
 		if (f.source == null) f.source = p;
@@ -424,6 +419,10 @@ public class PrototypeLoader {
 			// TODO
 //			Double.longBitsToDouble(tn);
         }
+
+		boolean isClosure = loadBoolean();
+		// TODO: require true
+		System.err.println("isClosure: " + (isClosure ? "true" : "false"));
 	}
 
 	/**
