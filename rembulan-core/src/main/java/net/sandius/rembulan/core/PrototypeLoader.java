@@ -50,9 +50,6 @@ public class PrototypeLoader {
 	public static final int LUA_TNUMFLT = LUA_TNUMBER | (0 << 4);  // float numbers
 	public static final int LUA_TNUMINT = LUA_TNUMBER | (1 << 4);  // integer numbers
 
-	/** The character encoding to use for file encoding.  Null means the default encoding */
-	public static String encoding = null;
-
 	/** Signature byte indicating the file is a compiled binary chunk */
 	public static final byte[] LUA_SIGNATURE	= { '\033', 'L', 'u', 'a' };
 
@@ -83,7 +80,7 @@ public class PrototypeLoader {
 	// values read from the header
 	private int     luacVersion;
 	private int     luacFormat;
-	private boolean luacLittleEndian;
+	private boolean littleEndian;
 	private int     luacSizeofInt;
 	private int     luacSizeofSizeT;
 	private int     luacSizeofInstruction;
@@ -94,19 +91,11 @@ public class PrototypeLoader {
 	public final DataInputStream is;
 
 	/** Name of what is being loaded? */
-	String name;
+	public final String name;
 
-	private static final Object[]     NOVALUES    = {};
-	private static final Prototype[] NOPROTOS    = {};
-	private static final LocalVariable[]   NOLOCVARS   = {};
-	private static final String[]  NOSTRVALUES = {};
-	private static final Upvalue.Desc[]  NOUPVALDESCS = {};
-	private static final int[]       NOINTS      = {};
-
-	int bytesToInt(byte a, byte b, byte c, byte d) {
-		return luacLittleEndian
-				? ((0xff & d) << 24) | ((0xff & c) << 16) | ((0xff & b) << 8) | (0xff & a)
-				: ((0xff & a) << 24) | ((0xff & b) << 16) | ((0xff & c) << 8) | (0xff & d);
+	public PrototypeLoader(InputStream stream, String name) {
+		this.name = name;
+		this.is = new DataInputStream(stream);
 	}
 
 	/**
@@ -115,9 +104,8 @@ public class PrototypeLoader {
 	 * @return the int value loaded.
 	 */
 	int loadInt32() throws IOException {
-		byte[] buf = new byte[4];
-		is.readFully(buf, 0, 4);
-		return bytesToInt(buf[0], buf[1], buf[2], buf[3]);
+		int i = is.readInt();
+		return littleEndian ? Integer.reverseBytes(i) : i;
 	}
 
 	/**
@@ -126,20 +114,8 @@ public class PrototypeLoader {
 	 * @return the long value loaded.
 	 */
 	long loadInt64() throws IOException {
-		int u = loadInt32();
-		int v = loadInt32();
-
-		long a, b;
-		if (luacLittleEndian) {
-			a = u;
-			b = v;
-		}
-		else {
-			b = u;
-			a = v;
-		}
-
-		return (b << 32) | (a & 0xffffffffL);
+		long l = is.readLong();
+		return littleEndian ? Long.reverseBytes(l) : l;
 	}
 
 	/**
@@ -154,15 +130,9 @@ public class PrototypeLoader {
 			return IntVector.EMPTY;
 		}
 
-		// read all data at once
-		int m = n << 2;
-		byte[] buf = new byte[m];
-		is.readFully(buf, 0, m);
-
 		int[] array = new int[n];
 		for (int i = 0; i < n; i++) {
-			int j = i << 2;
-			array[i] = bytesToInt(buf[j + 0], buf[j + 1], buf[j + 2], buf[j + 3]);
+			array[i] = loadInt32();
 		}
 
 		return IntVector.wrap(array);
@@ -336,13 +306,13 @@ public class PrototypeLoader {
 			throw new IllegalArgumentException("Endianness mismatch: 0x" + Long.toHexString(ti));
         }
         else {
-			luacLittleEndian = (ti == TestIntLE);
+			littleEndian = (ti == TestIntLE);
         }
 
         // TODO: use loadNumber here!
         long tn = is.readLong();
 
-		if (luacLittleEndian) {
+		if (littleEndian) {
 			// TODO: this!
         }
         else {
@@ -362,7 +332,7 @@ public class PrototypeLoader {
 	 * @return {@link Prototype} that was loaded, or null if the first 4 bytes were not the lua signature.
 	 * @throws IOException if an IOException occurs
 	 */
-	public static Prototype undump(InputStream stream, String chunkName, boolean littleEndian) throws IOException {
+	public static Prototype undump(InputStream stream, String chunkName) throws IOException {
 
 		// check rest of signature
 		if (stream.read() != LUA_SIGNATURE[0]
@@ -374,7 +344,7 @@ public class PrototypeLoader {
 
 		// load file as a compiled chunk
 		String sourceName = getSourceName(chunkName);
-		PrototypeLoader s = new PrototypeLoader(stream, sourceName, littleEndian);
+		PrototypeLoader s = new PrototypeLoader(stream, sourceName);
 		s.loadHeader();
 
 		return s.loadFunction(sourceName);
@@ -395,16 +365,4 @@ public class PrototypeLoader {
 		return name;
 	}
 
-	/** Private constructor for create a load state */
-	// TODO: endianness not needed?
-	public PrototypeLoader(InputStream stream, String name, boolean littleEndian) {
-		this.name = name;
-		this.is = new DataInputStream(stream);
-		this.luacLittleEndian = littleEndian;
-	}
-
-	private PrototypeLoader() {
-		this.name = "";
-		this.is = null;
-	}
 }

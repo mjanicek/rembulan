@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.ArrayList;
 
 public class LuaCPrototypeLoader {
 
@@ -88,7 +87,7 @@ public class LuaCPrototypeLoader {
 		byte[] bytes = baos.toByteArray();
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		return PrototypeLoader.undump(bais, name, true);
+		return PrototypeLoader.undump(bais, name);
 	}
 
 }
