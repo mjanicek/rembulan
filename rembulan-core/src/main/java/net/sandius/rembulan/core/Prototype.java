@@ -114,7 +114,7 @@ public class Prototype {
 			return false;
 		if (!locvars.equals(prototype.locvars)) return false;
 		if (!upvalues.equals(prototype.upvalues)) return false;
-		return source.equals(prototype.source);
+		return !(source != null ? !source.equals(prototype.source) : prototype.source != null);
 	}
 
 	@Override
@@ -125,7 +125,7 @@ public class Prototype {
 		result = 31 * result + (lineinfo != null ? lineinfo.hashCode() : 0);
 		result = 31 * result + locvars.hashCode();
 		result = 31 * result + upvalues.hashCode();
-		result = 31 * result + source.hashCode();
+		result = 31 * result + (source != null ? source.hashCode() : 0);
 		result = 31 * result + linedefined;
 		result = 31 * result + lastlinedefined;
 		result = 31 * result + numparams;
