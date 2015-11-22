@@ -95,22 +95,6 @@ public class Prototype {
 		}
 	}
 
-//	public static Prototype newEmptyPrototype(int n_upvalues) {
-//		return new Prototype(
-//				new ReadOnlyArray<Object>(new Object[0]),
-//				IntVector.wrap(new int[0]),
-//				new ReadOnlyArray<Prototype>(new Prototype[0]),
-//				IntVector.wrap(new int[0]),
-//				new ReadOnlyArray<LocalVariable>(new LocalVariable[0]),
-//				new ReadOnlyArray<Upvalue.Desc>(new Upvalue.Desc[n_upvalues]),
-//				null,
-//				0, 0, 0, false, 0);
-//	}
-
-//	public static Prototype newEmptyPrototype() {
-//		return Prototype.newEmptyPrototype(0);
-//	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -238,91 +222,6 @@ public class Prototype {
 			name = "binary string";
 		}
         return name;
-	}
-
-	public static class Builder implements GenericBuilder<Prototype> {
-		public final ArrayList<Object> constants;
-		public IntVector code;
-		public final ArrayList<Prototype> p;
-
-		public IntVector lineinfo;
-
-		public final ArrayList<LocalVariable> locvars;
-		public final ArrayList<Upvalue.Desc.Builder> upvalues;
-
-		public String source;
-		public int linedefined;
-		public int lastlinedefined;
-		public int numparams;
-		public boolean is_vararg;
-		public int maxstacksize;
-
-		public Builder() {
-			this.constants = new ArrayList<Object>();
-			this.code = null;
-			this.p = new ArrayList<Prototype>();
-			this.lineinfo = null;
-			this.locvars = new ArrayList<LocalVariable>();
-			this.upvalues = new ArrayList<Upvalue.Desc.Builder>();
-		}
-
-		// FIXME: ugly! is there a point in having this even?
-		public Builder(Prototype proto) {
-			this.constants = new ArrayList<Object>();
-			for (Object c : proto.consts) {
-				constants.add(c);
-			}
-
-			this.p = new ArrayList<Prototype>();
-			for (Prototype pp : proto.p) {
-				this.p.add(pp);
-			}
-
-			this.lineinfo = proto.lineinfo;
-
-			this.locvars = new ArrayList<LocalVariable>();
-			for (LocalVariable lv : proto.locvars) {
-				this.locvars.add(lv);
-			}
-
-			this.upvalues = new ArrayList<Upvalue.Desc.Builder>();
-			for (Upvalue.Desc uv : proto.upvalues) {
-				this.upvalues.add(new Upvalue.Desc.Builder(uv.name, uv.inStack, uv.index));
-			}
-
-			this.code = proto.code;
-
-			this.source = proto.source;
-			this.linedefined = proto.linedefined;
-			this.lastlinedefined = proto.lastlinedefined;
-			this.numparams = proto.numparams;
-			this.is_vararg = proto.is_vararg;
-			this.maxstacksize = proto.maxstacksize;
-		}
-
-		@Override
-		public Prototype build() {
-			Upvalue.Desc[] uvs0 = new Upvalue.Desc[this.upvalues.size()];
-			for (int i = 0; i < this.upvalues.size(); i++) {
-				uvs0[i] = this.upvalues.get(i).build();
-			}
-			ReadOnlyArray<Upvalue.Desc> uvs = ReadOnlyArray.wrap(uvs0);
-
-			return new Prototype(
-					ReadOnlyArray.fromCollection(Object.class, constants),
-					code,
-					ReadOnlyArray.fromCollection(Prototype.class, p),
-					lineinfo,
-					ReadOnlyArray.fromCollection(LocalVariable.class, locvars),
-					uvs,
-					source,
-					linedefined,
-					lastlinedefined,
-					numparams,
-					is_vararg,
-					maxstacksize);
-		}
-
 	}
 
 }

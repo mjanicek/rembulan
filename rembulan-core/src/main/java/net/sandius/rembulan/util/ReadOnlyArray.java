@@ -59,6 +59,7 @@ public class ReadOnlyArray<T> implements Iterable<T> {
 		return values[idx];
 	}
 
+	// FIXME: size or length?
 	public int size() {
 		return values.length;
 	}

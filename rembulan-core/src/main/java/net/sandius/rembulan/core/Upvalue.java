@@ -21,10 +21,6 @@
 ******************************************************************************/
 package net.sandius.rembulan.core;
 
-
-import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.GenericBuilder;
-
 public final class Upvalue {
 
 	public static class Desc {
@@ -39,7 +35,7 @@ public final class Upvalue {
 		public final short index;
 
 		public Desc(String name, boolean inStack, int index) {
-			Check.notNull(name);
+			// name may be null
 			this.name = name;
 			this.inStack = inStack;
 			this.index = (short) index;
@@ -49,23 +45,6 @@ public final class Upvalue {
 			return index + (inStack ? " instack " : " closed ") + name;
 		}
 
-		public static class Builder implements GenericBuilder<Desc> {
-
-			public String name;
-			public boolean inStack;
-			public short index;
-
-			public Builder(String name, boolean inStack, int index) {
-				this.name = name;
-				this.inStack = inStack;
-				this.index = (short) index;
-			}
-
-			@Override
-			public Desc build() {
-				return new Desc(name, inStack, index);
-			}
-		}
 	}
 
 }

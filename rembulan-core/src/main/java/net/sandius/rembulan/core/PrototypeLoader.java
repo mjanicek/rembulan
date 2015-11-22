@@ -22,7 +22,9 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.util.GenericBuilder;
 import net.sandius.rembulan.util.IntVector;
+import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -123,19 +125,13 @@ public class PrototypeLoader {
 	 *
 	 * @return the array of int values loaded.
 	 */
-	IntVector loadIntVector() throws IOException {
+	int[] loadIntVector() throws IOException {
 		int n = loadInt32();
-
-		if (n == 0) {
-			return IntVector.EMPTY;
-		}
-
 		int[] array = new int[n];
 		for (int i = 0; i < n; i++) {
 			array[i] = loadInt32();
 		}
-
-		return IntVector.wrap(array);
+		return array;
 	}
 
 	boolean loadBoolean() throws IOException {
@@ -197,55 +193,45 @@ public class PrototypeLoader {
 		}
 	}
 
-	/**
-	 * Load a list of constants from a binary chunk
-	 * @param f the function prototype
-	 * @throws IOException if an i/o exception occurs
-	 */
-	void loadConstants(Prototype.Builder f) throws IOException {
+	Object[] loadConstants() throws IOException {
 		int n = loadInt32();
+		Object[] array = new Object[n];
 		for (int i = 0; i < n; i++) {
-			f.constants.add(loadConstant());
+			array[i] = loadConstant();
 		}
+		return array;
 	}
 
-	void loadNestedPrototypes(Prototype.Builder f) throws IOException {
+	Prototype[] loadNestedPrototypes(String source) throws IOException {
 		int n = loadInt32();
+		Prototype[] array = new Prototype[n];
 		for (int i = 0; i < n; i++) {
-			f.p.add(loadFunction(f.source));
+			array[i] = loadFunction(source);
 		}
+		return array;
 	}
 
-	void loadUpvalues(Prototype.Builder f) throws IOException {
+	Upvalue.Desc[] loadUpvalues() throws IOException {
 		int n = loadInt32();
+		Upvalue.Desc[] array = new Upvalue.Desc[n];
 		for (int i = 0; i < n; i++) {
-			boolean instack = loadBoolean();
+			boolean inStack = loadBoolean();
 			int idx = ((int) is.readByte()) & 0xff;
-			f.upvalues.add(new Upvalue.Desc.Builder(null, instack, idx));
+			array[i] = new Upvalue.Desc(null, inStack, idx);
 		}
+		return array;
 	}
 
-	/**
-	 * Load the debug info for a function prototype
-	 * @param f the function Prototype
-	 * @throws IOException if there is an i/o exception
-	 */
-	void loadDebugInfo(Prototype.Builder f) throws IOException {
-		f.lineinfo = loadIntVector();
-
+	LocalVariable[] loadLocals() throws IOException {
 		int n = loadInt32();
-
+		LocalVariable[] array = new LocalVariable[n];
 		for (int i = 0; i < n; i++) {
-			String varname = loadString();
-			int startpc = loadInt32();
-			int endpc = loadInt32();
-			f.locvars.add(new LocalVariable(varname, startpc, endpc));
+			String name = loadString();
+			int start = loadInt32();
+			int end = loadInt32();
+			array[i] = new LocalVariable(name, start, end);
 		}
-
-		n = loadInt32();
-		for (int i = 0; i < n; i++) {
-			f.upvalues.get(i).name = loadString();
-		}
+		return array;
 	}
 
 	/**
@@ -255,30 +241,47 @@ public class PrototypeLoader {
 	 * @throws IOException
 	 */
 	public Prototype loadFunction(String p) throws IOException {
-		Prototype.Builder f = new Prototype.Builder();
+		String source = loadString();
+		if (source == null) source = p;
 
-////		this.L.push(f);
-		f.source = loadString();
-		if (f.source == null) f.source = p;
+		int firstLineDefined = loadInt32();
+		int lastLineDefined = loadInt32();
+		int numOfParameters = is.readUnsignedByte();
+		boolean isVararg = loadBoolean();
+		int maxStackSize = is.readUnsignedByte();
 
-		f.linedefined = loadInt32();
-		f.lastlinedefined = loadInt32();
-		f.numparams = is.readUnsignedByte();
-		f.is_vararg = loadBoolean();
-		f.maxstacksize = is.readUnsignedByte();
+		int[] code = loadIntVector();
+		Object[] constants = loadConstants();
+		Upvalue.Desc[] upvalues = loadUpvalues();
+		Prototype[] nestedPrototypes = loadNestedPrototypes(source);
 
-		f.code = loadIntVector();
-		loadConstants(f);
-		loadUpvalues(f);
-		loadNestedPrototypes(f);
-		loadDebugInfo(f);  // TODO: add support for debug-stripped chunks
+		// TODO: add support for debug-stripped chunks
 
-		// TODO: add check here, for debugging purposes, I believe
-		// see ldebug.c
-//		 IF (!luaG_checkcode(f), "bad code");
+		int[] lineInfo = loadIntVector();
+		LocalVariable[] locals = loadLocals();
 
-//		 this.L.pop();
-		 return f.build();
+		// fill in upvalue names
+		int n = loadInt32();
+		for (int i = 0; i < n; i++) {
+			upvalues[i] = new Upvalue.Desc(loadString(), upvalues[i].inStack, upvalues[i].index);
+		}
+
+		// TODO: add support for verifiers
+
+		return new Prototype(
+				ReadOnlyArray.wrap(constants),
+				IntVector.wrap(code),
+				ReadOnlyArray.wrap(nestedPrototypes),
+				IntVector.wrap(lineInfo),
+				ReadOnlyArray.wrap(locals),
+				ReadOnlyArray.wrap(upvalues),
+				source,
+				firstLineDefined,
+				lastLineDefined,
+				numOfParameters,
+				isVararg,
+				maxStackSize
+		);
 	}
 
 	/**

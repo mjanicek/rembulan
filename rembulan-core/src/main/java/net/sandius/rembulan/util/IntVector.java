@@ -6,7 +6,7 @@ import java.util.Arrays;
 // an immutable vector of ints
 public class IntVector {
 
-	public static final IntVector EMPTY = IntVector.wrap(new int[0]);
+	public static final IntVector EMPTY = new IntVector(new int[0]);
 
 	private final int[] values;
 
@@ -17,7 +17,7 @@ public class IntVector {
 
 	public static IntVector wrap(int[] array) {
 		Check.notNull(array);
-		return new IntVector(array);
+		return array.length > 0 ? new IntVector(array) : EMPTY;
 	}
 
 	public static IntVector copyFrom(int[] array) {
