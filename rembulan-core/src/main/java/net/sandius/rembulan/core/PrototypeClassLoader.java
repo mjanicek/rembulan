@@ -3,6 +3,7 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
+import net.sandius.rembulan.util.ReadOnlyArray;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -21,14 +22,14 @@ import static org.objectweb.asm.Opcodes.V1_7;
 public class PrototypeClassLoader extends ClassLoader {
 
 	private final String rootName;
-	private final Map<Prototype, Class<Function>> compiled;
+	private final Map<String, Prototype> installed;
 	private int index;
 
 	public PrototypeClassLoader(String rootName) {
 		Check.notNull(rootName);
 
 		this.rootName = rootName;
-		this.compiled = new HashMap<>();
+		this.installed = new HashMap<>();
 		this.index = 1;
 	}
 
@@ -85,33 +86,39 @@ public class PrototypeClassLoader extends ClassLoader {
 		return cw.toByteArray();
 	}
 
-	public Class<Function> classForPrototype(Prototype prototype) {
-		Check.notNull(prototype);
+	private static void printClassStructure(byte[] classBytes) {
+		// print the class structure for debugging
+		ClassReader reader = new ClassReader(classBytes);
+		ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.err));
+		reader.accept(cv, 0);
+	}
 
-		Class<Function> cp = compiled.get(prototype);
-		if (cp != null) {
-			return cp;
+	private String install(String className, Prototype prototype) {
+		System.err.println("Installing " + PrototypePrinter.pseudoAddr(prototype) + " as " + className);
+		installed.put(className, prototype);
+
+		ReadOnlyArray<Prototype> nested = prototype.getNestedPrototypes();
+		for (int i = 0; i < nested.size(); i++) {
+			install(className + "$" + (i + 1), nested.get(i));
+		}
+
+		return className;
+	}
+
+	public String install(Prototype prototype) {
+		return install(rootName + "$" + (index++), prototype);
+	}
+
+	@Override
+	public Class<?> findClass(String name) throws ClassNotFoundException {
+		Prototype proto = installed.get(name);
+		if (proto != null) {
+			byte[] javaBytes = compile(proto, name);
+			printClassStructure(javaBytes);
+			return defineCompiledLuaFunction(name, javaBytes);
 		}
 		else {
-			String name = rootName + "$" + (index++);
-
-			System.err.println("Compiling prototype " + PrototypePrinter.pseudoAddr(prototype) + " to " + name + "...");
-
-			// compile prototype into Java bytecode
-			byte[] javaClassBytes = compile(prototype, name);
-
-			{
-				// print the class structure for debugging
-				ClassReader reader = new ClassReader(javaClassBytes);
-				ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.err));
-				reader.accept(cv, 0);
-			}
-
-			// load the compiled class
-			cp = defineCompiledLuaFunction(name, javaClassBytes);
-
-			compiled.put(prototype, cp);
-			return cp;
+			throw new ClassNotFoundException(name);
 		}
 	}
 

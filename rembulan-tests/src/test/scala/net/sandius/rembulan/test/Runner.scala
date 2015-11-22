@@ -41,8 +41,9 @@ object Runner {
     val name = "lua.tmp.FortyTwo"
 
     val loader = new PrototypeClassLoader(name)
+    val mainChunk = loader.install(proto)
 
-    val clazz = loader.classForPrototype(proto)
+    val clazz = loader.findClass(mainChunk).asInstanceOf[Class[lua.Function]]
     val func = clazz.getConstructor().newInstance()
 
     val st = DummyLuaState.newDummy(true)
