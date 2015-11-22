@@ -40,9 +40,10 @@ object Runner {
 
     val name = "lua.tmp.FortyTwo"
 
-    val bytecode = PrototypeCompiler.compile(proto, name)
-    val clazz = ByteArrayLoader.defineClass(name, bytecode)
-    val func = clazz.getConstructor().newInstance().asInstanceOf[lua.Function]
+    val loader = new PrototypeClassLoader(name)
+
+    val clazz = loader.classForPrototype(proto)
+    val func = clazz.getConstructor().newInstance()
 
     val st = DummyLuaState.newDummy(true)
     val coro = st.getCurrentCoroutine

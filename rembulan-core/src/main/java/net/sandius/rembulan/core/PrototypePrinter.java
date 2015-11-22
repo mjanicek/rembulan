@@ -79,7 +79,7 @@ public class PrototypePrinter {
 		print(proto, out, true);
 	}
 
-	private static String pseudoAddr(Prototype proto) {
+	public static String pseudoAddr(Prototype proto) {
 		Check.notNull(proto);
 		return "0x" + Integer.toHexString(System.identityHashCode(proto));
 	}
