@@ -18,6 +18,10 @@ public class ObjectStack {
 		return new ObjectStack(maxSize);
 	}
 
+	public int getMaxSize() {
+		return values.length;
+	}
+
 	public int getTop() {
 		return top;
 	}

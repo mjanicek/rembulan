@@ -5,16 +5,39 @@ import net.sandius.rembulan.{core => lua}
 
 object Runner {
 
-  def res(coro: Coroutine, f: lua.Function): Unit = {
+  def res(coro: Coroutine, rct: ControlThrowable): ControlThrowable = {
     try {
-      f.resume(coro, 0, 0, 0)
+      val ci = rct.last
+      ci.function.resume(coro, ci)
+      null
     }
     catch {
       case ct: ControlThrowable =>
-        val it = ct.frameIterator()
-        while (it.hasNext) {
-          println(it.next())
-        }
+        inspect(coro, ct)
+        ct
+    }
+  }
+
+  def inspect(coro: Coroutine, ct: ControlThrowable): Unit = {
+    val os = coro.getObjectStack
+    var max = 0
+    for (i <- 0 until os.getMaxSize) {
+      if (os.get(i) != null) {
+        max = i
+      }
+    }
+
+    println("---")
+    println("Object stack: |- " + (for (i <- 0 to max) yield "[" + os.get(i) + "]").mkString(" "))
+    println("Call stack:")
+    if (ct != null) {
+      val it = ct.frameIterator()
+      while (it.hasNext) {
+        println("\t" + it.next())
+      }
+    }
+    else {
+      println("\t(empty)")
     }
   }
 
@@ -49,7 +72,18 @@ object Runner {
     val st = DummyLuaState.newDummy(true)
     val coro = st.getCurrentCoroutine
 
-    Runner.res(coro, func)
+    var ct: ControlThrowable = new ControlThrowable {
+      override def push(ci: CallInfo) = ???
+      override def frameIterator() = ???
+      override def last = new CallInfo(func, 0, 0, 0)
+    }
+
+    do {
+      ct = res(coro, ct)
+    } while (ct != null)
+
+    inspect(coro, null)
+
   }
 
 }

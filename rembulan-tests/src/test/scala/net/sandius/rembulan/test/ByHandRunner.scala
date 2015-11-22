@@ -10,7 +10,7 @@ object ByHandRunner {
     val coro = st.getCurrentCoroutine
     coro.getObjectStack.push(Array(Int.box(41)))
 
-    Runner.res(coro, inc)
+//    Runner.res(coro, inc)
   }
 
 }

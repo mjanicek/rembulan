@@ -13,4 +13,14 @@ public abstract class ControlThrowable extends Throwable {
 
 	public abstract Iterator<CallInfo> frameIterator();
 
+	@Deprecated
+	public CallInfo last() {
+		Iterator<CallInfo> it = frameIterator();
+		CallInfo result = null;
+		while (it.hasNext()) {
+			result = it.next();
+		}
+		return result;
+	}
+
 }
