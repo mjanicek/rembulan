@@ -130,7 +130,10 @@ public class PrototypePrinter {
 			out.print('\t');
 			out.print(i + 1);  // program counter
 			out.print('\t');
-			out.print("[" + proto.getLineAtPC(i) + "]");  // line number
+
+			int line = proto.getLineAtPC(i);
+			out.print("[" + (line >= 0 ? proto.getLineAtPC(i) : "-") + "]");  // line number
+
 			out.print('\t');
 
 			int insn = code.get(i);

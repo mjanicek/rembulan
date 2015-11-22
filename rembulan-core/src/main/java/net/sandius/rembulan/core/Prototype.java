@@ -60,7 +60,7 @@ public class Prototype {
 		// lineinfo may be null
 		Check.notNull(locvars);
 		Check.notNull(upvalues);
-		Check.notNull(source);
+		// source may be null
 
 		this.consts = consts;
 		this.code = code;
@@ -215,7 +215,10 @@ public class Prototype {
 	public String getShortSource() {
 //		String name = source.tojstring();
 		String name = source;
-        if (name.startsWith("@") || name.startsWith("=")) {
+		if (name == null) {
+			return "?";
+		}
+        else if (name.startsWith("@") || name.startsWith("=")) {
 			name = name.substring(1);
 		}
 		else if (name.startsWith("\033")) {

@@ -34,7 +34,7 @@ object Runner {
 
     System.err.println(program)
 
-    val proto = ploader.load(program, "fortytwo.lua")
+    val proto = ploader.load(program)
 
     PrototypePrinter.print(proto, System.err)
 

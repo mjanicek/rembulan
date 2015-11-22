@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LuaCPrototypeLoader {
 
@@ -25,8 +27,12 @@ public class LuaCPrototypeLoader {
 		public final InputStream out;
 		public final InputStream err;
 
-		public Call(String[] args) throws IOException {
+		public Call(String program, List<String> args) throws IOException {
+			Check.notNull(program);
 			Check.notNull(args);
+
+			args.add(0, program);
+
 			ProcessBuilder builder = new ProcessBuilder(args);
 
 			builder.redirectErrorStream(false);
@@ -40,11 +46,27 @@ public class LuaCPrototypeLoader {
 
 	}
 
-	public Prototype load(String program, String name) throws IOException {
-		Check.notNull(name);
+	public Prototype load(String program) throws IOException {
+		return load(program, false);
+	}
+
+	public Prototype load(String program, boolean stripDebug) throws IOException {
 		Check.notNull(program);
 
-		Call call = new Call(new String[] { luacName, "-o", "-", "-" });
+		List<String> args = new ArrayList<String>();
+
+		if (stripDebug) {
+			args.add("-s");
+		}
+
+		// output goes to stdout
+		args.add("-o");
+		args.add("-");
+
+		// read from stdin
+		args.add("-");
+
+		Call call = new Call(luacName, args);
 
 		call.in.write(program.getBytes());
 		call.in.close();
@@ -87,7 +109,7 @@ public class LuaCPrototypeLoader {
 		byte[] bytes = baos.toByteArray();
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		return PrototypeLoader.undump(bais, name);
+		return PrototypeLoader.undump(bais);
 	}
 
 }

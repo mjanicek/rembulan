@@ -92,11 +92,7 @@ public class PrototypeLoader {
 	/** input stream from which we are loading */
 	public final DataInputStream is;
 
-	/** Name of what is being loaded? */
-	public final String name;
-
-	public PrototypeLoader(InputStream stream, String name) {
-		this.name = name;
+	public PrototypeLoader(InputStream stream) {
 		this.is = new DataInputStream(stream);
 	}
 
@@ -234,15 +230,9 @@ public class PrototypeLoader {
 		return array;
 	}
 
-	/**
-	 * Load a function prototype from the input stream
-	 * @param p name of the source
-	 * @return {@link Prototype} instance that was loaded
-	 * @throws IOException
-	 */
-	public Prototype loadFunction(String p) throws IOException {
+	public Prototype loadFunction(String src) throws IOException {
 		String source = loadString();
-		if (source == null) source = p;
+		if (source == null) source = src;
 
 		int firstLineDefined = loadInt32();
 		int lastLineDefined = loadInt32();
@@ -255,7 +245,7 @@ public class PrototypeLoader {
 		Upvalue.Desc[] upvalues = loadUpvalues();
 		Prototype[] nestedPrototypes = loadNestedPrototypes(source);
 
-		// TODO: add support for debug-stripped chunks
+		// debug information
 
 		int[] lineInfo = loadIntVector();
 		LocalVariable[] locals = loadLocals();
@@ -331,11 +321,10 @@ public class PrototypeLoader {
 	/**
 	 * Load input stream as a lua binary chunk if the first 4 bytes are the lua binary signature.
 	 * @param stream InputStream to read, after having read the first byte already
-	 * @param chunkName Name to apply to the loaded chunk
 	 * @return {@link Prototype} that was loaded, or null if the first 4 bytes were not the lua signature.
 	 * @throws IOException if an IOException occurs
 	 */
-	public static Prototype undump(InputStream stream, String chunkName) throws IOException {
+	public static Prototype undump(InputStream stream) throws IOException {
 
 		// check rest of signature
 		if (stream.read() != LUA_SIGNATURE[0]
@@ -346,11 +335,10 @@ public class PrototypeLoader {
 		}
 
 		// load file as a compiled chunk
-		String sourceName = getSourceName(chunkName);
-		PrototypeLoader s = new PrototypeLoader(stream, sourceName);
+		PrototypeLoader s = new PrototypeLoader(stream);
 		s.loadHeader();
 
-		return s.loadFunction(sourceName);
+		return s.loadFunction(null);
 	}
 
 	/**
