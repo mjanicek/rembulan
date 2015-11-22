@@ -69,12 +69,12 @@ public class PrototypeClassLoader extends ClassLoader {
 						return className + "$" + (idx + 1);
 					}
 				},
-				prototype.getCode().length() - 1,  // ignoring the last return instruction
+				prototype.getCode().length(),
 				prototype.getMaximumStackSize()
 		);
 
 		lmv.begin();
-		for (int i = 0; i < code.length() - 1; i++) {  // ignoring the last return instruction
+		for (int i = 0; i < code.length(); i++) {
 			lmv.atPc(i, prototype.getLineAtPC(i));
 			lmv.instruction(code.get(i));
 		}

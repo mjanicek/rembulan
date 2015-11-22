@@ -358,6 +358,9 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	private void checkPreemptFromHere(int pc) {
+		// must be here... at least in case the instruction is return
+		visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+
 		pushCoroutine();
 		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Coroutine.class), "getOwnerState", Type.getMethodDescriptor(Type.getType(LuaState.class)), false);
 		mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(LuaState.class), "shouldPreemptNow", Type.getMethodDescriptor(Type.BOOLEAN_TYPE), false);
