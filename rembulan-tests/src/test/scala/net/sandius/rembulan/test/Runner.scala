@@ -78,11 +78,15 @@ object Runner {
       override def last = new CallInfo(func, 0, 0, 0)
     }
 
+    LuaState.setCurrentState(st)
+
     do {
       ct = res(coro, ct)
     } while (ct != null)
 
     inspect(coro, null)
+
+    LuaState.unsetCurrentState()
 
   }
 

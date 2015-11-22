@@ -8,6 +8,16 @@ public abstract class LuaState {
 		return current.get();
 	}
 
+	@Deprecated
+	public static void setCurrentState(LuaState state) {
+		current.set(state);
+	}
+
+	@Deprecated
+	public static void unsetCurrentState() {
+		current.remove();
+	}
+
 	public abstract Table nilMetatable();
 	public abstract Table booleanMetatable();
 	public abstract Table numberMetatable();
