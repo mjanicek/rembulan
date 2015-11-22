@@ -104,16 +104,6 @@ public class PrototypeLoader {
 	private static final int[]       NOINTS      = {};
 
 	int bytesToInt(byte a, byte b, byte c, byte d) {
-		System.err.println("  32-bit to int: ["
-				+ "0x" + Integer.toHexString(a & 0xff)
-				+ " "
-				+ "0x" + Integer.toHexString(b & 0xff)
-				+ " "
-				+ "0x" + Integer.toHexString(c & 0xff)
-				+ " "
-				+ "0x" + Integer.toHexString(d & 0xff)
-				+ "]");
-
 		return luacLittleEndian
 				? ((0xff & d) << 24) | ((0xff & c) << 16) | ((0xff & b) << 8) | (0xff & a)
 				: ((0xff & a) << 24) | ((0xff & b) << 16) | ((0xff & c) << 8) | (0xff & d);
@@ -127,9 +117,7 @@ public class PrototypeLoader {
 	int loadInt32() throws IOException {
 		byte[] buf = new byte[4];
 		is.readFully(buf, 0, 4);
-		int i = bytesToInt(buf[0], buf[1], buf[2], buf[3]);
-		System.err.println("  loadInt32: " + i);
-		return i;
+		return bytesToInt(buf[0], buf[1], buf[2], buf[3]);
 	}
 
 	/**
@@ -162,8 +150,6 @@ public class PrototypeLoader {
 	IntVector loadIntVector() throws IOException {
 		int n = loadInt32();
 
-		System.err.println("  loadIntVector of length " + n);
-
 		if (n == 0) {
 			return IntVector.EMPTY;
 		}
@@ -177,16 +163,6 @@ public class PrototypeLoader {
 		for (int i = 0; i < n; i++) {
 			int j = i << 2;
 			array[i] = bytesToInt(buf[j + 0], buf[j + 1], buf[j + 2], buf[j + 3]);
-			System.err.println("  int[" + i + "] == " + array[i]);
-
-			int insn = array[i];
-			System.err.println("    code? opcode=" + OpCode.opCode(insn)
-					+ " a=" + OpCode.arg_A(insn)
-					+ " b=" + OpCode.arg_B(insn)
-					+ " c=" + OpCode.arg_C(insn)
-					+ " ax=" + OpCode.arg_Ax(insn)
-					+ " bx=" + OpCode.arg_Bx(insn)
-					+ " sbx=" + OpCode.arg_sBx(insn));
 		}
 
 		return IntVector.wrap(array);
@@ -208,8 +184,6 @@ public class PrototypeLoader {
 		int hx = is.readUnsignedByte();
 		int size = hx == 0xff ? loadSizeT() : hx;
 
-		System.err.println("  loadString of length " + size);
-
 		if (size == 0) {
 			return null;
 		}
@@ -226,11 +200,7 @@ public class PrototypeLoader {
 			chars[i] = (char) (bytes[i] & 0xff);
 		}
 
-		String s = String.valueOf(chars);
-
-		System.err.println("  loadString yields \"" + s + "\"");
-
-		return s;
+		return String.valueOf(chars);
 	}
 
 	public long loadInteger() throws IOException {
@@ -271,9 +241,6 @@ public class PrototypeLoader {
 
 	void loadNestedPrototypes(Prototype.Builder f) throws IOException {
 		int n = loadInt32();
-
-		System.err.println("num of nested prototypes: " + n);
-
 		for (int i = 0; i < n; i++) {
 			f.p.add(loadFunction(f.source));
 		}
@@ -281,14 +248,10 @@ public class PrototypeLoader {
 
 	void loadUpvalues(Prototype.Builder f) throws IOException {
 		int n = loadInt32();
-
-		System.err.println("num of upvalues: " + n);
-
 		for (int i = 0; i < n; i++) {
 			boolean instack = loadBoolean();
 			int idx = ((int) is.readByte()) & 0xff;
 			f.upvalues.add(new Upvalue.Desc.Builder(null, instack, idx));
-			System.err.println("  upval #" + i + ": instack=" + (instack ? "true" : "false") + ", idx=" + idx);
 		}
 	}
 
@@ -300,27 +263,18 @@ public class PrototypeLoader {
 	void loadDebugInfo(Prototype.Builder f) throws IOException {
 		f.lineinfo = loadIntVector();
 
-		System.err.println("num of lineinfos: " + f.lineinfo.length());
-
 		int n = loadInt32();
-
-		System.err.println("num of locvars: " + n);
 
 		for (int i = 0; i < n; i++) {
 			String varname = loadString();
 			int startpc = loadInt32();
 			int endpc = loadInt32();
-			System.err.println("  locvar #" + i + ": \"" + varname + "\" [" + startpc + ", " + endpc + "]");
 			f.locvars.add(new LocalVariable(varname, startpc, endpc));
 		}
 
 		n = loadInt32();
-
-		System.err.println("num of upvalue names: " + n);
-
 		for (int i = 0; i < n; i++) {
 			f.upvalues.get(i).name = loadString();
-			System.err.println("  upval #" + i + " name: \"" + f.upvalues.get(i).name + "\"");
 		}
 	}
 
@@ -336,27 +290,15 @@ public class PrototypeLoader {
 ////		this.L.push(f);
 		f.source = loadString();
 		if (f.source == null) f.source = p;
-		System.err.println("source: " + f.source);
 
 		f.linedefined = loadInt32();
-		System.err.println("linedefined: " + f.linedefined);
 		f.lastlinedefined = loadInt32();
-		System.err.println("lastlinedefined: " + f.lastlinedefined);
 		f.numparams = is.readUnsignedByte();
-		System.err.println("numparams: " + f.numparams);
 		f.is_vararg = loadBoolean();
-		System.err.println("is_vararg: " + (f.is_vararg ? "true" : "false"));
 		f.maxstacksize = is.readUnsignedByte();
-		System.err.println("maxstacksize: " + f.maxstacksize);
 
 		f.code = loadIntVector();
-
-		System.err.println("code is int array of length " + f.code.length());
-
 		loadConstants(f);
-
-		System.err.println("constants #: " + f.constants.size());
-
 		loadUpvalues(f);
 		loadNestedPrototypes(f);
 		loadDebugInfo(f);  // TODO: add support for debug-stripped chunks
@@ -382,20 +324,13 @@ public class PrototypeLoader {
 		}
 
 		luacSizeofInt = is.readByte();
-		System.err.println("sizeofint: " + luacSizeofInt);
 		luacSizeofSizeT = is.readByte();
-		System.err.println("sizeofsize_t: " + luacSizeofSizeT);
 		luacSizeofInstruction = is.readByte();
-		System.err.println("sizeofinstruction: " + luacSizeofInstruction);
 		luacSizeofLuaInteger = is.readByte();
-		System.err.println("sizeofluainteger: " + luacSizeofLuaInteger);
 		luacSizeofLuaNumber = is.readByte();
-		System.err.println("sizeofluanumber: " + luacSizeofLuaNumber);
 
 		// check endianness
         long ti = is.readLong();
-
-		System.err.println("endian-int: " + Long.toHexString(ti));
 
 		if ((ti == TestIntLE) == (ti == TestIntBE)) {
 			throw new IllegalArgumentException("Endianness mismatch: 0x" + Long.toHexString(ti));
@@ -404,12 +339,8 @@ public class PrototypeLoader {
 			luacLittleEndian = (ti == TestIntLE);
         }
 
-		System.err.println("little endian: " + (luacLittleEndian ? "true" : "false"));
-
         // TODO: use loadNumber here!
         long tn = is.readLong();
-
-		System.err.println("endian-num: " + Long.toHexString(tn));
 
 		if (luacLittleEndian) {
 			// TODO: this!
@@ -422,7 +353,6 @@ public class PrototypeLoader {
 
 		boolean isClosure = loadBoolean();
 		// TODO: require true
-		System.err.println("isClosure: " + (isClosure ? "true" : "false"));
 	}
 
 	/**
