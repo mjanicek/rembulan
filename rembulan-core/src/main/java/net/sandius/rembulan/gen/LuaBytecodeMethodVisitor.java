@@ -68,6 +68,16 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitEnd();
 	}
 
+	private final static String RESUME_METHOD_NAME = "resume";
+
+	private final static Type RESUME_METHOD_TYPE = Type.getMethodType(
+			Type.VOID_TYPE,
+			Type.getType(Coroutine.class),
+			Type.INT_TYPE,
+			Type.INT_TYPE,
+			Type.INT_TYPE
+	);
+
 	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> nestedPrototypes, PrototypeToClassMap prototypeToClassMap, int numInstrs, int numRegs) {
 		super(ASM5);
 		Check.notNull(cv);
@@ -81,14 +91,6 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		this.numInstrs = numInstrs;
 
 		ie = this;
-
-		Type resumeType = Type.getMethodType(
-				Type.VOID_TYPE,
-				Type.getType(Coroutine.class),
-				Type.INT_TYPE,
-				Type.INT_TYPE,
-				Type.INT_TYPE
-		);
 
 		l_first = new Label();
 		l_last = new Label();
@@ -105,7 +107,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			l_pc_preempt_handler[i] = new Label();
 		}
 
-		mv = cv.visitMethod(ACC_PUBLIC, "resume", resumeType.getDescriptor(),
+		mv = cv.visitMethod(ACC_PUBLIC, RESUME_METHOD_NAME, RESUME_METHOD_TYPE.getDescriptor(),
 				null,
 				new String[] { Type.getInternalName(ControlThrowable.class) });
 	}
@@ -692,8 +694,23 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	@Override
 	public void l_CALL(int a, int b, int c) {
-		// TODO
-		visitInsn(NOP);
+
+		// TODO: only save relevant registers (from `a' onwards?) to the stack
+		saveRegisters();
+
+		if (b != 0) {
+			// b - 1 is the exact number of arguments
+			setTop(a + b);
+		}
+
+		pushRegister(a);  // the function
+		visitTypeInsn(CHECKCAST, Type.getInternalName(Function.class));
+
+		pushCoroutine();  // current coroutine
+		pushBasePlus(a + 1);  // base addr
+		pushBasePlus(a);  // return addr
+		pushInt(0);  // pc
+		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Function.class), RESUME_METHOD_NAME, RESUME_METHOD_TYPE.getDescriptor(), false);
 	}
 
 	@Override
@@ -704,11 +721,13 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	@Override
 	public void l_RETURN(int a, int b) {
 
-
+		// TODO: only save relevant registers (from `a' onwards?) to the stack
 		saveRegisters();
 
-		// FIXME: adjusting stack top
-		setTop(1);
+		if (b != 0) {
+			// b - 1 is the exact num of arguments
+			setTop(a + b - 1);
+		}
 
 		mv.visitInsn(RETURN);  // end; TODO: signal a return!
 	}
