@@ -225,11 +225,12 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	public void declarePreemptHandler(int pc) {
-		visitTryCatchBlock(l_pc_begin[pc], l_pc_end[pc], l_pc_preempt_handler[pc], Type.getInternalName(ControlThrowable.class));
+		// FIXME: continuing with pc + 1 is a hack!
+		visitTryCatchBlock(l_pc_begin[pc], l_pc_end[pc], l_pc_preempt_handler[pc + 1], Type.getInternalName(ControlThrowable.class));
 	}
 
 	public void declarePreemptHandlers() {
-		for (int i = 0; i < numInstrs; i++) {
+		for (int i = 0; i < numInstrs - 1; i++) {
 			declarePreemptHandler(i);
 		}
 	}
@@ -311,6 +312,15 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	private void pushBasePlus(int offset) {
 //		pushThis();
 		visitVarInsn(ILOAD, LVAR_BASE);
+		if (offset > 0) {
+			pushInt(offset);
+			mv.visitInsn(IADD);
+		}
+	}
+
+	private void pushReturnBasePlus(int offset) {
+//		pushThis();
+		visitVarInsn(ILOAD, LVAR_RETURN_BASE);
 		if (offset > 0) {
 			pushInt(offset);
 			mv.visitInsn(IADD);
@@ -735,6 +745,15 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		if (b != 0) {
 			// b - 1 is the exact num of arguments
 			setTop(a + b - 1);
+		}
+
+		// copy results to return address
+
+		for (int i = 0; i < b - 1; i++) {
+			pushObjectStack();
+			pushReturnBasePlus(i);
+			pushRegister(a + i);
+			visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), false);
 		}
 
 		mv.visitInsn(RETURN);  // end; TODO: signal a return!
