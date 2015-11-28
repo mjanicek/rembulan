@@ -747,13 +747,13 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			// b - 1 is the exact number of arguments
 
 			if (b - 1 > 0) {
-				visitInsn(DUP);
 				for (int i = 0; i < b - 1; i++) {
+					visitInsn(DUP);
 					pushInt(i);
 					pushRegister(a + 1 + i);
-					visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.getType(Registers.class), Type.INT_TYPE, Type.getType(Object.class)), true);
+					visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
 				}
-				visitInsn(POP);
+//				visitInsn(POP);
 			}
 		}
 		else {
@@ -792,7 +792,16 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 		if (b != 0) {
 			// b - 1 is the exact number of return values
-			saveRegistersToRet(a, a + b - 2);
+			if (b - 1 > 0) {
+				pushRet();
+				for (int i = 0; i < b - 1; i++) {
+					visitInsn(DUP);
+					pushInt(i);
+					pushRegister(a + i);
+					visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
+				}
+				visitInsn(POP);
+			}
 		}
 		else {
 			// returning up to stack top

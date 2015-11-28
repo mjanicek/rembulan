@@ -49,10 +49,10 @@ object Runner {
     val ploader = new LuaCPrototypeLoader(luacPath)
 
     val program =
-      """local f = function ()
-        |    return 4
+      """local f = function (x)
+        |    return x + 1
         |end
-        |return -1 + f() + 39
+        |return -1 + f(3) + 39
       """.stripMargin
 
     System.err.println(program)
