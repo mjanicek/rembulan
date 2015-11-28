@@ -48,7 +48,8 @@ public class PrototypeClassLoader extends ClassLoader {
 
 		final Type thisType = ASMUtils.typeForClassName(className);
 
-		ClassWriter cw = new ClassWriter(0); //ClassWriter.COMPUTE_FRAMES);
+		ClassWriter _cw = new ClassWriter(0); //ClassWriter.COMPUTE_FRAMES);
+		ClassVisitor cw = new TraceClassVisitor(_cw, new PrintWriter(System.err));
 
 		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Function.class), null);
 		cw.visitSource(prototype.getSource(), null);
@@ -83,14 +84,14 @@ public class PrototypeClassLoader extends ClassLoader {
 
 		cw.visitEnd();
 
-		return cw.toByteArray();
+		return _cw.toByteArray();
 	}
 
 	private static void printClassStructure(byte[] classBytes) {
 		// print the class structure for debugging
 		ClassReader reader = new ClassReader(classBytes);
 		ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.err));
-		reader.accept(cv, 0);
+		reader.accept(cv, ClassReader.EXPAND_FRAMES);
 	}
 
 	private String install(String className, Prototype prototype) {
@@ -113,7 +114,14 @@ public class PrototypeClassLoader extends ClassLoader {
 	public Class<?> findClass(String name) throws ClassNotFoundException {
 		Prototype proto = installed.get(name);
 		if (proto != null) {
+			System.err.println();
+			System.err.println("COMPILING");
+			System.err.println("---------");
 			byte[] javaBytes = compile(proto, name);
+
+			System.err.println();
+			System.err.println("FINISHED");
+			System.err.println("--------");
 			printClassStructure(javaBytes);
 			return defineCompiledLuaFunction(name, javaBytes);
 		}
