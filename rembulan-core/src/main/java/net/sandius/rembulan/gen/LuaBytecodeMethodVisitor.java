@@ -182,7 +182,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void emitSaveRegistersAndThrowBranch() {
 		visitLabel(l_save_and_yield);
 		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
-		saveRegistersToBase();
+		saveAllRegistersToBase();
 		pushCallInfoAndThrow();
 	}
 
@@ -308,22 +308,23 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitLdcInsn(s);
 	}
 
-	private void pushBasePlus(int offset) {
-//		pushThis();
-		visitVarInsn(ILOAD, LVAR_BASE);
+	private void pushPlus(int offset) {
 		if (offset > 0) {
 			pushInt(offset);
 			mv.visitInsn(IADD);
 		}
 	}
 
+	private void pushBasePlus(int offset) {
+//		pushThis();
+		visitVarInsn(ILOAD, LVAR_BASE);
+		pushPlus(offset);
+	}
+
 	private void pushReturnBasePlus(int offset) {
 //		pushThis();
 		visitVarInsn(ILOAD, LVAR_RETURN_BASE);
-		if (offset > 0) {
-			pushInt(offset);
-			mv.visitInsn(IADD);
-		}
+		pushPlus(offset);
 	}
 
 	private void pushObjectStack() {
@@ -365,8 +366,13 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		}
 	}
 
-	public void saveRegistersToBase() {
-		for (int i = 0; i < numRegs; i++) {
+	@Deprecated
+	public void saveAllRegistersToBase() {
+		saveRegistersToBase(0, numRegs - 1);
+	}
+
+	public void saveRegistersToBase(int from, int to) {
+		for (int i = from; i <= to; i++) {
 			saveRegisterToBase(i);
 		}
 	}
@@ -729,11 +735,14 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void l_CALL(int a, int b, int c) {
 
 		// TODO: only save relevant registers (from `a' onwards?) to the stack
-		saveRegistersToBase();
 
 		if (b != 0) {
 			// b - 1 is the exact number of arguments
+			saveRegistersToBase(a + 1, a + b - 1);
 			setTop(a + b);
+		}
+		else {
+			throw new UnsupportedOperationException("vararg calls not implemented");
 		}
 
 		pushRegister(a);  // the function
@@ -743,6 +752,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		pushBasePlus(a + 1);  // base addr
 		pushBasePlus(a);  // return addr
 		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Function.class), CALL_METHOD_NAME, CALL_METHOD_TYPE.getDescriptor(), false);
+
+		// TODO: load registers from a onwards as these have been updated by the called function
 	}
 
 	@Override
