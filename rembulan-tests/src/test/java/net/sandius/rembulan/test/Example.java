@@ -1,12 +1,11 @@
 package net.sandius.rembulan.test;
 
-import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.ObjectStack;
+import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.Preempted;
+import net.sandius.rembulan.core.Registers;
 
 public class Example extends Function {
 
@@ -15,18 +14,15 @@ public class Example extends Function {
 	}
 
 	@Override
-	protected void run(Coroutine coroutine, int base, int returnBase, int pc) throws ControlThrowable {
+	protected void run(Registers own, Registers ret, int pc) throws ControlThrowable {
 		// preamble: load previously-saved state
 
 		Object u, v;
 
-		coroutine.getOwnerState().shouldPreemptNow();
+		LuaState.getCurrentState().shouldPreemptNow();
 
-		{
-			ObjectStack os = coroutine.getObjectStack();
-			u = os.get(base + 0);
-			v = os.get(base + 1);
-		}
+		u = own.get(0);
+		v = own.get(1);
 
 		switch (pc) {
 			case 0:
@@ -39,13 +35,10 @@ public class Example extends Function {
 					pc = 1;
 
 					// save registers to the object stack
-					{
-						ObjectStack os = coroutine.getObjectStack();
-						os.set(base + 0, u);
-						os.set(base + 1, v);
-					}
+					own.set(0, u);
+					own.set(1, v);
 
-					yld.push(new CallInfo(this, base, returnBase, pc));
+//					yld.push(new CallInfo(this, base, returnBase, pc));
 
 					throw yld;
 				}
@@ -59,10 +52,10 @@ public class Example extends Function {
 //				}
 
 			case 2:
-				{
-					ObjectStack os = coroutine.getObjectStack();
-					os.setTop(1);
-				}
+//				{
+//					ObjectStack os = coroutine.getObjectStack();
+//					os.setTop(1);
+//				}
 				return;
 
 			default:

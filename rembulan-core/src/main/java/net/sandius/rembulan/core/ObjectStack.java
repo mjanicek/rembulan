@@ -62,4 +62,52 @@ public class ObjectStack {
 		values[i] = o;
 	}
 
+	public View rootView() {
+		return new View(this, 0);
+	}
+
+	public static class View implements Registers {
+
+		public final ObjectStack objectStack;
+		public final int offset;
+
+		protected View(ObjectStack objectStack, int offset) {
+			Check.notNull(objectStack);
+
+			this.objectStack = objectStack;
+			this.offset = offset;
+		}
+
+		@Override
+		public String toString() {
+			return "view:" + Integer.toHexString(objectStack.hashCode()) + "/" + offset;
+		}
+
+		@Override
+		public View from(int offset) {
+			return new View(objectStack, this.offset + offset);
+		}
+
+		@Override
+		public Object get(int idx) {
+			return objectStack.get(idx + offset);
+		}
+
+		@Override
+		public void set(int idx, Object object) {
+			objectStack.set(idx + offset, object);
+		}
+
+		@Override
+		public int getTop() {
+			return objectStack.getTop() - offset;
+		}
+
+		@Override
+		public void setTop(int newTop) {
+			objectStack.setTop(offset + newTop);
+		}
+
+	}
+
 }

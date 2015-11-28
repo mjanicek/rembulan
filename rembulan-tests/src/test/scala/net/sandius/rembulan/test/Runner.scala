@@ -8,7 +8,7 @@ object Runner {
   def res(coro: Coroutine, rct: ControlThrowable): ControlThrowable = {
     try {
       val cst = rct.frames()
-      cst(0).function.resume(coro, cst, 0)
+      cst(0).function.resume(cst, 0)
       null
     }
     catch {
@@ -72,11 +72,12 @@ object Runner {
     val st = DummyLuaState.newDummy(true)
     val coro = st.getCurrentCoroutine
 
+    val addr = coro.getObjectStack.rootView()
     var ct: ControlThrowable = new ControlThrowable {
       override def push(ci: CallInfo) = ???
       override def frameIterator() = ???
       override def last = ???
-      override def frames() = Array[CallInfo](new CallInfo(func, 0, 0, 0))
+      override def frames() = Array[CallInfo](new CallInfo(func, addr, addr, 0))
     }
 
     LuaState.setCurrentState(st)
