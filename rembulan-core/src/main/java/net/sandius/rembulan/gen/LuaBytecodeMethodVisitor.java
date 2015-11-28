@@ -607,7 +607,6 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	private void l_binOp(String method, int dest, int left, int right) {
 		System.err.println("BINOP(" + method + ") " + dest + " " + left + " " + right);
-		// TODO: swap these?
 		if (OpCode.isK(left)) pushConstant(OpCode.indexK(left)); else pushRegister(left);
 		if (OpCode.isK(right)) pushConstant(OpCode.indexK((byte) right)); else pushRegister(right);
 		visitMethodInsn(INVOKESTATIC, Type.getInternalName(Operators.class), method, "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;", false);
