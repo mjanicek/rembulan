@@ -10,7 +10,6 @@ import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.Preempted;
 import net.sandius.rembulan.core.Prototype;
-import net.sandius.rembulan.core.PrototypePrinter;
 import net.sandius.rembulan.core.PrototypeToClassMap;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -183,7 +182,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void emitSaveRegistersAndThrowBranch() {
 		visitLabel(l_save_and_yield);
 		visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{Type.getInternalName(ControlThrowable.class)});
-		saveRegisters();
+		saveRegistersToBase();
 		pushCallInfoAndThrow();
 	}
 
@@ -341,11 +340,20 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitVarInsn(ASTORE, REGISTER_OFFSET + idx);
 	}
 
-	private void saveRegister(int idx) {
+	private void saveRegisterToBase(int idx) {
 		Check.nonNegative(idx);
 
 		pushObjectStack();
 		pushBasePlus(idx);
+		pushRegister(idx);
+		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), false);
+	}
+
+	private void saveRegisterToRet(int idx) {
+		Check.nonNegative(idx);
+
+		pushObjectStack();
+		pushReturnBasePlus(idx);
 		pushRegister(idx);
 		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), false);
 	}
@@ -357,9 +365,15 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		}
 	}
 
-	public void saveRegisters() {
+	public void saveRegistersToBase() {
 		for (int i = 0; i < numRegs; i++) {
-			saveRegister(i);
+			saveRegisterToBase(i);
+		}
+	}
+
+	public void saveRegistersToRet(int from, int to) {
+		for (int i = from; i <= to; i++) {
+			saveRegisterToRet(i);
 		}
 	}
 
@@ -715,7 +729,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void l_CALL(int a, int b, int c) {
 
 		// TODO: only save relevant registers (from `a' onwards?) to the stack
-		saveRegisters();
+		saveRegistersToBase();
 
 		if (b != 0) {
 			// b - 1 is the exact number of arguments
@@ -740,23 +754,25 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void l_RETURN(int a, int b) {
 
 		// TODO: only save relevant registers (from `a' onwards?) to the stack
-		saveRegisters();
+//		saveRegistersToBase();
+
+//		if (b != 0) {
+//			// b - 1 is the exact num of arguments
+//			setTop(a + b - 1);
+//		}
+
+		// TODO: close upvalues
 
 		if (b != 0) {
-			// b - 1 is the exact num of arguments
-			setTop(a + b - 1);
+			// b - 1 is the exact number of return values
+			saveRegistersToRet(a, a + b - 2);
+		}
+		else {
+			// returning up to stack top
+			throw new UnsupportedOperationException("vararg return not implemented");
 		}
 
-		// copy results to return address
-
-		for (int i = 0; i < b - 1; i++) {
-			pushObjectStack();
-			pushReturnBasePlus(i);
-			pushRegister(a + i);
-			visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(ObjectStack.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), false);
-		}
-
-		mv.visitInsn(RETURN);  // end; TODO: signal a return!
+		visitInsn(RETURN);
 	}
 
 	@Override
