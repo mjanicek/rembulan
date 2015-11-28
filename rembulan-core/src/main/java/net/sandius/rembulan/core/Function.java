@@ -2,13 +2,24 @@ package net.sandius.rembulan.core;
 
 public abstract class Function {
 
-//	public abstract Object[] invoke(Object[] args);
-
-	public abstract void resume(Coroutine coroutine, int base, int returnBase, int pc) throws ControlThrowable;
-
-	public void resume(Coroutine coroutine, CallInfo ci) throws ControlThrowable {
-		resume(coroutine, ci.base, ci.returnAddr, ci.pc);
+	public void call(Coroutine coroutine, int base, int returnBase) throws ControlThrowable {
+		run(coroutine, base, returnBase, 0);
 	}
+
+	public void resume(Coroutine coroutine, CallInfo[] callStack, int index) throws ControlThrowable {
+		if (index < callStack.length - 1) {
+			int nextIndex = index + 1;
+			CallInfo ci = callStack[nextIndex];
+			ci.function.resume(coroutine, callStack, nextIndex);
+		}
+
+		assert (index == callStack.length - 1);  // this is now the top frame
+
+		CallInfo ci = callStack[index];
+		run(coroutine, ci.base, ci.returnAddr, ci.pc);
+	}
+
+	protected abstract void run(Coroutine coroutine, int base, int returnBase, int pc) throws ControlThrowable;
 
 	@Override
 	public String toString() {

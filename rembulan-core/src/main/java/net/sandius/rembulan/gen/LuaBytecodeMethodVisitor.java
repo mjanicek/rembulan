@@ -68,12 +68,21 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitEnd();
 	}
 
-	private final static String RESUME_METHOD_NAME = "resume";
+	private final static String RESUME_METHOD_NAME = "run";
 
 	private final static Type RESUME_METHOD_TYPE = Type.getMethodType(
 			Type.VOID_TYPE,
 			Type.getType(Coroutine.class),
 			Type.INT_TYPE,
+			Type.INT_TYPE,
+			Type.INT_TYPE
+	);
+
+	private final static String CALL_METHOD_NAME = "call";
+
+	private final static Type CALL_METHOD_TYPE = Type.getMethodType(
+			Type.VOID_TYPE,
+			Type.getType(Coroutine.class),
 			Type.INT_TYPE,
 			Type.INT_TYPE
 	);
@@ -107,7 +116,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 			l_pc_preempt_handler[i] = new Label();
 		}
 
-		mv = cv.visitMethod(ACC_PUBLIC, RESUME_METHOD_NAME, RESUME_METHOD_TYPE.getDescriptor(),
+		mv = cv.visitMethod(ACC_PROTECTED, RESUME_METHOD_NAME, RESUME_METHOD_TYPE.getDescriptor(),
 				null,
 				new String[] { Type.getInternalName(ControlThrowable.class) });
 	}
@@ -709,8 +718,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		pushCoroutine();  // current coroutine
 		pushBasePlus(a + 1);  // base addr
 		pushBasePlus(a);  // return addr
-		pushInt(0);  // pc
-		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Function.class), RESUME_METHOD_NAME, RESUME_METHOD_TYPE.getDescriptor(), false);
+		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Function.class), CALL_METHOD_NAME, CALL_METHOD_TYPE.getDescriptor(), false);
 	}
 
 	@Override

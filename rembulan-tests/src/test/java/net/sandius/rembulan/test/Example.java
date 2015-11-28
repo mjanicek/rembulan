@@ -15,7 +15,7 @@ public class Example extends Function {
 	}
 
 	@Override
-	public void resume(Coroutine coroutine, int base, int returnBase, int pc) throws ControlThrowable {
+	protected void run(Coroutine coroutine, int base, int returnBase, int pc) throws ControlThrowable {
 		// preamble: load previously-saved state
 
 		Object u, v;

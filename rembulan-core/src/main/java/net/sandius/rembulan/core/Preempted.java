@@ -33,6 +33,14 @@ public class Preempted extends ControlThrowable {
 		callStack[top++] = ci;
 	}
 
+	public CallInfo[] frames() {
+		CallInfo[] result = new CallInfo[top];
+		for (int i = 0; i < top; i++) {
+			result[i] = callStack[top - i - 1];
+		}
+		return result;
+	}
+
 	@Override
 	public Iterator<CallInfo> frameIterator() {
 		return new Iterator<CallInfo>() {
