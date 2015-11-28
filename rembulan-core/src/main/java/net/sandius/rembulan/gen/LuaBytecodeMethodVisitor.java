@@ -734,17 +734,6 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	@Override
 	public void l_CALL(int a, int b, int c) {
 
-		// TODO: only save relevant registers (from `a' onwards?) to the stack
-
-		if (b != 0) {
-			// b - 1 is the exact number of arguments
-			saveRegistersToBase(a + 1, a + b - 1);
-			setTop(a + b);
-		}
-		else {
-			throw new UnsupportedOperationException("vararg calls not implemented");
-		}
-
 		pushRegister(a);  // the function
 		visitTypeInsn(CHECKCAST, Type.getInternalName(Function.class));
 
@@ -752,6 +741,24 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		pushSelf();
 		pushInt(a + 1);
 		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "from", Type.getMethodDescriptor(Type.getType(Registers.class), Type.INT_TYPE), true);
+
+		// save arguments to the called function's registers
+		if (b != 0) {
+			// b - 1 is the exact number of arguments
+
+			if (b - 1 > 0) {
+				visitInsn(DUP);
+				for (int i = 0; i < b - 1; i++) {
+					pushInt(i);
+					pushRegister(a + 1 + i);
+					visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.getType(Registers.class), Type.INT_TYPE, Type.getType(Object.class)), true);
+				}
+				visitInsn(POP);
+			}
+		}
+		else {
+			throw new UnsupportedOperationException("vararg calls not implemented");
+		}
 
 		// return address
 		pushSelf();
