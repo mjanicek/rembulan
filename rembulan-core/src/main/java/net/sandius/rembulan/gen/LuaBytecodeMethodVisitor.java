@@ -754,6 +754,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Function.class), CALL_METHOD_NAME, CALL_METHOD_TYPE.getDescriptor(), false);
 
 		// TODO: load registers from a onwards as these have been updated by the called function
+
+		// TODO: handle `c' -- the # of saved results
 	}
 
 	@Override
