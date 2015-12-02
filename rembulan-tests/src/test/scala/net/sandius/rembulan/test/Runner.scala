@@ -55,6 +55,25 @@ object Runner {
         |return -1 + f(3) + 39
       """.stripMargin
 
+//    val program =
+//      """local f = 0
+//        |f(1)
+//      """.stripMargin
+
+//    val program =
+//      """local f = function (x, y)
+//        |    return x + y
+//        |end
+//        |return -1 + f(1, 3) + 39
+//      """.stripMargin
+
+//    val program =
+//      """local f = function (x, y, z)
+//        |    return x + y + z
+//        |end
+//        |return -1 + f(1, 1, 2) + 39
+//      """.stripMargin
+
     System.err.println(program)
 
     val proto = ploader.load(program)
