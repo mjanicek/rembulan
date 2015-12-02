@@ -547,20 +547,30 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	@Override
-	public void l_LOADK(int dest, int idx) {
-		System.err.println("LOADK " + dest + " " + idx);
-		pushConstant(OpCode.indexK(idx));
-		pushIntoRegister(dest);
+	public void l_LOADK(int a, int b) {
+		pushConstant(OpCode.indexK(b));
+		pushIntoRegister(a);
 	}
 
 	@Override
 	public void l_LOADBOOL(int a, int b, int c) {
-		throw new UnsupportedOperationException("not implemented");
+		boolean value = (b != 0);
+
+		visitFieldInsn(GETSTATIC, Type.getInternalName(Boolean.class), value ? "TRUE" : "FALSE", Type.getDescriptor(Boolean.class));
+		pushIntoRegister(a);
+
+		if (c != 0) {
+			// TODO: pc++
+			throw new UnsupportedOperationException("LOADBOOL: not implemented: pc increment");
+		}
 	}
 
 	@Override
 	public void l_LOADNIL(int a, int b) {
-		throw new UnsupportedOperationException("not implemented");
+		for (int i = 0; i < b + 1; i++) {
+			visitInsn(ACONST_NULL);
+			pushIntoRegister(a + i);
+		}
 	}
 
 	@Override
