@@ -334,15 +334,6 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 //		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Coroutine.class), "getObjectStack", Type.getMethodDescriptor(Type.getType(ObjectStack.class)), false);
 //	}
 
-	private void loadRegister(int idx) {
-		Check.nonNegative(idx);
-
-		pushSelf();
-		pushInt(idx);
-		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "get", Type.getMethodDescriptor(Type.getType(Object.class), Type.INT_TYPE), true);
-		visitVarInsn(ASTORE, REGISTER_OFFSET + idx);
-	}
-
 	private void saveRegisterToBase(int idx) {
 		Check.nonNegative(idx);
 
@@ -363,8 +354,14 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	public void loadRegisters() {
 		// load registers into local variables
+		pushSelf();
 		for (int i = 0; i < numRegs; i++) {
-			loadRegister(i);
+			if (i < numRegs - 1) {
+				visitInsn(DUP);
+			}
+			pushInt(i);
+			visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "get", Type.getMethodDescriptor(Type.getType(Object.class), Type.INT_TYPE), true);
+			visitVarInsn(ASTORE, REGISTER_OFFSET + i);
 		}
 	}
 
