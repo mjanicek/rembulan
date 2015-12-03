@@ -191,7 +191,7 @@ public class PrototypePrinter {
 		// additional hints
 		switch (opcode) {
 			case OpCode.CLOSURE:
-				hint.append(prettyPrint(children.get(ax)));
+				hint.append(prettyPrint(children.get(bx)));
 				break;
 		}
 
