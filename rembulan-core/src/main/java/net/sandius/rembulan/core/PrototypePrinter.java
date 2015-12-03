@@ -8,10 +8,12 @@ import java.io.PrintStream;
 
 public class PrototypePrinter {
 
-	private static void padSpaces(PrintStream out, int num) {
+	private static String spaces(int num) {
+		StringBuilder out = new StringBuilder();
 		for (int i = 0; i < num; i++) {
-			out.print(' ');
+			out.append(' ');
 		}
+		return out.toString();
 	}
 
 	public static String opcodeName(int opcode) {
@@ -98,6 +100,108 @@ public class PrototypePrinter {
 		return o.toString();
 	}
 
+	public static String instructionInfo(Prototype proto, int pc) {
+		Check.notNull(proto);
+		Check.nonNegative(pc);
+
+		StringBuilder out = new StringBuilder();
+
+		int insn = proto.getCode().get(pc);
+		ReadOnlyArray<Object> constants = proto.getConstants();
+		ReadOnlyArray<Prototype> children = proto.getNestedPrototypes();
+
+		int opcode = OpCode.opCode(insn);
+		int a = OpCode.arg_A(insn);
+		int b = OpCode.arg_B(insn);
+		int c = OpCode.arg_C(insn);
+		int bx = OpCode.arg_Bx(insn);
+		int sbx = OpCode.arg_sBx(insn);
+		int ax = OpCode.arg_Ax(insn);
+
+		String name = opcodeName(opcode);
+		out.append(name);  // opcode
+
+		out.append(spaces(9 - name.length()));
+		out.append('\t');
+
+		StringBuilder hint = new StringBuilder();
+
+		// instruction arguments
+		switch (OpCode.getOpMode(opcode)) {
+			case OpCode.iABC:
+				out.append(a);
+				switch (OpCode.getBMode(opcode)) {
+					case OpCode.OpArgN: break;
+					case OpCode.OpArgU: out.append(" ").append(b); break;
+					case OpCode.OpArgR: out.append(" ").append(b); break;
+						case OpCode.OpArgK:
+						out.append(" ");
+						if (OpCode.isK(b)) {
+							out.append(-1 - OpCode.indexK(b));
+							hint.append(prettyPrint(proto.getConstants().get(OpCode.indexK(b))));
+						}
+						else {
+							out.append(b);
+							hint.append("-");
+						}
+						break;
+				}
+
+				switch (OpCode.getCMode(opcode)) {
+					case OpCode.OpArgN: break;
+					case OpCode.OpArgU: out.append(" ").append(c); break;
+					case OpCode.OpArgR: out.append(" ").append(c); break;
+						case OpCode.OpArgK:
+						out.append(" ");
+						if (OpCode.isK(c)) {
+							out.append(-1 - OpCode.indexK(c));
+							(hint.length() > 0 ? hint : hint.append("-")).append(" ").append(prettyPrint(constants.get(OpCode.indexK(c))));
+						}
+						else {
+							out.append(c);
+							(hint.length() > 0 ? hint : hint.append("-")).append(" ").append("-");
+						}
+						break;
+				}
+				break;
+
+			case OpCode.iABx:
+				out.append(a);
+				switch (OpCode.getBMode(opcode)) {
+					case OpCode.OpArgN: break;
+					case OpCode.OpArgU: out.append(" ").append(bx); break;
+					case OpCode.OpArgR: out.append(" ").append(bx); break;
+						case OpCode.OpArgK:
+						out.append(" ").append(-1 - OpCode.indexK(bx));
+						hint.append(prettyPrint(constants.get(OpCode.indexK(bx))));
+						break;
+				}
+				break;
+
+			case OpCode.iAx:
+				out.append(ax);
+				break;
+
+			case OpCode.iAsBx:
+				out.append(a).append(" ").append(sbx);
+				break;
+			default:
+		}
+
+		// additional hints
+		switch (opcode) {
+			case OpCode.CLOSURE:
+				hint.append(prettyPrint(children.get(ax)));
+				break;
+		}
+
+		if (hint.length() > 0) {
+			out.append("\t; ").append(hint);
+		}
+
+		return out.toString();
+	}
+	
 	public static void print(Prototype proto, PrintStream out, boolean isMain) {
 		Check.notNull(proto);
 		Check.notNull(out);
@@ -132,101 +236,11 @@ public class PrototypePrinter {
 			out.print('\t');
 
 			int line = proto.getLineAtPC(i);
-			out.print("[" + (line >= 0 ? proto.getLineAtPC(i) : "-") + "]");  // line number
+			out.print("[" + (line >= 0 ? line : "-") + "]");  // line number
 
 			out.print('\t');
 
-			int insn = code.get(i);
-			int opcode = OpCode.opCode(insn);
-			int a = OpCode.arg_A(insn);
-			int b = OpCode.arg_B(insn);
-			int c = OpCode.arg_C(insn);
-			int bx = OpCode.arg_Bx(insn);
-			int sbx = OpCode.arg_sBx(insn);
-			int ax = OpCode.arg_Ax(insn);
-
-			String name = opcodeName(opcode);
-			out.print(name);  // opcode
-
-			padSpaces(out, 9 - name.length());
-			out.print('\t');
-
-			String hint = "";
-
-			// instruction arguments
-			switch (OpCode.getOpMode(opcode)) {
-				case OpCode.iABC:
-					out.print(a);
-					switch (OpCode.getBMode(opcode)) {
-						case OpCode.OpArgN: break;
-						case OpCode.OpArgU: out.print(" " + b); break;
-						case OpCode.OpArgR: out.print(" " + b); break;
- 						case OpCode.OpArgK:
-							out.print(" ");
-							if (OpCode.isK(b)) {
-								out.print(-1 - OpCode.indexK(b));
-								hint = prettyPrint(constants.get(OpCode.indexK(b)));
-							}
-							else {
-								out.print(b);
-								hint = "-";
-							}
-							break;
-					}
-
-					switch (OpCode.getCMode(opcode)) {
-						case OpCode.OpArgN: break;
-						case OpCode.OpArgU: out.print(" " + c); break;
-						case OpCode.OpArgR: out.print(" " + c); break;
- 						case OpCode.OpArgK:
-							out.print(" ");
-							if (OpCode.isK(c)) {
-								out.print(-1 - OpCode.indexK(c));
-								hint = (hint.isEmpty() ? "-" : hint) + " " + prettyPrint(constants.get(OpCode.indexK(c)));
-							}
-							else {
-								out.print(c);
-								hint = (hint.isEmpty() ? hint : hint + " -");
-							}
-							break;
-					}
-					break;
-
-				case OpCode.iABx:
-					out.print(a);
-					switch (OpCode.getBMode(opcode)) {
-						case OpCode.OpArgN: break;
-						case OpCode.OpArgU: out.print(" " + bx); break;
-						case OpCode.OpArgR: out.print(" " + bx); break;
- 						case OpCode.OpArgK:
-							out.print(" " + (-1 - OpCode.indexK(bx)));
-							hint += prettyPrint(constants.get(OpCode.indexK(bx)));
-							break;
-					}
-					break;
-
-				case OpCode.iAx:
-					out.print(ax);
-					break;
-
-				case OpCode.iAsBx:
-					out.print(a + " " + sbx);
-					break;
-				default:
-			}
-
-			// additional hints
-			switch (opcode) {
-				case OpCode.CLOSURE:
-					hint = prettyPrint(nested.get(ax));
-					break;
-			}
-
-			if (!hint.isEmpty()) {
-				out.print("\t; " + hint);
-			}
-
-			out.println();
+			out.println(instructionInfo(proto, i));
 		}
 
 		// constants
