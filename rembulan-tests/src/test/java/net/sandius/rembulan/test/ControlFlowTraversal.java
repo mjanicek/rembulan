@@ -124,76 +124,6 @@ public class ControlFlowTraversal {
 
 	}
 
-	private static void shiftIndices(ArrayList<Block> blocks, int idx) {
-		for (Block blk : blocks) {
-			if (blk != null) {
-				IntBuffer prev = blk.prev;
-				for (int j = 0; j < prev.length(); j++) {
-					int tgt = prev.get(j);
-					assert (tgt != idx);
-					prev.set(j, tgt > idx ? tgt - 1 : tgt);
-				}
-
-				IntBuffer next = blk.next;
-				for (int j = 0; j < next.length(); j++) {
-					int tgt = next.get(j);
-					assert (tgt != idx);
-					next.set(j, tgt > idx ? tgt - 1 : tgt);
-				}
-			}
-		}
-	}
-
-	// merge B into A (A remains)
-	private static void mergeBlocks(ArrayList<Block> blocks, int a, int b) {
-		Block b_a = blocks.get(a);
-		Block b_b = blocks.get(b);
-
-		assert (b_a.next.length() == 1);
-		assert (b_b.prev.length() == 1);
-		assert (b_a.next.get(0) == b);
-		assert (b_b.prev.get(0) == a);
-
-		b_a.instructionIndices.append(blocks.get(b).instructionIndices);
-		b_a.next.clear();
-		b_a.next.append(b_b.next);
-
-		// replace B with A
-		for (int i = 0; i < blocks.size(); i++) {
-			if (i != a && i != b) {
-				Block blk = blocks.get(i);
-				assert (!blk.next.contains(b));
-				blk.prev.replaceValue(b, a);
-			}
-		}
-
-		blocks.set(b, null);
-
-		shiftIndices(blocks, b);
-		blocks.remove(b);
-	}
-
-	private static void skipBlock(ArrayList<Block> blocks, int idx) {
-		assert (blocks.get(idx).prev.length() == 0);
-
-		// remove idx from links
-		IntBuffer nxt = blocks.get(idx).next;
-
-		for (int i = 0; i < nxt.length(); i++) {
-			int j = nxt.get(i);
-			if (j >= 0) {
-				Block blk = blocks.get(j);
-				assert (blk.prev.contains(idx));
-				blk.prev.removeValue(idx);
-			}
-		}
-
-		blocks.set(idx, null);
-
-		shiftIndices(blocks, idx);
-		blocks.remove(idx);
-	}
-
 	public ArrayList<Block> analyseBlocks() {
 		IntVector code = prototype.getCode();
 
@@ -219,16 +149,25 @@ public class ControlFlowTraversal {
 
 		int i = 0;
 		while (i < blocks.size()) {
-			Block blk = blocks.get(i);
+			Block blk_i = blocks.get(i);
 
 			// merge with next?
-			if (blk.next.length() == 1) {
-				int j = blk.next.get(0);
+			if (blk_i.next.length() == 1) {
+				int j = blk_i.next.get(0);
 				if (j >= 0) {
-					Block b = blocks.get(j);
-					if (b.prev.length() == 1) {
-						assert (b.prev.get(0) == i);
-						mergeBlocks(blocks, i, j);
+					Block blk_j = blocks.get(j);
+					if (blk_j.prev.length() == 1) {
+						assert (blk_j.prev.get(0) == i);
+
+						blk_i.merge(blk_j);
+
+						blocks.remove(j);
+
+						for (Block blk : blocks) {
+							blk.renumber(j, i);
+							blk.shift(j);
+						}
+
 						i = 0;
 						continue;
 					}
@@ -236,8 +175,15 @@ public class ControlFlowTraversal {
 			}
 
 			// skip?
-			if (blk.prev.length() == 0) {
-				skipBlock(blocks, i);
+			if (blk_i.prev.length() == 0) {
+
+				blocks.remove(i);
+
+				for (Block blk : blocks) {
+					blk.erase(i);
+					blk.shift(i);
+				}
+
 				i = 0;
 				continue;
 			}
@@ -305,6 +251,36 @@ public class ControlFlowTraversal {
 			this.instructionIndices = instructionIndices;
 			this.prev = prev;
 			this.next = next;
+		}
+
+		public void merge(Block that) {
+			instructionIndices.append(that.instructionIndices);
+			next.clear();
+			next.append(that.next);
+		}
+
+		public void shift(int idx) {
+			for (int j = 0; j < prev.length(); j++) {
+				int tgt = prev.get(j);
+				assert (tgt != idx);
+				prev.set(j, tgt > idx ? tgt - 1 : tgt);
+			}
+
+			for (int j = 0; j < next.length(); j++) {
+				int tgt = next.get(j);
+				assert (tgt != idx);
+				next.set(j, tgt > idx ? tgt - 1 : tgt);
+			}
+		}
+
+		public void renumber(int from, int to) {
+			prev.replaceValue(from, to);
+			next.replaceValue(from, to);
+		}
+
+		public void erase(int idx) {
+			prev.removeValue(idx);
+			next.removeValue(idx);
 		}
 
 	}
