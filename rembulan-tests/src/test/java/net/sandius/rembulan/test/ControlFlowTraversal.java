@@ -8,12 +8,13 @@ import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.IntVector;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 
 public class ControlFlowTraversal {
 
 	public final Prototype prototype;
 
-	private final Block[] blocks;
+	private final ArrayList<Block> blocks;
 
 	public ControlFlowTraversal(Prototype prototype) {
 		Check.notNull(prototype);
@@ -123,10 +124,8 @@ public class ControlFlowTraversal {
 
 	}
 
-	private static Block[] shiftIndices(Block[] blocks, int idx) {
-//		System.out.println("\t\tshifting blocks above " + idx);
-		for (int i = 0; i < blocks.length; i++) {
-			Block blk = blocks[i];
+	private static void shiftIndices(ArrayList<Block> blocks, int idx) {
+		for (Block blk : blocks) {
 			if (blk != null) {
 				IntBuffer prev = blk.prev;
 				for (int j = 0; j < prev.length(); j++) {
@@ -143,92 +142,59 @@ public class ControlFlowTraversal {
 				}
 			}
 		}
-
-		return blocks;
-	}
-
-	private static Block[] skipIndex(Block[] blocks, int idx) {
-//		System.out.println("\t\tskipping index " + idx);
-		Check.notNull(blocks);
-		Check.inRange(idx, 0, blocks.length - 1);
-
-		Block[] result = new Block[blocks.length - 1];
-		System.arraycopy(blocks, 0, result, 0, idx);
-		System.arraycopy(blocks, idx + 1, result, idx, blocks.length - idx - 1);
-		return result;
 	}
 
 	// merge B into A (A remains)
-	private static Block[] mergeBlocks(Block[] blocks, int a, int b) {
-//		System.out.println("merging block #" + b + " into #" + a);
-//		System.out.println("\tA (" + a + ") before = { prev = [" + tostring(blocks[a].prev) + "], next = [" + tostring(blocks[a].next) + "] }");
-//		System.out.println("\tB (" + b + ") before = { prev = [" + tostring(blocks[b].prev) + "], next = [" + tostring(blocks[b].next) + "] }");
-
-		Block b_a = blocks[a];
-		Block b_b = blocks[b];
+	private static void mergeBlocks(ArrayList<Block> blocks, int a, int b) {
+		Block b_a = blocks.get(a);
+		Block b_b = blocks.get(b);
 
 		assert (b_a.next.length() == 1);
 		assert (b_b.prev.length() == 1);
 		assert (b_a.next.get(0) == b);
 		assert (b_b.prev.get(0) == a);
 
-		b_a.instructionIndices.append(blocks[b].instructionIndices);
+		b_a.instructionIndices.append(blocks.get(b).instructionIndices);
 		b_a.next.clear();
 		b_a.next.append(b_b.next);
 
 		// replace B with A
-		for (int i = 0; i < blocks.length; i++) {
+		for (int i = 0; i < blocks.size(); i++) {
 			if (i != a && i != b) {
-				Block blk = blocks[i];
+				Block blk = blocks.get(i);
 				assert (!blk.next.contains(b));
-
 				blk.prev.replaceValue(b, a);
 			}
 		}
 
-		blocks[b] = null;
+		blocks.set(b, null);
 
-		blocks = shiftIndices(blocks, b);
-		blocks = skipIndex(blocks, b);
-
-//		System.out.println("\tA (" + a + ") after =  { prev = [" + tostring(blocks[a].prev) + "], next = [" + tostring(blocks[a].next) + "] }");
-
-		return blocks;
+		shiftIndices(blocks, b);
+		blocks.remove(b);
 	}
 
-	private static Block[] skipBlock(Block[] blocks, int idx) {
-//		System.out.println("skipping block #" + idx);
-
-		assert (blocks[idx].prev.length() == 0);
+	private static void skipBlock(ArrayList<Block> blocks, int idx) {
+		assert (blocks.get(idx).prev.length() == 0);
 
 		// remove idx from links
-		IntBuffer nxt = blocks[idx].next;
-
-//		System.out.println("\tnext = [" + tostring(nxt) + "]");
+		IntBuffer nxt = blocks.get(idx).next;
 
 		for (int i = 0; i < nxt.length(); i++) {
 			int j = nxt.get(i);
 			if (j >= 0) {
-//				System.out.println("\t\tlooking at #" + nxt[i]);
-				Block blk = blocks[j];
-//				System.out.println("\t\t\tprev before = [" + tostring(blk.prev) + "]");
-
+				Block blk = blocks.get(j);
 				assert (blk.prev.contains(idx));
-
 				blk.prev.removeValue(idx);
-//				System.out.println("\t\t\tprev after  = [" + tostring(blk.prev) + "]");
 			}
 		}
 
-		blocks[idx] = null;
+		blocks.set(idx, null);
 
-		blocks = shiftIndices(blocks, idx);
-		blocks = skipIndex(blocks, idx);
-
-		return blocks;
+		shiftIndices(blocks, idx);
+		blocks.remove(idx);
 	}
 
-	public Block[] analyseBlocks() {
+	public ArrayList<Block> analyseBlocks() {
 		IntVector code = prototype.getCode();
 
 		IntBuffer[] prev = new IntBuffer[code.length()];
@@ -244,26 +210,25 @@ public class ControlFlowTraversal {
 			visit(prev, next, i);
 		}
 
-		Block[] blocks = new Block[code.length()];
+		ArrayList<Block> blocks = new ArrayList<>();
 
 		for (int i = 0; i < code.length(); i++) {
 			IntBuffer instrs = IntBuffer.of(i);
-
-			blocks[i] = new Block(instrs, prev[i], next[i]);
+			blocks.add(new Block(instrs, prev[i], next[i]));
 		}
 
 		int i = 0;
-		while (i < blocks.length) {
-			Block blk = blocks[i];
+		while (i < blocks.size()) {
+			Block blk = blocks.get(i);
 
 			// merge with next?
 			if (blk.next.length() == 1) {
 				int j = blk.next.get(0);
 				if (j >= 0) {
-					Block b = blocks[j];
+					Block b = blocks.get(j);
 					if (b.prev.length() == 1) {
 						assert (b.prev.get(0) == i);
-						blocks = mergeBlocks(blocks, i, j);
+						mergeBlocks(blocks, i, j);
 						i = 0;
 						continue;
 					}
@@ -272,7 +237,7 @@ public class ControlFlowTraversal {
 
 			// skip?
 			if (blk.prev.length() == 0) {
-				blocks = skipBlock(blocks, i);
+				skipBlock(blocks, i);
 				i = 0;
 				continue;
 			}
@@ -286,14 +251,14 @@ public class ControlFlowTraversal {
 	public void print(PrintStream out) {
 //		out.println("Blocks (" + blocks.length + " total):");
 
-		for (int i = 0; i < blocks.length; i++) {
+		for (int i = 0; i < blocks.size(); i++) {
 			out.print("\t");
 			out.print("#");
 			out.print(i);
 
 			out.print(":");
 
-			Block b = blocks[i];
+			Block b = blocks.get(i);
 
 			out.print(" ");
 
