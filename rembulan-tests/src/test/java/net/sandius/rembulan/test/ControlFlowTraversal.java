@@ -12,32 +12,13 @@ public class ControlFlowTraversal {
 
 	public final Prototype prototype;
 
-	private final int[][] next;
-	private final int[][] prev;
-
 	private final Block[] blocks;
 
 	public ControlFlowTraversal(Prototype prototype) {
 		Check.notNull(prototype);
 
 		this.prototype = prototype;
-
-		IntVector code = prototype.getCode();
-
-		prev = new int[code.length()][];
-		next = new int[code.length()][];
-
-		for (int i = 0; i < code.length(); i++) {
-			prev[i] = new int[0];
-			next[i] = new int[0];
-		}
-
-		traverse(-1, 0);
-		for (int i = 0; i < code.length(); i++) {
-			visit(i);
-		}
-
-		blocks = analyseBlocks();
+		this.blocks = analyseBlocks();
 	}
 
 	private int[] cpy(int[] a) {
@@ -119,7 +100,7 @@ public class ControlFlowTraversal {
 		return buf.toString();
 	}
 
-	private void traverse(int from, int to) {
+	private void traverse(int[][] prev, int[][] next, int from, int to) {
 		IntVector code = prototype.getCode();
 
 		if (from >= 0) {
@@ -130,7 +111,7 @@ public class ControlFlowTraversal {
 		}
 	}
 
-	private void visit(int pc) {
+	private void visit(int[][] prev, int[][] next, int pc) {
 		int insn = prototype.getCode().get(pc);
 
 		int oc = OpCode.opCode(insn);
@@ -170,50 +151,50 @@ public class ControlFlowTraversal {
 			case OpCode.NOT:
 			case OpCode.LEN:
 			case OpCode.CONCAT:
-				traverse(pc, pc + 1); break;
+				traverse(prev, next, pc, pc + 1); break;
 
 //			//case OpCode.LOADKX:   ie.l_LOADKX(extra);  break;
 
 			case OpCode.LOADBOOL:
-				if (c != 0) traverse(pc, pc + 2); else traverse(pc, pc + 1); break;
+				if (c != 0) traverse(prev, next, pc, pc + 2); else traverse(prev, next, pc, pc + 1); break;
 
 			case OpCode.JMP:
-				traverse(pc, pc + sbx + 1); break;
+				traverse(prev, next, pc, pc + sbx + 1); break;
 
 			case OpCode.EQ:
 			case OpCode.LT:
 			case OpCode.LE:
 			case OpCode.TEST:
 			case OpCode.TESTSET:
-				traverse(pc, pc + 1); traverse(pc, pc + 2); break;
+				traverse(prev, next, pc, pc + 1); traverse(prev, next, pc, pc + 2); break;
 
 			case OpCode.CALL:
-				traverse(pc, pc + 1); break;
+				traverse(prev, next, pc, pc + 1); break;
 
 			case OpCode.TAILCALL:
 			case OpCode.RETURN:
-				traverse(pc, -1); break;
+				traverse(prev, next, pc, -1); break;
 
 			case OpCode.FORLOOP:
-				traverse(pc, pc + sbx + 1); traverse(pc, pc + 1); break;
+				traverse(prev, next, pc, pc + sbx + 1); traverse(prev, next, pc, pc + 1); break;
 
 			case OpCode.FORPREP:
-				traverse(pc, pc + sbx + 1); break;
+				traverse(prev, next, pc, pc + sbx + 1); break;
 
 			case OpCode.TFORCALL:
-				traverse(pc, pc + 1); break;
+				traverse(prev, next, pc, pc + 1); break;
 
 			case OpCode.TFORLOOP:
-				traverse(pc, pc + sbx + 1); traverse(pc, pc + 1); break;
+				traverse(prev, next, pc, pc + sbx + 1); traverse(prev, next, pc, pc + 1); break;
 
 			case OpCode.SETLIST:
-				traverse(pc, pc + 1); break;
+				traverse(prev, next, pc, pc + 1); break;
 
 			case OpCode.CLOSURE:
-				traverse(pc, pc + 1); break;
+				traverse(prev, next, pc, pc + 1); break;
 
 			case OpCode.VARARG:
-				traverse(pc, pc + 1); break;
+				traverse(prev, next, pc, pc + 1); break;
 
 //			case OpCode.EXTRAARG:
 
@@ -336,6 +317,19 @@ public class ControlFlowTraversal {
 
 	public Block[] analyseBlocks() {
 		IntVector code = prototype.getCode();
+
+		int[][] prev = new int[code.length()][];
+		int[][] next = new int[code.length()][];
+
+		for (int i = 0; i < code.length(); i++) {
+			prev[i] = new int[0];
+			next[i] = new int[0];
+		}
+
+		traverse(prev, next, -1, 0);
+		for (int i = 0; i < code.length(); i++) {
+			visit(prev, next, i);
+		}
 
 		Block[] blocks = new Block[code.length()];
 
