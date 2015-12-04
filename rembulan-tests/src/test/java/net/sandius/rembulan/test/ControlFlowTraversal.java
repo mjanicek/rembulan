@@ -22,7 +22,7 @@ public class ControlFlowTraversal {
 		this.blocks = analyseBlocks();
 	}
 
-	private void traverse(IntBuffer[] prev, IntBuffer[] next, int from, int to) {
+	private static void traverse(IntBuffer[] prev, IntBuffer[] next, int from, int to) {
 		if (from >= 0) {
 			next[from].append(to);
 		}
@@ -123,7 +123,7 @@ public class ControlFlowTraversal {
 
 	}
 
-	private Block[] shiftIndices(Block[] blocks, int idx) {
+	private static Block[] shiftIndices(Block[] blocks, int idx) {
 //		System.out.println("\t\tshifting blocks above " + idx);
 		for (int i = 0; i < blocks.length; i++) {
 			Block blk = blocks[i];
@@ -147,7 +147,7 @@ public class ControlFlowTraversal {
 		return blocks;
 	}
 
-	private Block[] skipIndex(Block[] blocks, int idx) {
+	private static Block[] skipIndex(Block[] blocks, int idx) {
 //		System.out.println("\t\tskipping index " + idx);
 		Check.notNull(blocks);
 		Check.inRange(idx, 0, blocks.length - 1);
@@ -159,7 +159,7 @@ public class ControlFlowTraversal {
 	}
 
 	// merge B into A (A remains)
-	private Block[] mergeBlocks(Block[] blocks, int a, int b) {
+	private static Block[] mergeBlocks(Block[] blocks, int a, int b) {
 //		System.out.println("merging block #" + b + " into #" + a);
 //		System.out.println("\tA (" + a + ") before = { prev = [" + tostring(blocks[a].prev) + "], next = [" + tostring(blocks[a].next) + "] }");
 //		System.out.println("\tB (" + b + ") before = { prev = [" + tostring(blocks[b].prev) + "], next = [" + tostring(blocks[b].next) + "] }");
@@ -196,7 +196,7 @@ public class ControlFlowTraversal {
 		return blocks;
 	}
 
-	private Block[] skipBlock(Block[] blocks, int idx) {
+	private static Block[] skipBlock(Block[] blocks, int idx) {
 //		System.out.println("skipping block #" + idx);
 
 		assert (blocks[idx].prev.length() == 0);
