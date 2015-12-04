@@ -26,16 +26,18 @@ public abstract class Check {
 		}
 	}
 
-	public static void nonNegative(int n) {
-		if (n < 0) {
-			throw new IllegalArgumentException("integer " + n + " must be non-negative");
+	public static void gt(int n, int limit) {
+		if (n <= limit) {
+			throw new IllegalArgumentException("integer " + n + " must be greater than " + limit);
 		}
 	}
 
+	public static void nonNegative(int n) {
+		gt(n, -1);
+	}
+
 	public static void positive(int n) {
-		if (n < 1) {
-			throw new IllegalArgumentException("integer " + n + " must be positive");
-		}
+		gt(n, 0);
 	}
 
 }

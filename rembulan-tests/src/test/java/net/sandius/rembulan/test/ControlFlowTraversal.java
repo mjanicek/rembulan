@@ -4,6 +4,7 @@ import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Prototype;
 import net.sandius.rembulan.core.PrototypePrinter;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.IntVector;
 
 import java.io.PrintStream;
@@ -21,97 +22,16 @@ public class ControlFlowTraversal {
 		this.blocks = analyseBlocks();
 	}
 
-	private int[] cpy(int[] a) {
-		Check.notNull(a);
-		int[] result = new int[a.length];
-		System.arraycopy(a, 0, result, 0, a.length);
-		return result;
-	}
-
-	private int[] append(int[] a, int i) {
-		Check.notNull(a);
-		assert (!contains(a, i));
-
-		int[] result = new int[a.length + 1];
-		System.arraycopy(a, 0, result, 0, a.length);
-		result[a.length] = i;
-		return result;
-	}
-
-	private int[] remove(int[] array, int value) {
-		if (contains(array, value)) {
-			int idx = 0;
-			for (int elem : array) {
-				if (elem == value) break;
-				idx++;
-			}
-
-			assert (array[idx] == value);
-
-			int[] result = new int[array.length - 1];
-			System.arraycopy(array, 0, result, 0, idx);
-			System.arraycopy(array, idx + 1, result, idx, array.length - idx - 1);
-			return result;
-		}
-		else {
-			return array;
-		}
-	}
-
-	private int[] replace(int[] array, int old, int nu) {
-		Check.notNull(array);
-
-		for (int i = 0; i < array.length; i++) {
-			if (array[i] == old) {
-				array[i] = nu;
-			}
-		}
-
-		return array;
-	}
-
-	private boolean contains(int[] a, int i) {
-		for (int elem : a) {
-			if (elem == i) return true;
-		}
-		return false;
-	}
-
-	private int[] concat(int[] a, int[] b) {
-		Check.notNull(a);
-		Check.notNull(b);
-
-		int[] result = new int[a.length + b.length];
-		System.arraycopy(a, 0, result, 0, a.length);
-		System.arraycopy(b, 0, result, a.length, b.length);
-		return result;
-	}
-
-	private String tostring(int[] array) {
-		Check.notNull(array);
-
-		StringBuilder buf = new StringBuilder();
-		for (int i = 0; i < array.length; i++) {
-			buf.append(array[i]);
-			if (i + 1 < array.length) {
-				buf.append(" ");
-			}
-		}
-		return buf.toString();
-	}
-
-	private void traverse(int[][] prev, int[][] next, int from, int to) {
-		IntVector code = prototype.getCode();
-
+	private void traverse(IntBuffer[] prev, IntBuffer[] next, int from, int to) {
 		if (from >= 0) {
-			next[from] = append(next[from], to);
+			next[from].append(to);
 		}
 		if (to >= 0) {
-			prev[to] = append(prev[to], from);
+			prev[to].append(from);
 		}
 	}
 
-	private void visit(int[][] prev, int[][] next, int pc) {
+	private void visit(IntBuffer[] prev, IntBuffer[] next, int pc) {
 		int insn = prototype.getCode().get(pc);
 
 		int oc = OpCode.opCode(insn);
@@ -208,21 +128,19 @@ public class ControlFlowTraversal {
 		for (int i = 0; i < blocks.length; i++) {
 			Block blk = blocks[i];
 			if (blk != null) {
-				int[] prev = blk.prev;
-				for (int j = 0; j < prev.length; j++) {
-					int tgt = prev[j];
+				IntBuffer prev = blk.prev;
+				for (int j = 0; j < prev.length(); j++) {
+					int tgt = prev.get(j);
 					assert (tgt != idx);
-					prev[j] = tgt > idx ? tgt - 1 : tgt;
+					prev.set(j, tgt > idx ? tgt - 1 : tgt);
 				}
-				blk.prev = prev;
 
-				int[] next = blk.next;
-				for (int j = 0; j < next.length; j++) {
-					int tgt = next[j];
+				IntBuffer next = blk.next;
+				for (int j = 0; j < next.length(); j++) {
+					int tgt = next.get(j);
 					assert (tgt != idx);
-					next[j] = tgt > idx ? tgt - 1 : tgt;
+					next.set(j, tgt > idx ? tgt - 1 : tgt);
 				}
-				blk.next = next;
 			}
 		}
 
@@ -249,28 +167,22 @@ public class ControlFlowTraversal {
 		Block b_a = blocks[a];
 		Block b_b = blocks[b];
 
-		assert (b_a.next.length == 1);
-		assert (b_b.prev.length == 1);
-		assert (b_a.next[0] == b);
-		assert (b_b.prev[0] == a);
+		assert (b_a.next.length() == 1);
+		assert (b_b.prev.length() == 1);
+		assert (b_a.next.get(0) == b);
+		assert (b_b.prev.get(0) == a);
 
-		blocks[a] = new Block(
-				concat(b_a.instructionIndices, b_b.instructionIndices),
-				cpy(b_a.prev),
-				cpy(b_b.next)
-		);
+		b_a.instructionIndices.append(blocks[b].instructionIndices);
+		b_a.next.clear();
+		b_a.next.append(b_b.next);
 
+		// replace B with A
 		for (int i = 0; i < blocks.length; i++) {
 			if (i != a && i != b) {
 				Block blk = blocks[i];
-				int[] prev = blk.prev;
-				int[] next = blk.next;
+				assert (!blk.next.contains(b));
 
-				assert (!contains(next, b));
-
-				if (contains(prev, b)) {
-					blk.prev = replace(blk.prev, b, a);
-				}
+				blk.prev.replaceValue(b, a);
 			}
 		}
 
@@ -287,22 +199,23 @@ public class ControlFlowTraversal {
 	private Block[] skipBlock(Block[] blocks, int idx) {
 //		System.out.println("skipping block #" + idx);
 
-		assert (blocks[idx].prev.length == 0);
+		assert (blocks[idx].prev.length() == 0);
 
 		// remove idx from links
-		int[] nxt = blocks[idx].next;
+		IntBuffer nxt = blocks[idx].next;
 
 //		System.out.println("\tnext = [" + tostring(nxt) + "]");
 
-		for (int i = 0; i < nxt.length; i++) {
-			if (nxt[i] >= 0) {
+		for (int i = 0; i < nxt.length(); i++) {
+			int j = nxt.get(i);
+			if (j >= 0) {
 //				System.out.println("\t\tlooking at #" + nxt[i]);
-				Block blk = blocks[nxt[i]];
+				Block blk = blocks[j];
 //				System.out.println("\t\t\tprev before = [" + tostring(blk.prev) + "]");
 
-				assert (contains(blk.prev, idx));
+				assert (blk.prev.contains(idx));
 
-				blk.prev = remove(blk.prev, idx);
+				blk.prev.removeValue(idx);
 //				System.out.println("\t\t\tprev after  = [" + tostring(blk.prev) + "]");
 			}
 		}
@@ -318,12 +231,12 @@ public class ControlFlowTraversal {
 	public Block[] analyseBlocks() {
 		IntVector code = prototype.getCode();
 
-		int[][] prev = new int[code.length()][];
-		int[][] next = new int[code.length()][];
+		IntBuffer[] prev = new IntBuffer[code.length()];
+		IntBuffer[] next = new IntBuffer[code.length()];
 
 		for (int i = 0; i < code.length(); i++) {
-			prev[i] = new int[0];
-			next[i] = new int[0];
+			prev[i] = new IntBuffer();
+			next[i] = new IntBuffer();
 		}
 
 		traverse(prev, next, -1, 0);
@@ -334,7 +247,9 @@ public class ControlFlowTraversal {
 		Block[] blocks = new Block[code.length()];
 
 		for (int i = 0; i < code.length(); i++) {
-			blocks[i] = new Block(new int[] { i }, prev[i], next[i]);
+			IntBuffer instrs = IntBuffer.of(i);
+
+			blocks[i] = new Block(instrs, prev[i], next[i]);
 		}
 
 		int i = 0;
@@ -342,12 +257,12 @@ public class ControlFlowTraversal {
 			Block blk = blocks[i];
 
 			// merge with next?
-			if (blk.next.length == 1) {
-				int j = blk.next[0];
+			if (blk.next.length() == 1) {
+				int j = blk.next.get(0);
 				if (j >= 0) {
 					Block b = blocks[j];
-					if (b.prev.length == 1) {
-						assert (b.prev[0] == i);
+					if (b.prev.length() == 1) {
+						assert (b.prev.get(0) == i);
 						blocks = mergeBlocks(blocks, i, j);
 						i = 0;
 						continue;
@@ -356,7 +271,7 @@ public class ControlFlowTraversal {
 			}
 
 			// skip?
-			if (blk.prev.length == 0) {
+			if (blk.prev.length() == 0) {
 				blocks = skipBlock(blocks, i);
 				i = 0;
 				continue;
@@ -383,26 +298,26 @@ public class ControlFlowTraversal {
 			out.print(" ");
 
 			out.print("[");
-			for (int j = 0; j < b.prev.length; j++) {
-				int idx = b.prev[j];
+			for (int j = 0; j < b.prev.length(); j++) {
+				int idx = b.prev.get(j);
 				out.print(idx >= 0 ? "#" + idx : "-");
-				if (j + 1 < b.prev.length) out.print(" ");
+				if (j + 1 < b.prev.length()) out.print(" ");
 			}
 			out.print("]");
 			out.print(" --> ");
 			out.print("[");
-			for (int j = 0; j < b.next.length; j++) {
-				int idx = b.next[j];
+			for (int j = 0; j < b.next.length(); j++) {
+				int idx = b.next.get(j);
 				out.print(idx >= 0 ? "#" + idx : "*");
-				if (j + 1 < b.next.length) out.print(" ");
+				if (j + 1 < b.next.length()) out.print(" ");
 			}
 			out.print("]");
 
 			out.println();
 
-			for (int j = 0; j < b.instructionIndices.length; j++) {
+			for (int j = 0; j < b.instructionIndices.length(); j++) {
 				out.print("\t\t");
-				int pc = b.instructionIndices[j];
+				int pc = b.instructionIndices.get(j);
 				out.print(pc + 1);
 				out.print("\t");
 				out.print(PrototypePrinter.instructionInfo(prototype, pc));
@@ -413,11 +328,15 @@ public class ControlFlowTraversal {
 
 	public static class Block {
 
-		public int[] instructionIndices;
-		public int[] prev;
-		public int[] next;
+		public final IntBuffer instructionIndices;
+		public final IntBuffer prev;
+		public final IntBuffer next;
 
-		public Block(int[] instructionIndices, int[] prev, int[] next) {
+		public Block(IntBuffer instructionIndices, IntBuffer prev, IntBuffer next) {
+			Check.notNull(instructionIndices);
+			Check.notNull(prev);
+			Check.notNull(next);
+
 			this.instructionIndices = instructionIndices;
 			this.prev = prev;
 			this.next = next;
