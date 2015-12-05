@@ -3,6 +3,7 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Prototype;
 import net.sandius.rembulan.core.PrototypePrinter;
+import net.sandius.rembulan.gen.Instruction;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.IntVector;
@@ -33,9 +34,8 @@ public class ControlFlowTraversal {
 	}
 
 	// instruction possibly involves a call
-	private boolean canTransferControl(int insn) {
-		int oc = OpCode.opCode(insn);
-		switch (oc) {
+	private boolean canTransferControl(int opcode) {
+		switch (opcode) {
 			case OpCode.ADD:
 			case OpCode.SUB:
 			case OpCode.MUL:
@@ -195,8 +195,7 @@ public class ControlFlowTraversal {
 		ArrayList<Block> blocks = new ArrayList<>();
 
 		for (int i = 0; i < code.length(); i++) {
-			IntBuffer instrs = IntBuffer.of(i);
-			blocks.add(new Block(instrs, prev[i], next[i]));
+			blocks.add(Block.newBlock(code.get(i), prev[i], next[i]));
 		}
 
 		int i = 0;
@@ -278,15 +277,18 @@ public class ControlFlowTraversal {
 
 			out.println();
 
-			for (int j = 0; j < b.instructionIndices.length(); j++) {
+			for (int j = 0; j < b.instructions.size(); j++) {
 				out.print("\t\t");
-				int pc = b.instructionIndices.get(j);
-				int insn = prototype.getCode().get(pc);
-				out.print(pc + 1);
-				out.print("\t");
-				out.print(canTransferControl(insn) ? "*" : " ");
-				out.print("\t");
-				out.print(PrototypePrinter.instructionInfo(prototype, pc));
+				Instruction insn = b.instructions.get(j);
+
+//				int insn = prototype.getCode().get(pc);
+//				out.print(pc + 1);
+//				out.print("\t");
+
+				out.print(canTransferControl(insn.getOpCode()) ? "*" : " ");
+//				out.print("\t");
+				out.print(" ");
+				out.print(PrototypePrinter.instructionInfo(insn.getIntValue(), prototype.getConstants(), prototype.getNestedPrototypes()));
 				out.println();
 			}
 		}
@@ -294,22 +296,28 @@ public class ControlFlowTraversal {
 
 	public static class Block {
 
-		public final IntBuffer instructionIndices;
+		public final ArrayList<Instruction> instructions;
 		public final IntBuffer prev;
 		public final IntBuffer next;
 
-		public Block(IntBuffer instructionIndices, IntBuffer prev, IntBuffer next) {
-			Check.notNull(instructionIndices);
+		private Block(ArrayList<Instruction> instructions, IntBuffer prev, IntBuffer next) {
+			Check.notNull(instructions);
 			Check.notNull(prev);
 			Check.notNull(next);
 
-			this.instructionIndices = instructionIndices;
+			this.instructions = instructions;
 			this.prev = prev;
 			this.next = next;
 		}
 
+		public static Block newBlock(int insn, IntBuffer prev, IntBuffer next) {
+			ArrayList<Instruction> l = new ArrayList<>();
+			l.add(Instruction.valueOf(insn));
+			return new Block(l, prev, next);
+		}
+
 		public void merge(Block that) {
-			instructionIndices.append(that.instructionIndices);
+			instructions.addAll(that.instructions);
 			next.clear();
 			next.append(that.next);
 		}

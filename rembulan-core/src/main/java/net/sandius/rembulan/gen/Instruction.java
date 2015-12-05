@@ -14,6 +14,11 @@ public abstract class Instruction {
 		return OpCode.opCode(insn);
 	}
 
+	@Deprecated
+	public int getIntValue() {
+		return insn;
+	}
+
 	public static Instruction valueOf(int insn) {
 		int oc = OpCode.opCode(insn);
 

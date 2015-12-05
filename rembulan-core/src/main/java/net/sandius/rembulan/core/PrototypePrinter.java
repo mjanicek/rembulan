@@ -104,11 +104,14 @@ public class PrototypePrinter {
 		Check.notNull(proto);
 		Check.nonNegative(pc);
 
-		StringBuilder out = new StringBuilder();
+		return instructionInfo(proto.getCode().get(pc), proto.getConstants(), proto.getNestedPrototypes());
+	}
 
-		int insn = proto.getCode().get(pc);
-		ReadOnlyArray<Object> constants = proto.getConstants();
-		ReadOnlyArray<Prototype> children = proto.getNestedPrototypes();
+	public static String instructionInfo(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
+		Check.notNull(constants);
+		Check.notNull(children);
+
+		StringBuilder out = new StringBuilder();
 
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
@@ -138,7 +141,7 @@ public class PrototypePrinter {
 						out.append(" ");
 						if (OpCode.isK(b)) {
 							out.append(-1 - OpCode.indexK(b));
-							hint.append(prettyPrint(proto.getConstants().get(OpCode.indexK(b))));
+							hint.append(prettyPrint(constants.get(OpCode.indexK(b))));
 						}
 						else {
 							out.append(b);
