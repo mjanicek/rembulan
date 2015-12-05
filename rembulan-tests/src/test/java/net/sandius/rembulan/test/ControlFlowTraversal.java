@@ -68,8 +68,6 @@ public class ControlFlowTraversal {
 				return false;
 
 			case OpCode.FORLOOP:
-				return true;
-
 			case OpCode.FORPREP:
 				return false;
 
