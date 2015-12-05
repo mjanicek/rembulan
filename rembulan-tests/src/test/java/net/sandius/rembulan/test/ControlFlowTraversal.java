@@ -2,7 +2,7 @@ package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Prototype;
-import net.sandius.rembulan.core.PrototypePrinter;
+import net.sandius.rembulan.gen.BlockNode;
 import net.sandius.rembulan.gen.Instruction;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntBuffer;
@@ -283,16 +283,16 @@ public class ControlFlowTraversal {
 
 			for (int j = 0; j < b.instructions.size(); j++) {
 				out.print("\t\t");
-				Instruction insn = b.instructions.get(j);
+				BlockNode node = b.instructions.get(j);
 
 //				int insn = prototype.getCode().get(pc);
 //				out.print(pc + 1);
 //				out.print("\t");
 
-				out.print(canTransferControl(insn.getOpCode()) ? "*" : " ");
+				out.print(node instanceof Instruction && canTransferControl(((Instruction) node).getOpCode()) ? "*" : " ");
 //				out.print("\t");
 				out.print(" ");
-				out.print(insn.toString());
+				out.print(node.toString());
 				out.println();
 			}
 
@@ -305,11 +305,11 @@ public class ControlFlowTraversal {
 
 	public static class Block {
 
-		public final ArrayList<Instruction> instructions;
+		public final ArrayList<BlockNode> instructions;
 		public final IntBuffer prev;
 		public final IntBuffer next;
 
-		private Block(ArrayList<Instruction> instructions, IntBuffer prev, IntBuffer next) {
+		private Block(ArrayList<BlockNode> instructions, IntBuffer prev, IntBuffer next) {
 			Check.notNull(instructions);
 			Check.notNull(prev);
 			Check.notNull(next);
@@ -320,7 +320,7 @@ public class ControlFlowTraversal {
 		}
 
 		public static Block newBlock(int insn, IntBuffer prev, IntBuffer next) {
-			ArrayList<Instruction> l = new ArrayList<>();
+			ArrayList<BlockNode> l = new ArrayList<>();
 			l.add(Instruction.valueOf(insn));
 			return new Block(l, prev, next);
 		}
@@ -356,7 +356,11 @@ public class ControlFlowTraversal {
 		}
 
 		public int getCost() {
-			return instructions.size();
+			int cost = 0;
+			for (BlockNode node : instructions) {
+				cost += node.getCost();
+			}
+			return cost;
 		}
 
 	}

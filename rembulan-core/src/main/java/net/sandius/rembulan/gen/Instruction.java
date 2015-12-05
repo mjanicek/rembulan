@@ -3,7 +3,7 @@ package net.sandius.rembulan.gen;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.PrototypePrinter;
 
-public abstract class Instruction {
+public abstract class Instruction extends BlockNode {
 
 	protected final int insn;
 
@@ -13,6 +13,11 @@ public abstract class Instruction {
 
 	public int getOpCode() {
 		return OpCode.opCode(insn);
+	}
+
+	@Override
+	public int getCost() {
+		return 1;
 	}
 
 	@Override
