@@ -100,17 +100,7 @@ public class PrototypePrinter {
 		return o.toString();
 	}
 
-	public static String instructionInfo(Prototype proto, int pc) {
-		Check.notNull(proto);
-		Check.nonNegative(pc);
-
-		return instructionInfo(proto.getCode().get(pc), proto.getConstants(), proto.getNestedPrototypes());
-	}
-
-	public static String instructionInfo(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
-		Check.notNull(constants);
-		Check.notNull(children);
-
+	public static String instructionInfo(int insn) {
 		StringBuilder out = new StringBuilder();
 
 		int opcode = OpCode.opCode(insn);
@@ -141,11 +131,9 @@ public class PrototypePrinter {
 						out.append(" ");
 						if (OpCode.isK(b)) {
 							out.append(-1 - OpCode.indexK(b));
-							hint.append(prettyPrint(constants.get(OpCode.indexK(b))));
 						}
 						else {
 							out.append(b);
-							hint.append("-");
 						}
 						break;
 				}
@@ -156,14 +144,7 @@ public class PrototypePrinter {
 					case OpCode.OpArgR: out.append(" ").append(c); break;
 						case OpCode.OpArgK:
 						out.append(" ");
-						if (OpCode.isK(c)) {
-							out.append(-1 - OpCode.indexK(c));
-							(hint.length() > 0 ? hint : hint.append("-")).append(" ").append(prettyPrint(constants.get(OpCode.indexK(c))));
-						}
-						else {
-							out.append(c);
-							(hint.length() > 0 ? hint : hint.append("-")).append(" ").append("-");
-						}
+						out.append(OpCode.isK(c) ? -1 - OpCode.indexK(c) : c);
 						break;
 				}
 				break;
@@ -174,9 +155,8 @@ public class PrototypePrinter {
 					case OpCode.OpArgN: break;
 					case OpCode.OpArgU: out.append(" ").append(bx); break;
 					case OpCode.OpArgR: out.append(" ").append(bx); break;
-						case OpCode.OpArgK:
+					case OpCode.OpArgK:
 						out.append(" ").append(-1 - OpCode.indexK(bx));
-						hint.append(prettyPrint(constants.get(OpCode.indexK(bx))));
 						break;
 				}
 				break;
@@ -191,6 +171,54 @@ public class PrototypePrinter {
 			default:
 		}
 
+		return out.toString();
+	}
+
+	public static String instructionInfoWithHints(Prototype proto, int pc) {
+		Check.notNull(proto);
+		Check.nonNegative(pc);
+
+		return instructionInfoWithHints(proto.getCode().get(pc), proto.getConstants(), proto.getNestedPrototypes());
+	}
+
+	private static String instructionInfoHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
+		int opcode = OpCode.opCode(insn);
+		int a = OpCode.arg_A(insn);
+		int b = OpCode.arg_B(insn);
+		int c = OpCode.arg_C(insn);
+		int bx = OpCode.arg_Bx(insn);
+		int sbx = OpCode.arg_sBx(insn);
+		int ax = OpCode.arg_Ax(insn);
+
+		StringBuilder hint = new StringBuilder();
+
+		// instruction arguments
+		switch (OpCode.getOpMode(opcode)) {
+			case OpCode.iABC:
+				if (OpCode.getBMode(opcode) == OpCode.OpArgK) {
+					hint.append(OpCode.isK(b) ? prettyPrint(constants.get(OpCode.indexK(b))) : "-");
+				}
+
+				if (OpCode.getCMode(opcode) == OpCode.OpArgK) {
+					if (OpCode.isK(c)) {
+						(hint.length() > 0 ? hint : hint.append("-")).append(" ").append(prettyPrint(constants.get(OpCode.indexK(c))));
+					}
+					else {
+						(hint.length() > 0 ? hint : hint.append("-")).append(" ").append("-");
+					}
+				}
+				break;
+
+			case OpCode.iABx:
+				if (OpCode.getBMode(opcode) == OpCode.OpArgK) {
+					hint.append(prettyPrint(constants.get(OpCode.indexK(bx))));
+				}
+				break;
+
+			default:
+				break;
+		}
+
 		// additional hints
 		switch (opcode) {
 			case OpCode.CLOSURE:
@@ -198,13 +226,18 @@ public class PrototypePrinter {
 				break;
 		}
 
-		if (hint.length() > 0) {
-			out.append("\t; ").append(hint);
-		}
-
-		return out.toString();
+		return hint.toString();
 	}
-	
+
+	public static String instructionInfoWithHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
+		Check.notNull(constants);
+		Check.notNull(children);
+
+		String instrInfo = instructionInfo(insn);
+		String hint = instructionInfoHints(insn, constants, children);
+		return instrInfo + (!hint.isEmpty() ? "\t; " + hint : "");
+	}
+
 	public static void print(Prototype proto, PrintStream out, boolean isMain) {
 		Check.notNull(proto);
 		Check.notNull(out);
@@ -243,7 +276,7 @@ public class PrototypePrinter {
 
 			out.print('\t');
 
-			out.println(instructionInfo(proto, i));
+			out.println(instructionInfoWithHints(proto, i));
 		}
 
 		// constants
