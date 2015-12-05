@@ -1,6 +1,7 @@
 package net.sandius.rembulan.gen;
 
 import net.sandius.rembulan.core.OpCode;
+import net.sandius.rembulan.core.PrototypePrinter;
 
 public abstract class Instruction {
 
@@ -14,9 +15,9 @@ public abstract class Instruction {
 		return OpCode.opCode(insn);
 	}
 
-	@Deprecated
-	public int getIntValue() {
-		return insn;
+	@Override
+	public String toString() {
+		return PrototypePrinter.instructionInfo(insn);
 	}
 
 	public static Instruction valueOf(int insn) {

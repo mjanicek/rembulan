@@ -292,7 +292,7 @@ public class ControlFlowTraversal {
 				out.print(canTransferControl(insn.getOpCode()) ? "*" : " ");
 //				out.print("\t");
 				out.print(" ");
-				out.print(PrototypePrinter.instructionInfoWithHints(insn.getIntValue(), prototype.getConstants(), prototype.getNestedPrototypes()));
+				out.print(insn.toString());
 				out.println();
 			}
 
