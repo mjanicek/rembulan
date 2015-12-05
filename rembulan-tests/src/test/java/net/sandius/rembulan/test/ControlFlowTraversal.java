@@ -259,6 +259,10 @@ public class ControlFlowTraversal {
 
 			out.print(" ");
 
+			out.print("(cost $" + b.getCost() + ")");
+
+			out.print(" ");
+
 			out.print("[");
 			for (int j = 0; j < b.prev.length(); j++) {
 				int idx = b.prev.get(j);
@@ -291,6 +295,11 @@ public class ControlFlowTraversal {
 				out.print(PrototypePrinter.instructionInfo(insn.getIntValue(), prototype.getConstants(), prototype.getNestedPrototypes()));
 				out.println();
 			}
+
+			if (i + 1 < blocks.size()) {
+				out.println();
+			}
+
 		}
 	}
 
@@ -344,6 +353,10 @@ public class ControlFlowTraversal {
 		public void erase(int idx) {
 			prev.removeValue(idx);
 			next.removeValue(idx);
+		}
+
+		public int getCost() {
+			return instructions.size();
 		}
 
 	}
