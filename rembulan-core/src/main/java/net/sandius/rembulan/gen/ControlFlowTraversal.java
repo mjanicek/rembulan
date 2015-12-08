@@ -228,9 +228,9 @@ public class ControlFlowTraversal {
 
 			out.println();
 
-			for (int j = 0; j < b.instructions.size(); j++) {
+			for (int j = 0; j < b.nodes.size(); j++) {
 				out.print("\t\t");
-				BlockNode node = b.instructions.get(j);
+				BlockNode node = b.nodes.get(j);
 
 //				int insn = prototype.getCode().get(pc);
 //				out.print(pc + 1);

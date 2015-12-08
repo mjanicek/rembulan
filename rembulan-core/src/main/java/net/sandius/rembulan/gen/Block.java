@@ -7,16 +7,16 @@ import java.util.ArrayList;
 
 public class Block {
 
-	public final ArrayList<BlockNode> instructions;
+	public final ArrayList<BlockNode> nodes;
 	public final IntBuffer prev;
 	public final IntBuffer next;
 
-	private Block(ArrayList<BlockNode> instructions, IntBuffer prev, IntBuffer next) {
-		Check.notNull(instructions);
+	private Block(ArrayList<BlockNode> nodes, IntBuffer prev, IntBuffer next) {
+		Check.notNull(nodes);
 		Check.notNull(prev);
 		Check.notNull(next);
 
-		this.instructions = instructions;
+		this.nodes = nodes;
 		this.prev = prev;
 		this.next = next;
 	}
@@ -28,7 +28,7 @@ public class Block {
 	}
 
 	public void merge(Block that) {
-		instructions.addAll(that.instructions);
+		nodes.addAll(that.nodes);
 		next.clear();
 		next.append(that.next);
 	}
@@ -59,7 +59,7 @@ public class Block {
 
 	public int getCost() {
 		int cost = 0;
-		for (BlockNode node : instructions) {
+		for (BlockNode node : nodes) {
 			cost += node.getCost();
 		}
 		return cost;
