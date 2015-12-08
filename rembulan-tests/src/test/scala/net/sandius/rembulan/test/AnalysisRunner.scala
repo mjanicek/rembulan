@@ -31,7 +31,10 @@ object AnalysisRunner {
       |  end
       |end
       |
+      |local hi = "hello."
+      |
       |function g()
+      |  print(hi)
       |  for i = 'x', 0 do print(i) end
       |end
       |
