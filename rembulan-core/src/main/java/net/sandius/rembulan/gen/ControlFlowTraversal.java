@@ -1,9 +1,7 @@
-package net.sandius.rembulan.test;
+package net.sandius.rembulan.gen;
 
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Prototype;
-import net.sandius.rembulan.gen.BlockNode;
-import net.sandius.rembulan.gen.Instruction;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.IntVector;

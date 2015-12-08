@@ -1,6 +1,7 @@
 package net.sandius.rembulan.test
 
 import net.sandius.rembulan.core.{PrototypePrinter, LuaCPrototypeLoader}
+import net.sandius.rembulan.gen.ControlFlowTraversal
 
 object AnalysisRunner {
 
