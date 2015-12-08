@@ -31,55 +31,6 @@ public class ControlFlowTraversal {
 		}
 	}
 
-	// instruction possibly involves a call
-	private boolean canTransferControl(int opcode) {
-		switch (opcode) {
-			case OpCode.ADD:
-			case OpCode.SUB:
-			case OpCode.MUL:
-			case OpCode.MOD:
-			case OpCode.POW:
-			case OpCode.DIV:
-			case OpCode.IDIV:
-			case OpCode.BAND:
-			case OpCode.BOR:
-			case OpCode.BXOR:
-			case OpCode.SHL:
-			case OpCode.SHR:
-			case OpCode.UNM:
-			case OpCode.BNOT:
-			case OpCode.NOT:
-			case OpCode.LEN:
-			case OpCode.CONCAT:
-				return true;
-
-			case OpCode.EQ:
-			case OpCode.LT:
-			case OpCode.LE:
-				return true;
-
-			case OpCode.CALL:
-			case OpCode.TAILCALL:
-				return true;
-
-			case OpCode.RETURN:
-				return false;
-
-			case OpCode.FORLOOP:
-			case OpCode.FORPREP:
-				return false;
-
-			case OpCode.TFORCALL:
-				return true;
-
-			case OpCode.TFORLOOP:
-				return false;
-
-			default:
-				return false;
-		}
-	}
-
 	private void visit(IntBuffer[] prev, IntBuffer[] next, int pc) {
 		int insn = prototype.getCode().get(pc);
 
@@ -285,7 +236,7 @@ public class ControlFlowTraversal {
 //				out.print(pc + 1);
 //				out.print("\t");
 
-				out.print(node instanceof Instruction && canTransferControl(((Instruction) node).getOpCode()) ? "*" : " ");
+				out.print(node instanceof Instruction && ((Instruction) node).canTransferControl() ? "*" : " ");
 //				out.print("\t");
 				out.print(" ");
 				out.print(node.toString());

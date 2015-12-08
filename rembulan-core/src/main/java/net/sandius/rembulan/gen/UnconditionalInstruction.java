@@ -86,4 +86,42 @@ public class UnconditionalInstruction extends Instruction {
 		return next;
 	}
 
+	@Override
+	public boolean canTransferControl() {
+		int opcode = getOpCode();
+
+		switch (opcode) {
+			case OpCode.ADD:
+			case OpCode.SUB:
+			case OpCode.MUL:
+			case OpCode.MOD:
+			case OpCode.POW:
+			case OpCode.DIV:
+			case OpCode.IDIV:
+			case OpCode.BAND:
+			case OpCode.BOR:
+			case OpCode.BXOR:
+			case OpCode.SHL:
+			case OpCode.SHR:
+			case OpCode.UNM:
+			case OpCode.BNOT:
+			case OpCode.NOT:
+			case OpCode.LEN:
+			case OpCode.CONCAT:
+				return true;
+
+			case OpCode.CALL:
+				return true;
+
+			case OpCode.FORPREP:
+				return false;
+
+			case OpCode.TFORCALL:
+				return true;
+
+			default:
+				return false;
+		}
+	}
+
 }

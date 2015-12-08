@@ -20,6 +20,8 @@ public abstract class Instruction extends BlockNode {
 		return 1;
 	}
 
+	public abstract boolean canTransferControl();
+
 	@Override
 	public String toString() {
 		return PrototypePrinter.instructionInfo(insn);

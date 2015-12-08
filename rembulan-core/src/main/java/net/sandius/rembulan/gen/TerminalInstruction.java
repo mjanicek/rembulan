@@ -21,4 +21,18 @@ public class TerminalInstruction extends Instruction {
 		}
 	}
 
+	@Override
+	public boolean canTransferControl() {
+		int opcode = getOpCode();
+
+		switch (opcode) {
+			case OpCode.TAILCALL:
+				return true;
+			case OpCode.RETURN:
+				return false;
+			default:
+				throw new IllegalStateException("Illegal opcode: " + opcode);
+		}
+	}
+
 }

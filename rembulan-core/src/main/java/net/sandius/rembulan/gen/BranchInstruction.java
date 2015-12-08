@@ -51,4 +51,27 @@ public class BranchInstruction extends Instruction {
 		return right;
 	}
 
+	@Override
+	public boolean canTransferControl() {
+		int opcode = getOpCode();
+
+		switch (opcode) {
+			case OpCode.EQ:
+			case OpCode.LT:
+			case OpCode.LE:
+				return true;
+
+			case OpCode.TEST:
+			case OpCode.TESTSET:
+				return false;
+
+			case OpCode.FORLOOP:
+			case OpCode.TFORLOOP:
+				return false;
+
+			default:
+				throw new IllegalStateException("Illegal opcode: " + opcode);
+		}
+	}
+
 }
