@@ -2,8 +2,10 @@ package net.sandius.rembulan.core;
 
 public abstract class LuaState {
 
+	@Deprecated
 	private static final ThreadLocal<LuaState> current = new ThreadLocal<LuaState>();
 
+	@Deprecated
 	public static LuaState getCurrentState() {
 		return current.get();
 	}
@@ -28,6 +30,7 @@ public abstract class LuaState {
 
 	public abstract boolean shouldPreemptNow();
 
+	@Deprecated
 	public abstract Coroutine getCurrentCoroutine();
 
 }

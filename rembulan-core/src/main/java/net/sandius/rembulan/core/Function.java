@@ -2,23 +2,18 @@ package net.sandius.rembulan.core;
 
 public abstract class Function {
 
-	public void call(Registers self, Registers ret) throws ControlThrowable {
-		run(self, ret, 0);
-	}
+	public void call(PreemptionContext pctx, Registers self, Registers ret) throws ControlThrowable {
+		CallInfo tail;
 
-	public void resume(CallInfo[] callStack, int index) throws ControlThrowable {
-		if (index < callStack.length - 1) {
-			int nextIndex = index + 1;
-			callStack[nextIndex].function.resume(callStack, nextIndex);
+		tail = run(pctx, self, ret, 0);
+
+		while (tail != null) {
+			tail.resume(pctx);
 		}
-
-		assert (index == callStack.length - 1);  // this is now the top frame
-
-		CallInfo ci = callStack[index];
-		run(ci.self, ci.ret, ci.pc);
 	}
 
-	protected abstract void run(Registers self, Registers ret, int pc) throws ControlThrowable;
+	// returns non-null if the continuation is a tail call.
+	protected abstract CallInfo run(PreemptionContext pctx, Registers self, Registers ret, int pc) throws ControlThrowable;
 
 	@Override
 	public String toString() {

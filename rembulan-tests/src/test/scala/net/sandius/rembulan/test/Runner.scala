@@ -1,24 +1,12 @@
 package net.sandius.rembulan.test
 
 import net.sandius.rembulan.core._
+import net.sandius.rembulan.util.Cons
 import net.sandius.rembulan.{core => lua}
 
 object Runner {
 
-  def res(coro: Coroutine, rct: ControlThrowable): ControlThrowable = {
-    try {
-      val cst = rct.frames()
-      cst(0).function.resume(cst, 0)
-      null
-    }
-    catch {
-      case ct: ControlThrowable =>
-        inspect(coro, ct)
-        ct
-    }
-  }
-
-  def inspect(coro: Coroutine, ct: ControlThrowable): Unit = {
+  def inspect(coro: Coroutine, callStack: Cons[CallInfo]): Unit = {
     val os = coro.getObjectStack
     var max = 0
     for (i <- 0 until os.getMaxSize) {
@@ -30,15 +18,47 @@ object Runner {
     println("---")
     println("Object stack: " + (for (i <- 0 to max) yield i + ":[" + os.get(i) + "]").mkString(" "))
     println("Call stack:")
-    if (ct != null) {
-      val it = ct.frameIterator()
-      while (it.hasNext) {
-        println("\t" + it.next())
+    if (callStack != null) {
+      var cs = callStack
+      while (cs != null) {
+        println("\t" + cs.car)
+        cs = cs.cdr
       }
     }
     else {
       println("\t(empty)")
     }
+  }
+
+  def doRun(func: lua.Function, args: AnyRef*): Unit = {
+    val st = DummyLuaState.newDummy(true)
+    val coro = st.getCurrentCoroutine
+    val addr = coro.getObjectStack.rootView()
+
+    for ((v, idx) <- args.zipWithIndex) {
+      addr.set(idx, v)
+    }
+
+    LuaState.setCurrentState(st)
+
+    val preempt = new PreemptionContext {
+      override def account(cost: Int) = {
+        throw new Preempted
+      }
+    }
+
+    val exec = new Exec(preempt)
+
+    exec.pushCall(new CallInfo(func, addr, addr, 0))
+
+    inspect(coro, exec.getCallStack)
+
+    while (exec.isPaused) {
+      exec.resume()
+      inspect(coro, exec.getCallStack)
+    }
+
+    LuaState.unsetCurrentState()
   }
 
   def main(args: Array[String]): Unit = {
@@ -88,27 +108,7 @@ object Runner {
     val clazz = loader.findClass(mainChunk).asInstanceOf[Class[lua.Function]]
     val func = clazz.getConstructor().newInstance()
 
-    val st = DummyLuaState.newDummy(true)
-    val coro = st.getCurrentCoroutine
-
-    val addr = coro.getObjectStack.rootView()
-    var ct: ControlThrowable = new ControlThrowable {
-      override def push(ci: CallInfo) = ???
-      override def frameIterator() = ???
-      override def last = ???
-      override def frames() = Array[CallInfo](new CallInfo(func, addr, addr, 0))
-    }
-
-    LuaState.setCurrentState(st)
-
-    do {
-      ct = res(coro, ct)
-    } while (ct != null)
-
-    inspect(coro, null)
-
-    LuaState.unsetCurrentState()
-
+    doRun(func)
   }
 
 }
