@@ -34,7 +34,7 @@ public class CallInfo {
 
 	@Override
 	public String toString() {
-		return "[" + function.toString() + ", pc=" + pc + ", self=" + self.toString() + ", ret=" + ret.toString() + "]";
+		return "[" + function.toString() + ", pc=" + pc + ", self=" + self.toString() + ", ret=" + ret.toString() + ", flags=" + flags + "]";
 	}
 
 	public CallInfo resume(PreemptionContext pctx) throws ControlThrowable {
