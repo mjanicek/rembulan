@@ -33,8 +33,8 @@ public class Example extends Function {
 					pctx.account(3);
 
 				case 3:
-					self.set(0, r_1);
-					self.set(1, r_2);
+					ret.set(0, r_1);
+					ret.set(1, r_2);
 			}
 		}
 		catch (ControlThrowable ct) {
