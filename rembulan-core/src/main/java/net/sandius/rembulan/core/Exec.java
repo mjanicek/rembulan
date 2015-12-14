@@ -48,10 +48,10 @@ public class Exec {
 			callStack = callStack.cdr;
 
 			try {
-				do {
-					// execute tail calls
-					top = top.resume(preemptionContext);
-				} while (top != null);
+				Function tc = top.function.run(preemptionContext, top.self, top.ret, top.pc, top.numResults, top.flags);
+				while (tc != null) {
+					tc = tc.run(preemptionContext, top.self, top.ret, 0, 0, CallInfo.TAILCALL);
+				}
 			}
 			catch (ControlThrowable ct) {
 				Iterator<CallInfo> it = ct.frameIterator();

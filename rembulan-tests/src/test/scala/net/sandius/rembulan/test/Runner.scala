@@ -49,7 +49,7 @@ object Runner {
 
     val exec = new Exec(preempt)
 
-    exec.pushCall(new CallInfo(func, addr, addr, 0))
+    exec.pushCall(new CallInfo(func, addr, addr, 0, 0, 0))
 
     inspect(coro, exec.getCallStack)
 

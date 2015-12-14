@@ -13,7 +13,7 @@ public class Example extends Function {
 	}
 
 	@Override
-	protected CallInfo run(PreemptionContext pctx, Registers self, Registers ret, int pc) throws ControlThrowable {
+	protected Function run(PreemptionContext pctx, Registers self, Registers ret, int pc, int numResults, int flags) throws ControlThrowable {
 		// registers
 		Object r_1, r_2, r_3;
 
@@ -43,7 +43,7 @@ public class Example extends Function {
 			self.set(1, r_2);
 			self.set(2, r_3);
 
-			ct.push(new CallInfo(this, self, ret, pc));
+			ct.push(new CallInfo(this, self, ret, pc, numResults, flags));
 
 			throw ct;
 		}
