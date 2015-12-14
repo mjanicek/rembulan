@@ -1,6 +1,5 @@
 package net.sandius.rembulan.test;
 
-import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.PreemptionContext;
@@ -43,7 +42,7 @@ public class Example extends Function {
 			self.set(1, r_2);
 			self.set(2, r_3);
 
-			ct.push(new CallInfo(this, self, ret, pc, numResults, flags));
+			ct.pushCall(this, self, ret, pc, numResults, flags);
 
 			throw ct;
 		}
