@@ -2,7 +2,9 @@ package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.Closure;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.ObjectStack;
+import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Registers;
 
@@ -32,9 +34,12 @@ public class MinusPlus extends Closure {
 	public static final Long k_1 = Long.valueOf(0);
 
 	@Override
-	protected Function run(PreemptionContext pctx, Registers self, Registers ret, int pc, int numResults, int flags) throws ControlThrowable {
+	protected Object run(PreemptionContext preemptionContext, LuaState state, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 		// registers
 		Object r_0, r_1, r_2;
+
+		Registers self = objectStack.viewFrom(base);
+		Registers retAddr = objectStack.viewFrom(ret);
 
 		// load registers
 		r_0 = self.get(0);
@@ -45,7 +50,7 @@ public class MinusPlus extends Closure {
 			switch (pc) {
 				case 0:  // GETUPVAL 0 0
 					pc = 1;
-					pctx.account(2);  // accounting the entire block already
+					preemptionContext.account(2);  // accounting the entire block already
 
 					r_0 = getUpValue(0);
 
@@ -56,10 +61,16 @@ public class MinusPlus extends Closure {
 					r_2 = k_1;
 
 				case 3:  // CALL 1 2 0
-					// TODO
+					pc = 4;  // store next pc
+
+					// store registers used in the call
+					self.set(1, r_1);  // call target
+					self.set(2, r_2);  // call arg #1
+
+					Operators.call(preemptionContext, state, objectStack, base + 1, base + 1, 0, 0);
 
 				case 4:  // TAILCALL 0 0 0
-					return (Function) r_0;  // FIXME
+					return r_0;  // TODO: is this correct?
 
 				case 5:  // RETURN 0 0
 					// dead code -- eliminated
@@ -73,7 +84,7 @@ public class MinusPlus extends Closure {
 			self.set(0, r_0);
 			self.set(1, r_1);
 
-			ct.pushCall(this, self, ret, pc, numResults, flags);
+			ct.pushCall(this, base, ret, pc, numResults, flags);
 
 			throw ct;
 		}

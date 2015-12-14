@@ -5,8 +5,8 @@ import net.sandius.rembulan.util.Check;
 public class CallInfo {
 
 	public final Function function;
-	public final Registers self;
-	public final Registers ret;
+	public final int base;
+	public final int ret;
 	public final int pc;
 	public final int numResults;
 
@@ -15,15 +15,15 @@ public class CallInfo {
 	public static final int TAILCALL = 0x1;
 	public static final int METAMETHOD = 0x2;
 
-	public CallInfo(Function function, Registers self, Registers ret, int pc, int numResults, int flags) {
+	public CallInfo(Function function, int base, int ret, int pc, int numResults, int flags) {
 		Check.notNull(function);
-		Check.notNull(self);
-		Check.notNull(ret);
+		Check.nonNegative(base);
+		Check.nonNegative(ret);
 		Check.nonNegative(pc);
 		Check.nonNegative(numResults);
 
 		this.function = function;
-		this.self = self;
+		this.base = base;
 		this.ret = ret;
 		this.pc = pc;
 		this.numResults = numResults;
@@ -32,11 +32,11 @@ public class CallInfo {
 
 	@Override
 	public String toString() {
-		return "[" + function.toString() + ", pc=" + pc + ", self=" + self.toString() + ", ret=" + ret.toString() + ", numResults=" + numResults + ", flags=" + flags + "]";
+		return "[" + function.toString() + ", pc=" + pc + ", base=" + base + ", ret=" + ret + ", numResults=" + numResults + ", flags=" + flags + "]";
 	}
 
-	public Function resume(PreemptionContext pctx) throws ControlThrowable {
-		return function.run(pctx, self, ret, pc, numResults, flags);
+	public void resume(PreemptionContext pctx, LuaState state, ObjectStack objectStack) throws ControlThrowable {
+		function.resume(pctx, state, objectStack, base, ret, pc, numResults, flags);
 	}
 
 }

@@ -8,17 +8,34 @@ import java.util.Iterator;
 public class Exec {
 
 	private final PreemptionContext preemptionContext;
+	private final LuaState state;
+
+	private final ObjectStack objectStack;
+
 	private Cons<CallInfo> callStack;
 
-	public Exec(PreemptionContext preemptionContext) {
+	public Exec(PreemptionContext preemptionContext, LuaState state, ObjectStack objectStack) {
 		Check.notNull(preemptionContext);
+		Check.notNull(state);
+		Check.notNull(objectStack);
 
 		this.preemptionContext = preemptionContext;
+		this.state = state;
+		this.objectStack = objectStack;
+
 		callStack = null;
 	}
 
 	public PreemptionContext getPreemptionContext() {
 		return preemptionContext;
+	}
+
+	public LuaState getState() {
+		return state;
+	}
+
+	public ObjectStack getObjectStack() {
+		return objectStack;
 	}
 
 	public boolean isPaused() {
@@ -48,10 +65,7 @@ public class Exec {
 			callStack = callStack.cdr;
 
 			try {
-				Function tc = top.function.run(preemptionContext, top.self, top.ret, top.pc, top.numResults, top.flags);
-				while (tc != null) {
-					tc = tc.run(preemptionContext, top.self, top.ret, 0, 0, CallInfo.TAILCALL);
-				}
+				top.resume(preemptionContext, state, objectStack);
 			}
 			catch (ControlThrowable ct) {
 				Iterator<CallInfo> it = ct.frameIterator();

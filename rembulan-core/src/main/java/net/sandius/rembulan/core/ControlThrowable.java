@@ -11,8 +11,8 @@ public abstract class ControlThrowable extends Throwable {
 
 	public abstract void push(CallInfo ci);
 
-	public void pushCall(Function function, Registers self, Registers ret, int pc, int numResults, int flags) {
-		push(new CallInfo(function, self, ret, pc, numResults, flags));
+	public void pushCall(Function function, int base, int ret, int pc, int numResults, int flags) {
+		push(new CallInfo(function, base, ret, pc, numResults, flags));
 	}
 
 	public abstract Iterator<CallInfo> frameIterator();

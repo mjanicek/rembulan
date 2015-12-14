@@ -62,6 +62,10 @@ public class ObjectStack {
 		values[i] = o;
 	}
 
+	public View viewFrom(int base) {
+		return new View(this, base);
+	}
+
 	public View rootView() {
 		return new View(this, 0);
 	}
