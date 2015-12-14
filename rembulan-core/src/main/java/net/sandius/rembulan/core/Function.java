@@ -16,6 +16,7 @@ public abstract class Function {
 
 		tc = this.run(pctx, state, objectStack, base, ret, pc, numResults, flags);
 
+		// FIXME: what if the value to be tail-called is nil?
 		while (tc != null) {
 			// tail-calling
 			tc = Operators.callOnce(pctx, state, tc, objectStack, base, ret, 0, CallInfo.TAILCALL);
