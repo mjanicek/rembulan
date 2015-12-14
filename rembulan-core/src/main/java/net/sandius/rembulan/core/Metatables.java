@@ -32,32 +32,33 @@ public class Metatables {
 
 	public static final String MT_CALL = "__call";
 
+	public static Table getMetatable(LuaState state, Object o) {
+		Check.notNull(state);
+		// o can be null
 
-	public static Table getMetatable(Object o) {
 		if (o instanceof LuaObject) {
 			return ((LuaObject) o).getMetatable();
 		}
 		else {
-			LuaState lst = LuaState.getCurrentState();
 			LuaType tpe = LuaType.typeOf(o);
 			switch (tpe) {
-				case NIL: return lst.nilMetatable();
-				case BOOLEAN: return lst.booleanMetatable();
-				case LIGHTUSERDATA: return lst.lightuserdataMetatable();
-				case NUMBER: return lst.numberMetatable();
-				case STRING: return lst.stringMetatable();
-				case FUNCTION: return lst.functionMetatable();
-				case THREAD: return lst.threadMetatable();
+				case NIL: return state.nilMetatable();
+				case BOOLEAN: return state.booleanMetatable();
+				case LIGHTUSERDATA: return state.lightuserdataMetatable();
+				case NUMBER: return state.numberMetatable();
+				case STRING: return state.stringMetatable();
+				case FUNCTION: return state.functionMetatable();
+				case THREAD: return state.threadMetatable();
 				default: throw new IllegalStateException("Illegal type: " + tpe);
 			}
 		}
 	}
 
-	public static Object getMetamethod(Object o, String event) {
+	public static Object getMetamethod(LuaState state, String event, Object o) {
 		// o can be null
 		Check.notNull(event);
 
-		Table mt = getMetatable(o);
+		Table mt = getMetatable(state, o);
 		if (mt != null) {
 			return mt.rawget(event);
 		}
@@ -66,9 +67,19 @@ public class Metatables {
 		}
 	}
 
+	@Deprecated
+	public static Object getMetamethod(Object o, String event) {
+		return getMetamethod(LuaState.getCurrentState(), event, o);
+	}
+
+	public static Object binaryHandlerFor(LuaState state, String event, Object a, Object b) {
+		Object ma = Metatables.getMetamethod(state, event, a);
+		return ma != null ? ma : Metatables.getMetamethod(state, event, b);
+	}
+
+	@Deprecated
 	public static Object binaryHandlerFor(String event, Object a, Object b) {
-		Object ma = Metatables.getMetamethod(a, event);
-		return ma != null ? ma : Metatables.getMetamethod(b, event);
+		return binaryHandlerFor(LuaState.getCurrentState(), event, a, b);
 	}
 
 }
