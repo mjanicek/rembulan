@@ -53,10 +53,10 @@ public class MinusPlus extends Closure {
 					pc = 1;
 					preemptionContext.account(2);  // accounting the entire block already
 
-					r_0 = getUpValue(0);
+					r_0 = getUpValue(objectStack, 0);
 
 				case 1:  // GETUPVAL 1 1
-					r_1 = getUpValue(1);
+					r_1 = getUpValue(objectStack, 1);
 
 				case 2:  // LOADK 2 -1
 					r_2 = k_1;

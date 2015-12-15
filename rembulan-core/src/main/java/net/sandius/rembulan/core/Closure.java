@@ -6,8 +6,9 @@ public abstract class Closure extends Function {
 		super();
 	}
 
-	protected Object getUpValue(int idx) {
-		throw new UnsupportedOperationException();
+	protected Object getUpValue(ObjectStack objectStack, int idx) {
+		// FIXME
+		return objectStack.get(idx);
 	}
 
 }
