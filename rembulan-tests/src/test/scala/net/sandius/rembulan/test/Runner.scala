@@ -6,6 +6,10 @@ import net.sandius.rembulan.{core => lua}
 
 object Runner {
 
+  def consToList[A](cons: Cons[A]): List[A] = {
+    if (cons == null) Nil else cons.car :: consToList(cons.cdr)
+  }
+
   def inspect(coro: Coroutine, callStack: Cons[CallInfo]): Unit = {
     val os = coro.getObjectStack
     var max = 0
@@ -18,15 +22,13 @@ object Runner {
     println("---")
     println("Object stack: " + (for (i <- 0 to max) yield i + ":[" + os.get(i) + "]").mkString(" "))
     println("Call stack:")
-    if (callStack != null) {
-      var cs = callStack
-      while (cs != null) {
-        println("\t" + cs.car)
-        cs = cs.cdr
-      }
+    val cs = consToList(callStack)
+
+    if (cs.isEmpty) {
+      println("\t(empty)")
     }
     else {
-      println("\t(empty)")
+      println((for (ci <- cs) yield "\t" + ci).reverse.mkString("\n"))
     }
   }
 
