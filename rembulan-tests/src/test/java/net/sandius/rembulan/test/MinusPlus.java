@@ -87,7 +87,7 @@ public class MinusPlus extends Closure {
 					// store registers used in the call
 					objectStack.set(base + 3, r_3);  // call target
 					objectStack.set(base + 4, r_4);  // call arg #1
-					objectStack.setTop(base + 4);
+					objectStack.setTop(base + 5);
 
 					Operators.call(preemptionContext, state, tail, objectStack, base + 3, base + 3, 0, 0);
 
@@ -100,7 +100,7 @@ public class MinusPlus extends Closure {
 					objectStack.set(base + 0, r_2);
 					objectStack.set(base + 1, r_3);
 					objectStack.set(base + 2, r_4);
-					objectStack.setTop(base + 2);
+					objectStack.setTop(objectStack.getTop() - 2);
 
 					tail.set(r_2);
 					return true;
@@ -160,6 +160,7 @@ public class MinusPlus extends Closure {
 
 					case 2:  // RETURN 1 2
 						objectStack.set(ret + 0, r_1);
+						objectStack.setTop(ret + 1);
 						return false;
 
 					default:
@@ -213,6 +214,7 @@ public class MinusPlus extends Closure {
 
 					case 2:  // RETURN 1 2
 						objectStack.set(ret + 0, r_1);
+						objectStack.setTop(ret + 1);
 						return false;
 
 					default:
