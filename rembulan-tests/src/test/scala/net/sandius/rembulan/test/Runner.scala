@@ -10,7 +10,7 @@ object Runner {
     if (cons == null) Nil else cons.car :: consToList(cons.cdr)
   }
 
-  def inspect(coro: Coroutine, callStack: Cons[CallInfo], cpuTime: Int): Unit = {
+  def inspect(idx: Int, coro: Coroutine, callStack: Cons[CallInfo], cpuTime: Int): Unit = {
     val os = coro.getObjectStack
     var max = 0
     for (i <- 0 until os.getMaxSize) {
@@ -19,18 +19,18 @@ object Runner {
       }
     }
 
-    println("---")
-    println("CPU time: " + cpuTime)
-    println("Object stack: " + (for (i <- 0 to max) yield i + ":[" + os.get(i) + "]").mkString(" "))
-    println("Call stack:")
+    println(idx + ": {")
+    println("\tCPU time: " + cpuTime)
+    println("\tObject stack: " + (for (i <- 0 to max) yield i + ":[" + os.get(i) + "]").mkString(" "))
+    println("\tCall stack: {")
     val cs = consToList(callStack)
+    if (cs.nonEmpty) {
+      println((for (ci <- cs) yield "\t\t" + ci).mkString("\n"))
+    }
+    println("\t\t// bottom")
+    println("\t}")
 
-    if (cs.isEmpty) {
-      println("\t(empty)")
-    }
-    else {
-      println((for (ci <- cs) yield "\t" + ci).mkString("\n"))
-    }
+    println("}")
   }
 
   def doRun(func: lua.Function, args: AnyRef*): Unit = {
@@ -57,11 +57,14 @@ object Runner {
 
     exec.pushCall(new CallInfo(func, 0, 0, 0, 0, 0))
 
-    inspect(coro, exec.getCallStack, cpuTime)
+    var idx = 0
+
+    inspect(idx, coro, exec.getCallStack, cpuTime)
 
     while (exec.isPaused) {
       exec.resume()
-      inspect(coro, exec.getCallStack, cpuTime)
+      idx += 1
+      inspect(idx, coro, exec.getCallStack, cpuTime)
     }
 
     LuaState.unsetCurrentState()
