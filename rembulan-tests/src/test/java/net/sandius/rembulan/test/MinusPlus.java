@@ -11,24 +11,36 @@ import net.sandius.rembulan.util.Ptr;
 
 /*
 function ()
+    local function plusOne(x)
+        return x + 1
+    end
+
+    local function unaryMinus(x)
+        return -x
+    end
+
     return unaryMinus(plusOne(0))
 end
+*/
 
-function <t2.lua:9,11> (7 instructions at 0x7f9cbac04810)
-0 params, 3 slots, 2 upvalues, 0 locals, 1 constant, 0 functions
-	1	[10]	GETUPVAL 	0 0	; unaryMinus
-	2	[10]	GETUPVAL 	1 1	; plusOne
-	3	[10]	LOADK    	2 -1	; 0
-	4	[10]	CALL     	1 2 0
-	5	[10]	TAILCALL 	0 0 0
-	6	[10]	RETURN   	0 0
-	7	[11]	RETURN   	0 1
-constants (1) for 0x7f9cbac04810:
-	1	0
-locals (0) for 0x7f9cbac04810:
-upvalues (2) for 0x7f9cbac04810:
-	0	unaryMinus	1	1
-	1	plusOne	1	0
+/*
+function <t2.lua:1,12> (9 instructions at 0x7fcec84046e0)
+0 params, 5 slots, 0 upvalues, 2 locals, 1 constant, 2 functions
+        1       [5]     CLOSURE         0 0     ; 0x7fcec84047f0
+        2       [9]     CLOSURE         1 1     ; 0x7fcec8404640
+        3       [11]    MOVE            2 1
+        4       [11]    MOVE            3 0
+        5       [11]    LOADK           4 -1    ; 0
+        6       [11]    CALL            3 2 0
+        7       [11]    TAILCALL        2 0 0
+        8       [11]    RETURN          2 0
+        9       [12]    RETURN          0 1
+constants (1) for 0x7fcec84046e0:
+        1       0
+locals (2) for 0x7fcec84046e0:
+        0       plusOne 2       10
+        1       unaryMinus      3       10
+upvalues (0) for 0x7fcec84046e0:
 */
 public class MinusPlus extends Closure {
 
@@ -37,62 +49,188 @@ public class MinusPlus extends Closure {
 	@Override
 	protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 		// registers
-		Object r_0, r_1, r_2;
-
-		Registers self = objectStack.viewFrom(base);
-		Registers retAddr = objectStack.viewFrom(ret);
+		Object r_0, r_1, r_2, r_3, r_4;
 
 		// load registers
-		r_0 = self.get(0);
-		r_1 = self.get(1);
-		r_2 = self.get(2);
+		r_0 = objectStack.get(base + 0);
+		r_1 = objectStack.get(base + 1);
+		r_2 = objectStack.get(base + 2);
+		r_3 = objectStack.get(base + 3);
+		r_4 = objectStack.get(base + 4);
 
 		try {
 			switch (pc) {
-				case 0:  // GETUPVAL 0 0
+				case 0:  // accounting block #0
 					pc = 1;
-					preemptionContext.account(2);  // accounting the entire block already
+					preemptionContext.account(7);  // accounting the entire block already
 
-					r_0 = getUpValue(objectStack, 0);
+				// Block #0: [1 .. 8], cost = 7
 
-				case 1:  // GETUPVAL 1 1
-					r_1 = getUpValue(objectStack, 1);
+				case 1:  // CLOSURE 0 0
+					r_0 = new p_0();
 
-				case 2:  // LOADK 2 -1
-					r_2 = k_1;
+				case 2:  // CLOSURE 1 1
+					r_1 = new p_1();
 
-				case 3:  // CALL 1 2 0
-					pc = 4;  // store next pc
+				case 3:  // MOVE 2 1
+					r_2 = r_1;
+
+				case 4:  // MOVE 3 0
+					r_3 = r_0;
+
+				case 5:  // LOADK 4 -1
+					r_4 = k_1;
+
+				case 6:  // CALL 3 2 0
+					pc = 7;  // store next pc
 
 					// store registers used in the call
-					self.set(1, r_1);  // call target
-					self.set(2, r_2);  // call arg #1
+					objectStack.set(base + 3, r_3);  // call target
+					objectStack.set(base + 4, r_4);  // call arg #1
+					objectStack.setTop(base + 4);
 
-					Operators.call(preemptionContext, state, tail, objectStack, base + 1, base + 1, 0, 0);
+					Operators.call(preemptionContext, state, tail, objectStack, base + 3, base + 3, 0, 0);
 
-				case 4:  // TAILCALL 0 0 0
+				case 7:
+					r_3 = objectStack.get(base + 3);
+					r_4 = objectStack.get(base + 4);
+
+				case 8:  // TAILCALL 2 0 0
 					// TODO: is this correct?
-					tail.set(r_0);
+					objectStack.set(base + 0, r_2);
+					objectStack.set(base + 1, r_3);
+					objectStack.set(base + 2, r_4);
+					objectStack.setTop(base + 2);
+
+					tail.set(r_2);
 					return true;
 
-				case 5:  // RETURN 0 0
+				default:
 					// dead code -- eliminated
-
-				case 6:  // RETURN 0 1
-					// dead code -- eliminated
+					throw new IllegalStateException();
 			}
 		}
 		catch (ControlThrowable ct) {
 			// save registers to the object stack
-			self.set(0, r_0);
-			self.set(1, r_1);
+			objectStack.set(base + 0, r_0);
+			objectStack.set(base + 1, r_1);
+			objectStack.set(base + 2, r_2);
+			objectStack.set(base + 3, r_3);
+			objectStack.set(base + 4, r_4);
 
 			ct.pushCall(this, base, ret, pc, numResults, flags);
 
 			throw ct;
 		}
+	}
 
-		return false;
+	/*
+	function <t2.lua:3,5> (3 instructions at 0x7fcec84047f0)
+	1 param, 2 slots, 0 upvalues, 1 local, 1 constant, 0 functions
+	        1       [4]     ADD             1 0 -1  ; - 1
+	        2       [4]     RETURN          1 2
+	        3       [5]     RETURN          0 1
+	constants (1) for 0x7fcec84047f0:
+	        1       1
+	locals (1) for 0x7fcec84047f0:
+	        0       x       1       4
+	upvalues (0) for 0x7fcec84047f0:
+	 */
+	public static class p_0 extends Closure {
+
+		public static final Long k_1 = Long.valueOf(1);
+
+		@Override
+		protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+			// registers
+			Object r_0, r_1;
+
+			// load registers
+			r_0 = objectStack.get(base + 0);
+			r_1 = objectStack.get(base + 1);
+
+			try {
+				switch (pc) {
+					case 0:
+						pc = 1;
+						preemptionContext.account(2);  // accounting the entire block already
+
+					case 1:  // ADD 1 0 -1
+						r_1 = Operators.add(r_0, k_1);
+
+					case 2:  // RETURN 1 2
+						objectStack.set(ret + 0, r_1);
+						return false;
+
+					default:
+						// dead code -- eliminated
+						throw new IllegalStateException();
+				}
+			}
+			catch (ControlThrowable ct) {
+				// save registers to the object stack
+				objectStack.set(base + 0, r_0);
+				objectStack.set(base + 1, r_1);
+
+				ct.pushCall(this, base, ret, pc, numResults, flags);
+
+				throw ct;
+			}
+		}
+
+	}
+
+	/*
+	function <t2.lua:7,9> (3 instructions at 0x7fcec8404640)
+	1 param, 2 slots, 0 upvalues, 1 local, 0 constants, 0 functions
+	        1       [8]     UNM             1 0
+	        2       [8]     RETURN          1 2
+	        3       [9]     RETURN          0 1
+	constants (0) for 0x7fcec8404640:
+	locals (1) for 0x7fcec8404640:
+	        0       x       1       4
+	upvalues (0) for 0x7fcec8404640:
+	 */
+	public static class p_1 extends Closure {
+
+		@Override
+		protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+			// registers
+			Object r_0, r_1;
+
+			// load registers
+			r_0 = objectStack.get(base + 0);
+			r_1 = objectStack.get(base + 1);
+
+			try {
+				switch (pc) {
+					case 0:
+						pc = 1;
+						preemptionContext.account(2);  // accounting the entire block already
+
+					case 1:  // UNM 1 0
+						r_1 = Operators.unm(r_0);
+
+					case 2:  // RETURN 1 2
+						objectStack.set(ret + 0, r_1);
+						return false;
+
+					default:
+						// dead code -- eliminated
+						throw new IllegalStateException();
+				}
+			}
+			catch (ControlThrowable ct) {
+				// save registers to the object stack
+				objectStack.set(base + 0, r_0);
+				objectStack.set(base + 1, r_1);
+
+				ct.pushCall(this, base, ret, pc, numResults, flags);
+
+				throw ct;
+			}
+		}
+
 	}
 
 }
