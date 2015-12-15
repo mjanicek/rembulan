@@ -12,8 +12,14 @@ object ByHandRunner {
 
 //    Runner.res(coro, inc)
 
-    val func = new Example()
-    Runner.doRun(func, 1:Integer, 42:Integer)
+    val f0 = new UnaryMinus()
+    val f1 = new PlusOne()
+    val f2 = new MinusPlus()
+
+    Runner.doRun(f2, f0, f1)
+
+//    val func = new Example()
+//    Runner.doRun(func, 1:Integer, 42:Integer)
 
   }
 
