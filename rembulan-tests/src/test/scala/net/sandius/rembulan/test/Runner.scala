@@ -10,7 +10,7 @@ object Runner {
     if (cons == null) Nil else cons.car :: consToList(cons.cdr)
   }
 
-  def inspect(coro: Coroutine, callStack: Cons[CallInfo]): Unit = {
+  def inspect(coro: Coroutine, callStack: Cons[CallInfo], cpuTime: Int): Unit = {
     val os = coro.getObjectStack
     var max = 0
     for (i <- 0 until os.getMaxSize) {
@@ -20,6 +20,7 @@ object Runner {
     }
 
     println("---")
+    println("CPU time: " + cpuTime)
     println("Object stack: " + (for (i <- 0 to max) yield i + ":[" + os.get(i) + "]").mkString(" "))
     println("Call stack:")
     val cs = consToList(callStack)
@@ -28,7 +29,7 @@ object Runner {
       println("\t(empty)")
     }
     else {
-      println((for (ci <- cs) yield "\t" + ci).reverse.mkString("\n"))
+      println((for (ci <- cs) yield "\t" + ci).mkString("\n"))
     }
   }
 
@@ -43,8 +44,11 @@ object Runner {
 
     LuaState.setCurrentState(st)
 
+    var cpuTime = 0
+
     val preempt = new PreemptionContext {
       override def account(cost: Int) = {
+        cpuTime += cost
         throw new Preempted
       }
     }
@@ -53,11 +57,11 @@ object Runner {
 
     exec.pushCall(new CallInfo(func, 0, 0, 0, 0, 0))
 
-    inspect(coro, exec.getCallStack)
+    inspect(coro, exec.getCallStack, cpuTime)
 
     while (exec.isPaused) {
       exec.resume()
-      inspect(coro, exec.getCallStack)
+      inspect(coro, exec.getCallStack, cpuTime)
     }
 
     LuaState.unsetCurrentState()
