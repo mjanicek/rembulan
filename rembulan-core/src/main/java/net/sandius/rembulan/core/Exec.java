@@ -67,15 +67,21 @@ public class Exec {
 			CallInfo top = callStack.car;
 			callStack = callStack.cdr;
 
+//			System.out.println("Will resume " + top.toString());
+//			System.out.println("Call stack now: " + Cons.toString(callStack, " "));
+
 			try {
 				tail.clear();
 				top.resume(preemptionContext, state, tail, objectStack);
 			}
 			catch (ControlThrowable ct) {
+//				System.out.println("Control event: " + ct.toString());
 				Iterator<CallInfo> it = ct.frameIterator();
+//				System.out.println("Call stack before: " + Cons.toString(callStack, " "));
 				while (it.hasNext()) {
 					callStack = new Cons<>(it.next(), callStack);
 				}
+//				System.out.println("Call stack after: " + Cons.toString(callStack, " "));
 
 				assert (callStack != null);
 				return true;  // we're paused
