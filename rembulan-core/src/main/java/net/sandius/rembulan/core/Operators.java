@@ -22,7 +22,7 @@ public class Operators {
 
 		Object handler = Metatables.getMetamethod(o, event);
 		if (handler == null) {
-			throw new IllegalOperationAttemptException("perform operation on", "illegal");
+			throw new IllegalOperationAttemptException("perform operation on", LuaType.typeOf(o).name);
 		}
 		else {
 			return callHandler(handler, o);
