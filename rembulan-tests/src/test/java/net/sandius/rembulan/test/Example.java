@@ -6,6 +6,7 @@ import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Registers;
+import net.sandius.rembulan.util.Ptr;
 
 public class Example extends Function {
 
@@ -14,7 +15,7 @@ public class Example extends Function {
 	}
 
 	@Override
-	protected Object run(PreemptionContext preemptionContext, LuaState state, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+	protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 		// registers
 		Object r_1, r_2, r_3;
 
@@ -52,7 +53,7 @@ public class Example extends Function {
 			throw ct;
 		}
 
-		return null;
+		return false;
 	}
 
 }

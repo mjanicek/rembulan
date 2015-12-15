@@ -1,6 +1,7 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.Ptr;
 
 public class CallInfo {
 
@@ -35,8 +36,8 @@ public class CallInfo {
 		return "[" + function.toString() + ", pc=" + pc + ", base=" + base + ", ret=" + ret + ", numResults=" + numResults + ", flags=" + flags + "]";
 	}
 
-	public void resume(PreemptionContext pctx, LuaState state, ObjectStack objectStack) throws ControlThrowable {
-		function.resume(pctx, state, objectStack, base, ret, pc, numResults, flags);
+	public void resume(PreemptionContext pctx, LuaState state, Ptr<Object> tail, ObjectStack objectStack) throws ControlThrowable {
+		function.resume(pctx, state, tail, objectStack, base, ret, pc, numResults, flags);
 	}
 
 }

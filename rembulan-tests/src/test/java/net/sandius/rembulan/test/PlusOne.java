@@ -7,6 +7,7 @@ import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Registers;
+import net.sandius.rembulan.util.Ptr;
 
 /*
 function (x)
@@ -29,7 +30,7 @@ public class PlusOne extends Closure {
 	public static final Long k_1 = Long.valueOf(1);
 
 	@Override
-	protected Object run(PreemptionContext preemptionContext, LuaState state, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+	protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 		// registers
 		Object r_0, r_1;
 
@@ -65,7 +66,7 @@ public class PlusOne extends Closure {
 			throw ct;
 		}
 
-		return null;
+		return false;
 	}
 
 }

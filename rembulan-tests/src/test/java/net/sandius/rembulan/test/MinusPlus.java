@@ -7,6 +7,7 @@ import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Registers;
+import net.sandius.rembulan.util.Ptr;
 
 /*
 function ()
@@ -34,7 +35,7 @@ public class MinusPlus extends Closure {
 	public static final Long k_1 = Long.valueOf(0);
 
 	@Override
-	protected Object run(PreemptionContext preemptionContext, LuaState state, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+	protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 		// registers
 		Object r_0, r_1, r_2;
 
@@ -67,10 +68,12 @@ public class MinusPlus extends Closure {
 					self.set(1, r_1);  // call target
 					self.set(2, r_2);  // call arg #1
 
-					Operators.call(preemptionContext, state, objectStack, base + 1, base + 1, 0, 0);
+					Operators.call(preemptionContext, state, tail, objectStack, base + 1, base + 1, 0, 0);
 
 				case 4:  // TAILCALL 0 0 0
-					return r_0;  // TODO: is this correct?
+					// TODO: is this correct?
+					tail.set(r_0);
+					return true;
 
 				case 5:  // RETURN 0 0
 					// dead code -- eliminated
@@ -89,7 +92,7 @@ public class MinusPlus extends Closure {
 			throw ct;
 		}
 
-		return null;
+		return false;
 	}
 
 }

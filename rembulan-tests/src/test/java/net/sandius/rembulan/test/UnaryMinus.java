@@ -7,6 +7,7 @@ import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Registers;
+import net.sandius.rembulan.util.Ptr;
 
 /*
 function (x)
@@ -27,7 +28,7 @@ upvalues (0) for 0x7f9cbac04640:
 public class UnaryMinus extends Closure {
 
 	@Override
-	protected Object run(PreemptionContext preemptionContext, LuaState state, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+	protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 		// registers
 		Object r_0, r_1;
 
@@ -66,7 +67,7 @@ public class UnaryMinus extends Closure {
 			throw ct;
 		}
 
-		return null;
+		return false;
 	}
 
 }

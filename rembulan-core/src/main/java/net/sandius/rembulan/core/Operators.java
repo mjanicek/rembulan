@@ -1,6 +1,7 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.Ptr;
 
 public class Operators {
 
@@ -338,6 +339,7 @@ public class Operators {
 	public static void call(
 			PreemptionContext preemptionContext,
 			LuaState state,
+			Ptr<Object> tail,
 			ObjectStack objectStack,
 			int base,
 			int ret,
@@ -355,6 +357,7 @@ public class Operators {
 			function.call(
 					preemptionContext,
 					state,
+					tail,
 					objectStack,
 					base + 1,
 					ret,
@@ -369,6 +372,7 @@ public class Operators {
 				function.call(
 						preemptionContext,
 						state,
+						tail,
 						objectStack,
 						base,
 						ret,
@@ -379,12 +383,15 @@ public class Operators {
 				throw new IllegalOperationAttemptException("call", LuaType.typeOf(target).name);
 			}
 		}
+
+		assert (tail.isNull());
 	}
 
-	public static Object callOnce(
+	public static boolean callOnce(
 			PreemptionContext preemptionContext,
 			LuaState state,
 			Object target,
+			Ptr<Object> tail,
 			ObjectStack objectStack,
 			int base,
 			int ret,
@@ -399,6 +406,7 @@ public class Operators {
 			return function.run(
 					preemptionContext,
 					state,
+					tail,
 					objectStack,
 					base + 1,
 					ret,
@@ -414,6 +422,7 @@ public class Operators {
 				return function.run(
 						preemptionContext,
 						state,
+						tail,
 						objectStack,
 						base,
 						ret,

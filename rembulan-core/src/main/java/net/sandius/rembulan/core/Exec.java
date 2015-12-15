@@ -2,6 +2,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
+import net.sandius.rembulan.util.Ptr;
 
 import java.util.Iterator;
 
@@ -60,12 +61,15 @@ public class Exec {
 	// return true if execution was paused, false if execution is finished
 	// in other words: returns true iff isPaused() == true afterwards
 	public boolean resume() {
+		Ptr<Object> tail = new Ptr<>();
+
 		while (callStack != null) {
 			CallInfo top = callStack.car;
 			callStack = callStack.cdr;
 
 			try {
-				top.resume(preemptionContext, state, objectStack);
+				tail.clear();
+				top.resume(preemptionContext, state, tail, objectStack);
 			}
 			catch (ControlThrowable ct) {
 				Iterator<CallInfo> it = ct.frameIterator();
