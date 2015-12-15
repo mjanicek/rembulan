@@ -1,6 +1,7 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.ReverseListIterator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.ListIterator;
 
 public abstract class ControlThrowable extends Throwable {
 
+	// Note: this is actually a queue
 	protected final ArrayList<CallInfo> callStack;
 
 	protected ControlThrowable() {
@@ -30,7 +32,7 @@ public abstract class ControlThrowable extends Throwable {
 
 	// LIFO iterator
 	public ListIterator<CallInfo> frameIterator() {
-		return Collections.unmodifiableList(callStack).listIterator();
+		return new ReverseListIterator<>(Collections.unmodifiableList(callStack).listIterator(callStack.size()));
 	}
 
 }
