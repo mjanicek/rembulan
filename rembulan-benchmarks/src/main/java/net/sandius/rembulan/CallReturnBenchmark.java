@@ -27,6 +27,44 @@ public class CallReturnBenchmark {
 		}
 	}
 
+	public static abstract class JavaFunc {
+		public abstract Object[] call(Object[] args);
+	}
+
+	public static class JavaFuncImpl extends JavaFunc {
+
+		private final Long n;
+
+		public JavaFuncImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		public Object[] call(Object[] args) {
+			JavaFunc f = (JavaFunc) args[0];
+			long l = ((Number) args[1]).longValue();
+
+			if (l > 0) {
+				Object[] result = f.call(new Object[] { f, l - 1 });
+				Number m = (Number) result[0];
+
+				return new Object[] { m.longValue() + 1 };
+			}
+			else {
+				return new Object[] { n };
+			}
+		}
+	}
+
+	@Benchmark
+	public void bmk_0_javaCall(Blackhole bh) {
+		JavaFunc f = new JavaFuncImpl(100);
+
+		Object[] result = f.call(new Object[] { f, 20 });
+
+		assertEquals(result[0], 120L);
+	}
+
 	public static abstract class ViewFunc {
 		public abstract void call(ObjectStack.View self, ObjectStack.View ret);
 	}
@@ -88,7 +126,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void bmk_0_sharedStackCall(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
+	public void bmk_1_sharedStackCall(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
 		ObjectStack os = osh.objectStack;
 		ViewFunc f = new ViewFuncImpl(100);
 		ObjectStack.View root = os.rootView();
@@ -159,7 +197,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void bmk_1_directCall(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
+	public void bmk_2_directCall(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
 		ObjectStack os = osh.objectStack;
 		DirectFunc f = new DirectFuncImpl(100);
 		os.set(0, f);
@@ -237,7 +275,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void bmk_2_allocRegistersCall(Blackhole bh) {
+	public void bmk_3_allocRegistersCall(Blackhole bh) {
 		AllocFunc f = new AllocFuncImpl(100);
 
 		FixedSizeRegisters out = new FixedSizeRegisters(1);
