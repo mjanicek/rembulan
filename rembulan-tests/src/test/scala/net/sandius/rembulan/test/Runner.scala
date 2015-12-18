@@ -47,7 +47,7 @@ object Runner {
     var cpuTime = 0
 
     val preempt = new PreemptionContext {
-      override def account(cost: Int) = {
+      override def withdraw(cost: Int) = {
         cpuTime += cost
         throw new Preempted
       }

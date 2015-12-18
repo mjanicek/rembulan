@@ -6,7 +6,6 @@ import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
-import net.sandius.rembulan.core.Registers;
 import net.sandius.rembulan.util.Ptr;
 
 /*
@@ -62,7 +61,7 @@ public class MinusPlus extends Closure {
 			switch (pc) {
 				case 0:  // accounting block #0
 					pc = 1;
-					preemptionContext.account(7);  // accounting the entire block already
+					preemptionContext.withdraw(7);  // accounting the entire block already
 
 				// Block #0: [1 .. 8], cost = 7
 
@@ -153,7 +152,7 @@ public class MinusPlus extends Closure {
 				switch (pc) {
 					case 0:
 						pc = 1;
-						preemptionContext.account(2);  // accounting the entire block already
+						preemptionContext.withdraw(2);  // accounting the entire block already
 
 					case 1:  // ADD 1 0 -1
 						r_1 = Operators.add(r_0, k_1);
@@ -207,7 +206,7 @@ public class MinusPlus extends Closure {
 				switch (pc) {
 					case 0:
 						pc = 1;
-						preemptionContext.account(2);  // accounting the entire block already
+						preemptionContext.withdraw(2);  // accounting the entire block already
 
 					case 1:  // UNM 1 0
 						r_1 = Operators.unm(r_0);

@@ -35,7 +35,7 @@ public class Example extends Function {
 					r_2 = r_3;
 
 					pc = 3;
-					preemptionContext.account(3);
+					preemptionContext.withdraw(3);
 
 				case 3:
 					retAddr.set(0, r_1);
