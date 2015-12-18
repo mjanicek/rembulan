@@ -1,6 +1,6 @@
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.core.ArrayRegisters;
+import net.sandius.rembulan.core.FixedSizeRegisters;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.Registers;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -16,31 +16,38 @@ import org.openjdk.jmh.infra.Blackhole;
 @Measurement(iterations = 10)
 public class RegistersBenchmark {
 
+	public static final int NESTING = 50;
+	public static final int SIZE = 5;
+
+	public static final int SHARED_STACK_SIZE = 250;
+
 	@State(Scope.Thread)
 	public static class ObjectStackHolder {
 		public final ObjectStack objectStack;
 		public ObjectStackHolder() {
-			objectStack = ObjectStack.newEmptyStack(250);
+			objectStack = ObjectStack.newEmptyStack(SHARED_STACK_SIZE);
 		}
 	}
 
     @Benchmark
     public void bmk_0_registersFromRootView(ObjectStackHolder osh, Blackhole bh) {
 		ObjectStack os = osh.objectStack;
-		Registers regs = os.rootView();
+		ObjectStack.View regs = os.rootView();
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < NESTING; i++) {
 			bh.consume(regs);
 
-			for (int j = 0; j < 5; j++) {
-				regs.set(j, false);
+			for (int j = 0; j < SIZE; j++) {
+				regs.push(j);
 			}
 
-			for (int j = 0; j < 5; j++) {
+			for (int j = 0; j < SIZE; j++) {
 				bh.consume(regs.get(j));
 			}
 
-			regs = regs.from(5);
+			if (i < NESTING) {
+				regs = regs.from(SIZE);
+			}
 		}
     }
 
@@ -49,15 +56,15 @@ public class RegistersBenchmark {
 		ObjectStack os = osh.objectStack;
 		int offset = 0;
 
-		for (int i = 0; i < 50; i++) {
+		for (int i = 0; i < NESTING; i++) {
 			Registers regs = os.viewFrom(offset);
 			bh.consume(regs);
 
-			for (int j = 0; j < 5; j++) {
-				regs.set(j, false);
+			for (int j = 0; j < SIZE; j++) {
+				regs.push(j);
 			}
 
-			for (int j = 0; j < 5; j++) {
+			for (int j = 0; j < SIZE; j++) {
 				bh.consume(regs.get(j));
 			}
 
@@ -66,32 +73,38 @@ public class RegistersBenchmark {
 	}
 
 	@Benchmark
-	public void bmk_2_directManipulation(ObjectStackHolder osh, Blackhole bh) {
+	public void bmk_2_directObjectStackManipulation(ObjectStackHolder osh, Blackhole bh) {
 		ObjectStack os = osh.objectStack;
+		bh.consume(os);
+
 		int offset = 0;
 
-		for (int i = 0; i < 50; i++) {
-			for (int j = 0; j < 5; j++) {
-				os.set(offset + j, false);
+		for (int i = 0; i < NESTING; i++) {
+			os.setTop(offset);
+			for (int j = 0; j < SIZE; j++) {
+				os.set(offset + j, j);
 			}
-			for (int j = 0; j < 5; j++) {
+			os.setTop(offset + SIZE);
+
+			for (int j = 0; j < SIZE; j++) {
 				bh.consume(os.get(offset + j));
 			}
+
 			offset += 5;
 		}
 	}
 
 	@Benchmark
-	public void bmk_2_registerAllocation(Blackhole bh) {
-		for (int i = 0; i < 50; i++) {
-			Registers regs = new ArrayRegisters(5);
+	public void bmk_3_registerAllocation(Blackhole bh) {
+		for (int i = 0; i < NESTING; i++) {
+			Registers regs = new FixedSizeRegisters(SIZE);
 			bh.consume(regs);
 
-			for (int j = 0; j < 5; j++) {
-				regs.set(j, false);
+			for (int j = 0; j < SIZE; j++) {
+				regs.push(j);
 			}
 
-			for (int j = 0; j < 5; j++) {
+			for (int j = 0; j < SIZE; j++) {
 				bh.consume(regs.get(j));
 			}
 		}

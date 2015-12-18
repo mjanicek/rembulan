@@ -2,6 +2,10 @@ package net.sandius.rembulan.core;
 
 public interface Registers {
 
+	int size();
+
+	void push(Object object);
+
 	Object get(int idx);
 
 	void set(int idx, Object object);
@@ -10,6 +14,6 @@ public interface Registers {
 
 	void setTop(int newTop);
 
-	Registers from(int offset);
+	ReturnTarget returnTargetFrom(int offset);
 
 }

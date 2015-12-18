@@ -63,11 +63,12 @@ public class ObjectStack {
 	}
 
 	public View viewFrom(int base) {
+		setTop(base);
 		return new View(this, base);
 	}
 
 	public View rootView() {
-		return new View(this, 0);
+		return viewFrom(0);
 	}
 
 	public static class View implements Registers {
@@ -82,14 +83,27 @@ public class ObjectStack {
 			this.offset = offset;
 		}
 
+		public View from(int offset) {
+			return new View(objectStack, this.offset + offset);
+		}
+
 		@Override
 		public String toString() {
 			return "view:" + Integer.toHexString(objectStack.hashCode()) + "/" + offset;
 		}
 
 		@Override
-		public View from(int offset) {
-			return new View(objectStack, this.offset + offset);
+		public int size() {
+			return objectStack.getMaxSize() - offset;
+		}
+
+		@Override
+		public void push(Object object) {
+			int top = getTop();
+			if (top < size()) {
+				set(top, object);
+				setTop(getTop() + 1);
+			}
 		}
 
 		@Override
@@ -110,6 +124,11 @@ public class ObjectStack {
 		@Override
 		public void setTop(int newTop) {
 			objectStack.setTop(offset + newTop);
+		}
+
+		@Override
+		public ReturnTarget returnTargetFrom(int offset) {
+			return new ReturnTarget(this, offset);
 		}
 
 	}
