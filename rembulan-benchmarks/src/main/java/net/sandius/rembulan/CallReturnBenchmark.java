@@ -326,6 +326,33 @@ public class CallReturnBenchmark {
 
 	}
 
+	public static class SelfRecursiveTailCallingResumableArgRetFuncImpl extends ArgRetFunc._3p._2r {
+
+		private final Long n;
+
+		public SelfRecursiveTailCallingResumableArgRetFuncImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		protected void resume(ObjectSink result, int pc, Object r_0, Object r_1) {
+			switch (pc) {
+				case 0:
+				case 1:
+					long l = ((Number) r_0).longValue();
+					long acc = ((Number) r_1).longValue();
+					if (l > 0) {
+						result.setTo(this, l - 1, acc + 1);
+						result.markAsTailCall();
+					}
+					else {
+						result.setTo(acc + n);
+					}
+			}
+		}
+
+	}
+
 	@Benchmark
 	public void _3_3_resumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new ResumableArgRetFuncImpl(100);
@@ -339,6 +366,14 @@ public class CallReturnBenchmark {
 		ArgRetFunc f = new TailCallingResumableArgRetFuncImpl(100);
 		ObjectSink result = new TripleCachingObjectSink();
 		_call(result, f, f, 20, 0);
+		assertEquals(result._0(), 120L);
+	}
+
+	@Benchmark
+	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse() {
+		ArgRetFunc f = new SelfRecursiveTailCallingResumableArgRetFuncImpl(100);
+		ObjectSink result = new TripleCachingObjectSink();
+		_call(result, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
