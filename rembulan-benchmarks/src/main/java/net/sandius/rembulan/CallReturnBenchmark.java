@@ -8,7 +8,6 @@ import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
-import org.openjdk.jmh.infra.Blackhole;
 
 @Fork(5)
 @Warmup(iterations = 10)
@@ -57,7 +56,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _0_javaTwoArgCallMethod(Blackhole bh) {
+	public void _0_javaTwoArgCallMethod() {
 		JavaTwoArgFunc f = new JavaTwoArgFuncImpl(100);
 
 		Object result = f.call(f, 20);
@@ -95,7 +94,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _1_javaResultInReturnValue(Blackhole bh) {
+	public void _1_javaResultInReturnValue() {
 		JavaArraysFunc f = new JavaArraysFuncImpl(100);
 
 		Object[] result = f.call(new Object[] { f, 20 });
@@ -160,7 +159,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_1_javaResultInArgument_newPtrAlloc(Blackhole bh) {
+	public void _2_1_javaResultInArgument_newPtrAlloc() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrAlloc(100);
 
 		Ptr<Object[]> result = new Ptr<Object[]>();
@@ -170,7 +169,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_2_javaResultInArgument_ptrReuse(Blackhole bh) {
+	public void _2_2_javaResultInArgument_ptrReuse() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrReuse(100);
 
 		Ptr<Object[]> result = new Ptr<Object[]>();
@@ -240,7 +239,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _3_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
+	public void _3_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		ViewFunc f = new ViewFuncImpl(100);
 		ObjectStack.View root = os.rootView();
@@ -311,7 +310,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _4_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
+	public void _4_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		DirectFunc f = new DirectFuncImpl(100);
 		os.set(0, f);
@@ -389,7 +388,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _5_perCallRegisterAllocationWithPushInterface(Blackhole bh) {
+	public void _5_perCallRegisterAllocationWithPushInterface() {
 		AllocFunc f = new AllocFuncImpl(100);
 
 		FixedSizeRegisters out = new FixedSizeRegisters(1);
