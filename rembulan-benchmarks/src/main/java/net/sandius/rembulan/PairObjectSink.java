@@ -22,11 +22,9 @@ public class PairObjectSink extends ObjectSink {
 
 	@Override
 	public void reset() {
-		if (size < 3) {
-			_0 = null;
-			_1 = null;
-		}
-		else {
+		_0 = null;
+		_1 = null;
+		if (size > 2) {
 			_var.clear();
 		}
 		size = 0;
@@ -41,13 +39,6 @@ public class PairObjectSink extends ObjectSink {
 			case 1:
 				_1 = o;
 				break;
-			case 2:
-				_var.add(_0);
-				_var.add(_1);
-				_0 = null;
-				_1 = null;
-				// intentionally falling through
-
 			default:
 				_var.add(o);
 				break;
@@ -62,27 +53,35 @@ public class PairObjectSink extends ObjectSink {
 			case 0: return EMPTY_ARRAY;
 			case 1: return new Object[] { _0 };
 			case 2: return new Object[] { _0, _1 };
-			default: return _var.toArray();
+			default:
+				Object[] result = new Object[size];
+				result[0] = _0;
+				result[1] = _1;
+				Object[] tmp = _var.toArray();
+				System.arraycopy(tmp, 0, result, 2, tmp.length);
+				return result;
 		}
 	}
 
 	@Override
 	public Object get(int idx) {
 		switch (idx) {
-			case 0: return _0();
-			case 1: return _1();
-			default: return size < 3 ? null : _var.get(idx);
+			case 0: return _0;
+			case 1: return _1;
+			default:
+				int i = idx - 2;
+				return i >= 0 && i < _var.size() ? _var.get(i) : null;
 		}
 	}
 
 	@Override
 	public Object _0() {
-		return size < 3 ? _0 : _var.get(0);
+		return _0;
 	}
 
 	@Override
 	public Object _1() {
-		return size < 3 ? _1 : _var.get(1);
+		return _1;
 	}
 
 }

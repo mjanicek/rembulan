@@ -23,12 +23,10 @@ public class TripleObjectSink extends ObjectSink {
 
 	@Override
 	public void reset() {
-		if (size < 4) {
-			_0 = null;
-			_1 = null;
-			_2 = null;
-		}
-		else {
+		_0 = null;
+		_1 = null;
+		_2 = null;
+		if (size > 3) {
 			_var.clear();
 		}
 		size = 0;
@@ -46,15 +44,6 @@ public class TripleObjectSink extends ObjectSink {
 			case 2:
 				_2 = o;
 				break;
-			case 3:
-				_var.add(_0);
-				_var.add(_1);
-				_var.add(_2);
-				_0 = null;
-				_1 = null;
-				_2 = null;
-				// intentionally falling through
-
 			default:
 				_var.add(o);
 				break;
@@ -70,32 +59,41 @@ public class TripleObjectSink extends ObjectSink {
 			case 1: return new Object[] { _0 };
 			case 2: return new Object[] { _0, _1 };
 			case 3: return new Object[] { _0, _1, _2 };
-			default: return _var.toArray();
+			default:
+				Object[] result = new Object[size];
+				result[0] = _0;
+				result[1] = _1;
+				result[2] = _2;
+				Object[] tmp = _var.toArray();
+				System.arraycopy(tmp, 0, result, 3, tmp.length);
+				return result;
 		}
 	}
 
 	@Override
 	public Object get(int idx) {
 		switch (idx) {
-			case 0: return _0();
-			case 1: return _1();
-			case 2: return _2();
-			default: return size < 4 ? null : _var.get(idx);
+			case 0: return _0;
+			case 1: return _1;
+			case 2: return _2;
+			default:
+				int i = idx - 3;
+				return i >= 0 && i < _var.size() ? _var.get(i) : null;
 		}
 	}
 
 	@Override
 	public Object _0() {
-		return size < 4 ? _0 : _var.get(0);
+		return _0;
 	}
 
 	@Override
 	public Object _1() {
-		return size < 4 ? _1 : _var.get(1);
+		return _1;
 	}
 
 	public Object _2() {
-		return size < 4 ? _2 : _var.get(2);
+		return _2;
 	}
 
 }
