@@ -62,6 +62,15 @@ public class PairObjectSink extends ObjectSink {
 	}
 
 	@Override
+	public void setTo(Object a, Object b, Object c, Object d, Object e) {
+		setCacheAndClearList(null, null);
+		_var.add(c);
+		_var.add(d);
+		_var.add(e);
+		size = 5;
+	}
+
+	@Override
 	public void push(Object o) {
 		switch (size++) {
 			case 0:
@@ -99,9 +108,7 @@ public class PairObjectSink extends ObjectSink {
 		switch (idx) {
 			case 0: return _0;
 			case 1: return _1;
-			default:
-				int i = idx - 2;
-				return i >= 0 && i < _var.size() ? _var.get(i) : null;
+			default: return idx < size && idx > 1 ? _var.get(idx - 2) : null;
 		}
 	}
 
@@ -113,6 +120,21 @@ public class PairObjectSink extends ObjectSink {
 	@Override
 	public Object _1() {
 		return _1;
+	}
+
+	@Override
+	public Object _2() {
+		return size > 2 ? _var.get(0) : null;
+	}
+
+	@Override
+	public Object _3() {
+		return size > 3 ? _var.get(1) : null;
+	}
+
+	@Override
+	public Object _4() {
+		return size > 4 ? _var.get(2) : null;
 	}
 
 }

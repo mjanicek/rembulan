@@ -21,36 +21,6 @@ public class SimpleObjectSink extends ObjectSink {
 	}
 
 	@Override
-	public void setTo(Object a) {
-		buf.clear();
-		buf.add(a);
-	}
-
-	@Override
-	public void setTo(Object a, Object b) {
-		buf.clear();
-		buf.add(a);
-		buf.add(b);
-	}
-
-	@Override
-	public void setTo(Object a, Object b, Object c) {
-		buf.clear();
-		buf.add(a);
-		buf.add(b);
-		buf.add(c);
-	}
-
-	@Override
-	public void setTo(Object a, Object b, Object c, Object d) {
-		buf.clear();
-		buf.add(a);
-		buf.add(b);
-		buf.add(c);
-		buf.add(d);
-	}
-
-	@Override
 	public void push(Object o) {
 		buf.add(o);
 	}
@@ -65,13 +35,4 @@ public class SimpleObjectSink extends ObjectSink {
 		return idx >= 0 && idx < buf.size() ? buf.get(idx) : null;
 	}
 
-	@Override
-	public Object _0() {
-		return buf.size() < 1 ? null : buf.get(0);
-	}
-
-	@Override
-	public Object _1() {
-		return buf.size() < 2 ? null : buf.get(1);
-	}
 }

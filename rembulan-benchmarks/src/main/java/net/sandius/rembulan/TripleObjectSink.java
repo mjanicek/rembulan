@@ -62,6 +62,14 @@ public class TripleObjectSink extends ObjectSink {
 	}
 
 	@Override
+	public void setTo(Object a, Object b, Object c, Object d, Object e) {
+		setCacheAndClearList(a, b, c);
+		_var.add(d);
+		_var.add(e);
+		size = 5;
+	}
+
+	@Override
 	public void push(Object o) {
 		switch (size++) {
 			case 0:
@@ -105,9 +113,7 @@ public class TripleObjectSink extends ObjectSink {
 			case 0: return _0;
 			case 1: return _1;
 			case 2: return _2;
-			default:
-				int i = idx - 3;
-				return i >= 0 && i < _var.size() ? _var.get(i) : null;
+			default: return idx < size && idx > 2 ? _var.get(idx - 3) : null;
 		}
 	}
 
@@ -121,8 +127,19 @@ public class TripleObjectSink extends ObjectSink {
 		return _1;
 	}
 
+	@Override
 	public Object _2() {
 		return _2;
+	}
+
+	@Override
+	public Object _3() {
+		return size > 3 ? _var.get(0) : null;
+	}
+
+	@Override
+	public Object _4() {
+		return size > 4 ? _var.get(1) : null;
 	}
 
 }
