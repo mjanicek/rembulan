@@ -2,11 +2,11 @@ package net.sandius.rembulan;
 
 import java.util.ArrayList;
 
-public class SimpleObjectSink extends ObjectSink {
+public class ArrayListObjectSink extends ObjectSink {
 
 	private final ArrayList<Object> buf;
 
-	public SimpleObjectSink() {
+	public ArrayListObjectSink() {
 		buf = new ArrayList<Object>();
 	}
 

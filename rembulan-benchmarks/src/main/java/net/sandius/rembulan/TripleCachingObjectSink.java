@@ -2,16 +2,17 @@ package net.sandius.rembulan;
 
 import java.util.ArrayList;
 
-public class PairObjectSink extends ObjectSink {
+public class TripleCachingObjectSink extends ObjectSink {
 
 	private Object _0;
 	private Object _1;
+	private Object _2;
 
 	private final ArrayList<Object> _var;
 
 	private int size;
 
-	public PairObjectSink() {
+	public TripleCachingObjectSink() {
 		_var = new ArrayList<Object>();
 	}
 
@@ -20,51 +21,49 @@ public class PairObjectSink extends ObjectSink {
 		return size;
 	}
 
-	protected void setCacheAndClearList(Object a, Object b) {
+	protected void setCacheAndClearList(Object a, Object b, Object c) {
 		_0 = a;
 		_1 = b;
-		if (size > 2) {
+		_2 = c;
+		if (size > 3) {
 			_var.clear();
 		}
 	}
 
 	@Override
 	public void reset() {
-		setCacheAndClearList(null, null);
+		setCacheAndClearList(null, null, null);
 		size = 0;
 	}
 
 	@Override
 	public void setTo(Object a) {
-		setCacheAndClearList(a, null);
+		setCacheAndClearList(a, null, null);
 		size = 1;
 	}
 
 	@Override
 	public void setTo(Object a, Object b) {
-		setCacheAndClearList(a, b);
+		setCacheAndClearList(a, b, null);
 		size = 2;
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c) {
-		setCacheAndClearList(null, null);
-		_var.add(c);
+		setCacheAndClearList(a, b, c);
 		size = 3;
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c, Object d) {
-		setCacheAndClearList(null, null);
-		_var.add(c);
+		setCacheAndClearList(a, b, c);
 		_var.add(d);
 		size = 4;
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c, Object d, Object e) {
-		setCacheAndClearList(null, null);
-		_var.add(c);
+		setCacheAndClearList(a, b, c);
 		_var.add(d);
 		_var.add(e);
 		size = 5;
@@ -78,6 +77,9 @@ public class PairObjectSink extends ObjectSink {
 				break;
 			case 1:
 				_1 = o;
+				break;
+			case 2:
+				_2 = o;
 				break;
 			default:
 				_var.add(o);
@@ -93,12 +95,14 @@ public class PairObjectSink extends ObjectSink {
 			case 0: return EMPTY_ARRAY;
 			case 1: return new Object[] { _0 };
 			case 2: return new Object[] { _0, _1 };
+			case 3: return new Object[] { _0, _1, _2 };
 			default:
 				Object[] result = new Object[size];
 				result[0] = _0;
 				result[1] = _1;
+				result[2] = _2;
 				Object[] tmp = _var.toArray();
-				System.arraycopy(tmp, 0, result, 2, tmp.length);
+				System.arraycopy(tmp, 0, result, 3, tmp.length);
 				return result;
 		}
 	}
@@ -108,7 +112,8 @@ public class PairObjectSink extends ObjectSink {
 		switch (idx) {
 			case 0: return _0;
 			case 1: return _1;
-			default: return idx < size && idx > 1 ? _var.get(idx - 2) : null;
+			case 2: return _2;
+			default: return idx < size && idx > 2 ? _var.get(idx - 3) : null;
 		}
 	}
 
@@ -124,17 +129,17 @@ public class PairObjectSink extends ObjectSink {
 
 	@Override
 	public Object _2() {
-		return size > 2 ? _var.get(0) : null;
+		return _2;
 	}
 
 	@Override
 	public Object _3() {
-		return size > 3 ? _var.get(1) : null;
+		return size > 3 ? _var.get(0) : null;
 	}
 
 	@Override
 	public Object _4() {
-		return size > 4 ? _var.get(2) : null;
+		return size > 4 ? _var.get(1) : null;
 	}
 
 }

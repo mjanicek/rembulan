@@ -233,7 +233,7 @@ public class CallReturnBenchmark {
 //	@Benchmark
 	public void _3_2_argRetFunc_ptrReuse() {
 		ArgRetFunc f = new ArgRetFuncImpl(100);
-		ObjectSink result = new PairObjectSink();
+		ObjectSink result = new PairCachingObjectSink();
 		f.call(result, f, 20);
 		assertEquals(result._0(), 120L);
 	}
@@ -269,7 +269,7 @@ public class CallReturnBenchmark {
 	@Benchmark
 	public void _3_3_resumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new ResumableArgRetFuncImpl(100);
-		ObjectSink result = new TripleObjectSink();
+		ObjectSink result = new TripleCachingObjectSink();
 		f.call(result, f, 20);
 		assertEquals(result._0(), 120L);
 	}

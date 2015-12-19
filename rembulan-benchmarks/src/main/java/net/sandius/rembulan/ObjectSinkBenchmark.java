@@ -17,17 +17,17 @@ public class ObjectSinkBenchmark {
 
 	@State(Scope.Thread)
 	public static class NoCacheSinkState {
-		public final ObjectSink sink = new SimpleObjectSink();
+		public final ObjectSink sink = new ArrayListObjectSink();
 	}
 
 	@State(Scope.Thread)
 	public static class PairCacheSinkState {
-		public final ObjectSink sink = new PairObjectSink();
+		public final ObjectSink sink = new PairCachingObjectSink();
 	}
 
 	@State(Scope.Thread)
 	public static class TripleCacheSinkState {
-		public final ObjectSink sink = new TripleObjectSink();
+		public final ObjectSink sink = new TripleCachingObjectSink();
 	}
 
 	public void impl_push(Blackhole bh, ObjectSink sink, int count) {
