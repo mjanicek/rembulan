@@ -241,18 +241,18 @@ public class CallReturnBenchmark {
 		assertEquals(result._0(), 120L);
 	}
 
-	public static void doCall(ObjectSink result, Object[] args) {
-		Object[] rem = new Object[args.length - 1];
-		System.arraycopy(args, 1, rem, 0, rem.length);
-		ArgRetFunc target = (ArgRetFunc) args[0];
-		target.call(result, rem);
-	}
-
 	public static void evaluateTailCalls(ObjectSink result) {
 		while (result.isTailCall()) {
-			Object[] args = result.toArray();
-			result.reset();
-			doCall(result, args);
+			ArgRetFunc target = (ArgRetFunc) result._0();
+			switch (result.size()) {
+				case 0: throw new IllegalStateException();
+				case 1: target.call(result); break;
+				case 2: target.call(result, result._1()); break;
+				case 3: target.call(result, result._1(), result._2()); break;
+				case 4: target.call(result, result._1(), result._2(), result._3()); break;
+				case 5: target.call(result, result._1(), result._2(), result._3(), result._4()); break;
+				default: target.call(result, result.tailAsArray()); break;
+			}
 		}
 	}
 
@@ -335,7 +335,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _3_4_tailCallingresumableArgRetFunc_ptrReuse() {
+	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new TailCallingResumableArgRetFuncImpl(100);
 		ObjectSink result = new TripleCachingObjectSink();
 		_call(result, f, f, 20, 0);

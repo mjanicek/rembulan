@@ -106,6 +106,21 @@ public class PairCachingObjectSink extends AbstractObjectSink {
 	}
 
 	@Override
+	public Object[] tailAsArray() {
+		switch (size) {
+			case 0: throw new IllegalArgumentException();
+			case 1: return EMPTY_ARRAY;
+			case 2: return new Object[] { _1 };
+			default:
+				Object[] result = new Object[size - 1];
+				result[0] = _1;
+				Object[] tmp = _var.toArray();
+				System.arraycopy(tmp, 0, result, 1, tmp.length);
+				return result;
+		}
+	}
+
+	@Override
 	public Object get(int idx) {
 		switch (idx) {
 			case 0: return _0;

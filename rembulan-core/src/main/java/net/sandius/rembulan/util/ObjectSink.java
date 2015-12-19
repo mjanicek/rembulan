@@ -49,6 +49,13 @@ public abstract class ObjectSink {
 
 	public abstract Object[] toArray();
 
+	public Object[] tailAsArray() {
+		Object[] tmp = toArray();
+		Object[] result = new Object[tmp.length - 1];
+		System.arraycopy(tmp, 1, result, 0, result.length);
+		return result;
+	}
+
 	public abstract Object get(int idx);
 
 	public Object _0() {
