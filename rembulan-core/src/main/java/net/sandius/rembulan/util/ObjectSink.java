@@ -4,7 +4,12 @@ public abstract class ObjectSink {
 
 	public abstract int size();
 
+	public abstract boolean isTailCall();
+
+	// resets tail call to false, size to 0
 	public abstract void reset();
+
+	public abstract void markAsTailCall();
 
 	public abstract void push(Object o);
 

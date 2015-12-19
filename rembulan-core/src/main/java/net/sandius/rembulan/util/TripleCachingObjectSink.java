@@ -2,7 +2,7 @@ package net.sandius.rembulan.util;
 
 import java.util.ArrayList;
 
-public class TripleCachingObjectSink extends ObjectSink {
+public class TripleCachingObjectSink extends AbstractObjectSink {
 
 	private Object _0;
 	private Object _1;
@@ -13,7 +13,8 @@ public class TripleCachingObjectSink extends ObjectSink {
 	private int size;
 
 	public TripleCachingObjectSink() {
-		_var = new ArrayList<Object>();
+		super();
+		_var = new ArrayList<>();
 	}
 
 	@Override
@@ -28,6 +29,7 @@ public class TripleCachingObjectSink extends ObjectSink {
 		if (size > 3) {
 			_var.clear();
 		}
+		resetTailCall();
 	}
 
 	@Override

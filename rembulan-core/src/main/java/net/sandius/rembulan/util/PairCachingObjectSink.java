@@ -2,7 +2,7 @@ package net.sandius.rembulan.util;
 
 import java.util.ArrayList;
 
-public class PairCachingObjectSink extends ObjectSink {
+public class PairCachingObjectSink extends AbstractObjectSink {
 
 	private Object _0;
 	private Object _1;
@@ -12,7 +12,8 @@ public class PairCachingObjectSink extends ObjectSink {
 	private int size;
 
 	public PairCachingObjectSink() {
-		_var = new ArrayList<Object>();
+		super();
+		_var = new ArrayList<>();
 	}
 
 	@Override
@@ -26,6 +27,7 @@ public class PairCachingObjectSink extends ObjectSink {
 		if (size > 2) {
 			_var.clear();
 		}
+		resetTailCall();
 	}
 
 	@Override

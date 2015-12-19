@@ -2,12 +2,13 @@ package net.sandius.rembulan.util;
 
 import java.util.ArrayList;
 
-public class ArrayListObjectSink extends ObjectSink {
+public class ArrayListObjectSink extends AbstractObjectSink {
 
 	private final ArrayList<Object> buf;
 
 	public ArrayListObjectSink() {
-		buf = new ArrayList<Object>();
+		super();
+		buf = new ArrayList<>();
 	}
 
 	@Override
@@ -18,6 +19,7 @@ public class ArrayListObjectSink extends ObjectSink {
 	@Override
 	public void reset() {
 		buf.clear();
+		resetTailCall();
 	}
 
 	@Override
