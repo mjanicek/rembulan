@@ -28,21 +28,58 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	public static abstract class JavaFunc {
-		public abstract Object[] call(Object[] args);
+	public static abstract class JavaTwoArgFunc {
+		public abstract Object call(Object arg1, Object arg2);
 	}
 
-	public static class JavaFuncImpl extends JavaFunc {
+	public static class JavaTwoArgFuncImpl extends JavaTwoArgFunc {
 
 		private final Long n;
 
-		public JavaFuncImpl(long n) {
+		public JavaTwoArgFuncImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		public Object call(Object arg1, Object arg2) {
+			JavaTwoArgFunc f = (JavaTwoArgFunc) arg1;
+			long l = ((Number) arg2).longValue();
+
+			if (l > 0) {
+				Object r = f.call(f, l - 1);
+				return ((Number)r).longValue() + 1;
+			}
+			else {
+				return n;
+			}
+		}
+
+	}
+
+	@Benchmark
+	public void _0_javaTwoArgCallMethod(Blackhole bh) {
+		JavaTwoArgFunc f = new JavaTwoArgFuncImpl(100);
+
+		Object result = f.call(f, 20);
+
+		assertEquals(result, 120L);
+	}
+
+	public static abstract class JavaArraysFunc {
+		public abstract Object[] call(Object[] args);
+	}
+
+	public static class JavaArraysFuncImpl extends JavaArraysFunc {
+
+		private final Long n;
+
+		public JavaArraysFuncImpl(long n) {
 			this.n = n;
 		}
 
 		@Override
 		public Object[] call(Object[] args) {
-			JavaFunc f = (JavaFunc) args[0];
+			JavaArraysFunc f = (JavaArraysFunc) args[0];
 			long l = ((Number) args[1]).longValue();
 
 			if (l > 0) {
@@ -58,29 +95,29 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _0_javaResultInReturnValue(Blackhole bh) {
-		JavaFunc f = new JavaFuncImpl(100);
+	public void _1_javaResultInReturnValue(Blackhole bh) {
+		JavaArraysFunc f = new JavaArraysFuncImpl(100);
 
 		Object[] result = f.call(new Object[] { f, 20 });
 
 		assertEquals(result[0], 120L);
 	}
 
-	public static abstract class JavaVoidRetFunc {
+	public static abstract class JavaArraysVoidRetFunc {
 		public abstract void call(Object[] args, Ptr<Object[]> result);
 	}
 
-	public static class JavaVoidRetFuncImpl_PtrAlloc extends JavaVoidRetFunc {
+	public static class JavaArraysVoidRetFuncImpl_PtrAlloc extends JavaArraysVoidRetFunc {
 
 		private final Long n;
 
-		public JavaVoidRetFuncImpl_PtrAlloc(long n) {
+		public JavaArraysVoidRetFuncImpl_PtrAlloc(long n) {
 			this.n = n;
 		}
 
 		@Override
 		public void call(Object[] args, Ptr<Object[]> result) {
-			JavaVoidRetFunc f = (JavaVoidRetFunc) args[0];
+			JavaArraysVoidRetFunc f = (JavaArraysVoidRetFunc) args[0];
 			long l = ((Number) args[1]).longValue();
 
 			if (l > 0) {
@@ -97,17 +134,17 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	public static class JavaVoidRetFuncImpl_PtrReuse extends JavaVoidRetFunc {
+	public static class JavaArraysVoidRetFuncImpl_PtrReuse extends JavaArraysVoidRetFunc {
 
 		private final Long n;
 
-		public JavaVoidRetFuncImpl_PtrReuse(long n) {
+		public JavaArraysVoidRetFuncImpl_PtrReuse(long n) {
 			this.n = n;
 		}
 
 		@Override
 		public void call(Object[] args, Ptr<Object[]> result) {
-			JavaVoidRetFunc f = (JavaVoidRetFunc) args[0];
+			JavaArraysVoidRetFunc f = (JavaArraysVoidRetFunc) args[0];
 			long l = ((Number) args[1]).longValue();
 
 			if (l > 0) {
@@ -123,8 +160,8 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _1_1_javaResultInArgument_newPtrAlloc(Blackhole bh) {
-		JavaVoidRetFunc f = new JavaVoidRetFuncImpl_PtrAlloc(100);
+	public void _2_1_javaResultInArgument_newPtrAlloc(Blackhole bh) {
+		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrAlloc(100);
 
 		Ptr<Object[]> result = new Ptr<Object[]>();
 		f.call(new Object[] { f, 20 }, result);
@@ -133,8 +170,8 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _1_2_javaResultInArgument_ptrReuse(Blackhole bh) {
-		JavaVoidRetFunc f = new JavaVoidRetFuncImpl_PtrReuse(100);
+	public void _2_2_javaResultInArgument_ptrReuse(Blackhole bh) {
+		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrReuse(100);
 
 		Ptr<Object[]> result = new Ptr<Object[]>();
 		f.call(new Object[] { f, 20 }, result);
@@ -203,7 +240,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
+	public void _3_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
 		ObjectStack os = osh.objectStack;
 		ViewFunc f = new ViewFuncImpl(100);
 		ObjectStack.View root = os.rootView();
@@ -274,7 +311,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _3_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
+	public void _4_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
 		ObjectStack os = osh.objectStack;
 		DirectFunc f = new DirectFuncImpl(100);
 		os.set(0, f);
@@ -352,7 +389,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _4_perCallRegisterAllocationWithPushInterface(Blackhole bh) {
+	public void _5_perCallRegisterAllocationWithPushInterface(Blackhole bh) {
 		AllocFunc f = new AllocFuncImpl(100);
 
 		FixedSizeRegisters out = new FixedSizeRegisters(1);
