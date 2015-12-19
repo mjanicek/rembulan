@@ -3,6 +3,7 @@ package net.sandius.rembulan;
 import net.sandius.rembulan.core.FixedSizeRegisters;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.ReturnTarget;
+import net.sandius.rembulan.util.Ptr;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -57,12 +58,88 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void bmk_0_javaCall(Blackhole bh) {
+	public void _0_javaResultInReturnValue(Blackhole bh) {
 		JavaFunc f = new JavaFuncImpl(100);
 
 		Object[] result = f.call(new Object[] { f, 20 });
 
 		assertEquals(result[0], 120L);
+	}
+
+	public static abstract class JavaVoidRetFunc {
+		public abstract void call(Object[] args, Ptr<Object[]> result);
+	}
+
+	public static class JavaVoidRetFuncImpl_PtrAlloc extends JavaVoidRetFunc {
+
+		private final Long n;
+
+		public JavaVoidRetFuncImpl_PtrAlloc(long n) {
+			this.n = n;
+		}
+
+		@Override
+		public void call(Object[] args, Ptr<Object[]> result) {
+			JavaVoidRetFunc f = (JavaVoidRetFunc) args[0];
+			long l = ((Number) args[1]).longValue();
+
+			if (l > 0) {
+				Ptr<Object[]> callResult = new Ptr<Object[]>();
+
+				f.call(new Object[] { f, l - 1 }, callResult);
+				Number m = (Number) callResult.getAndClear()[0];
+
+				result.set(new Object[] { m.longValue() + 1});
+			}
+			else {
+				result.set(new Object[] { n });
+			}
+		}
+	}
+
+	public static class JavaVoidRetFuncImpl_PtrReuse extends JavaVoidRetFunc {
+
+		private final Long n;
+
+		public JavaVoidRetFuncImpl_PtrReuse(long n) {
+			this.n = n;
+		}
+
+		@Override
+		public void call(Object[] args, Ptr<Object[]> result) {
+			JavaVoidRetFunc f = (JavaVoidRetFunc) args[0];
+			long l = ((Number) args[1]).longValue();
+
+			if (l > 0) {
+				f.call(new Object[] { f, l - 1 }, result);
+				Number m = (Number) result.getAndClear()[0];
+
+				result.set(new Object[] { m.longValue() + 1});
+			}
+			else {
+				result.set(new Object[] { n });
+			}
+		}
+	}
+
+	@Benchmark
+	public void _1_1_javaResultInArgument_newPtrAlloc(Blackhole bh) {
+		JavaVoidRetFunc f = new JavaVoidRetFuncImpl_PtrAlloc(100);
+
+		Ptr<Object[]> result = new Ptr<Object[]>();
+		f.call(new Object[] { f, 20 }, result);
+
+		assertEquals(result.get()[0], 120L);
+	}
+
+	@Benchmark
+	public void _1_2_javaResultInArgument_ptrReuse(Blackhole bh) {
+		JavaVoidRetFunc f = new JavaVoidRetFuncImpl_PtrReuse(100);
+
+		Ptr<Object[]> result = new Ptr<Object[]>();
+		f.call(new Object[] { f, 20 }, result);
+
+		assertEquals(result.get()[0], 120L);
 	}
 
 	public static abstract class ViewFunc {
@@ -126,7 +203,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void bmk_1_sharedStackCall(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
+	public void _2_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
 		ObjectStack os = osh.objectStack;
 		ViewFunc f = new ViewFuncImpl(100);
 		ObjectStack.View root = os.rootView();
@@ -197,7 +274,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void bmk_2_directCall(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
+	public void _3_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh, Blackhole bh) {
 		ObjectStack os = osh.objectStack;
 		DirectFunc f = new DirectFuncImpl(100);
 		os.set(0, f);
@@ -275,7 +352,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void bmk_3_allocRegistersCall(Blackhole bh) {
+	public void _4_perCallRegisterAllocationWithPushInterface(Blackhole bh) {
 		AllocFunc f = new AllocFuncImpl(100);
 
 		FixedSizeRegisters out = new FixedSizeRegisters(1);
