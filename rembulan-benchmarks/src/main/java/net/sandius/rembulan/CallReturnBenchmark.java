@@ -55,7 +55,7 @@ public class CallReturnBenchmark {
 
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _0_javaTwoArgCallMethod() {
 		JavaTwoArgFunc f = new JavaTwoArgFuncImpl(100);
 
@@ -93,7 +93,7 @@ public class CallReturnBenchmark {
 		}
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _1_javaResultInReturnValue() {
 		JavaArraysFunc f = new JavaArraysFuncImpl(100);
 
@@ -158,7 +158,7 @@ public class CallReturnBenchmark {
 		}
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _2_1_javaResultInArgument_newPtrAlloc() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrAlloc(100);
 
@@ -168,7 +168,7 @@ public class CallReturnBenchmark {
 		assertEquals(result.get()[0], 120L);
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _2_2_javaResultInArgument_ptrReuse() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrReuse(100);
 
@@ -232,11 +232,52 @@ public class CallReturnBenchmark {
 			}
 		}
 
+		@Override
+		public void resume(Ptr<Object[]> result, int pc, Object[] registers) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 	@Benchmark
 	public void _3_2_argRetFunc_ptrReuse() {
 		ArgRetFunc f = new ArgRetFuncImpl(100);
+		Ptr<Object[]> result = new Ptr<Object[]>();
+		f.call(result, f, 20);
+		assertEquals(result.get()[0], 120L);
+	}
+
+	public static class ResumableArgRetFuncImpl extends ArgRetFunc._2_2 {
+
+		private final Long n;
+
+		public ResumableArgRetFuncImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		protected void resume(Ptr<Object[]> result, int pc, Object r_0, Object r_1) {
+			switch (pc) {
+				case 0:
+				case 1:
+					long l = ((Number) r_1).longValue();
+					if (l > 0) {
+						ArgRetFunc f = (ArgRetFunc) r_0;
+						f.call(result, f, l - 1);
+						Number m = (Number) result.getAndClear()[0];
+						result.set(new Object[] { m.longValue() + 1 });
+					}
+					else {
+						result.set(new Object[] { n });
+					}
+			}
+		}
+
+	}
+
+	@Benchmark
+	public void _3_3_resumableArgRetFunc_ptrReuse() {
+		ArgRetFunc f = new ResumableArgRetFuncImpl(100);
 		Ptr<Object[]> result = new Ptr<Object[]>();
 		f.call(result, f, 20);
 		assertEquals(result.get()[0], 120L);

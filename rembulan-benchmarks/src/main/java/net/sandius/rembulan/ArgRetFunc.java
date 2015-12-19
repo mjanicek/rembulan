@@ -18,6 +18,8 @@ public abstract class ArgRetFunc {
 
 	public abstract void call(Ptr<Object[]> result, Object[] args);
 
+	public abstract void resume(Ptr<Object[]> result, int pc, Object[] registers);
+
 	public static abstract class _0 extends ArgRetFunc {
 
 		@Override
@@ -118,6 +120,39 @@ public abstract class ArgRetFunc {
 			Object b = args.length >= 2 ? args[1] : null;
 			call(result, a, b);
 		}
+
+	}
+
+	public static abstract class _2_2 extends ArgRetFunc._2 {
+
+		@Override
+		public void call(Ptr<Object[]> result, Object a, Object b) {
+			resume(result, 0, a, b);
+		}
+
+		@Override
+		public void resume(Ptr<Object[]> result, int pc, Object[] regs) {
+			resume(result, pc, regs[0], regs[1]);
+		}
+
+		protected abstract void resume(Ptr<Object[]> result, int pc, Object r_0, Object r_1);
+
+	}
+
+	public static abstract class _2_3 extends ArgRetFunc._2 {
+
+		@Override
+		public void call(Ptr<Object[]> result, Object a, Object b) {
+			resume(result, 0, a, b, null);
+		}
+
+		@Override
+		public void resume(Ptr<Object[]> result, int pc, Object[] regs) {
+			resume(result, pc, regs[0], regs[1], regs[2]);
+		}
+
+		protected abstract void resume(Ptr<Object[]> result, int pc, Object r_0, Object r_1, Object r_2);
+
 	}
 
 	public static abstract class _var extends ArgRetFunc {
