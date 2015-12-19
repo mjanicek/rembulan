@@ -9,23 +9,12 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 
+import static net.sandius.rembulan.Util.*;
+
 @Fork(5)
 @Warmup(iterations = 10)
 @Measurement(iterations = 10)
 public class CallReturnBenchmark {
-
-	public static void assertEquals(Object actual, Object expected) {
-		if (actual == null) {
-			if (expected != null) {
-				throw new AssertionError("Expected " + expected + ", got null");
-			}
-		}
-		else {
-			if (!actual.equals(expected)) {
-				throw new AssertionError("Expected " + expected + ", got " + actual);
-			}
-		}
-	}
 
 	public static abstract class JavaTwoArgFunc {
 		public abstract Object call(Object arg1, Object arg2);
