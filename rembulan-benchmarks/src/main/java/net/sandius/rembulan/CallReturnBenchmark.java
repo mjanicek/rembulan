@@ -55,7 +55,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _0_javaTwoArgCallMethod() {
 		JavaTwoArgFunc f = new JavaTwoArgFuncImpl(100);
 
@@ -93,7 +93,7 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _1_javaResultInReturnValue() {
 		JavaArraysFunc f = new JavaArraysFuncImpl(100);
 
@@ -158,7 +158,7 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _2_1_javaResultInArgument_newPtrAlloc() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrAlloc(100);
 
@@ -168,7 +168,7 @@ public class CallReturnBenchmark {
 		assertEquals(result.get()[0], 120L);
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _2_2_javaResultInArgument_ptrReuse() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrReuse(100);
 
@@ -203,7 +203,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _3_1_retFunc() {
 		RetFunc f = new RetFuncImpl(100);
 		Object[] result = f.call(f, 20);
@@ -219,32 +219,34 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void call(Ptr<Object[]> result, Object a, Object b) {
+		public void call(ObjectSink result, Object a, Object b) {
 			ArgRetFunc f = (ArgRetFunc) a;
 			long l = ((Number) b).longValue();
 			if (l > 0) {
 				f.call(result, f, l - 1);
-				Number m = (Number) result.getAndClear()[0];
-				result.set(new Object[] { m.longValue() + 1 });
+				Number m = (Number) result._0();
+				result.reset();
+				result.push(m.longValue() + 1);
 			}
 			else {
-				result.set(new Object[] { n });
+				result.reset();
+				result.push(n);
 			}
 		}
 
 		@Override
-		public void resume(Ptr<Object[]> result, int pc, Object[] registers) {
+		public void resume(ObjectSink result, int pc, Object[] registers) {
 			throw new UnsupportedOperationException();
 		}
 
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _3_2_argRetFunc_ptrReuse() {
 		ArgRetFunc f = new ArgRetFuncImpl(100);
-		Ptr<Object[]> result = new Ptr<Object[]>();
+		ObjectSink result = new PairObjectSink();
 		f.call(result, f, 20);
-		assertEquals(result.get()[0], 120L);
+		assertEquals(result._0(), 120L);
 	}
 
 	public static class ResumableArgRetFuncImpl extends ArgRetFunc._2p._2r {
@@ -256,7 +258,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		protected void resume(Ptr<Object[]> result, int pc, Object r_0, Object r_1) {
+		protected void resume(ObjectSink result, int pc, Object r_0, Object r_1) {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -264,11 +266,13 @@ public class CallReturnBenchmark {
 					if (l > 0) {
 						ArgRetFunc f = (ArgRetFunc) r_0;
 						f.call(result, f, l - 1);
-						Number m = (Number) result.getAndClear()[0];
-						result.set(new Object[] { m.longValue() + 1 });
+						Number m = (Number) result._0();
+						result.reset();
+						result.push(m.longValue() + 1);
 					}
 					else {
-						result.set(new Object[] { n });
+						result.reset();
+						result.push(n);
 					}
 			}
 		}
@@ -278,9 +282,9 @@ public class CallReturnBenchmark {
 	@Benchmark
 	public void _3_3_resumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new ResumableArgRetFuncImpl(100);
-		Ptr<Object[]> result = new Ptr<Object[]>();
+		ObjectSink result = new TripleObjectSink();
 		f.call(result, f, 20);
-		assertEquals(result.get()[0], 120L);
+		assertEquals(result._0(), 120L);
 	}
 
 	public static abstract class ViewFunc {
@@ -343,7 +347,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _4_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		ViewFunc f = new ViewFuncImpl(100);
@@ -414,7 +418,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _5_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		DirectFunc f = new DirectFuncImpl(100);
@@ -492,7 +496,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _6_perCallRegisterAllocationWithPushInterface() {
 		AllocFunc f = new AllocFuncImpl(100);
 
