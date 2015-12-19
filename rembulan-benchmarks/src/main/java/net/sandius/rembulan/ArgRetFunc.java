@@ -190,6 +190,22 @@ public abstract class ArgRetFunc {
 			call(result, a, b, c);
 		}
 
+		public static abstract class _2r extends _3p {
+
+			@Override
+			public void call(ObjectSink result, Object a, Object b, Object c) {
+				resume(result, 0, a, b);
+			}
+
+			@Override
+			public void resume(ObjectSink result, int pc, Object[] regs) {
+				resume(result, pc, regs[0], regs[1]);
+			}
+
+			protected abstract void resume(ObjectSink result, int pc, Object r_0, Object r_1);
+
+		}
+
 		public static abstract class _3r extends _3p {
 
 			@Override
