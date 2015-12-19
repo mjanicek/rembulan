@@ -41,126 +41,126 @@ public class ObjectSinkBenchmark {
 	// No cache
 
 	@Benchmark
-	public void _0_0_noCache_add0(NoCacheSinkState state, Blackhole bh) {
+	public void _0_00(NoCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 0);
 	}
 
 	@Benchmark
-	public void _0_1_noCache_add1(NoCacheSinkState state, Blackhole bh) {
+	public void _0_01(NoCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 1);
 	}
 
 	@Benchmark
-	public void _0_2_noCache_add2(NoCacheSinkState state, Blackhole bh) {
+	public void _0_02(NoCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 2);
 	}
 
 	@Benchmark
-	public void _0_3_noCache_add3(NoCacheSinkState state, Blackhole bh) {
+	public void _0_03(NoCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 3);
 	}
 
 	@Benchmark
-	public void _0_4_noCache_add4(NoCacheSinkState state, Blackhole bh) {
+	public void _0_04(NoCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 4);
 	}
 
 	@Benchmark
-	public void _0_5_noCache_add5(NoCacheSinkState state, Blackhole bh) {
+	public void _0_05(NoCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 5);
 	}
 
 	@Benchmark
-	public void _0_10_noCache_add10(NoCacheSinkState state, Blackhole bh) {
+	public void _0_10(NoCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 10);
 	}
 
 	@Benchmark
-	public void _0_20_noCache_add20(NoCacheSinkState state, Blackhole bh) {
+	public void _0_20(NoCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 20);
 	}
 
 	// Pair cache
 
 	@Benchmark
-	public void _2_0_pairCache_add0(PairCacheSinkState state, Blackhole bh) {
+	public void _2_00(PairCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 0);
 	}
 
 	@Benchmark
-	public void _2_1_pairCache_add1(PairCacheSinkState state, Blackhole bh) {
+	public void _2_01(PairCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 1);
 	}
 
 	@Benchmark
-	public void _2_2_pairCache_add2(PairCacheSinkState state, Blackhole bh) {
+	public void _2_02(PairCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 2);
 	}
 
 	@Benchmark
-	public void _2_3_pairCache_add3(PairCacheSinkState state, Blackhole bh) {
+	public void _2_03(PairCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 3);
 	}
 
 	@Benchmark
-	public void _2_4_pairCache_add4(PairCacheSinkState state, Blackhole bh) {
+	public void _2_04(PairCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 4);
 	}
 
 	@Benchmark
-	public void _2_5_pairCache_add5(PairCacheSinkState state, Blackhole bh) {
+	public void _2_05(PairCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 5);
 	}
 
 	@Benchmark
-	public void _2_10_pairCache_add10(PairCacheSinkState state, Blackhole bh) {
+	public void _2_10(PairCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 10);
 	}
 
 	@Benchmark
-	public void _2_20_pairCache_add20(PairCacheSinkState state, Blackhole bh) {
+	public void _2_20(PairCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 20);
 	}
 
 	// Triple cache
 
 	@Benchmark
-	public void _3_0_pairCache_add0(TripleCacheSinkState state, Blackhole bh) {
+	public void _3_00(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 0);
 	}
 
 	@Benchmark
-	public void _3_1_pairCache_add1(TripleCacheSinkState state, Blackhole bh) {
+	public void _3_01(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 1);
 	}
 
 	@Benchmark
-	public void _3_2_pairCache_add2(TripleCacheSinkState state, Blackhole bh) {
+	public void _3_02(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 2);
 	}
 
 	@Benchmark
-	public void _3_3_pairCache_add3(TripleCacheSinkState state, Blackhole bh) {
+	public void _3_03(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 3);
 	}
 
 	@Benchmark
-	public void _3_4_pairCache_add4(TripleCacheSinkState state, Blackhole bh) {
+	public void _3_04(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 4);
 	}
 
 	@Benchmark
-	public void _3_5_pairCache_add5(TripleCacheSinkState state, Blackhole bh) {
+	public void _3_05(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 5);
 	}
 
 	@Benchmark
-	public void _3_10_pairCache_add10(TripleCacheSinkState state, Blackhole bh) {
+	public void _3_10(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 10);
 	}
 
 	@Benchmark
-	public void _3_20_pairCache_add20(TripleCacheSinkState state, Blackhole bh) {
+	public void _3_20(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 20);
 	}
 
