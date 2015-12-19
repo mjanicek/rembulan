@@ -44,14 +44,14 @@ public class ObjectSinkBenchmark {
 	public void impl_set(Blackhole bh, ObjectSink sink, int count) {
 		switch (count) {
 			case 0: sink.reset(); break;
-			case 1: sink.setTo(1); break;
-			case 2: sink.setTo(1, 2); break;
-			case 3: sink.setTo(1, 2, 3); break;
-			case 4: sink.setTo(1, 2, 3, 4); break;
-			case 5: sink.setTo(1, 2, 3, 4, 5); break;
+			case 1: sink.setTo(0); break;
+			case 2: sink.setTo(0, 1); break;
+			case 3: sink.setTo(0, 1, 2); break;
+			case 4: sink.setTo(0, 1, 2, 3); break;
+			case 5: sink.setTo(0, 1, 2, 3, 4); break;
 			default:
-				sink.setTo(1, 2, 3, 4, 5);
-				for (int i = 6; i < count; i++) {
+				sink.setTo(0, 1, 2, 3, 4);
+				for (int i = 5; i < count; i++) {
 					sink.push(i);
 				}
 		}
