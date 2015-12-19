@@ -19,6 +19,10 @@ import static net.sandius.rembulan.Util.*;
 @Measurement(iterations = 10)
 public class CallReturnBenchmark {
 
+	public static ObjectSink newSink() {
+		return new TripleCachingObjectSink();
+	}
+
 	public static abstract class JavaTwoArgFunc {
 		public abstract Object call(Object arg1, Object arg2);
 	}
@@ -236,7 +240,7 @@ public class CallReturnBenchmark {
 //	@Benchmark
 	public void _3_2_argRetFunc_ptrReuse() {
 		ArgRetFunc f = new ArgRetFuncImpl(100);
-		ObjectSink result = new PairCachingObjectSink();
+		ObjectSink result = newSink();
 		f.call(result, f, 20);
 		assertEquals(result._0(), 120L);
 	}
@@ -356,7 +360,7 @@ public class CallReturnBenchmark {
 	@Benchmark
 	public void _3_3_resumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new ResumableArgRetFuncImpl(100);
-		ObjectSink result = new TripleCachingObjectSink();
+		ObjectSink result = newSink();
 		_call(result, f, f, 20);
 		assertEquals(result._0(), 120L);
 	}
@@ -364,7 +368,7 @@ public class CallReturnBenchmark {
 	@Benchmark
 	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new TailCallingResumableArgRetFuncImpl(100);
-		ObjectSink result = new TripleCachingObjectSink();
+		ObjectSink result = newSink();
 		_call(result, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
@@ -372,7 +376,7 @@ public class CallReturnBenchmark {
 	@Benchmark
 	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new SelfRecursiveTailCallingResumableArgRetFuncImpl(100);
-		ObjectSink result = new TripleCachingObjectSink();
+		ObjectSink result = newSink();
 		_call(result, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
