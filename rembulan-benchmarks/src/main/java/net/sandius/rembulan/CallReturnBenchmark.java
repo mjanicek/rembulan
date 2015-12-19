@@ -55,7 +55,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _0_javaTwoArgCallMethod() {
 		JavaTwoArgFunc f = new JavaTwoArgFuncImpl(100);
 
@@ -93,7 +93,7 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _1_javaResultInReturnValue() {
 		JavaArraysFunc f = new JavaArraysFuncImpl(100);
 
@@ -158,7 +158,7 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _2_1_javaResultInArgument_newPtrAlloc() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrAlloc(100);
 
@@ -168,13 +168,77 @@ public class CallReturnBenchmark {
 		assertEquals(result.get()[0], 120L);
 	}
 
-	@Benchmark
+//	@Benchmark
 	public void _2_2_javaResultInArgument_ptrReuse() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrReuse(100);
 
 		Ptr<Object[]> result = new Ptr<Object[]>();
 		f.call(new Object[] { f, 20 }, result);
 
+		assertEquals(result.get()[0], 120L);
+	}
+
+	public static class RetFuncImpl extends RetFunc._2 {
+
+		private final Long n;
+
+		public RetFuncImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		public Object[] call(Object a, Object b) {
+			RetFunc f = (RetFunc) a;
+			long l = ((Number) b).longValue();
+			if (l > 0) {
+				Object[] result = f.call(f, l - 1);
+				Number m = (Number) result[0];
+
+				return new Object[] { m.longValue() + 1 };
+			}
+			else {
+				return new Object[] { n };
+			}
+		}
+
+	}
+
+	@Benchmark
+	public void _3_1_retFunc() {
+		RetFunc f = new RetFuncImpl(100);
+		Object[] result = f.call(f, 20);
+		assertEquals(result[0], 120L);
+	}
+
+	public static class ArgRetFuncImpl extends ArgRetFunc._2 {
+
+		private final Long n;
+
+		public ArgRetFuncImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		public void call(Ptr<Object[]> result, Object a, Object b) {
+			ArgRetFunc f = (ArgRetFunc) a;
+			long l = ((Number) b).longValue();
+			if (l > 0) {
+				f.call(result, f, l - 1);
+				Number m = (Number) result.getAndClear()[0];
+				result.set(new Object[] { m.longValue() + 1 });
+			}
+			else {
+				result.set(new Object[] { n });
+			}
+		}
+
+	}
+
+	@Benchmark
+	public void _3_2_argRetFunc_ptrReuse() {
+		ArgRetFunc f = new ArgRetFuncImpl(100);
+		Ptr<Object[]> result = new Ptr<Object[]>();
+		f.call(result, f, 20);
 		assertEquals(result.get()[0], 120L);
 	}
 
@@ -239,7 +303,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _3_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh) {
+	public void _4_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		ViewFunc f = new ViewFuncImpl(100);
 		ObjectStack.View root = os.rootView();
@@ -310,7 +374,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _4_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh) {
+	public void _5_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		DirectFunc f = new DirectFuncImpl(100);
 		os.set(0, f);
@@ -388,7 +452,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _5_perCallRegisterAllocationWithPushInterface() {
+	public void _6_perCallRegisterAllocationWithPushInterface() {
 		AllocFunc f = new AllocFuncImpl(100);
 
 		FixedSizeRegisters out = new FixedSizeRegisters(1);
