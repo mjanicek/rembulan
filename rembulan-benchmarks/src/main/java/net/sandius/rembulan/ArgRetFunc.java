@@ -155,6 +155,59 @@ public abstract class ArgRetFunc {
 
 	}
 
+	public static abstract class _3p extends ArgRetFunc {
+
+		@Override
+		public void call(ObjectSink result) {
+			call(result, null, null, null);
+		}
+
+		@Override
+		public void call(ObjectSink result, Object a) {
+			call(result, a, null, null);
+		}
+
+		@Override
+		public void call(ObjectSink result, Object a, Object b) {
+			call(result, a, b, null);
+		}
+
+		@Override
+		public void call(ObjectSink result, Object a, Object b, Object c, Object d) {
+			call(result, a, b, c);
+		}
+
+		@Override
+		public void call(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
+			call(result, a, b, c);
+		}
+
+		@Override
+		public void call(ObjectSink result, Object[] args) {
+			Object a = args.length >= 1 ? args[0] : null;
+			Object b = args.length >= 2 ? args[1] : null;
+			Object c = args.length >= 3 ? args[2] : null;
+			call(result, a, b, c);
+		}
+
+		public static abstract class _3r extends _3p {
+
+			@Override
+			public void call(ObjectSink result, Object a, Object b, Object c) {
+				resume(result, 0, a, b, c);
+			}
+
+			@Override
+			public void resume(ObjectSink result, int pc, Object[] regs) {
+				resume(result, pc, regs[0], regs[1], regs[2]);
+			}
+
+			protected abstract void resume(ObjectSink result, int pc, Object r_0, Object r_1, Object r_2);
+
+		}
+
+	}
+
 	public static abstract class _vp extends ArgRetFunc {
 
 		@Override

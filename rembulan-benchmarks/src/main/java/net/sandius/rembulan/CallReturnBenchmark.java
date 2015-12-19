@@ -241,6 +241,36 @@ public class CallReturnBenchmark {
 		assertEquals(result._0(), 120L);
 	}
 
+	public static void doCall(ObjectSink result, Object[] args) {
+		Object[] rem = new Object[args.length - 1];
+		System.arraycopy(args, 1, rem, 0, rem.length);
+		ArgRetFunc target = (ArgRetFunc) args[0];
+		target.call(result, rem);
+	}
+
+	public static void evaluateTailCalls(ObjectSink result) {
+		while (result.isTailCall()) {
+			Object[] args = result.toArray();
+			result.reset();
+			doCall(result, args);
+		}
+	}
+
+	public static void _call(ObjectSink result, ArgRetFunc f, Object a) {
+		f.call(result, a);
+		evaluateTailCalls(result);
+	}
+
+	public static void _call(ObjectSink result, ArgRetFunc f, Object a, Object b) {
+		f.call(result, a, b);
+		evaluateTailCalls(result);
+	}
+
+	public static void _call(ObjectSink result, ArgRetFunc f, Object a, Object b, Object c) {
+		f.call(result, a, b, c);
+		evaluateTailCalls(result);
+	}
+
 	public static class ResumableArgRetFuncImpl extends ArgRetFunc._2p._2r {
 
 		private final Long n;
@@ -257,7 +287,7 @@ public class CallReturnBenchmark {
 					long l = ((Number) r_1).longValue();
 					if (l > 0) {
 						ArgRetFunc f = (ArgRetFunc) r_0;
-						f.call(result, f, l - 1);
+						_call(result, f, f, l - 1);
 						Number m = (Number) result._0();
 						result.setTo(m.longValue() + 1);
 					}
@@ -269,11 +299,46 @@ public class CallReturnBenchmark {
 
 	}
 
+	public static class TailCallingResumableArgRetFuncImpl extends ArgRetFunc._3p._3r {
+
+		private final Long n;
+
+		public TailCallingResumableArgRetFuncImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		protected void resume(ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
+			switch (pc) {
+				case 0:
+				case 1:
+					long l = ((Number) r_1).longValue();
+					long acc = ((Number) r_2).longValue();
+					if (l > 0) {
+						result.setTo(r_0, r_0, l - 1, acc + 1);
+						result.markAsTailCall();
+					}
+					else {
+						result.setTo(acc + n);
+					}
+			}
+		}
+
+	}
+
 	@Benchmark
 	public void _3_3_resumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new ResumableArgRetFuncImpl(100);
 		ObjectSink result = new TripleCachingObjectSink();
-		f.call(result, f, 20);
+		_call(result, f, f, 20);
+		assertEquals(result._0(), 120L);
+	}
+
+	@Benchmark
+	public void _3_4_tailCallingresumableArgRetFunc_ptrReuse() {
+		ArgRetFunc f = new TailCallingResumableArgRetFuncImpl(100);
+		ObjectSink result = new TripleCachingObjectSink();
+		_call(result, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
