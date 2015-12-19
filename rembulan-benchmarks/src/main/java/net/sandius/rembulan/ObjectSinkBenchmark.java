@@ -8,7 +8,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-@Fork(1)
+@Fork(2)
 @Warmup(iterations = 10)
 @Measurement(iterations = 10)
 public class ObjectSinkBenchmark {
@@ -70,6 +70,16 @@ public class ObjectSinkBenchmark {
 		impl(bh, state.sink, 5);
 	}
 
+	@Benchmark
+	public void _0_10_noCache_add10(NoCacheSinkState state, Blackhole bh) {
+		impl(bh, state.sink, 10);
+	}
+
+	@Benchmark
+	public void _0_20_noCache_add20(NoCacheSinkState state, Blackhole bh) {
+		impl(bh, state.sink, 20);
+	}
+
 	// Pair cache
 
 	@Benchmark
@@ -102,6 +112,16 @@ public class ObjectSinkBenchmark {
 		impl(bh, state.sink, 5);
 	}
 
+	@Benchmark
+	public void _2_10_pairCache_add10(PairCacheSinkState state, Blackhole bh) {
+		impl(bh, state.sink, 10);
+	}
+
+	@Benchmark
+	public void _2_20_pairCache_add20(PairCacheSinkState state, Blackhole bh) {
+		impl(bh, state.sink, 20);
+	}
+
 	// Triple cache
 
 	@Benchmark
@@ -132,6 +152,16 @@ public class ObjectSinkBenchmark {
 	@Benchmark
 	public void _3_5_pairCache_add5(TripleCacheSinkState state, Blackhole bh) {
 		impl(bh, state.sink, 5);
+	}
+
+	@Benchmark
+	public void _3_10_pairCache_add10(TripleCacheSinkState state, Blackhole bh) {
+		impl(bh, state.sink, 10);
+	}
+
+	@Benchmark
+	public void _3_20_pairCache_add20(TripleCacheSinkState state, Blackhole bh) {
+		impl(bh, state.sink, 20);
 	}
 
 }
