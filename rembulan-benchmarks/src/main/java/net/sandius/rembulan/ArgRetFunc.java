@@ -20,7 +20,7 @@ public abstract class ArgRetFunc {
 
 	public abstract void resume(Ptr<Object[]> result, int pc, Object[] registers);
 
-	public static abstract class _0 extends ArgRetFunc {
+	public static abstract class _0p extends ArgRetFunc {
 
 		@Override
 		public void call(Ptr<Object[]> result, Object a) {
@@ -53,7 +53,7 @@ public abstract class ArgRetFunc {
 		}
 	}
 
-	public static abstract class _1 extends ArgRetFunc {
+	public static abstract class _1p extends ArgRetFunc {
 
 		@Override
 		public void call(Ptr<Object[]> result) {
@@ -87,7 +87,7 @@ public abstract class ArgRetFunc {
 		}
 	}
 
-	public static abstract class _2 extends ArgRetFunc {
+	public static abstract class _2p extends ArgRetFunc {
 
 		@Override
 		public void call(Ptr<Object[]> result) {
@@ -121,41 +121,41 @@ public abstract class ArgRetFunc {
 			call(result, a, b);
 		}
 
+		public static abstract class _2r extends _2p {
+
+			@Override
+			public void call(Ptr<Object[]> result, Object a, Object b) {
+				resume(result, 0, a, b);
+			}
+
+			@Override
+			public void resume(Ptr<Object[]> result, int pc, Object[] regs) {
+				resume(result, pc, regs[0], regs[1]);
+			}
+
+			protected abstract void resume(Ptr<Object[]> result, int pc, Object r_0, Object r_1);
+
+		}
+
+		public static abstract class _3r extends _2p {
+
+			@Override
+			public void call(Ptr<Object[]> result, Object a, Object b) {
+				resume(result, 0, a, b, null);
+			}
+
+			@Override
+			public void resume(Ptr<Object[]> result, int pc, Object[] regs) {
+				resume(result, pc, regs[0], regs[1], regs[2]);
+			}
+
+			protected abstract void resume(Ptr<Object[]> result, int pc, Object r_0, Object r_1, Object r_2);
+
+		}
+
 	}
 
-	public static abstract class _2_2 extends ArgRetFunc._2 {
-
-		@Override
-		public void call(Ptr<Object[]> result, Object a, Object b) {
-			resume(result, 0, a, b);
-		}
-
-		@Override
-		public void resume(Ptr<Object[]> result, int pc, Object[] regs) {
-			resume(result, pc, regs[0], regs[1]);
-		}
-
-		protected abstract void resume(Ptr<Object[]> result, int pc, Object r_0, Object r_1);
-
-	}
-
-	public static abstract class _2_3 extends ArgRetFunc._2 {
-
-		@Override
-		public void call(Ptr<Object[]> result, Object a, Object b) {
-			resume(result, 0, a, b, null);
-		}
-
-		@Override
-		public void resume(Ptr<Object[]> result, int pc, Object[] regs) {
-			resume(result, pc, regs[0], regs[1], regs[2]);
-		}
-
-		protected abstract void resume(Ptr<Object[]> result, int pc, Object r_0, Object r_1, Object r_2);
-
-	}
-
-	public static abstract class _var extends ArgRetFunc {
+	public static abstract class _vp extends ArgRetFunc {
 
 		@Override
 		public void call(Ptr<Object[]> result) {

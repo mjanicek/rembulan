@@ -210,7 +210,7 @@ public class CallReturnBenchmark {
 		assertEquals(result[0], 120L);
 	}
 
-	public static class ArgRetFuncImpl extends ArgRetFunc._2 {
+	public static class ArgRetFuncImpl extends ArgRetFunc._2p {
 
 		private final Long n;
 
@@ -247,7 +247,7 @@ public class CallReturnBenchmark {
 		assertEquals(result.get()[0], 120L);
 	}
 
-	public static class ResumableArgRetFuncImpl extends ArgRetFunc._2_2 {
+	public static class ResumableArgRetFuncImpl extends ArgRetFunc._2p._2r {
 
 		private final Long n;
 
