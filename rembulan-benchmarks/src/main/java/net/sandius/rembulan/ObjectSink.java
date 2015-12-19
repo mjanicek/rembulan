@@ -6,6 +6,14 @@ public abstract class ObjectSink {
 
 	public abstract void reset();
 
+	public abstract void setTo(Object a);
+
+	public abstract void setTo(Object a, Object b);
+
+	public abstract void setTo(Object a, Object b, Object c);
+
+	public abstract void setTo(Object a, Object b, Object c, Object d);
+
 	public abstract void push(Object o);
 
 	public abstract Object[] toArray();

@@ -267,12 +267,10 @@ public class CallReturnBenchmark {
 						ArgRetFunc f = (ArgRetFunc) r_0;
 						f.call(result, f, l - 1);
 						Number m = (Number) result._0();
-						result.reset();
-						result.push(m.longValue() + 1);
+						result.setTo(m.longValue() + 1);
 					}
 					else {
-						result.reset();
-						result.push(n);
+						result.setTo(n);
 					}
 			}
 		}

@@ -21,6 +21,36 @@ public class SimpleObjectSink extends ObjectSink {
 	}
 
 	@Override
+	public void setTo(Object a) {
+		buf.clear();
+		buf.add(a);
+	}
+
+	@Override
+	public void setTo(Object a, Object b) {
+		buf.clear();
+		buf.add(a);
+		buf.add(b);
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c) {
+		buf.clear();
+		buf.add(a);
+		buf.add(b);
+		buf.add(c);
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c, Object d) {
+		buf.clear();
+		buf.add(a);
+		buf.add(b);
+		buf.add(c);
+		buf.add(d);
+	}
+
+	@Override
 	public void push(Object o) {
 		buf.add(o);
 	}

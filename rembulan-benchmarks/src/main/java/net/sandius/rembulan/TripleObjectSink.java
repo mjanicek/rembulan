@@ -21,15 +21,44 @@ public class TripleObjectSink extends ObjectSink {
 		return size;
 	}
 
-	@Override
-	public void reset() {
-		_0 = null;
-		_1 = null;
-		_2 = null;
+	protected void setCacheAndClearList(Object a, Object b, Object c) {
+		_0 = a;
+		_1 = b;
+		_2 = c;
 		if (size > 3) {
 			_var.clear();
 		}
+	}
+
+	@Override
+	public void reset() {
+		setCacheAndClearList(null, null, null);
 		size = 0;
+	}
+
+	@Override
+	public void setTo(Object a) {
+		setCacheAndClearList(a, null, null);
+		size = 1;
+	}
+
+	@Override
+	public void setTo(Object a, Object b) {
+		setCacheAndClearList(a, b, null);
+		size = 2;
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c) {
+		setCacheAndClearList(a, b, c);
+		size = 3;
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c, Object d) {
+		setCacheAndClearList(a, b, c);
+		_var.add(d);
+		size = 4;
 	}
 
 	@Override

@@ -20,14 +20,45 @@ public class PairObjectSink extends ObjectSink {
 		return size;
 	}
 
-	@Override
-	public void reset() {
-		_0 = null;
-		_1 = null;
+	protected void setCacheAndClearList(Object a, Object b) {
+		_0 = a;
+		_1 = b;
 		if (size > 2) {
 			_var.clear();
 		}
+	}
+
+	@Override
+	public void reset() {
+		setCacheAndClearList(null, null);
 		size = 0;
+	}
+
+	@Override
+	public void setTo(Object a) {
+		setCacheAndClearList(a, null);
+		size = 1;
+	}
+
+	@Override
+	public void setTo(Object a, Object b) {
+		setCacheAndClearList(a, b);
+		size = 2;
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c) {
+		setCacheAndClearList(null, null);
+		_var.add(c);
+		size = 3;
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c, Object d) {
+		setCacheAndClearList(null, null);
+		_var.add(c);
+		_var.add(d);
+		size = 4;
 	}
 
 	@Override
