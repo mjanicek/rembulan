@@ -1,5 +1,7 @@
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.util.ObjectSink;
+
 public abstract class ArgRetFunc {
 
 	public abstract void call(ObjectSink result);

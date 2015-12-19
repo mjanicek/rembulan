@@ -1,5 +1,9 @@
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.util.ArrayListObjectSink;
+import net.sandius.rembulan.util.ObjectSink;
+import net.sandius.rembulan.util.PairCachingObjectSink;
+import net.sandius.rembulan.util.TripleCachingObjectSink;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;

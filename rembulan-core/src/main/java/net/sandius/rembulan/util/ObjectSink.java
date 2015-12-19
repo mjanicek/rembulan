@@ -1,4 +1,4 @@
-package net.sandius.rembulan;
+package net.sandius.rembulan.util;
 
 public abstract class ObjectSink {
 
