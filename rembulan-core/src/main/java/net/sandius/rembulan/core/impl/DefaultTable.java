@@ -2,6 +2,7 @@ package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,13 @@ public class DefaultTable extends Table {
 	public DefaultTable() {
 		this.values = new HashMap<Object, Object>();
 	}
+
+	public static final TableFactory FACTORY_INSTANCE = new TableFactory() {
+		@Override
+		public Table newTable() {
+			return new DefaultTable();
+		}
+	};
 
 	@Override
 	public Table getMetatable() {

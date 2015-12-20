@@ -28,6 +28,8 @@ public abstract class LuaState {
 	public abstract Table threadMetatable();
 	public abstract Table lightuserdataMetatable();
 
+	public abstract TableFactory tableFactory();
+
 	public abstract boolean shouldPreemptNow();
 
 	@Deprecated
