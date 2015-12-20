@@ -67,6 +67,30 @@ public class CallReturnBenchmark {
 		}
 	}
 
+	public static abstract class JavaPrimitiveTwoArgFuncObject {
+		public abstract long call(JavaPrimitiveTwoArgFuncObject arg1, long arg2);
+	}
+
+	public static class JavaPrimitiveTwoArgFuncObjectImpl extends JavaPrimitiveTwoArgFuncObject {
+
+		private final long n;
+
+		public JavaPrimitiveTwoArgFuncObjectImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		public long call(JavaPrimitiveTwoArgFuncObject f, long l) {
+			if (l > 0) {
+				return f.call(f, l - 1) + 1;
+			}
+			else {
+				return n;
+			}
+		}
+
+	}
+
 	public static abstract class JavaTwoArgFuncObject {
 		public abstract Object call(Object arg1, Object arg2);
 	}
@@ -95,6 +119,38 @@ public class CallReturnBenchmark {
 
 	}
 
+	public static abstract class JavaVarargFuncObject {
+		public abstract Object call(Object... args);
+	}
+
+	public static class JavaVarargFuncObjectImpl extends JavaVarargFuncObject {
+
+		private final Long n;
+
+		public JavaVarargFuncObjectImpl(long n) {
+			this.n = n;
+		}
+
+		@Override
+		public Object call(Object... args) {
+			if (args.length < 2) {
+				throw new IllegalArgumentException();
+			}
+
+			JavaVarargFuncObject f = (JavaVarargFuncObject) args[0];
+			long l = ((Number) args[1]).longValue();
+
+			if (l > 0) {
+				return ((Number) f.call(f, l - 1)).longValue() + 1;
+			}
+			else {
+				return n;
+			}
+		}
+
+	}
+
+
 	@Benchmark
 	public void _0_0_primitiveMethod() {
 		long result = primitiveMethod(100, 20);
@@ -120,8 +176,22 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _0_4_javaTwoArgFunctionObjectMethod() {
+	public void _0_4_javaPrimitiveFunctionObject() {
+		JavaPrimitiveTwoArgFuncObject f = new JavaPrimitiveTwoArgFuncObjectImpl(100);
+		long result = f.call(f, 20);
+		assertEquals(result, 120L);
+	}
+
+	@Benchmark
+	public void _0_5_javaGenericTwoArgFunctionObject() {
 		JavaTwoArgFuncObject f = new JavaTwoArgFuncObjectImpl(100);
+		Object result = f.call(f, 20);
+		assertEquals(result, 120L);
+	}
+
+	@Benchmark
+	public void _0_6_javaVarargFunctionObject() {
+		JavaVarargFuncObject f = new JavaVarargFuncObjectImpl(100);
 		Object result = f.call(f, 20);
 		assertEquals(result, 120L);
 	}
