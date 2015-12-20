@@ -1,7 +1,7 @@
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.core.AbstractFunc2;
-import net.sandius.rembulan.core.AbstractFunc3;
+import net.sandius.rembulan.core.impl.AbstractFunc2;
+import net.sandius.rembulan.core.impl.AbstractFunc3;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.FixedSizeRegisters;
