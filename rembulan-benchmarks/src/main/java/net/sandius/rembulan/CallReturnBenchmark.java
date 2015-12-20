@@ -3,6 +3,7 @@ package net.sandius.rembulan;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.FixedSizeRegisters;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
+import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.LuaType;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.ObjectStack;
@@ -218,11 +219,11 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
+		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
 			Func f = (Func) arg1;
 			long l = ((Number) arg2).longValue();
 			if (l > 0) {
-				f.invoke(result, f, l - 1);
+				f.invoke(state, result, f, l - 1);
 				Number m = (Number) result._0();
 				result.reset();
 				result.push(m.longValue() + 1);
@@ -234,26 +235,26 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
 	}
 
 	@Benchmark
-	public void _3_2_argRetFunc_ptrReuse() throws ControlThrowable {
+	public void _3_2_argRetFunc_ptrReuse(DummyLuaState luaState) throws ControlThrowable {
 		Func f = new FuncImpl(100);
 		ObjectSink result = newSink();
-		f.invoke(result, f, 20);
+		f.invoke(luaState, result, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
-	public static Func callTarget(Object target) {
+	public static Func callTarget(LuaState state, Object target) {
 		if (target instanceof Func) {
 			return (Func) target;
 		}
 		else {
-			Object handler = Metatables.getMetamethod(target, Metatables.MT_CALL);
+			Object handler = Metatables.getMetamethod(state, Metatables.MT_CALL, target);
 
 			if (handler instanceof Func) {
 				return (Func) handler;
@@ -264,102 +265,102 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	public static void mt_invoke(ObjectSink result, Object target) throws ControlThrowable {
-		Func fn = callTarget(target);
-		if (fn == target) fn.invoke(result);
-		else fn.invoke(result, target);
+	public static void mt_invoke(LuaState state, ObjectSink result, Object target) throws ControlThrowable {
+		Func fn = callTarget(state, target);
+		if (fn == target) fn.invoke(state, result);
+		else fn.invoke(state, result, target);
 	}
 
-	public static void mt_invoke(ObjectSink result, Object target, Object arg1) throws ControlThrowable {
-		Func fn = callTarget(target);
-		if (fn == target) fn.invoke(result, arg1);
-		else fn.invoke(result, target, arg1);
+	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1) throws ControlThrowable {
+		Func fn = callTarget(state, target);
+		if (fn == target) fn.invoke(state, result, arg1);
+		else fn.invoke(state, result, target, arg1);
 	}
 
-	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2) throws ControlThrowable {
-		Func fn = callTarget(target);
-		if (fn == target) fn.invoke(result, arg1, arg2);
-		else fn.invoke(result, target, arg1, arg2);
+	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2) throws ControlThrowable {
+		Func fn = callTarget(state, target);
+		if (fn == target) fn.invoke(state, result, arg1, arg2);
+		else fn.invoke(state, result, target, arg1, arg2);
 	}
 
-	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-		Func fn = callTarget(target);
-		if (fn == target) fn.invoke(result, arg1, arg2, arg3);
-		else fn.invoke(result, target, arg1, arg2, arg3);
+	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+		Func fn = callTarget(state, target);
+		if (fn == target) fn.invoke(state, result, arg1, arg2, arg3);
+		else fn.invoke(state, result, target, arg1, arg2, arg3);
 	}
 
-	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
-		Func fn = callTarget(target);
-		if (fn == target) fn.invoke(result, arg1, arg2, arg3, arg4);
-		else fn.invoke(result, target, arg1, arg2, arg3, arg4);
+	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
+		Func fn = callTarget(state, target);
+		if (fn == target) fn.invoke(state, result, arg1, arg2, arg3, arg4);
+		else fn.invoke(state, result, target, arg1, arg2, arg3, arg4);
 	}
 
-	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
-		Func fn = callTarget(target);
-		if (fn == target) fn.invoke(result, arg1, arg2, arg3, arg4, arg5);
-		else fn.invoke(result, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
+	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
+		Func fn = callTarget(state, target);
+		if (fn == target) fn.invoke(state, result, arg1, arg2, arg3, arg4, arg5);
+		else fn.invoke(state, result, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
 	}
 
-	public static void mt_invoke(ObjectSink result, Object target, Object[] args) throws ControlThrowable {
-		Func fn = callTarget(target);
+	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object[] args) throws ControlThrowable {
+		Func fn = callTarget(state, target);
 		if (fn == target) {
-			fn.invoke(result, args);
+			fn.invoke(state, result, args);
 		}
 		else {
 			Object[] mtArgs = new Object[args.length + 1];
 			mtArgs[0] = target;
 			System.arraycopy(args, 0, mtArgs, 1, args.length);
-			fn.invoke(result, mtArgs);
+			fn.invoke(state, result, mtArgs);
 		}
 	}
 
-	public static void evaluateTailCalls(ObjectSink r) throws ControlThrowable {
+	public static void evaluateTailCalls(LuaState state, ObjectSink r) throws ControlThrowable {
 		while (r.isTailCall()) {
 			switch (r.size()) {
 				case 0: throw new IllegalStateException();
-				case 1: mt_invoke(r, r._0()); break;
-				case 2: mt_invoke(r, r._0(), r._1()); break;
-				case 3: mt_invoke(r, r._0(), r._1(), r._2()); break;
-				case 4: mt_invoke(r, r._0(), r._1(), r._2(), r._3()); break;
-				case 5: mt_invoke(r, r._0(), r._1(), r._2(), r._3(), r._4()); break;
-				default: mt_invoke(r, r._0(), r.tailAsArray()); break;
+				case 1: mt_invoke(state, r, r._0()); break;
+				case 2: mt_invoke(state, r, r._0(), r._1()); break;
+				case 3: mt_invoke(state, r, r._0(), r._1(), r._2()); break;
+				case 4: mt_invoke(state, r, r._0(), r._1(), r._2(), r._3()); break;
+				case 5: mt_invoke(state, r, r._0(), r._1(), r._2(), r._3(), r._4()); break;
+				default: mt_invoke(state, r, r._0(), r.tailAsArray()); break;
 			}
 		}
 	}
 
-	public static void call(ObjectSink result, Object target) throws ControlThrowable {
-		mt_invoke(result, target);
-		evaluateTailCalls(result);
+	public static void call(LuaState state, ObjectSink result, Object target) throws ControlThrowable {
+		mt_invoke(state, result, target);
+		evaluateTailCalls(state, result);
 	}
 
-	public static void call(ObjectSink result, Object target, Object arg1) throws ControlThrowable {
-		mt_invoke(result, target, arg1);
-		evaluateTailCalls(result);
+	public static void call(LuaState state, ObjectSink result, Object target, Object arg1) throws ControlThrowable {
+		mt_invoke(state, result, target, arg1);
+		evaluateTailCalls(state, result);
 	}
 
-	public static void call(ObjectSink result, Object target, Object arg1, Object arg2) throws ControlThrowable {
-		mt_invoke(result, target, arg1, arg2);
-		evaluateTailCalls(result);
+	public static void call(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2) throws ControlThrowable {
+		mt_invoke(state, result, target, arg1, arg2);
+		evaluateTailCalls(state, result);
 	}
 
-	public static void call(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-		mt_invoke(result, target, arg1, arg2, arg3);
-		evaluateTailCalls(result);
+	public static void call(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+		mt_invoke(state, result, target, arg1, arg2, arg3);
+		evaluateTailCalls(state, result);
 	}
 
-	public static void call(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
-		mt_invoke(result, target, arg1, arg2, arg3, arg4);
-		evaluateTailCalls(result);
+	public static void call(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
+		mt_invoke(state, result, target, arg1, arg2, arg3, arg4);
+		evaluateTailCalls(state, result);
 	}
 
-	public static void call(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
-		mt_invoke(result, target, arg1, arg2, arg3, arg4, arg5);
-		evaluateTailCalls(result);
+	public static void call(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
+		mt_invoke(state, result, target, arg1, arg2, arg3, arg4, arg5);
+		evaluateTailCalls(state, result);
 	}
 
-	public static void call(ObjectSink result, Object target, Object[] args) throws ControlThrowable {
-		mt_invoke(result, target, args);
-		evaluateTailCalls(result);
+	public static void call(LuaState state, ObjectSink result, Object target, Object[] args) throws ControlThrowable {
+		mt_invoke(state, result, target, args);
+		evaluateTailCalls(state, result);
 	}
 
 	public static class ResumableFuncImpl extends AbstractFunc2 {
@@ -370,13 +371,13 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
 			switch (pc) {
 				case 0:
 				case 1:
 					long l = ((Number) r_1).longValue();
 					if (l > 0) {
-						call(result, r_0, r_0, l - 1);
+						call(state, result, r_0, r_0, l - 1);
 						Number m = (Number) result._0();
 						result.setTo(m.longValue() + 1);
 					}
@@ -387,12 +388,12 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
-			run(result, 0, arg1, arg2);
+		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
+			run(state, result, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -406,7 +407,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
+		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -422,12 +423,12 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-			run(result, 0, arg1, arg2, arg3);
+		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+			run(state, result, 0, arg1, arg2, arg3);
 		}
 
 		@Override
-		public void resume(ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -441,7 +442,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -457,38 +458,38 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
-			run(result, 0, arg1, arg2);
+		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
+			run(state, result, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
 	}
 
 	@Benchmark
-	public void _3_3_resumableArgRetFunc_ptrReuse() throws ControlThrowable {
+	public void _3_3_resumableArgRetFunc_ptrReuse(DummyLuaState luaState) throws ControlThrowable {
 		Func f = new ResumableFuncImpl(100);
 		ObjectSink result = newSink();
-		call(result, f, f, 20);
+		call(luaState, result, f, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
 	@Benchmark
-	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse() throws ControlThrowable {
+	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse(DummyLuaState luaState) throws ControlThrowable {
 		Func f = new TailCallingResumableFuncImpl(100);
 		ObjectSink result = newSink();
-		call(result, f, f, 20, 0);
+		call(luaState, result, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
 	@Benchmark
-	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse() throws ControlThrowable {
+	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse(DummyLuaState luaState) throws ControlThrowable {
 		Func f = new SelfRecursiveTailCallingResumableFuncImpl(100);
 		ObjectSink result = newSink();
-		call(result, f, 20, 0);
+		call(luaState, result, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
