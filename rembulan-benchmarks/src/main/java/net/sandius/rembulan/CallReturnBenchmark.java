@@ -225,12 +225,10 @@ public class CallReturnBenchmark {
 			if (l > 0) {
 				f.invoke(state, result, f, l - 1);
 				Number m = (Number) result._0();
-				result.reset();
-				result.push(m.longValue() + 1);
+				result.setTo(m.longValue() + 1);
 			}
 			else {
-				result.reset();
-				result.push(n);
+				result.setTo(n);
 			}
 		}
 
