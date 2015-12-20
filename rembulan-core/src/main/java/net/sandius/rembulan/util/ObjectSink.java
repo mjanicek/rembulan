@@ -1,82 +1,42 @@
 package net.sandius.rembulan.util;
 
-public abstract class ObjectSink {
+public interface ObjectSink {
 
-	public abstract int size();
+	int size();
 
-	public abstract boolean isTailCall();
+	boolean isTailCall();
 
 	// resets tail call to false, size to 0
-	public abstract void reset();
+	void reset();
 
-	public abstract void markAsTailCall();
+	void markAsTailCall();
 
-	public abstract void push(Object o);
+	void push(Object o);
 
-	public void setTo(Object a) {
-		reset();
-		push(a);
-	}
+	void setTo(Object a);
 
-	public void setTo(Object a, Object b) {
-		reset();
-		push(a);
-		push(b);
-	}
+	void setTo(Object a, Object b);
 
-	public void setTo(Object a, Object b, Object c) {
-		reset();
-		push(a);
-		push(b);
-		push(c);
-	}
+	void setTo(Object a, Object b, Object c);
 
-	public void setTo(Object a, Object b, Object c, Object d) {
-		reset();
-		push(a);
-		push(b);
-		push(c);
-		push(d);
-	}
+	void setTo(Object a, Object b, Object c, Object d);
 
-	public void setTo(Object a, Object b, Object c, Object d, Object e) {
-		reset();
-		push(a);
-		push(b);
-		push(c);
-		push(d);
-		push(e);
-	}
+	void setTo(Object a, Object b, Object c, Object d, Object e);
 
-	public abstract Object[] toArray();
+	Object[] toArray();
 
-	public Object[] tailAsArray() {
-		Object[] tmp = toArray();
-		Object[] result = new Object[tmp.length - 1];
-		System.arraycopy(tmp, 1, result, 0, result.length);
-		return result;
-	}
+	Object[] tailAsArray();
 
-	public abstract Object get(int idx);
+	Object get(int idx);
 
-	public Object _0() {
-		return get(0);
-	};
+	Object _0();
+	
+	Object _1();
 
-	public Object _1() {
-		return get(1);
-	}
+	Object _2();
 
-	public Object _2() {
-		return get(2);
-	}
+	Object _3();
 
-	public Object _3() {
-		return get(3);
-	}
-
-	public Object _4() {
-		return get(4);
-	}
+	Object _4();
 
 }

@@ -1,6 +1,6 @@
 package net.sandius.rembulan.util;
 
-public abstract class AbstractObjectSink extends ObjectSink {
+public abstract class AbstractObjectSink implements ObjectSink {
 
 	protected boolean tailCall;
 
@@ -20,6 +20,79 @@ public abstract class AbstractObjectSink extends ObjectSink {
 	@Override
 	public void markAsTailCall() {
 		tailCall = true;
+	}
+
+	@Override
+	public void setTo(Object a) {
+		reset();
+		push(a);
+	}
+
+	@Override
+	public void setTo(Object a, Object b) {
+		reset();
+		push(a);
+		push(b);
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c) {
+		reset();
+		push(a);
+		push(b);
+		push(c);
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c, Object d) {
+		reset();
+		push(a);
+		push(b);
+		push(c);
+		push(d);
+	}
+
+	@Override
+	public void setTo(Object a, Object b, Object c, Object d, Object e) {
+		reset();
+		push(a);
+		push(b);
+		push(c);
+		push(d);
+		push(e);
+	}
+
+	@Override
+	public Object[] tailAsArray() {
+		Object[] tmp = toArray();
+		Object[] result = new Object[tmp.length - 1];
+		System.arraycopy(tmp, 1, result, 0, result.length);
+		return result;
+	}
+
+	@Override
+	public Object _0() {
+		return get(0);
+	};
+
+	@Override
+	public Object _1() {
+		return get(1);
+	}
+
+	@Override
+	public Object _2() {
+		return get(2);
+	}
+
+	@Override
+	public Object _3() {
+		return get(3);
+	}
+
+	@Override
+	public Object _4() {
+		return get(4);
 	}
 
 }
