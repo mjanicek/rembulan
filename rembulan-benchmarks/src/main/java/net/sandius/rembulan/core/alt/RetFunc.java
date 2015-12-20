@@ -1,4 +1,4 @@
-package net.sandius.rembulan;
+package net.sandius.rembulan.core.alt;
 
 public abstract class RetFunc {
 
