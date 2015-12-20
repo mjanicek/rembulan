@@ -34,7 +34,7 @@ object Runner {
     println("}")
   }
 
-  def doRun(func: lua.Func, args: AnyRef*): Unit = {
+  def doRun(func: lua.Invokable, args: AnyRef*): Unit = {
     val st = DummyLuaState.newDummy(true)
     val coro = st.getCurrentCoroutine
 //    val addr = coro.getObjectStack.rootView()
@@ -115,7 +115,7 @@ object Runner {
     val loader = new PrototypeClassLoader(name)
     val mainChunk = loader.install(proto)
 
-    val clazz = loader.findClass(mainChunk).asInstanceOf[Class[lua.Func]]
+    val clazz = loader.findClass(mainChunk).asInstanceOf[Class[lua.Invokable]]
     val func = clazz.getConstructor().newInstance()
 
     doRun(func)

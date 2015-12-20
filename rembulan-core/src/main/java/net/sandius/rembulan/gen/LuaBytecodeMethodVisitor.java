@@ -2,7 +2,7 @@ package net.sandius.rembulan.gen;
 
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Func;
+import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.Operators;
@@ -59,7 +59,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		Label l_begin = new Label();
 		mv.visitLabel(l_begin);
 		mv.visitVarInsn(ALOAD, 0);
-		mv.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(Func.class), "<init>", ctorType.getDescriptor(), false);
+		mv.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(Invokable.class), "<init>", ctorType.getDescriptor(), false);
 		mv.visitInsn(RETURN);
 		Label l_end = new Label();
 		mv.visitLabel(l_end);
@@ -749,7 +749,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void l_CALL(int a, int b, int c) {
 
 		pushRegister(a);  // the function
-		visitTypeInsn(CHECKCAST, Type.getInternalName(Func.class));
+		visitTypeInsn(CHECKCAST, Type.getInternalName(Invokable.class));
 
 		// base of the called function
 		pushSelf();
@@ -782,7 +782,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 // FIXME
 //		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "from", Type.getMethodDescriptor(Type.getType(Registers.class), Type.INT_TYPE), true);
 
-		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Func.class), CALL_METHOD_NAME, CALL_METHOD_TYPE.getDescriptor(), false);
+		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Invokable.class), CALL_METHOD_NAME, CALL_METHOD_TYPE.getDescriptor(), false);
 
 		// TODO: load registers from a onwards as these have been updated by the called function
 

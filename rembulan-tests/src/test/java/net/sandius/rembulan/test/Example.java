@@ -4,10 +4,10 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.PreemptionContext;
-import net.sandius.rembulan.core.impl.AbstractFunc2;
+import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.util.Ptr;
 
-public class Example extends AbstractFunc2 {
+public class Example extends Function2 {
 
 	public Example() {
 		super();

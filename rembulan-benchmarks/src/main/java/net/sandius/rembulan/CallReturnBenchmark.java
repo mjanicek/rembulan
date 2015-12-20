@@ -2,11 +2,11 @@ package net.sandius.rembulan;
 
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
-import net.sandius.rembulan.core.Func;
+import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.impl.AbstractFunc2;
-import net.sandius.rembulan.core.impl.AbstractFunc3;
+import net.sandius.rembulan.core.impl.Function2;
+import net.sandius.rembulan.core.impl.Function3;
 import net.sandius.rembulan.core.impl.QuintupleCachingObjectSink;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
@@ -193,7 +193,7 @@ public class CallReturnBenchmark {
 	}
 
 
-	public static class RecursiveInvokeFunc extends AbstractFunc2 {
+	public static class RecursiveInvokeFunc extends Function2 {
 
 		private final Long n;
 
@@ -203,7 +203,7 @@ public class CallReturnBenchmark {
 
 		@Override
 		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
-			Func f = (Func) arg1;
+			Invokable f = (Invokable) arg1;
 			long l = ((Number) arg2).longValue();
 			if (l > 0) {
 				f.invoke(state, result, f, l - 1);
@@ -222,7 +222,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	public static class RecursiveCallFunc extends AbstractFunc2 {
+	public static class RecursiveCallFunc extends Function2 {
 
 		private final Long n;
 
@@ -258,7 +258,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	public static class TailCallFunc extends AbstractFunc3 {
+	public static class TailCallFunc extends Function3 {
 
 		private final Long n;
 
@@ -293,7 +293,7 @@ public class CallReturnBenchmark {
 
 	}
 
-	public static class SelfRecursiveTailCallFunc extends AbstractFunc2 {
+	public static class SelfRecursiveTailCallFunc extends Function2 {
 
 		private final Long n;
 
@@ -330,7 +330,7 @@ public class CallReturnBenchmark {
 
 	@Benchmark
 	public void _1_1_recursiveInvoke(DummyLuaState luaState) throws ControlThrowable {
-		Func f = new RecursiveInvokeFunc(100);
+		Invokable f = new RecursiveInvokeFunc(100);
 		ObjectSink result = newSink();
 		f.invoke(luaState, result, f, 20);
 		assertEquals(result._0(), 120L);
@@ -338,7 +338,7 @@ public class CallReturnBenchmark {
 
 	@Benchmark
 	public void _1_2_recursiveCall(DummyLuaState luaState) throws ControlThrowable {
-		Func f = new RecursiveCallFunc(100);
+		Invokable f = new RecursiveCallFunc(100);
 		ObjectSink result = newSink();
 		Dispatch.call(luaState, result, f, f, 20);
 		assertEquals(result._0(), 120L);
@@ -346,7 +346,7 @@ public class CallReturnBenchmark {
 
 	@Benchmark
 	public void _1_3_tailCall(DummyLuaState luaState) throws ControlThrowable {
-		Func f = new TailCallFunc(100);
+		Invokable f = new TailCallFunc(100);
 		ObjectSink result = newSink();
 		Dispatch.call(luaState, result, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
@@ -354,7 +354,7 @@ public class CallReturnBenchmark {
 
 	@Benchmark
 	public void _1_4_selfRecursiveTailCall(DummyLuaState luaState) throws ControlThrowable {
-		Func f = new SelfRecursiveTailCallFunc(100);
+		Invokable f = new SelfRecursiveTailCallFunc(100);
 		ObjectSink result = newSink();
 		Dispatch.call(luaState, result, f, 20, 0);
 		assertEquals(result._0(), 120L);

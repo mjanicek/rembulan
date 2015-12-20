@@ -1,7 +1,6 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.Ptr;
 
 public class Operators {
 
@@ -275,7 +274,7 @@ public class Operators {
 			return null;
 		}
 
-		if (handler instanceof Func) {
+		if (handler instanceof Invokable) {
 			return callHandler(handler, table, key);  // TODO: should we trim to single value?
 		}
 		else if (handler instanceof Table) {
@@ -306,7 +305,7 @@ public class Operators {
 			return;
 		}
 
-		if (handler instanceof Func) {
+		if (handler instanceof Invokable) {
 			callHandler(handler, table, key, value);  // TODO: is it ok that we're ignoring the result?
 		}
 		else if (handler instanceof Table) {

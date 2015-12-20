@@ -6,15 +6,15 @@ public abstract class Dispatch {
 		// not to be instantiated or extended
 	}
 
-	public static Func callTarget(LuaState state, Object target) {
-		if (target instanceof Func) {
-			return (Func) target;
+	public static Invokable callTarget(LuaState state, Object target) {
+		if (target instanceof Invokable) {
+			return (Invokable) target;
 		}
 		else {
 			Object handler = Metatables.getMetamethod(state, Metatables.MT_CALL, target);
 
-			if (handler instanceof Func) {
-				return (Func) handler;
+			if (handler instanceof Invokable) {
+				return (Invokable) handler;
 			}
 			else {
 				throw new IllegalOperationAttemptException("call", LuaType.typeOf(target).name);
@@ -23,43 +23,43 @@ public abstract class Dispatch {
 	}
 
 	public static void mt_invoke(LuaState state, ObjectSink result, Object target) throws ControlThrowable {
-		Func fn = callTarget(state, target);
+		Invokable fn = callTarget(state, target);
 		if (fn == target) fn.invoke(state, result);
 		else fn.invoke(state, result, target);
 	}
 
 	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1) throws ControlThrowable {
-		Func fn = callTarget(state, target);
+		Invokable fn = callTarget(state, target);
 		if (fn == target) fn.invoke(state, result, arg1);
 		else fn.invoke(state, result, target, arg1);
 	}
 
 	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2) throws ControlThrowable {
-		Func fn = callTarget(state, target);
+		Invokable fn = callTarget(state, target);
 		if (fn == target) fn.invoke(state, result, arg1, arg2);
 		else fn.invoke(state, result, target, arg1, arg2);
 	}
 
 	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-		Func fn = callTarget(state, target);
+		Invokable fn = callTarget(state, target);
 		if (fn == target) fn.invoke(state, result, arg1, arg2, arg3);
 		else fn.invoke(state, result, target, arg1, arg2, arg3);
 	}
 
 	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
-		Func fn = callTarget(state, target);
+		Invokable fn = callTarget(state, target);
 		if (fn == target) fn.invoke(state, result, arg1, arg2, arg3, arg4);
 		else fn.invoke(state, result, target, arg1, arg2, arg3, arg4);
 	}
 
 	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
-		Func fn = callTarget(state, target);
+		Invokable fn = callTarget(state, target);
 		if (fn == target) fn.invoke(state, result, arg1, arg2, arg3, arg4, arg5);
 		else fn.invoke(state, result, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
 	}
 
 	public static void mt_invoke(LuaState state, ObjectSink result, Object target, Object[] args) throws ControlThrowable {
-		Func fn = callTarget(state, target);
+		Invokable fn = callTarget(state, target);
 		if (fn == target) {
 			fn.invoke(state, result, args);
 		}

@@ -181,7 +181,7 @@ public abstract class RawOperators {
 			// must denote the same mathematical value
 			return na.doubleValue() == nb.doubleValue() && na.longValue() == nb.longValue();
 		}
-		else if (a instanceof Boolean || a instanceof String || a instanceof Func) {
+		else if (a instanceof Boolean || a instanceof String || a instanceof Invokable) {
 			// value-based equality
 			return a.equals(b);
 		}

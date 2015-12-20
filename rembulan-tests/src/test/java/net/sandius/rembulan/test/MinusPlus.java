@@ -1,13 +1,12 @@
 package net.sandius.rembulan.test;
 
-import net.sandius.rembulan.core.Closure;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
-import net.sandius.rembulan.core.impl.AbstractFunc0;
-import net.sandius.rembulan.core.impl.AbstractFunc1;
+import net.sandius.rembulan.core.impl.Function0;
+import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.util.Ptr;
 
 /*
@@ -43,7 +42,7 @@ locals (2) for 0x7fcec84046e0:
         1       unaryMinus      3       10
 upvalues (0) for 0x7fcec84046e0:
 */
-public class MinusPlus extends AbstractFunc0 {
+public class MinusPlus extends Function0 {
 
 	public static final Long k_1 = Long.valueOf(0);
 
@@ -152,7 +151,7 @@ public class MinusPlus extends AbstractFunc0 {
 	        0       x       1       4
 	upvalues (0) for 0x7fcec84047f0:
 	 */
-	public static class p_0 extends AbstractFunc1 {
+	public static class p_0 extends Function1 {
 
 		public static final Long k_1 = Long.valueOf(1);
 
@@ -220,7 +219,7 @@ public class MinusPlus extends AbstractFunc0 {
 	        0       x       1       4
 	upvalues (0) for 0x7fcec8404640:
 	 */
-	public static class p_1 extends AbstractFunc1 {
+	public static class p_1 extends Function1 {
 
 		protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 			// registers
