@@ -1,11 +1,12 @@
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.core.AbstractFunc2;
+import net.sandius.rembulan.core.AbstractFunc3;
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.FixedSizeRegisters;
-import net.sandius.rembulan.core.IllegalOperationAttemptException;
+import net.sandius.rembulan.core.Func;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.LuaType;
-import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.ReturnTarget;
 import net.sandius.rembulan.util.ObjectSink;
