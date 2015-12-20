@@ -1,6 +1,6 @@
-package net.sandius.rembulan;
+package net.sandius.rembulan.util;
 
-public class Util {
+public class Assertions {
 
 	public static void assertEquals(Object actual, Object expected) {
 		if (actual == null) {

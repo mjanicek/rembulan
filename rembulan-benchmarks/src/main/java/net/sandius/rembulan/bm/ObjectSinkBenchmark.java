@@ -1,4 +1,4 @@
-package net.sandius.rembulan;
+package net.sandius.rembulan.bm;
 
 import net.sandius.rembulan.core.impl.ArrayListObjectSink;
 import net.sandius.rembulan.core.ObjectSink;
@@ -13,7 +13,7 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
 
-import static net.sandius.rembulan.Util.*;
+import static net.sandius.rembulan.util.Assertions.*;
 
 @Fork(1)
 @Warmup(iterations = 10)

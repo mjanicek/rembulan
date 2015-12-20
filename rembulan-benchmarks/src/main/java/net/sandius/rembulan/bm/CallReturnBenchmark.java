@@ -1,4 +1,4 @@
-package net.sandius.rembulan;
+package net.sandius.rembulan.bm;
 
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
@@ -13,7 +13,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 
-import static net.sandius.rembulan.Util.assertEquals;
+import static net.sandius.rembulan.util.Assertions.assertEquals;
 
 @Fork(1)
 @Warmup(iterations = 10)

@@ -1,4 +1,4 @@
-package net.sandius.rembulan;
+package net.sandius.rembulan.bm.legacy;
 
 import net.sandius.rembulan.core.legacy.FixedSizeRegisters;
 import net.sandius.rembulan.core.legacy.ObjectStack;
@@ -8,7 +8,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 
-import static net.sandius.rembulan.Util.assertEquals;
+import static net.sandius.rembulan.util.Assertions.assertEquals;
 
 @Fork(1)
 @Warmup(iterations = 10)

@@ -1,4 +1,4 @@
-package net.sandius.rembulan;
+package net.sandius.rembulan.bm.legacy;
 
 import net.sandius.rembulan.core.legacy.FixedSizeRegisters;
 import net.sandius.rembulan.core.legacy.ObjectStack;

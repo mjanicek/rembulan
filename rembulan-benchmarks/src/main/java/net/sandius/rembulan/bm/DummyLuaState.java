@@ -1,4 +1,4 @@
-package net.sandius.rembulan;
+package net.sandius.rembulan.bm;
 
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.LuaState;
