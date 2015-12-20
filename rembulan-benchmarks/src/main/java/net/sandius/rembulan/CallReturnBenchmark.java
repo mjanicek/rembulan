@@ -210,11 +210,11 @@ public class CallReturnBenchmark {
 		assertEquals(result[0], 120L);
 	}
 
-	public static class FuncImpl extends AbstractFunc2 {
+	public static class RecursiveInvokeFunc extends AbstractFunc2 {
 
 		private final Long n;
 
-		public FuncImpl(long n) {
+		public RecursiveInvokeFunc(long n) {
 			this.n = n;
 		}
 
@@ -239,14 +239,6 @@ public class CallReturnBenchmark {
 			throw new UnsupportedOperationException();
 		}
 
-	}
-
-	@Benchmark
-	public void _3_2_argRetFunc_ptrReuse(DummyLuaState luaState) throws ControlThrowable {
-		Func f = new FuncImpl(100);
-		ObjectSink result = newSink();
-		f.invoke(luaState, result, f, 20);
-		assertEquals(result._0(), 120L);
 	}
 
 	public static Func callTarget(LuaState state, Object target) {
@@ -363,11 +355,11 @@ public class CallReturnBenchmark {
 		evaluateTailCalls(state, result);
 	}
 
-	public static class ResumableFuncImpl extends AbstractFunc2 {
+	public static class RecursiveCallFunc extends AbstractFunc2 {
 
 		private final Long n;
 
-		public ResumableFuncImpl(long n) {
+		public RecursiveCallFunc(long n) {
 			this.n = n;
 		}
 
@@ -399,11 +391,11 @@ public class CallReturnBenchmark {
 
 	}
 
-	public static class TailCallingResumableFuncImpl extends AbstractFunc3 {
+	public static class TailCallFunc extends AbstractFunc3 {
 
 		private final Long n;
 
-		public TailCallingResumableFuncImpl(long n) {
+		public TailCallFunc(long n) {
 			this.n = n;
 		}
 
@@ -434,11 +426,11 @@ public class CallReturnBenchmark {
 
 	}
 
-	public static class SelfRecursiveTailCallingResumableFuncImpl extends AbstractFunc2 {
+	public static class SelfRecursiveTailCallFunc extends AbstractFunc2 {
 
 		private final Long n;
 
-		public SelfRecursiveTailCallingResumableFuncImpl(long n) {
+		public SelfRecursiveTailCallFunc(long n) {
 			this.n = n;
 		}
 
@@ -470,24 +462,32 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _3_3_resumableArgRetFunc_ptrReuse(DummyLuaState luaState) throws ControlThrowable {
-		Func f = new ResumableFuncImpl(100);
+	public void _4_1_recursiveInvoke(DummyLuaState luaState) throws ControlThrowable {
+		Func f = new RecursiveInvokeFunc(100);
+		ObjectSink result = newSink();
+		f.invoke(luaState, result, f, 20);
+		assertEquals(result._0(), 120L);
+	}
+
+	@Benchmark
+	public void _4_2_recursiveCall(DummyLuaState luaState) throws ControlThrowable {
+		Func f = new RecursiveCallFunc(100);
 		ObjectSink result = newSink();
 		call(luaState, result, f, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
 	@Benchmark
-	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse(DummyLuaState luaState) throws ControlThrowable {
-		Func f = new TailCallingResumableFuncImpl(100);
+	public void _4_3_tailCall(DummyLuaState luaState) throws ControlThrowable {
+		Func f = new TailCallFunc(100);
 		ObjectSink result = newSink();
 		call(luaState, result, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
 	@Benchmark
-	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse(DummyLuaState luaState) throws ControlThrowable {
-		Func f = new SelfRecursiveTailCallingResumableFuncImpl(100);
+	public void _4_4_selfRecursiveTailCall(DummyLuaState luaState) throws ControlThrowable {
+		Func f = new SelfRecursiveTailCallFunc(100);
 		ObjectSink result = newSink();
 		call(luaState, result, f, 20, 0);
 		assertEquals(result._0(), 120L);
@@ -554,7 +554,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _4_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh) {
+	public void _5_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		ViewFunc f = new ViewFuncImpl(100);
 		ObjectStack.View root = os.rootView();
@@ -625,7 +625,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _5_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh) {
+	public void _6_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		DirectFunc f = new DirectFuncImpl(100);
 		os.set(0, f);
@@ -703,7 +703,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _6_perCallRegisterAllocationWithPushInterface() {
+	public void _7_perCallRegisterAllocationWithPushInterface() {
 		AllocFunc f = new AllocFuncImpl(100);
 
 		FixedSizeRegisters out = new FixedSizeRegisters(1);
