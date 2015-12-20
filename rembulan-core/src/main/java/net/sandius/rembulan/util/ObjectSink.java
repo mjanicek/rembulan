@@ -23,6 +23,16 @@ public interface ObjectSink {
 
 	void setTo(Object a, Object b, Object c, Object d, Object e);
 
+	void tailCall(Object target);
+
+	void tailCall(Object target, Object arg1);
+
+	void tailCall(Object target, Object arg1, Object arg2);
+
+	void tailCall(Object target, Object arg1, Object arg2, Object arg3);
+
+	void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4);
+
 	Object[] toArray();
 
 	Object[] tailAsArray();

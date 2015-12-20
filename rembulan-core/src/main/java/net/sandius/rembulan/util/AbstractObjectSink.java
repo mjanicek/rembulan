@@ -63,6 +63,36 @@ public abstract class AbstractObjectSink implements ObjectSink {
 	}
 
 	@Override
+	public void tailCall(Object target) {
+		setTo(target);
+		markAsTailCall();
+	}
+
+	@Override
+	public void tailCall(Object target, Object arg1) {
+		setTo(target, arg1);
+		markAsTailCall();
+	}
+
+	@Override
+	public void tailCall(Object target, Object arg1, Object arg2) {
+		setTo(target, arg1, arg2);
+		markAsTailCall();
+	}
+
+	@Override
+	public void tailCall(Object target, Object arg1, Object arg2, Object arg3) {
+		setTo(target, arg1, arg2, arg3);
+		markAsTailCall();
+	}
+
+	@Override
+	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
+		setTo(target, arg1, arg2, arg3, arg4);
+		markAsTailCall();
+	}
+
+	@Override
 	public Object[] tailAsArray() {
 		Object[] tmp = toArray();
 		Object[] result = new Object[tmp.length - 1];

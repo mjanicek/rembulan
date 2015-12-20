@@ -326,8 +326,7 @@ public class CallReturnBenchmark {
 					long l = ((Number) r_1).longValue();
 					long acc = ((Number) r_2).longValue();
 					if (l > 0) {
-						result.setTo(r_0, r_0, l - 1, acc + 1);
-						result.markAsTailCall();
+						result.tailCall(r_0, r_0, l - 1, acc + 1);
 					}
 					else {
 						result.setTo(acc + n);
@@ -362,8 +361,7 @@ public class CallReturnBenchmark {
 					long l = ((Number) r_0).longValue();
 					long acc = ((Number) r_1).longValue();
 					if (l > 0) {
-						result.setTo(this, l - 1, acc + 1);
-						result.markAsTailCall();
+						result.tailCall(this, l - 1, acc + 1);
 					}
 					else {
 						result.setTo(acc + n);
