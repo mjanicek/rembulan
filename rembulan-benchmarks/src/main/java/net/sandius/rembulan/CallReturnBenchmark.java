@@ -230,7 +230,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ObjectSink result, int pc, Object[] registers) {
+		public void resume(ObjectSink result, SuspendedState suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -274,7 +274,7 @@ public class CallReturnBenchmark {
 		evaluateTailCalls(result);
 	}
 
-	public static class ResumableArgRetFuncImpl extends ArgRetFunc._2p._2r {
+	public static class ResumableArgRetFuncImpl extends ArgRetFunc._2p {
 
 		private final Long n;
 
@@ -282,8 +282,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		@Override
-		protected void resume(ObjectSink result, int pc, Object r_0, Object r_1) {
+		private void run(ObjectSink result, int pc, Object r_0, Object r_1) {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -300,9 +299,19 @@ public class CallReturnBenchmark {
 			}
 		}
 
+		@Override
+		public void invoke(ObjectSink result, Object a, Object b) {
+			run(result, 0, a, b);
+		}
+
+		@Override
+		public void resume(ObjectSink result, SuspendedState suspendedState) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
-	public static class TailCallingResumableArgRetFuncImpl extends ArgRetFunc._3p._3r {
+	public static class TailCallingResumableArgRetFuncImpl extends ArgRetFunc._3p {
 
 		private final Long n;
 
@@ -310,8 +319,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		@Override
-		protected void resume(ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
+		private void run(ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -327,9 +335,19 @@ public class CallReturnBenchmark {
 			}
 		}
 
+		@Override
+		public void invoke(ObjectSink result, Object a, Object b, Object c) {
+			run(result, 0, a, b, c);
+		}
+
+		@Override
+		public void resume(ObjectSink result, SuspendedState suspendedState) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
-	public static class SelfRecursiveTailCallingResumableArgRetFuncImpl extends ArgRetFunc._3p._2r {
+	public static class SelfRecursiveTailCallingResumableArgRetFuncImpl extends ArgRetFunc._2p {
 
 		private final Long n;
 
@@ -337,8 +355,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		@Override
-		protected void resume(ObjectSink result, int pc, Object r_0, Object r_1) {
+		private void run(ObjectSink result, int pc, Object r_0, Object r_1) {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -352,6 +369,16 @@ public class CallReturnBenchmark {
 						result.setTo(acc + n);
 					}
 			}
+		}
+
+		@Override
+		public void invoke(ObjectSink result, Object a, Object b) {
+			run(result, 0, a, b);
+		}
+
+		@Override
+		public void resume(ObjectSink result, SuspendedState suspendedState) {
+			throw new UnsupportedOperationException();
 		}
 
 	}

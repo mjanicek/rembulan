@@ -18,7 +18,7 @@ public abstract class ArgRetFunc {
 
 	public abstract void invoke(ObjectSink result, Object[] args);
 
-	public abstract void resume(ObjectSink result, int pc, Object[] registers);
+	public abstract void resume(ObjectSink result, SuspendedState suspendedState);
 
 	public static abstract class _0p extends ArgRetFunc {
 
@@ -121,38 +121,6 @@ public abstract class ArgRetFunc {
 			invoke(result, a, b);
 		}
 
-		public static abstract class _2r extends _2p {
-
-			@Override
-			public void invoke(ObjectSink result, Object a, Object b) {
-				resume(result, 0, a, b);
-			}
-
-			@Override
-			public void resume(ObjectSink result, int pc, Object[] regs) {
-				resume(result, pc, regs[0], regs[1]);
-			}
-
-			protected abstract void resume(ObjectSink result, int pc, Object r_0, Object r_1);
-
-		}
-
-		public static abstract class _3r extends _2p {
-
-			@Override
-			public void invoke(ObjectSink result, Object a, Object b) {
-				resume(result, 0, a, b, null);
-			}
-
-			@Override
-			public void resume(ObjectSink result, int pc, Object[] regs) {
-				resume(result, pc, regs[0], regs[1], regs[2]);
-			}
-
-			protected abstract void resume(ObjectSink result, int pc, Object r_0, Object r_1, Object r_2);
-
-		}
-
 	}
 
 	public static abstract class _3p extends ArgRetFunc {
@@ -188,38 +156,6 @@ public abstract class ArgRetFunc {
 			Object b = args.length >= 2 ? args[1] : null;
 			Object c = args.length >= 3 ? args[2] : null;
 			invoke(result, a, b, c);
-		}
-
-		public static abstract class _2r extends _3p {
-
-			@Override
-			public void invoke(ObjectSink result, Object a, Object b, Object c) {
-				resume(result, 0, a, b);
-			}
-
-			@Override
-			public void resume(ObjectSink result, int pc, Object[] regs) {
-				resume(result, pc, regs[0], regs[1]);
-			}
-
-			protected abstract void resume(ObjectSink result, int pc, Object r_0, Object r_1);
-
-		}
-
-		public static abstract class _3r extends _3p {
-
-			@Override
-			public void invoke(ObjectSink result, Object a, Object b, Object c) {
-				resume(result, 0, a, b, c);
-			}
-
-			@Override
-			public void resume(ObjectSink result, int pc, Object[] regs) {
-				resume(result, pc, regs[0], regs[1], regs[2]);
-			}
-
-			protected abstract void resume(ObjectSink result, int pc, Object r_0, Object r_1, Object r_2);
-
 		}
 
 	}
