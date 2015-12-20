@@ -8,7 +8,7 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 
-import static net.sandius.rembulan.util.Assertions.assertEquals;
+import static net.sandius.rembulan.util.testing.Assertions.assertEquals;
 
 @Fork(1)
 @Warmup(iterations = 10)
