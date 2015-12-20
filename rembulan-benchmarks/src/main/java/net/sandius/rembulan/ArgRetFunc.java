@@ -4,127 +4,127 @@ import net.sandius.rembulan.util.ObjectSink;
 
 public abstract class ArgRetFunc {
 
-	public abstract void call(ObjectSink result);
+	public abstract void invoke(ObjectSink result);
 
-	public abstract void call(ObjectSink result, Object a);
+	public abstract void invoke(ObjectSink result, Object a);
 
-	public abstract void call(ObjectSink result, Object a, Object b);
+	public abstract void invoke(ObjectSink result, Object a, Object b);
 
-	public abstract void call(ObjectSink result, Object a, Object b, Object c);
+	public abstract void invoke(ObjectSink result, Object a, Object b, Object c);
 
-	public abstract void call(ObjectSink result, Object a, Object b, Object c, Object d);
+	public abstract void invoke(ObjectSink result, Object a, Object b, Object c, Object d);
 
-	public abstract void call(ObjectSink result, Object a, Object b, Object c, Object d, Object e);
+	public abstract void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e);
 
-	public abstract void call(ObjectSink result, Object[] args);
+	public abstract void invoke(ObjectSink result, Object[] args);
 
 	public abstract void resume(ObjectSink result, int pc, Object[] registers);
 
 	public static abstract class _0p extends ArgRetFunc {
 
 		@Override
-		public void call(ObjectSink result, Object a) {
-			call(result);
+		public void invoke(ObjectSink result, Object a) {
+			invoke(result);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b) {
-			call(result);
+		public void invoke(ObjectSink result, Object a, Object b) {
+			invoke(result);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c) {
-			call(result);
+		public void invoke(ObjectSink result, Object a, Object b, Object c) {
+			invoke(result);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d) {
-			call(result);
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d) {
+			invoke(result);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
-			call(result);
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
+			invoke(result);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object[] args) {
-			call(result);
+		public void invoke(ObjectSink result, Object[] args) {
+			invoke(result);
 		}
 	}
 
 	public static abstract class _1p extends ArgRetFunc {
 
 		@Override
-		public void call(ObjectSink result) {
-			call(result, null);
+		public void invoke(ObjectSink result) {
+			invoke(result, null);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b) {
-			call(result, a);
+		public void invoke(ObjectSink result, Object a, Object b) {
+			invoke(result, a);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c) {
-			call(result, a);
+		public void invoke(ObjectSink result, Object a, Object b, Object c) {
+			invoke(result, a);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d) {
-			call(result, a);
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d) {
+			invoke(result, a);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
-			call(result, a);
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
+			invoke(result, a);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object[] args) {
+		public void invoke(ObjectSink result, Object[] args) {
 			Object a = args.length >= 1 ? args[0] : null;
-			call(result, a);
+			invoke(result, a);
 		}
 	}
 
 	public static abstract class _2p extends ArgRetFunc {
 
 		@Override
-		public void call(ObjectSink result) {
-			call(result, null, null);
+		public void invoke(ObjectSink result) {
+			invoke(result, null, null);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a) {
-			call(result, a, null);
+		public void invoke(ObjectSink result, Object a) {
+			invoke(result, a, null);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c) {
-			call(result, a, b);
+		public void invoke(ObjectSink result, Object a, Object b, Object c) {
+			invoke(result, a, b);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d) {
-			call(result, a, b);
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d) {
+			invoke(result, a, b);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
-			call(result, a, b);
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
+			invoke(result, a, b);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object[] args) {
+		public void invoke(ObjectSink result, Object[] args) {
 			Object a = args.length >= 1 ? args[0] : null;
 			Object b = args.length >= 2 ? args[1] : null;
-			call(result, a, b);
+			invoke(result, a, b);
 		}
 
 		public static abstract class _2r extends _2p {
 
 			@Override
-			public void call(ObjectSink result, Object a, Object b) {
+			public void invoke(ObjectSink result, Object a, Object b) {
 				resume(result, 0, a, b);
 			}
 
@@ -140,7 +140,7 @@ public abstract class ArgRetFunc {
 		public static abstract class _3r extends _2p {
 
 			@Override
-			public void call(ObjectSink result, Object a, Object b) {
+			public void invoke(ObjectSink result, Object a, Object b) {
 				resume(result, 0, a, b, null);
 			}
 
@@ -158,42 +158,42 @@ public abstract class ArgRetFunc {
 	public static abstract class _3p extends ArgRetFunc {
 
 		@Override
-		public void call(ObjectSink result) {
-			call(result, null, null, null);
+		public void invoke(ObjectSink result) {
+			invoke(result, null, null, null);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a) {
-			call(result, a, null, null);
+		public void invoke(ObjectSink result, Object a) {
+			invoke(result, a, null, null);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b) {
-			call(result, a, b, null);
+		public void invoke(ObjectSink result, Object a, Object b) {
+			invoke(result, a, b, null);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d) {
-			call(result, a, b, c);
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d) {
+			invoke(result, a, b, c);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
-			call(result, a, b, c);
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
+			invoke(result, a, b, c);
 		}
 
 		@Override
-		public void call(ObjectSink result, Object[] args) {
+		public void invoke(ObjectSink result, Object[] args) {
 			Object a = args.length >= 1 ? args[0] : null;
 			Object b = args.length >= 2 ? args[1] : null;
 			Object c = args.length >= 3 ? args[2] : null;
-			call(result, a, b, c);
+			invoke(result, a, b, c);
 		}
 
 		public static abstract class _2r extends _3p {
 
 			@Override
-			public void call(ObjectSink result, Object a, Object b, Object c) {
+			public void invoke(ObjectSink result, Object a, Object b, Object c) {
 				resume(result, 0, a, b);
 			}
 
@@ -209,7 +209,7 @@ public abstract class ArgRetFunc {
 		public static abstract class _3r extends _3p {
 
 			@Override
-			public void call(ObjectSink result, Object a, Object b, Object c) {
+			public void invoke(ObjectSink result, Object a, Object b, Object c) {
 				resume(result, 0, a, b, c);
 			}
 
@@ -227,33 +227,33 @@ public abstract class ArgRetFunc {
 	public static abstract class _vp extends ArgRetFunc {
 
 		@Override
-		public void call(ObjectSink result) {
-			call(result, new Object[] { });
+		public void invoke(ObjectSink result) {
+			invoke(result, new Object[] { });
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a) {
-			call(result, new Object[] { a });
+		public void invoke(ObjectSink result, Object a) {
+			invoke(result, new Object[] { a });
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b) {
-			call(result, new Object[] { a, b });
+		public void invoke(ObjectSink result, Object a, Object b) {
+			invoke(result, new Object[] { a, b });
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c) {
-			call(result, new Object[] { a, b, c });
+		public void invoke(ObjectSink result, Object a, Object b, Object c) {
+			invoke(result, new Object[] { a, b, c });
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d) {
-			call(result, new Object[] { a, b, c, d });
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d) {
+			invoke(result, new Object[] { a, b, c, d });
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
-			call(result, new Object[] { a, b, c, d, e });
+		public void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
+			invoke(result, new Object[] { a, b, c, d, e });
 		}
 	}
 

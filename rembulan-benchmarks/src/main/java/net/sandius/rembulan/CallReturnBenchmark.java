@@ -214,11 +214,11 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void call(ObjectSink result, Object a, Object b) {
+		public void invoke(ObjectSink result, Object a, Object b) {
 			ArgRetFunc f = (ArgRetFunc) a;
 			long l = ((Number) b).longValue();
 			if (l > 0) {
-				f.call(result, f, l - 1);
+				f.invoke(result, f, l - 1);
 				Number m = (Number) result._0();
 				result.reset();
 				result.push(m.longValue() + 1);
@@ -240,7 +240,7 @@ public class CallReturnBenchmark {
 	public void _3_2_argRetFunc_ptrReuse() {
 		ArgRetFunc f = new ArgRetFuncImpl(100);
 		ObjectSink result = newSink();
-		f.call(result, f, 20);
+		f.invoke(result, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -249,28 +249,28 @@ public class CallReturnBenchmark {
 			ArgRetFunc target = (ArgRetFunc) result._0();
 			switch (result.size()) {
 				case 0: throw new IllegalStateException();
-				case 1: target.call(result); break;
-				case 2: target.call(result, result._1()); break;
-				case 3: target.call(result, result._1(), result._2()); break;
-				case 4: target.call(result, result._1(), result._2(), result._3()); break;
-				case 5: target.call(result, result._1(), result._2(), result._3(), result._4()); break;
-				default: target.call(result, result.tailAsArray()); break;
+				case 1: target.invoke(result); break;
+				case 2: target.invoke(result, result._1()); break;
+				case 3: target.invoke(result, result._1(), result._2()); break;
+				case 4: target.invoke(result, result._1(), result._2(), result._3()); break;
+				case 5: target.invoke(result, result._1(), result._2(), result._3(), result._4()); break;
+				default: target.invoke(result, result.tailAsArray()); break;
 			}
 		}
 	}
 
-	public static void _call(ObjectSink result, ArgRetFunc f, Object a) {
-		f.call(result, a);
+	public static void call(ObjectSink result, ArgRetFunc f, Object a) {
+		f.invoke(result, a);
 		evaluateTailCalls(result);
 	}
 
-	public static void _call(ObjectSink result, ArgRetFunc f, Object a, Object b) {
-		f.call(result, a, b);
+	public static void call(ObjectSink result, ArgRetFunc f, Object a, Object b) {
+		f.invoke(result, a, b);
 		evaluateTailCalls(result);
 	}
 
-	public static void _call(ObjectSink result, ArgRetFunc f, Object a, Object b, Object c) {
-		f.call(result, a, b, c);
+	public static void call(ObjectSink result, ArgRetFunc f, Object a, Object b, Object c) {
+		f.invoke(result, a, b, c);
 		evaluateTailCalls(result);
 	}
 
@@ -290,7 +290,7 @@ public class CallReturnBenchmark {
 					long l = ((Number) r_1).longValue();
 					if (l > 0) {
 						ArgRetFunc f = (ArgRetFunc) r_0;
-						_call(result, f, f, l - 1);
+						call(result, f, f, l - 1);
 						Number m = (Number) result._0();
 						result.setTo(m.longValue() + 1);
 					}
@@ -360,7 +360,7 @@ public class CallReturnBenchmark {
 	public void _3_3_resumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new ResumableArgRetFuncImpl(100);
 		ObjectSink result = newSink();
-		_call(result, f, f, 20);
+		call(result, f, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -368,7 +368,7 @@ public class CallReturnBenchmark {
 	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new TailCallingResumableArgRetFuncImpl(100);
 		ObjectSink result = newSink();
-		_call(result, f, f, 20, 0);
+		call(result, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -376,7 +376,7 @@ public class CallReturnBenchmark {
 	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse() {
 		ArgRetFunc f = new SelfRecursiveTailCallingResumableArgRetFuncImpl(100);
 		ObjectSink result = newSink();
-		_call(result, f, 20, 0);
+		call(result, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
