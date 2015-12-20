@@ -24,7 +24,7 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.util.Check;
 
 /**
- * Data class to hold debug information relating to local variables for a {@link Prototype}
+ * Data class to hold debug information relating to local variables for a function prototype.
  */
 public class LocalVariable {
 	/** The local variable name */

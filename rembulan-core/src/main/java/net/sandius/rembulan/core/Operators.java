@@ -21,7 +21,7 @@ public class Operators {
 
 		Object handler = Metatables.getMetamethod(state, event, o);
 		if (handler == null) {
-			throw new IllegalOperationAttemptException("perform operation on", LuaType.typeOf(o).name);
+			throw new IllegalOperationAttemptException("perform operation on", Value.typeOf(o).name);
 		}
 		else {
 			return callHandler(handler, o);
@@ -167,7 +167,7 @@ public class Operators {
 					return ((Table) o).rawlen();
 				}
 				else {
-					throw new IllegalOperationAttemptException("get length of", LuaType.typeOf(o).name);
+					throw new IllegalOperationAttemptException("get length of", Value.typeOf(o).name);
 				}
 			}
 		}
@@ -233,7 +233,7 @@ public class Operators {
 				return flip ? !result : result;
 			}
 			else {
-				throw new IllegalOperationAttemptException("compare " + LuaType.typeOf(a) + " with " + LuaType.typeOf(b));
+				throw new IllegalOperationAttemptException("compare " + Value.typeOf(a) + " with " + Value.typeOf(b));
 			}
 		}
 	}
@@ -281,7 +281,7 @@ public class Operators {
 			return index(state, handler, key);  // TODO: protect against infinite loops
 		}
 		else {
-			throw new IllegalOperationAttemptException("index", LuaType.typeOf(table).name);
+			throw new IllegalOperationAttemptException("index", Value.typeOf(table).name);
 		}
 	}
 
@@ -312,7 +312,7 @@ public class Operators {
 			newindex(state, handler, key, value);  // TODO: protect against infinite loops
 		}
 		else {
-			throw new IllegalOperationAttemptException("index", LuaType.typeOf(table).name);
+			throw new IllegalOperationAttemptException("index", Value.typeOf(table).name);
 		}
 	}
 

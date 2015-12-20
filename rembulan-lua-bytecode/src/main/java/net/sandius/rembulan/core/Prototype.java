@@ -76,22 +76,9 @@ public class Prototype {
 		this.maxstacksize = maxstacksize;
 
 		for (Object o : this.consts) {
-			if (!isValidConstant(o)) {
+			if (!LuaConstant.isValidConstant(o)) {
 				throw new IllegalArgumentException("Not a valid constant: " + o);
 			}
-		}
-	}
-
-	public static boolean isValidConstant(Object o) {
-		LuaType tpe = LuaType.typeOf(o);
-		switch (tpe) {
-			case NIL:
-			case BOOLEAN:
-			case NUMBER:
-			case STRING:
-				return true;
-			default:
-				return false;
 		}
 	}
 

@@ -17,7 +17,7 @@ public abstract class Dispatch {
 				return (Invokable) handler;
 			}
 			else {
-				throw new IllegalOperationAttemptException("call", LuaType.typeOf(target).name);
+				throw new IllegalOperationAttemptException("call", Value.typeOf(target).name);
 			}
 		}
 	}

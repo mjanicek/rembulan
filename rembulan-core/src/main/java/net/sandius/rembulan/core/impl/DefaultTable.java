@@ -1,6 +1,6 @@
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 
@@ -42,7 +42,7 @@ public class DefaultTable extends Table {
 		if (key == null) {
 			throw new IllegalArgumentException("table index is nil");
 		}
-		if (RawOperators.isNaN(key)) {
+		if (Conversions.isNaN(key)) {
 			throw new IllegalArgumentException("table index is NaN");
 		}
 

@@ -2,20 +2,12 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
-import java.math.BigDecimal;
+import static net.sandius.rembulan.core.Conversions.*;
 
 public abstract class RawOperators {
 
 	private RawOperators() {
 		// not to be instantiated
-	}
-
-	public static boolean isFloatingPoint(Number n) {
-		return n instanceof Double || n instanceof Float || n instanceof BigDecimal;
-	}
-
-	public static boolean isNaN(Object o) {
-		return o instanceof Number && Double.isNaN(((Number) o).doubleValue());
 	}
 
 	// Arithmetic operators

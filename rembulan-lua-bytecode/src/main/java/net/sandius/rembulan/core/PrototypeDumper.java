@@ -77,7 +77,7 @@ public class PrototypeDumper {
 		}
 		else if (o instanceof Number) {
 			Number n = (Number) o;
-			if (RawOperators.isFloatingPoint(n)) {
+			if (Conversions.isFloatingPoint(n)) {
 				dumpDouble(n.doubleValue());
 			}
 			else {

@@ -12,7 +12,9 @@
 
   <modules>
     <module>rembulan-util</module>
+    <module>rembulan-lua-common</module>
     <module>rembulan-core</module>
+    <module>rembulan-lua-bytecode</module>
     <module>rembulan-parser</module>
     <module>rembulan-tests</module>
     <module>rembulan-benchmarks</module>

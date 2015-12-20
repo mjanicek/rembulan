@@ -40,7 +40,7 @@ public class Metatables {
 			return ((LuaObject) o).getMetatable();
 		}
 		else {
-			LuaType tpe = LuaType.typeOf(o);
+			LuaType tpe = Value.typeOf(o);
 			switch (tpe) {
 				case NIL: return state.nilMetatable();
 				case BOOLEAN: return state.booleanMetatable();
