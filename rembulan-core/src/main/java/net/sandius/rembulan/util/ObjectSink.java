@@ -45,6 +45,7 @@ public abstract class ObjectSink {
 		push(b);
 		push(c);
 		push(d);
+		push(e);
 	}
 
 	public abstract Object[] toArray();
