@@ -4,15 +4,14 @@ import net.sandius.rembulan.core.FixedSizeRegisters;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.ReturnTarget;
 import net.sandius.rembulan.util.ObjectSink;
-import net.sandius.rembulan.util.PairCachingObjectSink;
 import net.sandius.rembulan.util.Ptr;
-import net.sandius.rembulan.util.TripleCachingObjectSink;
+import net.sandius.rembulan.util.QuintupleCachingObjectSink;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 
-import static net.sandius.rembulan.Util.*;
+import static net.sandius.rembulan.Util.assertEquals;
 
 @Fork(5)
 @Warmup(iterations = 10)
@@ -20,7 +19,7 @@ import static net.sandius.rembulan.Util.*;
 public class CallReturnBenchmark {
 
 	public static ObjectSink newSink() {
-		return new TripleCachingObjectSink();
+		return new QuintupleCachingObjectSink();
 	}
 
 	public static abstract class JavaTwoArgFunc {
