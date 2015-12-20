@@ -266,62 +266,38 @@ public class CallReturnBenchmark {
 
 	public static void mt_invoke(ObjectSink result, Object target) throws ControlThrowable {
 		Func fn = callTarget(target);
-		if (fn == target) {
-			fn.invoke(result);
-		}
-		else {
-			fn.invoke(result, target);
-		}
+		if (fn == target) fn.invoke(result);
+		else fn.invoke(result, target);
 	}
 
 	public static void mt_invoke(ObjectSink result, Object target, Object arg1) throws ControlThrowable {
 		Func fn = callTarget(target);
-		if (fn == target) {
-			fn.invoke(result, arg1);
-		}
-		else {
-			fn.invoke(result, target, arg1);
-		}
+		if (fn == target) fn.invoke(result, arg1);
+		else fn.invoke(result, target, arg1);
 	}
 
 	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2) throws ControlThrowable {
 		Func fn = callTarget(target);
-		if (fn == target) {
-			fn.invoke(result, arg1, arg2);
-		}
-		else {
-			fn.invoke(result, target, arg1, arg2);
-		}
+		if (fn == target) fn.invoke(result, arg1, arg2);
+		else fn.invoke(result, target, arg1, arg2);
 	}
 
 	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
 		Func fn = callTarget(target);
-		if (fn == target) {
-			fn.invoke(result, arg1, arg2, arg3);
-		}
-		else {
-			fn.invoke(result, target, arg1, arg2, arg3);
-		}
+		if (fn == target) fn.invoke(result, arg1, arg2, arg3);
+		else fn.invoke(result, target, arg1, arg2, arg3);
 	}
 
 	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
 		Func fn = callTarget(target);
-		if (fn == target) {
-			fn.invoke(result, arg1, arg2, arg3, arg4);
-		}
-		else {
-			fn.invoke(result, target, arg1, arg2, arg3, arg4);
-		}
+		if (fn == target) fn.invoke(result, arg1, arg2, arg3, arg4);
+		else fn.invoke(result, target, arg1, arg2, arg3, arg4);
 	}
 
 	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
 		Func fn = callTarget(target);
-		if (fn == target) {
-			fn.invoke(result, arg1, arg2, arg3, arg4, arg5);
-		}
-		else {
-			fn.invoke(result, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
-		}
+		if (fn == target) fn.invoke(result, arg1, arg2, arg3, arg4, arg5);
+		else fn.invoke(result, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
 	}
 
 	public static void mt_invoke(ObjectSink result, Object target, Object[] args) throws ControlThrowable {
