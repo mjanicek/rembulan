@@ -11,17 +11,18 @@ object Runner {
   }
 
   def inspect(idx: Int, coro: Coroutine, callStack: Cons[CallInfo], cpuTime: Int): Unit = {
-    val os = coro.getObjectStack
-    var max = 0
-    for (i <- 0 until os.getMaxSize) {
-      if (os.get(i) != null) {
-        max = i
-      }
-    }
+//    val os = coro.getObjectStack
+//    var max = 0
+//    for (i <- 0 until os.getMaxSize) {
+//      if (os.get(i) != null) {
+//        max = i
+//      }
+//    }
 
     println(idx + ": {")
     println("\tCPU time: " + cpuTime)
-    println("\tObject stack: " + (for (i <- 0 to max) yield i + ":[" + os.get(i) + "]").mkString(" "))
+    println("\tObject stack: (not available)")
+//    println("\tObject stack: " + (for (i <- 0 to max) yield i + ":[" + os.get(i) + "]").mkString(" "))
     println("\tCall stack: {")
     val cs = consToList(callStack)
     if (cs.nonEmpty) {
@@ -36,11 +37,11 @@ object Runner {
   def doRun(func: lua.Function, args: AnyRef*): Unit = {
     val st = DummyLuaState.newDummy(true)
     val coro = st.getCurrentCoroutine
-    val addr = coro.getObjectStack.rootView()
+//    val addr = coro.getObjectStack.rootView()
 
-    for ((v, idx) <- args.zipWithIndex) {
-      addr.set(idx, v)
-    }
+//    for ((v, idx) <- args.zipWithIndex) {
+//      addr.set(idx, v)
+//    }
 
     LuaState.setCurrentState(st)
 
@@ -53,7 +54,7 @@ object Runner {
       }
     }
 
-    val exec = new Exec(preempt, st, coro.getObjectStack)
+    val exec = new Exec(preempt, st)
 
     exec.pushCall(new CallInfo(func, 0, 0, 0, 0, 0))
 

@@ -28,25 +28,17 @@ public class Coroutine {
 	// paused call stack: up-to-date only iff coroutine is not running
 	protected Cons<CallInfo> callStack;
 
-	protected final ObjectStack objectStack;
-
 	protected Coroutine yieldingTo;
 	protected Coroutine resuming;
 
-	public Coroutine(LuaState state, ObjectStack objectStack) {
+	public Coroutine(LuaState state) {
 		Check.notNull(state);
-		Check.notNull(objectStack);
 
 		this.state = state;
-		this.objectStack = objectStack;
 	}
 
 	public LuaState getOwnerState() {
 		return state;
-	}
-
-	public ObjectStack getObjectStack() {
-		return objectStack;
 	}
 
 	@Override

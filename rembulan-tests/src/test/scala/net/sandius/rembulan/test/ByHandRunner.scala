@@ -14,7 +14,7 @@ object ByHandRunner {
 
     val f2 = new MinusPlus()
 
-    Runner.doRun(f2)
+//    Runner.doRun(f2)
 
 //    val func = new Example()
 //    Runner.doRun(func, 1:Integer, 42:Integer)

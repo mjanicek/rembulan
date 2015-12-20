@@ -1,8 +1,8 @@
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.core.FixedSizeRegisters;
-import net.sandius.rembulan.core.ObjectStack;
-import net.sandius.rembulan.core.Registers;
+import net.sandius.rembulan.core.legacy.FixedSizeRegisters;
+import net.sandius.rembulan.core.legacy.ObjectStack;
+import net.sandius.rembulan.core.legacy.Registers;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;

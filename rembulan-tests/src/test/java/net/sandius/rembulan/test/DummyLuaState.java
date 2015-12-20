@@ -2,7 +2,6 @@ package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.Table;
 
 public class DummyLuaState extends LuaState {
@@ -12,7 +11,7 @@ public class DummyLuaState extends LuaState {
 
 	public DummyLuaState(boolean preempting) {
 		this.preempting = preempting;
-		mainCoroutine = new Coroutine(this, ObjectStack.newEmptyStack(250));
+		mainCoroutine = new Coroutine(this);
 	}
 
 	public static DummyLuaState newDummy(boolean preempting) {

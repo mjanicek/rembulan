@@ -3,9 +3,11 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.Closure;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectStack;
+import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.PreemptionContext;
+import net.sandius.rembulan.core.impl.AbstractFunc0;
+import net.sandius.rembulan.core.impl.AbstractFunc1;
 import net.sandius.rembulan.util.Ptr;
 
 /*
@@ -41,21 +43,26 @@ locals (2) for 0x7fcec84046e0:
         1       unaryMinus      3       10
 upvalues (0) for 0x7fcec84046e0:
 */
-public class MinusPlus extends Closure {
+public class MinusPlus extends AbstractFunc0 {
 
 	public static final Long k_1 = Long.valueOf(0);
 
-	@Override
-	protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+	protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 		// registers
 		Object r_0, r_1, r_2, r_3, r_4;
 
+		r_0 = null;
+		r_1 = null;
+		r_2 = null;
+		r_3 = null;
+		r_4 = null;
+
 		// load registers
-		r_0 = objectStack.get(base + 0);
-		r_1 = objectStack.get(base + 1);
-		r_2 = objectStack.get(base + 2);
-		r_3 = objectStack.get(base + 3);
-		r_4 = objectStack.get(base + 4);
+//		r_0 = objectStack.get(base + 0);
+//		r_1 = objectStack.get(base + 1);
+//		r_2 = objectStack.get(base + 2);
+//		r_3 = objectStack.get(base + 3);
+//		r_4 = objectStack.get(base + 4);
 
 		try {
 			switch (pc) {
@@ -84,22 +91,22 @@ public class MinusPlus extends Closure {
 					pc = 7;  // store next pc
 
 					// store registers used in the call
-					objectStack.set(base + 3, r_3);  // call target
-					objectStack.set(base + 4, r_4);  // call arg #1
-					objectStack.setTop(base + 5);
-
-					Operators.call(preemptionContext, state, tail, objectStack, base + 3, base + 3, 0, 0);
+//					objectStack.set(base + 3, r_3);  // call target
+//					objectStack.set(base + 4, r_4);  // call arg #1
+//					objectStack.setTop(base + 5);
+//
+//					Operators.call(preemptionContext, state, tail, objectStack, base + 3, base + 3, 0, 0);
 
 				case 7:
-					r_3 = objectStack.get(base + 3);
-					r_4 = objectStack.get(base + 4);
+//					r_3 = objectStack.get(base + 3);
+//					r_4 = objectStack.get(base + 4);
 
 				case 8:  // TAILCALL 2 0 0
 					// TODO: is this correct?
-					objectStack.set(base + 0, r_2);
-					objectStack.set(base + 1, r_3);
-					objectStack.set(base + 2, r_4);
-					objectStack.setTop(objectStack.getTop() - 2);
+//					objectStack.set(base + 0, r_2);
+//					objectStack.set(base + 1, r_3);
+//					objectStack.set(base + 2, r_4);
+//					objectStack.setTop(objectStack.getTop() - 2);
 
 					tail.set(r_2);
 					return true;
@@ -111,16 +118,26 @@ public class MinusPlus extends Closure {
 		}
 		catch (ControlThrowable ct) {
 			// save registers to the object stack
-			objectStack.set(base + 0, r_0);
-			objectStack.set(base + 1, r_1);
-			objectStack.set(base + 2, r_2);
-			objectStack.set(base + 3, r_3);
-			objectStack.set(base + 4, r_4);
+//			objectStack.set(base + 0, r_0);
+//			objectStack.set(base + 1, r_1);
+//			objectStack.set(base + 2, r_2);
+//			objectStack.set(base + 3, r_3);
+//			objectStack.set(base + 4, r_4);
 
-			ct.pushCall(this, base, ret, pc, numResults, flags);
+//			ct.pushCall(this, base, ret, pc, numResults, flags);
 
 			throw ct;
 		}
+	}
+
+	@Override
+	public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		throw new UnsupportedOperationException();
 	}
 
 	/*
@@ -135,18 +152,20 @@ public class MinusPlus extends Closure {
 	        0       x       1       4
 	upvalues (0) for 0x7fcec84047f0:
 	 */
-	public static class p_0 extends Closure {
+	public static class p_0 extends AbstractFunc1 {
 
 		public static final Long k_1 = Long.valueOf(1);
 
-		@Override
-		protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+		protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 			// registers
 			Object r_0, r_1;
 
+			r_0 = null;
+			r_1 = null;
+
 			// load registers
-			r_0 = objectStack.get(base + 0);
-			r_1 = objectStack.get(base + 1);
+//			r_0 = objectStack.get(base + 0);
+//			r_1 = objectStack.get(base + 1);
 
 			try {
 				switch (pc) {
@@ -158,8 +177,8 @@ public class MinusPlus extends Closure {
 						r_1 = Operators.add(r_0, k_1);
 
 					case 2:  // RETURN 1 2
-						objectStack.set(ret + 0, r_1);
-						objectStack.setTop(ret + 1);
+//						objectStack.set(ret + 0, r_1);
+//						objectStack.setTop(ret + 1);
 						return false;
 
 					default:
@@ -169,13 +188,23 @@ public class MinusPlus extends Closure {
 			}
 			catch (ControlThrowable ct) {
 				// save registers to the object stack
-				objectStack.set(base + 0, r_0);
-				objectStack.set(base + 1, r_1);
+//				objectStack.set(base + 0, r_0);
+//				objectStack.set(base + 1, r_1);
 
-				ct.pushCall(this, base, ret, pc, numResults, flags);
+//				ct.pushCall(this, base, ret, pc, numResults, flags);
 
 				throw ct;
 			}
+		}
+
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+			throw new UnsupportedOperationException();
 		}
 
 	}
@@ -191,16 +220,18 @@ public class MinusPlus extends Closure {
 	        0       x       1       4
 	upvalues (0) for 0x7fcec8404640:
 	 */
-	public static class p_1 extends Closure {
+	public static class p_1 extends AbstractFunc1 {
 
-		@Override
-		protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, ObjectStack objectStack, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
+		protected boolean run(PreemptionContext preemptionContext, LuaState state, Ptr<Object> tail, int base, int ret, int pc, int numResults, int flags) throws ControlThrowable {
 			// registers
 			Object r_0, r_1;
 
+			r_0 = null;
+			r_1 = null;
+
 			// load registers
-			r_0 = objectStack.get(base + 0);
-			r_1 = objectStack.get(base + 1);
+//			r_0 = objectStack.get(base + 0);
+//			r_1 = objectStack.get(base + 1);
 
 			try {
 				switch (pc) {
@@ -212,8 +243,8 @@ public class MinusPlus extends Closure {
 						r_1 = Operators.unm(r_0);
 
 					case 2:  // RETURN 1 2
-						objectStack.set(ret + 0, r_1);
-						objectStack.setTop(ret + 1);
+//						objectStack.set(ret + 0, r_1);
+//						objectStack.setTop(ret + 1);
 						return false;
 
 					default:
@@ -223,13 +254,23 @@ public class MinusPlus extends Closure {
 			}
 			catch (ControlThrowable ct) {
 				// save registers to the object stack
-				objectStack.set(base + 0, r_0);
-				objectStack.set(base + 1, r_1);
+//				objectStack.set(base + 0, r_0);
+//				objectStack.set(base + 1, r_1);
 
-				ct.pushCall(this, base, ret, pc, numResults, flags);
+//				ct.pushCall(this, base, ret, pc, numResults, flags);
 
 				throw ct;
 			}
+		}
+
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+			throw new UnsupportedOperationException();
 		}
 
 	}

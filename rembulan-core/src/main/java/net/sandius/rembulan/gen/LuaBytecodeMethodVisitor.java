@@ -9,7 +9,6 @@ import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.Preempted;
 import net.sandius.rembulan.core.Prototype;
 import net.sandius.rembulan.core.PrototypeToClassMap;
-import net.sandius.rembulan.core.Registers;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 import net.sandius.rembulan.util.asm.ASMUtils;
@@ -73,17 +72,19 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 	private final static Type RESUME_METHOD_TYPE = Type.getMethodType(
 			Type.VOID_TYPE,
-			Type.getType(Registers.class),
-			Type.getType(Registers.class),
+// FIXME
+//			Type.getType(Registers.class),
+//			Type.getType(Registers.class),
 			Type.INT_TYPE
 	);
 
 	private final static String CALL_METHOD_NAME = "call";
 
 	private final static Type CALL_METHOD_TYPE = Type.getMethodType(
-			Type.VOID_TYPE,
-			Type.getType(Registers.class),
-			Type.getType(Registers.class)
+			Type.VOID_TYPE
+// FIXME
+//			Type.getType(Registers.class),
+//			Type.getType(Registers.class)
 	);
 
 	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> nestedPrototypes, PrototypeToClassMap prototypeToClassMap, int numInstrs, int numRegs) {
@@ -135,8 +136,9 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		mv.visitLabel(l_last);
 
 		visitLocalVariable("this", thisType.getDescriptor(), null, l_first, l_last, LVAR_THIS);
-		visitLocalVariable("self", Type.getDescriptor(Registers.class), null, l_first, l_last, LVAR_SELF);
-		visitLocalVariable("ret", Type.getDescriptor(Registers.class), null, l_first, l_last, LVAR_SELF);
+// FIXME
+//		visitLocalVariable("self", Type.getDescriptor(Registers.class), null, l_first, l_last, LVAR_SELF);
+//		visitLocalVariable("ret", Type.getDescriptor(Registers.class), null, l_first, l_last, LVAR_SELF);
 		visitLocalVariable("pc", Type.INT_TYPE.getDescriptor(), null, l_first, l_last, LVAR_PC);
 
 		// registers
@@ -191,7 +193,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		pushSelf();
 		pushRet();
 		loadPc();
-		visitMethodInsn(INVOKESPECIAL, Type.getInternalName(CallInfo.class), "<init>", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Function.class), Type.getType(Registers.class), Type.getType(Registers.class), Type.INT_TYPE), false);
+// FIXME
+//		visitMethodInsn(INVOKESPECIAL, Type.getInternalName(CallInfo.class), "<init>", Type.getMethodDescriptor(Type.VOID_TYPE, Type.getType(Function.class), Type.getType(Registers.class), Type.getType(Registers.class), Type.INT_TYPE), false);
 	}
 
 	private void pushCallInfoAndThrow() {
@@ -340,7 +343,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		pushSelf();
 		pushInt(idx);
 		pushRegister(idx);
-		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
+// FIXME
+//		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
 	}
 
 	private void saveRegisterToRet(int idx) {
@@ -349,7 +353,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		pushRet();
 		pushInt(idx);
 		pushRegister(idx);
-		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
+// FIXME
+//		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
 	}
 
 	public void loadRegisters() {
@@ -360,7 +365,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 				visitInsn(DUP);
 			}
 			pushInt(i);
-			visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "get", Type.getMethodDescriptor(Type.getType(Object.class), Type.INT_TYPE), true);
+// FIXME
+//			visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "get", Type.getMethodDescriptor(Type.getType(Object.class), Type.INT_TYPE), true);
 			visitVarInsn(ASTORE, REGISTER_OFFSET + i);
 		}
 	}
@@ -394,7 +400,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	public void setTop(int to) {
 		pushSelf();
 		pushInt(to);
-		mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "setTop", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE), true);
+// FIXME
+//		mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "setTop", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE), true);
 	}
 
 	private void checkPreemptFromHere(int pc) {
@@ -747,7 +754,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		// base of the called function
 		pushSelf();
 		pushInt(a + 1);
-		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "from", Type.getMethodDescriptor(Type.getType(Registers.class), Type.INT_TYPE), true);
+// FIXME
+//		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "from", Type.getMethodDescriptor(Type.getType(Registers.class), Type.INT_TYPE), true);
 
 		// save arguments to the called function's registers
 		if (b != 0) {
@@ -758,7 +766,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 					visitInsn(DUP);
 					pushInt(i);
 					pushRegister(a + 1 + i);
-					visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
+// FIXME
+//					visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
 				}
 //				visitInsn(POP);
 			}
@@ -770,7 +779,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 		// return address
 		pushSelf();
 		pushInt(a);
-		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "from", Type.getMethodDescriptor(Type.getType(Registers.class), Type.INT_TYPE), true);
+// FIXME
+//		visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "from", Type.getMethodDescriptor(Type.getType(Registers.class), Type.INT_TYPE), true);
 
 		visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Function.class), CALL_METHOD_NAME, CALL_METHOD_TYPE.getDescriptor(), false);
 
@@ -805,7 +815,8 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 					visitInsn(DUP);
 					pushInt(i);
 					pushRegister(a + i);
-					visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
+// FIXME
+//					visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Registers.class), "set", Type.getMethodDescriptor(Type.VOID_TYPE, Type.INT_TYPE, Type.getType(Object.class)), true);
 				}
 				visitInsn(POP);
 			}

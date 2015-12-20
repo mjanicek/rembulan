@@ -1,4 +1,4 @@
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.legacy;
 
 public interface Registers {
 

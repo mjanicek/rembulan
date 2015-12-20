@@ -11,18 +11,14 @@ public class Exec {
 	private final PreemptionContext preemptionContext;
 	private final LuaState state;
 
-	private final ObjectStack objectStack;
-
 	private Cons<CallInfo> callStack;
 
-	public Exec(PreemptionContext preemptionContext, LuaState state, ObjectStack objectStack) {
+	public Exec(PreemptionContext preemptionContext, LuaState state) {
 		Check.notNull(preemptionContext);
 		Check.notNull(state);
-		Check.notNull(objectStack);
 
 		this.preemptionContext = preemptionContext;
 		this.state = state;
-		this.objectStack = objectStack;
 
 		callStack = null;
 	}
@@ -33,10 +29,6 @@ public class Exec {
 
 	public LuaState getState() {
 		return state;
-	}
-
-	public ObjectStack getObjectStack() {
-		return objectStack;
 	}
 
 	public boolean isPaused() {
@@ -72,7 +64,7 @@ public class Exec {
 
 			try {
 				tail.clear();
-				top.resume(preemptionContext, state, tail, objectStack);
+				top.resume();
 			}
 			catch (ControlThrowable ct) {
 //				System.out.println("Control event: " + ct.toString());

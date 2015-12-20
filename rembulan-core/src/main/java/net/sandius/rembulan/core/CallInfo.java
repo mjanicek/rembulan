@@ -36,8 +36,9 @@ public class CallInfo {
 		return "[" + function.toString() + ", pc=" + pc + ", base=" + base + ", ret=" + ret + ", numResults=" + numResults + ", flags=" + flags + "]";
 	}
 
-	public void resume(PreemptionContext pctx, LuaState state, Ptr<Object> tail, ObjectStack objectStack) throws ControlThrowable {
-		function.resume(pctx, state, tail, objectStack, base, ret, pc, numResults, flags);
+	@Deprecated
+	public void resume() throws ControlThrowable {
+		throw new UnsupportedOperationException();
 	}
 
 }

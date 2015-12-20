@@ -1,4 +1,4 @@
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.legacy;
 
 import net.sandius.rembulan.util.Check;
 

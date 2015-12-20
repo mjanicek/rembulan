@@ -317,6 +317,7 @@ public class Operators {
 		}
 	}
 
+	@Deprecated
 	public static Object call(Object tgt, Object[] args) {
 		if (tgt instanceof Function) {
 			Function f = (Function) tgt;
@@ -331,107 +332,6 @@ public class Operators {
 			}
 			else {
 				throw new IllegalOperationAttemptException("call", LuaType.typeOf(tgt).name);
-			}
-		}
-	}
-
-	// call with possible tail-calls resolved
-	public static void call(
-			PreemptionContext preemptionContext,
-			LuaState state,
-			Ptr<Object> tail,
-			ObjectStack objectStack,
-			int base,
-			int ret,
-			int numResults,
-			int flags) throws ControlThrowable {
-
-		// FIXME: code duplication, see callOnce()
-
-		Object target = objectStack.get(base);
-
-		if (target instanceof Function) {
-			Function function = (Function) target;
-
-			// regular call
-			function.call(
-					preemptionContext,
-					state,
-					tail,
-					objectStack,
-					base + 1,
-					ret,
-					numResults,
-					flags);
-		}
-		else {
-			Object handler = Metatables.getMetamethod(state, Metatables.MT_CALL, target);
-
-			if (handler instanceof Function) {
-				Function function = (Function) handler;
-				function.call(
-						preemptionContext,
-						state,
-						tail,
-						objectStack,
-						base,
-						ret,
-						numResults,
-						flags | CallInfo.METAMETHOD);
-			}
-			else {
-				throw new IllegalOperationAttemptException("call", LuaType.typeOf(target).name);
-			}
-		}
-
-		assert (tail.isNull());
-	}
-
-	public static boolean callOnce(
-			PreemptionContext preemptionContext,
-			LuaState state,
-			Object target,
-			Ptr<Object> tail,
-			ObjectStack objectStack,
-			int base,
-			int ret,
-			int numResults,
-			int flags) throws ControlThrowable {
-
-		// FIXME: code duplication, see call()
-
-		if (target instanceof Function) {
-			Function function = (Function) target;
-
-			return function.run(
-					preemptionContext,
-					state,
-					tail,
-					objectStack,
-					base + 1,
-					ret,
-					0,
-					numResults,
-					flags);
-		}
-		else {
-			Object handler = Metatables.getMetamethod(state, Metatables.MT_CALL, target);
-
-			if (handler instanceof Function) {
-				Function function = (Function) handler;
-				return function.run(
-						preemptionContext,
-						state,
-						tail,
-						objectStack,
-						base,
-						ret,
-						0,
-						numResults,
-						flags | CallInfo.METAMETHOD);
-			}
-			else {
-				throw new IllegalOperationAttemptException("call", LuaType.typeOf(target).name);
 			}
 		}
 	}
