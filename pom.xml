@@ -11,6 +11,7 @@
   <packaging>pom</packaging>
 
   <modules>
+    <module>rembulan-util</module>
     <module>rembulan-core</module>
     <module>rembulan-parser</module>
     <module>rembulan-tests</module>
