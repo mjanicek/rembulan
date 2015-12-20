@@ -6,15 +6,15 @@ public interface Func {
 
 	void invoke(ObjectSink result);
 
-	void invoke(ObjectSink result, Object a);
+	void invoke(ObjectSink result, Object arg1);
 
-	void invoke(ObjectSink result, Object a, Object b);
+	void invoke(ObjectSink result, Object arg1, Object arg2);
 
-	void invoke(ObjectSink result, Object a, Object b, Object c);
+	void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3);
 
-	void invoke(ObjectSink result, Object a, Object b, Object c, Object d);
+	void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3, Object arg4);
 
-	void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e);
+	void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
 	void invoke(ObjectSink result, Object[] args);
 

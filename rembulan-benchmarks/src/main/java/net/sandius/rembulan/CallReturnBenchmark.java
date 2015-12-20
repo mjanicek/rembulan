@@ -214,9 +214,9 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object a, Object b) {
-			Func f = (Func) a;
-			long l = ((Number) b).longValue();
+		public void invoke(ObjectSink result, Object arg1, Object arg2) {
+			Func f = (Func) arg1;
+			long l = ((Number) arg2).longValue();
 			if (l > 0) {
 				f.invoke(result, f, l - 1);
 				Number m = (Number) result._0();
@@ -300,8 +300,8 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object a, Object b) {
-			run(result, 0, a, b);
+		public void invoke(ObjectSink result, Object arg1, Object arg2) {
+			run(result, 0, arg1, arg2);
 		}
 
 		@Override
@@ -335,8 +335,8 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object a, Object b, Object c) {
-			run(result, 0, a, b, c);
+		public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3) {
+			run(result, 0, arg1, arg2, arg3);
 		}
 
 		@Override
@@ -370,8 +370,8 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object a, Object b) {
-			run(result, 0, a, b);
+		public void invoke(ObjectSink result, Object arg1, Object arg2) {
+			run(result, 0, arg1, arg2);
 		}
 
 		@Override

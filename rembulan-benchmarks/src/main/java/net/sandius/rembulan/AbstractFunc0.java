@@ -5,27 +5,27 @@ import net.sandius.rembulan.util.ObjectSink;
 public abstract class AbstractFunc0 implements Func {
 
 	@Override
-	public void invoke(ObjectSink result, Object a) {
+	public void invoke(ObjectSink result, Object arg1) {
 		invoke(result);
 	}
 
 	@Override
-	public void invoke(ObjectSink result, Object a, Object b) {
+	public void invoke(ObjectSink result, Object arg1, Object arg2) {
 		invoke(result);
 	}
 
 	@Override
-	public void invoke(ObjectSink result, Object a, Object b, Object c) {
+	public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3) {
 		invoke(result);
 	}
 
 	@Override
-	public void invoke(ObjectSink result, Object a, Object b, Object c, Object d) {
+	public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3, Object arg4) {
 		invoke(result);
 	}
 
 	@Override
-	public void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
+	public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
 		invoke(result);
 	}
 

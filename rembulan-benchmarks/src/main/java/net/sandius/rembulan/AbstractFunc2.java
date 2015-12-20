@@ -10,23 +10,23 @@ public abstract class AbstractFunc2 implements Func {
 	}
 
 	@Override
-	public void invoke(ObjectSink result, Object a) {
-		invoke(result, a, null);
+	public void invoke(ObjectSink result, Object arg1) {
+		invoke(result, arg1, null);
 	}
 
 	@Override
-	public void invoke(ObjectSink result, Object a, Object b, Object c) {
-		invoke(result, a, b);
+	public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3) {
+		invoke(result, arg1, arg2);
 	}
 
 	@Override
-	public void invoke(ObjectSink result, Object a, Object b, Object c, Object d) {
-		invoke(result, a, b);
+	public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3, Object arg4) {
+		invoke(result, arg1, arg2);
 	}
 
 	@Override
-	public void invoke(ObjectSink result, Object a, Object b, Object c, Object d, Object e) {
-		invoke(result, a, b);
+	public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+		invoke(result, arg1, arg2);
 	}
 
 	@Override
