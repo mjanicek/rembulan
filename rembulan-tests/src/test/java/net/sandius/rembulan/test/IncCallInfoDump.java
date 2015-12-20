@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test;
 
-import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.Func;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -29,7 +29,7 @@ public class IncCallInfoDump implements Opcodes {
 		ClassVisitor cv = cw; // new TraceClassVisitor(cw, new PrintWriter(System.out));
 //		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.err));
 
-		cv.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Function.class), null);
+		cv.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Func.class), null);
 
 		cv.visitSource("=stdin", null);
 

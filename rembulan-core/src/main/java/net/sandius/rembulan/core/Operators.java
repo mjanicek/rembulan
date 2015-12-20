@@ -35,7 +35,7 @@ public class Operators {
 	}
 
 	private static Object callHandler(Object handler, Object[] args) {
-		return trim(call(handler, args));
+		throw new UnsupportedOperationException();  // FIXME
 	}
 
 	private static Object callHandler(Object handler, Object o) {
@@ -275,7 +275,7 @@ public class Operators {
 			return null;
 		}
 
-		if (handler instanceof Function) {
+		if (handler instanceof Func) {
 			return callHandler(handler, table, key);  // TODO: should we trim to single value?
 		}
 		else if (handler instanceof Table) {
@@ -306,7 +306,7 @@ public class Operators {
 			return;
 		}
 
-		if (handler instanceof Function) {
+		if (handler instanceof Func) {
 			callHandler(handler, table, key, value);  // TODO: is it ok that we're ignoring the result?
 		}
 		else if (handler instanceof Table) {
@@ -314,25 +314,6 @@ public class Operators {
 		}
 		else {
 			throw new IllegalOperationAttemptException("index", LuaType.typeOf(table).name);
-		}
-	}
-
-	@Deprecated
-	public static Object call(Object tgt, Object[] args) {
-		if (tgt instanceof Function) {
-			Function f = (Function) tgt;
-			throw new UnsupportedOperationException();
-//			return f.invoke(args);
-		}
-		else {
-			Object handler = Metatables.getMetamethod(tgt, Metatables.MT_CALL);
-
-			if (handler != null) {
-				return callHandler(handler, tgt, args);
-			}
-			else {
-				throw new IllegalOperationAttemptException("call", LuaType.typeOf(tgt).name);
-			}
 		}
 	}
 

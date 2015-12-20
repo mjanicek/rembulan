@@ -8,6 +8,6 @@ object IncWrapper {
 
   private lazy val incClazz = incClazzForName("lua.tmp.FortyTwo")
 
-  def newInc(): Function = incClazz.getConstructor().newInstance().asInstanceOf[Function]
+  def newInc(): Func = incClazz.getConstructor().newInstance().asInstanceOf[Func]
 
 }

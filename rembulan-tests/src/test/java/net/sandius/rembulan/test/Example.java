@@ -1,7 +1,6 @@
 package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.PreemptionContext;

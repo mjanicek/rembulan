@@ -33,13 +33,13 @@ public class PrototypeClassLoader extends ClassLoader {
 		this.index = 1;
 	}
 
-	private Class<Function> defineCompiledLuaFunction(String name, byte[] data) {
+	private Class<Func> defineCompiledLuaFunction(String name, byte[] data) {
 		Class<?> cl = defineClass(name, data, 0, data.length);
 
-		assert Function.class.isAssignableFrom(cl);
+		assert Func.class.isAssignableFrom(cl);
 
 		// FIXME: unchecked, uncheckable cast!
-		return (Class<Function>) cl;
+		return (Class<Func>) cl;
 	}
 
 	protected byte[] compile(final Prototype prototype, final String className) {
@@ -51,7 +51,7 @@ public class PrototypeClassLoader extends ClassLoader {
 		ClassWriter _cw = new ClassWriter(0); //ClassWriter.COMPUTE_FRAMES);
 		ClassVisitor cw = new TraceClassVisitor(_cw, new PrintWriter(System.err));
 
-		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Function.class), null);
+		cw.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Func.class), null);
 		cw.visitSource(prototype.getSource(), null);
 
 		// constructor

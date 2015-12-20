@@ -1,11 +1,10 @@
 package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Func;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 
-public abstract class AbstractFuncVararg implements Func {
+public abstract class AbstractFuncVararg extends AbstractFunc {
 
 	@Override
 	public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {

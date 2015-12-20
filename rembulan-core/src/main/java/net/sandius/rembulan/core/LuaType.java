@@ -41,7 +41,7 @@ public enum LuaType {
 		else if (v instanceof Number) return LuaType.NUMBER;
 		else if (v instanceof String) return LuaType.STRING;
 		else if (v instanceof Table) return LuaType.TABLE;
-		else if (v instanceof Function) return LuaType.FUNCTION;
+		else if (v instanceof Func) return LuaType.FUNCTION;
 		else if (v instanceof Userdata) return LuaType.USERDATA;
 		else if (v instanceof Coroutine) return LuaType.THREAD;
 		else return LuaType.LIGHTUSERDATA;

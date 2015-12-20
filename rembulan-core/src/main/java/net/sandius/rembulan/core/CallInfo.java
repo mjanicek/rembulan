@@ -5,7 +5,7 @@ import net.sandius.rembulan.util.Ptr;
 
 public class CallInfo {
 
-	public final Function function;
+	public final Func function;
 	public final int base;
 	public final int ret;
 	public final int pc;
@@ -16,7 +16,7 @@ public class CallInfo {
 	public static final int TAILCALL = 0x1;
 	public static final int METAMETHOD = 0x2;
 
-	public CallInfo(Function function, int base, int ret, int pc, int numResults, int flags) {
+	public CallInfo(Func function, int base, int ret, int pc, int numResults, int flags) {
 		Check.notNull(function);
 		Check.nonNegative(base);
 		Check.nonNegative(ret);
