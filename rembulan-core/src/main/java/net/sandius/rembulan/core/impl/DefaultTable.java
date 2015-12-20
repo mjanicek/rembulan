@@ -1,4 +1,7 @@
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.impl;
+
+import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.core.Table;
 
 import java.util.HashMap;
 import java.util.Map;

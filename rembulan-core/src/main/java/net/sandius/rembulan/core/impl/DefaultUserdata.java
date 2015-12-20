@@ -1,5 +1,7 @@
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.impl;
 
+import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.util.Check;
 
 public class DefaultUserdata extends Userdata {
