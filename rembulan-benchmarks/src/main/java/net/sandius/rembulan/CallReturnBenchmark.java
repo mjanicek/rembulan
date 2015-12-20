@@ -2,7 +2,9 @@ package net.sandius.rembulan;
 
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.FixedSizeRegisters;
+import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.LuaType;
+import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.ReturnTarget;
 import net.sandius.rembulan.util.ObjectSink;
@@ -251,7 +253,14 @@ public class CallReturnBenchmark {
 			return (Func) target;
 		}
 		else {
-			throw new IllegalArgumentException("attempt to call a " + LuaType.typeOf(target) + " value");
+			Object handler = Metatables.getMetamethod(target, Metatables.MT_CALL);
+
+			if (handler instanceof Func) {
+				return (Func) handler;
+			}
+			else {
+				throw new IllegalOperationAttemptException("call", LuaType.typeOf(target).name);
+			}
 		}
 	}
 
