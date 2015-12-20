@@ -3,6 +3,7 @@ package net.sandius.rembulan;
 import net.sandius.rembulan.util.ArrayListObjectSink;
 import net.sandius.rembulan.util.ObjectSink;
 import net.sandius.rembulan.util.PairCachingObjectSink;
+import net.sandius.rembulan.util.QuintupleCachingObjectSink;
 import net.sandius.rembulan.util.TripleCachingObjectSink;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
@@ -14,9 +15,9 @@ import org.openjdk.jmh.infra.Blackhole;
 
 import static net.sandius.rembulan.Util.*;
 
-@Fork(2)
+@Fork(1)
 @Warmup(iterations = 10)
-@Measurement(iterations = 10)
+@Measurement(iterations = 20)
 public class ObjectSinkBenchmark {
 
 	@State(Scope.Thread)
@@ -32,6 +33,11 @@ public class ObjectSinkBenchmark {
 	@State(Scope.Thread)
 	public static class TripleCacheSinkState {
 		public final ObjectSink sink = new TripleCachingObjectSink();
+	}
+
+	@State(Scope.Thread)
+	public static class QuintupleCacheSinkState {
+		public final ObjectSink sink = new QuintupleCachingObjectSink();
 	}
 
 	public void impl_push(Blackhole bh, ObjectSink sink, int count) {
@@ -194,6 +200,48 @@ public class ObjectSinkBenchmark {
 		impl_push(bh, state.sink, 20);
 	}
 
+	// Quintuple cache
+
+	@Benchmark
+	public void push_5_00(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_push(bh, state.sink, 0);
+	}
+
+	@Benchmark
+	public void push_5_01(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_push(bh, state.sink, 1);
+	}
+
+	@Benchmark
+	public void push_5_02(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_push(bh, state.sink, 2);
+	}
+
+	@Benchmark
+	public void push_5_03(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_push(bh, state.sink, 3);
+	}
+
+	@Benchmark
+	public void push_5_04(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_push(bh, state.sink, 4);
+	}
+
+	@Benchmark
+	public void push_5_05(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_push(bh, state.sink, 5);
+	}
+
+	@Benchmark
+	public void push_5_10(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_push(bh, state.sink, 10);
+	}
+
+	@Benchmark
+	public void push_5_20(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_push(bh, state.sink, 20);
+	}
+
 	// ------------------------------------------------------------------
 	// Set
 
@@ -322,5 +370,48 @@ public class ObjectSinkBenchmark {
 	public void set_3_20(TripleCacheSinkState state, Blackhole bh) {
 		impl_set(bh, state.sink, 20);
 	}
-	
+
+	// Quintuple cache
+
+	@Benchmark
+	public void set_5_00(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_set(bh, state.sink, 0);
+	}
+
+	@Benchmark
+	public void set_5_01(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_set(bh, state.sink, 1);
+	}
+
+	@Benchmark
+	public void set_5_02(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_set(bh, state.sink, 2);
+	}
+
+	@Benchmark
+	public void set_5_03(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_set(bh, state.sink, 3);
+	}
+
+	@Benchmark
+	public void set_5_04(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_set(bh, state.sink, 4);
+	}
+
+	@Benchmark
+	public void set_5_05(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_set(bh, state.sink, 5);
+	}
+
+	@Benchmark
+	public void set_5_10(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_set(bh, state.sink, 10);
+	}
+
+	@Benchmark
+	public void set_5_20(QuintupleCacheSinkState state, Blackhole bh) {
+		impl_set(bh, state.sink, 20);
+	}
+
+
 }
