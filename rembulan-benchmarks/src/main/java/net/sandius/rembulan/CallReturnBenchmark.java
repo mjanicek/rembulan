@@ -28,21 +28,60 @@ public class CallReturnBenchmark {
 		return new QuintupleCachingObjectSink();
 	}
 
-	public static abstract class JavaTwoArgFunc {
+	public long primitiveMethod(long n, long l) {
+		if (l > 0) {
+			return primitiveMethod(n, l - 1) + 1;
+		}
+		else {
+			return n;
+		}
+	}
+
+	public Object objectMethod(Object n, Object l) {
+		long ll = ((Number) l).longValue();
+		if (ll > 0) {
+			return ((Number) objectMethod(n, ll - 1)).longValue() + 1;
+		}
+		else {
+			return n;
+		}
+	}
+
+	public Number numberObjectMethod(Number n, Number l) {
+		long ll = l.longValue();
+		if (ll > 0) {
+			return numberObjectMethod(n, ll - 1).longValue() + 1;
+		}
+		else {
+			return n;
+		}
+	}
+
+	public Long longObjectMethod(Long n, Long l) {
+		long ll = l;
+		if (ll > 0) {
+			return longObjectMethod(n, ll - 1) + 1;
+		}
+		else {
+			return n;
+		}
+	}
+
+	public static abstract class JavaTwoArgFuncObject {
 		public abstract Object call(Object arg1, Object arg2);
 	}
 
-	public static class JavaTwoArgFuncImpl extends JavaTwoArgFunc {
+	public static class JavaTwoArgFuncObjectImpl extends JavaTwoArgFuncObject {
 
 		private final Long n;
 
-		public JavaTwoArgFuncImpl(long n) {
+		public JavaTwoArgFuncObjectImpl(long n) {
 			this.n = n;
 		}
 
 		@Override
 		public Object call(Object arg1, Object arg2) {
-			JavaTwoArgFunc f = (JavaTwoArgFunc) arg1;
+			JavaTwoArgFuncObject f = (JavaTwoArgFuncObject) arg1;
 			long l = ((Number) arg2).longValue();
 
 			if (l > 0) {
@@ -57,11 +96,33 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _0_javaTwoArgCallMethod() {
-		JavaTwoArgFunc f = new JavaTwoArgFuncImpl(100);
+	public void _0_0_primitiveMethod() {
+		long result = primitiveMethod(100, 20);
+		assertEquals(result, 120L);
+	}
 
+	@Benchmark
+	public void _0_1_objectMethod() {
+		Object result = objectMethod(100L, 20L);
+		assertEquals(result, 120L);
+	}
+
+	@Benchmark
+	public void _0_2_numberObjectMethod() {
+		Number result = numberObjectMethod(100L, 20L);
+		assertEquals(result, 120L);
+	}
+
+	@Benchmark
+	public void _0_3_longObjectMethod() {
+		Long result = longObjectMethod(100L, 20L);
+		assertEquals(result, 120L);
+	}
+
+	@Benchmark
+	public void _0_4_javaTwoArgFunctionObjectMethod() {
+		JavaTwoArgFuncObject f = new JavaTwoArgFuncObjectImpl(100);
 		Object result = f.call(f, 20);
-
 		assertEquals(result, 120L);
 	}
 
