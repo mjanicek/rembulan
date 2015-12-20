@@ -259,18 +259,33 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	public static void call(ObjectSink result, Func f, Object a) {
-		f.invoke(result, a);
+	public static void call(ObjectSink result, Func f, Object arg1) {
+		f.invoke(result, arg1);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, Func f, Object a, Object b) {
-		f.invoke(result, a, b);
+	public static void call(ObjectSink result, Func f, Object arg1, Object arg2) {
+		f.invoke(result, arg1, arg2);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, Func f, Object a, Object b, Object c) {
-		f.invoke(result, a, b, c);
+	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3) {
+		f.invoke(result, arg1, arg2, arg3);
+		evaluateTailCalls(result);
+	}
+
+	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3, Object arg4) {
+		f.invoke(result, arg1, arg2, arg3, arg4);
+		evaluateTailCalls(result);
+	}
+
+	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+		f.invoke(result, arg1, arg2, arg3, arg4, arg5);
+		evaluateTailCalls(result);
+	}
+
+	public static void call(ObjectSink result, Func f, Object[] args) {
+		f.invoke(result, f, args);
 		evaluateTailCalls(result);
 	}
 
