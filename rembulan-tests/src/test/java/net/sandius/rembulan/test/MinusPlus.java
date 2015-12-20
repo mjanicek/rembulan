@@ -173,7 +173,7 @@ public class MinusPlus extends Function0 {
 						preemptionContext.withdraw(2);  // accounting the entire block already
 
 					case 1:  // ADD 1 0 -1
-						r_1 = Operators.add(r_0, k_1);
+						r_1 = Operators.add(state, r_0, k_1);
 
 					case 2:  // RETURN 1 2
 //						objectStack.set(ret + 0, r_1);
@@ -239,7 +239,7 @@ public class MinusPlus extends Function0 {
 						preemptionContext.withdraw(2);  // accounting the entire block already
 
 					case 1:  // UNM 1 0
-						r_1 = Operators.unm(r_0);
+						r_1 = Operators.unm(state, r_0);
 
 					case 2:  // RETURN 1 2
 //						objectStack.set(ret + 0, r_1);

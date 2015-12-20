@@ -67,19 +67,9 @@ public class Metatables {
 		}
 	}
 
-	@Deprecated
-	public static Object getMetamethod(Object o, String event) {
-		return getMetamethod(LuaState.getCurrentState(), event, o);
-	}
-
 	public static Object binaryHandlerFor(LuaState state, String event, Object a, Object b) {
 		Object ma = Metatables.getMetamethod(state, event, a);
 		return ma != null ? ma : Metatables.getMetamethod(state, event, b);
-	}
-
-	@Deprecated
-	public static Object binaryHandlerFor(String event, Object a, Object b) {
-		return binaryHandlerFor(LuaState.getCurrentState(), event, a, b);
 	}
 
 }
