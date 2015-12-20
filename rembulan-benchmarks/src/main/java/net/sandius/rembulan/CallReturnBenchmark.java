@@ -230,7 +230,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ObjectSink result, SuspendedState suspendedState) {
+		public void resume(ObjectSink result, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -305,7 +305,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ObjectSink result, SuspendedState suspendedState) {
+		public void resume(ObjectSink result, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -340,7 +340,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ObjectSink result, SuspendedState suspendedState) {
+		public void resume(ObjectSink result, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -375,7 +375,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ObjectSink result, SuspendedState suspendedState) {
+		public void resume(ObjectSink result, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 

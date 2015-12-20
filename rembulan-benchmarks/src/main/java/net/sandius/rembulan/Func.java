@@ -18,6 +18,6 @@ public interface Func {
 
 	void invoke(ObjectSink result, Object[] args);
 
-	void resume(ObjectSink result, SuspendedState suspendedState);
+	void resume(ObjectSink result, Object suspendedState);
 
 }
