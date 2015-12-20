@@ -1,7 +1,5 @@
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.util.ObjectSink;
-
 public abstract class AbstractFunc3 implements Func {
 
 	@Override

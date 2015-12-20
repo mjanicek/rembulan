@@ -1,4 +1,6 @@
-package net.sandius.rembulan.util;
+package net.sandius.rembulan.core.impl;
+
+import net.sandius.rembulan.core.ObjectSink;
 
 public abstract class AbstractObjectSink implements ObjectSink {
 

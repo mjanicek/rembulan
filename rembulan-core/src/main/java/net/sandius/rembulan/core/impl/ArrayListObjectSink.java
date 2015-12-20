@@ -1,4 +1,4 @@
-package net.sandius.rembulan.util;
+package net.sandius.rembulan.core.impl;
 
 import java.util.ArrayList;
 

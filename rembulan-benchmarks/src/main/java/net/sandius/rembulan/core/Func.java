@@ -1,7 +1,5 @@
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.util.ObjectSink;
-
 public interface Func {
 
 	void invoke(LuaState state, ObjectSink result) throws ControlThrowable;
