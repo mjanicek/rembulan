@@ -1,5 +1,6 @@
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.FixedSizeRegisters;
 import net.sandius.rembulan.core.ObjectStack;
 import net.sandius.rembulan.core.ReturnTarget;
@@ -214,7 +215,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object arg1, Object arg2) {
+		public void invoke(ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
 			Func f = (Func) arg1;
 			long l = ((Number) arg2).longValue();
 			if (l > 0) {
@@ -230,21 +231,21 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ObjectSink result, Object suspendedState) {
+		public void resume(ObjectSink result, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
 	}
 
 	@Benchmark
-	public void _3_2_argRetFunc_ptrReuse() {
+	public void _3_2_argRetFunc_ptrReuse() throws ControlThrowable {
 		Func f = new FuncImpl(100);
 		ObjectSink result = newSink();
 		f.invoke(result, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
-	public static void evaluateTailCalls(ObjectSink result) {
+	public static void evaluateTailCalls(ObjectSink result) throws ControlThrowable {
 		while (result.isTailCall()) {
 			Func target = (Func) result._0();
 			switch (result.size()) {
@@ -259,32 +260,32 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	public static void call(ObjectSink result, Func f, Object arg1) {
+	public static void call(ObjectSink result, Func f, Object arg1) throws ControlThrowable {
 		f.invoke(result, arg1);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, Func f, Object arg1, Object arg2) {
+	public static void call(ObjectSink result, Func f, Object arg1, Object arg2) throws ControlThrowable {
 		f.invoke(result, arg1, arg2);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3) {
+	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
 		f.invoke(result, arg1, arg2, arg3);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3, Object arg4) {
+	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
 		f.invoke(result, arg1, arg2, arg3, arg4);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+	public static void call(ObjectSink result, Func f, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
 		f.invoke(result, arg1, arg2, arg3, arg4, arg5);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, Func f, Object[] args) {
+	public static void call(ObjectSink result, Func f, Object[] args) throws ControlThrowable {
 		f.invoke(result, f, args);
 		evaluateTailCalls(result);
 	}
@@ -297,7 +298,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ObjectSink result, int pc, Object r_0, Object r_1) {
+		private void run(ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -315,12 +316,12 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object arg1, Object arg2) {
+		public void invoke(ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
 			run(result, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(ObjectSink result, Object suspendedState) {
+		public void resume(ObjectSink result, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -350,12 +351,12 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3) {
+		public void invoke(ObjectSink result, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
 			run(result, 0, arg1, arg2, arg3);
 		}
 
 		@Override
-		public void resume(ObjectSink result, Object suspendedState) {
+		public void resume(ObjectSink result, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -369,7 +370,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ObjectSink result, int pc, Object r_0, Object r_1) {
+		private void run(ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -385,19 +386,19 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ObjectSink result, Object arg1, Object arg2) {
+		public void invoke(ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
 			run(result, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(ObjectSink result, Object suspendedState) {
+		public void resume(ObjectSink result, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
 	}
 
 	@Benchmark
-	public void _3_3_resumableArgRetFunc_ptrReuse() {
+	public void _3_3_resumableArgRetFunc_ptrReuse() throws ControlThrowable {
 		Func f = new ResumableFuncImpl(100);
 		ObjectSink result = newSink();
 		call(result, f, f, 20);
@@ -405,7 +406,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse() {
+	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse() throws ControlThrowable {
 		Func f = new TailCallingResumableFuncImpl(100);
 		ObjectSink result = newSink();
 		call(result, f, f, 20, 0);
@@ -413,7 +414,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse() {
+	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse() throws ControlThrowable {
 		Func f = new SelfRecursiveTailCallingResumableFuncImpl(100);
 		ObjectSink result = newSink();
 		call(result, f, 20, 0);
