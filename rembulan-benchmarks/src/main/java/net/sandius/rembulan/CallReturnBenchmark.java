@@ -255,55 +255,125 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	public static void evaluateTailCalls(ObjectSink result) throws ControlThrowable {
-		while (result.isTailCall()) {
-			Object target = result._0();
-			Func fn = callTarget(target);
-			switch (result.size()) {
+	public static void mt_invoke(ObjectSink result, Object target) throws ControlThrowable {
+		Func fn = callTarget(target);
+		if (fn == target) {
+			fn.invoke(result);
+		}
+		else {
+			fn.invoke(result, target);
+		}
+	}
+
+	public static void mt_invoke(ObjectSink result, Object target, Object arg1) throws ControlThrowable {
+		Func fn = callTarget(target);
+		if (fn == target) {
+			fn.invoke(result, arg1);
+		}
+		else {
+			fn.invoke(result, target, arg1);
+		}
+	}
+
+	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2) throws ControlThrowable {
+		Func fn = callTarget(target);
+		if (fn == target) {
+			fn.invoke(result, arg1, arg2);
+		}
+		else {
+			fn.invoke(result, target, arg1, arg2);
+		}
+	}
+
+	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+		Func fn = callTarget(target);
+		if (fn == target) {
+			fn.invoke(result, arg1, arg2, arg3);
+		}
+		else {
+			fn.invoke(result, target, arg1, arg2, arg3);
+		}
+	}
+
+	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
+		Func fn = callTarget(target);
+		if (fn == target) {
+			fn.invoke(result, arg1, arg2, arg3, arg4);
+		}
+		else {
+			fn.invoke(result, target, arg1, arg2, arg3, arg4);
+		}
+	}
+
+	public static void mt_invoke(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
+		Func fn = callTarget(target);
+		if (fn == target) {
+			fn.invoke(result, arg1, arg2, arg3, arg4, arg5);
+		}
+		else {
+			fn.invoke(result, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
+		}
+	}
+
+	public static void mt_invoke(ObjectSink result, Object target, Object[] args) throws ControlThrowable {
+		Func fn = callTarget(target);
+		if (fn == target) {
+			fn.invoke(result, args);
+		}
+		else {
+			Object[] mtArgs = new Object[args.length + 1];
+			mtArgs[0] = target;
+			System.arraycopy(args, 0, mtArgs, 1, args.length);
+			fn.invoke(result, mtArgs);
+		}
+	}
+
+	public static void evaluateTailCalls(ObjectSink r) throws ControlThrowable {
+		while (r.isTailCall()) {
+			switch (r.size()) {
 				case 0: throw new IllegalStateException();
-				case 1: fn.invoke(result); break;
-				case 2: fn.invoke(result, result._1()); break;
-				case 3: fn.invoke(result, result._1(), result._2()); break;
-				case 4: fn.invoke(result, result._1(), result._2(), result._3()); break;
-				case 5: fn.invoke(result, result._1(), result._2(), result._3(), result._4()); break;
-				default: fn.invoke(result, result.tailAsArray()); break;
+				case 1: mt_invoke(r, r._0()); break;
+				case 2: mt_invoke(r, r._0(), r._1()); break;
+				case 3: mt_invoke(r, r._0(), r._1(), r._2()); break;
+				case 4: mt_invoke(r, r._0(), r._1(), r._2(), r._3()); break;
+				case 5: mt_invoke(r, r._0(), r._1(), r._2(), r._3(), r._4()); break;
+				default: mt_invoke(r, r._0(), r.tailAsArray()); break;
 			}
 		}
 	}
 
+	public static void call(ObjectSink result, Object target) throws ControlThrowable {
+		mt_invoke(result, target);
+		evaluateTailCalls(result);
+	}
+
 	public static void call(ObjectSink result, Object target, Object arg1) throws ControlThrowable {
-		Func fn = callTarget(target);
-		fn.invoke(result, arg1);
+		mt_invoke(result, target, arg1);
 		evaluateTailCalls(result);
 	}
 
 	public static void call(ObjectSink result, Object target, Object arg1, Object arg2) throws ControlThrowable {
-		Func fn = callTarget(target);
-		fn.invoke(result, arg1, arg2);
+		mt_invoke(result, target, arg1, arg2);
 		evaluateTailCalls(result);
 	}
 
 	public static void call(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-		Func fn = callTarget(target);
-		fn.invoke(result, arg1, arg2, arg3);
+		mt_invoke(result, target, arg1, arg2, arg3);
 		evaluateTailCalls(result);
 	}
 
 	public static void call(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
-		Func f = callTarget(target);
-		f.invoke(result, arg1, arg2, arg3, arg4);
+		mt_invoke(result, target, arg1, arg2, arg3, arg4);
 		evaluateTailCalls(result);
 	}
 
 	public static void call(ObjectSink result, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
-		Func fn = callTarget(target);
-		fn.invoke(result, arg1, arg2, arg3, arg4, arg5);
+		mt_invoke(result, target, arg1, arg2, arg3, arg4, arg5);
 		evaluateTailCalls(result);
 	}
 
 	public static void call(ObjectSink result, Object target, Object[] args) throws ControlThrowable {
-		Func fn = callTarget(target);
-		fn.invoke(result, fn, args);
+		mt_invoke(result, target, args);
 		evaluateTailCalls(result);
 	}
 
