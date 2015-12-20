@@ -205,17 +205,17 @@ public class CallReturnBenchmark {
 		assertEquals(result[0], 120L);
 	}
 
-	public static class ArgRetFuncImpl extends ArgRetFunc._2p {
+	public static class FuncImpl extends AbstractFunc2 {
 
 		private final Long n;
 
-		public ArgRetFuncImpl(long n) {
+		public FuncImpl(long n) {
 			this.n = n;
 		}
 
 		@Override
 		public void invoke(ObjectSink result, Object a, Object b) {
-			ArgRetFunc f = (ArgRetFunc) a;
+			Func f = (Func) a;
 			long l = ((Number) b).longValue();
 			if (l > 0) {
 				f.invoke(result, f, l - 1);
@@ -238,7 +238,7 @@ public class CallReturnBenchmark {
 
 	@Benchmark
 	public void _3_2_argRetFunc_ptrReuse() {
-		ArgRetFunc f = new ArgRetFuncImpl(100);
+		Func f = new FuncImpl(100);
 		ObjectSink result = newSink();
 		f.invoke(result, f, 20);
 		assertEquals(result._0(), 120L);
@@ -246,7 +246,7 @@ public class CallReturnBenchmark {
 
 	public static void evaluateTailCalls(ObjectSink result) {
 		while (result.isTailCall()) {
-			ArgRetFunc target = (ArgRetFunc) result._0();
+			Func target = (Func) result._0();
 			switch (result.size()) {
 				case 0: throw new IllegalStateException();
 				case 1: target.invoke(result); break;
@@ -259,26 +259,26 @@ public class CallReturnBenchmark {
 		}
 	}
 
-	public static void call(ObjectSink result, ArgRetFunc f, Object a) {
+	public static void call(ObjectSink result, Func f, Object a) {
 		f.invoke(result, a);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, ArgRetFunc f, Object a, Object b) {
+	public static void call(ObjectSink result, Func f, Object a, Object b) {
 		f.invoke(result, a, b);
 		evaluateTailCalls(result);
 	}
 
-	public static void call(ObjectSink result, ArgRetFunc f, Object a, Object b, Object c) {
+	public static void call(ObjectSink result, Func f, Object a, Object b, Object c) {
 		f.invoke(result, a, b, c);
 		evaluateTailCalls(result);
 	}
 
-	public static class ResumableArgRetFuncImpl extends ArgRetFunc._2p {
+	public static class ResumableFuncImpl extends AbstractFunc2 {
 
 		private final Long n;
 
-		public ResumableArgRetFuncImpl(long n) {
+		public ResumableFuncImpl(long n) {
 			this.n = n;
 		}
 
@@ -288,7 +288,7 @@ public class CallReturnBenchmark {
 				case 1:
 					long l = ((Number) r_1).longValue();
 					if (l > 0) {
-						ArgRetFunc f = (ArgRetFunc) r_0;
+						Func f = (Func) r_0;
 						call(result, f, f, l - 1);
 						Number m = (Number) result._0();
 						result.setTo(m.longValue() + 1);
@@ -311,11 +311,11 @@ public class CallReturnBenchmark {
 
 	}
 
-	public static class TailCallingResumableArgRetFuncImpl extends ArgRetFunc._3p {
+	public static class TailCallingResumableFuncImpl extends AbstractFunc3 {
 
 		private final Long n;
 
-		public TailCallingResumableArgRetFuncImpl(long n) {
+		public TailCallingResumableFuncImpl(long n) {
 			this.n = n;
 		}
 
@@ -347,11 +347,11 @@ public class CallReturnBenchmark {
 
 	}
 
-	public static class SelfRecursiveTailCallingResumableArgRetFuncImpl extends ArgRetFunc._2p {
+	public static class SelfRecursiveTailCallingResumableFuncImpl extends AbstractFunc2 {
 
 		private final Long n;
 
-		public SelfRecursiveTailCallingResumableArgRetFuncImpl(long n) {
+		public SelfRecursiveTailCallingResumableFuncImpl(long n) {
 			this.n = n;
 		}
 
@@ -385,7 +385,7 @@ public class CallReturnBenchmark {
 
 	@Benchmark
 	public void _3_3_resumableArgRetFunc_ptrReuse() {
-		ArgRetFunc f = new ResumableArgRetFuncImpl(100);
+		Func f = new ResumableFuncImpl(100);
 		ObjectSink result = newSink();
 		call(result, f, f, 20);
 		assertEquals(result._0(), 120L);
@@ -393,7 +393,7 @@ public class CallReturnBenchmark {
 
 	@Benchmark
 	public void _3_4_tailCallingResumableArgRetFunc_ptrReuse() {
-		ArgRetFunc f = new TailCallingResumableArgRetFuncImpl(100);
+		Func f = new TailCallingResumableFuncImpl(100);
 		ObjectSink result = newSink();
 		call(result, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
@@ -401,7 +401,7 @@ public class CallReturnBenchmark {
 
 	@Benchmark
 	public void _3_5_selfRecursiveTailCallingResumableArgRetFunc_ptrReuse() {
-		ArgRetFunc f = new SelfRecursiveTailCallingResumableArgRetFuncImpl(100);
+		Func f = new SelfRecursiveTailCallingResumableFuncImpl(100);
 		ObjectSink result = newSink();
 		call(result, f, 20, 0);
 		assertEquals(result._0(), 120L);
