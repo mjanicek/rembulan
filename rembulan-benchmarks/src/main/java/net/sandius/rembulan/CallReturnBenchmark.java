@@ -13,9 +13,9 @@ import org.openjdk.jmh.annotations.Warmup;
 
 import static net.sandius.rembulan.Util.assertEquals;
 
-@Fork(5)
+@Fork(1)
 @Warmup(iterations = 10)
-@Measurement(iterations = 10)
+@Measurement(iterations = 20)
 public class CallReturnBenchmark {
 
 	public static ObjectSink newSink() {
@@ -50,7 +50,7 @@ public class CallReturnBenchmark {
 
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _0_javaTwoArgCallMethod() {
 		JavaTwoArgFunc f = new JavaTwoArgFuncImpl(100);
 
@@ -88,7 +88,7 @@ public class CallReturnBenchmark {
 		}
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _1_javaResultInReturnValue() {
 		JavaArraysFunc f = new JavaArraysFuncImpl(100);
 
@@ -153,7 +153,7 @@ public class CallReturnBenchmark {
 		}
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _2_1_javaResultInArgument_newPtrAlloc() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrAlloc(100);
 
@@ -163,7 +163,7 @@ public class CallReturnBenchmark {
 		assertEquals(result.get()[0], 120L);
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _2_2_javaResultInArgument_ptrReuse() {
 		JavaArraysVoidRetFunc f = new JavaArraysVoidRetFuncImpl_PtrReuse(100);
 
@@ -198,7 +198,7 @@ public class CallReturnBenchmark {
 
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _3_1_retFunc() {
 		RetFunc f = new RetFuncImpl(100);
 		Object[] result = f.call(f, 20);
@@ -236,7 +236,7 @@ public class CallReturnBenchmark {
 
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _3_2_argRetFunc_ptrReuse() {
 		ArgRetFunc f = new ArgRetFuncImpl(100);
 		ObjectSink result = newSink();
@@ -440,7 +440,7 @@ public class CallReturnBenchmark {
 
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _4_sharedStackWithViews(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		ViewFunc f = new ViewFuncImpl(100);
@@ -511,7 +511,7 @@ public class CallReturnBenchmark {
 
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _5_directStackManipulation(RegistersBenchmark.ObjectStackHolder osh) {
 		ObjectStack os = osh.objectStack;
 		DirectFunc f = new DirectFuncImpl(100);
@@ -589,7 +589,7 @@ public class CallReturnBenchmark {
 
 	}
 
-//	@Benchmark
+	@Benchmark
 	public void _6_perCallRegisterAllocationWithPushInterface() {
 		AllocFunc f = new AllocFuncImpl(100);
 
