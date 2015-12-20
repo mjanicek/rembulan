@@ -1,4 +1,4 @@
-package net.sandius.rembulan.gen;
+package net.sandius.rembulan.core.gen;
 
 public abstract class BlockNode {
 

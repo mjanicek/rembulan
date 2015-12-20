@@ -1,6 +1,6 @@
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
+import net.sandius.rembulan.core.gen.LuaBytecodeMethodVisitor;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;

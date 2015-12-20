@@ -1,4 +1,4 @@
-package net.sandius.rembulan.gen;
+package net.sandius.rembulan.core.gen;
 
 import net.sandius.rembulan.core.CallInfo;
 import net.sandius.rembulan.core.ControlThrowable;

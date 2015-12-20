@@ -16,6 +16,7 @@
     <module>rembulan-core</module>
     <module>rembulan-lua-bytecode</module>
     <module>rembulan-parser</module>
+    <module>rembulan-compiler</module>
     <module>rembulan-tests</module>
     <module>rembulan-benchmarks</module>
   </modules>

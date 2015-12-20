@@ -2,7 +2,7 @@ package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.OpCode;
-import net.sandius.rembulan.gen.LuaBytecodeMethodVisitor;
+import net.sandius.rembulan.core.gen.LuaBytecodeMethodVisitor;
 import net.sandius.rembulan.util.ReadOnlyArray;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
