@@ -202,9 +202,9 @@ public class PrototypeLoader {
 		}
 	}
 
-	Constants loadConstants(ConstantsBuilder.Factory factory) throws IOException {
+	Constants loadConstants() throws IOException {
 		int n = loadInt32();
-		ConstantsBuilder bld = factory.newBuilder();
+		ConstantsBuilder bld = constantsBuilderFactory.newBuilder();
 		for (int i = 0; i < n; i++) {
 			loadConstant(bld);
 		}
@@ -254,7 +254,7 @@ public class PrototypeLoader {
 		int maxStackSize = is.readUnsignedByte();
 
 		int[] code = loadIntVector();
-		Constants constants = loadConstants(constantsBuilderFactory);
+		Constants constants = loadConstants();
 		Upvalue.Desc[] upvalues = loadUpvalues();
 		Prototype[] nestedPrototypes = loadNestedPrototypes(source);
 
