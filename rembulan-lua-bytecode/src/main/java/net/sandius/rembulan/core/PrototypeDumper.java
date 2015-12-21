@@ -67,29 +67,29 @@ public class PrototypeDumper {
 		dumpInt64(Double.doubleToLongBits(d));
 	}
 
-	public void dumpConstant(Object o) throws IOException {
-		if (o == null) {
-			out.writeByte(PrototypeLoader.LUA_TNIL);
-		}
-		else if (o instanceof Boolean) {
-			out.writeByte(PrototypeLoader.LUA_TBOOLEAN);
-			dumpBoolean((Boolean) o);
-		}
-		else if (o instanceof Number) {
-			Number n = (Number) o;
-			if (Conversions.isFloatingPoint(n)) {
-				dumpDouble(n.doubleValue());
-			}
-			else {
-				dumpInt64(n.longValue());
-			}
-		}
-		else if (o instanceof String) {
-			dumpString((String) o);
-		}
-		else {
-			throw new IllegalArgumentException("Not a valid constant: " + o);
-		}
+	public void dumpConstNil() throws IOException {
+		out.writeByte(PrototypeLoader.LUA_TNIL);
+	}
+
+	public void dumpConstBoolean(boolean value) throws IOException {
+		out.writeByte(PrototypeLoader.LUA_TBOOLEAN);
+		dumpBoolean(value);
+	}
+
+	public void dumpConstInteger(long value) throws IOException {
+		out.writeByte(PrototypeLoader.LUA_TNUMINT);
+		dumpInt64(value);
+	}
+
+	public void dumpConstFloat(double value) throws IOException {
+		out.writeByte(PrototypeLoader.LUA_TNUMFLT);
+		dumpDouble(value);
+	}
+
+	public void dumpConstString(String value) throws IOException {
+		Check.notNull(value);
+		out.writeByte(PrototypeLoader.LUA_TSTRING);
+		dumpString(value);
 	}
 
 	public void dumpIntVector(IntVector iv) throws IOException {
@@ -101,12 +101,17 @@ public class PrototypeDumper {
 		}
 	}
 
-	public void dumpConstants(ReadOnlyArray<Object> constants) throws IOException {
+	public void dumpConstants(Constants constants) throws IOException {
 		Check.notNull(constants);
 
 		dumpInt32(constants.size());
 		for (int i = 0; i < constants.size(); i++) {
-			dumpConstant(constants.get(i));
+			if (constants.isNil(i)) dumpConstNil();
+			else if (constants.isBoolean(i)) dumpConstBoolean(constants.getBoolean(i));
+			else if (constants.isInteger(i)) dumpConstInteger(constants.getInteger(i));
+			else if (constants.isFloat(i)) dumpConstFloat(constants.getFloat(i));
+			else if (constants.isString(i)) dumpConstString(constants.getString(i));
+			else throw new IllegalArgumentException("Unknown constant #" + i);
 		}
 	}
 

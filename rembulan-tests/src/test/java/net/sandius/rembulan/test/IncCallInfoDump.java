@@ -1,5 +1,7 @@
 package net.sandius.rembulan.test;
 
+import net.sandius.rembulan.core.ArrayBackedConstants;
+import net.sandius.rembulan.core.Constants;
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.OpCode;
 import net.sandius.rembulan.core.gen.LuaBytecodeMethodVisitor;
@@ -11,10 +13,10 @@ public class IncCallInfoDump implements Opcodes {
 
 	private final Type thisType;
 
-	private final ReadOnlyArray<Object> constants = ReadOnlyArray.copyFrom(new Object[] {
+	private final Constants constants = new ArrayBackedConstants(ReadOnlyArray.copyFrom(new Object[] {
 			3L,
 			39L
-	});
+	}));
 
 	public IncCallInfoDump(String className) {
 		this.thisType = ASMUtils.typeForClassName(className);

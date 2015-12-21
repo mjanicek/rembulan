@@ -100,6 +100,15 @@ public class PrototypePrinter {
 		return o.toString();
 	}
 
+	private static Object getConstant(Constants constants, int idx) {
+		if (constants.isNil(idx)) return null;
+		else if (constants.isBoolean(idx)) return constants.getBoolean(idx);
+		else if (constants.isInteger(idx)) return constants.getInteger(idx);
+		else if (constants.isFloat(idx)) return constants.getFloat(idx);
+		else if (constants.isString(idx)) return constants.getString(idx);
+		else throw new IllegalArgumentException("Unknown constant #" + idx);
+	}
+
 	public static String instructionInfo(int insn) {
 		StringBuilder out = new StringBuilder();
 
@@ -181,7 +190,7 @@ public class PrototypePrinter {
 		return instructionInfoWithHints(proto.getCode().get(pc), proto.getConstants(), proto.getNestedPrototypes());
 	}
 
-	private static String instructionInfoHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
+	private static String instructionInfoHints(int insn, Constants constants, ReadOnlyArray<Prototype> children) {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
 		int b = OpCode.arg_B(insn);
@@ -196,12 +205,12 @@ public class PrototypePrinter {
 		switch (OpCode.getOpMode(opcode)) {
 			case OpCode.iABC:
 				if (OpCode.getBMode(opcode) == OpCode.OpArgK) {
-					hint.append(OpCode.isK(b) ? prettyPrint(constants.get(OpCode.indexK(b))) : "-");
+					hint.append(OpCode.isK(b) ? prettyPrint(getConstant(constants, OpCode.indexK(b))) : "-");
 				}
 
 				if (OpCode.getCMode(opcode) == OpCode.OpArgK) {
 					if (OpCode.isK(c)) {
-						(hint.length() > 0 ? hint : hint.append("-")).append(" ").append(prettyPrint(constants.get(OpCode.indexK(c))));
+						(hint.length() > 0 ? hint : hint.append("-")).append(" ").append(prettyPrint(getConstant(constants, OpCode.indexK(c))));
 					}
 					else {
 						(hint.length() > 0 ? hint : hint.append("-")).append(" ").append("-");
@@ -211,7 +220,7 @@ public class PrototypePrinter {
 
 			case OpCode.iABx:
 				if (OpCode.getBMode(opcode) == OpCode.OpArgK) {
-					hint.append(prettyPrint(constants.get(OpCode.indexK(bx))));
+					hint.append(prettyPrint(getConstant(constants, OpCode.indexK(bx))));
 				}
 				break;
 
@@ -229,7 +238,7 @@ public class PrototypePrinter {
 		return hint.toString();
 	}
 
-	public static String instructionInfoWithHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
+	public static String instructionInfoWithHints(int insn, Constants constants, ReadOnlyArray<Prototype> children) {
 		Check.notNull(constants);
 		Check.notNull(children);
 
@@ -243,7 +252,7 @@ public class PrototypePrinter {
 		Check.notNull(out);
 
 		IntVector code = proto.getCode();
-		ReadOnlyArray<Object> constants = proto.getConstants();
+		Constants constants = proto.getConstants();
 		ReadOnlyArray<LocalVariable> locals = proto.getLocalVariables();
 		ReadOnlyArray<Upvalue.Desc> upvalues = proto.getUpValueDescriptions();
 		ReadOnlyArray<Prototype> nested = proto.getNestedPrototypes();
@@ -286,7 +295,7 @@ public class PrototypePrinter {
 			out.print(i + 1);  // index
 			out.print('\t');
 
-			Object c = constants.get(i);
+			Object c = getConstant(constants, i);
 
 			out.print(prettyPrint(c));
 

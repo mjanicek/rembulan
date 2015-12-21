@@ -1,6 +1,7 @@
 package net.sandius.rembulan.core.gen;
 
 import net.sandius.rembulan.core.CallInfo;
+import net.sandius.rembulan.core.Constants;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.LuaState;
@@ -31,7 +32,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	private static final int LVAR_PC = 3;
 
 	private final Type thisType;
-	private final ReadOnlyArray<Object> constants;
+	private final Constants constants;
 	private final ReadOnlyArray<Prototype> nestedPrototypes;
 	private final PrototypeToClassMap prototypeToClassMap;
 
@@ -87,7 +88,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 //			Type.getType(Registers.class)
 	);
 
-	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> nestedPrototypes, PrototypeToClassMap prototypeToClassMap, int numInstrs, int numRegs) {
+	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, Constants constants, ReadOnlyArray<Prototype> nestedPrototypes, PrototypeToClassMap prototypeToClassMap, int numInstrs, int numRegs) {
 		super(ASM5);
 		Check.notNull(cv);
 		Check.notNull(thisType);
@@ -445,29 +446,25 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 //	}
 
 	public void pushConstant(int idx) {
-		Object c = constants.get(idx);
-
-		if (c instanceof Integer) {
-			pushInt((Integer) c);
-			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", false);
+		if (constants.isNil(idx)) {
+			throw new UnsupportedOperationException("not implemented");  // TODO
 		}
-		else if (c instanceof Long) {
-			pushLong((Long) c);
+		if (constants.isBoolean(idx)) {
+			throw new UnsupportedOperationException("not implemented");  // TODO
+		}
+		else if (constants.isInteger(idx)) {
+			pushLong(constants.getInteger(idx));
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
 		}
-		else if (c instanceof Float) {
-			pushFloat((Float) c);
-			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", false);
-		}
-		else if (c instanceof Double) {
-			pushDouble((Double) c);
+		else if (constants.isFloat(idx)) {
+			pushDouble(constants.getFloat(idx));
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
 		}
-		else if (c instanceof String) {
-			pushString((String) c);
+		else if (constants.isString(idx)) {
+			pushString(constants.getString(idx));
 		}
 		else {
-			throw new IllegalArgumentException("Unsupported constant type: " + c.getClass());
+			throw new IllegalArgumentException("Unsupported constant #" + idx);
 		}
 	}
 

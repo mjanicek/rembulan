@@ -11,8 +11,7 @@ public class Prototype {
 
 	// TODO: split into required and optional debug part
 
-	/* constants used by the function */
-	private final ReadOnlyArray<Object> consts;
+	private final Constants consts;
 
 	private final IntVector code;
 
@@ -41,7 +40,7 @@ public class Prototype {
 	private final int maxstacksize;
 
 	public Prototype(
-			ReadOnlyArray<Object> consts,
+			Constants consts,
 			IntVector code,
 			ReadOnlyArray<Prototype> p,
 			IntVector lineinfo,
@@ -74,12 +73,6 @@ public class Prototype {
 		this.numparams = numparams;
 		this.is_vararg = is_vararg;
 		this.maxstacksize = maxstacksize;
-
-		for (Object o : this.consts) {
-			if (!LuaConstant.isValidConstant(o)) {
-				throw new IllegalArgumentException("Not a valid constant: " + o);
-			}
-		}
 	}
 
 	@Override
@@ -121,7 +114,7 @@ public class Prototype {
 		return result;
 	}
 
-	public ReadOnlyArray<Object> getConstants() {
+	public Constants getConstants() {
 		return consts;
 	}
 

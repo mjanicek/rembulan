@@ -259,7 +259,7 @@ public class PrototypeLoader {
 		// TODO: add support for verifiers
 
 		return new Prototype(
-				ReadOnlyArray.wrap(constants),
+				new ArrayBackedConstants(ReadOnlyArray.wrap(constants)),
 				IntVector.wrap(code),
 				ReadOnlyArray.wrap(nestedPrototypes),
 				IntVector.wrap(lineInfo),
