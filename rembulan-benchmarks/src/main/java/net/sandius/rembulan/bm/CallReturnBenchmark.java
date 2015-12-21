@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.Operators;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.Function3;
 import net.sandius.rembulan.core.impl.QuintupleCachingObjectSink;
@@ -357,6 +358,51 @@ public class CallReturnBenchmark {
 		Invokable f = new SelfRecursiveTailCallFunc(100);
 		ObjectSink result = newSink();
 		Dispatch.call(luaState, result, f, 20, 0);
+		assertEquals(result._0(), 120L);
+	}
+
+	public static class RecursiveOpCallFunc extends Function2 {
+
+		private final Long n;
+
+		public RecursiveOpCallFunc(long n) {
+			this.n = n;
+		}
+
+		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
+			switch (pc) {
+				case 0:
+				case 1:
+					if (Operators.gt(state, r_1, 0)) {
+						r_1 = Operators.sub(state, r_1, 1);
+						Dispatch.call(state, result, r_0, r_0, r_1);
+						r_0 = result._0();
+						r_0 = Operators.add(state, r_0, 1);
+						result.setTo(r_0);
+					}
+					else {
+						result.setTo(n);
+					}
+			}
+		}
+
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
+			run(state, result, 0, arg1, arg2);
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
+	@Benchmark
+	public void _2_1_recursiveOpCall(DummyLuaState luaState) throws ControlThrowable {
+		Invokable f = new RecursiveOpCallFunc(100);
+		ObjectSink result = newSink();
+		Dispatch.call(luaState, result, f, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 

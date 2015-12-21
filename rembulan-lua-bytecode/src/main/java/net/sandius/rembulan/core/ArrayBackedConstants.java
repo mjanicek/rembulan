@@ -17,7 +17,8 @@ public class ArrayBackedConstants extends AbstractConstants {
 		for (Object o : consts) {
 			if (!(o == null
 					|| o instanceof Boolean
-					|| o instanceof Number
+					|| o instanceof Long
+					|| o instanceof Double
 					|| o instanceof String)) {
 				throw new IllegalArgumentException("Illegal constant of type " + o.getClass().getCanonicalName() + ": " + o.toString());
 			}
@@ -41,12 +42,12 @@ public class ArrayBackedConstants extends AbstractConstants {
 
 	@Override
 	public boolean isInteger(int idx) {
-		return Conversions.objectAsLong(consts.get(idx)) != null;
+		return consts.get(idx) instanceof Long;
 	}
 
 	@Override
 	public boolean isFloat(int idx) {
-		return Conversions.isFloatingPoint(Conversions.objectAsNumber(consts.get(idx)));
+		return consts.get(idx) instanceof Double;
 	}
 
 	@Override
@@ -61,12 +62,12 @@ public class ArrayBackedConstants extends AbstractConstants {
 
 	@Override
 	public long getInteger(int idx) {
-		return Conversions.objectAsLong(consts.get(idx));
+		return (Long) consts.get(idx);
 	}
 
 	@Override
 	public double getFloat(int idx) {
-		return Conversions.objectAsNumber(consts.get(idx)).doubleValue();
+		return (Double) consts.get(idx);
 	}
 
 	@Override

@@ -60,50 +60,144 @@ public class Operators {
 	}
 
 	public static Object add(LuaState state, Object a, Object b) {
-		Number na = Conversions.objectAsNumber(a);
-		Number nb = Conversions.objectAsNumber(b);
-		return na != null && nb != null ? RawOperators.rawadd(na, nb) : tryMetamethodCall(state, Metatables.MT_ADD, a, b);
+		if (Value.isInteger(a)) {
+			if (Value.isInteger(b)) {
+				return RawOperators.rawadd(Value.toInteger(a), Value.toInteger(b));
+			}
+			else if (Value.isFloat(b)) {
+				return RawOperators.rawadd(Value.toInteger(a), Value.toFloat(b));
+			}
+			else if (b instanceof String) {
+				Double db = Conversions.stringAsDouble((String) b);
+				if (db != null) {
+					return RawOperators.rawadd(Value.toInteger(a), db);
+				}
+			}
+		}
+		else if (Value.isFloat(a)) {
+			if (Value.isInteger(b)) {
+				return RawOperators.rawadd(Value.toFloat(a), Value.toInteger(b));
+			}
+			else if (Value.isFloat(b)) {
+				return RawOperators.rawadd(Value.toFloat(a), Value.toFloat(b));
+			}
+			else if (b instanceof String) {
+				Double db = Conversions.stringAsDouble((String) b);
+				if (db != null) {
+					return RawOperators.rawadd(Value.toFloat(a), db);
+				}
+			}
+		}
+		else if (a instanceof String) {
+			Double da = Conversions.stringAsDouble((String) a);
+			if (da != null) {
+				if (Value.isInteger(b)) {
+					return RawOperators.rawadd(da, Value.toInteger(b));
+				}
+				else if (Value.isFloat(b)) {
+					return RawOperators.rawadd(da, Value.toFloat(b));
+				}
+				else if (b instanceof String) {
+					Double db = Conversions.stringAsDouble((String) b);
+					if (db != null) {
+						return RawOperators.rawadd(da, db);
+					}
+				}
+			}
+		}
+
+		return tryMetamethodCall(state, Metatables.MT_ADD, a, b);
 	}
 
 	public static Object sub(LuaState state, Object a, Object b) {
-		Number na = Conversions.objectAsNumber(a);
-		Number nb = Conversions.objectAsNumber(b);
-		return na != null && nb != null ? RawOperators.rawsub(na, nb) : tryMetamethodCall(state, Metatables.MT_SUB, a, b);
+		if (Value.isInteger(a)) {
+			if (Value.isInteger(b)) {
+				return RawOperators.rawsub(Value.toInteger(a), Value.toInteger(b));
+			}
+			else if (Value.isFloat(b)) {
+				return RawOperators.rawsub(Value.toInteger(a), Value.toFloat(b));
+			}
+			else if (b instanceof String) {
+				Double db = Conversions.stringAsDouble((String) b);
+				if (db != null) {
+					return RawOperators.rawsub(Value.toInteger(a), db);
+				}
+			}
+		}
+		else if (Value.isFloat(a)) {
+			if (Value.isInteger(b)) {
+				return RawOperators.rawsub(Value.toFloat(a), Value.toInteger(b));
+			}
+			else if (Value.isFloat(b)) {
+				return RawOperators.rawsub(Value.toFloat(a), Value.toFloat(b));
+			}
+			else if (b instanceof String) {
+				Double db = Conversions.stringAsDouble((String) b);
+				if (db != null) {
+					return RawOperators.rawsub(Value.toFloat(a), db);
+				}
+			}
+		}
+		else if (a instanceof String) {
+			Double da = Conversions.stringAsDouble((String) a);
+			if (da != null) {
+				if (Value.isInteger(b)) {
+					return RawOperators.rawsub(da, Value.toInteger(b));
+				}
+				else if (Value.isFloat(b)) {
+					return RawOperators.rawsub(da, Value.toFloat(b));
+				}
+				else if (b instanceof String) {
+					Double db = Conversions.stringAsDouble((String) b);
+					if (db != null) {
+						return RawOperators.rawsub(da, db);
+					}
+				}
+			}
+		}
+
+		return tryMetamethodCall(state, Metatables.MT_SUB, a, b);
 	}
 
 	public static Object mul(LuaState state, Object a, Object b) {
-		Number na = Conversions.objectAsNumber(a);
-		Number nb = Conversions.objectAsNumber(b);
-		return na != null && nb != null ? RawOperators.rawmul(na, nb) : tryMetamethodCall(state, Metatables.MT_MUL, a, b);
+		throw new UnsupportedOperationException();  // TODO
+//		Number na = Conversions.objectAsNumber(a);
+//		Number nb = Conversions.objectAsNumber(b);
+//		return na != null && nb != null ? RawOperators.rawmul(na, nb) : tryMetamethodCall(state, Metatables.MT_MUL, a, b);
 	}
 
 	public static Object div(LuaState state, Object a, Object b) {
-		Number na = Conversions.objectAsNumber(a);
-		Number nb = Conversions.objectAsNumber(b);
-		return na != null && nb != null ? RawOperators.rawdiv(na, nb) : tryMetamethodCall(state, Metatables.MT_DIV, a, b);
+		throw new UnsupportedOperationException();  // TODO
+//		Number na = Conversions.objectAsNumber(a);
+//		Number nb = Conversions.objectAsNumber(b);
+//		return na != null && nb != null ? RawOperators.rawdiv(na, nb) : tryMetamethodCall(state, Metatables.MT_DIV, a, b);
 	}
 
 	public static Object mod(LuaState state, Object a, Object b) {
-		Number na = Conversions.objectAsNumber(a);
-		Number nb = Conversions.objectAsNumber(b);
-		return na != null && nb != null ? RawOperators.rawmod(na, nb) : tryMetamethodCall(state, Metatables.MT_MOD, a, b);
+		throw new UnsupportedOperationException();  // TODO
+//		Number na = Conversions.objectAsNumber(a);
+//		Number nb = Conversions.objectAsNumber(b);
+//		return na != null && nb != null ? RawOperators.rawmod(na, nb) : tryMetamethodCall(state, Metatables.MT_MOD, a, b);
 	}
 
 	public static Object pow(LuaState state, Object a, Object b) {
-		Number na = Conversions.objectAsNumber(a);
-		Number nb = Conversions.objectAsNumber(b);
-		return na != null && nb != null ? RawOperators.rawpow(na, nb) : tryMetamethodCall(state, Metatables.MT_POW, a, b);
+		throw new UnsupportedOperationException();  // TODO
+//		Number na = Conversions.objectAsNumber(a);
+//		Number nb = Conversions.objectAsNumber(b);
+//		return na != null && nb != null ? RawOperators.rawpow(na, nb) : tryMetamethodCall(state, Metatables.MT_POW, a, b);
 	}
 
 	public static Object unm(LuaState state, Object o) {
-		Number no = Conversions.objectAsNumber(o);
-		return no != null ? RawOperators.rawunm(no) : tryMetamethodCall(state, Metatables.MT_UNM, o);
+		throw new UnsupportedOperationException();  // TODO
+//		Number no = Conversions.objectAsNumber(o);
+//		return no != null ? RawOperators.rawunm(no) : tryMetamethodCall(state, Metatables.MT_UNM, o);
 	}
 
 	public static Object idiv(LuaState state, Object a, Object b) {
-		Number na = Conversions.objectAsNumber(a);
-		Number nb = Conversions.objectAsNumber(b);
-		return na != null && nb != null ? RawOperators.rawidiv(na, nb) : tryMetamethodCall(state, Metatables.MT_IDIV, a, b);
+		throw new UnsupportedOperationException();  // TODO
+//		Number na = Conversions.objectAsNumber(a);
+//		Number nb = Conversions.objectAsNumber(b);
+//		return na != null && nb != null ? RawOperators.rawidiv(na, nb) : tryMetamethodCall(state, Metatables.MT_IDIV, a, b);
 	}
 
 	public static Object band(LuaState state, Object a, Object b) {
@@ -142,8 +236,8 @@ public class Operators {
 	}
 
 	public static Object concat(LuaState state, Object a, Object b) {
-		String sa = Conversions.objectAsString(a);
-		String sb = Conversions.objectAsString(b);
+		String sa = Coercions.asString(a);
+		String sb = Coercions.asString(b);
 
 		if (sa != null && sb != null) {
 			return sa.concat(sb);
@@ -193,15 +287,27 @@ public class Operators {
 	}
 
 	public static boolean lt(LuaState state, Object a, Object b) {
-		if (a instanceof Number && b instanceof Number) {
-			return RawOperators.rawlt((Number) a, (Number) b);
+		if (Value.isInteger(a)) {
+			if (Value.isInteger(b)) {
+				return RawOperators.rawlt(Value.toInteger(a), Value.toInteger(b));
+			}
+			else if (Value.isFloat(b)) {
+				return RawOperators.rawlt(Value.toInteger(a), Value.toFloat(b));
+			}
+		}
+		else if (Value.isFloat(a)) {
+			if (Value.isInteger(b)) {
+				return RawOperators.rawlt(Value.toFloat(a), Value.toInteger(b));
+			}
+			else if (Value.isFloat(b)) {
+				return RawOperators.rawlt(Value.toFloat(a), Value.toFloat(b));
+			}
 		}
 		else if (a instanceof String && b instanceof String) {
 			return RawOperators.rawlt((String) a, (String) b);
 		}
-		else {
-			return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_LT, a, b));
-		}
+
+		return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_LT, a, b));
 	}
 
 	public static boolean le(LuaState state, Object a, Object b) {

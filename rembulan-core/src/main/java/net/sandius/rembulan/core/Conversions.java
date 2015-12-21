@@ -15,15 +15,6 @@ public abstract class Conversions {
 		// not to be instantiated
 	}
 
-	public static boolean isFloatingPoint(Number n) {
-		return n instanceof Double || n instanceof Float || n instanceof BigDecimal;
-	}
-
-	public static boolean isNaN(Object o) {
-		return o instanceof Number && Double.isNaN(((Number) o).doubleValue());
-	}
-
-
 	public static Long numberAsLong(Number n) {
 		long l = n.longValue();
 		return (double) l == n.doubleValue() && l != Long.MAX_VALUE ? l : null;
@@ -46,7 +37,7 @@ public abstract class Conversions {
 		}
 	}
 
-	public static Number stringAsNumber(String s) {
+	public static Double stringAsDouble(String s) {
 		try {
 			return stringToDouble(s);
 		}
@@ -55,41 +46,18 @@ public abstract class Conversions {
 		}
 	}
 
-	public static String toLuaFormatString(double d) {
-		if (Double.isNaN(d)) return "nan";
-		else if (Double.isInfinite(d)) return d > 0 ? "inf" : "-inf";
-		else return Double.toString(d);  // TODO: check that the format matches that of Lua
-	}
-
-	public static String toLuaFormatString(long l) {
-		return Long.toString(l);
-	}
-
-	public static String numberToLuaFormatString(Number n) {
-		Check.notNull(n);
-		return isFloatingPoint(n) ? toLuaFormatString(n.doubleValue()) : toLuaFormatString(n.longValue());
-	}
-
 	// argument can be null
 	public static Number objectAsNumber(Object o) {
 		return o instanceof Number
 				? (Number) o
 				: o instanceof String
-						? stringAsNumber((String) o)
+						? stringAsDouble((String) o)
 						: null;
 	}
 
 	public static Long objectAsLong(Object o) {
 		Number n = objectAsNumber(o);
 		return n != null ? numberAsLong(n) : null;
-	}
-
-	public static String objectAsString(Object o) {
-		return o instanceof String
-				? (String) o
-				: o instanceof Number
-						? numberToLuaFormatString((Number) o)
-						: null;
 	}
 
 	public static boolean objectToBoolean(Object o) {

@@ -90,22 +90,14 @@ public class PrototypePrinter {
 		return "\"" + s + "\"";  // FIXME!
 	}
 
-	private static String prettyPrint(Object o) {
-		Check.notNull(o);
+	private static String constantToString(Constants constants, int idx) {
+		Check.notNull(constants);
 
-		if (o instanceof Prototype) return pseudoAddr((Prototype) o);
-		if (o instanceof String) return escape((String) o);
-		if (o instanceof Number) return Conversions.numberToLuaFormatString((Number) o);
-
-		return o.toString();
-	}
-
-	private static Object getConstant(Constants constants, int idx) {
-		if (constants.isNil(idx)) return null;
-		else if (constants.isBoolean(idx)) return constants.getBoolean(idx);
-		else if (constants.isInteger(idx)) return constants.getInteger(idx);
-		else if (constants.isFloat(idx)) return constants.getFloat(idx);
-		else if (constants.isString(idx)) return constants.getString(idx);
+		if (constants.isNil(idx)) return LuaFormat.NIL;
+		else if (constants.isBoolean(idx)) return LuaFormat.toString(constants.getBoolean(idx));
+		else if (constants.isInteger(idx)) return LuaFormat.toString(constants.getInteger(idx));
+		else if (constants.isFloat(idx)) return LuaFormat.toString(constants.getFloat(idx));
+		else if (constants.isString(idx)) return escape(constants.getString(idx));
 		else throw new IllegalArgumentException("Unknown constant #" + idx);
 	}
 
@@ -205,12 +197,12 @@ public class PrototypePrinter {
 		switch (OpCode.getOpMode(opcode)) {
 			case OpCode.iABC:
 				if (OpCode.getBMode(opcode) == OpCode.OpArgK) {
-					hint.append(OpCode.isK(b) ? prettyPrint(getConstant(constants, OpCode.indexK(b))) : "-");
+					hint.append(OpCode.isK(b) ? constantToString(constants, OpCode.indexK(b)) : "-");
 				}
 
 				if (OpCode.getCMode(opcode) == OpCode.OpArgK) {
 					if (OpCode.isK(c)) {
-						(hint.length() > 0 ? hint : hint.append("-")).append(" ").append(prettyPrint(getConstant(constants, OpCode.indexK(c))));
+						(hint.length() > 0 ? hint : hint.append("-")).append(" ").append(constantToString(constants, OpCode.indexK(c)));
 					}
 					else {
 						(hint.length() > 0 ? hint : hint.append("-")).append(" ").append("-");
@@ -220,7 +212,7 @@ public class PrototypePrinter {
 
 			case OpCode.iABx:
 				if (OpCode.getBMode(opcode) == OpCode.OpArgK) {
-					hint.append(prettyPrint(getConstant(constants, OpCode.indexK(bx))));
+					hint.append(constantToString(constants, OpCode.indexK(bx)));
 				}
 				break;
 
@@ -231,7 +223,7 @@ public class PrototypePrinter {
 		// additional hints
 		switch (opcode) {
 			case OpCode.CLOSURE:
-				hint.append(prettyPrint(children.get(bx)));
+				hint.append(pseudoAddr(children.get(bx)));
 				break;
 		}
 
@@ -294,11 +286,7 @@ public class PrototypePrinter {
 			out.print('\t');
 			out.print(i + 1);  // index
 			out.print('\t');
-
-			Object c = getConstant(constants, i);
-
-			out.print(prettyPrint(c));
-
+			out.print(constantToString(constants, i));
 			out.println();
 		}
 

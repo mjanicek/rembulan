@@ -2,8 +2,6 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
-import static net.sandius.rembulan.core.Conversions.*;
-
 public abstract class RawOperators {
 
 	private RawOperators() {
@@ -12,67 +10,54 @@ public abstract class RawOperators {
 
 	// Arithmetic operators
 
-	// arguments must not be null
-	public static Number rawadd(Number a, Number b) {
-		if (isFloatingPoint(a) || isFloatingPoint(b)) {
-			return a.doubleValue() + b.doubleValue();
-		}
-		else {
-			return a.longValue() + b.longValue();
-		}
+	public static long rawadd(long a, long b) {
+		return a + b;
 	}
 
-	// arguments must not be null
-	public static Number rawsub(Number a, Number b) {
-		if (isFloatingPoint(a) || isFloatingPoint(b)) {
-			return a.doubleValue() - b.doubleValue();
-		}
-		else {
-			return a.longValue() - b.longValue();
-		}
+	public static double rawadd(double a, double b) {
+		return a + b;
 	}
 
-	// arguments must not be null
-	public static Number rawmul(Number a, Number b) {
-		if (isFloatingPoint(a) || isFloatingPoint(b)) {
-			return a.doubleValue() * b.doubleValue();
-		}
-		else {
-			return a.longValue() * b.longValue();
-		}
+	public static long rawsub(long a, long b) {
+		return a - b;
 	}
 
-	// arguments must not be null
-	public static Number rawdiv(Number a, Number b) {
-		return a.doubleValue() / b.doubleValue();
+	public static double rawsub(double a, double b) {
+		return a - b;
 	}
 
-	// arguments must not be null
-	public static Number rawmod(Number a, Number b) {
-		if (isFloatingPoint(a) || isFloatingPoint(b)) {
-			double x = a.doubleValue();
-			double y = b.doubleValue();
-			return y != 0 ? x - y * Math.floor(x / y) : Double.NaN;
-		}
-		else {
-			long x = a.longValue();
-			long y = b.longValue();
-			if (y == 0) throw new IllegalArgumentException("attempt to perform 'n%0'");
-			else return x - y * (long) Math.floor((double) x / (double) y);
-		}
+	public static long rawmul(long a, long b) {
+		return a * b;
 	}
 
-	// arguments must not be null
-	public static Number rawidiv(Number a, Number b) {
-		if (isFloatingPoint(a) || isFloatingPoint(b)) {
-			return Math.floor(a.doubleValue() / b.doubleValue());
-		}
-		else {
-			long x = a.longValue();
-			long y = b.longValue();
-			if (y == 0) throw new IllegalArgumentException("attempt to divide by zero");
-			else return (long) Math.floor((double) x / (double) y);
-		}
+	public static double rawmul(double a, double b) {
+		return a * b;
+	}
+
+	public static double rawdiv(long a, long b) {
+		return ((double) a) / ((double) b);
+	}
+
+	public static double rawdiv(double a, double b) {
+		return a / b;
+	}
+
+	public static double rawmod(long a, long b) {
+		if (b == 0) throw new IllegalArgumentException("attempt to perform 'n%0'");
+		else return a - b * (long) Math.floor((double) a / (double) b);
+	}
+
+	public static double rawmod(double a, double b) {
+		return b != 0 ? a - b * Math.floor(a / b) : Double.NaN;
+	}
+
+	public static double rawidiv(double a, double b) {
+		return Math.floor(a / b);
+	}
+
+	public static long rawidiv(long a, long b) {
+		if (b == 0) throw new IllegalArgumentException("attempt to divide by zero");
+		else return (long) Math.floor((double) a / (double) b);
 	}
 
 	// arguments must not be null
@@ -80,79 +65,37 @@ public abstract class RawOperators {
 		return Math.pow(a.doubleValue(), b.doubleValue());
 	}
 
-	public static Number rawunm(Number n) {
-		if (isFloatingPoint(n)) {
-			return -n.doubleValue();
-		}
-		else {
-			return -n.longValue();
-		}
+	public static long rawunm(long n) {
+		return -n;
+	}
+
+	public static double rawunm(double n) {
+		return -n;
 	}
 
 	// Bitwise operators
 
 	public static Number rawband(long la, long lb) {
-//		Long la = Conversions.numberAsLong(a);
-//		Long lb = Conversions.numberAsLong(b);
-//
-//		if (la == null || lb == null) {
-//			throw new NoIntegerRepresentationException();
-//		}
-//
 		return la & lb;
 	}
 
 	public static Number rawbor(long la, long lb) {
-//		Long la = Conversions.numberAsLong(a);
-//		Long lb = Conversions.numberAsLong(b);
-//
-//		if (la == null || lb == null) {
-//			throw new NoIntegerRepresentationException();
-//		}
-
 		return la | lb;
 	}
 
 	public static Number rawbxor(long la, long lb) {
-//		Long la = Conversions.numberAsLong(a);
-//		Long lb = Conversions.numberAsLong(b);
-//
-//		if (la == null || lb == null) {
-//			throw new NoIntegerRepresentationException();
-//		}
-
 		return la ^ lb;
 	}
 
 	public static Number rawbnot(long ln) {
-//		Long ln = Conversions.numberAsLong(n);
-//
-//		if (ln == null) {
-//			throw new NoIntegerRepresentationException();
-//		}
-
 		return ~ln;
 	}
 
 	public static Number rawshl(long la, long lb) {
-//		Long la = Conversions.numberAsLong(a);
-//		Long lb = Conversions.numberAsLong(b);
-//
-//		if (la == null || lb == null) {
-//			throw new NoIntegerRepresentationException();
-//		}
-
 		return la << lb;
 	}
 
 	public static Number rawshr(long la, long lb) {
-//		Long la = Conversions.numberAsLong(a);
-//		Long lb = Conversions.numberAsLong(b);
-//
-//		if (la == null || lb == null) {
-//			throw new NoIntegerRepresentationException();
-//		}
-
 		return la >>> lb;
 	}
 
@@ -190,20 +133,29 @@ public abstract class RawOperators {
 		}
 	}
 
-	public static boolean rawlt(Number a, Number b) {
-		return isFloatingPoint(a) || isFloatingPoint(b)
-			? a.doubleValue() < b.doubleValue()
-			: a.longValue() < b.longValue();
+	public static boolean rawlt(long a, long b) {
+		return a < b;
+	}
+
+	public static boolean rawlt(double a, double b) {
+		return a < b;
 	}
 
 	public static boolean rawlt(String a, String b) {
 		return a.compareTo(b) < 0;
 	}
 
+	public static boolean rawle(long a, long b) {
+		return a <= b;
+	}
+
+	public static boolean rawle(double a, double b) {
+		return a <= b;
+	}
+
+	@Deprecated
 	public static boolean rawle(Number a, Number b) {
-		return isFloatingPoint(a) || isFloatingPoint(b)
-			? a.doubleValue() <= b.doubleValue()
-			: a.longValue() <= b.longValue();
+		throw new UnsupportedOperationException();  // TODO
 	}
 
 	public static boolean rawle(String a, String b) {

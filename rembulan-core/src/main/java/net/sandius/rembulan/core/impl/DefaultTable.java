@@ -1,8 +1,8 @@
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
+import net.sandius.rembulan.core.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +42,7 @@ public class DefaultTable extends Table {
 		if (key == null) {
 			throw new IllegalArgumentException("table index is nil");
 		}
-		if (Conversions.isNaN(key)) {
+		if (Value.isNaN(key)) {
 			throw new IllegalArgumentException("table index is NaN");
 		}
 
