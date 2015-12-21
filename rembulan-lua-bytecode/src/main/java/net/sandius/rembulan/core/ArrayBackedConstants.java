@@ -3,6 +3,8 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
+import java.util.ArrayList;
+
 public class ArrayBackedConstants extends AbstractConstants {
 
 	private final ReadOnlyArray<Object> consts;
@@ -71,4 +73,48 @@ public class ArrayBackedConstants extends AbstractConstants {
 	public String getString(int idx) {
 		return (String) consts.get(idx);
 	}
+
+	public static class Builder implements ConstantsBuilder {
+
+		public static final ConstantsBuilder.Factory<Builder> FACTORY = new ConstantsBuilder.Factory<Builder>() {
+			@Override
+			public Builder newBuilder() {
+				return new Builder();
+			}
+		};
+
+		private final ArrayList<Object> buf;
+
+		public Builder() {
+			buf = new ArrayList<>();
+		}
+
+		public void addNil() {
+			buf.add(null);
+		}
+
+		public void addBoolean(boolean value) {
+			buf.add(value);
+		}
+
+		public void addInteger(long value) {
+			buf.add(value);
+		}
+
+		public void addFloat(double value) {
+			buf.add(value);
+		}
+
+		public void addString(String value) {
+			Check.notNull(value);
+			buf.add(value);
+		}
+
+		@Override
+		public Constants build() {
+			return new ArrayBackedConstants(ReadOnlyArray.wrap(buf.toArray()));
+		}
+
+	}
+
 }

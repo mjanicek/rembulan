@@ -22,7 +22,7 @@
 
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.util.GenericBuilder;
+import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
@@ -92,8 +92,18 @@ public class PrototypeLoader {
 	/** input stream from which we are loading */
 	public final DataInputStream is;
 
+	private final ConstantsBuilder.Factory constantsBuilderFactory;
+
+	public PrototypeLoader(DataInputStream stream, ConstantsBuilder.Factory constantsBuilderFactory) {
+		Check.notNull(stream);
+		Check.notNull(constantsBuilderFactory);
+
+		this.is = stream;
+		this.constantsBuilderFactory = constantsBuilderFactory;
+	}
+
 	public PrototypeLoader(InputStream stream) {
-		this.is = new DataInputStream(stream);
+		this(new DataInputStream(stream), ArrayBackedConstants.Builder.FACTORY);
 	}
 
 	/**
@@ -173,29 +183,32 @@ public class PrototypeLoader {
 		return Double.longBitsToDouble(loadInt64());
 	}
 
-	public Object loadConstant() throws IOException {
+	public void loadConstant(ConstantsBuilder bld) throws IOException {
 		byte tag = is.readByte();
 		switch (tag) {
-			case LUA_TNIL:     return null;
-			case LUA_TBOOLEAN: return loadBoolean();
+			case LUA_TNIL:     bld.addNil(); break;
+			case LUA_TBOOLEAN: bld.addBoolean(loadBoolean()); break;
 
-			case LUA_TNUMINT:  return loadInteger();
-			case LUA_TNUMFLT:  return loadFloat();
+			case LUA_TNUMINT:  bld.addInteger(loadInteger()); break;
+			case LUA_TNUMFLT:  bld.addFloat(loadFloat()); break;
 
-			case LUA_TSHRSTR:  return loadString();
-			case LUA_TLNGSTR:  return loadString();  // TODO: is this correct?
+			case LUA_TSHRSTR:
+			case LUA_TLNGSTR:
+				// TODO: is this correct for long strings?
+				bld.addString(loadString());
+				break;
 
 			default: throw new IllegalStateException("Illegal constant type: " + tag);
 		}
 	}
 
-	Object[] loadConstants() throws IOException {
+	Constants loadConstants(ConstantsBuilder.Factory factory) throws IOException {
 		int n = loadInt32();
-		Object[] array = new Object[n];
+		ConstantsBuilder bld = factory.newBuilder();
 		for (int i = 0; i < n; i++) {
-			array[i] = loadConstant();
+			loadConstant(bld);
 		}
-		return array;
+		return bld.build();
 	}
 
 	Prototype[] loadNestedPrototypes(String source) throws IOException {
@@ -241,7 +254,7 @@ public class PrototypeLoader {
 		int maxStackSize = is.readUnsignedByte();
 
 		int[] code = loadIntVector();
-		Object[] constants = loadConstants();
+		Constants constants = loadConstants(constantsBuilderFactory);
 		Upvalue.Desc[] upvalues = loadUpvalues();
 		Prototype[] nestedPrototypes = loadNestedPrototypes(source);
 
@@ -259,7 +272,7 @@ public class PrototypeLoader {
 		// TODO: add support for verifiers
 
 		return new Prototype(
-				new ArrayBackedConstants(ReadOnlyArray.wrap(constants)),
+				constants,
 				IntVector.wrap(code),
 				ReadOnlyArray.wrap(nestedPrototypes),
 				IntVector.wrap(lineInfo),
