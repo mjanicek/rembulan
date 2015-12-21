@@ -1,4 +1,4 @@
-package net.sandius.rembulan.bm.alt;
+package net.sandius.rembulan.core.alt;
 
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.LuaState;

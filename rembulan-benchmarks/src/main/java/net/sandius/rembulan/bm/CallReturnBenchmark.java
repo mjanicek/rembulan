@@ -1,16 +1,12 @@
 package net.sandius.rembulan.bm;
 
-import net.sandius.rembulan.bm.alt.AltOperators;
+import net.sandius.rembulan.core.alt.AltOperators;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Operators;
-import net.sandius.rembulan.core.RawOperators;
-import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.Function3;
 import net.sandius.rembulan.core.impl.QuintupleCachingObjectSink;
