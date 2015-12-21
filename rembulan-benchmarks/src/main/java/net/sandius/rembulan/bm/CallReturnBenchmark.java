@@ -1,11 +1,16 @@
 package net.sandius.rembulan.bm;
 
+import net.sandius.rembulan.bm.alt.AltOperators;
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Operators;
+import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.Function3;
 import net.sandius.rembulan.core.impl.QuintupleCachingObjectSink;
@@ -365,6 +370,9 @@ public class CallReturnBenchmark {
 
 		private final Long n;
 
+		private static final Long k_0 = 0L;
+		private static final Long k_1 = 1L;
+
 		public RecursiveOpCallFunc(long n) {
 			this.n = n;
 		}
@@ -373,11 +381,51 @@ public class CallReturnBenchmark {
 			switch (pc) {
 				case 0:
 				case 1:
-					if (Operators.gt(state, r_1, 0)) {
-						r_1 = Operators.sub(state, r_1, 1);
+					if (Operators.lt(state, k_0, r_1)) {
+						r_1 = Operators.sub(state, r_1, k_1);
 						Dispatch.call(state, result, r_0, r_0, r_1);
 						r_0 = result._0();
-						r_0 = Operators.add(state, r_0, 1);
+						r_0 = Operators.add(state, r_0, k_1);
+						result.setTo(r_0);
+					}
+					else {
+						result.setTo(n);
+					}
+			}
+		}
+
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
+			run(state, result, 0, arg1, arg2);
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
+	public static class AltRecursiveOpCallFunc extends Function2 {
+
+		private final Long n;
+
+		private static final Long k_0 = 0L;
+		private static final Long k_1 = 1L;
+
+		public AltRecursiveOpCallFunc(long n) {
+			this.n = n;
+		}
+
+		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
+			switch (pc) {
+				case 0:
+				case 1:
+					if (AltOperators.lt(state, k_0, r_1)) {
+						r_1 = Operators.sub(state, r_1, k_1);
+						Dispatch.call(state, result, r_0, r_0, r_1);
+						r_0 = result._0();
+						r_0 = Operators.add(state, r_0, k_1);
 						result.setTo(r_0);
 					}
 					else {
@@ -435,10 +483,18 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_2_recursiveOpCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _2_2_0_recursiveOpCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new RecursiveOpCallFunc(100);
 		ObjectSink result = newSink();
 		Dispatch.call(luaState, result, f, f, 20);
+		assertEquals(result._0(), 120L);
+	}
+
+	@Benchmark
+	public void _2_2_1_altRecursiveOpCall(DummyLuaState luaState) throws ControlThrowable {
+		Invokable f = new AltRecursiveOpCallFunc(100);
+		ObjectSink result = newSink();
+		Dispatch.call(luaState, result, f, f, 20L);
 		assertEquals(result._0(), 120L);
 	}
 

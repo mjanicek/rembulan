@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 public class Operators {
 
-	private static Object tryMetamethodCall(LuaState state, String event, Object a, Object b) {
+	public static Object tryMetamethodCall(LuaState state, String event, Object a, Object b) {
 		Check.notNull(event);
 
 		Object handler = Metatables.binaryHandlerFor(state, event, a, b);
@@ -16,7 +16,7 @@ public class Operators {
 		}
 	}
 
-	private static Object tryMetamethodCall(LuaState state, String event, Object o) {
+	public static Object tryMetamethodCall(LuaState state, String event, Object o) {
 		Check.notNull(event);
 
 		Object handler = Metatables.getMetamethod(state, event, o);
@@ -305,6 +305,17 @@ public class Operators {
 		}
 		else if (a instanceof String && b instanceof String) {
 			return RawOperators.rawlt((String) a, (String) b);
+		}
+
+		return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_LT, a, b));
+	}
+
+	public static boolean lt(LuaState state, long a, Object b) {
+		if (Value.isInteger(b)) {
+			return RawOperators.rawlt(Value.toInteger(a), Value.toInteger(b));
+		}
+		else if (Value.isFloat(b)) {
+			return RawOperators.rawlt(Value.toInteger(a), Value.toFloat(b));
 		}
 
 		return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_LT, a, b));
