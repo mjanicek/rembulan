@@ -82,4 +82,14 @@ public abstract class Value {
 		}
 	}
 
+	public static String asString(Object o) {
+		return o instanceof String
+				? (String) o
+				: (o instanceof Number
+						? (isFloat((Number) o)
+								? LuaFormat.toString(((Number) o).doubleValue())
+								: LuaFormat.toString(((Number) o).longValue()))
+						: null);
+	}
+
 }

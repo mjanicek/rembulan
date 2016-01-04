@@ -402,14 +402,14 @@ public class CallReturnBenchmark {
 
 	}
 
-	public static class AltRecursiveOpCallFunc extends Function2 {
+	public static class RecursiveAltOpCallFunc extends Function2 {
 
 		private final Long n;
 
 		private static final Long k_0 = 0L;
 		private static final Long k_1 = 1L;
 
-		public AltRecursiveOpCallFunc(long n) {
+		public RecursiveAltOpCallFunc(long n) {
 			this.n = n;
 		}
 
@@ -418,10 +418,10 @@ public class CallReturnBenchmark {
 				case 0:
 				case 1:
 					if (AltOperators.lt(state, k_0, r_1)) {
-						r_1 = Operators.sub(state, r_1, k_1);
+						r_1 = AltOperators.sub(state, r_1, k_1);
 						Dispatch.call(state, result, r_0, r_0, r_1);
 						r_0 = result._0();
-						r_0 = Operators.add(state, r_0, k_1);
+						r_0 = AltOperators.add(state, r_0, k_1);
 						result.setTo(r_0);
 					}
 					else {
@@ -444,7 +444,10 @@ public class CallReturnBenchmark {
 
 	public static class TailCallOpFunc extends Function3 {
 
-		private final long n;
+		private final Long n;
+
+		private static final Long k_0 = 0L;
+		private static final Long k_1 = 1L;
 
 		public TailCallOpFunc(long n) {
 			this.n = n;
@@ -454,13 +457,52 @@ public class CallReturnBenchmark {
 			switch (pc) {
 				case 0:
 				case 1:
-					if (Operators.gt(state, r_1, 0)) {
-						r_1 = Operators.sub(state, r_1, 1);
-						r_2 = Operators.add(state, r_2, 1);
+					if (Operators.gt(state, r_1, k_0)) {
+						r_1 = Operators.sub(state, r_1, k_1);
+						r_2 = Operators.add(state, r_2, k_1);
 						result.tailCall(r_0, r_0, r_1, r_2);
 					}
 					else {
 						r_0 = Operators.add(state, r_2, n);
+						result.setTo(r_0);
+					}
+			}
+		}
+
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+			run(state, result, 0, arg1, arg2, arg3);
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+			throw new UnsupportedOperationException();
+		}
+
+	}
+
+	public static class TailCallAltOpFunc extends Function3 {
+
+		private final Long n;
+
+		private static final Long k_0 = 0L;
+		private static final Long k_1 = 1L;
+
+		public TailCallAltOpFunc(long n) {
+			this.n = n;
+		}
+
+		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
+			switch (pc) {
+				case 0:
+				case 1:
+					if (AltOperators.gt(state, r_1, k_0)) {
+						r_1 = AltOperators.sub(state, r_1, k_1);
+						r_2 = AltOperators.add(state, r_2, k_1);
+						result.tailCall(r_0, r_0, r_1, r_2);
+					}
+					else {
+						r_0 = AltOperators.add(state, r_2, n);
 						result.setTo(r_0);
 					}
 			}
@@ -487,16 +529,24 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_2_1_altRecursiveOpCall(DummyLuaState luaState) throws ControlThrowable {
-		Invokable f = new AltRecursiveOpCallFunc(100);
+	public void _2_2_1_recursiveAltOpCall(DummyLuaState luaState) throws ControlThrowable {
+		Invokable f = new RecursiveAltOpCallFunc(100);
 		ObjectSink result = newSink();
 		Dispatch.call(luaState, result, f, f, 20L);
 		assertEquals(result._0(), 120L);
 	}
 
 	@Benchmark
-	public void _2_3_tailOpCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _2_3_0_tailOpCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new TailCallOpFunc(100);
+		ObjectSink result = newSink();
+		Dispatch.call(luaState, result, f, f, 20, 0);
+		assertEquals(result._0(), 120L);
+	}
+
+	@Benchmark
+	public void _2_3_1_tailAltOpCall(DummyLuaState luaState) throws ControlThrowable {
+		Invokable f = new TailCallAltOpFunc(100);
 		ObjectSink result = newSink();
 		Dispatch.call(luaState, result, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
