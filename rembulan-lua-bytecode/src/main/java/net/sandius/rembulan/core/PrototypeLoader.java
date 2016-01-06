@@ -93,18 +93,9 @@ public class PrototypeLoader {
 	/** input stream from which we are loading */
 	public final DataInputStream is;
 
-	private final ConstantsBuilder.Factory constantsBuilderFactory;
-
-	public PrototypeLoader(DataInputStream stream, ConstantsBuilder.Factory constantsBuilderFactory) {
-		Check.notNull(stream);
-		Check.notNull(constantsBuilderFactory);
-
-		this.is = stream;
-		this.constantsBuilderFactory = constantsBuilderFactory;
-	}
-
 	public PrototypeLoader(InputStream stream) {
-		this(new DataInputStream(stream), ArrayBackedConstants.Builder.FACTORY);
+		Check.notNull(stream);
+		this.is = new DataInputStream(stream);
 	}
 
 	/**

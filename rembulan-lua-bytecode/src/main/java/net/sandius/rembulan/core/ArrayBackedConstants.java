@@ -75,48 +75,4 @@ public class ArrayBackedConstants extends AbstractConstants {
 		return (String) consts.get(idx);
 	}
 
-	@Deprecated
-	public static class Builder implements ConstantsBuilder {
-
-		public static final ConstantsBuilder.Factory<Builder> FACTORY = new ConstantsBuilder.Factory<Builder>() {
-			@Override
-			public Builder newBuilder() {
-				return new Builder();
-			}
-		};
-
-		private final ArrayList<Object> buf;
-
-		public Builder() {
-			buf = new ArrayList<>();
-		}
-
-		public void addNil() {
-			buf.add(null);
-		}
-
-		public void addBoolean(boolean value) {
-			buf.add(value);
-		}
-
-		public void addInteger(long value) {
-			buf.add(value);
-		}
-
-		public void addFloat(double value) {
-			buf.add(value);
-		}
-
-		public void addString(String value) {
-			Check.notNull(value);
-			buf.add(value);
-		}
-
-		@Override
-		public Constants build() {
-			return new ArrayBackedConstants(ReadOnlyArray.wrap(buf.toArray()));
-		}
-
-	}
-
 }
