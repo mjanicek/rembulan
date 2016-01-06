@@ -75,6 +75,7 @@ public class ArrayBackedConstants extends AbstractConstants {
 		return (String) consts.get(idx);
 	}
 
+	@Deprecated
 	public static class Builder implements ConstantsBuilder {
 
 		public static final ConstantsBuilder.Factory<Builder> FACTORY = new ConstantsBuilder.Factory<Builder>() {

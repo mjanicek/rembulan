@@ -57,4 +57,21 @@ public abstract class AbstractConstants implements Constants {
 		return result;
 	}
 
+	@Override
+	public void accept(ConstantsVisitor visitor) {
+		Objects.requireNonNull(visitor);
+
+		int sz = size();
+		visitor.begin(sz);
+		for (int i = 0; i < sz; i++) {
+			if (isNil(i)) visitor.visitNil(i);
+			else if (isBoolean(i)) visitor.visitBoolean(i, getBoolean(i));
+			else if (isInteger(i)) visitor.visitInteger(i, getInteger(i));
+			else if (isFloat(i)) visitor.visitFloat(i, getFloat(i));
+			else if (isString(i)) visitor.visitString(i, getString(i));
+			else throw new IllegalStateException("Illegal constant: #" + i);
+		}
+		visitor.end();
+	}
+
 }

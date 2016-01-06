@@ -6,6 +6,7 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 public class PrototypeDumper {
 
@@ -101,18 +102,8 @@ public class PrototypeDumper {
 		}
 	}
 
-	public void dumpConstants(Constants constants) throws IOException {
-		Check.notNull(constants);
-
-		dumpInt32(constants.size());
-		for (int i = 0; i < constants.size(); i++) {
-			if (constants.isNil(i)) dumpConstNil();
-			else if (constants.isBoolean(i)) dumpConstBoolean(constants.getBoolean(i));
-			else if (constants.isInteger(i)) dumpConstInteger(constants.getInteger(i));
-			else if (constants.isFloat(i)) dumpConstFloat(constants.getFloat(i));
-			else if (constants.isString(i)) dumpConstString(constants.getString(i));
-			else throw new IllegalArgumentException("Unknown constant #" + i);
-		}
+	public void visitConstants(ConstantsVisitor cv, Constants constants) {
+		constants.accept(cv);
 	}
 
 	public void dumpNestedPrototypes(ReadOnlyArray<Prototype> protos) throws IOException {
@@ -186,13 +177,80 @@ public class PrototypeDumper {
 			if (strip) dumpInt32(0); else dumpString(proto.getSource());
 		}
 
+		ConstantsVisitor constVisitor = new ConstantsVisitor() {
+			@Override
+			public void begin(int size) {
+				try {
+					dumpInt32(size);
+				}
+				catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void visitNil(int idx) {
+				try {
+					dumpConstNil();
+				}
+				catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void visitBoolean(int idx, boolean value) {
+				try {
+					dumpConstBoolean(value);
+				}
+				catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void visitInteger(int idx, long value) {
+				try {
+					dumpConstInteger(value);
+				}
+				catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void visitFloat(int idx, double value) {
+				try {
+					dumpConstFloat(value);
+				}
+				catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void visitString(int idx, String value) {
+				try {
+					dumpConstString(value);
+				}
+				catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+
+			@Override
+			public void end() {
+				// no-op
+			}
+		};
+
 		dumpInt32(proto.getBeginLine());
 		dumpInt32(proto.getEndLine());
 		out.writeByte(proto.getNumberOfParameters());
 		dumpBoolean(proto.isVararg());
 		out.writeByte(proto.getMaximumStackSize());
 		dumpIntVector(proto.getCode());
-		dumpConstants(proto.getConstants());
+		visitConstants(constVisitor, proto.getConstants());
 		dumpNestedPrototypes(proto.getNestedPrototypes());
 		dumpUpvalues(proto.getUpValueDescriptions());
 		dumpDebug(proto);

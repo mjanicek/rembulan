@@ -22,4 +22,6 @@ public interface Constants {
 
 	String getString(int idx);
 
+	void accept(ConstantsVisitor visitor);
+
 }

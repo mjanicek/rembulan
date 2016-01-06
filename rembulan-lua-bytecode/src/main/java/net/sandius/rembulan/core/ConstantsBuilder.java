@@ -2,6 +2,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.GenericBuilder;
 
+@Deprecated
 public interface ConstantsBuilder extends GenericBuilder<Constants> {
 
 	void addNil();

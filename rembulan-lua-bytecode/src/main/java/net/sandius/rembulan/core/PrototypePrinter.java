@@ -239,7 +239,7 @@ public class PrototypePrinter {
 		return instrInfo + (!hint.isEmpty() ? "\t; " + hint : "");
 	}
 
-	public static void print(Prototype proto, PrintStream out, boolean isMain) {
+	public static void print(final Prototype proto, final PrintStream out, boolean isMain) {
 		Check.notNull(proto);
 		Check.notNull(out);
 
@@ -281,14 +281,56 @@ public class PrototypePrinter {
 		}
 
 		// constants
-		out.println("constants (" + constants.size() + ") for " + pseudoAddr(proto) + ":");
-		for (int i = 0; i < constants.size(); i++) {
-			out.print('\t');
-			out.print(i + 1);  // index
-			out.print('\t');
-			out.print(constantToString(constants, i));
-			out.println();
-		}
+
+		ConstantsVisitor cv = new ConstantsVisitor() {
+			@Override
+			public void begin(int size) {
+				out.println("constants (" + size + ") for " + pseudoAddr(proto) + ":");
+			}
+
+			private void printPrefix(int idx) {
+				out.print('\t');
+				out.print(idx + 1);
+				out.print('\t');
+			}
+
+			@Override
+			public void visitNil(int idx) {
+				printPrefix(idx);
+				out.println(LuaFormat.NIL);
+			}
+
+			@Override
+			public void visitBoolean(int idx, boolean value) {
+				printPrefix(idx);
+				out.println(LuaFormat.toString(value));
+			}
+
+			@Override
+			public void visitInteger(int idx, long value) {
+				printPrefix(idx);
+				out.println(LuaFormat.toString(value));
+			}
+
+			@Override
+			public void visitFloat(int idx, double value) {
+				printPrefix(idx);
+				out.println(LuaFormat.toString(value));
+			}
+
+			@Override
+			public void visitString(int idx, String value) {
+				printPrefix(idx);
+				out.println(escape(value));
+			}
+
+			@Override
+			public void end() {
+				// no-op
+			}
+		};
+
+		constants.accept(cv);
 
 		// locals
 		out.println("locals (" + locals.size() + ") for " + pseudoAddr(proto) + ":");

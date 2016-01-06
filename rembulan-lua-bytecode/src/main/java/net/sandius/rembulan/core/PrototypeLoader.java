@@ -24,6 +24,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
+import net.sandius.rembulan.util.Ptr;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.io.DataInputStream;
@@ -183,32 +184,32 @@ public class PrototypeLoader {
 		return Double.longBitsToDouble(loadInt64());
 	}
 
-	public void loadConstant(ConstantsBuilder bld) throws IOException {
+	public void loadConstant(int idx, ConstantsVisitor cv) throws IOException {
 		byte tag = is.readByte();
 		switch (tag) {
-			case LUA_TNIL:     bld.addNil(); break;
-			case LUA_TBOOLEAN: bld.addBoolean(loadBoolean()); break;
+			case LUA_TNIL:     cv.visitNil(idx); break;
+			case LUA_TBOOLEAN: cv.visitBoolean(idx, loadBoolean()); break;
 
-			case LUA_TNUMINT:  bld.addInteger(loadInteger()); break;
-			case LUA_TNUMFLT:  bld.addFloat(loadFloat()); break;
+			case LUA_TNUMINT:  cv.visitInteger(idx, loadInteger()); break;
+			case LUA_TNUMFLT:  cv.visitFloat(idx, loadFloat()); break;
 
 			case LUA_TSHRSTR:
 			case LUA_TLNGSTR:
 				// TODO: is this correct for long strings?
-				bld.addString(loadString());
+				cv.visitString(idx, loadString());
 				break;
 
 			default: throw new IllegalStateException("Illegal constant type: " + tag);
 		}
 	}
 
-	Constants loadConstants() throws IOException {
+	void visitConstants(ConstantsVisitor cv) throws IOException {
 		int n = loadInt32();
-		ConstantsBuilder bld = constantsBuilderFactory.newBuilder();
+		cv.begin(n);
 		for (int i = 0; i < n; i++) {
-			loadConstant(bld);
+			loadConstant(i, cv);
 		}
-		return bld.build();
+		cv.end();
 	}
 
 	Prototype[] loadNestedPrototypes(String source) throws IOException {
@@ -254,7 +255,51 @@ public class PrototypeLoader {
 		int maxStackSize = is.readUnsignedByte();
 
 		int[] code = loadIntVector();
-		Constants constants = loadConstants();
+
+		final Ptr<Constants> consts = new Ptr<>();
+
+		ConstantsVisitor cv = new ConstantsVisitor() {
+
+			private Object[] cs = null;
+
+			@Override
+			public void begin(int size) {
+				cs = new Object[size];
+			}
+
+			@Override
+			public void visitNil(int idx) {
+				cs[idx] = null;
+			}
+
+			@Override
+			public void visitBoolean(int idx, boolean value) {
+				cs[idx] = value;
+			}
+
+			@Override
+			public void visitInteger(int idx, long value) {
+				cs[idx] = value;
+			}
+
+			@Override
+			public void visitFloat(int idx, double value) {
+				cs[idx] = value;
+			}
+
+			@Override
+			public void visitString(int idx, String value) {
+				cs[idx] = value;
+			}
+
+			@Override
+			public void end() {
+				consts.set(new ArrayBackedConstants(ReadOnlyArray.wrap(cs)));
+			}
+		};
+
+		visitConstants(cv);
+
 		Upvalue.Desc[] upvalues = loadUpvalues();
 		Prototype[] nestedPrototypes = loadNestedPrototypes(source);
 
@@ -272,7 +317,7 @@ public class PrototypeLoader {
 		// TODO: add support for verifiers
 
 		return new Prototype(
-				constants,
+				consts.get(),
 				IntVector.wrap(code),
 				ReadOnlyArray.wrap(nestedPrototypes),
 				IntVector.wrap(lineInfo),
