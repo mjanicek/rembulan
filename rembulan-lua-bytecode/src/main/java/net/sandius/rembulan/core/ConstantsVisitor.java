@@ -1,8 +1,11 @@
 package net.sandius.rembulan.core;
 
+@Deprecated
 public interface ConstantsVisitor {
 
-	void begin(int size);
+	void visitBegin(int size);
+
+	void visitEnd();
 
 	void visitNil(int idx);
 
@@ -13,7 +16,5 @@ public interface ConstantsVisitor {
 	void visitFloat(int idx, double value);
 
 	void visitString(int idx, String value);
-
-	void end();
 
 }

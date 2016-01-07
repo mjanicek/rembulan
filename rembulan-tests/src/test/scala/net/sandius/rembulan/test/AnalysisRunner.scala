@@ -1,5 +1,7 @@
 package net.sandius.rembulan.test
 
+import java.io.PrintWriter
+
 import net.sandius.rembulan.core.gen.ControlFlowTraversal
 import net.sandius.rembulan.core.{PrototypePrinter, LuaCPrototypeLoader}
 
@@ -59,7 +61,7 @@ object AnalysisRunner {
 
     val proto = ploader.load(program)
 
-    PrototypePrinter.print(proto, System.out)
+    PrototypePrinter.print(proto, new PrintWriter(System.out))
 
     println()
     println("Control flow")

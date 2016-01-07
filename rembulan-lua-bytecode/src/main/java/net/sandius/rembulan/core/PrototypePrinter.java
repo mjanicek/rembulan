@@ -5,6 +5,7 @@ import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.io.PrintStream;
+import java.io.PrintWriter;
 
 public class PrototypePrinter {
 
@@ -77,7 +78,7 @@ public class PrototypePrinter {
 		return n + (orMore ? "+" : "") + " " + (orMore || n == 0 || n > 1 ? pl : sg);
 	}
 
-	public static void print(Prototype proto, PrintStream out) {
+	public static void print(Prototype proto, PrintWriter out) {
 		print(proto, out, true);
 	}
 
@@ -86,7 +87,7 @@ public class PrototypePrinter {
 		return "0x" + Integer.toHexString(System.identityHashCode(proto));
 	}
 
-	private static String escape(String s) {
+	public static String escape(String s) {
 		return "\"" + s + "\"";  // FIXME!
 	}
 
@@ -239,7 +240,7 @@ public class PrototypePrinter {
 		return instrInfo + (!hint.isEmpty() ? "\t; " + hint : "");
 	}
 
-	public static void print(final Prototype proto, final PrintStream out, boolean isMain) {
+	public static void print(final Prototype proto, final PrintWriter out, boolean isMain) {
 		Check.notNull(proto);
 		Check.notNull(out);
 
@@ -281,56 +282,19 @@ public class PrototypePrinter {
 		}
 
 		// constants
+		out.println("constants (" + constants.size() + ") for " + pseudoAddr(proto) + ":");
+		for (int i = 0; i < constants.size(); i++) {
+			out.print('\t');
+			out.print(i + 1);
+			out.print('\t');
 
-		ConstantsVisitor cv = new ConstantsVisitor() {
-			@Override
-			public void begin(int size) {
-				out.println("constants (" + size + ") for " + pseudoAddr(proto) + ":");
-			}
-
-			private void printPrefix(int idx) {
-				out.print('\t');
-				out.print(idx + 1);
-				out.print('\t');
-			}
-
-			@Override
-			public void visitNil(int idx) {
-				printPrefix(idx);
-				out.println(LuaFormat.NIL);
-			}
-
-			@Override
-			public void visitBoolean(int idx, boolean value) {
-				printPrefix(idx);
-				out.println(LuaFormat.toString(value));
-			}
-
-			@Override
-			public void visitInteger(int idx, long value) {
-				printPrefix(idx);
-				out.println(LuaFormat.toString(value));
-			}
-
-			@Override
-			public void visitFloat(int idx, double value) {
-				printPrefix(idx);
-				out.println(LuaFormat.toString(value));
-			}
-
-			@Override
-			public void visitString(int idx, String value) {
-				printPrefix(idx);
-				out.println(escape(value));
-			}
-
-			@Override
-			public void end() {
-				// no-op
-			}
-		};
-
-		constants.accept(cv);
+			if (constants.isNil(i)) out.println(LuaFormat.NIL);
+			else if (constants.isBoolean(i)) out.println(LuaFormat.toString(constants.getBoolean(i)));
+			else if (constants.isInteger(i)) out.println(LuaFormat.toString(constants.getInteger(i)));
+			else if (constants.isFloat(i)) out.println(LuaFormat.toString(constants.getFloat(i)));
+			else if (constants.isString(i)) out.println(escape(constants.getString(i)));
+			else throw new IllegalArgumentException("Illegal constant #" + i);
+		}
 
 		// locals
 		out.println("locals (" + locals.size() + ") for " + pseudoAddr(proto) + ":");
@@ -362,6 +326,7 @@ public class PrototypePrinter {
 			print(np, out, false);
 		}
 
+		out.flush();
 	}
 
 }

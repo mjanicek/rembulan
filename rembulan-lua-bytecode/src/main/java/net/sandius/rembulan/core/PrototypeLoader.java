@@ -175,33 +175,33 @@ public class PrototypeLoader {
 		return Double.longBitsToDouble(loadInt64());
 	}
 
-	public void loadConstant(int idx, ConstantsVisitor cv) throws IOException {
+	public void loadConstant(PrototypeVisitor visitor) throws IOException {
 		byte tag = is.readByte();
 		switch (tag) {
-			case LUA_TNIL:     cv.visitNil(idx); break;
-			case LUA_TBOOLEAN: cv.visitBoolean(idx, loadBoolean()); break;
+			case LUA_TNIL:     visitor.visitNilConst(); break;
+			case LUA_TBOOLEAN: visitor.visitBooleanConst(loadBoolean()); break;
 
-			case LUA_TNUMINT:  cv.visitInteger(idx, loadInteger()); break;
-			case LUA_TNUMFLT:  cv.visitFloat(idx, loadFloat()); break;
+			case LUA_TNUMINT:  visitor.visitIntegerConst(loadInteger()); break;
+			case LUA_TNUMFLT:  visitor.visitFloatConst(loadFloat()); break;
 
 			case LUA_TSHRSTR:
 			case LUA_TLNGSTR:
 				// TODO: is this correct for long strings?
-				cv.visitString(idx, loadString());
+				visitor.visitStringConst(loadString());
 				break;
 
 			default: throw new IllegalStateException("Illegal constant type: " + tag);
 		}
 	}
 
-	void visitConstants(ConstantsVisitor cv) throws IOException {
-		int n = loadInt32();
-		cv.begin(n);
-		for (int i = 0; i < n; i++) {
-			loadConstant(i, cv);
-		}
-		cv.end();
-	}
+//	void visitConstants(PrototypeVisitor visitor) throws IOException {
+//		int n = loadInt32();
+//		cv.visitBegin(n);
+//		for (int i = 0; i < n; i++) {
+//			loadConstant(i, cv);
+//		}
+//		cv.visitEnd();
+//	}
 
 	Prototype[] loadNestedPrototypes(String source) throws IOException {
 		int n = loadInt32();
@@ -236,8 +236,14 @@ public class PrototypeLoader {
 	}
 
 	public Prototype loadFunction(String src) throws IOException {
+		PrototypeBuilderVisitor visitor = new PrototypeBuilderVisitor();
+		accept(visitor);
+		return visitor.get();
+	}
+
+	public void accept(PrototypeVisitor visitor) throws IOException {
 		String source = loadString();
-		if (source == null) source = src;
+//		if (source == null) source = src;  // TODO
 
 		int firstLineDefined = loadInt32();
 		int lastLineDefined = loadInt32();
@@ -245,82 +251,65 @@ public class PrototypeLoader {
 		boolean isVararg = loadBoolean();
 		int maxStackSize = is.readUnsignedByte();
 
-		int[] code = loadIntVector();
+		visitor.visit(numOfParameters, isVararg, maxStackSize, source, firstLineDefined, lastLineDefined);
 
-		final Ptr<Constants> consts = new Ptr<>();
-
-		ConstantsVisitor cv = new ConstantsVisitor() {
-
-			private Object[] cs = null;
-
-			@Override
-			public void begin(int size) {
-				cs = new Object[size];
-			}
-
-			@Override
-			public void visitNil(int idx) {
-				cs[idx] = null;
-			}
-
-			@Override
-			public void visitBoolean(int idx, boolean value) {
-				cs[idx] = value;
-			}
-
-			@Override
-			public void visitInteger(int idx, long value) {
-				cs[idx] = value;
-			}
-
-			@Override
-			public void visitFloat(int idx, double value) {
-				cs[idx] = value;
-			}
-
-			@Override
-			public void visitString(int idx, String value) {
-				cs[idx] = value;
-			}
-
-			@Override
-			public void end() {
-				consts.set(new ArrayBackedConstants(ReadOnlyArray.wrap(cs)));
-			}
-		};
-
-		visitConstants(cv);
-
-		Upvalue.Desc[] upvalues = loadUpvalues();
-		Prototype[] nestedPrototypes = loadNestedPrototypes(source);
-
-		// debug information
-
-		int[] lineInfo = loadIntVector();
-		LocalVariable[] locals = loadLocals();
-
-		// fill in upvalue names
-		int n = loadInt32();
-		for (int i = 0; i < n; i++) {
-			upvalues[i] = new Upvalue.Desc(loadString(), upvalues[i].inStack, upvalues[i].index);
+		// code
+		for (int insn : loadIntVector()) {
+			visitor.visitInstruction(insn);
 		}
 
-		// TODO: add support for verifiers
+		// constants
+		{
+			int n = loadInt32();
+			for (int i = 0; i < n; i++) {
+				loadConstant(visitor);
+			}
+		}
 
-		return new Prototype(
-				consts.get(),
-				IntVector.wrap(code),
-				ReadOnlyArray.wrap(nestedPrototypes),
-				IntVector.wrap(lineInfo),
-				ReadOnlyArray.wrap(locals),
-				ReadOnlyArray.wrap(upvalues),
-				source,
-				firstLineDefined,
-				lastLineDefined,
-				numOfParameters,
-				isVararg,
-				maxStackSize
-		);
+		// upvalues
+		{
+			int n = loadInt32();
+			for (int i = 0; i < n; i++) {
+				boolean inStack = loadBoolean();
+				int idx = is.readUnsignedByte();
+				visitor.visitUpvalue(inStack, idx);
+			}
+		}
+
+		// nested prototypes
+		{
+			int n = loadInt32();
+			for (int i = 0; i < n; i++) {
+				PrototypeVisitor pv = visitor.visitNestedPrototype();
+				accept(pv);
+			}
+		}
+
+		// debug information
+		{
+			int[] lineInfo = loadIntVector();
+
+			for (int line : lineInfo) {
+				visitor.visitLine(line);
+			}
+
+			int n = loadInt32();
+			for (int i = 0; i < n; i++) {
+				String name = loadString();
+				int start = loadInt32();
+				int end = loadInt32();
+				visitor.visitLocalVariable(name, start, end);
+			}
+
+			n = loadInt32();
+			for (int i = 0; i < n; i++) {
+				String uvn = loadString();
+				visitor.visitUpvalueName(uvn);
+			}
+
+		}
+
+		visitor.visitEnd();
 	}
 
 	/**

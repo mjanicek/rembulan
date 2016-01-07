@@ -179,7 +179,7 @@ public class PrototypeDumper {
 
 		ConstantsVisitor constVisitor = new ConstantsVisitor() {
 			@Override
-			public void begin(int size) {
+			public void visitBegin(int size) {
 				try {
 					dumpInt32(size);
 				}
@@ -239,7 +239,7 @@ public class PrototypeDumper {
 			}
 
 			@Override
-			public void end() {
+			public void visitEnd() {
 				// no-op
 			}
 		};

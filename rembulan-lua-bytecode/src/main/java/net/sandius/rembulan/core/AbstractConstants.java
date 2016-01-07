@@ -62,7 +62,7 @@ public abstract class AbstractConstants implements Constants {
 		Objects.requireNonNull(visitor);
 
 		int sz = size();
-		visitor.begin(sz);
+		visitor.visitBegin(sz);
 		for (int i = 0; i < sz; i++) {
 			if (isNil(i)) visitor.visitNil(i);
 			else if (isBoolean(i)) visitor.visitBoolean(i, getBoolean(i));
@@ -71,7 +71,7 @@ public abstract class AbstractConstants implements Constants {
 			else if (isString(i)) visitor.visitString(i, getString(i));
 			else throw new IllegalStateException("Illegal constant: #" + i);
 		}
-		visitor.end();
+		visitor.visitEnd();
 	}
 
 }

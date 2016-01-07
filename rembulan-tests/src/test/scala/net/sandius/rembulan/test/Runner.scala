@@ -1,5 +1,7 @@
 package net.sandius.rembulan.test
 
+import java.io.PrintWriter
+
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.util.Cons
 import net.sandius.rembulan.{core => lua}
@@ -108,7 +110,7 @@ object Runner {
 
     val proto = ploader.load(program)
 
-    PrototypePrinter.print(proto, System.err)
+    PrototypePrinter.print(proto, new PrintWriter(System.err))
 
     val name = "lua.tmp.FortyTwo"
 
