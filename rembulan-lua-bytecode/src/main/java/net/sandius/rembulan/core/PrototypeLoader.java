@@ -66,7 +66,8 @@ public class PrototypeLoader {
 		acceptUpvalues(pv);
 		acceptNestedPrototypes(pv);
 		acceptDebugInfo(pv);
-		pv.visitEnd();
+
+		if (pv != null) pv.visitEnd();
 	}
 
 	protected void acceptHeader(PrototypeVisitor pv) throws IOException {
