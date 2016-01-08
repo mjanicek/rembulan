@@ -123,6 +123,70 @@ public class Prototype {
 		return result;
 	}
 
+	public void accept(PrototypeVisitor pv) {
+		if (pv != null) {
+			pv.visitSource(getSource(), getBeginLine(), getEndLine());
+			pv.visitSize(getNumberOfParameters(), isVararg(), getMaximumStackSize());
+
+			// code
+			IntVector code = getCode();
+			for (int i = 0; i < code.length(); i++) {
+				int insn = code.get(i);
+
+				int opcode = OpCode.opCode(insn);
+
+				int a = OpCode.arg_A(insn);
+				int b = OpCode.arg_B(insn);
+				int c = OpCode.arg_C(insn);
+				int bx = OpCode.arg_Bx(insn);
+				int sbx = OpCode.arg_sBx(insn);
+				int ax = OpCode.arg_Ax(insn);
+
+				switch (OpCode.getOpMode(opcode)) {
+					case OpCode.iABC:  pv.visitABCInstruction(opcode, a, b, c); break;
+					case OpCode.iABx:  pv.visitABxInstruction(opcode, a, bx); break;
+					case OpCode.iAsBx: pv.visitAsBxInstruction(opcode, a, sbx); break;
+					case OpCode.iAx:   pv.visitAxInstruction(opcode, ax); break;
+					default: throw new IllegalStateException("Illegal instruction: " + Integer.toHexString(insn));
+				}
+
+				int line = getLineAtPC(i);
+				if (line > 0) {
+					pv.visitLine(line);
+				}
+			}
+
+			// constants
+			for (Object c : getConstants()) {
+				if (c == null) pv.visitNilConst();
+				else if (c instanceof Boolean) pv.visitBooleanConst((Boolean) c);
+				else if (c instanceof Long) pv.visitIntegerConst((Long) c);
+				else if (c instanceof Double) pv.visitFloatConst((Double) c);
+				else if (c instanceof String) pv.visitStringConst((String) c);
+				else throw new IllegalStateException("Illegal constant: " + c);
+			}
+
+			// upvalues
+			for (UpvalueDesc uvd : getUpValueDescriptions()) {
+				pv.visitUpvalue(uvd.inStack, uvd.index);
+				pv.visitUpvalueName(uvd.name);
+			}
+
+			// nested prototypes
+			for (Prototype p : getNestedPrototypes()) {
+				PrototypeVisitor npv = pv.visitNestedPrototype();
+				p.accept(npv);
+			}
+
+			// local variables
+			for (LocalVariable lv : getLocalVariables()) {
+				pv.visitLocalVariable(lv.name, lv.beginPC, lv.endPC);
+			}
+
+			pv.visitEnd();
+		}
+	}
+
 	public ReadOnlyArray<Object> getConstants() {
 		return consts;
 	}
@@ -146,7 +210,7 @@ public class Prototype {
 			if (pc < locvars.get(i).endPC) {  // is variable active?
 				number--;
 				if (number == 0) {
-					return locvars.get(i).variableName;
+					return locvars.get(i).name;
 				}
 			}
 		}
@@ -218,18 +282,18 @@ public class Prototype {
 
 	public static class LocalVariable {
 
-		public final String variableName;
+		public final String name;
 		public final int beginPC;
 		public final int endPC;
 
-		public LocalVariable(String variableName, int beginPC, int endPC) {
-			this.variableName = Objects.requireNonNull(variableName);
+		public LocalVariable(String name, int beginPC, int endPC) {
+			this.name = Objects.requireNonNull(name);
 			this.beginPC = beginPC;
 			this.endPC = endPC;
 		}
 
 		public String toString() {
-			return variableName + " " + beginPC + "-" + endPC;
+			return name + " " + beginPC + "-" + endPC;
 		}
 
 		@Override
@@ -239,12 +303,12 @@ public class Prototype {
 
 			LocalVariable that = (LocalVariable) o;
 
-			return beginPC == that.beginPC && endPC == that.endPC && variableName.equals(that.variableName);
+			return beginPC == that.beginPC && endPC == that.endPC && name.equals(that.name);
 		}
 
 		@Override
 		public int hashCode() {
-			int result = variableName.hashCode();
+			int result = name.hashCode();
 			result = 31 * result + beginPC;
 			result = 31 * result + endPC;
 			return result;

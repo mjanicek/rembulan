@@ -96,21 +96,20 @@ public class PrototypeLoader {
 		if (pv != null) {
 			for (int insn : insns) {
 				int opcode = OpCode.opCode(insn);
+
+				int a = OpCode.arg_A(insn);
+				int b = OpCode.arg_B(insn);
+				int c = OpCode.arg_C(insn);
+				int bx = OpCode.arg_Bx(insn);
+				int sbx = OpCode.arg_sBx(insn);
+				int ax = OpCode.arg_Ax(insn);
+
 				switch (OpCode.getOpMode(opcode)) {
-					case OpCode.iABC:
-						pv.visitABCInstruction(opcode, OpCode.arg_A(insn), OpCode.arg_B(insn), OpCode.arg_C(insn));
-						break;
-					case OpCode.iABx:
-						pv.visitABxInstruction(opcode, OpCode.arg_A(insn), OpCode.arg_Bx(insn));
-						break;
-					case OpCode.iAsBx:
-						pv.visitAsBxInstruction(opcode, OpCode.arg_A(insn), OpCode.arg_sBx(insn));
-						break;
-					case OpCode.iAx:
-						pv.visitAxInstruction(opcode, OpCode.arg_Ax(insn));
-						break;
-					default:
-						throw new IllegalArgumentException("Illegal opmode for instruction: " + Integer.toHexString(insn));
+					case OpCode.iABC:  pv.visitABCInstruction(opcode, a, b, c); break;
+					case OpCode.iABx:  pv.visitABxInstruction(opcode, a, bx); break;
+					case OpCode.iAsBx: pv.visitAsBxInstruction(opcode, a, sbx); break;
+					case OpCode.iAx:   pv.visitAxInstruction(opcode, ax); break;
+					default: throw new IllegalArgumentException("Illegal instruction: " + Integer.toHexString(insn));
 				}
 			}
 		}

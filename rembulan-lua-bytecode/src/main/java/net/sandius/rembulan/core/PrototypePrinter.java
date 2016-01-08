@@ -4,7 +4,6 @@ import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-import java.io.PrintStream;
 import java.io.PrintWriter;
 
 public class PrototypePrinter {
@@ -256,7 +255,7 @@ public class PrototypePrinter {
 			out.print('\t');
 
 			Prototype.LocalVariable lv = locals.get(i);
-			out.print(lv.variableName + "\t" + (lv.beginPC + 1) + "\t" + (lv.endPC + 1));
+			out.print(lv.name + "\t" + (lv.beginPC + 1) + "\t" + (lv.endPC + 1));
 			out.println();
 		}
 
