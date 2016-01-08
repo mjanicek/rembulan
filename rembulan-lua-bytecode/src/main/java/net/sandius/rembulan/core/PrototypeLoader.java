@@ -94,7 +94,23 @@ public class PrototypeLoader {
 		int[] insns = is.readIntArray();
 		if (pv != null) {
 			for (int insn : insns) {
-				pv.visitInstruction(insn);
+				int opcode = OpCode.opCode(insn);
+				switch (OpCode.getOpMode(opcode)) {
+					case OpCode.iABC:
+						pv.visitABCInstruction(opcode, OpCode.arg_A(insn), OpCode.arg_B(insn), OpCode.arg_C(insn));
+						break;
+					case OpCode.iABx:
+						pv.visitABxInstruction(opcode, OpCode.arg_A(insn), OpCode.arg_Bx(insn));
+						break;
+					case OpCode.iAsBx:
+						pv.visitAsBxInstruction(opcode, OpCode.arg_A(insn), OpCode.arg_sBx(insn));
+						break;
+					case OpCode.iAx:
+						pv.visitAxInstruction(opcode, OpCode.arg_Ax(insn));
+						break;
+					default:
+						throw new IllegalArgumentException("Illegal opmode for instruction: " + Integer.toHexString(insn));
+				}
 			}
 		}
 	}

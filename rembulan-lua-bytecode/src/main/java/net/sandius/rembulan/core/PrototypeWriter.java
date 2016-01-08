@@ -124,6 +124,25 @@ public class PrototypeWriter extends PrototypeVisitor {
 	}
 
 	@Override
+	public void visitABCInstruction(int opcode, int a, int b, int c) {
+		visitInstruction(OpCode.fromABC(opcode, a, b, c));
+	}
+
+	@Override
+	public void visitABxInstruction(int opcode, int a, int bx) {
+		visitInstruction(OpCode.fromABx(opcode, a, bx));
+	}
+
+	@Override
+	public void visitAsBxInstruction(int opcode, int a, int sbx) {
+		visitInstruction(OpCode.fromAsBx(opcode, a, sbx));
+	}
+
+	@Override
+	public void visitAxInstruction(int opcode, int ax) {
+		visitInstruction(OpCode.fromAx(opcode, ax));
+	}
+
 	public void visitInstruction(int insn) {
 		try {
 			code.writeInt(insn);

@@ -30,9 +30,27 @@ public abstract class PrototypeVisitor {
 		}
 	}
 
-	public void visitInstruction(int insn) {
+	public void visitABCInstruction(int opcode, int a, int b, int c) {
 		if (pv != null) {
-			pv.visitInstruction(insn);
+			pv.visitABCInstruction(opcode, a, b, c);
+		}
+	}
+
+	public void visitABxInstruction(int opcode, int a, int bx) {
+		if (pv != null) {
+			pv.visitABxInstruction(opcode, a, bx);
+		}
+	}
+
+	public void visitAsBxInstruction(int opcode, int a, int sbx) {
+		if (pv != null) {
+			pv.visitAsBxInstruction(opcode, a, sbx);
+		}
+	}
+
+	public void visitAxInstruction(int opcode, int ax) {
+		if (pv != null) {
+			pv.visitAxInstruction(opcode, ax);
 		}
 	}
 

@@ -115,6 +115,30 @@ public class OpCode {
 	public static final int MAXARG_sBx      = (MAXARG_Bx>>1);     	/* `sBx' is signed */
 	public static final int MAXARG_Ax       = ((1<<SIZE_Ax)-1);
 
+	public static int fromABC(int opcode, int a, int b, int c) {
+		return ((opcode & MAX_OP) << POS_OP)
+				+ ((a & MAXARG_A) << POS_A)
+				+ ((b & MAXARG_B) << POS_B)
+				+ ((c & MAXARG_C) << POS_C);
+	}
+
+	public static int fromABx(int opcode, int a, int bx) {
+		return ((opcode & MAX_OP) << POS_OP)
+				+ ((a & MAXARG_A) << POS_A)
+				+ ((bx & MAXARG_Bx) << POS_Bx);
+	}
+
+	public static int fromAsBx(int opcode, int a, int sbx) {
+		return ((opcode & MAX_OP) << POS_OP)
+				+ ((a & MAXARG_A) << POS_A)
+				+ ((sbx & MAXARG_sBx) << POS_Bx);
+	}
+
+	public static int fromAx(int opcode, int ax) {
+		return ((opcode & MAX_OP) << POS_OP)
+				+ ((ax & MAXARG_A) << POS_Ax);
+	}
+
 	public static int opCode(int insn) {
 		return (insn >> POS_OP) & MAX_OP;
 	}
