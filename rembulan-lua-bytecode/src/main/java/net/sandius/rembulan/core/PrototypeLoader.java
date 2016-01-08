@@ -30,6 +30,7 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteOrder;
 
 public class PrototypeLoader {
 
@@ -59,13 +60,8 @@ public class PrototypeLoader {
 	/** Data to catch conversion errors */
 	public static final byte[] LUAC_TAIL = { (byte) 0x19, (byte) 0x93, '\r', '\n', (byte) 0x1a, '\n', };
 
-	public static final long TestIntLE = 0x7856000000000000L;
-	public static final long TestIntBE = 0x0000000000005678L;
-
-	public static final double TestNum = 370.5;
-	public static final long TestNumBitsLE = 0x0000000000287740L;
-	public static final long TestNumBitsBE = 0x4077280000000000L;
-
+	public static final long TestInteger = 0x5678L;
+	public static final double TestFloat = 370.5;
 
 	/** Name for compiled chunks */
 	public static final String SOURCE_BINARY_STRING = "binary string";
@@ -83,7 +79,7 @@ public class PrototypeLoader {
 	// values read from the header
 	private int     luacVersion;
 	private int     luacFormat;
-	private boolean littleEndian;
+	private ByteOrder byteOrder;
 	private int     luacSizeofInt;
 	private int     luacSizeofSizeT;
 	private int     luacSizeofInstruction;
@@ -98,6 +94,11 @@ public class PrototypeLoader {
 		this.is = new DataInputStream(stream);
 	}
 
+	@Deprecated
+	protected boolean littleEndian() {
+		return byteOrder == ByteOrder.LITTLE_ENDIAN;
+	}
+
 	/**
 	 * Load a signed 32-bit integer from the input stream.
 	 *
@@ -105,7 +106,7 @@ public class PrototypeLoader {
 	 */
 	int loadInt32() throws IOException {
 		int i = is.readInt();
-		return littleEndian ? Integer.reverseBytes(i) : i;
+		return littleEndian() ? Integer.reverseBytes(i) : i;
 	}
 
 	/**
@@ -115,7 +116,7 @@ public class PrototypeLoader {
 	 */
 	long loadInt64() throws IOException {
 		long l = is.readLong();
-		return littleEndian ? Long.reverseBytes(l) : l;
+		return littleEndian() ? Long.reverseBytes(l) : l;
 	}
 
 	/**
@@ -272,6 +273,12 @@ public class PrototypeLoader {
 		visitor.visitEnd();
 	}
 
+	protected static ByteOrder checkByteOrder(long value, long bigEndianValue) {
+		if (value == bigEndianValue) return ByteOrder.BIG_ENDIAN;
+		else if (value == Long.reverseBytes(bigEndianValue)) return ByteOrder.LITTLE_ENDIAN;
+		else return null;
+	}
+
 	/**
 	 * Load the lua chunk header values.
 	 * @throws IOException if an i/o exception occurs.
@@ -291,26 +298,29 @@ public class PrototypeLoader {
 		luacSizeofLuaNumber = is.readByte();
 
 		// check endianness
-        long ti = is.readLong();
+        long ti = is.readLong();  // FIXME: read 8 bytes instead, assume big-endian
+		long tf = is.readLong();  // FIXME: read 8 bytes instead, assume big-endian
 
-		if ((ti == TestIntLE) == (ti == TestIntBE)) {
-			throw new IllegalArgumentException("Endianness mismatch: 0x" + Long.toHexString(ti));
-        }
-        else {
-			littleEndian = (ti == TestIntLE);
-        }
+		ByteOrder integerByteOrder = checkByteOrder(ti, TestInteger);
+		ByteOrder floatByteOrder = checkByteOrder(tf, Double.doubleToLongBits(TestFloat));
 
-        // TODO: use loadNumber here!
-        long tn = is.readLong();
-
-		if (littleEndian) {
-			// TODO: this!
-        }
-        else {
-			// no conversion necessary
-			// TODO
-//			Double.longBitsToDouble(tn);
-        }
+		if (integerByteOrder != null && floatByteOrder != null) {
+			if (integerByteOrder != floatByteOrder) {
+				throw new IllegalArgumentException("Endianness mismatch: " + integerByteOrder + " (ints) vs " + floatByteOrder + " (floats)");
+			}
+			else {
+				byteOrder = integerByteOrder;
+			}
+		}
+		else if (integerByteOrder != null) {
+			byteOrder = integerByteOrder;
+		}
+		else if (floatByteOrder != null) {
+			byteOrder = floatByteOrder;
+		}
+		else {
+			throw new IllegalArgumentException("Unable to determine endianness: 0x" + Long.toHexString(ti) + " (integer as big-endian long),  0x" + Long.toHexString(tf) + " (float as big-endian long)");
+		}
 
 		boolean isClosure = loadBoolean();
 		// TODO: require true
