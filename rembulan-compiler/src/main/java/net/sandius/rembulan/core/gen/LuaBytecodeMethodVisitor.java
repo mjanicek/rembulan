@@ -1,7 +1,6 @@
 package net.sandius.rembulan.core.gen;
 
 import net.sandius.rembulan.core.CallInfo;
-import net.sandius.rembulan.core.Constants;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.LuaState;
@@ -32,7 +31,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	private static final int LVAR_PC = 3;
 
 	private final Type thisType;
-	private final Constants constants;
+	private final ReadOnlyArray<Object> constants;
 	private final ReadOnlyArray<Prototype> nestedPrototypes;
 	private final PrototypeToClassMap prototypeToClassMap;
 
@@ -88,7 +87,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 //			Type.getType(Registers.class)
 	);
 
-	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, Constants constants, ReadOnlyArray<Prototype> nestedPrototypes, PrototypeToClassMap prototypeToClassMap, int numInstrs, int numRegs) {
+	public LuaBytecodeMethodVisitor(ClassVisitor cv, Type thisType, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> nestedPrototypes, PrototypeToClassMap prototypeToClassMap, int numInstrs, int numRegs) {
 		super(ASM5);
 		Check.notNull(cv);
 		Check.notNull(thisType);
@@ -446,22 +445,22 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 //	}
 
 	public void pushConstant(int idx) {
-		if (constants.isNil(idx)) {
+		if (constants.get(idx) == null) {
 			throw new UnsupportedOperationException("not implemented");  // TODO
 		}
-		if (constants.isBoolean(idx)) {
+		if (constants.get(idx) instanceof Boolean) {
 			throw new UnsupportedOperationException("not implemented");  // TODO
 		}
-		else if (constants.isInteger(idx)) {
-			pushLong(constants.getInteger(idx));
+		else if (constants.get(idx) instanceof Long) {
+			pushLong((Long) constants.get(idx));
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", false);
 		}
-		else if (constants.isFloat(idx)) {
-			pushDouble(constants.getFloat(idx));
+		else if (constants.get(idx) instanceof Double) {
+			pushDouble((Double) constants.get(idx));
 			mv.visitMethodInsn(INVOKESTATIC, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", false);
 		}
-		else if (constants.isString(idx)) {
-			pushString(constants.getString(idx));
+		else if (constants.get(idx) instanceof String) {
+			pushString((String) constants.get(idx));
 		}
 		else {
 			throw new IllegalArgumentException("Unsupported constant #" + idx);

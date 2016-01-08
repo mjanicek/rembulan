@@ -91,15 +91,26 @@ public class PrototypePrinter {
 		return "\"" + s + "\"";  // FIXME!
 	}
 
-	private static String constantToString(Constants constants, int idx) {
-		Check.notNull(constants);
+	private static String constantToString(Object c) {
+		if (c == null) return LuaFormat.NIL;
+		else if (c instanceof Boolean) return LuaFormat.toString((Boolean) c);
+		else if (c instanceof Long) return LuaFormat.toString((Long) c);
+		else if (c instanceof Double) return LuaFormat.toString((Double) c);
+		else if (c instanceof String) return escape((String) c);
+		else return null;
+	}
 
-		if (constants.isNil(idx)) return LuaFormat.NIL;
-		else if (constants.isBoolean(idx)) return LuaFormat.toString(constants.getBoolean(idx));
-		else if (constants.isInteger(idx)) return LuaFormat.toString(constants.getInteger(idx));
-		else if (constants.isFloat(idx)) return LuaFormat.toString(constants.getFloat(idx));
-		else if (constants.isString(idx)) return escape(constants.getString(idx));
-		else throw new IllegalArgumentException("Unknown constant #" + idx);
+	private static String constantToString(ReadOnlyArray<Object> constants, int idx) {
+		Check.notNull(constants);
+		Object c = constants.get(idx);
+		String s = constantToString(c);
+
+		if (s != null) {
+			return s;
+		}
+		else {
+			throw new IllegalArgumentException("Unknown constant #" + idx + "(" + c + ")");
+		}
 	}
 
 	public static String instructionInfo(int insn) {
@@ -183,7 +194,7 @@ public class PrototypePrinter {
 		return instructionInfoWithHints(proto.getCode().get(pc), proto.getConstants(), proto.getNestedPrototypes());
 	}
 
-	private static String instructionInfoHints(int insn, Constants constants, ReadOnlyArray<Prototype> children) {
+	private static String instructionInfoHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
 		int b = OpCode.arg_B(insn);
@@ -231,7 +242,7 @@ public class PrototypePrinter {
 		return hint.toString();
 	}
 
-	public static String instructionInfoWithHints(int insn, Constants constants, ReadOnlyArray<Prototype> children) {
+	public static String instructionInfoWithHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
 		Check.notNull(constants);
 		Check.notNull(children);
 
@@ -245,7 +256,7 @@ public class PrototypePrinter {
 		Check.notNull(out);
 
 		IntVector code = proto.getCode();
-		Constants constants = proto.getConstants();
+		ReadOnlyArray<Object> constants = proto.getConstants();
 		ReadOnlyArray<LocalVariable> locals = proto.getLocalVariables();
 		ReadOnlyArray<Upvalue.Desc> upvalues = proto.getUpValueDescriptions();
 		ReadOnlyArray<Prototype> nested = proto.getNestedPrototypes();
@@ -287,13 +298,7 @@ public class PrototypePrinter {
 			out.print('\t');
 			out.print(i + 1);
 			out.print('\t');
-
-			if (constants.isNil(i)) out.println(LuaFormat.NIL);
-			else if (constants.isBoolean(i)) out.println(LuaFormat.toString(constants.getBoolean(i)));
-			else if (constants.isInteger(i)) out.println(LuaFormat.toString(constants.getInteger(i)));
-			else if (constants.isFloat(i)) out.println(LuaFormat.toString(constants.getFloat(i)));
-			else if (constants.isString(i)) out.println(escape(constants.getString(i)));
-			else throw new IllegalArgumentException("Illegal constant #" + i);
+			out.println(constantToString(constants, i));
 		}
 
 		// locals

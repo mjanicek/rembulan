@@ -55,7 +55,7 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 
 	@Override
 	public void visitEnd() {
-		Constants constants = new ArrayBackedConstants(ReadOnlyArray.fromCollection(Object.class, consts));
+		ReadOnlyArray<Object> constants = ReadOnlyArray.fromCollection(Object.class, consts);
 
 		ArrayList<Prototype> nestedPrototypes = new ArrayList<>();
 		for (PrototypeBuilderVisitor visitor : nested) {

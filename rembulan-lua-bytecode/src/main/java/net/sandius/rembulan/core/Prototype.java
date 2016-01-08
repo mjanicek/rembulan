@@ -11,7 +11,7 @@ public class Prototype {
 
 	// TODO: split into required and optional debug part
 
-	private final Constants consts;
+	private final ReadOnlyArray<Object> consts;
 
 	private final IntVector code;
 
@@ -40,7 +40,7 @@ public class Prototype {
 	private final int maxstacksize;
 
 	public Prototype(
-			Constants consts,
+			ReadOnlyArray<Object> consts,
 			IntVector code,
 			ReadOnlyArray<Prototype> p,
 			IntVector lineinfo,
@@ -60,6 +60,16 @@ public class Prototype {
 		Check.notNull(locvars);
 		Check.notNull(upvalues);
 		// source may be null
+
+		for (Object o : consts) {
+			if (!(o == null
+					|| o instanceof Boolean
+					|| o instanceof Long
+					|| o instanceof Double
+					|| o instanceof String)) {
+				throw new IllegalArgumentException("Illegal constant of type " + o.getClass().getCanonicalName() + ": " + o.toString());
+			}
+		}
 
 		this.consts = consts;
 		this.code = code;
@@ -114,7 +124,7 @@ public class Prototype {
 		return result;
 	}
 
-	public Constants getConstants() {
+	public ReadOnlyArray<Object> getConstants() {
 		return consts;
 	}
 
