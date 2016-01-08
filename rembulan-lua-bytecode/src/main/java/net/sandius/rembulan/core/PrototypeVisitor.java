@@ -2,30 +2,94 @@ package net.sandius.rembulan.core;
 
 public abstract class PrototypeVisitor {
 
-	public abstract void visit(int numParams, boolean vararg, int maxStackSize, String source, int firstLineDefined, int lastLineDefined);
+	protected final PrototypeVisitor pv;
 
-	public abstract void visitEnd();
+	public PrototypeVisitor(PrototypeVisitor pv) {
+		this.pv = pv;
+	}
 
-	public abstract void visitInstruction(int insn);
+	public PrototypeVisitor() {
+		this(null);
+	}
 
-	public abstract void visitNilConst();
+	public void visit(int numParams, boolean vararg, int maxStackSize, String source, int firstLineDefined, int lastLineDefined) {
+		if (pv != null) {
+			pv.visit(numParams, vararg, maxStackSize, source, firstLineDefined, lastLineDefined);
+		}
+	}
 
-	public abstract void visitBooleanConst(boolean value);
+	public void visitEnd() {
+		if (pv != null) {
+			pv.visitEnd();
+		}
+	}
 
-	public abstract void visitIntegerConst(long value);
+	public void visitInstruction(int insn) {
+		if (pv != null) {
+			pv.visitInstruction(insn);
+		}
+	}
 
-	public abstract void visitFloatConst(double value);
+	public void visitNilConst() {
+		if (pv != null) {
+			pv.visitNilConst();
+		}
+	}
 
-	public abstract void visitStringConst(String value);
+	public void visitBooleanConst(boolean value) {
+		if (pv != null) {
+			pv.visitBooleanConst(value);
+		}
+	}
 
-	public abstract void visitUpvalue(boolean inStack, int index);
+	public void visitIntegerConst(long value) {
+		if (pv != null) {
+			pv.visitIntegerConst(value);
+		}
+	}
 
-	public abstract PrototypeVisitor visitNestedPrototype();
+	public void visitFloatConst(double value) {
+		if (pv != null) {
+			pv.visitFloatConst(value);
+		}
+	}
 
-	public abstract void visitLine(int line);
+	public void visitStringConst(String value) {
+		if (pv != null) {
+			pv.visitStringConst(value);
+		}
+	}
 
-	public abstract void visitUpvalueName(String name);
+	public void visitUpvalue(boolean inStack, int index) {
+		if (pv != null) {
+			pv.visitUpvalue(inStack, index);
+		}
+	}
 
-	public abstract void visitLocalVariable(String name, int beginPC, int endPC);
+	public PrototypeVisitor visitNestedPrototype() {
+		if (pv != null) {
+			return pv.visitNestedPrototype();
+		}
+
+		return null;
+	}
+
+	public void visitLine(int line) {
+		if (pv != null) {
+			pv.visitLine(line);
+		}
+	}
+
+	public void visitUpvalueName(String name) {
+		if (pv != null) {
+			pv.visitUpvalueName(name);
+		}
+	}
+
+	public void visitLocalVariable(String name, int beginPC, int endPC) {
+		if (pv != null) {
+			pv.visitLocalVariable(name, beginPC, endPC);
+		}
+	}
 
 }

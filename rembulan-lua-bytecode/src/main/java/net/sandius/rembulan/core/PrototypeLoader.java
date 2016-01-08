@@ -144,7 +144,7 @@ public class PrototypeLoader {
 	 *
 	 * @return the string value loaded.
 	 */
-	String loadString() throws IOException {
+	protected String loadString() throws IOException {
 		int hx = is.readUnsignedByte();
 		int size = hx == 0xff ? loadSizeT() : hx;
 
@@ -167,15 +167,15 @@ public class PrototypeLoader {
 		return String.valueOf(chars);
 	}
 
-	public long loadInteger() throws IOException {
+	protected long loadInteger() throws IOException {
 		return loadInt64();
 	}
 
-	public double loadFloat() throws IOException {
+	protected double loadFloat() throws IOException {
 		return Double.longBitsToDouble(loadInt64());
 	}
 
-	public void loadConstant(PrototypeVisitor visitor) throws IOException {
+	protected void loadConstant(PrototypeVisitor visitor) throws IOException {
 		byte tag = is.readByte();
 		switch (tag) {
 			case LUA_TNIL:     visitor.visitNilConst(); break;
@@ -194,47 +194,7 @@ public class PrototypeLoader {
 		}
 	}
 
-//	void visitConstants(PrototypeVisitor visitor) throws IOException {
-//		int n = loadInt32();
-//		cv.visitBegin(n);
-//		for (int i = 0; i < n; i++) {
-//			loadConstant(i, cv);
-//		}
-//		cv.visitEnd();
-//	}
-
-	Prototype[] loadNestedPrototypes(String source) throws IOException {
-		int n = loadInt32();
-		Prototype[] array = new Prototype[n];
-		for (int i = 0; i < n; i++) {
-			array[i] = loadFunction(source);
-		}
-		return array;
-	}
-
-	Upvalue.Desc[] loadUpvalues() throws IOException {
-		int n = loadInt32();
-		Upvalue.Desc[] array = new Upvalue.Desc[n];
-		for (int i = 0; i < n; i++) {
-			boolean inStack = loadBoolean();
-			int idx = ((int) is.readByte()) & 0xff;
-			array[i] = new Upvalue.Desc(null, inStack, idx);
-		}
-		return array;
-	}
-
-	LocalVariable[] loadLocals() throws IOException {
-		int n = loadInt32();
-		LocalVariable[] array = new LocalVariable[n];
-		for (int i = 0; i < n; i++) {
-			String name = loadString();
-			int start = loadInt32();
-			int end = loadInt32();
-			array[i] = new LocalVariable(name, start, end);
-		}
-		return array;
-	}
-
+	@Deprecated
 	public Prototype loadFunction(String src) throws IOException {
 		PrototypeBuilderVisitor visitor = new PrototypeBuilderVisitor();
 		accept(visitor);
