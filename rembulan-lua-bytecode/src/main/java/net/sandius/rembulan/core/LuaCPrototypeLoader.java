@@ -46,11 +46,11 @@ public class LuaCPrototypeLoader {
 
 	}
 
-	public Prototype load(String program) throws IOException {
-		return load(program, false);
+	public void accept(String program, PrototypeVisitor pv) throws IOException {
+		accept(program, pv, false);
 	}
 
-	public Prototype load(String program, boolean stripDebug) throws IOException {
+	public void accept(String program, PrototypeVisitor pv, boolean stripDebug) throws IOException {
 		Check.notNull(program);
 
 		List<String> args = new ArrayList<String>();
@@ -109,7 +109,15 @@ public class LuaCPrototypeLoader {
 		byte[] bytes = baos.toByteArray();
 
 		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		return PrototypeLoader.undump(bais);
+		PrototypeLoader loader = PrototypeLoader.fromInputStream(bais);
+		loader.accept(pv);
+	}
+
+	@Deprecated
+	public Prototype load(String program) throws IOException {
+		PrototypeBuilderVisitor visitor = new PrototypeBuilderVisitor();
+		accept(program, visitor);
+		return visitor.get();
 	}
 
 }
