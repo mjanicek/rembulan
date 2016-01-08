@@ -55,108 +55,126 @@ public class PrototypeLoader {
 		this.is = Objects.requireNonNull(stream);
 	}
 
-	/**
-	 * Load an array of signed 32-bit integers from the input stream.
-	 *
-	 * @return the array of int values loaded.
-	 */
-	private int[] loadIntVector() throws IOException {
-		int n = is.readInt();
-		int[] array = new int[n];
-		for (int i = 0; i < n; i++) {
-			array[i] = is.readInt();
-		}
-		return array;
+	public static PrototypeLoader fromInputStream(InputStream stream) throws IOException {
+		return new PrototypeLoader(LuaChunkInputStream.fromInputStream(stream));
 	}
 
-	public void accept(PrototypeVisitor visitor) throws IOException {
-		String source = is.readString();
-//		if (source == null) source = src;  // TODO
+	public void accept(PrototypeVisitor pv) throws IOException {
+		acceptHeader(pv);
+		acceptCode(pv);
+		acceptConstants(pv);
+		acceptUpvalues(pv);
+		acceptNestedPrototypes(pv);
+		acceptDebugInfo(pv);
+		pv.visitEnd();
+	}
 
+	protected void acceptHeader(PrototypeVisitor pv) throws IOException {
+		String source = is.readString();
 		int firstLineDefined = is.readInt();
 		int lastLineDefined = is.readInt();
 		int numOfParameters = is.readUnsignedByte();
 		boolean isVararg = is.readBoolean();
 		int maxStackSize = is.readUnsignedByte();
 
-		visitor.visit(numOfParameters, isVararg, maxStackSize, source, firstLineDefined, lastLineDefined);
-
-		// code
-		for (int insn : loadIntVector()) {
-			visitor.visitInstruction(insn);
-		}
-
-		// constants
-		{
-			int n = is.readInt();
-			for (int i = 0; i < n; i++) {
-				int tag = is.readUnsignedByte();
-				switch (tag) {
-					case LUA_TNIL:     visitor.visitNilConst(); break;
-					case LUA_TBOOLEAN: visitor.visitBooleanConst(is.readBoolean()); break;
-
-					case LUA_TNUMINT:  visitor.visitIntegerConst(is.readInteger()); break;
-					case LUA_TNUMFLT:  visitor.visitFloatConst(is.readFloat()); break;
-
-					case LUA_TSHRSTR:
-					case LUA_TLNGSTR:
-						// TODO: is this correct for long strings?
-						visitor.visitStringConst(is.readString());
-						break;
-
-					default: throw new IllegalStateException("Illegal constant type: " + tag);
-				}
-			}
-		}
-
-		// upvalues
-		{
-			int n = is.readInt();
-			for (int i = 0; i < n; i++) {
-				boolean inStack = is.readBoolean();
-				int idx = is.readUnsignedByte();
-				visitor.visitUpvalue(inStack, idx);
-			}
-		}
-
-		// nested prototypes
-		{
-			int n = is.readInt();
-			for (int i = 0; i < n; i++) {
-				PrototypeVisitor pv = visitor.visitNestedPrototype();
-				accept(pv);
-			}
-		}
-
-		// debug information
-		{
-			int[] lineInfo = loadIntVector();
-
-			for (int line : lineInfo) {
-				visitor.visitLine(line);
-			}
-
-			int n = is.readInt();
-			for (int i = 0; i < n; i++) {
-				String name = is.readString();
-				int start = is.readInt();
-				int end = is.readInt();
-				visitor.visitLocalVariable(name, start, end);
-			}
-
-			n = is.readInt();
-			for (int i = 0; i < n; i++) {
-				String uvn = is.readString();
-				visitor.visitUpvalueName(uvn);
-			}
-
-		}
-
-		visitor.visitEnd();
+		if (pv != null) pv.visit(numOfParameters, isVararg, maxStackSize, source, firstLineDefined, lastLineDefined);
 	}
 
-	public static PrototypeLoader fromInputStream(InputStream stream) throws IOException {
-		return new PrototypeLoader(LuaChunkInputStream.fromInputStream(stream));
+	protected void acceptCode(PrototypeVisitor pv) throws IOException {
+		int[] insns = is.readIntArray();
+		if (pv != null) {
+			for (int insn : insns) {
+				pv.visitInstruction(insn);
+			}
+		}
+	}
+
+	protected void acceptConstants(PrototypeVisitor pv) throws IOException {
+		int n = is.readInt();
+		for (int i = 0; i < n; i++) {
+			int tag = is.readUnsignedByte();
+			switch (tag) {
+				case LUA_TNIL:
+					if (pv != null) pv.visitNilConst(); break;
+				case LUA_TBOOLEAN: {
+					boolean value = is.readBoolean();
+					if (pv != null) pv.visitBooleanConst(value);
+					break;
+				}
+
+				case LUA_TNUMINT: {
+					long value = is.readInteger();
+					if (pv != null) pv.visitIntegerConst(value);
+					break;
+				}
+				case LUA_TNUMFLT: {
+					double value = is.readFloat();
+					if (pv != null) pv.visitFloatConst(value);
+					break;
+				}
+
+				case LUA_TSHRSTR:
+				case LUA_TLNGSTR: {
+					String value = is.readString();
+					// TODO: is this correct for long strings?
+					if (pv != null) pv.visitStringConst(value);
+					break;
+				}
+
+				default: throw new IllegalStateException("Illegal constant type: " + tag);
+			}
+		}
+	}
+
+	protected void acceptUpvalues(PrototypeVisitor pv) throws IOException {
+		int n = is.readInt();
+		for (int i = 0; i < n; i++) {
+			boolean inStack = is.readBoolean();
+			int idx = is.readUnsignedByte();
+			if (pv != null) pv.visitUpvalue(inStack, idx);
+		}
+	}
+
+	protected void acceptNestedPrototypes(PrototypeVisitor pv) throws IOException {
+		int n = is.readInt();
+		for (int i = 0; i < n; i++) {
+			PrototypeVisitor npv = pv != null ? pv.visitNestedPrototype() : null;
+			accept(npv);
+		}
+	}
+
+	protected void acceptDebugInfo(PrototypeVisitor pv) throws IOException {
+		acceptLineInfo(pv);
+		acceptLocalVariables(pv);
+		acceptUpvalueNames(pv);
+	}
+
+	protected void acceptLineInfo(PrototypeVisitor pv) throws IOException {
+		int[] lineInfo = is.readIntArray();
+
+		if (pv != null) {
+			for (int line : lineInfo) {
+				pv.visitLine(line);
+			}
+		}
+	}
+
+	protected void acceptLocalVariables(PrototypeVisitor pv) throws IOException {
+		int n = is.readInt();
+		for (int i = 0; i < n; i++) {
+			String name = is.readString();
+			int start = is.readInt();
+			int end = is.readInt();
+			if (pv != null) pv.visitLocalVariable(name, start, end);
+		}
+	}
+
+	protected void acceptUpvalueNames(PrototypeVisitor pv) throws IOException {
+		int n = is.readInt();
+		for (int i = 0; i < n; i++) {
+			String uvn = is.readString();
+			if (pv != null) pv.visitUpvalueName(uvn);
+		}
 	}
 
 	@Deprecated

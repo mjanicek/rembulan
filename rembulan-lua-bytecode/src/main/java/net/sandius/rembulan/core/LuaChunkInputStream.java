@@ -159,6 +159,20 @@ public class LuaChunkInputStream extends FilterInputStream {
 		return String.valueOf(chars);
 	}
 
+	/**
+	 * Load an array of signed 32-bit integers from the input stream.
+	 *
+	 * @return the array of int values loaded.
+	 */
+	public int[] readIntArray() throws IOException {
+		int n = readInt();
+		int[] array = new int[n];
+		for (int i = 0; i < n; i++) {
+			array[i] = readInt();
+		}
+		return array;
+	}
+
 	private static final byte[] HEADER_SIGNATURE = { '\033', 'L', 'u', 'a' };
 	public static final int HEADER_VERSION = 0x53;
 	public static final int HEADER_FORMAT = 0;
