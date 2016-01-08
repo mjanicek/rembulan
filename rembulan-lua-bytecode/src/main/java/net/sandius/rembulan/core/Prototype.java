@@ -1,11 +1,10 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.GenericBuilder;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-import java.util.ArrayList;
+import java.util.Objects;
 
 public class Prototype {
 
@@ -25,7 +24,7 @@ public class Prototype {
 	private final ReadOnlyArray<LocalVariable> locvars;
 
 	/* upvalue information */
-	private final ReadOnlyArray<Upvalue.Desc> upvalues;
+	private final ReadOnlyArray<UpvalueDesc> upvalues;
 
 	private final String source;
 
@@ -45,7 +44,7 @@ public class Prototype {
 			ReadOnlyArray<Prototype> p,
 			IntVector lineinfo,
 			ReadOnlyArray<LocalVariable> locvars,
-			ReadOnlyArray<Upvalue.Desc> upvalues,
+			ReadOnlyArray<UpvalueDesc> upvalues,
 			String source,
 			int linedefined,
 			int lastlinedefined,
@@ -158,7 +157,7 @@ public class Prototype {
 		return locvars;
 	}
 
-	public ReadOnlyArray<Upvalue.Desc> getUpValueDescriptions() {
+	public ReadOnlyArray<UpvalueDesc> getUpValueDescriptions() {
 		return upvalues;
 	}
 
@@ -215,6 +214,79 @@ public class Prototype {
 			name = "binary string";
 		}
         return name;
+	}
+
+	public static class LocalVariable {
+
+		public final String variableName;
+		public final int beginPC;
+		public final int endPC;
+
+		public LocalVariable(String variableName, int beginPC, int endPC) {
+			this.variableName = Objects.requireNonNull(variableName);
+			this.beginPC = beginPC;
+			this.endPC = endPC;
+		}
+
+		public String toString() {
+			return variableName + " " + beginPC + "-" + endPC;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			LocalVariable that = (LocalVariable) o;
+
+			return beginPC == that.beginPC && endPC == that.endPC && variableName.equals(that.variableName);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = variableName.hashCode();
+			result = 31 * result + beginPC;
+			result = 31 * result + endPC;
+			return result;
+		}
+
+	}
+
+	public static class UpvalueDesc {
+
+		public final String name;
+		public final boolean inStack;
+		public final short index;
+
+		public UpvalueDesc(String name, boolean inStack, int index) {
+			// name may be null
+			this.name = name;
+			this.inStack = inStack;
+			this.index = (short) index;
+		}
+
+		public String toString() {
+			return index + " " + (inStack ? "instack" : "closed") + " " + name;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			UpvalueDesc that = (UpvalueDesc) o;
+
+			return inStack == that.inStack && index == that.index && !(name != null ? !name.equals(that.name) : that.name != null);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = name != null ? name.hashCode() : 0;
+			result = 31 * result + (inStack ? 1 : 0);
+			result = 31 * result + (int) index;
+			return result;
+		}
+
 	}
 
 }

@@ -18,13 +18,13 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 
 	private IntBuffer code;
 	private ArrayList<Object> consts;
-	private ArrayList<Upvalue.Desc> upvalueDesc;
+	private ArrayList<Prototype.UpvalueDesc> upvalueDesc;
 
 	private ArrayList<PrototypeBuilderVisitor> nested;
 
 	private IntBuffer lines;
 	private ArrayList<String> upvalueNames;
-	private ArrayList<LocalVariable> locals;
+	private ArrayList<Prototype.LocalVariable> locals;
 
 	private Prototype result;
 
@@ -62,11 +62,11 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 			nestedPrototypes.add(Objects.requireNonNull(visitor.get()));
 		}
 
-		ArrayList<Upvalue.Desc> upvals = new ArrayList<>();
+		ArrayList<Prototype.UpvalueDesc> upvals = new ArrayList<>();
 		Iterator<String> names = upvalueNames.iterator();
-		for (Upvalue.Desc uvd : upvalueDesc) {
+		for (Prototype.UpvalueDesc uvd : upvalueDesc) {
 			String name = names.hasNext() ? names.next() : null;
-			upvals.add(new Upvalue.Desc(name, uvd.inStack, uvd.index));
+			upvals.add(new Prototype.UpvalueDesc(name, uvd.inStack, uvd.index));
 		}
 
 		result = new Prototype(
@@ -74,8 +74,8 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 				code.toVector(),
 				ReadOnlyArray.fromCollection(Prototype.class, nestedPrototypes),
 				lines.toVector(),
-				ReadOnlyArray.fromCollection(LocalVariable.class, locals),
-				ReadOnlyArray.fromCollection(Upvalue.Desc.class, upvals),
+				ReadOnlyArray.fromCollection(Prototype.LocalVariable.class, locals),
+				ReadOnlyArray.fromCollection(Prototype.UpvalueDesc.class, upvals),
 				source,
 				firstLineDefined,
 				lastLineDefined,
@@ -141,7 +141,7 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 
 	@Override
 	public void visitUpvalue(boolean inStack, int index) {
-		upvalueDesc.add(new Upvalue.Desc(null, inStack, index));
+		upvalueDesc.add(new Prototype.UpvalueDesc(null, inStack, index));
 	}
 
 	@Override
@@ -164,7 +164,7 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 
 	@Override
 	public void visitLocalVariable(String name, int beginPC, int endPC) {
-		locals.add(new LocalVariable(name, beginPC, endPC));
+		locals.add(new Prototype.LocalVariable(name, beginPC, endPC));
 	}
 
 }

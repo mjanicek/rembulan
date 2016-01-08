@@ -257,8 +257,8 @@ public class PrototypePrinter {
 
 		IntVector code = proto.getCode();
 		ReadOnlyArray<Object> constants = proto.getConstants();
-		ReadOnlyArray<LocalVariable> locals = proto.getLocalVariables();
-		ReadOnlyArray<Upvalue.Desc> upvalues = proto.getUpValueDescriptions();
+		ReadOnlyArray<Prototype.LocalVariable> locals = proto.getLocalVariables();
+		ReadOnlyArray<Prototype.UpvalueDesc> upvalues = proto.getUpValueDescriptions();
 		ReadOnlyArray<Prototype> nested = proto.getNestedPrototypes();
 
 		// 1st line
@@ -308,7 +308,7 @@ public class PrototypePrinter {
 			out.print(i);  // index
 			out.print('\t');
 
-			LocalVariable lv = locals.get(i);
+			Prototype.LocalVariable lv = locals.get(i);
 			out.print(lv.variableName + "\t" + (lv.beginPC + 1) + "\t" + (lv.endPC + 1));
 			out.println();
 		}
@@ -320,7 +320,7 @@ public class PrototypePrinter {
 			out.print(i);  // index
 			out.print('\t');
 
-			Upvalue.Desc uvd = upvalues.get(i);
+			Prototype.UpvalueDesc uvd = upvalues.get(i);
 			out.print(uvd.name + "\t" + (uvd.inStack ? 1 : 0) + "\t" + uvd.index);
 			out.println();
 		}
