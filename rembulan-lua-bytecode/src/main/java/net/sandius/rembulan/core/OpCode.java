@@ -131,7 +131,7 @@ public class OpCode {
 	public static int fromAsBx(int opcode, int a, int sbx) {
 		return ((opcode & MAX_OP) << POS_OP)
 				+ ((a & MAXARG_A) << POS_A)
-				+ ((sbx & MAXARG_sBx) << POS_Bx);
+				+ (((sbx + MAXARG_sBx) & MAXARG_Bx) << POS_Bx);
 	}
 
 	public static int fromAx(int opcode, int ax) {
