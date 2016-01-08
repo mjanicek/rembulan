@@ -17,59 +17,6 @@ public class PrototypePrinter {
 		return out.toString();
 	}
 
-	public static String opcodeName(int opcode) {
-		switch (opcode) {
-			case OpCode.MOVE: return "MOVE";
-			case OpCode.LOADK: return "LOADK";
-			case OpCode.LOADKX: return "LOADKX";
-			case OpCode.LOADBOOL: return "LOADBOOL";
-			case OpCode.LOADNIL: return "LOADNIL";
-			case OpCode.GETUPVAL: return "GETUPVAL";
-			case OpCode.GETTABUP: return "GETTABUP";
-			case OpCode.GETTABLE: return "GETTABLE";
-			case OpCode.SETTABUP: return "SETTABUP";
-			case OpCode.SETUPVAL: return "SETUPVAL";
-			case OpCode.SETTABLE: return "SETTABLE";
-			case OpCode.NEWTABLE: return "NEWTABLE";
-			case OpCode.SELF: return "SELF";
-			case OpCode.ADD: return "ADD";
-			case OpCode.SUB: return "SUB";
-			case OpCode.MUL: return "MUL";
-			case OpCode.MOD: return "MOD";
-			case OpCode.POW: return "POW";
-			case OpCode.DIV: return "DIV";
-			case OpCode.IDIV: return "IDIV";
-			case OpCode.BAND: return "BAND";
-			case OpCode.BOR: return "BOR";
-			case OpCode.BXOR: return "BXOR";
-			case OpCode.SHL: return "SHL";
-			case OpCode.SHR: return "SHR";
-			case OpCode.UNM: return "UNM";
-			case OpCode.BNOT: return "BNOT";
-			case OpCode.NOT: return "NOT";
-			case OpCode.LEN: return "LEN";
-			case OpCode.CONCAT: return "CONCAT";
-			case OpCode.JMP: return "JMP";
-			case OpCode.EQ: return "EQ";
-			case OpCode.LT: return "LT";
-			case OpCode.LE: return "LE";
-			case OpCode.TEST: return "TEST";
-			case OpCode.TESTSET: return "TESTSET";
-			case OpCode.CALL: return "CALL";
-			case OpCode.TAILCALL: return "TAILCALL";
-			case OpCode.RETURN: return "RETURN";
-			case OpCode.FORLOOP: return "FORLOOP";
-			case OpCode.FORPREP: return "FORPREP";
-			case OpCode.TFORCALL: return "TFORCALL";
-			case OpCode.TFORLOOP: return "TFORLOOP";
-			case OpCode.SETLIST: return "SETLIST";
-			case OpCode.CLOSURE: return "CLOSURE";
-			case OpCode.VARARG: return "VARARG";
-			case OpCode.EXTRAARG: return "EXTRAARG";
-			default: throw new IllegalArgumentException("Unknown opcode: " + opcode);
-		}
-	}
-
 	private static String plural(int n, String sg, String pl) {
 		return n + " " + (n == 0 || n > 1 ? pl : sg);
 	}
@@ -124,7 +71,7 @@ public class PrototypePrinter {
 		int sbx = OpCode.arg_sBx(insn);
 		int ax = OpCode.arg_Ax(insn);
 
-		String name = opcodeName(opcode);
+		String name = OpCode.opcodeName(opcode);
 		out.append(name);  // opcode
 
 		out.append(spaces(9 - name.length()));
