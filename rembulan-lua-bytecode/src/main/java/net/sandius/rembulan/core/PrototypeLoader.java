@@ -22,15 +22,9 @@
 
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.IntVector;
-import net.sandius.rembulan.util.Ptr;
-import net.sandius.rembulan.util.ReadOnlyArray;
-
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteOrder;
+import java.util.Objects;
 
 public class PrototypeLoader {
 
@@ -54,69 +48,11 @@ public class PrototypeLoader {
 	public static final int LUA_TNUMFLT = LUA_TNUMBER | (0 << 4);  // float numbers
 	public static final int LUA_TNUMINT = LUA_TNUMBER | (1 << 4);  // integer numbers
 
-	/** Signature byte indicating the file is a compiled binary chunk */
-	public static final byte[] LUA_SIGNATURE	= { '\033', 'L', 'u', 'a' };
-
-	/** Data to catch conversion errors */
-	public static final byte[] LUAC_TAIL = { (byte) 0x19, (byte) 0x93, '\r', '\n', (byte) 0x1a, '\n', };
-
-	public static final long TestInteger = 0x5678L;
-	public static final double TestFloat = 370.5;
-
-	/** Name for compiled chunks */
-	public static final String SOURCE_BINARY_STRING = "binary string";
-
-
-	/** for header of binary files -- this is Lua 5.3 */
-	public static final int LUAC_VERSION		= 0x53;
-
-	/** for header of binary files -- this is the official format */
-	public static final int LUAC_FORMAT		= 0;
-
-	/** size of header of binary files */
-	public static final int LUAC_HEADERSIZE		= 12;
-
-	// values read from the header
-	private int     luacVersion;
-	private int     luacFormat;
-	private ByteOrder byteOrder;
-	private int     luacSizeofInt;
-	private int     luacSizeofSizeT;
-	private int     luacSizeofInstruction;
-	private int     luacSizeofLuaInteger;
-	private int     luacSizeofLuaNumber;
-
 	/** input stream from which we are loading */
-	public final DataInputStream is;
+	protected final LuaChunkInputStream is;
 
-	public PrototypeLoader(InputStream stream) {
-		Check.notNull(stream);
-		this.is = new DataInputStream(stream);
-	}
-
-	@Deprecated
-	protected boolean littleEndian() {
-		return byteOrder == ByteOrder.LITTLE_ENDIAN;
-	}
-
-	/**
-	 * Load a signed 32-bit integer from the input stream.
-	 *
-	 * @return the int value loaded.
-	 */
-	int loadInt32() throws IOException {
-		int i = is.readInt();
-		return littleEndian() ? Integer.reverseBytes(i) : i;
-	}
-
-	/**
-	 * Load a signed 64-bit integer from the input stream.
-	 *
-	 * @return the long value loaded.
-	 */
-	long loadInt64() throws IOException {
-		long l = is.readLong();
-		return littleEndian() ? Long.reverseBytes(l) : l;
+	public PrototypeLoader(LuaChunkInputStream stream) {
+		this.is = Objects.requireNonNull(stream);
 	}
 
 	/**
@@ -124,92 +60,23 @@ public class PrototypeLoader {
 	 *
 	 * @return the array of int values loaded.
 	 */
-	int[] loadIntVector() throws IOException {
-		int n = loadInt32();
+	private int[] loadIntVector() throws IOException {
+		int n = is.readInt();
 		int[] array = new int[n];
 		for (int i = 0; i < n; i++) {
-			array[i] = loadInt32();
+			array[i] = is.readInt();
 		}
 		return array;
 	}
 
-	boolean loadBoolean() throws IOException {
-		return is.readUnsignedByte() != 0;
-	}
-
-	int loadSizeT() throws IOException {
-		return this.luacSizeofSizeT == 8 ? (int) loadInt64() : loadInt32();
-	}
-
-	/** Load a string from the input stream.
-	 *
-	 * @return the string value loaded.
-	 */
-	protected String loadString() throws IOException {
-		int hx = is.readUnsignedByte();
-		int size = hx == 0xff ? loadSizeT() : hx;
-
-		if (size == 0) {
-			return null;
-		}
-
-		assert (size > 0);
-
-		size -= 1;  // trailing '\0' is not stored
-
-		byte[] bytes = new byte[size];
-		is.readFully(bytes, 0, size);
-
-		char[] chars = new char[size];
-		for (int i = 0; i < chars.length; i++) {
-			chars[i] = (char) (bytes[i] & 0xff);
-		}
-
-		return String.valueOf(chars);
-	}
-
-	protected long loadInteger() throws IOException {
-		return loadInt64();
-	}
-
-	protected double loadFloat() throws IOException {
-		return Double.longBitsToDouble(loadInt64());
-	}
-
-	protected void loadConstant(PrototypeVisitor visitor) throws IOException {
-		byte tag = is.readByte();
-		switch (tag) {
-			case LUA_TNIL:     visitor.visitNilConst(); break;
-			case LUA_TBOOLEAN: visitor.visitBooleanConst(loadBoolean()); break;
-
-			case LUA_TNUMINT:  visitor.visitIntegerConst(loadInteger()); break;
-			case LUA_TNUMFLT:  visitor.visitFloatConst(loadFloat()); break;
-
-			case LUA_TSHRSTR:
-			case LUA_TLNGSTR:
-				// TODO: is this correct for long strings?
-				visitor.visitStringConst(loadString());
-				break;
-
-			default: throw new IllegalStateException("Illegal constant type: " + tag);
-		}
-	}
-
-	@Deprecated
-	public Prototype loadFunction(String src) throws IOException {
-		PrototypeBuilderVisitor visitor = new PrototypeBuilderVisitor();
-		accept(visitor);
-		return visitor.get();
-	}
-
 	public void accept(PrototypeVisitor visitor) throws IOException {
-		String source = loadString();
+		String source = is.readString();
 //		if (source == null) source = src;  // TODO
 
-		int firstLineDefined = loadInt32();
-		int lastLineDefined = loadInt32();
+		int firstLineDefined = is.readInt();
+		int lastLineDefined = is.readInt();
 		int numOfParameters = is.readUnsignedByte();
-		boolean isVararg = loadBoolean();
+		boolean isVararg = is.readBoolean();
 		int maxStackSize = is.readUnsignedByte();
 
 		visitor.visit(numOfParameters, isVararg, maxStackSize, source, firstLineDefined, lastLineDefined);
@@ -221,17 +88,32 @@ public class PrototypeLoader {
 
 		// constants
 		{
-			int n = loadInt32();
+			int n = is.readInt();
 			for (int i = 0; i < n; i++) {
-				loadConstant(visitor);
+				int tag = is.readUnsignedByte();
+				switch (tag) {
+					case LUA_TNIL:     visitor.visitNilConst(); break;
+					case LUA_TBOOLEAN: visitor.visitBooleanConst(is.readBoolean()); break;
+
+					case LUA_TNUMINT:  visitor.visitIntegerConst(is.readInteger()); break;
+					case LUA_TNUMFLT:  visitor.visitFloatConst(is.readFloat()); break;
+
+					case LUA_TSHRSTR:
+					case LUA_TLNGSTR:
+						// TODO: is this correct for long strings?
+						visitor.visitStringConst(is.readString());
+						break;
+
+					default: throw new IllegalStateException("Illegal constant type: " + tag);
+				}
 			}
 		}
 
 		// upvalues
 		{
-			int n = loadInt32();
+			int n = is.readInt();
 			for (int i = 0; i < n; i++) {
-				boolean inStack = loadBoolean();
+				boolean inStack = is.readBoolean();
 				int idx = is.readUnsignedByte();
 				visitor.visitUpvalue(inStack, idx);
 			}
@@ -239,7 +121,7 @@ public class PrototypeLoader {
 
 		// nested prototypes
 		{
-			int n = loadInt32();
+			int n = is.readInt();
 			for (int i = 0; i < n; i++) {
 				PrototypeVisitor pv = visitor.visitNestedPrototype();
 				accept(pv);
@@ -254,17 +136,17 @@ public class PrototypeLoader {
 				visitor.visitLine(line);
 			}
 
-			int n = loadInt32();
+			int n = is.readInt();
 			for (int i = 0; i < n; i++) {
-				String name = loadString();
-				int start = loadInt32();
-				int end = loadInt32();
+				String name = is.readString();
+				int start = is.readInt();
+				int end = is.readInt();
 				visitor.visitLocalVariable(name, start, end);
 			}
 
-			n = loadInt32();
+			n = is.readInt();
 			for (int i = 0; i < n; i++) {
-				String uvn = loadString();
+				String uvn = is.readString();
 				visitor.visitUpvalueName(uvn);
 			}
 
@@ -273,95 +155,16 @@ public class PrototypeLoader {
 		visitor.visitEnd();
 	}
 
-	protected static ByteOrder checkByteOrder(long value, long bigEndianValue) {
-		if (value == bigEndianValue) return ByteOrder.BIG_ENDIAN;
-		else if (value == Long.reverseBytes(bigEndianValue)) return ByteOrder.LITTLE_ENDIAN;
-		else return null;
+	public static PrototypeLoader fromInputStream(InputStream stream) throws IOException {
+		return new PrototypeLoader(LuaChunkInputStream.fromInputStream(stream));
 	}
 
-	/**
-	 * Load the lua chunk header values.
-	 * @throws IOException if an i/o exception occurs.
-	 */
-	public void loadHeader() throws IOException {
-		luacVersion = is.readByte();
-		luacFormat = is.readByte();
-
-		for (int i = 0; i < LUAC_TAIL.length; ++i) {
-			if (is.readByte() != LUAC_TAIL[i]) throw new RuntimeException("Unexpected byte in LuaC tail of header, index=" + i);
-		}
-
-		luacSizeofInt = is.readByte();
-		luacSizeofSizeT = is.readByte();
-		luacSizeofInstruction = is.readByte();
-		luacSizeofLuaInteger = is.readByte();
-		luacSizeofLuaNumber = is.readByte();
-
-		// check endianness
-        long ti = is.readLong();  // FIXME: read 8 bytes instead, assume big-endian
-		long tf = is.readLong();  // FIXME: read 8 bytes instead, assume big-endian
-
-		ByteOrder integerByteOrder = checkByteOrder(ti, TestInteger);
-		ByteOrder floatByteOrder = checkByteOrder(tf, Double.doubleToLongBits(TestFloat));
-
-		if (integerByteOrder != null && floatByteOrder != null) {
-			if (integerByteOrder != floatByteOrder) {
-				throw new IllegalArgumentException("Endianness mismatch: " + integerByteOrder + " (ints) vs " + floatByteOrder + " (floats)");
-			}
-			else {
-				byteOrder = integerByteOrder;
-			}
-		}
-		else if (integerByteOrder != null) {
-			byteOrder = integerByteOrder;
-		}
-		else if (floatByteOrder != null) {
-			byteOrder = floatByteOrder;
-		}
-		else {
-			throw new IllegalArgumentException("Unable to determine endianness: 0x" + Long.toHexString(ti) + " (integer as big-endian long),  0x" + Long.toHexString(tf) + " (float as big-endian long)");
-		}
-
-		boolean isClosure = loadBoolean();
-		// TODO: require true
-	}
-
-	/**
-	 * Load input stream as a lua binary chunk if the first 4 bytes are the lua binary signature.
-	 * @param stream InputStream to read, after having read the first byte already
-	 * @return {@link Prototype} that was loaded, or null if the first 4 bytes were not the lua signature.
-	 * @throws IOException if an IOException occurs
-	 */
+	@Deprecated
 	public static Prototype undump(InputStream stream) throws IOException {
-
-		// check rest of signature
-		if (stream.read() != LUA_SIGNATURE[0]
-				|| stream.read() != LUA_SIGNATURE[1]
-				|| stream.read() != LUA_SIGNATURE[2]
-				|| stream.read() != LUA_SIGNATURE[3]) {
-			return null;
-		}
-
-		// load file as a compiled chunk
-		PrototypeLoader s = new PrototypeLoader(stream);
-		s.loadHeader();
-
-		return s.loadFunction(null);
-	}
-
-	/**
-	 * Construct a source name from a supplied chunk name
-	 * @param name String name that appears in the chunk
-	 * @return source file name
-	 */
-	public static String getSourceName(String name) {
-		if (name.startsWith("@") || name.startsWith("=")) {
-			name = name.substring(1);
-		}
-		else if (name.startsWith("\033")) {
-			name = SOURCE_BINARY_STRING;
-		}
-		return name;
+		PrototypeLoader loader = fromInputStream(stream);
+		PrototypeBuilderVisitor visitor = new PrototypeBuilderVisitor();
+		loader.accept(visitor);
+		return visitor.get();
 	}
 
 }
