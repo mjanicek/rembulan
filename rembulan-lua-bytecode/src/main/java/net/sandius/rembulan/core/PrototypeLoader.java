@@ -70,12 +70,19 @@ public class PrototypeLoader {
 	}
 
 	protected void acceptHeader(PrototypeVisitor pv) throws IOException {
+		acceptSource(pv);
+		acceptSize(pv);
+	}
+
+	protected void acceptSource(PrototypeVisitor pv) throws IOException {
 		String source = is.readString();
 		int firstLineDefined = is.readInt();
 		int lastLineDefined = is.readInt();
 
 		if (pv != null) pv.visitSource(source, firstLineDefined, lastLineDefined);
+	}
 
+	protected void acceptSize(PrototypeVisitor pv) throws IOException {
 		int numOfParameters = is.readUnsignedByte();
 		boolean isVararg = is.readBoolean();
 		int maxStackSize = is.readUnsignedByte();
