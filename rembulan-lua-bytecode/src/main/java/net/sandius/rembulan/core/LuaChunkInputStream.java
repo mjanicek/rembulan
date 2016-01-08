@@ -6,7 +6,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class LuaChunkInputStream extends FilterInputStream {
