@@ -1,5 +1,7 @@
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.util.Check;
+
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.FilterInputStream;
@@ -137,20 +139,30 @@ public class LuaChunkInputStream extends FilterInputStream {
 
 	public String readString() throws IOException  {
 		int hx = readUnsignedByte();
-		int size = hx == 0xff ? readSizeT() : hx;
+		return hx == 0xff ? readLongString() : readShortStringBody(hx);
+	}
 
-		if (size == 0) {
-			return null;
-		}
+	protected String readShortStringBody(int length) throws IOException {
+		Check.inRange(length, 0, 0xff - 1);
+		if (length == 0) return null;  // FIXME: null or "" ?
+		else return readStringBody(new byte[length - 1]);
+	}
 
-		assert (size > 0);
+	public String readShortString() throws IOException {
+		int length = readUnsignedByte();
+		return readShortStringBody(length);
+	}
 
-		size -= 1;  // trailing '\0' is not stored
+	public String readLongString() throws IOException {
+		int length = readSizeT();
+		Check.gt(length, 0xff);
+		return readStringBody(new byte[length - 1]);
+	}
 
-		byte[] bytes = new byte[size];
+	protected String readStringBody(byte[] bytes) throws IOException {
 		readFully(bytes, 0, bytes.length);
 
-		char[] chars = new char[size];
+		char[] chars = new char[bytes.length];
 		for (int i = 0; i < chars.length; i++) {
 			chars[i] = (char) (bytes[i] & 0xff);
 		}

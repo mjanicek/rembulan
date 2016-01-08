@@ -140,10 +140,13 @@ public class PrototypeLoader {
 					break;
 				}
 
-				case LUA_TSHRSTR:
+				case LUA_TSHRSTR: {
+					String value = is.readShortString();
+					if (pv != null) pv.visitStringConst(value);
+					break;
+				}
 				case LUA_TLNGSTR: {
-					String value = is.readString();
-					// TODO: is this correct for long strings?
+					String value = is.readLongString();
 					if (pv != null) pv.visitStringConst(value);
 					break;
 				}
