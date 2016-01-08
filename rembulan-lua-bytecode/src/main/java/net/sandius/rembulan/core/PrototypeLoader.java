@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
-public class PrototypeLoader {
+public class PrototypeLoader implements PrototypeVisitable {
 
 	// type constants
 	public static final int LUA_TINT            = (-2);
@@ -59,15 +59,21 @@ public class PrototypeLoader {
 		return new PrototypeLoader(LuaChunkInputStream.fromInputStream(stream));
 	}
 
-	public void accept(PrototypeVisitor pv) throws IOException {
-		acceptHeader(pv);
-		acceptCode(pv);
-		acceptConstants(pv);
-		acceptUpvalues(pv);
-		acceptNestedPrototypes(pv);
-		acceptDebugInfo(pv);
+	@Override
+	public void accept(PrototypeVisitor pv) {
+		try {
+			acceptHeader(pv);
+			acceptCode(pv);
+			acceptConstants(pv);
+			acceptUpvalues(pv);
+			acceptNestedPrototypes(pv);
+			acceptDebugInfo(pv);
 
-		if (pv != null) pv.visitEnd();
+			if (pv != null) pv.visitEnd();
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	protected void acceptHeader(PrototypeVisitor pv) throws IOException {

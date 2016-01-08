@@ -6,7 +6,7 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.Objects;
 
-public class Prototype {
+public class Prototype implements PrototypeVisitable {
 
 	// TODO: split into required and optional debug part
 
@@ -123,6 +123,7 @@ public class Prototype {
 		return result;
 	}
 
+	@Override
 	public void accept(PrototypeVisitor pv) {
 		if (pv != null) {
 			pv.visitSource(getSource(), getBeginLine(), getEndLine());
