@@ -12,9 +12,15 @@ public abstract class PrototypeVisitor {
 		this(null);
 	}
 
-	public void visit(int numParams, boolean vararg, int maxStackSize, String source, int firstLineDefined, int lastLineDefined) {
+	public void visitSource(String source, int firstLineDefined, int lastLineDefined) {
 		if (pv != null) {
-			pv.visit(numParams, vararg, maxStackSize, source, firstLineDefined, lastLineDefined);
+			pv.visitSource(source, firstLineDefined, lastLineDefined);
+		}
+	}
+
+	public void visitSize(int numParams, boolean vararg, int maxStackSize) {
+		if (pv != null) {
+			pv.visitSize(numParams, vararg, maxStackSize);
 		}
 	}
 

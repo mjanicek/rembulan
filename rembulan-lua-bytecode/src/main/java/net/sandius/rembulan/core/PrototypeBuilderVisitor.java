@@ -29,13 +29,10 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 	private Prototype result;
 
 	@Override
-	public void visit(int numParams, boolean vararg, int maxStackSize, String source, int firstLineDefined, int lastLineDefined) {
+	public void visitSize(int numParams, boolean vararg, int maxStackSize) {
 		this.numParams = numParams;
 		this.vararg = vararg;
 		this.maxStackSize = maxStackSize;
-		this.source = source;
-		this.firstLineDefined = firstLineDefined;
-		this.lastLineDefined = lastLineDefined;
 
 		this.code = new IntBuffer();
 		this.consts = new ArrayList<>();
@@ -47,6 +44,13 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 		this.locals = new ArrayList<>();
 
 		result = null;
+	}
+
+	@Override
+	public void visitSource(String source, int firstLineDefined, int lastLineDefined) {
+		this.source = source;
+		this.firstLineDefined = firstLineDefined;
+		this.lastLineDefined = lastLineDefined;
 	}
 
 	@Override

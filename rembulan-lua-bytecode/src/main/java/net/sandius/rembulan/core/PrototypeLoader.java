@@ -73,11 +73,14 @@ public class PrototypeLoader {
 		String source = is.readString();
 		int firstLineDefined = is.readInt();
 		int lastLineDefined = is.readInt();
+
+		if (pv != null) pv.visitSource(source, firstLineDefined, lastLineDefined);
+
 		int numOfParameters = is.readUnsignedByte();
 		boolean isVararg = is.readBoolean();
 		int maxStackSize = is.readUnsignedByte();
 
-		if (pv != null) pv.visit(numOfParameters, isVararg, maxStackSize, source, firstLineDefined, lastLineDefined);
+		if (pv != null) pv.visitSize(numOfParameters, isVararg, maxStackSize);
 	}
 
 	protected void acceptCode(PrototypeVisitor pv) throws IOException {

@@ -14,7 +14,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 	public final ByteOrder byteOrder;
 	public final OutputStream out;
 
-	private final ByteArrayDataOutputStream header;
+	private final ByteArrayDataOutputStream sourceHeader;
+	private final ByteArrayDataOutputStream sigHeader;
 
 	private int numCode;
 	private final ByteArrayDataOutputStream code;
@@ -39,7 +40,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 		this.byteOrder = byteOrder;
 		this.out = out;
 
-		this.header = ByteArrayDataOutputStream.newInstance(byteOrder);
+		this.sourceHeader = ByteArrayDataOutputStream.newInstance(byteOrder);
+		this.sigHeader = ByteArrayDataOutputStream.newInstance(byteOrder);
 
 		this.numCode = 0;
 		this.code = ByteArrayDataOutputStream.newInstance(byteOrder);
@@ -96,14 +98,25 @@ public class PrototypeWriter extends PrototypeVisitor {
 	}
 
 	@Override
-	public void visit(int numParams, boolean vararg, int maxStackSize, String source, int firstLineDefined, int lastLineDefined) {
+	public void visitSize(int numParams, boolean vararg, int maxStackSize) {
 		try {
-			writeString(header, source);
-			header.writeInt(firstLineDefined);
-			header.writeInt(lastLineDefined);
-			header.writeByte(numParams);
-			header.writeBoolean(vararg);
-			header.writeByte(maxStackSize);
+			sigHeader.reset();
+			sigHeader.writeByte(numParams);
+			sigHeader.writeBoolean(vararg);
+			sigHeader.writeByte(maxStackSize);
+		}
+		catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public void visitSource(String source, int firstLineDefined, int lastLineDefined) {
+		try {
+			sigHeader.reset();
+			writeString(sourceHeader, source);
+			sourceHeader.writeInt(firstLineDefined);
+			sourceHeader.writeInt(lastLineDefined);
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -239,7 +252,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			header.writeTo(out);
+			sourceHeader.writeTo(out);
+			sigHeader.writeTo(out);
 
 			writeInt(out, byteOrder, numCode);
 			code.writeTo(out);
