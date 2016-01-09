@@ -92,25 +92,7 @@ public class LuaCPrototypeLoader {
 		}
 
 		// no error, read stdout
-		InputStream outStream = new BufferedInputStream(call.out);
-
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		byte[] buf = new byte[1024];
-
-		int n = 0;
-		do {
-			n = outStream.read(buf, 0, buf.length);
-			if (n > 0) {
-				baos.write(buf, 0, n);
-			}
-		} while (n >= 0);
-
-		// compiled prototype from luac
-		byte[] bytes = baos.toByteArray();
-
-		ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-		PrototypeLoader loader = PrototypeLoader.fromInputStream(bais);
-		loader.accept(pv);
+		PrototypeLoader.fromInputStream(new BufferedInputStream(call.out)).accept(pv);
 	}
 
 	@Deprecated
