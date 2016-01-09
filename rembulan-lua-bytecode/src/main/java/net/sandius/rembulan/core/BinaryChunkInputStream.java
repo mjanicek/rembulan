@@ -87,12 +87,12 @@ public class BinaryChunkInputStream extends FilterInputStream {
 	}
 
 	protected long readInt64() throws IOException {
-		int a = readInt32();
-		int b = readInt32();
+		long a = readInt32() & 0xffffffffL;
+		long b = readInt32() & 0xffffffffL;
 
 		return bigEndian
-				? (long) (a << 32) + (long) (b << 0)
-				: (long) (a << 0) + (long) (b << 32);
+				? (a << 32) + (b << 0)
+				: (a << 0) + (b << 32);
 	}
 
 	private int readInt(boolean is32Bit) throws IOException {
