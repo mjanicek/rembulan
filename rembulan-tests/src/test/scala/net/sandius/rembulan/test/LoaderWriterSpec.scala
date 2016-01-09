@@ -115,4 +115,34 @@ class LoaderWriterSpec extends FunSpec with MustMatchers {
 
   prog("print( 1 == b and b )\n")
 
+  prog(
+  """function hello()
+    |  return "Hello."
+    |end
+  """.stripMargin)
+
+  prog(
+  """function f(x)
+    |  print(x)
+    |  if x > 0 then
+    |    return f(x - 1)
+    |  else
+    |    if x < 0 then
+    |      return f(x + 1)
+    |    else
+    |      return 0
+    |    end
+    |  end
+    |end
+    |
+    |local hi = "hello."
+    |
+    |function g()
+    |  print(hi)
+    |  for i = 'x', 0 do print(i) end
+    |end
+    |
+    |return f(3),f(-2)
+    """.stripMargin)
+
 }

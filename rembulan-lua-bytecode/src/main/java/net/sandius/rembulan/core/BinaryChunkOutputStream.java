@@ -177,25 +177,30 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 	}
 
 	public void writeString(String s) throws IOException {
-		Objects.requireNonNull(s);
-
-		byte[] bytes = s.getBytes();
-
-		if (bytes.length + 1 < 0xff) {
-			writeShortString(bytes);
+		if (s == null) {
+			write(0);
 		}
 		else {
-			writeLongString(bytes);
+			byte[] bytes = s.getBytes();
+
+			if (bytes.length + 1 < 0xff) {
+				writeShortString(bytes);
+			}
+			else {
+				writeLongString(bytes);
+			}
 		}
 	}
 
 	public void writeShortString(byte[] bytes) throws IOException {
+		Objects.requireNonNull(bytes);
 		Check.lt(bytes.length + 1, 0xff);
 		write(bytes.length + 1);  // encoding the array size of a C-style string, i.e. including the trailing '\0'
 		writeStringBody(bytes);
 	}
 
 	public void writeLongString(byte[] bytes) throws IOException {
+		Objects.requireNonNull(bytes);
 		write(0xff);
 		writeSizeT(bytes.length + 1);  // encoding the array size of a C-style string, i.e. including the trailing '\0'
 		writeStringBody(bytes);

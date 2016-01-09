@@ -59,14 +59,14 @@ public class PrototypeWriter extends PrototypeVisitor {
 		}
 	}
 
-	public PrototypeWriter(OutputStream out, BinaryChunkFormat format) {
+	private PrototypeWriter(OutputStream out, BinaryChunkFormat format, boolean writeSignature) {
 		Objects.requireNonNull(out);
 		Objects.requireNonNull(format);
 
 		this.out = new BinaryChunkOutputStream(out, format);
 		this.format = format;
 
-		this.signatureWritten = false;
+		this.signatureWritten = !writeSignature;
 
 		this.sourceHeader = new BinaryChunkOutputBuffer();
 		this.sigHeader = new BinaryChunkOutputBuffer();
@@ -80,6 +80,10 @@ public class PrototypeWriter extends PrototypeVisitor {
 		this.lines = new BinaryChunkOutputBuffer();
 		this.locals = new BinaryChunkOutputBuffer();
 		this.upvalueNames = new BinaryChunkOutputBuffer();
+	}
+
+	public PrototypeWriter(OutputStream out, BinaryChunkFormat format) {
+		this(out, format, true);
 	}
 
 	public PrototypeWriter(OutputStream out, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
@@ -225,7 +229,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public PrototypeVisitor visitNestedPrototype() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrototypeWriter pw = new PrototypeWriter(baos, format);
+		PrototypeWriter pw = new PrototypeWriter(baos, format, false);
 		nested.add(baos);
 		return pw;
 	}
