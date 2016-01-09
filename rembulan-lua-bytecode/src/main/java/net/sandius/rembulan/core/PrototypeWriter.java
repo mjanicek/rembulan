@@ -4,8 +4,6 @@ import net.sandius.rembulan.util.Check;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -13,63 +11,66 @@ public class PrototypeWriter extends PrototypeVisitor {
 
 	public final BinaryChunkOutputStream out;
 
-	private final BinaryChunkOutputBuffer sourceHeader;
-	private final BinaryChunkOutputBuffer sigHeader;
+	private final Buffer sourceHeader;
+	private final Buffer sigHeader;
 
-	private final BinaryChunkOutputBuffer code;
-	private final BinaryChunkOutputBuffer constants;
-	private final BinaryChunkOutputBuffer upvalues;
+	private final SequenceBuffer code;
+	private final SequenceBuffer constants;
+	private final SequenceBuffer upvalues;
 
 	private final ArrayList<ByteArrayOutputStream> nested;
 
-	private final BinaryChunkOutputBuffer lines;
-	private final BinaryChunkOutputBuffer locals;
-	private final BinaryChunkOutputBuffer upvalueNames;
+	private final SequenceBuffer lines;
+	private final SequenceBuffer locals;
+	private final SequenceBuffer upvalueNames;
 
-	class BinaryChunkOutputBuffer {
-		private int count;
-		private final ByteArrayOutputStream data;
-		public final BinaryChunkOutputStream stream;
-
-		public BinaryChunkOutputBuffer() {
-			this.count = 0;
-			this.data = new ByteArrayOutputStream();
-			this.stream = new BinaryChunkOutputStream(this.data, out.getFormat());
-		}
+	class Buffer {
+		private final ByteArrayOutputStream data = new ByteArrayOutputStream();
+		public final BinaryChunkOutputStream stream = new BinaryChunkOutputStream(this.data, out.getFormat());
 
 		public void reset() {
 			data.reset();
 		}
 
+		public void write() throws IOException {
+			data.writeTo(out);
+		}
+	}
+
+	class SequenceBuffer extends Buffer {
+		private int count = 0;
+
 		public void inc() {
 			count += 1;
 		}
 
-		public void writeToAsData(OutputStream out) throws IOException {
-			data.writeTo(out);
+		public void reset() {
+			super.reset();
+			count = 0;
 		}
 
-		public void writeToAsSequence(BinaryChunkOutputStream out) throws IOException {
+		@Override
+		public void write() throws IOException {
 			out.writeInt(count);
-			data.writeTo(out);
+			super.write();
 		}
 	}
 
 	public PrototypeWriter(BinaryChunkOutputStream out) {
 		this.out = Objects.requireNonNull(out);
 
-		this.sourceHeader = new BinaryChunkOutputBuffer();
-		this.sigHeader = new BinaryChunkOutputBuffer();
+		this.sourceHeader = new Buffer();
+		this.sigHeader = new Buffer();
 
-		this.code = new BinaryChunkOutputBuffer();
-		this.constants = new BinaryChunkOutputBuffer();
-		this.upvalues = new BinaryChunkOutputBuffer();
+		this.code = new SequenceBuffer();
+		this.constants = new SequenceBuffer();
+		this.upvalues = new SequenceBuffer();
 
 		this.nested = new ArrayList<>();
 
-		this.lines = new BinaryChunkOutputBuffer();
-		this.locals = new BinaryChunkOutputBuffer();
-		this.upvalueNames = new BinaryChunkOutputBuffer();
+		this.lines = new SequenceBuffer();
+		this.locals = new SequenceBuffer();
+		this.upvalueNames = new SequenceBuffer();
 	}
 
 	@Override
@@ -254,21 +255,21 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			sourceHeader.writeToAsData(out);
-			sigHeader.writeToAsData(out);
+			sourceHeader.write();
+			sigHeader.write();
 
-			code.writeToAsSequence(out);
-			constants.writeToAsSequence(out);
-			upvalues.writeToAsSequence(out);
+			code.write();
+			constants.write();
+			upvalues.write();
 
 			out.writeInt(nested.size());
 			for (ByteArrayOutputStream nestedBaos : nested) {
 				nestedBaos.writeTo(out);
 			}
 
-			lines.writeToAsSequence(out);
-			locals.writeToAsSequence(out);
-			upvalueNames.writeToAsSequence(out);
+			lines.write();
+			locals.write();
+			upvalueNames.write();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
