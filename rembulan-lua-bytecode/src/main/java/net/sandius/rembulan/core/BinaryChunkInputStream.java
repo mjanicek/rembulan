@@ -53,6 +53,32 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		);
 	}
 
+	// Uncomment the following to trace every byte read to stdout.
+/*
+	private int idx = 0;
+
+	private static String toHex(int b) {
+		String s = Integer.toHexString(b & 0xff);
+		return s.length() == 1 ? "0" + s : s;
+	}
+
+	@Override
+	public int read(byte[] b, int off, int len) throws IOException {
+		int r = in.read(b, off, len);
+		for (int i = 0; i < len; i++) {
+			System.out.println("#" + idx++ + "[]: " + toHex(b[off + i]));
+		}
+		return r;
+	}
+
+	@Override
+	public int read() throws IOException {
+		int b = in.read();
+		System.out.println("#" + idx++ + ": " + toHex(b));
+		return b;
+	}
+*/
+
 	protected int readUnsignedByte() throws IOException {
 		int c = read();
 		if (c < 0) throw new EOFException();
