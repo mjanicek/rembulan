@@ -6,14 +6,6 @@ import java.util.Objects;
 
 public class PrototypeLoader implements PrototypeVisitable {
 
-	// type tags of constants
-	public static final int CONST_NIL = 0;
-	public static final int CONST_BOOLEAN = 1;
-	public static final int CONST_FLOAT = 3;
-	public static final int CONST_SHORT_STRING = 4;
-	public static final int CONST_INTEGER = CONST_FLOAT | (1 << 4);
-	public static final int CONST_LONG_STRING = CONST_SHORT_STRING | (1 << 4);
-
 	protected final BinaryChunkInputStream is;
 
 	public PrototypeLoader(BinaryChunkInputStream stream) {
@@ -91,31 +83,31 @@ public class PrototypeLoader implements PrototypeVisitable {
 		for (int i = 0; i < n; i++) {
 			int tag = is.readUnsignedByte();
 			switch (tag) {
-				case CONST_NIL:
+				case BinaryChunkConstants.CONST_NIL:
 					if (pv != null) pv.visitNilConst(); break;
-				case CONST_BOOLEAN: {
+				case BinaryChunkConstants.CONST_BOOLEAN: {
 					boolean value = is.readBoolean();
 					if (pv != null) pv.visitBooleanConst(value);
 					break;
 				}
 
-				case CONST_INTEGER: {
+				case BinaryChunkConstants.CONST_INTEGER: {
 					long value = is.readInteger();
 					if (pv != null) pv.visitIntegerConst(value);
 					break;
 				}
-				case CONST_FLOAT: {
+				case BinaryChunkConstants.CONST_FLOAT: {
 					double value = is.readFloat();
 					if (pv != null) pv.visitFloatConst(value);
 					break;
 				}
 
-				case CONST_SHORT_STRING: {
+				case BinaryChunkConstants.CONST_SHORT_STRING: {
 					String value = is.readShortString();
 					if (pv != null) pv.visitStringConst(value);
 					break;
 				}
-				case CONST_LONG_STRING: {
+				case BinaryChunkConstants.CONST_LONG_STRING: {
 					String value = is.readLongString();
 					if (pv != null) pv.visitStringConst(value);
 					break;

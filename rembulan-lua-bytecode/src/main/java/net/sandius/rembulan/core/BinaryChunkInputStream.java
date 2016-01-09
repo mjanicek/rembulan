@@ -187,22 +187,22 @@ public class BinaryChunkInputStream extends FilterInputStream {
 
 	private static void readAndCheckLuaSignature(DataInputStream stream) throws IOException {
 		{
-			int diff = readBinaryLiteral(stream, BinaryChunkHeader.SIGNATURE);
+			int diff = readBinaryLiteral(stream, BinaryChunkConstants.SIGNATURE);
 			if (diff != -1) {
 				throw new IllegalArgumentException("Unexpected byte at position " + diff);
 			}
 		}
 
 		int version = stream.readUnsignedByte();
-		if (version != BinaryChunkHeader.VERSION) throw new IllegalArgumentException("Unsupported version: " + Integer.toHexString(version));
+		if (version != BinaryChunkConstants.VERSION) throw new IllegalArgumentException("Unsupported version: " + Integer.toHexString(version));
 
 		int format = stream.readUnsignedByte();
-		if (format != BinaryChunkHeader.FORMAT) throw new IllegalArgumentException("Unsupported format: " + Integer.toHexString(format));
+		if (format != BinaryChunkConstants.FORMAT) throw new IllegalArgumentException("Unsupported format: " + Integer.toHexString(format));
 
 		{
-			int diff = readBinaryLiteral(stream, BinaryChunkHeader.TAIL);
+			int diff = readBinaryLiteral(stream, BinaryChunkConstants.TAIL);
 			if (diff != -1) {
-				throw new IllegalArgumentException("Unexpected byte at position " + (BinaryChunkHeader.SIGNATURE.length() + 2 + diff));
+				throw new IllegalArgumentException("Unexpected byte at position " + (BinaryChunkConstants.SIGNATURE.length() + 2 + diff));
 			}
 		}
 	}
@@ -214,8 +214,8 @@ public class BinaryChunkInputStream extends FilterInputStream {
 	}
 
 	protected static ByteOrder decideByteOrder(long integerBits, long floatBits) {
-		ByteOrder integerByteOrder = testByteOrder(integerBits, BinaryChunkHeader.BYTE_ORDER_TEST_INTEGER);
-		ByteOrder floatByteOrder = testByteOrder(floatBits, Double.doubleToLongBits(BinaryChunkHeader.BYTE_ORDER_TEST_FLOAT));
+		ByteOrder integerByteOrder = testByteOrder(integerBits, BinaryChunkConstants.BYTE_ORDER_TEST_INTEGER);
+		ByteOrder floatByteOrder = testByteOrder(floatBits, Double.doubleToLongBits(BinaryChunkConstants.BYTE_ORDER_TEST_FLOAT));
 
 		if (integerByteOrder != null && floatByteOrder != null) {
 			if (integerByteOrder != floatByteOrder) {

@@ -41,10 +41,10 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 	}
 
 	public void writeHeader() throws IOException {
-		write(BinaryChunkHeader.SIGNATURE.getBytes());
-		write(BinaryChunkHeader.VERSION);
-		write(BinaryChunkHeader.FORMAT);
-		write(BinaryChunkHeader.TAIL.getBytes());
+		write(BinaryChunkConstants.SIGNATURE.getBytes());
+		write(BinaryChunkConstants.VERSION);
+		write(BinaryChunkConstants.FORMAT);
+		write(BinaryChunkConstants.TAIL.getBytes());
 
 		write(intIs32Bit ? 4 : 8);
 		write(sizeTIs32Bit ? 4 : 8);
@@ -52,8 +52,8 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 		write(luaIntegerIs32Bit ? 4 : 8);
 		write(luaFloatIs32Bit ? 4 : 8);
 
-		writeInteger(BinaryChunkHeader.BYTE_ORDER_TEST_INTEGER);
-		writeFloat(BinaryChunkHeader.BYTE_ORDER_TEST_FLOAT);
+		writeInteger(BinaryChunkConstants.BYTE_ORDER_TEST_INTEGER);
+		writeFloat(BinaryChunkConstants.BYTE_ORDER_TEST_FLOAT);
 
 		// true: function follows
 		writeBoolean(true);

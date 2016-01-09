@@ -147,7 +147,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitNilConst() {
 		try {
-			constants.stream.writeByte(PrototypeLoader.CONST_NIL);
+			constants.stream.writeByte(BinaryChunkConstants.CONST_NIL);
 			constants.inc();
 		}
 		catch (IOException e) {
@@ -158,7 +158,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitBooleanConst(boolean value) {
 		try {
-			constants.stream.writeByte(PrototypeLoader.CONST_BOOLEAN);
+			constants.stream.writeByte(BinaryChunkConstants.CONST_BOOLEAN);
 			constants.stream.writeBoolean(value);
 			constants.inc();
 		}
@@ -170,7 +170,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitIntegerConst(long value) {
 		try {
-			constants.stream.writeByte(PrototypeLoader.CONST_INTEGER);
+			constants.stream.writeByte(BinaryChunkConstants.CONST_INTEGER);
 			constants.stream.writeInteger(value);
 			constants.inc();
 		}
@@ -182,7 +182,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitFloatConst(double value) {
 		try {
-			constants.stream.writeByte(PrototypeLoader.CONST_FLOAT);
+			constants.stream.writeByte(BinaryChunkConstants.CONST_FLOAT);
 			constants.stream.writeFloat(value);
 			constants.inc();
 		}
@@ -197,11 +197,11 @@ public class PrototypeWriter extends PrototypeVisitor {
 		try {
 			byte[] bytes = value.getBytes();
 			if (bytes.length < 0xff) {
-				constants.stream.writeByte(PrototypeLoader.CONST_SHORT_STRING);
+				constants.stream.writeByte(BinaryChunkConstants.CONST_SHORT_STRING);
 				constants.stream.writeShortString(bytes);
 			}
 			else {
-				constants.stream.writeByte(PrototypeLoader.CONST_LONG_STRING);
+				constants.stream.writeByte(BinaryChunkConstants.CONST_LONG_STRING);
 				constants.stream.writeLongString(bytes);
 			}
 			constants.inc();
