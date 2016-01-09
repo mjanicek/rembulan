@@ -1,6 +1,5 @@
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.core.util.ByteArrayDataOutputStream;
 import net.sandius.rembulan.util.Check;
 
 import java.io.ByteArrayOutputStream;
@@ -12,98 +11,89 @@ import java.util.ArrayList;
 public class PrototypeWriter extends PrototypeVisitor {
 
 	public final ByteOrder byteOrder;
-	public final OutputStream out;
+	public final BinaryChunkOutputStream out;
 
-	private final ByteArrayDataOutputStream sourceHeader;
-	private final ByteArrayDataOutputStream sigHeader;
+	private final int sizeOfInt;
+	private final int sizeOfSizeT;
+	private final int sizeOfInstruction;
+	private final int sizeOfLuaInteger;
+	private final int sizeOfLuaFloat;
 
-	private int numCode;
-	private final ByteArrayDataOutputStream code;
-	private int numConstants;
-	private final ByteArrayDataOutputStream constants;
-	private int numUpvalues;
-	private final ByteArrayDataOutputStream upvalues;
+	private final BinaryChunkOutputBuffer sourceHeader;
+	private final BinaryChunkOutputBuffer sigHeader;
+
+	private final BinaryChunkOutputBuffer code;
+	private final BinaryChunkOutputBuffer constants;
+	private final BinaryChunkOutputBuffer upvalues;
 
 	private final ArrayList<ByteArrayOutputStream> nested;
 
-	private int numLines;
-	private final ByteArrayDataOutputStream lines;
+	private final BinaryChunkOutputBuffer lines;
+	private final BinaryChunkOutputBuffer locals;
+	private final BinaryChunkOutputBuffer upvalueNames;
 
-	private int numLocals;
-	private final ByteArrayDataOutputStream locals;
+	class BinaryChunkOutputBuffer {
+		private int count;
+		private final ByteArrayOutputStream data;
+		public final BinaryChunkOutputStream stream;
 
-	private int numUpvalueNames;
-	private final ByteArrayDataOutputStream upvalueNames;
+		public BinaryChunkOutputBuffer() {
+			this.count = 0;
+			this.data = new ByteArrayOutputStream();
+			this.stream = new BinaryChunkOutputStream(this.data, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
+		}
 
-	public PrototypeWriter(OutputStream out, ByteOrder byteOrder) {
+		public void reset() {
+			data.reset();
+		}
+
+		public void inc() {
+			count += 1;
+		}
+
+		public void writeToAsData(OutputStream out) throws IOException {
+			data.writeTo(out);
+		}
+
+		public void writeToAsSequence(BinaryChunkOutputStream out) throws IOException {
+			out.writeInt(count);
+			data.writeTo(out);
+		}
+	}
+
+	public PrototypeWriter(OutputStream out, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
 		Check.notNull(out);
+
+		this.out = new BinaryChunkOutputStream(out, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
+
 		this.byteOrder = byteOrder;
-		this.out = out;
+		this.sizeOfInt = sizeOfInt;
+		this.sizeOfSizeT = sizeOfSizeT;
+		this.sizeOfInstruction = sizeOfInstruction;
+		this.sizeOfLuaInteger = sizeOfLuaInteger;
+		this.sizeOfLuaFloat = sizeOfLuaFloat;
 
-		this.sourceHeader = ByteArrayDataOutputStream.newInstance(byteOrder);
-		this.sigHeader = ByteArrayDataOutputStream.newInstance(byteOrder);
+		this.sourceHeader = new BinaryChunkOutputBuffer();
+		this.sigHeader = new BinaryChunkOutputBuffer();
 
-		this.numCode = 0;
-		this.code = ByteArrayDataOutputStream.newInstance(byteOrder);
-
-		this.numConstants = 0;
-		this.constants = ByteArrayDataOutputStream.newInstance(byteOrder);
-
-		this.numUpvalues = 0;
-		this.upvalues = ByteArrayDataOutputStream.newInstance(byteOrder);
+		this.code = new BinaryChunkOutputBuffer();
+		this.constants = new BinaryChunkOutputBuffer();
+		this.upvalues = new BinaryChunkOutputBuffer();
 
 		this.nested = new ArrayList<>();
 
-		this.numLines = 0;
-		this.lines = ByteArrayDataOutputStream.newInstance(byteOrder);
-
-		this.numLocals = 0;
-		this.locals = ByteArrayDataOutputStream.newInstance(byteOrder);
-
-		this.numUpvalueNames = 0;
-		this.upvalueNames = ByteArrayDataOutputStream.newInstance(byteOrder);
-	}
-
-	protected static void writeInt(OutputStream out, ByteOrder byteOrder, int v) throws IOException {
-		if (byteOrder == ByteOrder.BIG_ENDIAN) {
-			out.write((v >>> 24) & 0xFF);
-			out.write((v >>> 16) & 0xFF);
-			out.write((v >>>  8) & 0xFF);
-			out.write((v >>>  0) & 0xFF);
-		}
-		else if (byteOrder == ByteOrder.LITTLE_ENDIAN) {
-			out.write((v >>>  0) & 0xFF);
-			out.write((v >>>  8) & 0xFF);
-			out.write((v >>> 16) & 0xFF);
-			out.write((v >>> 24) & 0xFF);
-		}
-		else throw new IllegalArgumentException("Illegal byte order");
-	}
-
-	protected static void writeString(ByteArrayDataOutputStream bados, String s) throws IOException {
-		Check.notNull(s);
-
-		int size = s.length() + 1;
-		if (size < 0xff) {
-			bados.writeByte(size);
-		}
-		else {
-			bados.writeByte(0xff);
-			bados.writeInt(size);
-		}
-
-		byte[] bytes = s.getBytes();
-		bados.write(bytes, 0, bytes.length);
-		// no need to write the trailing '\0'
+		this.lines = new BinaryChunkOutputBuffer();
+		this.locals = new BinaryChunkOutputBuffer();
+		this.upvalueNames = new BinaryChunkOutputBuffer();
 	}
 
 	@Override
 	public void visitSize(int numParams, boolean vararg, int maxStackSize) {
 		try {
 			sigHeader.reset();
-			sigHeader.writeByte(numParams);
-			sigHeader.writeBoolean(vararg);
-			sigHeader.writeByte(maxStackSize);
+			sigHeader.stream.writeByte(numParams);
+			sigHeader.stream.writeBoolean(vararg);
+			sigHeader.stream.writeByte(maxStackSize);
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -114,9 +104,10 @@ public class PrototypeWriter extends PrototypeVisitor {
 	public void visitSource(String source, int firstLineDefined, int lastLineDefined) {
 		try {
 			sigHeader.reset();
-			writeString(sourceHeader, source);
-			sourceHeader.writeInt(firstLineDefined);
-			sourceHeader.writeInt(lastLineDefined);
+			sourceHeader.reset();
+			sourceHeader.stream.writeString(source);
+			sourceHeader.stream.writeInt(firstLineDefined);
+			sourceHeader.stream.writeInt(lastLineDefined);
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -145,8 +136,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 
 	public void visitInstruction(int insn) {
 		try {
-			code.writeInt(insn);
-			numCode += 1;
+			code.stream.writeInstruction(insn);
+			code.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -156,8 +147,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitNilConst() {
 		try {
-			constants.writeByte(PrototypeLoader.CONST_NIL);
-			numConstants += 1;
+			constants.stream.writeByte(PrototypeLoader.CONST_NIL);
+			constants.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -167,9 +158,9 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitBooleanConst(boolean value) {
 		try {
-			constants.writeByte(PrototypeLoader.CONST_BOOLEAN);
-			constants.writeBoolean(value);
-			numConstants += 1;
+			constants.stream.writeByte(PrototypeLoader.CONST_BOOLEAN);
+			constants.stream.writeBoolean(value);
+			constants.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -179,9 +170,9 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitIntegerConst(long value) {
 		try {
-			constants.writeByte(PrototypeLoader.CONST_INTEGER);
-			constants.writeLong(value);
-			numConstants += 1;
+			constants.stream.writeByte(PrototypeLoader.CONST_INTEGER);
+			constants.stream.writeInteger(value);
+			constants.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -191,9 +182,9 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitFloatConst(double value) {
 		try {
-			constants.writeByte(PrototypeLoader.CONST_FLOAT);
-			constants.writeDouble(value);
-			numConstants += 1;
+			constants.stream.writeByte(PrototypeLoader.CONST_FLOAT);
+			constants.stream.writeFloat(value);
+			constants.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -204,9 +195,16 @@ public class PrototypeWriter extends PrototypeVisitor {
 	public void visitStringConst(String value) {
 		Check.notNull(value);
 		try {
-			constants.writeByte(PrototypeLoader.CONST_SHORT_STRING);
-			writeString(constants, value);
-			numConstants += 1;
+			byte[] bytes = value.getBytes();
+			if (bytes.length < 0xff) {
+				constants.stream.writeByte(PrototypeLoader.CONST_SHORT_STRING);
+				constants.stream.writeShortString(bytes);
+			}
+			else {
+				constants.stream.writeByte(PrototypeLoader.CONST_LONG_STRING);
+				constants.stream.writeLongString(bytes);
+			}
+			constants.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -216,9 +214,9 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitUpvalue(boolean inStack, int index) {
 		try {
-			upvalues.writeBoolean(inStack);
-			upvalues.writeByte(index);
-			numUpvalues += 1;
+			upvalues.stream.writeBoolean(inStack);
+			upvalues.stream.writeByte(index);
+			upvalues.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -228,7 +226,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public PrototypeVisitor visitNestedPrototype() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrototypeWriter pw = new PrototypeWriter(baos, byteOrder);
+		PrototypeWriter pw = new PrototypeWriter(baos, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
 		nested.add(baos);
 		return pw;
 	}
@@ -236,8 +234,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitLine(int line) {
 		try {
-			lines.writeInt(line);
-			numLines += 1;
+			lines.stream.writeInt(line);
+			lines.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -247,8 +245,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitUpvalueName(String name) {
 		try {
-			writeString(upvalueNames, name);
-			numUpvalueNames += 1;
+			upvalueNames.stream.writeString(name);
+			upvalueNames.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -258,10 +256,10 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitLocalVariable(String name, int beginPC, int endPC) {
 		try {
-			writeString(locals, name);
-			locals.writeInt(beginPC);
-			locals.writeInt(endPC);
-			numLocals += 1;
+			locals.stream.writeString(name);
+			locals.stream.writeInt(beginPC);
+			locals.stream.writeInt(endPC);
+			locals.inc();
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);
@@ -271,31 +269,21 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			sourceHeader.writeTo(out);
-			sigHeader.writeTo(out);
+			sourceHeader.writeToAsData(out);
+			sigHeader.writeToAsData(out);
 
-			writeInt(out, byteOrder, numCode);
-			code.writeTo(out);
+			code.writeToAsSequence(out);
+			constants.writeToAsSequence(out);
+			upvalues.writeToAsSequence(out);
 
-			writeInt(out, byteOrder, numConstants);
-			constants.writeTo(out);
-
-			writeInt(out, byteOrder, numUpvalues);
-			upvalues.writeTo(out);
-
-			writeInt(out, byteOrder, nested.size());
+			out.writeInt(nested.size());
 			for (ByteArrayOutputStream nestedBaos : nested) {
 				nestedBaos.writeTo(out);
 			}
 
-			writeInt(out, byteOrder, numLines);
-			lines.writeTo(out);
-
-			writeInt(out, byteOrder, numLocals);
-			locals.writeTo(out);
-
-			writeInt(out, byteOrder, numUpvalueNames);
-			upvalueNames.writeTo(out);
+			lines.writeToAsSequence(out);
+			locals.writeToAsSequence(out);
+			upvalueNames.writeToAsSequence(out);
 		}
 		catch (IOException e) {
 			throw new RuntimeException(e);

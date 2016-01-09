@@ -59,6 +59,10 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 		writeBoolean(true);
 	}
 
+	public void writeByte(int b) throws IOException {
+		write(b);
+	}
+
 	public void writeBoolean(boolean v) throws IOException {
 		write(v ? 1 : 0);
 	}
@@ -120,6 +124,15 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 		}
 		else {
 			writeInt64(v);
+		}
+	}
+
+	public void writeInstruction(int insn) throws IOException {
+		if (instructionIs32Bit) {
+			writeInt32(insn);
+		}
+		else {
+			writeInt64(insn);
 		}
 	}
 

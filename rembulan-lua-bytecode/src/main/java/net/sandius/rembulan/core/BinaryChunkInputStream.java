@@ -84,8 +84,8 @@ public class BinaryChunkInputStream extends FilterInputStream {
 				: (long) (a << 0) + (long) (b << 32);
 	}
 
-	public int readInt() throws IOException {
-		if (intIs32Bit) {
+	private int readInt(boolean is32Bit) throws IOException {
+		if (is32Bit) {
 			return readInt32();
 		}
 		else {
@@ -94,24 +94,21 @@ public class BinaryChunkInputStream extends FilterInputStream {
 				return (int) l;
 			}
 			else {
-				throw new IllegalArgumentException("64-bit int cannot be represented in 32-bit: " + l);
+				throw new IllegalArgumentException("64-bit value cannot be represented in 32-bit: " + l);
 			}
 		}
 	}
 
+	public int readInt() throws IOException {
+		return readInt(intIs32Bit);
+	}
+
 	public int readSizeT() throws IOException  {
-		if (sizeTIs32Bit) {
-			return readInt32();
-		}
-		else {
-			long l = readInt64();
-			if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
-				return (int) l;
-			}
-			else {
-				throw new IllegalArgumentException("64-bit size_t cannot be represented in 32-bit: " + l);
-			}
-		}
+		return readInt(sizeTIs32Bit);
+	}
+
+	public int readInstruction() throws IOException {
+		return readInt(instructionIs32Bit);
 	}
 
 	public long readInteger() throws IOException  {
