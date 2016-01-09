@@ -32,36 +32,49 @@ class LoaderWriterSpec extends FunSpec with MustMatchers {
     visitor.get
   }
 
-  def dump(proto: Prototype): Array[Byte] = {
+  def dump(proto: Prototype, format: BinaryChunkFormat): Array[Byte] = {
     val baos = new ByteArrayOutputStream()
-    val writer = new PrototypeWriter(baos, ByteOrder.LITTLE_ENDIAN, 4, 4, 4, 8, 8)
+    val writer = new PrototypeWriter(baos, format)
     proto.accept(writer)
     baos.toByteArray
   }
+
+  val formats = List(
+    new BinaryChunkFormat(ByteOrder.LITTLE_ENDIAN, 4, 4, 4, 8, 8),
+    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN, 4, 4, 4, 8, 8),
+    new BinaryChunkFormat(ByteOrder.LITTLE_ENDIAN, 8, 8, 8, 8, 8),
+    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN, 8, 8, 8, 8, 8)
+  )
 
   def prog(program: String) {
 
     describe("Program \"" + escape(program) + "\"") {
 
       lazy val prototype = compile(program)
-      lazy val dumped = dump(prototype)
-      lazy val reloaded = load(dumped)
 
       it("is accepted") {
         prototype must not be null
       }
 
-      it("can be dumped") {
-        dumped must not be null
-        dumped must not be empty
-      }
+      for (fmt <- formats) {
+        describe ("dumped as " + fmt) {
 
-      it("can be reloaded") {
-        reloaded must not be null
-      }
+          lazy val dumped = dump(prototype, fmt)
+          lazy val reloaded = load(dumped)
 
-      it("reloaded yields an equal prototype to the original") {
-        reloaded mustEqual prototype
+          it("can be dumped") {
+            dumped must not be null
+            dumped must not be empty
+          }
+
+          it("can be reloaded") {
+            reloaded must not be null
+          }
+
+          it("reloaded yields a prototype equal to the original") {
+            reloaded mustEqual prototype
+          }
+        }
       }
 
     }
