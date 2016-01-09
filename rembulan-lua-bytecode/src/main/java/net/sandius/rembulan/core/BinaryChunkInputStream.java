@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.nio.ByteOrder;
 import java.util.Objects;
 
-public class LuaChunkInputStream extends FilterInputStream {
+public class BinaryChunkInputStream extends FilterInputStream {
 
 	protected final ByteOrder byteOrder;
 
@@ -20,7 +20,7 @@ public class LuaChunkInputStream extends FilterInputStream {
 	protected final int sizeOfLuaInteger;
 	protected final int sizeOfLuaFloat;
 
-	public LuaChunkInputStream(InputStream in, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
+	public BinaryChunkInputStream(InputStream in, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
 		super(in);
 
 		this.byteOrder = Objects.requireNonNull(byteOrder);
@@ -229,7 +229,7 @@ public class LuaChunkInputStream extends FilterInputStream {
 		else return null;
 	}
 
-	public static LuaChunkInputStream fromInputStream(InputStream stream) throws IOException {
+	public static BinaryChunkInputStream fromInputStream(InputStream stream) throws IOException {
 		DataInputStream dis = new DataInputStream(stream);
 		readAndCheckLuaSignature(dis);
 
@@ -272,7 +272,7 @@ public class LuaChunkInputStream extends FilterInputStream {
 			throw new IllegalArgumentException("Function expected");
 		}
 
-		return new LuaChunkInputStream(stream, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
+		return new BinaryChunkInputStream(stream, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
 	}
 
 }

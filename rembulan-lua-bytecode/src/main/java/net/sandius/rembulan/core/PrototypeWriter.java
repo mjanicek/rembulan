@@ -156,7 +156,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitNilConst() {
 		try {
-			constants.writeByte(PrototypeLoader.LUA_TNIL);
+			constants.writeByte(PrototypeLoader.CONST_NIL);
 			numConstants += 1;
 		}
 		catch (IOException e) {
@@ -167,7 +167,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitBooleanConst(boolean value) {
 		try {
-			constants.writeByte(PrototypeLoader.LUA_TBOOLEAN);
+			constants.writeByte(PrototypeLoader.CONST_BOOLEAN);
 			constants.writeBoolean(value);
 			numConstants += 1;
 		}
@@ -179,7 +179,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitIntegerConst(long value) {
 		try {
-			constants.writeByte(PrototypeLoader.LUA_TNUMINT);
+			constants.writeByte(PrototypeLoader.CONST_INTEGER);
 			constants.writeLong(value);
 			numConstants += 1;
 		}
@@ -191,7 +191,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitFloatConst(double value) {
 		try {
-			constants.writeByte(PrototypeLoader.LUA_TNUMFLT);
+			constants.writeByte(PrototypeLoader.CONST_FLOAT);
 			constants.writeDouble(value);
 			numConstants += 1;
 		}
@@ -204,7 +204,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	public void visitStringConst(String value) {
 		Check.notNull(value);
 		try {
-			constants.writeByte(PrototypeLoader.LUA_TSTRING);
+			constants.writeByte(PrototypeLoader.CONST_SHORT_STRING);
 			writeString(constants, value);
 			numConstants += 1;
 		}

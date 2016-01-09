@@ -1,25 +1,3 @@
-/*******************************************************************************
-* Copyright (c) 2009 Luaj.org. All rights reserved.
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-******************************************************************************/
-
 package net.sandius.rembulan.core;
 
 import java.io.IOException;
@@ -28,35 +6,22 @@ import java.util.Objects;
 
 public class PrototypeLoader implements PrototypeVisitable {
 
-	// type constants
-	public static final int LUA_TINT            = (-2);
-	public static final int LUA_TNONE			= (-1);
-	public static final int LUA_TNIL			= 0;
-	public static final int LUA_TBOOLEAN		= 1;
-	public static final int LUA_TLIGHTUSERDATA	= 2;
-	public static final int LUA_TNUMBER			= 3;
-	public static final int LUA_TSTRING			= 4;
-	public static final int LUA_TTABLE			= 5;
-	public static final int LUA_TFUNCTION		= 6;
-	public static final int LUA_TUSERDATA		= 7;
-	public static final int LUA_TTHREAD			= 8;
-	public static final int LUA_TVALUE          = 9;
+	// type tags of constants
+	public static final int CONST_NIL = 0;
+	public static final int CONST_BOOLEAN = 1;
+	public static final int CONST_FLOAT = 3;
+	public static final int CONST_SHORT_STRING = 4;
+	public static final int CONST_INTEGER = CONST_FLOAT | (1 << 4);
+	public static final int CONST_LONG_STRING = CONST_SHORT_STRING | (1 << 4);
 
-	public static final int LUA_TSHRSTR = LUA_TSTRING | (0 << 4);  // short strings
-	public static final int LUA_TLNGSTR = LUA_TSTRING | (1 << 4);  // long strings
+	protected final BinaryChunkInputStream is;
 
-	public static final int LUA_TNUMFLT = LUA_TNUMBER | (0 << 4);  // float numbers
-	public static final int LUA_TNUMINT = LUA_TNUMBER | (1 << 4);  // integer numbers
-
-	/** input stream from which we are loading */
-	protected final LuaChunkInputStream is;
-
-	public PrototypeLoader(LuaChunkInputStream stream) {
+	public PrototypeLoader(BinaryChunkInputStream stream) {
 		this.is = Objects.requireNonNull(stream);
 	}
 
 	public static PrototypeLoader fromInputStream(InputStream stream) throws IOException {
-		return new PrototypeLoader(LuaChunkInputStream.fromInputStream(stream));
+		return new PrototypeLoader(BinaryChunkInputStream.fromInputStream(stream));
 	}
 
 	@Override
@@ -126,31 +91,31 @@ public class PrototypeLoader implements PrototypeVisitable {
 		for (int i = 0; i < n; i++) {
 			int tag = is.readUnsignedByte();
 			switch (tag) {
-				case LUA_TNIL:
+				case CONST_NIL:
 					if (pv != null) pv.visitNilConst(); break;
-				case LUA_TBOOLEAN: {
+				case CONST_BOOLEAN: {
 					boolean value = is.readBoolean();
 					if (pv != null) pv.visitBooleanConst(value);
 					break;
 				}
 
-				case LUA_TNUMINT: {
+				case CONST_INTEGER: {
 					long value = is.readInteger();
 					if (pv != null) pv.visitIntegerConst(value);
 					break;
 				}
-				case LUA_TNUMFLT: {
+				case CONST_FLOAT: {
 					double value = is.readFloat();
 					if (pv != null) pv.visitFloatConst(value);
 					break;
 				}
 
-				case LUA_TSHRSTR: {
+				case CONST_SHORT_STRING: {
 					String value = is.readShortString();
 					if (pv != null) pv.visitStringConst(value);
 					break;
 				}
-				case LUA_TLNGSTR: {
+				case CONST_LONG_STRING: {
 					String value = is.readLongString();
 					if (pv != null) pv.visitStringConst(value);
 					break;
@@ -210,14 +175,6 @@ public class PrototypeLoader implements PrototypeVisitable {
 			String uvn = is.readString();
 			if (pv != null) pv.visitUpvalueName(uvn);
 		}
-	}
-
-	@Deprecated
-	public static Prototype undump(InputStream stream) throws IOException {
-		PrototypeLoader loader = fromInputStream(stream);
-		PrototypeBuilderVisitor visitor = new PrototypeBuilderVisitor();
-		loader.accept(visitor);
-		return visitor.get();
 	}
 
 }
