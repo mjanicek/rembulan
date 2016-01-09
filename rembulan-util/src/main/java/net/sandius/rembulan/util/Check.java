@@ -26,8 +26,14 @@ public abstract class Check {
 		}
 	}
 
+	public static void lt(int n, int limit) {
+		if (!(n < limit)) {
+			throw new IllegalArgumentException("integer " + n + " must be lesser than " + limit);
+		}
+	}
+
 	public static void gt(int n, int limit) {
-		if (n <= limit) {
+		if (!(n > limit)) {
 			throw new IllegalArgumentException("integer " + n + " must be greater than " + limit);
 		}
 	}

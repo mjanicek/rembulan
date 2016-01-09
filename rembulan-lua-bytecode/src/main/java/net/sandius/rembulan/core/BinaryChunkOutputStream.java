@@ -40,11 +40,17 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 		return bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
 	}
 
+	private void writeBinaryLiteral(String lit) throws IOException {
+		for (int i = 0; i < lit.length(); i++) {
+			write(lit.charAt(i) & 0xff);
+		}
+	}
+
 	public void writeHeader() throws IOException {
-		write(BinaryChunkConstants.SIGNATURE.getBytes());
+		writeBinaryLiteral(BinaryChunkConstants.SIGNATURE);
 		write(BinaryChunkConstants.VERSION);
 		write(BinaryChunkConstants.FORMAT);
-		write(BinaryChunkConstants.TAIL.getBytes());
+		writeBinaryLiteral(BinaryChunkConstants.TAIL);
 
 		write(intIs32Bit ? 4 : 8);
 		write(sizeTIs32Bit ? 4 : 8);
@@ -164,7 +170,7 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 
 		byte[] bytes = s.getBytes();
 
-		if (bytes.length < 0xff) {
+		if (bytes.length + 1 < 0xff) {
 			writeShortString(bytes);
 		}
 		else {
@@ -173,20 +179,20 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 	}
 
 	public void writeShortString(byte[] bytes) throws IOException {
-		Check.gt(bytes.length, 0xff - 1);
-		write(bytes.length);
+		Check.lt(bytes.length + 1, 0xff);
+		write(bytes.length + 1);  // encoding the array size of a C-style string, i.e. including the trailing '\0'
 		writeStringBody(bytes);
 	}
 
 	public void writeLongString(byte[] bytes) throws IOException {
 		write(0xff);
-		writeSizeT(bytes.length);
+		writeSizeT(bytes.length + 1);  // encoding the array size of a C-style string, i.e. including the trailing '\0'
 		writeStringBody(bytes);
 	}
 
 	protected void writeStringBody(byte[] bytes) throws IOException {
 		write(bytes, 0, bytes.length);
-		// no need to write the trailing '\0'
+		// no need to actually write the trailing '\0'
 	}
 
 }

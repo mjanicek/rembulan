@@ -55,9 +55,10 @@ public class PrototypeLoader implements PrototypeVisitable {
 	}
 
 	protected void acceptCode(PrototypeVisitor pv) throws IOException {
-		int[] insns = is.readIntArray();
-		if (pv != null) {
-			for (int insn : insns) {
+		int n = is.readInt();
+		for (int i = 0; i < n; i++) {
+			int insn = is.readInstruction();
+			if (pv != null) {
 				int opcode = OpCode.opCode(insn);
 
 				int a = OpCode.arg_A(insn);
@@ -142,12 +143,10 @@ public class PrototypeLoader implements PrototypeVisitable {
 	}
 
 	protected void acceptLineInfo(PrototypeVisitor pv) throws IOException {
-		int[] lineInfo = is.readIntArray();
-
-		if (pv != null) {
-			for (int line : lineInfo) {
-				pv.visitLine(line);
-			}
+		int n = is.readInt();
+		for (int i = 0; i < n; i++) {
+			int line = is.readInt();
+			if (pv != null) pv.visitLine(line);
 		}
 	}
 

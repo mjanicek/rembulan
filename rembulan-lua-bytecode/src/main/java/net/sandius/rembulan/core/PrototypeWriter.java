@@ -19,6 +19,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 	private final int sizeOfLuaInteger;
 	private final int sizeOfLuaFloat;
 
+	private boolean signatureWritten;
+
 	private final BinaryChunkOutputBuffer sourceHeader;
 	private final BinaryChunkOutputBuffer sigHeader;
 
@@ -65,6 +67,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 		Check.notNull(out);
 
 		this.out = new BinaryChunkOutputStream(out, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
+
+		this.signatureWritten = false;
 
 		this.byteOrder = byteOrder;
 		this.sizeOfInt = sizeOfInt;
@@ -269,6 +273,11 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitEnd() {
 		try {
+			if (!signatureWritten) {
+				out.writeHeader();
+				signatureWritten = true;
+			}
+
 			sourceHeader.writeToAsData(out);
 			sigHeader.writeToAsData(out);
 

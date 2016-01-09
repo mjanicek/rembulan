@@ -43,7 +43,7 @@ public class BinaryChunkInputStream extends FilterInputStream {
 	}
 
 	protected int readUnsignedByte() throws IOException {
-		int c = in.read();
+		int c = read();
 		if (c < 0) throw new EOFException();
 		return c;
 	}
@@ -52,7 +52,7 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		if (len < 0) throw new IndexOutOfBoundsException();
 		int n = 0;
 		while (n < len) {
-			int count = in.read(b, off + n, len - n);
+			int count = read(b, off + n, len - n);
 			if (count < 0) throw new EOFException();
 			n += count;
 		}
@@ -63,10 +63,10 @@ public class BinaryChunkInputStream extends FilterInputStream {
 	}
 
 	protected int readInt32() throws IOException {
-		int c1 = in.read();
-		int c2 = in.read();
-		int c3 = in.read();
-		int c4 = in.read();
+		int c1 = read();
+		int c2 = read();
+		int c3 = read();
+		int c4 = read();
 
 		if ((c1 | c2 | c3 | c4) < 0) throw new EOFException();
 
@@ -162,36 +162,22 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		return String.valueOf(chars);
 	}
 
-	/**
-	 * Load an array of signed 32-bit integers from the input stream.
-	 *
-	 * @return the array of int values loaded.
-	 */
-	public int[] readIntArray() throws IOException {
-		int n = readInt();
-		int[] array = new int[n];
-		for (int i = 0; i < n; i++) {
-			array[i] = readInt();
-		}
-		return array;
-	}
-
 	// returns -1 if matches, index of first non-matching byte otherwise
-	private static int readBinaryLiteral(DataInputStream stream, String expected) throws IOException {
+	private static void readBinaryLiteral(DataInputStream stream, String expected, int offset) throws IOException {
 		for (int i = 0; i < expected.length(); i++) {
 			int b = stream.readUnsignedByte();
-			if ((byte) b != (byte) (expected.charAt(i) & 0xff)) return i;
+			int exp = expected.charAt(i) & 0xff;
+
+			if (b != exp) {
+				throw new IllegalArgumentException("Unexpected byte at position " + (offset + i)
+						+ ": expecting 0x" + Integer.toHexString(exp)
+						+ ", got 0x" + Integer.toHexString(b));
+			}
 		}
-		return -1;
 	}
 
 	private static void readAndCheckLuaSignature(DataInputStream stream) throws IOException {
-		{
-			int diff = readBinaryLiteral(stream, BinaryChunkConstants.SIGNATURE);
-			if (diff != -1) {
-				throw new IllegalArgumentException("Unexpected byte at position " + diff);
-			}
-		}
+		readBinaryLiteral(stream, BinaryChunkConstants.SIGNATURE, 0);
 
 		int version = stream.readUnsignedByte();
 		if (version != BinaryChunkConstants.VERSION) throw new IllegalArgumentException("Unsupported version: " + Integer.toHexString(version));
@@ -199,12 +185,7 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		int format = stream.readUnsignedByte();
 		if (format != BinaryChunkConstants.FORMAT) throw new IllegalArgumentException("Unsupported format: " + Integer.toHexString(format));
 
-		{
-			int diff = readBinaryLiteral(stream, BinaryChunkConstants.TAIL);
-			if (diff != -1) {
-				throw new IllegalArgumentException("Unexpected byte at position " + (BinaryChunkConstants.SIGNATURE.length() + 2 + diff));
-			}
-		}
+		readBinaryLiteral(stream, BinaryChunkConstants.TAIL, BinaryChunkConstants.SIGNATURE.length() + 2);
 	}
 
 	protected static ByteOrder testByteOrder(long actualValue, long bigEndianValue) {
