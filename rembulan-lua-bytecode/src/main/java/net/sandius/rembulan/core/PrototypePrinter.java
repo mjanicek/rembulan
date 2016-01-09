@@ -4,6 +4,7 @@ import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
+import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 
 public class PrototypePrinter {
@@ -26,6 +27,12 @@ public class PrototypePrinter {
 
 	public static void print(Prototype proto, PrintWriter out) {
 		print(proto, out, true);
+	}
+
+	public static String toString(Prototype proto) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		print(proto, new PrintWriter(baos));
+		return new String(baos.toByteArray());
 	}
 
 	public static String pseudoAddr(Prototype proto) {

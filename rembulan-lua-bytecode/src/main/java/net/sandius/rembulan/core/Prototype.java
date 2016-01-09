@@ -258,6 +258,11 @@ public class Prototype implements PrototypeVisitable {
 		return maxstacksize;
 	}
 
+//	@Override
+//	public String toString() {
+//		return PrototypePrinter.toString(this);
+//	}
+
 	public String getSource() {
 		return source;
 	}
