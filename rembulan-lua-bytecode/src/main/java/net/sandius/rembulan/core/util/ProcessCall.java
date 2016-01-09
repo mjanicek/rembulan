@@ -1,7 +1,9 @@
 package net.sandius.rembulan.core.util;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +43,40 @@ public class ProcessCall {
 		commandLineArgs.addAll(args);
 
 		return new ProcessCall(commandLineArgs);
+	}
+
+	private static String drainToString(InputStream stream) throws IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+		StringBuilder resultBuilder = new StringBuilder();
+		do {
+			String line = reader.readLine();
+			if (line != null) {
+				if (resultBuilder.length() > 0) {
+					// we don't want the trailing newline
+					resultBuilder.append('\n');
+				}
+				resultBuilder.append(line);
+			}
+			else {
+				break;
+			}
+		} while (true);
+
+		// got non-empty stderr
+		if (resultBuilder.length() > 0) {
+			return resultBuilder.toString();
+		}
+		else {
+			return null;
+		}
+	}
+
+	public String drainStdoutToString() throws IOException {
+		return drainToString(out);
+	}
+
+	public String drainStderrToString() throws IOException {
+		return drainToString(err);
 	}
 
 }

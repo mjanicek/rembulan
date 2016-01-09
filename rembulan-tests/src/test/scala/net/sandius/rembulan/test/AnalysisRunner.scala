@@ -14,6 +14,9 @@ object AnalysisRunner {
 
     val ploader = new LuaCPrototypeLoader(luacPath)
 
+    println(ploader.getVersion)
+    println("------------")
+
 //    val program =
 //      """
 //        |if x >= 0 and x <= 10 then print(x) end

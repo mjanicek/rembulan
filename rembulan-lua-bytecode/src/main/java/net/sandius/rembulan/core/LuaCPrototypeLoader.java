@@ -4,9 +4,7 @@ import net.sandius.rembulan.core.util.ProcessCall;
 import net.sandius.rembulan.util.Check;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +14,20 @@ public class LuaCPrototypeLoader {
 
 	public LuaCPrototypeLoader(String luacName) {
 		this.luacName = luacName;
+	}
+
+	public String getVersion() {
+		List<String> args = new ArrayList<String>();
+		args.add("-v");
+
+		try {
+			ProcessCall call = ProcessCall.doCall(luacName, args);
+			call.in.close();
+			return call.drainStdoutToString();
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 
 	public void accept(String program, PrototypeVisitor pv) throws IOException {
@@ -44,25 +56,9 @@ public class LuaCPrototypeLoader {
 		call.in.close();
 
 		// read stderr
-		BufferedReader errStream = new BufferedReader(new InputStreamReader(call.err));
-		StringBuilder errBuilder = new StringBuilder();
-		do {
-			String line = errStream.readLine();
-			if (line != null) {
-				if (errBuilder.length() > 0) {
-					// we don't want the trailing newline
-					errBuilder.append('\n');
-				}
-				errBuilder.append(line);
-			}
-			else {
-				break;
-			}
-		} while (true);
-
-		// got non-empty stderr
-		if (errBuilder.length() > 0) {
-			throw new IllegalArgumentException(errBuilder.toString());
+		String error = call.drainStderrToString();
+		if (error != null) {
+			throw new IllegalArgumentException(error);
 		}
 
 		// no error, read stdout
