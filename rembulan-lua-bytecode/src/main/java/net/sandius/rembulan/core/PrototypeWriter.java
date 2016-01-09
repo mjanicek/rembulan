@@ -89,7 +89,6 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitSource(String source, int firstLineDefined, int lastLineDefined) {
 		try {
-			sigHeader.reset();
 			sourceHeader.reset();
 			sourceHeader.stream.writeString(source);
 			sourceHeader.stream.writeInt(firstLineDefined);
