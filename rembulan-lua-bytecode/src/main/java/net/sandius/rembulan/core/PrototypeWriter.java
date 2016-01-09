@@ -251,6 +251,17 @@ public class PrototypeWriter extends PrototypeVisitor {
 		}
 	}
 
+	protected void reset() {
+		sourceHeader.reset();
+		sigHeader.reset();
+		code.reset();
+		constants.reset();
+		nested.clear();
+		lines.reset();
+		locals.reset();
+		upvalueNames.reset();
+	}
+
 	@Override
 	public void visitEnd() {
 		try {
@@ -273,6 +284,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 		catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
+		reset();
 	}
 
 }
