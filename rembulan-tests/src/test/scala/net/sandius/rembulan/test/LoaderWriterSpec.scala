@@ -41,9 +41,16 @@ class LoaderWriterSpec extends FunSpec with MustMatchers {
 
   val formats = List(
     new BinaryChunkFormat(ByteOrder.LITTLE_ENDIAN, 4, 4, 4, 8, 8),
-    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN, 4, 4, 4, 8, 8),
+    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN,    4, 4, 4, 8, 8),
+
+    new BinaryChunkFormat(ByteOrder.LITTLE_ENDIAN, 4, 8, 4, 8, 8),
+    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN,    4, 8, 4, 8, 8),
+
+    new BinaryChunkFormat(ByteOrder.LITTLE_ENDIAN, 4, 8, 8, 8, 8),
+    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN,    4, 8, 8, 8, 8),
+
     new BinaryChunkFormat(ByteOrder.LITTLE_ENDIAN, 8, 8, 8, 8, 8),
-    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN, 8, 8, 8, 8, 8)
+    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN,    8, 8, 8, 8, 8)
   )
 
   def prog(program: String) {
