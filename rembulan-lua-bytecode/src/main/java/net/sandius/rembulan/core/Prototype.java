@@ -258,10 +258,6 @@ public class Prototype implements PrototypeVisitable {
 		return maxstacksize;
 	}
 
-	public String toString() {
-		return source + ":" + linedefined + "-" + lastlinedefined;
-	}
-
 	public String getSource() {
 		return source;
 	}
