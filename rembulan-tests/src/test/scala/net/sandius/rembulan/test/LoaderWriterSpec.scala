@@ -53,7 +53,10 @@ class LoaderWriterSpec extends FunSpec with MustMatchers {
     new BinaryChunkFormat(ByteOrder.BIG_ENDIAN,    4, 8, 8, 8, 8),
 
     new BinaryChunkFormat(ByteOrder.LITTLE_ENDIAN, 8, 8, 8, 8, 8),
-    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN,    8, 8, 8, 8, 8)
+    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN,    8, 8, 8, 8, 8),
+
+    new BinaryChunkFormat(ByteOrder.LITTLE_ENDIAN, 4, 4, 4, 4, 4),
+    new BinaryChunkFormat(ByteOrder.BIG_ENDIAN,    4, 4, 4, 4, 4)
   )
 
   def prog(program: String) {
