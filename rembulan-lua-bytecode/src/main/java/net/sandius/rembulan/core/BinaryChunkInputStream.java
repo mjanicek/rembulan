@@ -223,10 +223,33 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		}
 	}
 
-	protected static ByteOrder checkByteOrder(long value, long bigEndianValue) {
-		if (value == bigEndianValue) return ByteOrder.BIG_ENDIAN;
-		else if (value == Long.reverseBytes(bigEndianValue)) return ByteOrder.LITTLE_ENDIAN;
+	protected static ByteOrder testByteOrder(long actualValue, long bigEndianValue) {
+		if (actualValue == bigEndianValue) return ByteOrder.BIG_ENDIAN;
+		else if (actualValue == Long.reverseBytes(bigEndianValue)) return ByteOrder.LITTLE_ENDIAN;
 		else return null;
+	}
+
+	protected static ByteOrder decideByteOrder(long integerBits, long floatBits) {
+		ByteOrder integerByteOrder = testByteOrder(integerBits, TestInteger);
+		ByteOrder floatByteOrder = testByteOrder(floatBits, Double.doubleToLongBits(TestFloat));
+
+		if (integerByteOrder != null && floatByteOrder != null) {
+			if (integerByteOrder != floatByteOrder) {
+				throw new IllegalArgumentException("Byte order mismatch: " + integerByteOrder + " (ints) vs " + floatByteOrder + " (floats)");
+			}
+			else {
+				return integerByteOrder;
+			}
+		}
+		else if (integerByteOrder != null) {
+			return integerByteOrder;
+		}
+		else if (floatByteOrder != null) {
+			return floatByteOrder;
+		}
+		else {
+			throw new IllegalArgumentException("Unable to determine byte order: 0x" + Long.toHexString(integerBits) + " (integer as big-endian long),  0x" + Long.toHexString(floatBits) + " (float as big-endian long)");
+		}
 	}
 
 	public static BinaryChunkInputStream fromInputStream(InputStream stream) throws IOException {
@@ -240,32 +263,9 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		int sizeOfLuaFloat = dis.readUnsignedByte();
 
 		// detect endianness
-
         long ti = dis.readLong();
 		long tf = dis.readLong();
-
-		ByteOrder integerByteOrder = checkByteOrder(ti, TestInteger);
-		ByteOrder floatByteOrder = checkByteOrder(tf, Double.doubleToLongBits(TestFloat));
-
-		final ByteOrder byteOrder;
-
-		if (integerByteOrder != null && floatByteOrder != null) {
-			if (integerByteOrder != floatByteOrder) {
-				throw new IllegalArgumentException("Endianness mismatch: " + integerByteOrder + " (ints) vs " + floatByteOrder + " (floats)");
-			}
-			else {
-				byteOrder = integerByteOrder;
-			}
-		}
-		else if (integerByteOrder != null) {
-			byteOrder = integerByteOrder;
-		}
-		else if (floatByteOrder != null) {
-			byteOrder = floatByteOrder;
-		}
-		else {
-			throw new IllegalArgumentException("Unable to determine endianness: 0x" + Long.toHexString(ti) + " (integer as big-endian long),  0x" + Long.toHexString(tf) + " (float as big-endian long)");
-		}
+		ByteOrder byteOrder = decideByteOrder(ti, tf);
 
 		boolean isFunction = dis.readBoolean();
 		if (!isFunction) {
