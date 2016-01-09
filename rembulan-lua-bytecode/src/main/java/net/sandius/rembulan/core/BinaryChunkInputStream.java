@@ -12,27 +12,34 @@ import java.util.Objects;
 
 public class BinaryChunkInputStream extends FilterInputStream {
 
-	protected final ByteOrder byteOrder;
+	protected final boolean bigEndian;
 
-	protected final int sizeOfInt;
-	protected final int sizeOfSizeT;
-	protected final int sizeOfInstruction;
-	protected final int sizeOfLuaInteger;
-	protected final int sizeOfLuaFloat;
+	protected final boolean intIs32Bit;
+	protected final boolean sizeTIs32Bit;
+	protected final boolean instructionIs32Bit;
+	protected final boolean luaIntegerIs32Bit;
+	protected final boolean luaFloatIs32Bit;
+
+	private static boolean bitWidthIs32Bit(int bitWidth) {
+		if (bitWidth == 4) return true;
+		else if (bitWidth == 8) return false;
+		else throw new IllegalArgumentException("Illegal bit width: " + bitWidth + ", expected 4 or 8");
+	}
 
 	public BinaryChunkInputStream(InputStream in, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
 		super(in);
 
-		this.byteOrder = Objects.requireNonNull(byteOrder);
-		this.sizeOfInt = sizeOfInt;
-		this.sizeOfSizeT = sizeOfSizeT;
-		this.sizeOfInstruction = sizeOfInstruction;
-		this.sizeOfLuaInteger = sizeOfLuaInteger;
-		this.sizeOfLuaFloat = sizeOfLuaFloat;
+		this.bigEndian = Objects.requireNonNull(byteOrder) == ByteOrder.BIG_ENDIAN;
+
+		this.intIs32Bit = bitWidthIs32Bit(sizeOfInt);
+		this.sizeTIs32Bit = bitWidthIs32Bit(sizeOfSizeT);
+		this.instructionIs32Bit = bitWidthIs32Bit(sizeOfInstruction);
+		this.luaIntegerIs32Bit = bitWidthIs32Bit(sizeOfLuaInteger);
+		this.luaFloatIs32Bit = bitWidthIs32Bit(sizeOfLuaFloat);
 	}
 
-	protected boolean isBigEndian() {
-		return byteOrder == ByteOrder.BIG_ENDIAN;
+	public ByteOrder byteOrder() {
+		return bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
 	}
 
 	protected int readUnsignedByte() throws IOException {
@@ -63,7 +70,7 @@ public class BinaryChunkInputStream extends FilterInputStream {
 
 		if ((c1 | c2 | c3 | c4) < 0) throw new EOFException();
 
-		return isBigEndian()
+		return bigEndian
 				? ((c1 << 24) + (c2 << 16) + (c3 << 8) + (c4 << 0))
 				: ((c1 << 0) + (c2 << 8) + (c3 << 16) + (c4 << 24));
 	}
@@ -72,16 +79,16 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		int a = readInt32();
 		int b = readInt32();
 
-		return isBigEndian()
+		return bigEndian
 				? (long) (a << 32) + (long) (b << 0)
 				: (long) (a << 0) + (long) (b << 32);
 	}
 
 	public int readInt() throws IOException {
-		if (sizeOfInt == 4) {
+		if (intIs32Bit) {
 			return readInt32();
 		}
-		else if (sizeOfInt == 8) {
+		else {
 			long l = readInt64();
 			if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
 				return (int) l;
@@ -90,16 +97,13 @@ public class BinaryChunkInputStream extends FilterInputStream {
 				throw new IllegalArgumentException("64-bit int cannot be represented in 32-bit: " + l);
 			}
 		}
-		else {
-			throw new IllegalArgumentException("Illegal size of int: " + sizeOfInt);
-		}
 	}
 
 	public int readSizeT() throws IOException  {
-		if (sizeOfSizeT == 4) {
+		if (sizeTIs32Bit) {
 			return readInt32();
 		}
-		else if (sizeOfSizeT == 8) {
+		else {
 			long l = readInt64();
 			if (l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
 				return (int) l;
@@ -108,32 +112,23 @@ public class BinaryChunkInputStream extends FilterInputStream {
 				throw new IllegalArgumentException("64-bit size_t cannot be represented in 32-bit: " + l);
 			}
 		}
-		else {
-			throw new IllegalArgumentException("Illegal size of size_t: " + sizeOfSizeT);
-		}
 	}
 
 	public long readInteger() throws IOException  {
-		if (sizeOfLuaInteger == 8) {
-			return readInt64();
-		}
-		else if (sizeOfLuaInteger == 4) {
+		if (luaIntegerIs32Bit) {
 			return readInt32();
 		}
 		else {
-			throw new IllegalArgumentException("Illegal size of Lua integer: " + sizeOfLuaInteger);
+			return readInt64();
 		}
 	}
 
 	public double readFloat() throws IOException  {
-		if (sizeOfLuaFloat == 8) {
-			return Double.longBitsToDouble(readInt64());
-		}
-		else if (sizeOfLuaFloat == 4) {
-			return Double.longBitsToDouble(readInt32());
+		if (luaFloatIs32Bit) {
+			return (double) Float.intBitsToFloat(readInt32());
 		}
 		else {
-			throw new IllegalArgumentException("Illegal size of Lua float: " + sizeOfLuaInteger);
+			return Double.longBitsToDouble(readInt64());
 		}
 	}
 
@@ -184,41 +179,33 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		return array;
 	}
 
-	private static final byte[] HEADER_SIGNATURE = { '\033', 'L', 'u', 'a' };
-	public static final int HEADER_VERSION = 0x53;
-	public static final int HEADER_FORMAT = 0;
-	private static final byte[] HEADER_TAIL = { (byte) 0x19, (byte) 0x93, '\r', '\n', (byte) 0x1a, '\n', };
-
-	public static final long TestInteger = 0x5678L;
-	public static final double TestFloat = 370.5;
-
 	// returns -1 if matches, index of first non-matching byte otherwise
-	private static int readBinaryLiteral(DataInputStream stream, byte[] expected) throws IOException {
-		for (int i = 0; i < expected.length; i++) {
+	private static int readBinaryLiteral(DataInputStream stream, String expected) throws IOException {
+		for (int i = 0; i < expected.length(); i++) {
 			int b = stream.readUnsignedByte();
-			if ((byte) b != expected[i]) return i;
+			if ((byte) b != (byte) (expected.charAt(i) & 0xff)) return i;
 		}
 		return -1;
 	}
 
 	private static void readAndCheckLuaSignature(DataInputStream stream) throws IOException {
 		{
-			int diff = readBinaryLiteral(stream, HEADER_SIGNATURE);
+			int diff = readBinaryLiteral(stream, BinaryChunkHeader.SIGNATURE);
 			if (diff != -1) {
 				throw new IllegalArgumentException("Unexpected byte at position " + diff);
 			}
 		}
 
 		int version = stream.readUnsignedByte();
-		if (version != HEADER_VERSION) throw new IllegalArgumentException("Unsupported version: " + Integer.toHexString(version));
+		if (version != BinaryChunkHeader.VERSION) throw new IllegalArgumentException("Unsupported version: " + Integer.toHexString(version));
 
 		int format = stream.readUnsignedByte();
-		if (format != HEADER_FORMAT) throw new IllegalArgumentException("Unsupported format: " + Integer.toHexString(format));
+		if (format != BinaryChunkHeader.FORMAT) throw new IllegalArgumentException("Unsupported format: " + Integer.toHexString(format));
 
 		{
-			int diff = readBinaryLiteral(stream, HEADER_TAIL);
+			int diff = readBinaryLiteral(stream, BinaryChunkHeader.TAIL);
 			if (diff != -1) {
-				throw new IllegalArgumentException("Unexpected byte at position " + (HEADER_SIGNATURE.length + 2 + diff));
+				throw new IllegalArgumentException("Unexpected byte at position " + (BinaryChunkHeader.SIGNATURE.length() + 2 + diff));
 			}
 		}
 	}
@@ -230,8 +217,8 @@ public class BinaryChunkInputStream extends FilterInputStream {
 	}
 
 	protected static ByteOrder decideByteOrder(long integerBits, long floatBits) {
-		ByteOrder integerByteOrder = testByteOrder(integerBits, TestInteger);
-		ByteOrder floatByteOrder = testByteOrder(floatBits, Double.doubleToLongBits(TestFloat));
+		ByteOrder integerByteOrder = testByteOrder(integerBits, BinaryChunkHeader.BYTE_ORDER_TEST_INTEGER);
+		ByteOrder floatByteOrder = testByteOrder(floatBits, Double.doubleToLongBits(BinaryChunkHeader.BYTE_ORDER_TEST_FLOAT));
 
 		if (integerByteOrder != null && floatByteOrder != null) {
 			if (integerByteOrder != floatByteOrder) {
