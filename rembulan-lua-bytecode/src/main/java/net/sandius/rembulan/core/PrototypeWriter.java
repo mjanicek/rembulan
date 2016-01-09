@@ -13,10 +13,6 @@ public class PrototypeWriter extends PrototypeVisitor {
 
 	public final BinaryChunkOutputStream out;
 
-	private final BinaryChunkFormat format;
-
-	private boolean signatureWritten;
-
 	private final BinaryChunkOutputBuffer sourceHeader;
 	private final BinaryChunkOutputBuffer sigHeader;
 
@@ -38,7 +34,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 		public BinaryChunkOutputBuffer() {
 			this.count = 0;
 			this.data = new ByteArrayOutputStream();
-			this.stream = new BinaryChunkOutputStream(this.data, format);
+			this.stream = new BinaryChunkOutputStream(this.data, out.getFormat());
 		}
 
 		public void reset() {
@@ -59,14 +55,8 @@ public class PrototypeWriter extends PrototypeVisitor {
 		}
 	}
 
-	private PrototypeWriter(OutputStream out, BinaryChunkFormat format, boolean writeSignature) {
-		Objects.requireNonNull(out);
-		Objects.requireNonNull(format);
-
-		this.out = new BinaryChunkOutputStream(out, format);
-		this.format = format;
-
-		this.signatureWritten = !writeSignature;
+	public PrototypeWriter(BinaryChunkOutputStream out) {
+		this.out = Objects.requireNonNull(out);
 
 		this.sourceHeader = new BinaryChunkOutputBuffer();
 		this.sigHeader = new BinaryChunkOutputBuffer();
@@ -80,14 +70,6 @@ public class PrototypeWriter extends PrototypeVisitor {
 		this.lines = new BinaryChunkOutputBuffer();
 		this.locals = new BinaryChunkOutputBuffer();
 		this.upvalueNames = new BinaryChunkOutputBuffer();
-	}
-
-	public PrototypeWriter(OutputStream out, BinaryChunkFormat format) {
-		this(out, format, true);
-	}
-
-	public PrototypeWriter(OutputStream out, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
-		this(out, new BinaryChunkFormat(byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat));
 	}
 
 	@Override
@@ -229,7 +211,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public PrototypeVisitor visitNestedPrototype() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrototypeWriter pw = new PrototypeWriter(baos, format, false);
+		PrototypeWriter pw = new PrototypeWriter(new BinaryChunkOutputStream(baos, out.getFormat()));
 		nested.add(baos);
 		return pw;
 	}
@@ -272,11 +254,6 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public void visitEnd() {
 		try {
-			if (!signatureWritten) {
-				out.writeHeader();
-				signatureWritten = true;
-			}
-
 			sourceHeader.writeToAsData(out);
 			sigHeader.writeToAsData(out);
 
