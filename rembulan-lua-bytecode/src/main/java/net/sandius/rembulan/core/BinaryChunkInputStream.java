@@ -23,7 +23,7 @@ public class BinaryChunkInputStream extends FilterInputStream {
 	private static boolean bitWidthIs32Bit(int bitWidth) {
 		if (bitWidth == 4) return true;
 		else if (bitWidth == 8) return false;
-		else throw new IllegalArgumentException("Illegal bit width: " + bitWidth + ", expected 4 or 8");
+		else throw new IllegalArgumentException("Illegal byte width: " + bitWidth + ", expected 4 or 8");
 	}
 
 	public BinaryChunkInputStream(InputStream in, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
