@@ -1,5 +1,6 @@
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.core.util.BitUtils;
 import net.sandius.rembulan.util.Check;
 
 import java.io.DataInputStream;
@@ -20,10 +21,10 @@ public class BinaryChunkInputStream extends FilterInputStream {
 	protected final boolean luaIntegerIs32Bit;
 	protected final boolean luaFloatIs32Bit;
 
-	private static boolean bitWidthIs32Bit(int bitWidth) {
-		if (bitWidth == 4) return true;
-		else if (bitWidth == 8) return false;
-		else throw new IllegalArgumentException("Illegal byte width: " + bitWidth + ", expected 4 or 8");
+	private static boolean bitWidthIs32Bit(String what, int width) {
+		if (width == 4) return true;
+		else if (width == 8) return false;
+		else throw new UnsupportedFormatException(what + " width not supported: " + width);
 	}
 
 	public BinaryChunkInputStream(InputStream in, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
@@ -31,11 +32,11 @@ public class BinaryChunkInputStream extends FilterInputStream {
 
 		this.bigEndian = Objects.requireNonNull(byteOrder) == ByteOrder.BIG_ENDIAN;
 
-		this.intIs32Bit = bitWidthIs32Bit(sizeOfInt);
-		this.sizeTIs32Bit = bitWidthIs32Bit(sizeOfSizeT);
-		this.instructionIs32Bit = bitWidthIs32Bit(sizeOfInstruction);
-		this.luaIntegerIs32Bit = bitWidthIs32Bit(sizeOfLuaInteger);
-		this.luaFloatIs32Bit = bitWidthIs32Bit(sizeOfLuaFloat);
+		this.intIs32Bit = bitWidthIs32Bit("int", sizeOfInt);
+		this.sizeTIs32Bit = bitWidthIs32Bit("size_t", sizeOfSizeT);
+		this.instructionIs32Bit = bitWidthIs32Bit("instruction", sizeOfInstruction);
+		this.luaIntegerIs32Bit = bitWidthIs32Bit("integer constant", sizeOfLuaInteger);
+		this.luaFloatIs32Bit = bitWidthIs32Bit("float constant", sizeOfLuaFloat);
 	}
 
 	public BinaryChunkInputStream(InputStream in, BinaryChunkFormat format) {
@@ -225,35 +226,6 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		readBinaryLiteral(stream, BinaryChunkConstants.TAIL, BinaryChunkConstants.SIGNATURE.length() + 2);
 	}
 
-	protected static ByteOrder testByteOrder(long actualValue, long bigEndianValue) {
-		if (actualValue == bigEndianValue) return ByteOrder.BIG_ENDIAN;
-		else if (actualValue == Long.reverseBytes(bigEndianValue)) return ByteOrder.LITTLE_ENDIAN;
-		else return null;
-	}
-
-	protected static ByteOrder decideByteOrder(long integerBits, long floatBits) {
-		ByteOrder integerByteOrder = testByteOrder(integerBits, BinaryChunkConstants.BYTE_ORDER_TEST_INTEGER);
-		ByteOrder floatByteOrder = testByteOrder(floatBits, Double.doubleToLongBits(BinaryChunkConstants.BYTE_ORDER_TEST_FLOAT));
-
-		if (integerByteOrder != null && floatByteOrder != null) {
-			if (integerByteOrder != floatByteOrder) {
-				throw new IllegalArgumentException("Byte order mismatch: " + integerByteOrder + " (ints) vs " + floatByteOrder + " (floats)");
-			}
-			else {
-				return integerByteOrder;
-			}
-		}
-		else if (integerByteOrder != null) {
-			return integerByteOrder;
-		}
-		else if (floatByteOrder != null) {
-			return floatByteOrder;
-		}
-		else {
-			throw new IllegalArgumentException("Unable to determine byte order: 0x" + Long.toHexString(integerBits) + " (integer as big-endian long),  0x" + Long.toHexString(floatBits) + " (float as big-endian long)");
-		}
-	}
-
 	public static BinaryChunkInputStream fromInputStream(InputStream stream) throws IOException {
 		DataInputStream dis = new DataInputStream(stream);
 		readAndCheckLuaSignature(dis);
@@ -262,12 +234,30 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		int sizeOfSizeT = dis.readUnsignedByte();
 		int sizeOfInstruction = dis.readUnsignedByte();
 		int sizeOfLuaInteger = dis.readUnsignedByte();
+		if (!(sizeOfLuaInteger == 4 || sizeOfLuaInteger == 8)) throw new UnsupportedFormatException("integer constant width not supported: " + sizeOfLuaInteger);
 		int sizeOfLuaFloat = dis.readUnsignedByte();
+		if (!(sizeOfLuaFloat == 4 || sizeOfLuaFloat == 8)) throw new UnsupportedFormatException("float constant width not supported: " + sizeOfLuaFloat);
 
-		// detect endianness
-        long ti = dis.readLong();
-		long tf = dis.readLong();
-		ByteOrder byteOrder = decideByteOrder(ti, tf);
+		byte[] integerBytes = new byte[sizeOfLuaInteger];
+		byte[] floatBytes = new byte[sizeOfLuaFloat];
+
+		dis.readFully(integerBytes);
+		dis.readFully(floatBytes);
+
+		ByteOrder integerByteOrder = BitUtils.testByteOrder(integerBytes, BinaryChunkConstants.BYTE_ORDER_TEST_INTEGER);
+		ByteOrder floatByteOrder = BitUtils.testByteOrder(floatBytes, BinaryChunkConstants.BYTE_ORDER_TEST_FLOAT);
+
+		final ByteOrder byteOrder;
+		if (integerByteOrder != null && floatByteOrder != null) {
+			if (integerByteOrder == floatByteOrder) byteOrder = integerByteOrder;
+			else throw new IllegalArgumentException("Byte order mismatch: " + integerByteOrder + " (ints) vs " + floatByteOrder + " (floats)");
+		}
+		else if (integerByteOrder != null) byteOrder = integerByteOrder;
+		else if (floatByteOrder != null) byteOrder = floatByteOrder;
+		else throw new IllegalArgumentException("Unable to determine byte order: "
+					+ "0x" + BitUtils.toHexString(integerBytes) + " (integer)"
+					+ ", "
+					+ "0x" + BitUtils.toHexString(floatBytes) + " (float)");
 
 		boolean isFunction = dis.readBoolean();
 		if (!isFunction) {

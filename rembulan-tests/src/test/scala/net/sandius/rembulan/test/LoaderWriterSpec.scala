@@ -151,4 +151,6 @@ class LoaderWriterSpec extends FunSpec with MustMatchers {
     |return f(3),f(-2)
     """.stripMargin)
 
+  prog("print(10000.0)\n")
+
 }
