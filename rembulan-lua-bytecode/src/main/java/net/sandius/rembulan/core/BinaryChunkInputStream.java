@@ -38,8 +38,19 @@ public class BinaryChunkInputStream extends FilterInputStream {
 		this.luaFloatIs32Bit = bitWidthIs32Bit(sizeOfLuaFloat);
 	}
 
-	public ByteOrder byteOrder() {
-		return bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
+	public BinaryChunkInputStream(InputStream in, BinaryChunkFormat format) {
+		this(in, format.byteOrder, format.sizeOfInt, format.sizeOfSizeT, format.sizeOfInstruction, format.sizeOfLuaInteger, format.sizeOfLuaFloat);
+	}
+
+	public BinaryChunkFormat getFormat() {
+		return new BinaryChunkFormat(
+				bigEndian ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN,
+				intIs32Bit ? 4 : 8,
+				sizeTIs32Bit ? 4 : 8,
+				instructionIs32Bit ? 4 : 8,
+				luaIntegerIs32Bit ? 4 : 8,
+				luaFloatIs32Bit ? 4 : 8
+		);
 	}
 
 	protected int readUnsignedByte() throws IOException {

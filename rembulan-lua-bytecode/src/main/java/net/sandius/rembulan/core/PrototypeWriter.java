@@ -7,17 +7,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class PrototypeWriter extends PrototypeVisitor {
 
-	public final ByteOrder byteOrder;
 	public final BinaryChunkOutputStream out;
 
-	private final int sizeOfInt;
-	private final int sizeOfSizeT;
-	private final int sizeOfInstruction;
-	private final int sizeOfLuaInteger;
-	private final int sizeOfLuaFloat;
+	private final BinaryChunkFormat format;
 
 	private boolean signatureWritten;
 
@@ -42,7 +38,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 		public BinaryChunkOutputBuffer() {
 			this.count = 0;
 			this.data = new ByteArrayOutputStream();
-			this.stream = new BinaryChunkOutputStream(this.data, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
+			this.stream = new BinaryChunkOutputStream(this.data, format);
 		}
 
 		public void reset() {
@@ -63,19 +59,14 @@ public class PrototypeWriter extends PrototypeVisitor {
 		}
 	}
 
-	public PrototypeWriter(OutputStream out, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
-		Check.notNull(out);
+	public PrototypeWriter(OutputStream out, BinaryChunkFormat format) {
+		Objects.requireNonNull(out);
+		Objects.requireNonNull(format);
 
-		this.out = new BinaryChunkOutputStream(out, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
+		this.out = new BinaryChunkOutputStream(out, format);
+		this.format = format;
 
 		this.signatureWritten = false;
-
-		this.byteOrder = byteOrder;
-		this.sizeOfInt = sizeOfInt;
-		this.sizeOfSizeT = sizeOfSizeT;
-		this.sizeOfInstruction = sizeOfInstruction;
-		this.sizeOfLuaInteger = sizeOfLuaInteger;
-		this.sizeOfLuaFloat = sizeOfLuaFloat;
 
 		this.sourceHeader = new BinaryChunkOutputBuffer();
 		this.sigHeader = new BinaryChunkOutputBuffer();
@@ -89,6 +80,10 @@ public class PrototypeWriter extends PrototypeVisitor {
 		this.lines = new BinaryChunkOutputBuffer();
 		this.locals = new BinaryChunkOutputBuffer();
 		this.upvalueNames = new BinaryChunkOutputBuffer();
+	}
+
+	public PrototypeWriter(OutputStream out, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
+		this(out, new BinaryChunkFormat(byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat));
 	}
 
 	@Override
@@ -230,7 +225,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public PrototypeVisitor visitNestedPrototype() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrototypeWriter pw = new PrototypeWriter(baos, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);
+		PrototypeWriter pw = new PrototypeWriter(baos, format);
 		nested.add(baos);
 		return pw;
 	}
