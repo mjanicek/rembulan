@@ -9,7 +9,7 @@ object AnalysisRunner {
 
   def main(args: Array[String]): Unit = {
 
-    val luacPath = "/Users/sandius/bin/luac53"
+    val luacPath = "luac53"
     require (luacPath != null)
 
     val ploader = new LuaCPrototypeLoader(luacPath)
