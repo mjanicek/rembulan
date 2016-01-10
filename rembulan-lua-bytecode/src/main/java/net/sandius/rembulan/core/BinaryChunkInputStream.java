@@ -259,9 +259,10 @@ public class BinaryChunkInputStream extends FilterInputStream {
 					+ ", "
 					+ "0x" + BitUtils.toHexString(floatBytes) + " (float)");
 
-		boolean isFunction = dis.readBoolean();
-		if (!isFunction) {
-			throw new IllegalArgumentException("Function expected");
+		// FIXME: this must equal the number of upvalues of the prototype that follows
+		int numOfUpvalues = dis.readUnsignedByte();
+		if (numOfUpvalues != 1) {
+			throw new IllegalArgumentException("Single upvalue expected");
 		}
 
 		return new BinaryChunkInputStream(stream, byteOrder, sizeOfInt, sizeOfSizeT, sizeOfInstruction, sizeOfLuaInteger, sizeOfLuaFloat);

@@ -72,8 +72,8 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 		writeInteger(BinaryChunkConstants.BYTE_ORDER_TEST_INTEGER);
 		writeFloat(BinaryChunkConstants.BYTE_ORDER_TEST_FLOAT);
 
-		// true: function follows
-		writeBoolean(true);
+		// FIXME: this must equal the number of upvalues of the prototype that follows
+		write(1);
 	}
 
 	public void writeByte(int b) throws IOException {
