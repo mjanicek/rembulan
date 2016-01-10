@@ -1,5 +1,6 @@
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.core.util.BitUtils;
 import net.sandius.rembulan.util.Check;
 
 import java.io.FilterOutputStream;
@@ -9,6 +10,8 @@ import java.nio.ByteOrder;
 import java.util.Objects;
 
 public class BinaryChunkOutputStream extends FilterOutputStream {
+
+	private final boolean strictMode;
 
 	protected final boolean bigEndian;
 
@@ -24,8 +27,10 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 		else throw new IllegalArgumentException("Illegal byte width: " + bitWidth + ", expected 4 or 8");
 	}
 
-	public BinaryChunkOutputStream(OutputStream out, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
+	public BinaryChunkOutputStream(OutputStream out, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat, boolean strictMode) {
 		super(out);
+
+		this.strictMode = strictMode;
 
 		this.bigEndian = Objects.requireNonNull(byteOrder) == ByteOrder.BIG_ENDIAN;
 
@@ -36,8 +41,12 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 		this.luaFloatIs32Bit = bitWidthIs32Bit(sizeOfLuaFloat);
 	}
 
+	public BinaryChunkOutputStream(OutputStream out, BinaryChunkFormat format, boolean strictMode) {
+		this(out, format.byteOrder, format.sizeOfInt, format.sizeOfSizeT, format.sizeOfInstruction, format.sizeOfLuaInteger, format.sizeOfLuaFloat, strictMode);
+	}
+
 	public BinaryChunkOutputStream(OutputStream out, BinaryChunkFormat format) {
-		this(out, format.byteOrder, format.sizeOfInt, format.sizeOfSizeT, format.sizeOfInstruction, format.sizeOfLuaInteger, format.sizeOfLuaFloat);
+		this(out, format, false);
 	}
 
 	public BinaryChunkFormat getFormat() {
@@ -49,6 +58,10 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 				luaIntegerIs32Bit ? 4 : 8,
 				luaFloatIs32Bit ? 4 : 8
 		);
+	}
+
+	public boolean isStrict() {
+		return strictMode;
 	}
 
 	private void writeBinaryLiteral(String lit) throws IOException {
@@ -159,7 +172,7 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 				writeInt32((int) v);
 			}
 			else {
-				throw new IllegalArgumentException("Integer cannot be represented as 32-bit: 0x" + v);
+				throw new IllegalArgumentException("Integer cannot be represented as 32-bit: " + v);
 			}
 		}
 		else {
@@ -169,6 +182,9 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 
 	public void writeFloat(double v) throws IOException {
 		if (luaFloatIs32Bit) {
+			if (strictMode && !BitUtils.doubleCanBeRepresentedByFloat(v)) {
+				throw new IllegalArgumentException("64-bit float cannot be represented in 32-bit without loss of precision: " + v);
+			}
 			writeInt32(Float.floatToIntBits((float) v));
 		}
 		else {

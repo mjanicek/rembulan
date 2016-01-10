@@ -59,4 +59,9 @@ public class BitUtils {
 		}
 	}
 
+	public static boolean doubleCanBeRepresentedByFloat(double d) {
+		float f = (float) d;
+		return d == f || Double.isNaN(d);
+	}
+
 }

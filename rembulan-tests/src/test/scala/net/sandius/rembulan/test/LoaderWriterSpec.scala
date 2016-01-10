@@ -34,7 +34,7 @@ class LoaderWriterSpec extends FunSpec with MustMatchers {
 
   def dump(proto: Prototype, format: BinaryChunkFormat): Array[Byte] = {
     val baos = new ByteArrayOutputStream()
-    val out = new BinaryChunkOutputStream(baos, format)
+    val out = new BinaryChunkOutputStream(baos, format, true)
     val writer = new PrototypeWriter(out)
 
     out.writeHeader()
@@ -158,5 +158,7 @@ class LoaderWriterSpec extends FunSpec with MustMatchers {
     """.stripMargin)
 
   prog("print(10000.0)\n")
+
+  prog("print(3.0)\n")
 
 }

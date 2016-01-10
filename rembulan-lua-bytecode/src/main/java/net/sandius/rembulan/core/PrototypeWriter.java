@@ -26,7 +26,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 
 	class Buffer {
 		private final ByteArrayOutputStream data = new ByteArrayOutputStream();
-		public final BinaryChunkOutputStream stream = new BinaryChunkOutputStream(this.data, out.getFormat());
+		public final BinaryChunkOutputStream stream = new BinaryChunkOutputStream(this.data, out.getFormat(), out.isStrict());
 
 		public void reset() {
 			data.reset();
@@ -211,7 +211,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	@Override
 	public PrototypeVisitor visitNestedPrototype() {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		PrototypeWriter pw = new PrototypeWriter(new BinaryChunkOutputStream(baos, out.getFormat()));
+		PrototypeWriter pw = new PrototypeWriter(new BinaryChunkOutputStream(baos, out.getFormat(), out.isStrict()));
 		nested.add(baos);
 		return pw;
 	}
