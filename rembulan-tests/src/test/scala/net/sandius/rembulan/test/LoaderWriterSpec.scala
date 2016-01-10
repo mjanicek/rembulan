@@ -14,7 +14,7 @@ class LoaderWriterSpec extends FunSpec with MustMatchers {
   val luacPath = "luac53"
   val luacLoader = new LuaCPrototypeLoader(luacPath)
 
-  def escape(raw: String) = PrettyPrinter.escapedString(raw)
+  def escape(raw: String) = PrototypePrinter.escape(raw)
 
   def compile(program: String): Prototype = {
     val visitor = new PrototypeBuilderVisitor

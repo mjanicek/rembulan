@@ -41,7 +41,33 @@ public class PrototypePrinter {
 	}
 
 	public static String escape(String s) {
-		return "\"" + s + "\"";  // FIXME!
+		StringBuilder bld = new StringBuilder();
+
+		byte[] bytes = s.getBytes();
+		for (byte b : bytes) {
+			char c = (char) b;
+			if (c >= ' ' && c <= '~' && c != '\"' && c != '\\') {
+				bld.append((char) b);
+			}
+			else {
+				bld.append('\\');
+				switch (c) {
+					case '"':  bld.append('"'); break;
+					case '\\': bld.append("\\"); break;
+					case (char) 0x07: bld.append('a'); break;  // bell
+					case '\b': bld.append('b'); break;  // backspace
+					case '\f': bld.append('f'); break;  // form feed
+					case '\t': bld.append('t'); break;  // tab
+					case '\r': bld.append("r"); break;  // carriage return
+					case '\n': bld.append('n'); break;  // newline
+					case (char) 0x0b: bld.append('v'); break;  // vertical tab
+					default:
+						bld.append(Integer.toString(1000 + (0xff & c)).substring(1));
+				}
+			}
+		}
+		
+		return bld.toString();
 	}
 
 	private static String constantToString(Object c) {
@@ -49,7 +75,7 @@ public class PrototypePrinter {
 		else if (c instanceof Boolean) return LuaFormat.toString((Boolean) c);
 		else if (c instanceof Long) return LuaFormat.toString((Long) c);
 		else if (c instanceof Double) return LuaFormat.toString((Double) c);
-		else if (c instanceof String) return escape((String) c);
+		else if (c instanceof String) return "\"" + escape((String) c) + "\"";
 		else return null;
 	}
 
