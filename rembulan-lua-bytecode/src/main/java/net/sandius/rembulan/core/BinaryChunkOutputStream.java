@@ -46,7 +46,7 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 	}
 
 	public BinaryChunkOutputStream(OutputStream out, BinaryChunkFormat format) {
-		this(out, format, false);
+		this(out, format, true);
 	}
 
 	public BinaryChunkFormat getFormat() {
