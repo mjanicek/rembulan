@@ -2,7 +2,9 @@ package net.sandius.rembulan.test
 
 import java.io.PrintWriter
 
+import net.sandius.rembulan.compiler.PrototypeClassLoader
 import net.sandius.rembulan.core._
+import net.sandius.rembulan.lbc.{PrototypePrinter, LuaCPrototypeLoader}
 import net.sandius.rembulan.util.Cons
 import net.sandius.rembulan.{core => lua}
 

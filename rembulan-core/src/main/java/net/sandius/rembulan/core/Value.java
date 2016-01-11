@@ -1,5 +1,8 @@
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.LuaFormat;
+import net.sandius.rembulan.LuaType;
+
 public abstract class Value {
 
 	private Value() {

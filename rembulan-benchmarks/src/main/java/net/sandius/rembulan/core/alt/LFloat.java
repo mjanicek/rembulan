@@ -1,6 +1,6 @@
 package net.sandius.rembulan.core.alt;
 
-import net.sandius.rembulan.core.LuaFormat;
+import net.sandius.rembulan.LuaFormat;
 
 public final class LFloat extends LNumber {
 

@@ -1,5 +1,6 @@
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.util.Check;
 
 public class Metatables {

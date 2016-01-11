@@ -1,6 +1,6 @@
 package net.sandius.rembulan.core.alt;
 
-import net.sandius.rembulan.core.LuaType;
+import net.sandius.rembulan.LuaType;
 
 import java.util.Objects;
 

@@ -1,7 +1,7 @@
 package net.sandius.rembulan.core.alt;
 
-import net.sandius.rembulan.core.LuaFormat;
-import net.sandius.rembulan.core.LuaType;
+import net.sandius.rembulan.LuaFormat;
+import net.sandius.rembulan.LuaType;
 
 public final class LNil extends LValue {
 

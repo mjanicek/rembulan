@@ -1,9 +1,8 @@
 package net.sandius.rembulan.test
 
 import java.io.PrintWriter
-
-import net.sandius.rembulan.core.gen.ControlFlowTraversal
-import net.sandius.rembulan.core.{PrototypePrinterVisitor, PrototypePrinter, LuaCPrototypeLoader}
+import net.sandius.rembulan.compiler.gen.ControlFlowTraversal
+import net.sandius.rembulan.lbc.{PrototypePrinterVisitor, PrototypePrinter, LuaCPrototypeLoader}
 
 object AnalysisRunner {
 

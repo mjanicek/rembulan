@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.core.LuaType;
+import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.util.Check;
 

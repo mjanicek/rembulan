@@ -1,5 +1,7 @@
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.LuaFormat;
+
 public abstract class Coercions {
 
 	private Coercions() {
