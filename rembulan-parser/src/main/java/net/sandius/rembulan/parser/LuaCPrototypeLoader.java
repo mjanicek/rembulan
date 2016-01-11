@@ -1,5 +1,9 @@
-package net.sandius.rembulan.lbc;
+package net.sandius.rembulan.parser;
 
+import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.lbc.PrototypeBuilderVisitor;
+import net.sandius.rembulan.lbc.PrototypeLoader;
+import net.sandius.rembulan.lbc.PrototypeVisitor;
 import net.sandius.rembulan.util.ProcessCall;
 import net.sandius.rembulan.util.Check;
 

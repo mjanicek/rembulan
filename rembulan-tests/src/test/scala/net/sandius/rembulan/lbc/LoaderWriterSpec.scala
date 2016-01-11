@@ -3,6 +3,7 @@ package net.sandius.rembulan.lbc
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.nio.ByteOrder
 
+import net.sandius.rembulan.parser.LuaCPrototypeLoader
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
