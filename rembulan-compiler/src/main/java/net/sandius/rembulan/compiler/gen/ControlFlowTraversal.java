@@ -5,9 +5,12 @@ import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.IntVector;
+import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class ControlFlowTraversal {
 
@@ -142,7 +145,7 @@ public class ControlFlowTraversal {
 		ArrayList<Block> blocks = new ArrayList<>();
 
 		for (int i = 0; i < code.length(); i++) {
-			blocks.add(Block.newBlock(code.get(i), prev[i], next[i]));
+			blocks.add(Block.newBlock(i + 1, code.get(i), prev[i], next[i]));
 		}
 
 		int i = 0;
@@ -192,9 +195,115 @@ public class ControlFlowTraversal {
 		return blocks;
 	}
 
-	public void print(PrintStream out) {
-//		out.println("Blocks (" + blocks.length + " total):");
+	private String slotState(int pc) {
+		StringBuilder bld = new StringBuilder();
 
+		ReadOnlyArray<Prototype.LocalVariable> locals = prototype.getLocalVariables();
+
+//		int numActive = 0;
+//		for (Prototype.LocalVariable lv : locals) {
+//			if (pc >= lv.beginPC && pc <= lv.endPC) {
+//				numActive += 1;
+//			}
+//		}
+//
+//		bld.append(numActive + ": ");
+		bld.append("[ ");
+
+		int lidx = 0;
+
+		for (int i = 0; i < prototype.getMaximumStackSize(); i++) {
+			String sl = null;
+
+			while (lidx < locals.size()) {
+				Prototype.LocalVariable lv = locals.get(lidx);
+				lidx += 1;
+				if (pc >= lv.beginPC && pc < lv.endPC) {
+					sl = Integer.toString(lidx - 1);
+					break;
+				}
+			}
+
+			if (sl != null) {
+				bld.append(sl);
+			}
+			else {
+				bld.append('-');
+			}
+
+			if (i + 1 < prototype.getMaximumStackSize()) bld.append(' ');
+		}
+
+//		for (int j = 0; j < locals.size(); j++) {
+//			Prototype.LocalVariable lv = locals.get(j);
+//			if (pc >= lv.beginPC && pc <= lv.endPC) {
+//				bld.append(j);
+//			}
+//			else {
+//				bld.append('-');
+//			}
+//
+//			if (j + 1 < locals.size()) bld.append('|');
+//		}
+
+		bld.append(" ]");
+		return bld.toString();
+	}
+
+	private String closureHint(int insn) {
+		StringBuilder bld = new StringBuilder();
+
+		Prototype closureProto = prototype.getNestedPrototypes().get(OpCode.arg_Bx(insn));
+
+		ReadOnlyArray<Prototype.UpvalueDesc> upvals = closureProto.getUpValueDescriptions();
+		for (Prototype.UpvalueDesc uvd : upvals) {
+			bld.append(uvd.index);
+			if (!uvd.inStack) bld.append('?');
+			bld.append(' ');
+		}
+
+		return bld.toString();
+	}
+
+	public String blockToString(Block b, String prefix, boolean slots) {
+		StringBuilder bld = new StringBuilder();
+		
+		for (int j = 0; j < b.nodes.size(); j++) {
+			bld.append(prefix);
+			BlockNode node = b.nodes.get(j);
+
+			int pc = node.getPc();
+
+			bld.append(pc > 0 ? pc : "-");
+			bld.append('\t');
+
+			if (slots) {
+				bld.append(slotState(pc - 1));
+				bld.append('\t');
+			}
+
+//			int insn = prototype.getCode().get(pc);
+//			bld.append(pc + 1);
+//			bld.append("\t");
+
+			bld.append(node instanceof Instruction && ((Instruction) node).canTransferControl() ? "*" : " ");
+//				bld.append("\t");
+			bld.append(" ");
+			bld.append(node.toString());
+
+			if (node instanceof Instruction && ((Instruction) node).getOpCode() == OpCode.CLOSURE) {
+				bld.append('\t');
+				bld.append(";\tupvals: ");
+				bld.append(closureHint(((Instruction) node).insn));
+			}
+
+			bld.append('\n');
+		}
+
+		return bld.toString();
+	}
+
+	public void print(PrintStream out) {
 		for (int i = 0; i < blocks.size(); i++) {
 			out.print("\t");
 			out.print("#");
@@ -227,27 +336,18 @@ public class ControlFlowTraversal {
 			out.print("]");
 
 			out.println();
-
-			for (int j = 0; j < b.nodes.size(); j++) {
-				out.print("\t\t");
-				BlockNode node = b.nodes.get(j);
-
-//				int insn = prototype.getCode().get(pc);
-//				out.print(pc + 1);
-//				out.print("\t");
-
-				out.print(node instanceof Instruction && ((Instruction) node).canTransferControl() ? "*" : " ");
-//				out.print("\t");
-				out.print(" ");
-				out.print(node.toString());
-				out.println();
-			}
+			
+			String bk = blockToString(b, "\t\t", true);
+			out.print(bk);
 
 			if (i + 1 < blocks.size()) {
 				out.println();
 			}
-
 		}
+	}
+	
+	public List<Block> getBlocks() {
+		return Collections.unmodifiableList(blocks);
 	}
 
 }

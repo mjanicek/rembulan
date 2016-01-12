@@ -5,14 +5,21 @@ import net.sandius.rembulan.lbc.PrototypePrinter;
 
 public abstract class Instruction extends BlockNode {
 
+	protected final int pc;
 	protected final int insn;
 
-	public Instruction(int insn) {
+	public Instruction(int pc, int insn) {
+		this.pc = pc;
 		this.insn = insn;
 	}
 
 	public int getOpCode() {
 		return OpCode.opCode(insn);
+	}
+
+	@Override
+	public int getPc() {
+		return pc;
 	}
 
 	@Override
@@ -27,15 +34,15 @@ public abstract class Instruction extends BlockNode {
 		return PrototypePrinter.instructionInfo(insn);
 	}
 
-	public static Instruction valueOf(int insn) {
+	public static Instruction valueOf(int pc, int insn) {
 		int oc = OpCode.opCode(insn);
 
-		Instruction i = UnconditionalInstruction.fromInstruction(insn);
+		Instruction i = UnconditionalInstruction.fromInstruction(pc, insn);
 		if (i == null) {
-			i = BranchInstruction.fromInstruction(insn);
+			i = BranchInstruction.fromInstruction(pc, insn);
 		}
 		if (i == null) {
-			i = TerminalInstruction.fromInstruction(insn);
+			i = TerminalInstruction.fromInstruction(pc, insn);
 		}
 		if (i == null) {
 			throw new IllegalArgumentException("Unsupported instruction: " + insn + " (opcode = " + oc + ")");

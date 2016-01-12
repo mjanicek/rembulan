@@ -7,13 +7,13 @@ public class BranchInstruction extends Instruction {
 	protected final int left;
 	protected final int right;
 
-	private BranchInstruction(int insn, int left, int right) {
-		super(insn);
+	private BranchInstruction(int pc, int insn, int left, int right) {
+		super(pc, insn);
 		this.left = left;
 		this.right = right;
 	}
 
-	public static BranchInstruction fromInstruction(int insn) {
+	public static BranchInstruction fromInstruction(int pc, int insn) {
 		int opcode = OpCode.opCode(insn);
 		int sbx = OpCode.arg_sBx(insn);
 
@@ -40,7 +40,7 @@ public class BranchInstruction extends Instruction {
 				return null;
 		}
 
-		return new BranchInstruction(insn, left, right);
+		return new BranchInstruction(pc, insn, left, right);
 	}
 
 	public int leftOffset() {

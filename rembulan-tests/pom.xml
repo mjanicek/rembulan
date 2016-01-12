@@ -57,6 +57,12 @@
     </dependency>
 
     <dependency>
+      <groupId>com.github.jlmauduy</groupId>
+      <artifactId>ascii-graphs_${scala.binary.version}</artifactId>
+      <version>0.0.7</version>
+    </dependency>
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.11</version>

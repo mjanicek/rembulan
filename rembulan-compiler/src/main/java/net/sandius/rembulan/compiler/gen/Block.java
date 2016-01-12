@@ -21,9 +21,9 @@ public class Block {
 		this.next = next;
 	}
 
-	public static Block newBlock(int insn, IntBuffer prev, IntBuffer next) {
+	public static Block newBlock(int pc, int insn, IntBuffer prev, IntBuffer next) {
 		ArrayList<BlockNode> l = new ArrayList<>();
-		l.add(Instruction.valueOf(insn));
+		l.add(Instruction.valueOf(pc, insn));
 		return new Block(l, prev, next);
 	}
 

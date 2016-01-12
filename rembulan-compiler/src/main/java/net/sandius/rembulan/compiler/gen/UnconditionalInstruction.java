@@ -6,12 +6,12 @@ public class UnconditionalInstruction extends Instruction {
 
 	protected final int next;
 
-	private UnconditionalInstruction(int insn, int next) {
-		super(insn);
+	private UnconditionalInstruction(int pc, int insn, int next) {
+		super(pc, insn);
 		this.next = next;
 	}
 
-	public static UnconditionalInstruction fromInstruction(int insn) {
+	public static UnconditionalInstruction fromInstruction(int pc, int insn) {
 		int opcode = OpCode.opCode(insn);
 		int c = OpCode.arg_C(insn);
 		int sbx = OpCode.arg_sBx(insn);
@@ -79,7 +79,7 @@ public class UnconditionalInstruction extends Instruction {
 				return null;
 		}
 
-		return new UnconditionalInstruction(insn, next);
+		return new UnconditionalInstruction(pc, insn, next);
 	}
 
 	public int nextOffset() {
