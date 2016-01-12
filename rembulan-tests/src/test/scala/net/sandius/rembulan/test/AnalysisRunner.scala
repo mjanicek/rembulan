@@ -9,6 +9,7 @@ import net.sandius.rembulan.parser.LuaCPrototypeLoader
 import net.sandius.rembulan.util.IntBuffer
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 
 object AnalysisRunner {
 
@@ -124,6 +125,33 @@ object AnalysisRunner {
         println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
       }
 
+      /*
+       Possible types:
+
+       * ... any
+       N ... nil
+       B ... boolean
+       lU ... lightuserdata
+       nI ... integer
+       nF ... float
+       S ... string
+       T ... table
+       F ... function
+       U ... userdata
+       C ... thread
+      */
+
+      val params = ArrayBuffer.empty[String]
+      for (i <- 1 to proto.getNumberOfParameters) {
+        params.append("*")
+      }
+      if (proto.isVararg) {
+        params.append("...")
+      }
+
+//      println("Parameters: (" + params.mkString(" ") + ")")
+
+
       val trav = new ControlFlowTraversal(proto)
 
 //      trav.print(System.out)
@@ -142,7 +170,16 @@ object AnalysisRunner {
         }
       }
 
-      case object Entry
+      case object Entry {
+        override def toString = {
+          val firstLine = "Entry"
+          val signature = params.mkString("(", " ", ")")
+
+          val sep = fillStr("-", ((firstLine :: signature :: Nil) map { _.length }).max)
+
+          (firstLine :: sep :: signature :: Nil).mkString("\n")
+        }
+      }
       case object Exit
 
       val vertices = blox.indices.toSet
