@@ -225,12 +225,13 @@ public class ControlFlowTraversal {
 				}
 			}
 
-			if (sl != null) {
-				bld.append(sl);
-			}
-			else {
-				bld.append('-');
-			}
+			bld.append('-');
+//			if (sl != null) {
+//				bld.append(sl);
+//			}
+//			else {
+//				bld.append('-');
+//			}
 
 			if (i + 1 < prototype.getMaximumStackSize()) bld.append(' ');
 		}
@@ -314,6 +315,15 @@ public class ControlFlowTraversal {
 				if (opcode == OpCode.CLOSURE) {
 					appendHintDelimiter(hint);
 					hint.append("upvals: ").append(closureHint(((Instruction) node).insn));
+				}
+				if (opcode == OpCode.JMP || opcode == OpCode.FORPREP || opcode == OpCode.FORLOOP) {
+					int offset = (OpCode.arg_sBx(insn));
+					int dest = pc + offset + 1;
+
+					if (offset < 0) {
+						appendHintDelimiter(hint);
+						hint.append("close ").append(dest).append(" to ").append(pc);
+					}
 				}
 
 				if (hint.length() > 0) {
