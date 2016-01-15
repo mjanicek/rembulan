@@ -174,7 +174,7 @@ public class PrototypePrinter {
 		return instructionInfoWithHints(proto.getCode().get(pc), proto.getConstants(), proto.getNestedPrototypes());
 	}
 
-	private static String instructionInfoHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
+	public static String instructionInfoHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
 		int b = OpCode.arg_B(insn);

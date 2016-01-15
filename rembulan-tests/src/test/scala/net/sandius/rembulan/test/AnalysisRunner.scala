@@ -160,7 +160,7 @@ object AnalysisRunner {
 
       case class Bk(idx: Int) {
         override def toString = {
-          val lines = trav.blockToString(blox(idx), "", true).split("\n").toSeq
+          val lines = trav.blockToString(blox(idx), "", true, true).split("\n").toSeq
           val tabulated = tabulate(lines, "  ").toList
 
           val blk = "Block #" + idx

@@ -2,6 +2,7 @@ package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.lbc.PrototypePrinter;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.IntVector;
@@ -265,7 +266,13 @@ public class ControlFlowTraversal {
 		return bld.toString();
 	}
 
-	public String blockToString(Block b, String prefix, boolean slots) {
+	private static void appendHintDelimiter(StringBuilder bld) {
+		if (bld.length() > 0) {
+			bld.append("; ");
+		}
+	}
+
+	public String blockToString(Block b, String prefix, boolean slots, boolean hints) {
 		StringBuilder bld = new StringBuilder();
 		
 		for (int j = 0; j < b.nodes.size(); j++) {
@@ -291,10 +298,33 @@ public class ControlFlowTraversal {
 			bld.append(" ");
 			bld.append(node.toString());
 
-			if (node instanceof Instruction && ((Instruction) node).getOpCode() == OpCode.CLOSURE) {
-				bld.append('\t');
-				bld.append(";\tupvals: ");
-				bld.append(closureHint(((Instruction) node).insn));
+			if (node instanceof Instruction) {
+				int opcode = ((Instruction) node).getOpCode();
+				int insn = ((Instruction) node).insn;
+
+				StringBuilder hint = new StringBuilder();
+
+				if (hints) {
+					String hs = PrototypePrinter.instructionInfoHints(insn, prototype.getConstants(), prototype.getNestedPrototypes());
+					if (!hs.isEmpty()) {
+						hint.append(hs);
+					}
+				}
+
+				if (opcode == OpCode.CLOSURE) {
+					appendHintDelimiter(hint);
+					hint.append("upvals: ").append(closureHint(((Instruction) node).insn));
+				}
+				else if (opcode == OpCode.JMP) {
+					int destPC = pc + OpCode.arg_sBx(insn) + 1;
+
+					appendHintDelimiter(hint);
+					hint.append("to ").append(destPC);
+				}
+
+				if (hint.length() > 0) {
+					bld.append("\t; ").append(hint);
+				}
 			}
 
 			bld.append('\n');
@@ -337,7 +367,7 @@ public class ControlFlowTraversal {
 
 			out.println();
 			
-			String bk = blockToString(b, "\t\t", true);
+			String bk = blockToString(b, "\t\t", true, true);
 			out.print(bk);
 
 			if (i + 1 < blocks.size()) {
