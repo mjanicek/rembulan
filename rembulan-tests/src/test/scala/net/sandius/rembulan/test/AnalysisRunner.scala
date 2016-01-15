@@ -53,6 +53,14 @@ object AnalysisRunner {
 //        |if x >= 0 and x <= 10 then print(x) end
 //      """.stripMargin
 
+    val program =
+    """
+      |local x = {}
+      |for i = 0, 10 do
+      |  x[i] = function() return i, x end
+      |end
+    """.stripMargin
+
 /*
     val program =
     """
@@ -68,6 +76,7 @@ object AnalysisRunner {
     """.stripMargin
 */
 
+/*
     val program =
     """do
       |  local a = 0
@@ -102,6 +111,7 @@ object AnalysisRunner {
       |
       |return f(3),f(-2)
       """.stripMargin
+*/
 
 //    val program =
 //      """local f = function (x, y)
