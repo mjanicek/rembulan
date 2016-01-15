@@ -53,6 +53,21 @@ object AnalysisRunner {
 //        |if x >= 0 and x <= 10 then print(x) end
 //      """.stripMargin
 
+/*
+    val program =
+    """
+      |local x
+      |x = 1
+      |
+      |local function sqr()
+      |  return x * x
+      |end
+      |
+      |x = 3
+      |return sqr()
+    """.stripMargin
+*/
+
     val program =
     """do
       |  local a = 0
