@@ -171,10 +171,10 @@ public class PrototypePrinter {
 		Check.notNull(proto);
 		Check.nonNegative(pc);
 
-		return instructionInfoWithHints(proto.getCode().get(pc), proto.getConstants(), proto.getNestedPrototypes());
+		return instructionInfoWithHints(proto.getCode().get(pc), pc + 1, proto.getConstants(), proto.getNestedPrototypes());
 	}
 
-	public static String instructionInfoHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
+	public static String instructionInfoHints(int insn, int pc, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
 		int b = OpCode.arg_B(insn);
@@ -217,17 +217,26 @@ public class PrototypePrinter {
 			case OpCode.CLOSURE:
 				hint.append(pseudoAddr(children.get(bx)));
 				break;
+
+			case OpCode.JMP:
+			case OpCode.FORLOOP:
+			case OpCode.FORPREP:
+			{
+				int destPC = pc + sbx + 1;
+				hint.append("to ").append(destPC);
+			}
+				break;
 		}
 
 		return hint.toString();
 	}
 
-	public static String instructionInfoWithHints(int insn, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
+	public static String instructionInfoWithHints(int insn, int pc, ReadOnlyArray<Object> constants, ReadOnlyArray<Prototype> children) {
 		Check.notNull(constants);
 		Check.notNull(children);
 
 		String instrInfo = instructionInfo(insn);
-		String hint = instructionInfoHints(insn, constants, children);
+		String hint = instructionInfoHints(insn, pc, constants, children);
 		return instrInfo + (!hint.isEmpty() ? "\t; " + hint : "");
 	}
 

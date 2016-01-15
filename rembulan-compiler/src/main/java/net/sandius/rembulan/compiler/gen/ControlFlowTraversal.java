@@ -305,7 +305,7 @@ public class ControlFlowTraversal {
 				StringBuilder hint = new StringBuilder();
 
 				if (hints) {
-					String hs = PrototypePrinter.instructionInfoHints(insn, prototype.getConstants(), prototype.getNestedPrototypes());
+					String hs = PrototypePrinter.instructionInfoHints(insn, pc, prototype.getConstants(), prototype.getNestedPrototypes());
 					if (!hs.isEmpty()) {
 						hint.append(hs);
 					}
@@ -314,12 +314,6 @@ public class ControlFlowTraversal {
 				if (opcode == OpCode.CLOSURE) {
 					appendHintDelimiter(hint);
 					hint.append("upvals: ").append(closureHint(((Instruction) node).insn));
-				}
-				else if (opcode == OpCode.JMP) {
-					int destPC = pc + OpCode.arg_sBx(insn) + 1;
-
-					appendHintDelimiter(hint);
-					hint.append("to ").append(destPC);
 				}
 
 				if (hint.length() > 0) {
