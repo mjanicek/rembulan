@@ -11,20 +11,24 @@ public class Block {
 	public final IntBuffer prev;
 	public final IntBuffer next;
 
-	private Block(ArrayList<BlockNode> nodes, IntBuffer prev, IntBuffer next) {
+	public Slots slots;
+
+	private Block(Slots slots, ArrayList<BlockNode> nodes, IntBuffer prev, IntBuffer next) {
+		Check.notNull(slots);
 		Check.notNull(nodes);
 		Check.notNull(prev);
 		Check.notNull(next);
 
+		this.slots = slots;
 		this.nodes = nodes;
 		this.prev = prev;
 		this.next = next;
 	}
 
-	public static Block newBlock(int pc, int insn, IntBuffer prev, IntBuffer next) {
+	public static Block newBlock(int pc, int insn, int slotSize, IntBuffer prev, IntBuffer next) {
 		ArrayList<BlockNode> l = new ArrayList<>();
 		l.add(Instruction.valueOf(pc, insn));
-		return new Block(l, prev, next);
+		return new Block(Slots.init(slotSize), l, prev, next);
 	}
 
 	public void merge(Block that) {
@@ -63,6 +67,10 @@ public class Block {
 			cost += node.getCost();
 		}
 		return cost;
+	}
+
+	public Slots slots() {
+		return slots;
 	}
 
 }

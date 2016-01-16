@@ -57,7 +57,7 @@ object AnalysisRunner {
     """
       |local x = {}
       |for i = 0, 10 do
-      |  x[i] = function() return i, x end
+      |  if i % 2 == 0 then x[i // 2] = function() return i, x end end
       |end
     """.stripMargin
 
@@ -185,13 +185,16 @@ object AnalysisRunner {
 
       case class Bk(idx: Int) {
         override def toString = {
-          val lines = trav.blockToString(blox(idx), "", true, true).split("\n").toSeq
+          val block = blox(idx)
+
+          val lines = trav.blockToString(block, "", false, true).split("\n").toSeq
           val tabulated = tabulate(lines, "  ").toList
 
           val blk = "Block #" + idx
+          val slots = "[ " + block.slots().toString + " ]"
           val underline = fillStr("-", (tabulated map { _.length }).max)
 
-          (blk :: underline :: tabulated).mkString("\n")
+          (blk :: slots :: underline :: tabulated).mkString("\n")
         }
       }
 

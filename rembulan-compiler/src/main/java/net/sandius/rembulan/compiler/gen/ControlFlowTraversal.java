@@ -146,7 +146,7 @@ public class ControlFlowTraversal {
 		ArrayList<Block> blocks = new ArrayList<>();
 
 		for (int i = 0; i < code.length(); i++) {
-			blocks.add(Block.newBlock(i + 1, code.get(i), prev[i], next[i]));
+			blocks.add(Block.newBlock(i + 1, code.get(i), prototype.getMaximumStackSize(), prev[i], next[i]));
 		}
 
 		int i = 0;
@@ -260,7 +260,7 @@ public class ControlFlowTraversal {
 		ReadOnlyArray<Prototype.UpvalueDesc> upvals = closureProto.getUpValueDescriptions();
 		for (Prototype.UpvalueDesc uvd : upvals) {
 			bld.append(uvd.index);
-			if (!uvd.inStack) bld.append('?');
+			if (!uvd.inStack) bld.append('^');
 			bld.append(' ');
 		}
 
@@ -286,7 +286,8 @@ public class ControlFlowTraversal {
 			bld.append('\t');
 
 			if (slots) {
-				bld.append(slotState(pc - 1));
+				bld.append("[ ").append(b.slots()).append(" ]");
+//				bld.append(slotState(pc - 1));
 				bld.append('\t');
 			}
 
@@ -314,15 +315,41 @@ public class ControlFlowTraversal {
 
 				if (opcode == OpCode.CLOSURE) {
 					appendHintDelimiter(hint);
-					hint.append("upvals: ").append(closureHint(((Instruction) node).insn));
+					hint.append("capture ").append(closureHint(((Instruction) node).insn));
 				}
 				if (opcode == OpCode.JMP || opcode == OpCode.FORPREP || opcode == OpCode.FORLOOP) {
-					int offset = (OpCode.arg_sBx(insn));
+					int offset = OpCode.arg_sBx(insn);
+					int min = OpCode.arg_A(insn);
 					int dest = pc + offset + 1;
 
 					if (offset < 0) {
 						appendHintDelimiter(hint);
-						hint.append("close ").append(dest).append(" to ").append(pc);
+						hint.append("freshen regs >= ").append(min).append(" cap'd in ").append(dest).append(" to ").append(pc).append(" = {");
+
+						// which registers have been captured in this range?
+						IntBuffer caps = new IntBuffer();
+
+						for (int i = dest - 1; i < pc; i++) {
+							int in = prototype.getCode().get(i);
+							if (OpCode.opCode(in) == OpCode.CLOSURE) {
+								Prototype nested = prototype.getNestedPrototypes().get(OpCode.arg_Bx(in));
+								for (Prototype.UpvalueDesc uvd : nested.getUpValueDescriptions()) {
+									if (uvd.inStack && uvd.index > min) {
+										caps.append(uvd.index);
+									}
+								}
+							}
+						}
+
+						{
+							StringBuilder bx = new StringBuilder();
+							for (int i = 0; i < caps.length(); i++) {
+								if (bx.length() > 0) bx.append(", ");
+								bx.append(caps.get(i));
+							}
+							hint.append(bx.toString()).append("}");
+						}
+
 					}
 				}
 
