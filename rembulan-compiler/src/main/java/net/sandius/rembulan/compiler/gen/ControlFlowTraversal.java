@@ -317,39 +317,13 @@ public class ControlFlowTraversal {
 					appendHintDelimiter(hint);
 					hint.append("capture ").append(closureHint(((Instruction) node).insn));
 				}
-				if (opcode == OpCode.JMP || opcode == OpCode.FORPREP || opcode == OpCode.FORLOOP) {
-					int offset = OpCode.arg_sBx(insn);
-					int min = OpCode.arg_A(insn);
-					int dest = pc + offset + 1;
+				if (opcode == OpCode.JMP) {
+					int a = OpCode.arg_A(insn);
 
-					if (offset < 0) {
+					if (a != 0) {
 						appendHintDelimiter(hint);
-						hint.append("freshen regs >= ").append(min).append(" cap'd in ").append(dest).append(" to ").append(pc).append(" = {");
-
-						// which registers have been captured in this range?
-						IntBuffer caps = new IntBuffer();
-
-						for (int i = dest - 1; i < pc; i++) {
-							int in = prototype.getCode().get(i);
-							if (OpCode.opCode(in) == OpCode.CLOSURE) {
-								Prototype nested = prototype.getNestedPrototypes().get(OpCode.arg_Bx(in));
-								for (Prototype.UpvalueDesc uvd : nested.getUpValueDescriptions()) {
-									if (uvd.inStack && uvd.index > min) {
-										caps.append(uvd.index);
-									}
-								}
-							}
-						}
-
-						{
-							StringBuilder bx = new StringBuilder();
-							for (int i = 0; i < caps.length(); i++) {
-								if (bx.length() > 0) bx.append(", ");
-								bx.append(caps.get(i));
-							}
-							hint.append(bx.toString()).append("}");
-						}
-
+						int min = a - 1;
+						hint.append("freshen regs >= ").append(min);
 					}
 				}
 
