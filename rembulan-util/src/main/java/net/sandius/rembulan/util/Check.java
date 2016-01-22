@@ -18,6 +18,18 @@ public abstract class Check {
 		}
 	}
 
+	public static void isEq(Object a, Object b) {
+		if (a != b) {
+			throw new IllegalArgumentException();
+		}
+	}
+
+	public static void isEq(int a, int b) {
+		if (a != b) {
+			throw new IllegalArgumentException();
+		}
+	}
+
 	public static void numOfArgs(Object[] args, int num) {
 		Check.notNull(args);
 

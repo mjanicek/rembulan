@@ -17,20 +17,20 @@ public class NInsn {
 		NNode ownNode;
 		switch (opcode) {
 			case OpCode.MOVE:
-				ownNode = new Move(a, b).append(pcToLabel.get(pc + 1));
+				ownNode = new Move(a, b).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.LOADK:
-				ownNode = new LoadK(a, b).append(pcToLabel.get(pc + 1));
+				ownNode = new LoadK(a, b).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 
 			case OpCode.LOADNIL:
-				ownNode = new LoadNil(a, b).append(pcToLabel.get(pc + 1));
+				ownNode = new LoadNil(a, b).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.LOADBOOL:
-				ownNode = new LoadBool(a, b).append(pcToLabel.get(pc + (c != 0 ? 2 : 1)));
+				ownNode = new LoadBool(a, b).followedBy(pcToLabel.get(pc + (c != 0 ? 2 : 1)));
 				break;
 
 			case OpCode.ADD:
@@ -60,7 +60,7 @@ public class NInsn {
 					case OpCode.SHL:  op = BinOpType.SHL; break;
 					case OpCode.SHR:  op = BinOpType.SHR; break;
 				}
-				ownNode = new BinOp(op, a, b, c).append(pcToLabel.get(pc + 1));
+				ownNode = new BinOp(op, a, b, c).followedBy(pcToLabel.get(pc + 1));
 
 			}
 				break;
@@ -76,19 +76,19 @@ public class NInsn {
 					case OpCode.NOT:  op = UnOpType.NOT; break;
 					case OpCode.LEN:  op = UnOpType.LEN; break;
 				}
-				ownNode = new UnOp(op, a, b).append(pcToLabel.get(pc + 1));
+				ownNode = new UnOp(op, a, b).followedBy(pcToLabel.get(pc + 1));
 			}
 				break;
 
 			case OpCode.CONCAT:
-				ownNode = new Concat(a, b, c).append(pcToLabel.get(pc + 1));
+				ownNode = new Concat(a, b, c).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 
 			case OpCode.JMP: {
 				int dest = pc + sbx + 1;
 
-				if (a > 0) ownNode = new NCloseUpvalues(a - 1).append(pcToLabel.get(dest));
+				if (a > 0) ownNode = new NCloseUpvalues(a - 1).followedBy(pcToLabel.get(dest));
 				else ownNode = pcToLabel.get(dest);
 			}
 				break;
@@ -98,66 +98,61 @@ public class NInsn {
 				NLabel right = pcToLabel.get(pc + 2);
 				Eq eq = new Eq(a, b, c);
 
-				// TODO: inequality!
-				eq.trueBranch = left;
-				eq.falseBranch = right;
-
-				ownNode = eq;
+				// TODO: NEQ has the branches swapped?
+				ownNode = eq.withTrueBranch(left).withFalseBranch(right);
 			}
 				break;
 
 			case OpCode.CALL:
-				ownNode = new Call(a, b, c).append(pcToLabel.get(pc + 1));
+				ownNode = new Call(a, b, c).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.FORPREP:
-				ownNode = new ForPrep(a, b).append(pcToLabel.get(pc + sbx + 1));
+				ownNode = new ForPrep(a, b).followedBy(pcToLabel.get(pc + sbx + 1));
 				break;
 
 			case OpCode.RETURN:
-				ownNode = new NAccountEnd().append(new Return(a, b));
+				ownNode = new NAccountEnd().followedBy(new Return(a, b));
 				break;
 
 			case OpCode.FORLOOP: {
 				ForLoop fl = new ForLoop(a, sbx);
 				NLabel cont = pcToLabel.get(pc + sbx + 1);
 				NLabel exit = pcToLabel.get(pc + 1);
-				fl.trueBranch = cont;
-				fl.falseBranch = exit;
-				ownNode = fl;
+				ownNode = fl.withTrueBranch(cont).withFalseBranch(exit);
 			}
 				break;
 
 			case OpCode.CLOSURE:
-				ownNode = new NClosure(a, b).append(pcToLabel.get(pc + 1));
+				ownNode = new NClosure(a, b).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.GETUPVAL:
-				ownNode = new GetUpVal(a, b).append(pcToLabel.get(pc + 1));
+				ownNode = new GetUpVal(a, b).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.GETTABUP:
-				ownNode = new GetTabUp(a, b).append(pcToLabel.get(pc + 1));
+				ownNode = new GetTabUp(a, b).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.GETTABLE:
-				ownNode = new GetTable(a, b, c).append(pcToLabel.get(pc + 1));
+				ownNode = new GetTable(a, b, c).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.SETTABUP:
-				ownNode = new SetTabUp(a, b, c).append(pcToLabel.get(pc + 1));
+				ownNode = new SetTabUp(a, b, c).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.SETUPVAL:
-				ownNode = new SetUpVal(a, b).append(pcToLabel.get(pc + 1));
+				ownNode = new SetUpVal(a, b).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.SETTABLE:
-				ownNode = new SetTable(a, b, c).append(pcToLabel.get(pc + 1));
+				ownNode = new SetTable(a, b, c).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.NEWTABLE:
-				ownNode = new NewTable(a, b, c).append(pcToLabel.get(pc + 1));
+				ownNode = new NewTable(a, b, c).followedBy(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.SELF:
@@ -171,11 +166,11 @@ public class NInsn {
 		}
 
 		// CPU accounting
-		ownNode = new NAccountOne().append(ownNode);
+		ownNode = new NAccountOne().followedBy(ownNode);
 
 		// line info
 		if (line > 0) {
-			ownNode = new NLine(line).append(ownNode);
+			ownNode = new NLine(line).followedBy(ownNode);
 		}
 
 		return ownNode;
