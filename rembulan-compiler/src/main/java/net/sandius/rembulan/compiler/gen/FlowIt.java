@@ -117,24 +117,8 @@ public class FlowIt {
 		}
 		else {
 			inDegree.put(n, 1);
-			if (n instanceof NEntry) {
-				NEntry e = (NEntry) n;
-				reachabilityRecurse(e.next(), inDegree);
-			}
-			else if (n instanceof NUnconditional) {
-				NUnconditional u = (NUnconditional) n;
-				reachabilityRecurse(u.next(), inDegree);
-			}
-			else if (n instanceof NBranch) {
-				NBranch b = (NBranch) n;
-				reachabilityRecurse(b.trueBranch(), inDegree);
-				reachabilityRecurse(b.falseBranch(), inDegree);
-			}
-			else if (n instanceof NTerminal) {
-				// no-op
-			}
-			else {
-				throw new IllegalStateException();
+			for (NNode out : n.out()) {
+				reachabilityRecurse(out, inDegree);
 			}
 		}
 	}

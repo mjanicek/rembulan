@@ -24,7 +24,12 @@ public abstract class NUnconditional extends NNode {
 
 	@Override
 	public final Iterable<NNode> out() {
-		return Collections.singleton(next);
+		if (next != null) {
+			return Collections.singleton(next);
+		}
+		else {
+			return Collections.emptySet();
+		}
 	}
 
 	@Override
