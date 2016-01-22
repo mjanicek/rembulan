@@ -90,4 +90,8 @@ public final class NEntry extends NNode {
 		return this;
 	}
 
+	public NEntry enter(NNode n) {
+		return enter(NLabel.guard(n));
+	}
+
 }

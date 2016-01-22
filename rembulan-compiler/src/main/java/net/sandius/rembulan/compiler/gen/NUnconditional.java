@@ -70,8 +70,22 @@ public abstract class NUnconditional extends NNode {
 			n.replaceOutgoing(this, nxt);
 			nxt.attachIncoming(n);
 		}
-
 	}
 
+	public void insertBefore(NNode n) {
+		Check.notNull(n);
+
+		if (next != null) {
+			next.detachIncoming(this);
+		}
+
+		for (NNode m : n.in()) {
+			m.replaceOutgoing(n, this);
+			n.detachIncoming(m);
+		}
+
+		next = n;
+		n.attachIncoming(this);
+	}
 
 }

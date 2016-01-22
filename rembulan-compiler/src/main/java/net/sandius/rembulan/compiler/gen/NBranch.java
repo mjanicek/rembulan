@@ -77,7 +77,11 @@ public abstract class NBranch extends NNode {
 		return this;
 	}
 
-	public NBranch withFalseBranch(NLabel n) {
+	public NBranch withTrueBranch(NNode n) {
+		return withTrueBranch(NLabel.guard(n));
+	}
+
+	private NBranch withFalseBranch(NLabel n) {
 		Check.notNull(n);
 
 		if (falseBranch != null) {
@@ -88,6 +92,10 @@ public abstract class NBranch extends NNode {
 		n.attachIncoming(this);
 
 		return this;
+	}
+
+	public NBranch withFalseBranch(NNode n) {
+		return withFalseBranch(NLabel.guard(n));
 	}
 
 }
