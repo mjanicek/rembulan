@@ -6,12 +6,10 @@ import java.util.Collections;
 
 public abstract class NUnconditional extends NSingleInput {
 
-	private NNode prev;
 	private NNode next;
 
 	public NUnconditional(NNode next) {
 		super();
-		this.prev = null;
 		this.next = next;
 	}
 
