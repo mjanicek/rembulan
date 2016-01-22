@@ -7,8 +7,8 @@ import java.util.Set;
 
 public abstract class NBranch extends NNode {
 
-	private NNode trueBranch;
-	private NNode falseBranch;
+	private NLabel trueBranch;
+	private NLabel falseBranch;
 
 	public NBranch() {
 		super();
@@ -41,25 +41,30 @@ public abstract class NBranch extends NNode {
 	@Override
 	public final void replaceOutgoing(NNode n, NNode replacement) {
 		Check.notNull(n);
+		if (!(replacement instanceof NLabel)) {
+			throw new IllegalArgumentException("Replacement is not a label");
+		}
+
+		NLabel rep = (NLabel) replacement;
 
 		if (n == trueBranch || n == falseBranch) {
-			if (n == trueBranch) trueBranch = replacement;
-			if (n == falseBranch) falseBranch = replacement;
+			if (n == trueBranch) trueBranch = rep;
+			if (n == falseBranch) falseBranch = rep;
 		}
 		else {
 			throw new IllegalArgumentException("Node not a branch: " + n.toString());
 		}
 	}
 
-	public NNode trueBranch() {
+	public NLabel trueBranch() {
 		return trueBranch;
 	}
 
-	public NNode falseBranch() {
+	public NLabel falseBranch() {
 		return falseBranch;
 	}
 
-	public NBranch withTrueBranch(NNode n) {
+	public NBranch withTrueBranch(NLabel n) {
 		Check.notNull(n);
 
 		if (trueBranch != null) {
@@ -72,7 +77,7 @@ public abstract class NBranch extends NNode {
 		return this;
 	}
 
-	public NBranch withFalseBranch(NNode n) {
+	public NBranch withFalseBranch(NLabel n) {
 		Check.notNull(n);
 
 		if (falseBranch != null) {

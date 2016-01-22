@@ -47,17 +47,20 @@ public class FlowIt {
 		Set<NEntry> entryPoints = new HashSet<>();
 		entryPoints.add(callEntry);
 
-		removeUnnecessaryLabels(entryPoints);
+		removeInnerLabels(entryPoints);
 
 		System.out.println();
 		printNodes(entryPoints);
 
 	}
 
-	private void removeUnnecessaryLabels(Iterable<NEntry> entryPoints) {
+	private void removeInnerLabels(Iterable<NEntry> entryPoints) {
 		for (NNode n : accessibleNodes(entryPoints)) {
 			if (n instanceof NLabel && n.inDegree() <= 1) {
-				((NLabel) n).remove();
+				// only do this when the incoming edge is an unconditional node
+				if (n.in().iterator().next() instanceof NUnconditional) {
+					((NLabel) n).remove();
+				}
 			}
 		}
 	}

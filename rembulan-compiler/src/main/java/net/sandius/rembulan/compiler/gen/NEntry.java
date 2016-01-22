@@ -3,10 +3,12 @@ package net.sandius.rembulan.compiler.gen;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public final class NEntry extends NNode {
 
-	private NNode next;
+	private NLabel next;
 
 	public NEntry() {
 		super();
@@ -50,7 +52,9 @@ public final class NEntry extends NNode {
 	@Override
 	public Iterable<NNode> out() {
 		if (next != null) {
-			return Collections.singleton(next);
+			Set<NNode> result = new HashSet<>();
+			result.add(next);
+			return result;
 		}
 		else {
 			return Collections.emptySet();
@@ -66,11 +70,14 @@ public final class NEntry extends NNode {
 	public void replaceOutgoing(NNode n, NNode replacement) {
 		Check.notNull(n);
 		Check.isEq(n, next);
+		if (!(replacement instanceof NLabel)) {
+			throw new IllegalArgumentException("Replacement is not a label");
+		}
 
-		next = replacement;
+		next = (NLabel) replacement;
 	}
 
-	public NEntry enter(NNode n) {
+	public NEntry enter(NLabel n) {
 		Check.notNull(n);
 
 		if (next != null) {
