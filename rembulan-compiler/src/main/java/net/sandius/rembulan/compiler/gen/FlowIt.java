@@ -55,7 +55,7 @@ public class FlowIt {
 	}
 
 	private void removeInnerLabels(Iterable<NEntry> entryPoints) {
-		for (NNode n : accessibleNodes(entryPoints)) {
+		for (NNode n : reachableNodes(entryPoints)) {
 			if (n instanceof NLabel && n.inDegree() <= 1) {
 				// only do this when the incoming edge is an unconditional node
 				if (n.in().iterator().next() instanceof NUnconditional) {
@@ -67,7 +67,7 @@ public class FlowIt {
 
 	private void printNodes(Iterable<NEntry> entryPoints) {
 		ArrayList<NNode> nodes = new ArrayList<>();
-		for (NNode n : accessibleNodes(entryPoints)) {
+		for (NNode n : reachableNodes(entryPoints)) {
 			nodes.add(n);
 		}
 
@@ -96,19 +96,19 @@ public class FlowIt {
 		System.out.println("]");
 	}
 
-	private Iterable<NNode> accessibleNodes(Iterable<NEntry> entryPoints) {
-		return accessibility(entryPoints).keySet();
+	private Iterable<NNode> reachableNodes(Iterable<NEntry> entryPoints) {
+		return reachability(entryPoints).keySet();
 	}
 
-	private Map<NNode, Integer> accessibility(Iterable<NEntry> entryPoints) {
+	private Map<NNode, Integer> reachability(Iterable<NEntry> entryPoints) {
 		Map<NNode, Integer> inDegree = new HashMap<>();
 		for (NEntry entry : entryPoints) {
-			accessibilityRecurse(entry, inDegree);
+			reachabilityRecurse(entry, inDegree);
 		}
 		return Collections.unmodifiableMap(inDegree);
 	}
 
-	private void accessibilityRecurse(NNode n, Map<NNode, Integer> inDegree) {
+	private void reachabilityRecurse(NNode n, Map<NNode, Integer> inDegree) {
 		if (inDegree.containsKey(n)) {
 			if (n instanceof NEntry) {
 				throw new IllegalStateException("Re-entering an entry node");
@@ -119,16 +119,16 @@ public class FlowIt {
 			inDegree.put(n, 1);
 			if (n instanceof NEntry) {
 				NEntry e = (NEntry) n;
-				accessibilityRecurse(e.next(), inDegree);
+				reachabilityRecurse(e.next(), inDegree);
 			}
 			else if (n instanceof NUnconditional) {
 				NUnconditional u = (NUnconditional) n;
-				accessibilityRecurse(u.next(), inDegree);
+				reachabilityRecurse(u.next(), inDegree);
 			}
 			else if (n instanceof NBranch) {
 				NBranch b = (NBranch) n;
-				accessibilityRecurse(b.trueBranch(), inDegree);
-				accessibilityRecurse(b.falseBranch(), inDegree);
+				reachabilityRecurse(b.trueBranch(), inDegree);
+				reachabilityRecurse(b.falseBranch(), inDegree);
 			}
 			else if (n instanceof NTerminal) {
 				// no-op
