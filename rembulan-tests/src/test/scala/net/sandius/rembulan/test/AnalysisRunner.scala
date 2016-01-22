@@ -3,7 +3,7 @@ package net.sandius.rembulan.test
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 import java.io.PrintWriter
-import net.sandius.rembulan.compiler.gen.ControlFlowTraversal
+import net.sandius.rembulan.compiler.gen.{FlowIt, ControlFlowTraversal}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinterVisitor, PrototypePrinter}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
 import net.sandius.rembulan.util.IntBuffer
@@ -230,7 +230,28 @@ object AnalysisRunner {
       }
     }
 
-    printTraversal(proto)
+    def printFlow(proto: Prototype, main: Boolean = true): Unit = {
+      if (main) {
+        println("Main (" + PrototypePrinter.pseudoAddr(proto) + "):")
+      }
+      else {
+        println()
+        println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
+      }
+
+      val flow = new FlowIt(proto)
+      flow.go()
+
+      val it = proto.getNestedPrototypes.iterator()
+      while (it.hasNext) {
+        val child = it.next()
+        printFlow(child, false)
+      }
+    }
+
+    printFlow(proto)
+
+//    printTraversal(proto)
 
   }
 

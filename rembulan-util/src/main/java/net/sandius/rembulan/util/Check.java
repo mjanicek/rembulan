@@ -12,6 +12,12 @@ public abstract class Check {
 		}
 	}
 
+	public static void isNull(Object o) {
+		if (o != null) {
+			throw new IllegalArgumentException();
+		}
+	}
+
 	public static void numOfArgs(Object[] args, int num) {
 		Check.notNull(args);
 

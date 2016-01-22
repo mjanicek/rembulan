@@ -67,6 +67,10 @@ public class Slots {
 		return new Slots(states);
 	}
 
+	public int size() {
+		return states.length;
+	}
+
 	public ReadOnlyArray<SlotState> states() {
 		return ReadOnlyArray.wrap(states);
 	}
