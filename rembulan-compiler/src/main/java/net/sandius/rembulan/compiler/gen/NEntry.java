@@ -20,11 +20,6 @@ public final class NEntry extends NNode {
 		return "ENTRY";
 	}
 
-	@Override
-	protected String nextToString() {
-		return next != null ? next.toString() : "NULL";
-	}
-
 	public NNode next() {
 		return next;
 	}

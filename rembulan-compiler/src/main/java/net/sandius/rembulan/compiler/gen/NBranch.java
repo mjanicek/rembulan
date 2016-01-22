@@ -5,7 +5,7 @@ import net.sandius.rembulan.util.Check;
 import java.util.HashSet;
 import java.util.Set;
 
-public abstract class NBranch extends NNode {
+public abstract class NBranch extends NSingleInput {
 
 	private NLabel trueBranch;
 	private NLabel falseBranch;
@@ -14,15 +14,6 @@ public abstract class NBranch extends NNode {
 		super();
 		this.trueBranch = null;
 		this.falseBranch = null;
-	}
-
-	@Override
-	public String nextToString() {
-		return "true:("
-				+ (trueBranch != null ? trueBranch.selfToString() : "NULL")
-				+ "), false:("
-				+ (falseBranch != null ? falseBranch.selfToString() : "NULL")
-				+ ")";
 	}
 
 	@Override

@@ -3,15 +3,20 @@ package net.sandius.rembulan.compiler.gen;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class NLabel extends NNode {
 
 	public final String name;
+
+	private final Set<NNode> in;
 	private NNode next;
 
 	public NLabel(String name, NNode n) {
 		super();
 		this.name = name;
+		this.in = new HashSet<>();
 		this.next = n;
 	}
 
@@ -29,12 +34,17 @@ public class NLabel extends NNode {
 	}
 
 	@Override
-	public String nextToString() {
-		return next != null ? next.toString() : "NULL";
+	public Iterable<NNode> in() {
+		return in;
 	}
 
 	@Override
-	public final Iterable<NNode> out() {
+	public int inDegree() {
+		return in.size();
+	}
+
+	@Override
+	public Iterable<NNode> out() {
 		if (next != null) {
 			return Collections.singleton(next);
 		}
@@ -44,8 +54,18 @@ public class NLabel extends NNode {
 	}
 
 	@Override
-	public final int outDegree() {
+	public int outDegree() {
 		return next != null ? 1 : 0;
+	}
+
+	@Override
+	public void detachIncoming(NNode n) {
+		in.remove(n);
+	}
+
+	@Override
+	public void attachIncoming(NNode n) {
+		in.add(n);
 	}
 
 	@Override

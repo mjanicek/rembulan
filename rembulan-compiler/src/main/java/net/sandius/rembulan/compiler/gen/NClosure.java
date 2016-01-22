@@ -14,16 +14,6 @@ public class NClosure extends NUnconditional {
 	}
 
 	@Override
-	public Slots registerEffect(Prototype proto, Slots slots) {
-		for (Prototype.UpvalueDesc uvd : proto.getNestedPrototypes().get(index).getUpValueDescriptions()) {
-			if (uvd.inStack) {
-				slots.capture(uvd.index);
-			}
-		}
-		return slots;
-	}
-
-	@Override
 	public String selfToString() {
 		return "Closure(" + dest + "," + index + ")";
 	}

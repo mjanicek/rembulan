@@ -4,22 +4,19 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.Collections;
 
-public abstract class NUnconditional extends NNode {
+public abstract class NUnconditional extends NSingleInput {
 
+	private NNode prev;
 	private NNode next;
 
 	public NUnconditional(NNode next) {
 		super();
+		this.prev = null;
 		this.next = next;
 	}
 
 	public NUnconditional() {
 		this(null);
-	}
-
-	@Override
-	public String nextToString() {
-		return next != null ? next.toString() : "NULL";
 	}
 
 	@Override
