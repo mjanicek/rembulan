@@ -1,5 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.util.Check;
+
 import java.util.Iterator;
 
 public class LinearSeq extends Linear {
@@ -52,6 +54,17 @@ public class LinearSeq extends Linear {
 
 	public void grow() {
 		while (growRight());  // just grow as much as possible
+	}
+
+	public void apply(LinearSeqTransformation tf) {
+		Check.notNull(tf);
+		tf.apply(this);
+	}
+
+	public void insertAtBeginning(Linear node) {
+		Sink n = beginSentinel.next();
+		beginSentinel.appendSink(node);
+		node.appendSink(n);
 	}
 
 	private class LinearIterator implements Iterator<Linear> {

@@ -67,6 +67,30 @@ public abstract class Linear implements Node, Sink, Src {
 		this.prev = n;
 	}
 
+	public void remove() {
+		Src p = this.prev();
+		Sink n = this.next();
+
+		p.setNext(n);
+		n.setPrev(p);
+
+		this.setPrev(Nodes.DUMMY_SRC);
+		this.setNext(Nodes.DUMMY_SINK);
+	}
+
+	public void replaceWith(Linear replacement) {
+		Src p = this.prev();
+		Sink n = this.next();
+
+		p.setNext(replacement);
+		replacement.setPrev(p);
+		replacement.setNext(n);
+		n.setPrev(replacement);
+
+		this.setPrev(Nodes.DUMMY_SRC);
+		this.setNext(Nodes.DUMMY_SINK);
+	}
+
 	@Override
 	public void accept(NodeVisitor visitor) {
 		if (visitor.visitNode(this)) {

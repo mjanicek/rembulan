@@ -1,13 +1,20 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.compiler.gen.block.AccountingNode;
 import net.sandius.rembulan.compiler.gen.block.Entry;
+import net.sandius.rembulan.compiler.gen.block.LineInfo;
+import net.sandius.rembulan.compiler.gen.block.Linear;
+import net.sandius.rembulan.compiler.gen.block.LinearPredicate;
 import net.sandius.rembulan.compiler.gen.block.LinearSeq;
+import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
+import net.sandius.rembulan.compiler.gen.block.Predicates;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
@@ -15,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -56,10 +64,57 @@ public class FlowIt {
 		inlineInnerJumps(entryPoints);
 		makeBlocks(entryPoints);
 
+		applyTransformation(entryPoints, new CollectCPUAccounting());
+
+		// remove line info nodes
+//		applyTransformation(entryPoints, new LinearSeqTransformation.Remove(Predicates.isClass(LineInfo.class)));
+
 //		System.out.println();
 //		printNodes(entryPoints);
 
 		return reachabilityEdges(entryPoints);
+	}
+
+	private static class CollectCPUAccounting extends LinearSeqTransformation {
+
+		@Override
+		public void apply(LinearSeq seq) {
+			List<AccountingNode> accountingNodes = new ArrayList<>();
+
+			int cost = 0;
+
+			for (Node n : seq.nodes()) {
+				if (n instanceof AccountingNode) {
+					if (n instanceof AccountingNode.Tick) {
+						cost += 1;
+					}
+					else if (n instanceof AccountingNode.Sum) {
+						cost += ((AccountingNode.Sum) n).cost;
+					}
+					accountingNodes.add((AccountingNode) n);
+				}
+			}
+
+			for (AccountingNode an : accountingNodes) {
+				// remove all nodes
+				an.remove();
+			}
+
+			if (cost > 0) {
+				// insert cost node at the beginning
+				seq.insertAtBeginning(new AccountingNode.Sum(cost));
+			}
+		}
+
+	}
+
+	private void applyTransformation(Iterable<Entry> entryPoints, LinearSeqTransformation tf) {
+		for (Node n : reachableNodes(entryPoints)) {
+			if (n instanceof LinearSeq) {
+				LinearSeq seq = (LinearSeq) n;
+				seq.apply(tf);
+			}
+		}
 	}
 
 	private void inlineInnerJumps(Iterable<Entry> entryPoints) {
