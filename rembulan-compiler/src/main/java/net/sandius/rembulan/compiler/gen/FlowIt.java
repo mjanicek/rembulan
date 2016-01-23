@@ -25,7 +25,7 @@ public class FlowIt {
 		this.prototype = prototype;
 	}
 
-	public void go() {
+	public Map<Node, Edges> go() {
 		IntVector code = prototype.getCode();
 		Target[] targets = new Target[code.length()];
 		for (int pc = 0; pc < targets.length; pc++) {
@@ -54,9 +54,10 @@ public class FlowIt {
 
 		inlineInnerJumps(entryPoints);
 
-		System.out.println();
-		printNodes(entryPoints);
+//		System.out.println();
+//		printNodes(entryPoints);
 
+		return reachabilityEdges(entryPoints);
 	}
 
 	private void inlineInnerJumps(Iterable<Entry> entryPoints) {
@@ -71,7 +72,7 @@ public class FlowIt {
 		}
 	}
 
-	private static class Edges {
+	public static class Edges {
 		// FIXME: may in principle be multisets
 		public final Set<Node> in;
 		public final Set<Node> out;

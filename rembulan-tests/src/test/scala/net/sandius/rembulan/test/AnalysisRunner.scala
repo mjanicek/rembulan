@@ -3,6 +3,7 @@ package net.sandius.rembulan.test
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 import java.io.PrintWriter
+import net.sandius.rembulan.compiler.gen.block.Node
 import net.sandius.rembulan.compiler.gen.{FlowIt, ControlFlowTraversal}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinterVisitor, PrototypePrinter}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
@@ -240,7 +241,22 @@ object AnalysisRunner {
       }
 
       val flow = new FlowIt(proto)
-      flow.go()
+
+      val flowEdges = flow.go().toMap
+
+      val vertices = flowEdges.keySet
+      val in = (for ((n, es) <- flowEdges) yield (es.in.toSet map { e: Node => (e, n) })).flatten
+      val out = (for ((n, es) <- flowEdges) yield (es.out.toSet map { e: Node => (n, e) })).flatten
+      val edges = (in ++ out).toSet
+
+      val graph = Graph(
+        vertices = vertices,
+        edges = edges.toList
+      )
+
+      val ascii = GraphLayout.renderGraph(graph)
+      println()
+      println(ascii)
 
       val it = proto.getNestedPrototypes.iterator()
       while (it.hasNext) {
