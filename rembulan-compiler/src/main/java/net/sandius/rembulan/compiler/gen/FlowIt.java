@@ -66,7 +66,10 @@ public class FlowIt {
 
 		applyTransformation(entryPoints, new CollectCPUAccounting());
 
-		// remove line info nodes
+		// remove repeated line info nodes
+		applyTransformation(entryPoints, new RemoveRedundantLineNodes());
+
+		// remove all line info nodes
 //		applyTransformation(entryPoints, new LinearSeqTransformation.Remove(Predicates.isClass(LineInfo.class)));
 
 //		System.out.println();
@@ -83,7 +86,7 @@ public class FlowIt {
 
 			int cost = 0;
 
-			for (Node n : seq.nodes()) {
+			for (Linear n : seq.nodes()) {
 				if (n instanceof AccountingNode) {
 					if (n instanceof AccountingNode.Tick) {
 						cost += 1;
@@ -104,6 +107,32 @@ public class FlowIt {
 				// insert cost node at the beginning
 				seq.insertAtBeginning(new AccountingNode.Sum(cost));
 			}
+		}
+
+	}
+
+	private static class RemoveRedundantLineNodes extends LinearSeqTransformation {
+
+		@Override
+		public void apply(LinearSeq seq) {
+			int line = -1;
+			List<Linear> toBeRemoved = new ArrayList<>();
+
+			for (Linear n : seq.nodes()) {
+				if (n instanceof LineInfo) {
+					LineInfo lineInfoNode = (LineInfo) n;
+					if (lineInfoNode.line == line) {
+						// no need to keep this one
+						toBeRemoved.add(lineInfoNode);
+					}
+					line = lineInfoNode.line;
+				}
+			}
+
+			for (Linear n : toBeRemoved) {
+				n.remove();
+			}
+
 		}
 
 	}
