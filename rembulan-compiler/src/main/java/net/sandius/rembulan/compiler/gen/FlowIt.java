@@ -1,5 +1,11 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.compiler.gen.block.Entry;
+import net.sandius.rembulan.compiler.gen.block.Node;
+import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
+import net.sandius.rembulan.compiler.gen.block.Nodes;
+import net.sandius.rembulan.compiler.gen.block.Target;
+import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -21,18 +27,17 @@ public class FlowIt {
 
 	public void go() {
 		IntVector code = prototype.getCode();
-		NLabel[] labels = new NLabel[code.length()];
-		for (int i = 0; i < labels.length; i++) {
-			labels[i] = new NLabel(Integer.toString(i + 1));
+		Target[] targets = new Target[code.length()];
+		for (int pc = 0; pc < targets.length; pc++) {
+			targets[pc] = new Target(Integer.toString(pc + 1));
 		}
 
-		ReadOnlyArray<NLabel> pcLabels = ReadOnlyArray.wrap(labels);
+		ReadOnlyArray<Target> pcLabels = ReadOnlyArray.wrap(targets);
 
-		for (int i = 0; i < pcLabels.size(); i++) {
-			int insn = code.get(i);
-			int line = prototype.getLineAtPC(i);
-			NNode node = NInsn.translate(insn, i, line, pcLabels);
-			pcLabels.get(i).followedBy(node);
+		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator();
+
+		for (int pc = 0; pc < pcLabels.size(); pc++) {
+			translator.translate(code.get(pc), pc, prototype.getLineAtPC(pc), pcLabels);
 		}
 
 //		System.out.println("[");
@@ -42,51 +47,111 @@ public class FlowIt {
 //		}
 //		System.out.println("]");
 
-		NEntry callEntry = new NEntry().enter(pcLabels.get(0));
+		Entry callEntry = new Entry("main", pcLabels.get(0));
 
-		Set<NEntry> entryPoints = new HashSet<>();
+		Set<Entry> entryPoints = new HashSet<>();
 		entryPoints.add(callEntry);
 
-		removeInnerLabels(entryPoints);
+		inlineInnerJumps(entryPoints);
 
 		System.out.println();
 		printNodes(entryPoints);
 
 	}
 
-	private void removeInnerLabels(Iterable<NEntry> entryPoints) {
-		for (NNode n : reachableNodes(entryPoints)) {
-			if (n instanceof NLabel && n.inDegree() <= 1) {
-				// only do this when the incoming edge is an unconditional node
-				if (n.in().iterator().next() instanceof NUnconditional) {
-					((NLabel) n).remove();
+	private void inlineInnerJumps(Iterable<Entry> entryPoints) {
+		for (Node n : reachableNodes(entryPoints)) {
+			if (n instanceof Target) {
+				Target t = (Target) n;
+				UnconditionalJump jmp = t.optIncomingJump();
+				if (jmp != null) {
+					Nodes.inline(jmp);
 				}
 			}
 		}
 	}
 
-	private void printNodes(Iterable<NEntry> entryPoints) {
-		ArrayList<NNode> nodes = new ArrayList<>();
-		for (NNode n : reachableNodes(entryPoints)) {
+	private static class Edges {
+		// FIXME: may in principle be multisets
+		public final Set<Node> in;
+		public final Set<Node> out;
+
+		public Edges() {
+			this.in = new HashSet<>();
+			this.out = new HashSet<>();
+		}
+	}
+
+	private Map<Node, Edges> reachabilityEdges(Iterable<Entry> entryPoints) {
+		final Map<Node, Integer> timesVisited = new HashMap<>();
+		final Map<Node, Edges> edges = new HashMap<>();
+
+		NodeVisitor visitor = new NodeVisitor() {
+
+			@Override
+			public boolean visitNode(Node node) {
+				if (timesVisited.containsKey(node)) {
+					timesVisited.put(node, timesVisited.get(node) + 1);
+					return false;
+				}
+				else {
+					timesVisited.put(node, 1);
+					if (!edges.containsKey(node)) {
+						edges.put(node, new Edges());
+					}
+					return true;
+				}
+			}
+
+			@Override
+			public void visitEdge(Node from, Node to) {
+				if (!edges.containsKey(from)) {
+					edges.put(from, new Edges());
+				}
+				if (!edges.containsKey(to)) {
+					edges.put(to, new Edges());
+				}
+
+				Edges fromEdges = edges.get(from);
+				Edges toEdges = edges.get(to);
+
+				fromEdges.out.add(to);
+				toEdges.in.add(from);
+			}
+		};
+
+		for (Entry entry : entryPoints) {
+			entry.accept(visitor);
+		}
+
+		return Collections.unmodifiableMap(edges);
+	}
+
+	private void printNodes(Iterable<Entry> entryPoints) {
+		ArrayList<Node> nodes = new ArrayList<>();
+		Map<Node, Edges> edges = reachabilityEdges(entryPoints);
+
+		for (Node n : edges.keySet()) {
 			nodes.add(n);
 		}
 
 		System.out.println("[");
 		for (int i = 0; i < nodes.size(); i++) {
-			NNode n = nodes.get(i);
+			Node n = nodes.get(i);
+			Edges e = edges.get(n);
 
 			System.out.print("\t" + i + ": ");
 			System.out.print("{ ");
-			for (NNode m : n.in()) {
+			for (Node m : e.in) {
 				int idx = nodes.indexOf(m);
 				System.out.print(idx + " ");
 			}
 			System.out.print("} -> ");
 
-			System.out.print(n.selfToString());
+			System.out.print(n.toString());
 
 			System.out.print(" -> { ");
-			for (NNode m : n.out()) {
+			for (Node m : e.out) {
 				int idx = nodes.indexOf(m);
 				System.out.print(idx + " ");
 			}
@@ -96,31 +161,38 @@ public class FlowIt {
 		System.out.println("]");
 	}
 
-	private Iterable<NNode> reachableNodes(Iterable<NEntry> entryPoints) {
+	private Iterable<Node> reachableNodes(Iterable<Entry> entryPoints) {
 		return reachability(entryPoints).keySet();
 	}
 
-	private Map<NNode, Integer> reachability(Iterable<NEntry> entryPoints) {
-		Map<NNode, Integer> inDegree = new HashMap<>();
-		for (NEntry entry : entryPoints) {
-			reachabilityRecurse(entry, inDegree);
+	private Map<Node, Integer> reachability(Iterable<Entry> entryPoints) {
+		final Map<Node, Integer> inDegree = new HashMap<>();
+
+		NodeVisitor visitor = new NodeVisitor() {
+
+			@Override
+			public boolean visitNode(Node n) {
+				if (inDegree.containsKey(n)) {
+					inDegree.put(n, inDegree.get(n) + 1);
+					return false;
+				}
+				else {
+					inDegree.put(n, 1);
+					return true;
+				}
+			}
+
+			@Override
+			public void visitEdge(Node from, Node to) {
+				// no-op
+			}
+
+		};
+
+		for (Entry entry : entryPoints) {
+			entry.accept(visitor);
 		}
 		return Collections.unmodifiableMap(inDegree);
-	}
-
-	private void reachabilityRecurse(NNode n, Map<NNode, Integer> inDegree) {
-		if (inDegree.containsKey(n)) {
-			if (n instanceof NEntry) {
-				throw new IllegalStateException("Re-entering an entry node");
-			}
-			inDegree.put(n, inDegree.get(n) + 1);
-		}
-		else {
-			inDegree.put(n, 1);
-			for (NNode out : n.out()) {
-				reachabilityRecurse(out, inDegree);
-			}
-		}
 	}
 
 }

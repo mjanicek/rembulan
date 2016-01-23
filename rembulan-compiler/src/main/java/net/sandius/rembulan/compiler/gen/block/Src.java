@@ -8,4 +8,6 @@ public interface Src extends Node {
 
 	void appendSink(Sink that);
 
+	Src appendLinear(Linear that);
+
 }

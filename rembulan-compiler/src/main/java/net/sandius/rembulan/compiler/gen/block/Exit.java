@@ -2,13 +2,12 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.util.Check;
 
-public class Exit implements Node, Sink {
+public abstract class Exit implements Node, Sink {
 
 	private Src prev;
 
-	public Exit(Src prev) {
-		Check.notNull(prev);
-		this.prev = prev;
+	public Exit() {
+		this.prev = Nodes.DUMMY_SRC;
 	}
 
 	@Override
@@ -31,7 +30,7 @@ public class Exit implements Node, Sink {
 
 	@Override
 	public void accept(NodeVisitor visitor) {
-		visitor.visit(this);
+		visitor.visitNode(this);
 	}
 
 }

@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.util.Check;
 
-public class Linear implements Node, Sink, Src {
+public abstract class Linear implements Node, Sink, Src {
 
 	private Src prev;
 	private Sink next;
@@ -32,6 +32,25 @@ public class Linear implements Node, Sink, Src {
 	}
 
 	@Override
+	public Src appendLinear(Linear that) {
+		Check.notNull(that);
+		appendSink(that);
+		return that;
+	}
+
+	public void insertAfter(Src n) {
+		Sink next = n.next();
+		n.appendSink(this);
+		next.prependSource(this);
+	}
+
+	public void insertBefore(Sink n) {
+		Src prev = n.prev();
+		prev.appendSink(this);
+		n.prependSource(this);
+	}
+
+	@Override
 	public Sink next() {
 		return next;
 	}
@@ -50,7 +69,8 @@ public class Linear implements Node, Sink, Src {
 
 	@Override
 	public void accept(NodeVisitor visitor) {
-		if (visitor.visit(this)) {
+		if (visitor.visitNode(this)) {
+			visitor.visitEdge(this, next);
 			next.accept(visitor);
 		}
 	}

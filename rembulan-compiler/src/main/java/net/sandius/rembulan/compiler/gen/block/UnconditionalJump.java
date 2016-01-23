@@ -15,6 +15,11 @@ public class UnconditionalJump implements Node, Sink, Jump {
 	}
 
 	@Override
+	public String toString() {
+		return "Jump-To(" + target.toString() + ")";
+	}
+
+	@Override
 	public Src prev() {
 		return prev;
 	}
@@ -46,7 +51,8 @@ public class UnconditionalJump implements Node, Sink, Jump {
 
 	@Override
 	public void accept(NodeVisitor visitor) {
-		if (visitor.visit(this)) {
+		if (visitor.visitNode(this)) {
+			visitor.visitEdge(this, target);
 			target.accept(visitor);
 		}
 	}

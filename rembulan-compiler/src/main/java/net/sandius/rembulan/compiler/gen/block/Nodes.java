@@ -28,7 +28,7 @@ public abstract class Nodes {
 
 	public static void inline(UnconditionalJump jmp) {
 		Target tgt = jmp.target();
-		if (tgt.isSingleTarget() != jmp) {
+		if (tgt.optIncomingJump() != jmp) {
 			throw new IllegalArgumentException("Jump destination cannot be inlined: " + tgt);
 		}
 
@@ -48,7 +48,7 @@ public abstract class Nodes {
 
 			@Override
 			public void accept(NodeVisitor visitor) {
-				visitor.visit(this);
+				visitor.visitNode(this);
 			}
 
 			@Override
@@ -96,6 +96,13 @@ public abstract class Nodes {
 				Check.notNull(that);
 				this.setNext(that);
 				that.setPrev(this);
+			}
+
+			@Override
+			public Src appendLinear(Linear that) {
+				Check.notNull(that);
+				appendSink(that);
+				return that;
 			}
 
 		};

@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.util.Check;
 
-public class Branch implements Node, Sink, Jump {
+public abstract class Branch implements Node, Sink, Jump {
 
 	private Src prev;
 	private Target trueBranch;
@@ -61,8 +61,10 @@ public class Branch implements Node, Sink, Jump {
 
 	@Override
 	public void accept(NodeVisitor visitor) {
-		if (visitor.visit(this)) {
+		if (visitor.visitNode(this)) {
+			visitor.visitEdge(this, trueBranch);
 			trueBranch.accept(visitor);
+			visitor.visitEdge(this, falseBranch);
 			falseBranch.accept(visitor);
 		}
 	}

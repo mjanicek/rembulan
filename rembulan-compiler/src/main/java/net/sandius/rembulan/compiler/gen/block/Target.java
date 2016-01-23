@@ -7,12 +7,23 @@ import java.util.Map;
 
 public class Target implements Node, Src {
 
+	private final String name;
 	private final Map<Jump, Integer> in;
 	private Sink next;
 
-	public Target() {
+	public Target(String name) {
+		this.name = name;
 		this.in = new HashMap<>();
 		this.next = Nodes.DUMMY_SINK;
+	}
+
+	public Target() {
+		this(null);
+	}
+
+	@Override
+	public String toString() {
+		return "@" + (name != null ? name : Integer.toHexString(System.identityHashCode(this)));
 	}
 
 	public void inc(Jump jmp) {
@@ -50,15 +61,23 @@ public class Target implements Node, Src {
 	}
 
 	@Override
+	public Src appendLinear(Linear that) {
+		Check.notNull(that);
+		appendSink(that);
+		return that;
+	}
+
+	@Override
 	public void accept(NodeVisitor visitor) {
-		if (visitor.visit(this)) {
+		if (visitor.visitNode(this)) {
+			visitor.visitEdge(this, next);
 			next.accept(visitor);
 		}
 	}
 
 	// if there is a single unconditional jump to this target.
 	// return it, otherwise return null.
-	public UnconditionalJump isSingleTarget() {
+	public UnconditionalJump optIncomingJump() {
 		UnconditionalJump jmp = null;
 
 		for (Jump origin : in.keySet()) {
@@ -80,7 +99,7 @@ public class Target implements Node, Src {
 				return null;
 			}
 		}
-		return null;
+		return jmp;
 	}
 
 }
