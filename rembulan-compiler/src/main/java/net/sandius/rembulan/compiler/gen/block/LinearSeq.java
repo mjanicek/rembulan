@@ -67,6 +67,26 @@ public class LinearSeq extends Linear {
 		node.appendSink(n);
 	}
 
+	public void dissolve() {
+		Src p = this.prev();
+		Sink n = this.next();
+
+		Sink first = beginSentinel.next();
+		Src last = endSentinel.prev();
+
+		if (first == last) {
+			// empty sequence
+			p.appendSink(n);
+		}
+		else {
+			// non-empty
+			p.appendSink(first);
+			n.prependSource(last);
+		}
+
+		beginSentinel.appendSink(endSentinel);
+	}
+
 	private class LinearIterator implements Iterator<Linear> {
 
 		private Sink at;

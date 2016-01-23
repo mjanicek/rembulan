@@ -69,6 +69,9 @@ public class FlowIt {
 		// remove repeated line info nodes
 		applyTransformation(entryPoints, new RemoveRedundantLineNodes());
 
+		// dissolve blocks
+//		dissolveBlocks(entryPoints);
+
 		// remove all line info nodes
 //		applyTransformation(entryPoints, new LinearSeqTransformation.Remove(Predicates.isClass(LineInfo.class)));
 
@@ -169,6 +172,15 @@ public class FlowIt {
 				block.grow();
 			}
 		}
+	}
+
+	private void dissolveBlocks(Iterable<Entry> entryPoints) {
+		applyTransformation(entryPoints, new LinearSeqTransformation() {
+			@Override
+			public void apply(LinearSeq seq) {
+				seq.dissolve();
+			}
+		});
 	}
 
 	public static class Edges {
