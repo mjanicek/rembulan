@@ -18,17 +18,25 @@ public class LinearSeq extends Linear {
 	public String toString() {
 		Iterator<Linear> it = new LinearIterator();
 		StringBuilder bld = new StringBuilder();
+		bld.append("--\n");
 		while (it.hasNext()) {
 			Linear l = it.next();
-			bld.append(l.toString());
-			if (it.hasNext()) bld.append('\n');
+			bld.append(l.toString()).append('\n');
 		}
+		bld.append("--");
 		return bld.toString();
 	}
 
 	public boolean growRight() {
-		if (this.next() instanceof Linear) {
-			Linear newElem = (Linear) this.next();
+		Sink nxt = this.next();
+
+		if (nxt instanceof Linear) {
+			if (nxt instanceof LinearSeq) {
+				throw new UnsupportedOperationException();
+			}
+
+			Linear newElem = (Linear) nxt;
+
 			Sink newNext = newElem.next();
 
 			this.appendSink(newNext);
