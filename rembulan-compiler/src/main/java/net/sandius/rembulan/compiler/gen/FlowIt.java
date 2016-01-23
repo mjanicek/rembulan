@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.Entry;
+import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
@@ -53,6 +54,7 @@ public class FlowIt {
 		entryPoints.add(callEntry);
 
 		inlineInnerJumps(entryPoints);
+		makeBlocks(entryPoints);
 
 //		System.out.println();
 //		printNodes(entryPoints);
@@ -68,6 +70,17 @@ public class FlowIt {
 				if (jmp != null) {
 					Nodes.inline(jmp);
 				}
+			}
+		}
+	}
+
+	private void makeBlocks(Iterable<Entry> entryPoints) {
+		for (Node n : reachableNodes(entryPoints)) {
+			if (n instanceof Target) {
+				Target t = (Target) n;
+				LinearSeq block = new LinearSeq();
+				block.insertAfter(t);
+				block.grow();
 			}
 		}
 	}
