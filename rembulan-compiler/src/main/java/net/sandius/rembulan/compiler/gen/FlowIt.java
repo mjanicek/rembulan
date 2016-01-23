@@ -82,23 +82,25 @@ public class FlowIt {
 
 		@Override
 		public void apply(LinearSeq seq) {
-			List<AccountingNode> accountingNodes = new ArrayList<>();
+			List<AccountingNode> toBeRemoved = new ArrayList<>();
 
 			int cost = 0;
 
 			for (Linear n : seq.nodes()) {
 				if (n instanceof AccountingNode) {
+					AccountingNode an = (AccountingNode) n;
 					if (n instanceof AccountingNode.Tick) {
 						cost += 1;
+						toBeRemoved.add(an);
 					}
 					else if (n instanceof AccountingNode.Sum) {
 						cost += ((AccountingNode.Sum) n).cost;
+						toBeRemoved.add(an);
 					}
-					accountingNodes.add((AccountingNode) n);
 				}
 			}
 
-			for (AccountingNode an : accountingNodes) {
+			for (AccountingNode an : toBeRemoved) {
 				// remove all nodes
 				an.remove();
 			}
