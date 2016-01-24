@@ -30,11 +30,14 @@ public class FlowIt {
 
 	public final Prototype prototype;
 
+	public Map<Node, Edges> reachabilityGraph;
+	public Map<Node, InOutSlots> slots;
+
 	public FlowIt(Prototype prototype) {
 		this.prototype = prototype;
 	}
 
-	public Map<Node, Edges> go() {
+	public void go() {
 		IntVector code = prototype.getCode();
 		Target[] targets = new Target[code.length()];
 		for (int pc = 0; pc < targets.length; pc++) {
@@ -78,7 +81,8 @@ public class FlowIt {
 //		System.out.println();
 //		printNodes(entryPoints);
 
-		return reachabilityEdges(entryPoints);
+		reachabilityGraph = reachabilityEdges(entryPoints);
+		slots = dataFlow(callEntry);
 	}
 
 	private static class CollectCPUAccounting extends LinearSeqTransformation {
@@ -194,6 +198,33 @@ public class FlowIt {
 		}
 	}
 
+	public class InOutSlots {
+		public Slots in;
+		public Slots out;
+
+		public InOutSlots() {
+			this.in = Slots.init(prototype.getMaximumStackSize());
+			this.out = Slots.init(prototype.getMaximumStackSize());
+		}
+	}
+
+	private Map<Node, InOutSlots> initSlots(Entry entryPoint) {
+		Map<Node, InOutSlots> slots = new HashMap<>();
+		for (Node n : reachableNodes(Collections.singleton(entryPoint))) {
+			InOutSlots ios = new InOutSlots();
+			if (n == entryPoint) {
+				ios.in = null;
+				ios.out = entrySlots();
+			}
+			slots.put(n, ios);
+		}
+		return slots;
+	}
+
+	public Map<Node, InOutSlots> dataFlow(Entry entryPoint) {
+		return initSlots(entryPoint);
+	}
+
 	private Map<Node, Edges> reachabilityEdges(Iterable<Entry> entryPoints) {
 		final Map<Node, Integer> timesVisited = new HashMap<>();
 		final Map<Node, Edges> edges = new HashMap<>();
@@ -305,6 +336,14 @@ public class FlowIt {
 			entry.accept(visitor);
 		}
 		return Collections.unmodifiableMap(inDegree);
+	}
+
+	private Slots entrySlots() {
+		Slots s = Slots.init(prototype.getMaximumStackSize());
+		for (int i = 0; i < prototype.getNumberOfParameters(); i++) {
+			s = s.updateType(i, Slots.SlotType.ANY);
+		}
+		return s;
 	}
 
 }

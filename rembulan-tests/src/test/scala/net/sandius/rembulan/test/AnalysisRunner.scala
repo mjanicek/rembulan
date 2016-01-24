@@ -241,13 +241,29 @@ object AnalysisRunner {
       }
 
       val flow = new FlowIt(proto)
+      flow.go()
 
-      val flowEdges = flow.go().toMap
+      val flowEdges = flow.reachabilityGraph.toMap
+      val flowStates = flow.slots.toMap
 
-      val vertices = flowEdges.keySet
+      case class MyNode(node: Node) {
+        require (node != null)
+        override def toString = {
+          val ios = flowStates(node)
+          val in = if (ios.in != null) "[" + ios.in.toString + "]" else "(none)"
+          val out = if (ios.out != null) "[" + ios.out.toString + "]" else "(none)"
+
+          in + " ->\n" + node.toString + "\n-> " + out
+        }
+      }
+
+      val vertices = flowEdges.keySet map { MyNode }
       val in = (for ((n, es) <- flowEdges) yield (es.in.toSet map { e: Node => (e, n) })).flatten
       val out = (for ((n, es) <- flowEdges) yield (es.out.toSet map { e: Node => (n, e) })).flatten
-      val edges = (in ++ out).toSet
+//      val edges = (in ++ out).toSet
+      val edges0 = (in ++ out).toSet
+      val edges = edges0 map { case (u, v) => (MyNode(u), MyNode(v)) }
+
 
       val graph = Graph(
         vertices = vertices,
