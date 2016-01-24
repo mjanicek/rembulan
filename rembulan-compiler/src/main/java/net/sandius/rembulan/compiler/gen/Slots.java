@@ -95,21 +95,20 @@ public class Slots {
 			SlotType type = getType(i);
 
 			if (bld.length() > 0) bld.append(' ');
-			switch (state) {
-				case FRESH: bld.append('-'); break;
-				case CAPTURED: bld.append('@'); break;
+			if (state == SlotState.CAPTURED) {
+				bld.append('@');
 			}
 			switch (type) {
-				case ANY: bld.append('*'); break;
-				case NIL: bld.append('0'); break;
-				case BOOLEAN: bld.append('B'); break;
-				case NUMBER: bld.append('n'); break;
-				case NUMBER_INTEGER: bld.append("nI"); break;
-				case NUMBER_FLOAT: bld.append("nF"); break;
-				case STRING: bld.append('S'); break;
-				case FUNCTION: bld.append('F'); break;
-				case TABLE: bld.append('T'); break;
-				case THREAD: bld.append('R'); break;
+				case ANY: bld.append(" * "); break;
+				case NIL: bld.append(" - "); break;
+				case BOOLEAN: bld.append("boo"); break;
+				case NUMBER: bld.append("num"); break;
+				case NUMBER_INTEGER: bld.append("int"); break;
+				case NUMBER_FLOAT: bld.append("flt"); break;
+				case STRING: bld.append("str"); break;
+				case FUNCTION: bld.append("fun"); break;
+				case TABLE: bld.append("tab"); break;
+				case THREAD: bld.append("thr"); break;
 				default: bld.append('?'); break;
 			}
 		}
@@ -184,6 +183,15 @@ public class Slots {
 
 	public Slots join(int idx, SlotType type) {
 		return updateType(idx, getType(idx).join(type));
+	}
+
+	public Slots joinAll(Slots that) {
+		Check.notNull(that);
+		Slots s = this;
+		for (int i = 0; i < size(); i++) {
+			s = join(i, that.getType(i));
+		}
+		return s;
 	}
 
 }

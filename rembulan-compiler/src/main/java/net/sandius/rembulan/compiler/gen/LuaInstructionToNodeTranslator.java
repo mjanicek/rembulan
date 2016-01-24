@@ -6,8 +6,6 @@ import net.sandius.rembulan.compiler.gen.block.CloseUpvalues;
 import net.sandius.rembulan.compiler.gen.block.Exit;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.Linear;
-import net.sandius.rembulan.compiler.gen.block.Nodes;
-import net.sandius.rembulan.compiler.gen.block.Sink;
 import net.sandius.rembulan.compiler.gen.block.Src;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
@@ -50,6 +48,7 @@ public class LuaInstructionToNodeTranslator {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
 		int b = OpCode.arg_B(insn);
+		int bx = OpCode.arg_Bx(insn);
 		int c = OpCode.arg_C(insn);
 		int sbx = OpCode.arg_sBx(insn);
 
@@ -64,7 +63,7 @@ public class LuaInstructionToNodeTranslator {
 				break;
 
 			case OpCode.LOADK:
-				tail.append(new LoadK(a, b)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new LoadK(a, bx)).jumpTo(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.LOADNIL:
@@ -87,7 +86,10 @@ public class LuaInstructionToNodeTranslator {
 			case OpCode.BXOR:
 			case OpCode.SHL:
 			case OpCode.SHR:
-				tail.append(new BinOp(BinOpType.fromOpcode(opcode), a, b, c)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new BinOp(BinOpType.fromOpcode(opcode),
+						a,
+						OpCode.isK(b) ? -1 - OpCode.indexK(b) : b,
+						OpCode.isK(c) ? -1 - OpCode.indexK(c) : c)).jumpTo(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.UNM:

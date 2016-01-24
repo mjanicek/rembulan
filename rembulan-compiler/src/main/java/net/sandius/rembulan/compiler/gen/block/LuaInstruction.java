@@ -1,73 +1,110 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.Slots.SlotType;
 import net.sandius.rembulan.lbc.OpCode;
+import net.sandius.rembulan.lbc.Prototype;
 
 import java.util.Objects;
 
 public class LuaInstruction {
 
-	public static class Move extends Linear {
-		public final int a;
-		public final int b;
+	public static SlotType constantType(Object k) {
+		if (k == null) return SlotType.NIL;
+		else if (k instanceof Boolean) return SlotType.BOOLEAN;
+		else if (k instanceof Double || k instanceof Float) return SlotType.NUMBER_FLOAT;
+		else if (k instanceof Number) return SlotType.NUMBER_INTEGER;
+		else if (k instanceof String) return SlotType.STRING;
+		else {
+			throw new IllegalStateException("Unknown constant: " + k);
+		}
+	}
 
-		public Move(int a, int b) {
-			this.a = a;
-			this.b = b;
+	public static class Move extends Linear implements SlotEffect {
+		public final int dest;
+		public final int src;
+
+		public Move(int dest, int src) {
+			this.dest = dest;
+			this.src = src;
 		}
 
 		@Override
 		public String toString() {
-			return "MOVE(" + a + "," + b + ")";
+			return "MOVE(" + dest + "," + src + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in.updateType(dest, in.getType(src));
 		}
 
 	}
 
-	public static class LoadK extends Linear {
-		public final int a;
-		public final int b;
+	public static class LoadK extends Linear implements SlotEffect {
+		public final int dest;
+		public final int kIndex;
 
-		public LoadK(int a, int b) {
-			this.a = a;
-			this.b = b;
+		public LoadK(int dest, int kIndex) {
+			this.dest = dest;
+			this.kIndex = kIndex;
 		}
 
 		@Override
 		public String toString() {
-			return "LOADK(" + a + "," + b + ")";
+			return "LOADK(" + dest + "," + kIndex + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in.updateType(dest, constantType(prototype.getConstants().get(kIndex)));
 		}
 
 	}
 
-	public static class LoadNil extends Linear {
-		public final int a;
-		public final int b;
+	public static class LoadNil extends Linear implements SlotEffect {
+		public final int dest;
+		public final int lastOffset;
 
-		public LoadNil(int a, int b) {
-			this.a = a;
-			this.b = b;
+		public LoadNil(int dest, int lastOffset) {
+			this.dest = dest;
+			this.lastOffset = lastOffset;
 		}
 
 		@Override
 		public String toString() {
-			return "LOADNIL(" + a + "," + b + ")";
+			return "LOADNIL(" + dest + "," + lastOffset + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			Slots s = in;
+			for (int i = dest; i <= dest + lastOffset; i++) {
+				s = s.updateType(i, SlotType.NIL);
+			}
+			return s;
 		}
 
 	}
 
-	public static class LoadBool extends Linear {
-		public final int a;
-		public final int b;
+	public static class LoadBool extends Linear implements SlotEffect {
+		public final int dest;
+		public final int arg;
 
-		public LoadBool(int a, int b) {
-			this.a = a;
-			this.b = b;
+		public LoadBool(int dest, int arg) {
+			this.dest = dest;
+			this.arg = arg;
 		}
 
 		@Override
 		public String toString() {
-			return "LOADBOOL(" + a + "," + b + ")";
+			return "LOADBOOL(" + dest + "," + arg + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in.updateType(dest, SlotType.BOOLEAN);
+		}
 	}
 
 	public enum BinOpType {
@@ -106,47 +143,118 @@ public class LuaInstruction {
 		}
 	}
 
-	public static class BinOp extends Linear {
+	public static class BinOp extends Linear implements SlotEffect {
 
 		public final BinOpType op;
-		public final int a;
+		public final int dest;
 		public final int b;
 		public final int c;
 
-		public BinOp(BinOpType op, int a, int b, int c) {
+		public BinOp(BinOpType op, int dest, int b, int c) {
 			this.op = Objects.requireNonNull(op);
-			this.a = a;
+			this.dest = dest;
 			this.b = b;
 			this.c = c;
 		}
 
 		@Override
 		public String toString() {
-			return op.toString() + "(" + a + "," + b + "," + c + ")";
+			return op.toString() + "(" + dest + "," + b + "," + c + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			SlotType lType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : in.getType(b);
+			SlotType rType = c < 0 ? constantType(prototype.getConstants().get(-c - 1)) : in.getType(c);
+
+			SlotType resultType = SlotType.ANY;  // assume we'll be calling a metamethod
+
+			if (lType.isNumber() && rType.isNumber()) {
+				boolean lInteger = lType == SlotType.NUMBER_INTEGER;
+				boolean rInteger = rType == SlotType.NUMBER_INTEGER;
+
+				boolean lFloat = lType == SlotType.NUMBER_FLOAT;
+				boolean rFloat = rType == SlotType.NUMBER_FLOAT;
+
+				// it's a number in any case
+				resultType = SlotType.NUMBER;
+
+				switch (op) {
+					case ADD:
+					case SUB:
+					case MUL:
+					case MOD:
+					case IDIV:
+						if (lInteger && rInteger) resultType = SlotType.NUMBER_INTEGER;
+						else if (lFloat || rFloat) resultType = SlotType.NUMBER_FLOAT;
+						break;
+
+					case DIV:
+					case POW:
+						resultType = SlotType.NUMBER_FLOAT;
+						break;
+
+					case BAND:
+					case BOR:
+					case BXOR:
+					case SHL:
+					case SHR:
+						resultType = SlotType.NUMBER_INTEGER;
+						break;
+				}
+			}
+
+			return in.updateType(dest, resultType);
 		}
 
 	}
 
-	public static class UnOp extends Linear {
+	public static class UnOp extends Linear implements SlotEffect {
 
 		public final UnOpType op;
-		public final int a;
+		public final int dest;
 		public final int b;
 
-		public UnOp(UnOpType op, int a, int b) {
+		public UnOp(UnOpType op, int dest, int b) {
 			this.op = Objects.requireNonNull(op);
-			this.a = a;
+			this.dest = dest;
 			this.b = b;
 		}
 
 		@Override
 		public String toString() {
-			return op.toString() + "(" + a + "," + b + ")";
+			return op.toString() + "(" + dest + "," + b + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			SlotType argType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : in.getType(b);
+
+			SlotType resultType = SlotType.ANY;  // assume we'll be calling a metamethod
+
+			switch (op) {
+				case UNM:
+					if (argType.isNumber()) resultType = argType;
+					break;
+
+				case BNOT:
+					if (argType == SlotType.NUMBER_INTEGER) resultType = argType;
+					break;
+
+				case NOT:
+					resultType = SlotType.BOOLEAN;
+					break;
+
+				case LEN:
+					if (argType == SlotType.STRING) resultType = SlotType.NUMBER_INTEGER;
+					break;
+			}
+
+			return in.updateType(dest, resultType);
+		}
 	}
 
-	public static class Concat extends Linear {
+	public static class Concat extends Linear implements SlotEffect {
 
 		public final int a;
 		public final int b;
@@ -163,9 +271,14 @@ public class LuaInstruction {
 			return "CONCAT(" + a + "," + b + "," + c + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
-	public static class Call extends Linear {
+	public static class Call extends Linear implements SlotEffect {
 
 		public final int a;
 		public final int b;
@@ -182,9 +295,37 @@ public class LuaInstruction {
 			return "CALL(" + a + "," + b + "," + c + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			Slots s = in;
+
+			// Since we don't know what the called function does, we must
+			// assume that it may change any open upvalue.
+			for (int i = 0; i < in.size(); i++) {
+				if (s.getState(i).isCaptured()) {
+					s = s.updateType(i, SlotType.ANY);
+				}
+			}
+
+			if (c > 0) {
+				// (c - 1) is the exact number of result values
+				for (int i = a; i < a + c - 1; i++) {
+					s = s.updateType(i, SlotType.ANY);
+				}
+			}
+			else {
+				// variable number of results
+				for (int i = a; i < in.size(); i++) {
+					s = s.updateType(i, SlotType.ANY);
+				}
+			}
+
+			return s;
+		}
+
 	}
 
-	public static class ForPrep extends Linear {
+	public static class ForPrep extends Linear implements SlotEffect {
 		public final int a;
 		public final int b;
 
@@ -198,10 +339,45 @@ public class LuaInstruction {
 			return "FORPREP(" + a + "," + b + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			SlotType a0 = in.getType(a + 0);
+			SlotType a1 = in.getType(a + 1);
+			SlotType a2 = in.getType(a + 2);
+
+			if (a0 == SlotType.NUMBER_INTEGER
+					&& a1 == SlotType.NUMBER_INTEGER
+					&& a2 == SlotType.NUMBER_INTEGER) {
+
+				// integer loop
+				return in.updateType(a + 0, SlotType.NUMBER_INTEGER)
+						.updateType(a + 1, SlotType.NUMBER_INTEGER)
+						.updateType(a + 2, SlotType.NUMBER_INTEGER)
+						.updateType(a + 3, SlotType.NUMBER_INTEGER);
+			}
+			else if (a0.isNumber()
+					&& a1.isNumber()
+					&& a2.isNumber()) {
+
+				// float loop
+				return in.updateType(a + 0, SlotType.NUMBER_FLOAT)
+						.updateType(a + 1, SlotType.NUMBER_FLOAT)
+						.updateType(a + 2, SlotType.NUMBER_FLOAT)
+						.updateType(a + 3, SlotType.NUMBER_FLOAT);
+			}
+			else {
+				// unknown, but numeric loop
+				return in.updateType(a + 0, SlotType.NUMBER)
+						.updateType(a + 1, SlotType.NUMBER)
+						.updateType(a + 2, SlotType.NUMBER)
+						.updateType(a + 3, SlotType.NUMBER);
+			}
+		}
+
 	}
 
 
-	public static class GetUpVal extends Linear {
+	public static class GetUpVal extends Linear implements SlotEffect {
 		public final int a;
 		public final int b;
 
@@ -215,9 +391,14 @@ public class LuaInstruction {
 			return "GETUPVAL(" + a + "," + b + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in.updateType(a, SlotType.ANY);
+		}
+
 	}
 
-	public static class GetTabUp extends Linear {
+	public static class GetTabUp extends Linear implements SlotEffect {
 		public final int a;
 		public final int b;
 
@@ -231,9 +412,14 @@ public class LuaInstruction {
 			return "GETTABUP(" + a + "," + b + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in.updateType(a, SlotType.ANY);
+		}
+
 	}
 
-	public static class GetTable extends Linear {
+	public static class GetTable extends Linear implements SlotEffect {
 
 		public final int a;
 		public final int b;
@@ -250,9 +436,14 @@ public class LuaInstruction {
 			return "GETTABLE(" + a + "," + b + "," + c + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in.updateType(a, SlotType.ANY);
+		}
+
 	}
 
-	public static class SetTabUp extends Linear {
+	public static class SetTabUp extends Linear implements SlotEffect {
 
 		public final int a;
 		public final int b;
@@ -269,9 +460,14 @@ public class LuaInstruction {
 			return "SETTABUP(" + a + "," + b + "," + c + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;
+		}
+
 	}
 
-	public static class SetUpVal extends Linear {
+	public static class SetUpVal extends Linear implements SlotEffect {
 		public final int a;
 		public final int b;
 
@@ -285,9 +481,14 @@ public class LuaInstruction {
 			return "SETUPVAL(" + a + "," + b + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;
+		}
+
 	}
 
-	public static class SetTable extends Linear {
+	public static class SetTable extends Linear implements SlotEffect {
 		public final int a;
 		public final int b;
 		public final int c;
@@ -303,9 +504,14 @@ public class LuaInstruction {
 			return "SETTABLE(" + a + "," + b + "," + c + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;
+		}
+
 	}
 
-	public static class NewTable extends Linear {
+	public static class NewTable extends Linear implements SlotEffect {
 		public final int a;
 		public final int b;
 		public final int c;
@@ -321,9 +527,14 @@ public class LuaInstruction {
 			return "NEWTABLE(" + a + "," + b + "," + c + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in.updateType(a, SlotType.TABLE);
+		}
+
 	}
 
-	public static class Eq extends Branch {
+	public static class Eq extends Branch implements SlotEffect {
 		public final int a;
 		public final int b;
 		public final int c;
@@ -340,9 +551,14 @@ public class LuaInstruction {
 			return "EQ(" + a + "," + b + "," + c + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;
+		}
+
 	}
 
-	public static class ForLoop extends Branch {
+	public static class ForLoop extends Branch implements SlotEffect {
 		public final int a;
 		public final int sbx;
 
@@ -357,9 +573,14 @@ public class LuaInstruction {
 			return "FORLOOP(" + a + "," + sbx + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;
+		}
+
 	}
 
-	public static class Closure extends Linear {
+	public static class Closure extends Linear implements SlotEffect {
 
 		public final int dest;
 		public final int index;
@@ -374,9 +595,23 @@ public class LuaInstruction {
 			return "CLOSURE(" + dest + "," + index + ")";
 		}
 
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			Slots s = in.updateType(dest, SlotType.FUNCTION);
+
+			Prototype p = prototype.getNestedPrototypes().get(index);
+			for (Prototype.UpvalueDesc uvd : p.getUpValueDescriptions()) {
+				if (uvd.inStack) {
+					s = s.capture(uvd.index);
+				}
+			}
+
+			return s;
+		}
+
 	}
 
-	public static class Return extends Exit {
+	public static class Return extends Exit implements SlotEffect {
 		public final int a;
 		public final int b;
 
@@ -388,6 +623,11 @@ public class LuaInstruction {
 		@Override
 		public String toString() {
 			return "RETURN(" + a + "," + b + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;
 		}
 
 	}

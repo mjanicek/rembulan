@@ -4,17 +4,15 @@ import net.sandius.rembulan.compiler.gen.block.AccountingNode;
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.Linear;
-import net.sandius.rembulan.compiler.gen.block.LinearPredicate;
 import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
-import net.sandius.rembulan.compiler.gen.block.Predicates;
+import net.sandius.rembulan.compiler.gen.block.SlotEffect;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
-import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
@@ -73,7 +71,7 @@ public class FlowIt {
 		applyTransformation(entryPoints, new RemoveRedundantLineNodes());
 
 		// dissolve blocks
-//		dissolveBlocks(entryPoints);
+		dissolveBlocks(entryPoints);
 
 		// remove all line info nodes
 //		applyTransformation(entryPoints, new LinearSeqTransformation.Remove(Predicates.isClass(LineInfo.class)));
@@ -198,31 +196,83 @@ public class FlowIt {
 		}
 	}
 
-	public class InOutSlots {
+	public static class InOutSlots {
 		public Slots in;
 		public Slots out;
 
 		public InOutSlots() {
-			this.in = Slots.init(prototype.getMaximumStackSize());
-			this.out = Slots.init(prototype.getMaximumStackSize());
+			this.in = null;
+			this.out = null;
 		}
 	}
 
 	private Map<Node, InOutSlots> initSlots(Entry entryPoint) {
 		Map<Node, InOutSlots> slots = new HashMap<>();
 		for (Node n : reachableNodes(Collections.singleton(entryPoint))) {
-			InOutSlots ios = new InOutSlots();
-			if (n == entryPoint) {
-				ios.in = null;
-				ios.out = entrySlots();
-			}
-			slots.put(n, ios);
+			slots.put(n, new InOutSlots());
 		}
+
+		InOutSlots entryIos = slots.get(entryPoint);
+		entryIos.out = entrySlots();
+
 		return slots;
 	}
 
 	public Map<Node, InOutSlots> dataFlow(Entry entryPoint) {
-		return initSlots(entryPoint);
+		Map<Node, Edges> edges = reachabilityEdges(Collections.singleton(entryPoint));
+		Map<Node, InOutSlots> slots = initSlots(entryPoint);
+
+		Set<Node> nodes = edges.keySet();
+
+		boolean changed;
+
+		// FIXME: terribly inefficient
+
+		do {
+			changed = false;
+
+			for (Node n : nodes) {
+
+				Edges es = edges.get(n);
+				Set<Node> in = es.in;
+
+				InOutSlots ios = slots.get(n);
+
+				if (!in.isEmpty()) {
+					Slots newIn = null;
+					for (Node inNode : in) {
+						Slots t = slots.get(inNode).out;
+						if (t != null) {
+							newIn = newIn == null ? t : newIn.joinAll(t);
+						}
+					}
+
+					Slots oldIn = ios.in;
+
+					if (newIn != null && !newIn.equals(oldIn)) {
+						ios.in = newIn;
+						changed = true;
+
+						// now recompute the output
+
+						if (n instanceof SlotEffect) {
+							SlotEffect eff = (SlotEffect) n;
+							ios.out = eff.effect(newIn, prototype);
+						}
+						else {
+							ios.out = newIn;
+						}
+
+						break;
+					}
+
+				}
+
+			}
+
+		} while (changed);
+
+		return slots;
 	}
 
 	private Map<Node, Edges> reachabilityEdges(Iterable<Entry> entryPoints) {
