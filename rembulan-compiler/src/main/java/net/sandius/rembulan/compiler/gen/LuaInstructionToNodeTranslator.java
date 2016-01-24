@@ -120,12 +120,34 @@ public class LuaInstructionToNodeTranslator {
 			}
 				break;
 
+			case OpCode.LT: {
+				Target left = pcToLabel.get(pc + 1);
+				Target right = pcToLabel.get(pc + 2);
+
+				// TODO: NEQ has the branches swapped?
+				tail.branch(new Lt(left, right, a, b, c));
+			}
+				break;
+
+			case OpCode.LE: {
+				Target left = pcToLabel.get(pc + 1);
+				Target right = pcToLabel.get(pc + 2);
+
+				// TODO: NEQ has the branches swapped?
+				tail.branch(new Le(left, right, a, b, c));
+			}
+				break;
+
 			case OpCode.CALL:
 				tail.append(new Call(a, b, c)).jumpTo(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.FORPREP:
 				tail.append(new ForPrep(a, b)).jumpTo(pcToLabel.get(pc + sbx + 1));
+				break;
+
+			case OpCode.TAILCALL:
+				tail.append(new AccountingNode.End()).term(new TailCall(a, b, c));
 				break;
 
 			case OpCode.RETURN:

@@ -558,6 +558,54 @@ public class LuaInstruction {
 
 	}
 
+	public static class Lt extends Branch implements SlotEffect {
+		public final int a;
+		public final int b;
+		public final int c;
+
+		public Lt(Target trueBranch, Target falseBranch, int a, int b, int c) {
+			super(trueBranch, falseBranch);
+			this.a = a;
+			this.b = b;
+			this.c = c;
+		}
+
+		@Override
+		public String toString() {
+			return "LT(" + a + "," + b + "," + c + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;  // TODO
+		}
+
+	}
+
+	public static class Le extends Branch implements SlotEffect {
+		public final int a;
+		public final int b;
+		public final int c;
+
+		public Le(Target trueBranch, Target falseBranch, int a, int b, int c) {
+			super(trueBranch, falseBranch);
+			this.a = a;
+			this.b = b;
+			this.c = c;
+		}
+
+		@Override
+		public String toString() {
+			return "LE(" + a + "," + b + "," + c + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;  // TODO
+		}
+
+	}
+
 	public static class ForLoop extends Branch implements SlotEffect {
 		public final int a;
 		public final int sbx;
@@ -575,7 +623,7 @@ public class LuaInstruction {
 
 		@Override
 		public Slots effect(Slots in, Prototype prototype) {
-			return in;
+			return in;  // TODO
 		}
 
 	}
@@ -627,7 +675,30 @@ public class LuaInstruction {
 
 		@Override
 		public Slots effect(Slots in, Prototype prototype) {
-			return in;
+			return in;  // TODO
+		}
+
+	}
+
+	public static class TailCall extends Exit implements SlotEffect {
+		public final int a;
+		public final int b;
+		public final int c;
+
+		public TailCall(int a, int b, int c) {
+			this.a = a;
+			this.b = b;
+			this.c = c;
+		}
+
+		@Override
+		public String toString() {
+			return "TAILCALL(" + a + "," + b + "," + c + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in, Prototype prototype) {
+			return in;  // TODO
 		}
 
 	}
