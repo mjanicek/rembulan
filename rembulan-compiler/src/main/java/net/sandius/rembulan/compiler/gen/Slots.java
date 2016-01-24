@@ -138,6 +138,10 @@ public class Slots {
 		return ReadOnlyArray.wrap(states);
 	}
 
+	public ReadOnlyArray<SlotType> types() {
+		return ReadOnlyArray.wrap(types);
+	}
+
 	public SlotState getState(int idx) {
 		return states[idx];
 	}
