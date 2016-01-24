@@ -59,6 +59,17 @@ public class ReadOnlyArray<T> implements Iterable<T> {
 		return values[idx];
 	}
 
+	public ReadOnlyArray<T> update(int idx, T value) {
+		if (get(idx) == value) {
+			return this;
+		}
+		else {
+			T[] copy = Arrays.copyOf(values, values.length);
+			copy[idx] = value;
+			return wrap(copy);
+		}
+	}
+
 	// FIXME: size or length?
 	public int size() {
 		return values.length;
