@@ -58,13 +58,13 @@ public class Slots {
 
 	}
 
-	private final SlotState[] states;
-	private final SlotType[] types;
+	private final ReadOnlyArray<SlotState> states;
+	private final ReadOnlyArray<SlotType> types;
 
-	private Slots(SlotState[] states, SlotType[] types) {
+	private Slots(ReadOnlyArray<SlotState> states, ReadOnlyArray<SlotType> types) {
 		Check.notNull(states);
 		Check.notNull(types);
-		Check.isEq(states.length, types.length);
+		Check.isEq(states.size(), types.size());
 
 		this.states = states;
 		this.types = types;
@@ -77,13 +77,13 @@ public class Slots {
 
 		Slots that = (Slots) o;
 
-		return Arrays.equals(states, that.states) && Arrays.equals(types, that.types);
+		return states.shallowEquals(that.states) && types.shallowEquals(that.types);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = Arrays.hashCode(states);
-		result = 31 * result + Arrays.hashCode(types);
+		int result = states.shallowHashCode();
+		result = 31 * result + states.shallowHashCode();
 		return result;
 	}
 
@@ -124,26 +124,26 @@ public class Slots {
 
 		for (int i = 0; i < size; i++) {
 			states[i] = SlotState.FRESH;
-			types[i] = SlotType.ANY;
+			types[i] = SlotType.NIL;
 		}
 
-		return new Slots(states, types);
+		return new Slots(ReadOnlyArray.wrap(states), ReadOnlyArray.wrap(types));
 	}
 
 	public int size() {
-		return states.length;
+		return states.size();
 	}
 
 	public ReadOnlyArray<SlotState> states() {
-		return ReadOnlyArray.wrap(states);
+		return states;
 	}
 
 	public ReadOnlyArray<SlotType> types() {
-		return ReadOnlyArray.wrap(types);
+		return types;
 	}
 
 	public SlotState getState(int idx) {
-		return states[idx];
+		return states.get(idx);
 	}
 
 	public Slots updateState(int idx, SlotState to) {
@@ -154,9 +154,7 @@ public class Slots {
 			return this;
 		}
 		else {
-			SlotState[] statesCopy = Arrays.copyOf(states, states.length);
-			statesCopy[idx] = to;
-			return new Slots(statesCopy, Arrays.copyOf(types, types.length));
+			return new Slots(states.update(idx, to), types);
 		}
 	}
 
@@ -169,7 +167,7 @@ public class Slots {
 	}
 
 	public SlotType getType(int idx) {
-		return types[idx];
+		return types.get(idx);
 	}
 
 	public Slots updateType(int idx, SlotType type) {
@@ -180,9 +178,7 @@ public class Slots {
 			return this;
 		}
 		else {
-			SlotType[] typesCopy = Arrays.copyOf(types, types.length);
-			typesCopy[idx] = type;
-			return new Slots(Arrays.copyOf(states, states.length), typesCopy);
+			return new Slots(states, types.update(idx, type));
 		}
 	}
 

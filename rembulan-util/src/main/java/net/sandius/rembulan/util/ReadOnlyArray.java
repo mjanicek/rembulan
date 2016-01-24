@@ -50,9 +50,17 @@ public class ReadOnlyArray<T> implements Iterable<T> {
 		return Arrays.deepEquals(this.values, that.values);
 	}
 
+	public boolean shallowEquals(ReadOnlyArray<T> that) {
+		return this == that || that != null && Arrays.equals(this.values, that.values);
+	}
+
 	@Override
 	public int hashCode() {
 		return Arrays.deepHashCode(values);
+	}
+
+	public int shallowHashCode() {
+		return Arrays.hashCode(values);
 	}
 
 	public T get(int idx) {
