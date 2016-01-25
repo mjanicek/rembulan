@@ -1,42 +1,66 @@
 package net.sandius.rembulan.test
 
+import java.io.PrintWriter
+
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
-import java.io.PrintWriter
+import net.sandius.rembulan.compiler.gen.FlowIt
 import net.sandius.rembulan.compiler.gen.block.Node
-import net.sandius.rembulan.compiler.gen.{FlowIt, ControlFlowTraversal}
-import net.sandius.rembulan.lbc.{Prototype, PrototypePrinterVisitor, PrototypePrinter}
+import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
-import net.sandius.rembulan.util.IntBuffer
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
 
 object AnalysisRunner {
 
-  def fillStr(pattern: String, width: Int): String = {
-    val bld = new StringBuilder()
-    while (bld.length < width) {
-      val rem = width - bld.length
-      bld.append(pattern.substring(0, math.min(rem, pattern.length)))
+  def printFlow(proto: Prototype, main: Boolean = true): Unit = {
+    if (main) {
+      println("Main (" + PrototypePrinter.pseudoAddr(proto) + "):")
     }
-    bld.toString()
-  }
+    else {
+      println()
+      println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
+    }
 
-  def padRight(s: String, width: Int): String = {
-    if (s.length >= width) s else s + fillStr(" ", width - s.length)
-  }
+    val flow = new FlowIt(proto)
+    flow.go()
 
-  def tabulate(lines: Seq[String], tab: String): Seq[String] = {
-    val tabbedLines = for (l <- lines) yield l.split("\t").toSeq
-    val numCols = (tabbedLines map { _.size }).max
-    val matrix = tabbedLines map { tl => tl ++ Seq.fill[String](numCols - tl.size)("") }
+    val flowEdges = flow.reachabilityGraph.toMap
+    val flowStates = flow.slots.toMap
 
-    val cols = matrix.transpose
-    val colWidths = for (col <- cols) yield (col map { _.length }).max
+    case class MyNode(node: Node) {
+      require (node != null)
+      override def toString = {
+        val ios = flowStates(node)
+        val in = if (ios.in != null) "[ " + ios.in.toString + " ]" else "(none)"
+        val out = if (ios.out != null) "[ " + ios.out.toString + " ]" else "(none)"
 
-    val padded = for (row <- matrix) yield for ((cell, width) <- row zip colWidths) yield padRight(cell, width)
-    for (row <- padded) yield row.mkString(tab)
+        "   " + in + " ->\n" + node.toString + "\n-> " + out + "   "
+      }
+    }
+
+    val vertices = flowEdges.keySet map { MyNode }
+    val in = (for ((n, es) <- flowEdges) yield (es.in.toSet map { e: Node => (e, n) })).flatten
+    val out = (for ((n, es) <- flowEdges) yield (es.out.toSet map { e: Node => (n, e) })).flatten
+//      val edges = (in ++ out).toSet
+    val edges0 = (in ++ out).toSet
+    val edges = edges0 map { case (u, v) => (MyNode(u), MyNode(v)) }
+
+
+    val graph = Graph(
+      vertices = vertices,
+      edges = edges.toList
+    )
+
+    val ascii = GraphLayout.renderGraph(graph)
+    println()
+    println(ascii)
+
+    val it = proto.getNestedPrototypes.iterator()
+    while (it.hasNext) {
+      val child = it.next()
+      printFlow(child, false)
+    }
   }
 
   def main(args: Array[String]): Unit = {
@@ -140,150 +164,7 @@ object AnalysisRunner {
     println("------------")
     println()
 
-    def intBufferToSeq(ib: IntBuffer): IndexedSeq[Int] = for (i <- 0 to ib.length() - 1) yield ib.get(i)
-
-    def printTraversal(proto: Prototype, main: Boolean = true): Unit = {
-      if (main) {
-        println("Main (" + PrototypePrinter.pseudoAddr(proto) + "):")
-      }
-      else {
-        println()
-        println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
-      }
-
-      /*
-       Possible types:
-
-       * ... any
-       N ... nil
-       B ... boolean
-       lU ... lightuserdata
-       nI ... integer
-       nF ... float
-       S ... string
-       T ... table
-       F ... function
-       U ... userdata
-       C ... thread
-      */
-
-      val params = ArrayBuffer.empty[String]
-      for (i <- 1 to proto.getNumberOfParameters) {
-        params.append("*")
-      }
-      if (proto.isVararg) {
-        params.append("...")
-      }
-
-//      println("Parameters: (" + params.mkString(" ") + ")")
-
-
-      val trav = new ControlFlowTraversal(proto)
-
-//      trav.print(System.out)
-
-      val blox = trav.getBlocks.toSeq
-
-      case class Bk(idx: Int) {
-        override def toString = {
-          val block = blox(idx)
-
-          val lines = trav.blockToString(block, "", false, true).split("\n").toSeq
-          val tabulated = tabulate(lines, "  ").toList
-
-          val blk = "Block #" + idx
-          val slots = "[ " + block.slots().toString + " ]"
-          val underline = fillStr("-", (tabulated map { _.length }).max)
-
-          (blk :: slots :: underline :: tabulated).mkString("\n")
-        }
-      }
-
-      case object Entry {
-        override def toString = {
-          val firstLine = "Entry"
-          val signature = params.mkString("(", " ", ")")
-
-          val sep = fillStr("-", ((firstLine :: signature :: Nil) map { _.length }).max)
-
-          (firstLine :: sep :: signature :: Nil).mkString("\n")
-        }
-      }
-      case object Exit
-
-      val vertices = blox.indices.toSet
-      val edges = for (v <- vertices; nx <- intBufferToSeq(blox.get(v).next) if nx >= 0) yield (Bk(v), Bk(nx))
-      val exitEdges = for (v <- vertices if blox.get(v).next.contains(-1)) yield (Bk(v), Exit)
-
-      val graph = Graph(
-        vertices = Set(Entry, Exit) ++ (blox.indices map Bk),
-        edges = (Entry -> Bk(0)) :: (edges.toList ::: exitEdges.toList)
-      )
-
-      val ascii = GraphLayout.renderGraph(graph)
-      println()
-      println(ascii)
-
-      val it = proto.getNestedPrototypes.iterator()
-      while (it.hasNext) {
-        val child = it.next()
-        printTraversal(child, false)
-      }
-    }
-
-    def printFlow(proto: Prototype, main: Boolean = true): Unit = {
-      if (main) {
-        println("Main (" + PrototypePrinter.pseudoAddr(proto) + "):")
-      }
-      else {
-        println()
-        println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
-      }
-
-      val flow = new FlowIt(proto)
-      flow.go()
-
-      val flowEdges = flow.reachabilityGraph.toMap
-      val flowStates = flow.slots.toMap
-
-      case class MyNode(node: Node) {
-        require (node != null)
-        override def toString = {
-          val ios = flowStates(node)
-          val in = if (ios.in != null) "[ " + ios.in.toString + " ]" else "(none)"
-          val out = if (ios.out != null) "[ " + ios.out.toString + " ]" else "(none)"
-
-          "   " + in + " ->\n" + node.toString + "\n-> " + out + "   "
-        }
-      }
-
-      val vertices = flowEdges.keySet map { MyNode }
-      val in = (for ((n, es) <- flowEdges) yield (es.in.toSet map { e: Node => (e, n) })).flatten
-      val out = (for ((n, es) <- flowEdges) yield (es.out.toSet map { e: Node => (n, e) })).flatten
-//      val edges = (in ++ out).toSet
-      val edges0 = (in ++ out).toSet
-      val edges = edges0 map { case (u, v) => (MyNode(u), MyNode(v)) }
-
-
-      val graph = Graph(
-        vertices = vertices,
-        edges = edges.toList
-      )
-
-      val ascii = GraphLayout.renderGraph(graph)
-      println()
-      println(ascii)
-
-      val it = proto.getNestedPrototypes.iterator()
-      while (it.hasNext) {
-        val child = it.next()
-        printFlow(child, false)
-      }
-    }
-
     printFlow(proto)
-
-//    printTraversal(proto)
 
   }
 
