@@ -13,6 +13,92 @@ import scala.collection.JavaConversions._
 
 object AnalysisRunner {
 
+  object fragments {
+
+    object IfThenElse extends Fragment {
+      code =
+          """if x >= 0 and x <= 10 then print(x) end
+          """
+    }
+
+    object Upvalues1 extends Fragment {
+      code =
+          """
+            |local x = {}
+            |for i = 0, 10 do
+            |  if i % 2 == 0 then x[i // 2] = function() return i, x end end
+            |end
+          """
+    }
+
+    object Upvalues2 extends Fragment {
+      code =
+          """
+            |local x
+            |x = 1
+            |
+            |local function sqr()
+            |  return x * x
+            |end
+            |
+            |x = 3
+            |return sqr()
+          """
+    }
+
+
+    object BlockLocals extends Fragment {
+      code =
+          """do
+            |  local a = 0
+            |  local b = 1
+            |end
+            |
+            |do
+            |  local a = 2
+            |end
+          """
+    }
+
+    object Tailcalls extends Fragment {
+      code =
+          """function f(x)
+            |  print(x)
+            |  if x > 0 then
+            |    return f(x - 1)
+            |  else
+            |    if x < 0 then
+            |      return f(x + 1)
+            |    else
+            |      return 0
+            |    end
+            |  end
+            |end
+            |
+            |return f(3),f(-2)
+          """
+    }
+
+    object FuncWith2Params extends Fragment {
+      code =
+          """local f = function (x, y)
+            |    return x + y
+            |end
+            |return -1 + f(1, 3) + 39
+          """
+    }
+
+    object FuncWith3Params extends Fragment {
+      code =
+          """local f = function (x, y, z)
+            |    return x + y + z
+            |end
+            |return -1 + f(1, 1, 2) + 39
+          """
+    }
+
+  }
+
   def printFlow(proto: Prototype, main: Boolean = true): Unit = {
     if (main) {
       println("Main (" + PrototypePrinter.pseudoAddr(proto) + "):")
@@ -22,8 +108,12 @@ object AnalysisRunner {
       println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
     }
 
+    val before = System.nanoTime()
     val flow = new FlowIt(proto)
     flow.go()
+    val after = System.nanoTime()
+
+    System.out.println("Analysis took %.1f ms".format((after - before) / 1000000.0))
 
     val flowEdges = flow.reachabilityGraph.toMap
     val flowStates = flow.slots.toMap
@@ -65,6 +155,8 @@ object AnalysisRunner {
 
   def main(args: Array[String]): Unit = {
 
+    import fragments._
+
     val luacPath = "luac53"
     require (luacPath != null)
 
@@ -73,88 +165,11 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-//    val program =
-//      """
-//        |if x >= 0 and x <= 10 then print(x) end
-//      """.stripMargin
+    val program = Upvalues1
 
-    val program =
-    """
-      |local x = {}
-      |for i = 0, 10 do
-      |  if i % 2 == 0 then x[i // 2] = function() return i, x end end
-      |end
-    """.stripMargin
+    println(program.code)
 
-/*
-    val program =
-    """
-      |local x
-      |x = 1
-      |
-      |local function sqr()
-      |  return x * x
-      |end
-      |
-      |x = 3
-      |return sqr()
-    """.stripMargin
-*/
-
-/*
-    val program =
-    """do
-      |  local a = 0
-      |  local b = 1
-      |end
-      |
-      |do
-      |  local a = 2
-      |end
-      |
-      |function f(x)
-      |  print(x)
-      |  if x > 0 then
-      |    return f(x - 1)
-      |  else
-      |    if x < 0 then
-      |      return f(x + 1)
-      |    else
-      |      return 0
-      |    end
-      |  end
-      |end
-      |
-      |local hi = "hello."
-      |
-      |function g()
-      |  print(hi)
-      |  for i = 0, 10 do
-      |    coroutine.yield(function() return i end)
-      |  end
-      |end
-      |
-      |return f(3),f(-2)
-      """.stripMargin
-*/
-
-//    val program =
-//      """local f = function (x, y)
-//        |    return x + y
-//        |end
-//        |return -1 + f(1, 3) + 39
-//      """.stripMargin
-
-//    val program =
-//      """local f = function (x, y, z)
-//        |    return x + y + z
-//        |end
-//        |return -1 + f(1, 1, 2) + 39
-//      """.stripMargin
-
-    println(program)
-
-    val proto = ploader.load(program)
+    val proto = ploader.load(program.code)
 
     proto.accept(new PrototypePrinterVisitor(new PrintWriter(System.out)))
 //    PrototypePrinter.print(proto, new PrintWriter(System.out))
