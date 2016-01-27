@@ -96,7 +96,7 @@ public class Slots {
 
 //			if (bld.length() > 0) bld.append(' ');
 			if (state == SlotState.CAPTURED) {
-				bld.append('@');
+				bld.append('^');
 			}
 			switch (type) {
 				case ANY: bld.append("A"); break;
