@@ -94,21 +94,21 @@ public class Slots {
 			SlotState state = getState(i);
 			SlotType type = getType(i);
 
-			if (bld.length() > 0) bld.append(' ');
+//			if (bld.length() > 0) bld.append(' ');
 			if (state == SlotState.CAPTURED) {
 				bld.append('@');
 			}
 			switch (type) {
-				case ANY: bld.append(" * "); break;
-				case NIL: bld.append(" - "); break;
-				case BOOLEAN: bld.append("boo"); break;
-				case NUMBER: bld.append("num"); break;
-				case NUMBER_INTEGER: bld.append("int"); break;
-				case NUMBER_FLOAT: bld.append("flt"); break;
-				case STRING: bld.append("str"); break;
-				case FUNCTION: bld.append("fun"); break;
-				case TABLE: bld.append("tab"); break;
-				case THREAD: bld.append("thr"); break;
+				case ANY: bld.append("A"); break;
+				case NIL: bld.append("-"); break;
+				case BOOLEAN: bld.append("B"); break;
+				case NUMBER: bld.append("N"); break;
+				case NUMBER_INTEGER: bld.append("i"); break;
+				case NUMBER_FLOAT: bld.append("f"); break;
+				case STRING: bld.append("S"); break;
+				case FUNCTION: bld.append("F"); break;
+				case TABLE: bld.append("T"); break;
+				case THREAD: bld.append("C"); break;
 				default: bld.append('?'); break;
 			}
 		}
