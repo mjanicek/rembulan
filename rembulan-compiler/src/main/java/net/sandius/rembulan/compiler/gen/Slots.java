@@ -185,11 +185,13 @@ public class Slots {
 		return updateType(idx, getType(idx).join(type));
 	}
 
-	public Slots joinAll(Slots that) {
+	public Slots join(Slots that) {
 		Check.notNull(that);
+		Check.isEq(this.size(), that.size());
+
 		Slots s = this;
 		for (int i = 0; i < size(); i++) {
-			s = join(i, that.getType(i));
+			s = s.join(i, that.getType(i));
 		}
 		return s;
 	}

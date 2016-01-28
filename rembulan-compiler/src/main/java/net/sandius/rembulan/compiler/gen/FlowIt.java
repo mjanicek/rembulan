@@ -13,15 +13,18 @@ import net.sandius.rembulan.compiler.gen.block.SlotEffect;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class FlowIt {
@@ -213,64 +216,64 @@ public class FlowIt {
 		}
 
 		InOutSlots entryIos = slots.get(entryPoint);
+		entryIos.in = null;
 		entryIos.out = entrySlots();
 
 		return slots;
+	}
+
+	private Slots effect(Node n, Slots in) {
+		if (n instanceof SlotEffect) {
+			SlotEffect eff = (SlotEffect) n;
+			return eff.effect(in, prototype);
+		}
+		else {
+			return in;
+		}
+	}
+
+	private boolean joinWith(Map<Node, InOutSlots> slots, Node n, Slots addIn) {
+		Check.notNull(slots);
+		Check.notNull(addIn);
+
+		InOutSlots s_n = slots.get(n);
+		Slots oldIn = s_n.in;
+		s_n.in = oldIn == null ? addIn : oldIn.join(addIn);
+
+		return !s_n.in.equals(oldIn);
 	}
 
 	public Map<Node, InOutSlots> dataFlow(Entry entryPoint) {
 		Map<Node, Edges> edges = reachabilityEdges(Collections.singleton(entryPoint));
 		Map<Node, InOutSlots> slots = initSlots(entryPoint);
 
-		Set<Node> nodes = edges.keySet();
+		Slots entrySlots = entrySlots();
 
-		boolean changed;
+		Queue<Node> workList = new ArrayDeque<>();
 
-		// FIXME: terribly inefficient
+		// push entry point's slots to the immediate successors
+		for (Node n : edges.get(entryPoint).out) {
+			if (joinWith(slots, n, entrySlots)) {
+				workList.add(n);
+			}
+		}
 
-		do {
-			changed = false;
+		while (!workList.isEmpty()) {
+			Node n = workList.remove();
+			assert (n != null);
 
-			for (Node n : nodes) {
+			InOutSlots s_n = slots.get(n);
+			assert (s_n.in != null);
 
-				Edges es = edges.get(n);
-				Set<Node> in = es.in;
-
-				InOutSlots ios = slots.get(n);
-
-				if (!in.isEmpty()) {
-					Slots newIn = null;
-					for (Node inNode : in) {
-						Slots t = slots.get(inNode).out;
-						if (t != null) {
-							newIn = newIn == null ? t : newIn.joinAll(t);
-						}
-					}
-
-					Slots oldIn = ios.in;
-
-					if (newIn != null && !newIn.equals(oldIn)) {
-						ios.in = newIn;
-						changed = true;
-
-						// now recompute the output
-
-						if (n instanceof SlotEffect) {
-							SlotEffect eff = (SlotEffect) n;
-							ios.out = eff.effect(newIn, prototype);
-						}
-						else {
-							ios.out = newIn;
-						}
-
-						break;
-					}
-
+			// compute effect and push it to outputs
+			Slots o = effect(n, s_n.in);
+			for (Node m : edges.get(n).out) {
+				if (joinWith(slots, m, o)) {
+					workList.add(m);
 				}
-
 			}
 
-		} while (changed);
+		}
 
 		return slots;
 	}
