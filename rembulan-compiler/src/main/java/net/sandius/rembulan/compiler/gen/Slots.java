@@ -193,6 +193,13 @@ public class Slots {
 		for (int i = 0; i < size(); i++) {
 			s = s.join(i, that.getType(i));
 		}
+
+		for (int i = 0; i < size(); i++) {
+			if (that.getState(i).isCaptured()) {
+				s = s.capture(i);
+			}
+		}
+
 		return s;
 	}
 
