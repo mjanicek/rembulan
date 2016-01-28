@@ -1,19 +1,23 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.AccountingNode;
+import net.sandius.rembulan.compiler.gen.block.Capture;
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
+import net.sandius.rembulan.compiler.gen.block.LocalVariableEffect;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
+import net.sandius.rembulan.compiler.gen.block.Sink;
 import net.sandius.rembulan.compiler.gen.block.SlotEffect;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
@@ -30,6 +34,9 @@ import java.util.Set;
 public class FlowIt {
 
 	public final Prototype prototype;
+
+	public Entry callEntry;
+	public Set<Entry> entryPoints;
 
 	public Map<Node, Edges> reachabilityGraph;
 	public Map<Node, Slots> slots;
@@ -60,13 +67,13 @@ public class FlowIt {
 //		}
 //		System.out.println("]");
 
-		Entry callEntry = new Entry("main", pcLabels.get(0));
+		callEntry = new Entry("main", pcLabels.get(0));
 
-		Set<Entry> entryPoints = new HashSet<>();
+		entryPoints = new HashSet<>();
 		entryPoints.add(callEntry);
 
-		inlineInnerJumps(entryPoints);
-		makeBlocks(entryPoints);
+		inlineInnerJumps();
+		makeBlocks();
 
 		applyTransformation(entryPoints, new CollectCPUAccounting());
 
@@ -82,8 +89,15 @@ public class FlowIt {
 //		System.out.println();
 //		printNodes(entryPoints);
 
-		reachabilityGraph = reachabilityEdges(entryPoints);
-		slots = dataFlow(callEntry);
+		updateReachability();
+		updateDataFlow();
+
+		// add capture nodes
+		insertCaptureNodes();
+
+		updateReachability();
+		updateDataFlow();
+
 	}
 
 	private static class CollectCPUAccounting extends LinearSeqTransformation {
@@ -156,7 +170,7 @@ public class FlowIt {
 		}
 	}
 
-	private void inlineInnerJumps(Iterable<Entry> entryPoints) {
+	private void inlineInnerJumps() {
 		for (Node n : reachableNodes(entryPoints)) {
 			if (n instanceof Target) {
 				Target t = (Target) n;
@@ -168,7 +182,7 @@ public class FlowIt {
 		}
 	}
 
-	private void makeBlocks(Iterable<Entry> entryPoints) {
+	private void makeBlocks() {
 		for (Node n : reachableNodes(entryPoints)) {
 			if (n instanceof Target) {
 				Target t = (Target) n;
@@ -186,6 +200,43 @@ public class FlowIt {
 				seq.dissolve();
 			}
 		});
+	}
+
+	public void updateReachability() {
+		reachabilityGraph = reachabilityEdges(entryPoints);
+	}
+
+	public void insertCaptureNodes() {
+		for (Node n : reachabilityGraph.keySet()) {
+			if (n instanceof Sink && !(n instanceof LocalVariableEffect)) {
+				Slots s_n = slots.get(n);
+
+				if (s_n != null) {
+					IntBuffer uncaptured = new IntBuffer();
+
+					for (Node m : reachabilityGraph.get(n).out) {
+						Slots s_m = slots.get(m);
+
+						for (int i = 0; i < s_n.size(); i++) {
+							if (!s_n.getState(i).isCaptured() && s_m.getState(i).isCaptured()) {
+								// need to capture i
+								uncaptured.append(i);
+//								System.out.println("need to capture " + i + " in " + n);
+							}
+						}
+					}
+
+					for (int i = 0; i < uncaptured.length(); i++) {
+						int index = uncaptured.get(i);
+
+						Capture captureNode = new Capture(index);
+						captureNode.insertBefore((Sink) n);
+
+//						System.out.println("adding " + captureNode);
+					}
+				}
+			}
+		}
 	}
 
 	public static class Edges {
@@ -230,6 +281,10 @@ public class FlowIt {
 		else {
 			return false;
 		}
+	}
+
+	public void updateDataFlow() {
+		slots = dataFlow(callEntry);
 	}
 
 	public Map<Node, Slots> dataFlow(Entry entryPoint) {

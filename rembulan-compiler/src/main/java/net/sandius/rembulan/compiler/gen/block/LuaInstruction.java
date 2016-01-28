@@ -628,7 +628,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Closure extends Linear implements SlotEffect {
+	public static class Closure extends Linear implements SlotEffect, LocalVariableEffect {
 
 		public final int dest;
 		public final int index;

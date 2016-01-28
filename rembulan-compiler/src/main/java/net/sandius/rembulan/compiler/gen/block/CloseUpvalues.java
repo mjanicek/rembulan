@@ -4,7 +4,7 @@ import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 
-public class CloseUpvalues extends Linear implements SlotEffect {
+public class CloseUpvalues extends Linear implements SlotEffect, LocalVariableEffect {
 
 	public final int fromIndex;
 
