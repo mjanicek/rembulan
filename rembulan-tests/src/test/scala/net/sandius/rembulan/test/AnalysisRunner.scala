@@ -121,11 +121,10 @@ object AnalysisRunner {
     case class MyNode(node: Node) {
       require (node != null)
       override def toString = {
-        val ios = flowStates(node)
-        val in = if (ios.in != null) "[ " + ios.in.toString + " ]" else "(none)"
-        val out = if (ios.out != null) "[ " + ios.out.toString + " ]" else "(none)"
+        val sx = flowStates(node)
+        val in = if (sx != null) "[" + sx.toString + "]" else "(none)"
 
-        "   " + in + " ->\n" + node.toString + "\n-> " + out + "   "
+        "  " + in + "  \n" + node.toString
       }
     }
 

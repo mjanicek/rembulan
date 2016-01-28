@@ -32,7 +32,7 @@ public class FlowIt {
 	public final Prototype prototype;
 
 	public Map<Node, Edges> reachabilityGraph;
-	public Map<Node, InOutSlots> slots;
+	public Map<Node, Slots> slots;
 
 	public FlowIt(Prototype prototype) {
 		this.prototype = prototype;
@@ -199,26 +199,11 @@ public class FlowIt {
 		}
 	}
 
-	public static class InOutSlots {
-		public Slots in;
-		public Slots out;
-
-		public InOutSlots() {
-			this.in = null;
-			this.out = null;
-		}
-	}
-
-	private Map<Node, InOutSlots> initSlots(Entry entryPoint) {
-		Map<Node, InOutSlots> slots = new HashMap<>();
+	private Map<Node, Slots> initSlots(Entry entryPoint) {
+		Map<Node, Slots> slots = new HashMap<>();
 		for (Node n : reachableNodes(Collections.singleton(entryPoint))) {
-			slots.put(n, new InOutSlots());
+			slots.put(n, null);
 		}
-
-		InOutSlots entryIos = slots.get(entryPoint);
-		entryIos.in = null;
-		entryIos.out = entrySlots();
-
 		return slots;
 	}
 
@@ -232,20 +217,24 @@ public class FlowIt {
 		}
 	}
 
-	private boolean joinWith(Map<Node, InOutSlots> slots, Node n, Slots addIn) {
+	private boolean joinWith(Map<Node, Slots> slots, Node n, Slots addIn) {
 		Check.notNull(slots);
 		Check.notNull(addIn);
 
-		InOutSlots s_n = slots.get(n);
-		Slots oldIn = s_n.in;
-		s_n.in = oldIn == null ? addIn : oldIn.join(addIn);
-
-		return !s_n.in.equals(oldIn);
+		Slots oldIn = slots.get(n);
+		Slots newIn = oldIn == null ? addIn : oldIn.join(addIn);
+		if (!newIn.equals(oldIn)) {
+			slots.put(n, newIn);
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
-	public Map<Node, InOutSlots> dataFlow(Entry entryPoint) {
+	public Map<Node, Slots> dataFlow(Entry entryPoint) {
 		Map<Node, Edges> edges = reachabilityEdges(Collections.singleton(entryPoint));
-		Map<Node, InOutSlots> slots = initSlots(entryPoint);
+		Map<Node, Slots> slots = initSlots(entryPoint);
 
 		Slots entrySlots = entrySlots();
 
@@ -262,11 +251,10 @@ public class FlowIt {
 			Node n = workList.remove();
 			assert (n != null);
 
-			InOutSlots s_n = slots.get(n);
-			assert (s_n.in != null);
+			assert (slots.get(n) != null);
 
 			// compute effect and push it to outputs
-			Slots o = effect(n, s_n.in);
+			Slots o = effect(n, slots.get(n));
 			for (Node m : edges.get(n).out) {
 				if (joinWith(slots, m, o)) {
 					workList.add(m);
