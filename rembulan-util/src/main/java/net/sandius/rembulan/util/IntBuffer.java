@@ -36,6 +36,10 @@ public class IntBuffer {
 		return len;
 	}
 
+	public boolean isEmpty() {
+		return length() == 0;
+	}
+
 	public int get(int idx) {
 		Check.inRange(idx, 0, len - 1);
 		return buf[idx];

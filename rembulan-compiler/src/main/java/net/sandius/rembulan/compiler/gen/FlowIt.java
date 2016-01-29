@@ -223,18 +223,13 @@ public class FlowIt {
 							if (!s_n.getState(i).isCaptured() && s_m.getState(i).isCaptured()) {
 								// need to capture i
 								uncaptured.append(i);
-//								System.out.println("need to capture " + i + " in " + n);
 							}
 						}
 					}
 
-					for (int i = 0; i < uncaptured.length(); i++) {
-						int index = uncaptured.get(i);
-
-						Capture captureNode = new Capture(index);
+					if (!uncaptured.isEmpty()) {
+						Capture captureNode = new Capture(uncaptured.toVector());
 						captureNode.insertBefore((Sink) n);
-
-//						System.out.println("adding " + captureNode);
 					}
 				}
 			}

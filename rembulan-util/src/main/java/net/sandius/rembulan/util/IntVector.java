@@ -48,8 +48,23 @@ public class IntVector {
 		return Arrays.hashCode(values);
 	}
 
+	public String toString(String separator) {
+		StringBuilder bld = new StringBuilder();
+		for (int i = 0; i < values.length; i++) {
+			bld.append(values[i]);
+			if (i + 1 < values.length) {
+				bld.append(separator);
+			}
+		}
+		return bld.toString();
+	}
+
 	public int length() {
 		return values.length;
+	}
+
+	public boolean isEmpty() {
+		return length() == 0;
 	}
 
 	public int get(int index) {
