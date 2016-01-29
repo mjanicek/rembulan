@@ -2,7 +2,7 @@ package net.sandius.rembulan.util;
 
 import java.util.Arrays;
 
-public class IntBuffer {
+public class IntBuffer extends IntContainer {
 
 	private int[] buf;
 	private int len;
@@ -32,14 +32,12 @@ public class IntBuffer {
 		buf = nbuf;
 	}
 
+	@Override
 	public int length() {
 		return len;
 	}
 
-	public boolean isEmpty() {
-		return length() == 0;
-	}
-
+	@Override
 	public int get(int idx) {
 		Check.inRange(idx, 0, len - 1);
 		return buf[idx];
@@ -78,13 +76,6 @@ public class IntBuffer {
 
 	public void clear() {
 		len = 0;
-	}
-
-	public boolean contains(int value) {
-		for (int i = 0; i < len; i++) {
-			if (buf[i] == value) return true;
-		}
-		return false;
 	}
 
 	public void append(int value) {

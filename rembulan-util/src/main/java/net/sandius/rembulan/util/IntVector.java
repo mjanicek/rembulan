@@ -1,10 +1,9 @@
 package net.sandius.rembulan.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 // an immutable vector of ints
-public class IntVector {
+public class IntVector extends IntContainer {
 
 	public static final IntVector EMPTY = new IntVector(new int[0]);
 
@@ -48,91 +47,14 @@ public class IntVector {
 		return Arrays.hashCode(values);
 	}
 
-	public String toString(String separator) {
-		StringBuilder bld = new StringBuilder();
-		for (int i = 0; i < values.length; i++) {
-			bld.append(values[i]);
-			if (i + 1 < values.length) {
-				bld.append(separator);
-			}
-		}
-		return bld.toString();
-	}
-
+	@Override
 	public int length() {
 		return values.length;
 	}
 
-	public boolean isEmpty() {
-		return length() == 0;
-	}
-
+	@Override
 	public int get(int index) {
 		return values[index];
-	}
-
-	public static class Builder implements GenericBuilder<IntVector> {
-
-		private final ArrayList<Integer> values;
-
-		private Builder(ArrayList<Integer> values) {
-			Check.notNull(values);
-			this.values = values;
-		}
-
-		private Builder() {
-			this(new ArrayList<Integer>());
-		}
-
-		public Builder copy() {
-			ArrayList<Integer> cp = new ArrayList<Integer>();
-			cp.addAll(values);
-			return new Builder(cp);
-		}
-
-		public Builder clear() {
-			values.clear();
-			return this;
-		}
-
-		public Builder append(int v) {
-			values.add(v);
-			return this;
-		}
-
-		public Builder append(int[] vs) {
-			Check.notNull(vs);
-			for (int v : vs) {
-				append(v);
-			}
-			return this;
-		}
-
-		public Builder set(int[] vs) {
-			Check.notNull(vs);
-			return clear().append(vs);
-		}
-
-		public Builder set(IntVector vs) {
-			Check.notNull(vs);
-			return clear().append(vs.copyToNewArray());
-		}
-
-		@Override
-		public IntVector build() {
-			int[] vs = new int[values.size()];
-
-			for (int i = 0; i < values.size(); i++) {
-				vs[i] = values.get(i);
-			}
-
-			return IntVector.wrap(vs);
-		}
-
-	}
-
-	public static Builder newBuilder() {
-		return new Builder();
 	}
 
 }
