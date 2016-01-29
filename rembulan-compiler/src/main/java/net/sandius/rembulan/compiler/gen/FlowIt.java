@@ -95,6 +95,8 @@ public class FlowIt {
 		// add capture nodes
 		insertCaptureNodes();
 
+		makeBlocks();
+
 		updateReachability();
 		updateDataFlow();
 

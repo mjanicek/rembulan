@@ -1,10 +1,12 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Iterator;
 
-public class LinearSeq extends Linear {
+public class LinearSeq extends Linear implements SlotEffect {
 
 	private final Sentinel beginSentinel;
 	private final Sentinel endSentinel;
@@ -20,12 +22,12 @@ public class LinearSeq extends Linear {
 	public String toString() {
 		Iterator<Linear> it = new LinearIterator();
 		StringBuilder bld = new StringBuilder();
-		bld.append("--\n");
+//		bld.append("--\n");
 		while (it.hasNext()) {
 			Linear l = it.next();
 			bld.append(l.toString()).append('\n');
 		}
-		bld.append("--");
+//		bld.append("--");
 		return bld.toString();
 	}
 
@@ -85,6 +87,17 @@ public class LinearSeq extends Linear {
 		}
 
 		beginSentinel.appendSink(endSentinel);
+	}
+
+	@Override
+	public Slots effect(Slots in, Prototype prototype) {
+		Slots s = in;
+		for (Node n : nodes()) {
+			if (n instanceof SlotEffect) {
+				s = ((SlotEffect) n).effect(s, prototype);
+			}
+		}
+		return s;
 	}
 
 	private class LinearIterator implements Iterator<Linear> {
