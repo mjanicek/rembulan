@@ -44,6 +44,10 @@ public class LuaInstructionToNodeTranslator {
 		}
 	}
 
+	private static int registerOrConst(int i) {
+		return OpCode.isK(i) ? -1 - OpCode.indexK(i) : i;
+	}
+
 	public void translate(int insn, int pc, int line, ReadOnlyArray<Target> pcToLabel) {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
@@ -88,8 +92,8 @@ public class LuaInstructionToNodeTranslator {
 			case OpCode.SHR:
 				tail.append(new BinOp(BinOpType.fromOpcode(opcode),
 						a,
-						OpCode.isK(b) ? -1 - OpCode.indexK(b) : b,
-						OpCode.isK(c) ? -1 - OpCode.indexK(c) : c)).jumpTo(pcToLabel.get(pc + 1));
+						registerOrConst(b),
+						registerOrConst(c))).jumpTo(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.UNM:
@@ -111,31 +115,31 @@ public class LuaInstructionToNodeTranslator {
 				tail.jumpTo(pcToLabel.get(pc + sbx + 1));
 				break;
 
-			case OpCode.EQ: {
-				Target left = pcToLabel.get(pc + 1);
-				Target right = pcToLabel.get(pc + 2);
-
-				// TODO: NEQ has the branches swapped?
-				tail.branch(new Eq(left, right, a, b, c));
-			}
+			case OpCode.EQ:
+				tail.branch(new Eq(
+						pcToLabel.get(pc + 1),
+						pcToLabel.get(pc + 2),
+						a == 0,
+						registerOrConst(b),
+						registerOrConst(c)));
 				break;
 
-			case OpCode.LT: {
-				Target left = pcToLabel.get(pc + 1);
-				Target right = pcToLabel.get(pc + 2);
-
-				// TODO: NEQ has the branches swapped?
-				tail.branch(new Lt(left, right, a, b, c));
-			}
+			case OpCode.LT:
+				tail.branch(new Lt(
+						pcToLabel.get(pc + 1),
+						pcToLabel.get(pc + 2),
+						a == 0,
+						registerOrConst(b),
+						registerOrConst(c)));
 				break;
 
-			case OpCode.LE: {
-				Target left = pcToLabel.get(pc + 1);
-				Target right = pcToLabel.get(pc + 2);
-
-				// TODO: NEQ has the branches swapped?
-				tail.branch(new Le(left, right, a, b, c));
-			}
+			case OpCode.LE:
+				tail.branch(new Le(
+						pcToLabel.get(pc + 1),
+						pcToLabel.get(pc + 2),
+						a == 0,
+						registerOrConst(b),
+						registerOrConst(c)));
 				break;
 
 			case OpCode.CALL:

@@ -535,20 +535,20 @@ public class LuaInstruction {
 	}
 
 	public static class Eq extends Branch implements SlotEffect {
-		public final int a;
+		public final boolean pos;
 		public final int b;
 		public final int c;
 
-		public Eq(Target trueBranch, Target falseBranch, int a, int b, int c) {
+		public Eq(Target trueBranch, Target falseBranch, boolean pos, int b, int c) {
 			super(trueBranch, falseBranch);
-			this.a = a;
+			this.pos = pos;
 			this.b = b;
 			this.c = c;
 		}
 
 		@Override
 		public String toString() {
-			return "EQ(" + a + "," + b + "," + c + ")";
+			return (pos ? "EQ" : "NOT-EQ") +  "(" + b + "," + c + ")";
 		}
 
 		@Override
@@ -559,20 +559,20 @@ public class LuaInstruction {
 	}
 
 	public static class Lt extends Branch implements SlotEffect {
-		public final int a;
+		public final boolean pos;
 		public final int b;
 		public final int c;
 
-		public Lt(Target trueBranch, Target falseBranch, int a, int b, int c) {
+		public Lt(Target trueBranch, Target falseBranch, boolean pos, int b, int c) {
 			super(trueBranch, falseBranch);
-			this.a = a;
+			this.pos = pos;
 			this.b = b;
 			this.c = c;
 		}
 
 		@Override
 		public String toString() {
-			return "LT(" + a + "," + b + "," + c + ")";
+			return (pos ? "LT" : "NOT-LT") + "(" + b + "," + c + ")";
 		}
 
 		@Override
@@ -583,20 +583,20 @@ public class LuaInstruction {
 	}
 
 	public static class Le extends Branch implements SlotEffect {
-		public final int a;
+		public final boolean pos;
 		public final int b;
 		public final int c;
 
-		public Le(Target trueBranch, Target falseBranch, int a, int b, int c) {
+		public Le(Target trueBranch, Target falseBranch, boolean pos, int b, int c) {
 			super(trueBranch, falseBranch);
-			this.a = a;
+			this.pos = pos;
 			this.b = b;
 			this.c = c;
 		}
 
 		@Override
 		public String toString() {
-			return "LE(" + a + "," + b + "," + c + ")";
+			return (pos ? "LE" : "NOT-LE") + "(" + b + "," + c + ")";
 		}
 
 		@Override
