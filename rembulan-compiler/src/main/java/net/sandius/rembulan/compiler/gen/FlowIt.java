@@ -95,6 +95,8 @@ public class FlowIt {
 		// add capture nodes
 		insertCaptureNodes();
 
+		addResumptionPoints();
+
 		makeBlocks();
 
 		updateReachability();
@@ -188,9 +190,20 @@ public class FlowIt {
 		for (Node n : reachableNodes(entryPoints)) {
 			if (n instanceof Target) {
 				Target t = (Target) n;
-				LinearSeq block = new LinearSeq();
-				block.insertAfter(t);
-				block.grow();
+				if (t.next() instanceof Linear) {
+					// only insert blocks where they have a chance to grow
+					LinearSeq block = new LinearSeq();
+					block.insertAfter(t);
+					block.grow();
+				}
+			}
+		}
+	}
+
+	private void addResumptionPoints() {
+		for (Node n : reachableNodes(entryPoints)) {
+			if (n instanceof AccountingNode) {
+				insertResumptionAfter((AccountingNode) n);
 			}
 		}
 	}
@@ -236,6 +249,19 @@ public class FlowIt {
 		}
 	}
 
+	public void insertResumptionAfter(Linear n) {
+		Sink next = n.next();
+
+		Target tgt = new Target();
+		UnconditionalJump jmp = new UnconditionalJump(tgt);
+
+		n.appendSink(jmp);
+		tgt.appendSink(next);
+
+		Entry resumeEntry = new Entry(tgt);
+		entryPoints.add(resumeEntry);
+	}
+
 	public static class Edges {
 		// FIXME: may in principle be multisets
 		public final Set<Node> in;
@@ -247,9 +273,9 @@ public class FlowIt {
 		}
 	}
 
-	private Map<Node, Slots> initSlots(Entry entryPoint) {
+	private Map<Node, Slots> initSlots(Set<Entry> entryPoints) {
 		Map<Node, Slots> slots = new HashMap<>();
-		for (Node n : reachableNodes(Collections.singleton(entryPoint))) {
+		for (Node n : reachableNodes(entryPoints)) {
 			slots.put(n, null);
 		}
 		return slots;
@@ -281,12 +307,12 @@ public class FlowIt {
 	}
 
 	public void updateDataFlow() {
-		slots = dataFlow(callEntry);
+		slots = dataFlow(callEntry, entryPoints);
 	}
 
-	public Map<Node, Slots> dataFlow(Entry entryPoint) {
-		Map<Node, Edges> edges = reachabilityEdges(Collections.singleton(entryPoint));
-		Map<Node, Slots> slots = initSlots(entryPoint);
+	public Map<Node, Slots> dataFlow(Entry entryPoint, Set<Entry> entryPoints) {
+		Map<Node, Edges> edges = reachabilityEdges(entryPoints);
+		Map<Node, Slots> slots = initSlots(entryPoints);
 
 		Slots entrySlots = entrySlots();
 
