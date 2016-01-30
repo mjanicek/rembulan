@@ -116,7 +116,7 @@ public class LuaInstructionToNodeTranslator {
 				break;
 
 			case OpCode.FORPREP:
-				tail.append(new ForPrep(a, b)).jumpTo(pcToLabel.get(pc + sbx + 1));
+				tail.append(new ForPrep(a, registerOrConst(b))).jumpTo(pcToLabel.get(pc + sbx + 1));
 				break;
 
 			case OpCode.TAILCALL:
