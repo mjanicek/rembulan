@@ -4,7 +4,7 @@ import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 
-public class Capture extends Linear implements SlotEffect, LocalVariableEffect {
+public class Capture extends Linear implements LocalVariableEffect {
 
 	public final IntVector indices;
 

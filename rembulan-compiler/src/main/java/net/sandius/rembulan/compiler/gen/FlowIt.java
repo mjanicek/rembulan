@@ -13,7 +13,6 @@ import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
-import net.sandius.rembulan.compiler.gen.block.SlotEffect;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
@@ -274,16 +273,6 @@ public class FlowIt {
 		return slots;
 	}
 
-	private Slots effect(Node n, Slots in) {
-		if (n instanceof SlotEffect) {
-			SlotEffect eff = (SlotEffect) n;
-			return eff.effect(in);
-		}
-		else {
-			return in;
-		}
-	}
-
 	private boolean joinWith(Map<Node, Slots> slots, Node n, Slots addIn) {
 		Check.notNull(slots);
 		Check.notNull(addIn);
@@ -325,7 +314,7 @@ public class FlowIt {
 			assert (slots.get(n) != null);
 
 			// compute effect and push it to outputs
-			Slots o = effect(n, slots.get(n));
+			Slots o = n.effect(slots.get(n));
 			for (Node m : edges.get(n).out) {
 				if (joinWith(slots, m, o)) {
 					workList.add(m);

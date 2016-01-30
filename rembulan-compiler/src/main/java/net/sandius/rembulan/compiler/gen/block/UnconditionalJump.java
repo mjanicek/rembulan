@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
 public class UnconditionalJump implements Node, Sink, Jump {
@@ -55,6 +56,11 @@ public class UnconditionalJump implements Node, Sink, Jump {
 			visitor.visitEdge(this, target);
 			target.accept(visitor);
 		}
+	}
+
+	@Override
+	public Slots effect(Slots in) {
+		return in;
 	}
 
 }

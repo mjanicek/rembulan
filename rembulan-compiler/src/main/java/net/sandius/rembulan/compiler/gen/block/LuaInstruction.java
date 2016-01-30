@@ -20,7 +20,7 @@ public class LuaInstruction {
 		}
 	}
 
-	public static class Move extends Linear implements SlotEffect {
+	public static class Move extends Linear {
 		public final int dest;
 		public final int src;
 
@@ -41,7 +41,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class LoadK extends Linear implements SlotEffect {
+	public static class LoadK extends Linear {
 
 		public final Prototype prototype;
 
@@ -66,7 +66,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class LoadNil extends Linear implements SlotEffect {
+	public static class LoadNil extends Linear {
 		public final int dest;
 		public final int lastOffset;
 
@@ -91,7 +91,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class LoadBool extends Linear implements SlotEffect {
+	public static class LoadBool extends Linear {
 		public final int dest;
 		public final int arg;
 
@@ -147,7 +147,7 @@ public class LuaInstruction {
 		}
 	}
 
-	public static class BinOp extends Linear implements SlotEffect {
+	public static class BinOp extends Linear {
 
 		public final Prototype prototype;
 
@@ -216,7 +216,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class UnOp extends Linear implements SlotEffect {
+	public static class UnOp extends Linear {
 
 		public final Prototype prototype;
 
@@ -264,7 +264,7 @@ public class LuaInstruction {
 		}
 	}
 
-	public static class Concat extends Linear implements SlotEffect {
+	public static class Concat extends Linear {
 
 		public final int a;
 		public final int b;
@@ -288,7 +288,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Call extends Linear implements SlotEffect {
+	public static class Call extends Linear {
 
 		public final int a;
 		public final int b;
@@ -335,7 +335,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class ForPrep extends Linear implements SlotEffect {
+	public static class ForPrep extends Linear {
 		public final int a;
 		public final int b;
 
@@ -387,7 +387,7 @@ public class LuaInstruction {
 	}
 
 
-	public static class GetUpVal extends Linear implements SlotEffect {
+	public static class GetUpVal extends Linear {
 		public final int a;
 		public final int b;
 
@@ -408,7 +408,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class GetTabUp extends Linear implements SlotEffect {
+	public static class GetTabUp extends Linear {
 		public final int a;
 		public final int b;
 
@@ -429,7 +429,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class GetTable extends Linear implements SlotEffect {
+	public static class GetTable extends Linear {
 
 		public final int a;
 		public final int b;
@@ -453,7 +453,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class SetTabUp extends Linear implements SlotEffect {
+	public static class SetTabUp extends Linear {
 
 		public final int a;
 		public final int b;
@@ -477,7 +477,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class SetUpVal extends Linear implements SlotEffect {
+	public static class SetUpVal extends Linear {
 		public final int a;
 		public final int b;
 
@@ -498,7 +498,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class SetTable extends Linear implements SlotEffect {
+	public static class SetTable extends Linear {
 		public final int a;
 		public final int b;
 		public final int c;
@@ -521,7 +521,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class NewTable extends Linear implements SlotEffect {
+	public static class NewTable extends Linear {
 		public final int a;
 		public final int b;
 		public final int c;
@@ -544,7 +544,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Eq extends Branch implements SlotEffect {
+	public static class Eq extends Branch {
 		public final boolean pos;
 		public final int b;
 		public final int c;
@@ -568,7 +568,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Lt extends Branch implements SlotEffect {
+	public static class Lt extends Branch {
 		public final boolean pos;
 		public final int b;
 		public final int c;
@@ -592,7 +592,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Le extends Branch implements SlotEffect {
+	public static class Le extends Branch {
 		public final boolean pos;
 		public final int b;
 		public final int c;
@@ -616,7 +616,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class ForLoop extends Branch implements SlotEffect {
+	public static class ForLoop extends Branch {
 		public final int a;
 		public final int sbx;
 
@@ -638,7 +638,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Closure extends Linear implements SlotEffect, LocalVariableEffect {
+	public static class Closure extends Linear implements LocalVariableEffect {
 
 		public final Prototype prototype;
 
@@ -672,7 +672,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Return extends Exit implements SlotEffect {
+	public static class Return extends Exit {
 		public final int a;
 		public final int b;
 
@@ -693,7 +693,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class TailCall extends Exit implements SlotEffect {
+	public static class TailCall extends Exit {
 		public final int a;
 		public final int b;
 		public final int c;

@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
 public abstract class Linear implements Node, Sink, Src {
@@ -97,6 +98,11 @@ public abstract class Linear implements Node, Sink, Src {
 			visitor.visitEdge(this, next);
 			next.accept(visitor);
 		}
+	}
+
+	@Override
+	public Slots effect(Slots in) {
+		return in;
 	}
 
 }

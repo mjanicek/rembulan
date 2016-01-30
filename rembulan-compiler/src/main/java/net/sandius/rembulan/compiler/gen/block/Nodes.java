@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
 public abstract class Nodes {
@@ -68,6 +69,11 @@ public abstract class Nodes {
 				that.setNext(this);
 			}
 
+			@Override
+			public Slots effect(Slots in) {
+				return in;
+			}
+
 		};
 	}
 
@@ -103,6 +109,11 @@ public abstract class Nodes {
 				Check.notNull(that);
 				appendSink(that);
 				return that;
+			}
+
+			@Override
+			public Slots effect(Slots in) {
+				return in;
 			}
 
 		};

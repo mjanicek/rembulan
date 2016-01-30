@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
 public class Entry implements Node, Jump {
@@ -39,6 +40,12 @@ public class Entry implements Node, Jump {
 			visitor.visitEdge(this, target);
 			target.accept(visitor);
 		}
+	}
+
+	@Override
+	public Slots effect(Slots in) {
+		// TODO: is this correct?
+		return in;
 	}
 
 }

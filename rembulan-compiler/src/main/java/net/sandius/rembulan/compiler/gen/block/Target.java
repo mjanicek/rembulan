@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
 import java.util.HashMap;
@@ -100,6 +101,11 @@ public class Target implements Node, Src {
 			}
 		}
 		return jmp;
+	}
+
+	@Override
+	public Slots effect(Slots in) {
+		return in;
 	}
 
 }

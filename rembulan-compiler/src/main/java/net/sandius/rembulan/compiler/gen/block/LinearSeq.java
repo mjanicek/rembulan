@@ -6,7 +6,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.Iterator;
 
-public class LinearSeq extends Linear implements SlotEffect {
+public class LinearSeq extends Linear {
 
 	private final Sentinel beginSentinel;
 	private final Sentinel endSentinel;
@@ -93,9 +93,7 @@ public class LinearSeq extends Linear implements SlotEffect {
 	public Slots effect(Slots in) {
 		Slots s = in;
 		for (Node n : nodes()) {
-			if (n instanceof SlotEffect) {
-				s = ((SlotEffect) n).effect(s);
-			}
+			s = n.effect(s);
 		}
 		return s;
 	}
