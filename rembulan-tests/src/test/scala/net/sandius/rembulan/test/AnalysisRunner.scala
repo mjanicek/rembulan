@@ -5,7 +5,7 @@ import java.io.PrintWriter
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 import net.sandius.rembulan.compiler.gen.FlowIt
-import net.sandius.rembulan.compiler.gen.block.Node
+import net.sandius.rembulan.compiler.gen.block.{ResumptionPoint, Node}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
 
@@ -140,6 +140,11 @@ object AnalysisRunner {
       vertices = vertices,
       edges = edges.toList
     )
+
+//    println("Resume points:")
+//    for (r: ResumptionPoint <- flow.resumePoints.toSet) {
+//      println("\t" + r.toString + " : " + "[" + flowStates(r) + "]")
+//    }
 
     val ascii = GraphLayout.renderGraph(graph)
     println()

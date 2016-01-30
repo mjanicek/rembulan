@@ -11,6 +11,7 @@ import net.sandius.rembulan.compiler.gen.block.LocalVariableEffect;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
+import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
 import net.sandius.rembulan.compiler.gen.block.SlotEffect;
 import net.sandius.rembulan.compiler.gen.block.Target;
@@ -36,7 +37,7 @@ public class FlowIt {
 	public final Prototype prototype;
 
 	public Entry callEntry;
-	public Set<Entry> entryPoints;
+	public Set<ResumptionPoint> resumePoints;
 
 	public Map<Node, Edges> reachabilityGraph;
 	public Map<Node, Slots> slots;
@@ -69,19 +70,18 @@ public class FlowIt {
 
 		callEntry = new Entry("main", pcLabels.get(0));
 
-		entryPoints = new HashSet<>();
-		entryPoints.add(callEntry);
+		resumePoints = new HashSet<>();
 
 		inlineInnerJumps();
 		makeBlocks();
 
-		applyTransformation(entryPoints, new CollectCPUAccounting());
+		applyTransformation(new CollectCPUAccounting());
 
 		// remove repeated line info nodes
-		applyTransformation(entryPoints, new RemoveRedundantLineNodes());
+		applyTransformation(new RemoveRedundantLineNodes());
 
 		// dissolve blocks
-		dissolveBlocks(entryPoints);
+		dissolveBlocks();
 
 		// remove all line info nodes
 //		applyTransformation(entryPoints, new LinearSeqTransformation.Remove(Predicates.isClass(LineInfo.class)));
@@ -165,8 +165,8 @@ public class FlowIt {
 
 	}
 
-	private void applyTransformation(Iterable<Entry> entryPoints, LinearSeqTransformation tf) {
-		for (Node n : reachableNodes(entryPoints)) {
+	private void applyTransformation(LinearSeqTransformation tf) {
+		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
 			if (n instanceof LinearSeq) {
 				LinearSeq seq = (LinearSeq) n;
 				seq.apply(tf);
@@ -175,7 +175,7 @@ public class FlowIt {
 	}
 
 	private void inlineInnerJumps() {
-		for (Node n : reachableNodes(entryPoints)) {
+		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
 			if (n instanceof Target) {
 				Target t = (Target) n;
 				UnconditionalJump jmp = t.optIncomingJump();
@@ -187,7 +187,7 @@ public class FlowIt {
 	}
 
 	private void makeBlocks() {
-		for (Node n : reachableNodes(entryPoints)) {
+		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
 			if (n instanceof Target) {
 				Target t = (Target) n;
 				if (t.next() instanceof Linear) {
@@ -201,15 +201,15 @@ public class FlowIt {
 	}
 
 	private void addResumptionPoints() {
-		for (Node n : reachableNodes(entryPoints)) {
+		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
 			if (n instanceof AccountingNode) {
 				insertResumptionAfter((AccountingNode) n);
 			}
 		}
 	}
 
-	private void dissolveBlocks(Iterable<Entry> entryPoints) {
-		applyTransformation(entryPoints, new LinearSeqTransformation() {
+	private void dissolveBlocks() {
+		applyTransformation(new LinearSeqTransformation() {
 			@Override
 			public void apply(LinearSeq seq) {
 				seq.dissolve();
@@ -218,7 +218,7 @@ public class FlowIt {
 	}
 
 	public void updateReachability() {
-		reachabilityGraph = reachabilityEdges(entryPoints);
+		reachabilityGraph = reachabilityEdges(Collections.singleton(callEntry));
 	}
 
 	public void insertCaptureNodes() {
@@ -250,16 +250,9 @@ public class FlowIt {
 	}
 
 	public void insertResumptionAfter(Linear n) {
-		Sink next = n.next();
-
-		Target tgt = new Target();
-		UnconditionalJump jmp = new UnconditionalJump(tgt);
-
-		n.appendSink(jmp);
-		tgt.appendSink(next);
-
-		Entry resumeEntry = new Entry(tgt);
-		entryPoints.add(resumeEntry);
+		ResumptionPoint resume = new ResumptionPoint();
+		resume.insertAfter(n);
+		resumePoints.add(resume);
 	}
 
 	public static class Edges {
@@ -273,9 +266,9 @@ public class FlowIt {
 		}
 	}
 
-	private Map<Node, Slots> initSlots(Set<Entry> entryPoints) {
+	private Map<Node, Slots> initSlots() {
 		Map<Node, Slots> slots = new HashMap<>();
-		for (Node n : reachableNodes(entryPoints)) {
+		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
 			slots.put(n, null);
 		}
 		return slots;
@@ -307,19 +300,19 @@ public class FlowIt {
 	}
 
 	public void updateDataFlow() {
-		slots = dataFlow(callEntry, entryPoints);
+		slots = dataFlow();
 	}
 
-	public Map<Node, Slots> dataFlow(Entry entryPoint, Set<Entry> entryPoints) {
-		Map<Node, Edges> edges = reachabilityEdges(entryPoints);
-		Map<Node, Slots> slots = initSlots(entryPoints);
+	public Map<Node, Slots> dataFlow() {
+		Map<Node, Edges> edges = reachabilityEdges(Collections.singleton(callEntry));
+		Map<Node, Slots> slots = initSlots();
 
 		Slots entrySlots = entrySlots();
 
 		Queue<Node> workList = new ArrayDeque<>();
 
 		// push entry point's slots to the immediate successors
-		for (Node n : edges.get(entryPoint).out) {
+		for (Node n : edges.get(callEntry).out) {
 			if (joinWith(slots, n, entrySlots)) {
 				workList.add(n);
 			}
