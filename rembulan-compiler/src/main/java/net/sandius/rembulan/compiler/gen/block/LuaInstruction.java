@@ -283,7 +283,7 @@ public class LuaInstruction {
 
 		@Override
 		public Slots effect(Slots in) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException();  // TODO
 		}
 
 	}
@@ -472,6 +472,7 @@ public class LuaInstruction {
 
 		@Override
 		public Slots effect(Slots in) {
+			// TODO: this might have a possible effect?
 			return in;
 		}
 
@@ -493,6 +494,7 @@ public class LuaInstruction {
 
 		@Override
 		public Slots effect(Slots in) {
+			// TODO: this might have a possible effect?
 			return in;
 		}
 
@@ -561,11 +563,6 @@ public class LuaInstruction {
 			return (pos ? "EQ" : "NOT-EQ") +  "(" + b + "," + c + ")";
 		}
 
-		@Override
-		public Slots effect(Slots in) {
-			return in;
-		}
-
 	}
 
 	public static class Lt extends Branch {
@@ -583,11 +580,6 @@ public class LuaInstruction {
 		@Override
 		public String toString() {
 			return (pos ? "LT" : "NOT-LT") + "(" + b + "," + c + ")";
-		}
-
-		@Override
-		public Slots effect(Slots in) {
-			return in;  // TODO
 		}
 
 	}
@@ -609,11 +601,6 @@ public class LuaInstruction {
 			return (pos ? "LE" : "NOT-LE") + "(" + b + "," + c + ")";
 		}
 
-		@Override
-		public Slots effect(Slots in) {
-			return in;  // TODO
-		}
-
 	}
 
 	public static class ForLoop extends Branch {
@@ -629,11 +616,6 @@ public class LuaInstruction {
 		@Override
 		public String toString() {
 			return "FORLOOP(" + a + "," + sbx + ")";
-		}
-
-		@Override
-		public Slots effect(Slots in) {
-			return in;  // TODO
 		}
 
 	}
@@ -686,10 +668,6 @@ public class LuaInstruction {
 			return "RETURN(" + a + "," + b + ")";
 		}
 
-		@Override
-		public Slots effect(Slots in) {
-			return in;  // TODO
-		}
 
 	}
 

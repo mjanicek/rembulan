@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
 public abstract class Branch implements Node, Sink, Jump {
@@ -67,6 +68,16 @@ public abstract class Branch implements Node, Sink, Jump {
 			visitor.visitEdge(this, falseBranch);
 			falseBranch.accept(visitor);
 		}
+	}
+
+	@Override
+	public Slots effect(Slots in) {
+		return in;
+	}
+
+	@Override
+	public Slots inSlots() {
+		throw new UnsupportedOperationException();  // TODO
 	}
 
 }

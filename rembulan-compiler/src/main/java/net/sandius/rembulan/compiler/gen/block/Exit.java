@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
 public abstract class Exit implements Node, Sink {
@@ -31,6 +32,16 @@ public abstract class Exit implements Node, Sink {
 	@Override
 	public void accept(NodeVisitor visitor) {
 		visitor.visitNode(this);
+	}
+
+	@Override
+	public Slots effect(Slots in) {
+		return in;
+	}
+
+	@Override
+	public Slots inSlots() {
+		throw new UnsupportedOperationException();
 	}
 
 }

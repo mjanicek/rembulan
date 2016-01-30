@@ -108,4 +108,9 @@ public class Target implements Node, Src {
 		return in;
 	}
 
+	@Override
+	public Slots outSlots() {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
 }

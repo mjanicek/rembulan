@@ -105,4 +105,14 @@ public abstract class Linear implements Node, Sink, Src {
 		return in;
 	}
 
+	@Override
+	public Slots inSlots() {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public Slots outSlots() {
+		return effect(inSlots());
+	}
+
 }

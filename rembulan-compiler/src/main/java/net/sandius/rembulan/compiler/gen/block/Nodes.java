@@ -74,6 +74,11 @@ public abstract class Nodes {
 				return in;
 			}
 
+			@Override
+			public Slots inSlots() {
+				throw new UnsupportedOperationException();  // TODO
+			}
+
 		};
 	}
 
@@ -114,6 +119,11 @@ public abstract class Nodes {
 			@Override
 			public Slots effect(Slots in) {
 				return in;
+			}
+
+			@Override
+			public Slots outSlots() {
+				throw new UnsupportedOperationException();  // TODO
 			}
 
 		};

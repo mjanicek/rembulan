@@ -63,4 +63,9 @@ public class UnconditionalJump implements Node, Sink, Jump {
 		return in;
 	}
 
+	@Override
+	public Slots inSlots() {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
 }
