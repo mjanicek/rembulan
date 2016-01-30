@@ -90,11 +90,11 @@ public class LinearSeq extends Linear implements SlotEffect {
 	}
 
 	@Override
-	public Slots effect(Slots in, Prototype prototype) {
+	public Slots effect(Slots in) {
 		Slots s = in;
 		for (Node n : nodes()) {
 			if (n instanceof SlotEffect) {
-				s = ((SlotEffect) n).effect(s, prototype);
+				s = ((SlotEffect) n).effect(s);
 			}
 		}
 		return s;

@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.Slots;
-import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 
@@ -20,7 +19,7 @@ public class Capture extends Linear implements SlotEffect, LocalVariableEffect {
 	}
 
 	@Override
-	public Slots effect(Slots in, Prototype prototype) {
+	public Slots effect(Slots in) {
 		Slots s = in;
 		for (int i = 0; i < indices.length(); i++) {
 			s = s.capture(indices.get(i));

@@ -6,6 +6,7 @@ import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.lbc.OpCode;
+import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
@@ -17,7 +18,7 @@ public class LuaInstructionToNodeTranslator {
 		return OpCode.isK(i) ? -1 - OpCode.indexK(i) : i;
 	}
 
-	public void translate(int insn, int pc, int line, ReadOnlyArray<Target> pcToLabel) {
+	public void translate(Prototype prototype, int insn, int pc, int line, ReadOnlyArray<Target> pcToLabel) {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
 		int b = OpCode.arg_B(insn);
@@ -36,7 +37,7 @@ public class LuaInstructionToNodeTranslator {
 				break;
 
 			case OpCode.LOADK:
-				tail.append(new LoadK(a, bx)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new LoadK(prototype, a, bx)).jumpTo(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.LOADNIL:
@@ -59,7 +60,9 @@ public class LuaInstructionToNodeTranslator {
 			case OpCode.BXOR:
 			case OpCode.SHL:
 			case OpCode.SHR:
-				tail.append(new BinOp(BinOpType.fromOpcode(opcode),
+				tail.append(new BinOp(
+						prototype,
+						BinOpType.fromOpcode(opcode),
 						a,
 						registerOrConst(b),
 						registerOrConst(c))).jumpTo(pcToLabel.get(pc + 1));
@@ -69,7 +72,11 @@ public class LuaInstructionToNodeTranslator {
 			case OpCode.BNOT:
 			case OpCode.NOT:
 			case OpCode.LEN:
-				tail.append(new UnOp(UnOpType.fromOpcode(opcode), a, b)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new UnOp(
+						prototype,
+						UnOpType.fromOpcode(opcode),
+						a,
+						b)).jumpTo(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.CONCAT:
@@ -135,7 +142,7 @@ public class LuaInstructionToNodeTranslator {
 				break;
 
 			case OpCode.CLOSURE:
-				tail.append(new Closure(a, b)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new Closure(prototype, a, b)).jumpTo(pcToLabel.get(pc + 1));
 				break;
 
 			case OpCode.GETUPVAL:

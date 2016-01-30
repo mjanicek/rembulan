@@ -58,7 +58,7 @@ public class FlowIt {
 		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator();
 
 		for (int pc = 0; pc < pcLabels.size(); pc++) {
-			translator.translate(code.get(pc), pc, prototype.getLineAtPC(pc), pcLabels);
+			translator.translate(prototype, code.get(pc), pc, prototype.getLineAtPC(pc), pcLabels);
 		}
 
 //		System.out.println("[");
@@ -277,7 +277,7 @@ public class FlowIt {
 	private Slots effect(Node n, Slots in) {
 		if (n instanceof SlotEffect) {
 			SlotEffect eff = (SlotEffect) n;
-			return eff.effect(in, prototype);
+			return eff.effect(in);
 		}
 		else {
 			return in;
