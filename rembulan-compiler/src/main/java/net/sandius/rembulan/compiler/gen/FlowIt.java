@@ -3,12 +3,14 @@ package net.sandius.rembulan.compiler.gen;
 import net.sandius.rembulan.compiler.gen.block.AccountingNode;
 import net.sandius.rembulan.compiler.gen.block.Capture;
 import net.sandius.rembulan.compiler.gen.block.Entry;
+import net.sandius.rembulan.compiler.gen.block.HookNode;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
 import net.sandius.rembulan.compiler.gen.block.LocalVariableEffect;
 import net.sandius.rembulan.compiler.gen.block.Node;
+import net.sandius.rembulan.compiler.gen.block.NodeAppender;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
@@ -71,6 +73,8 @@ public class FlowIt {
 
 		resumePoints = new HashSet<>();
 
+		insertHooks();
+
 		inlineInnerJumps();
 		makeBlocks();
 
@@ -101,6 +105,20 @@ public class FlowIt {
 		updateReachability();
 		updateDataFlow();
 
+	}
+
+	public void insertHooks() {
+		// the call hook
+		Target oldEntryTarget = callEntry.target();
+		Target newEntryTarget = new Target();
+		NodeAppender appender = new NodeAppender(newEntryTarget);
+		appender
+				.append(new HookNode.Call())
+				.jumpTo(oldEntryTarget);
+
+		callEntry.setTarget(newEntryTarget);
+
+		// TODO: return hooks
 	}
 
 	private static class CollectCPUAccounting extends LinearSeqTransformation {
