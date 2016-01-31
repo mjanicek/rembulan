@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.compiler.gen.block.BinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.CloseUpvalues;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
@@ -88,9 +89,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_ADD(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.Add(
 				prototype,
-				LuaInstruction.BinOpType.ADD,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -98,9 +98,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_SUB(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.Sub(
 				prototype,
-				LuaInstruction.BinOpType.SUB,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -108,9 +107,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_MUL(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.Mul(
 				prototype,
-				LuaInstruction.BinOpType.MUL,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -118,9 +116,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_MOD(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.Mod(
 				prototype,
-				LuaInstruction.BinOpType.MOD,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -128,9 +125,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_POW(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.Pow(
 				prototype,
-				LuaInstruction.BinOpType.POW,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -138,9 +134,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_DIV(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.Div(
 				prototype,
-				LuaInstruction.BinOpType.DIV,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -148,9 +143,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_IDIV(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.IDiv(
 				prototype,
-				LuaInstruction.BinOpType.IDIV,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -158,9 +152,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_BAND(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.BAnd(
 				prototype,
-				LuaInstruction.BinOpType.BAND,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -168,9 +161,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_BOR(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.BOr(
 				prototype,
-				LuaInstruction.BinOpType.BOR,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -178,9 +170,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_BXOR(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.BXor(
 				prototype,
-				LuaInstruction.BinOpType.BXOR,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -188,9 +179,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_SHL(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.Shl(
 				prototype,
-				LuaInstruction.BinOpType.SHL,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
@@ -198,9 +188,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_SHR(int a, int b, int c) {
-		appender.append(new LuaInstruction.BinOp(
+		appender.append(new BinaryOperation.Shr(
 				prototype,
-				LuaInstruction.BinOpType.SHR,
 				a,
 				LuaInstruction.registerOrConst(b),
 				LuaInstruction.registerOrConst(c))).toNext();
