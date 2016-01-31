@@ -9,6 +9,10 @@ import java.util.Objects;
 
 public class LuaInstruction {
 
+	public static int registerOrConst(int i) {
+		return OpCode.isK(i) ? -1 - OpCode.indexK(i) : i;
+	}
+
 	public static SlotType constantType(Object k) {
 		if (k == null) return SlotType.NIL;
 		else if (k instanceof Boolean) return SlotType.BOOLEAN;
@@ -392,19 +396,14 @@ public class LuaInstruction {
 
 	public static class ForPrep extends Linear {
 		public final int a;
-		public final int b;
 
-		private enum LoopType {
-		}
-
-		public ForPrep(int a, int b) {
+		public ForPrep(int a) {
 			this.a = a;
-			this.b = b;
 		}
 
 		@Override
 		public String toString() {
-			return "FORPREP" + loopType(inSlots()).toSuffix() + "(" + a + "," + b + ")";
+			return "FORPREP" + loopType(inSlots()).toSuffix() + "(" + a + ")";
 		}
 
 		private NumOpType loopType(Slots in) {

@@ -513,7 +513,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 
 			case OpCode.CONCAT:  ie.l_CONCAT(a, b, c); break;
 
-			case OpCode.JMP:  ie.l_JMP(sbx); break;
+			case OpCode.JMP:  ie.l_JMP(a, sbx); break;
 			case OpCode.EQ:   ie.l_EQ(a, b, c); break;
 			case OpCode.LT:   ie.l_LT(a, b, c); break;
 			case OpCode.LE:   ie.l_LE(a, b, c); break;
@@ -710,7 +710,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	@Override
-	public void l_JMP(int sbx) {
+	public void l_JMP(int a, int sbx) {
 		throw new UnsupportedOperationException("not implemented");
 	}
 

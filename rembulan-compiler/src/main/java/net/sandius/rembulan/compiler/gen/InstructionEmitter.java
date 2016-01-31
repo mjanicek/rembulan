@@ -35,7 +35,7 @@ public interface InstructionEmitter {
 
 	void l_CONCAT(int a, int b, int c);
 
-	void l_JMP(int sbx);
+	void l_JMP(int a, int sbx);
 	void l_EQ(int a, int b, int c);
 	void l_LT(int a, int b, int c);
 	void l_LE(int a, int b, int c);
