@@ -1,8 +1,11 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.AccountingNode;
+import net.sandius.rembulan.compiler.gen.block.Branch;
 import net.sandius.rembulan.compiler.gen.block.CloseUpvalues;
+import net.sandius.rembulan.compiler.gen.block.Exit;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
+import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.lbc.OpCode;
@@ -14,30 +17,94 @@ import static net.sandius.rembulan.compiler.gen.block.LuaInstruction.*;
 
 public class LuaInstructionToNodeTranslator {
 
+	private final Prototype prototype;
+	private final ReadOnlyArray<Target> pcToLabel;
+	
+	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel) {
+		Check.notNull(prototype);
+		Check.notNull(pcToLabel);
+
+		this.prototype = prototype;
+		this.pcToLabel = pcToLabel;
+	}
+	
 	private static int registerOrConst(int i) {
 		return OpCode.isK(i) ? -1 - OpCode.indexK(i) : i;
 	}
 
-	private Target jmp(int pc, int dest, ReadOnlyArray<Target> pcToLabel) {
+	private class MyNodeAppender {
+		private final int pc;
+		private final NodeAppender appender;
 
-		Target jmpTarget = pcToLabel.get(dest);
-
-		if (dest < pc) {
-			// this is a backward jump
-
-			Target tgt = new Target();
-			NodeAppender appender = new NodeAppender(tgt);
-			appender.append(new AccountingNode.Flush())
-					.jumpTo(jmpTarget);
-
-			return tgt;
+		public MyNodeAppender(int pc) {
+			this.appender = new NodeAppender(pcToLabel.get(pc));
+			this.pc = pc;
 		}
-		else {
-			return jmpTarget;
+
+		public MyNodeAppender append(Linear lin) {
+			appender.append(lin);
+			return this;
 		}
+
+		public void branch(Branch branch) {
+			appender.branch(branch);
+		}
+
+		public void term(Exit term) {
+			appender.append(new AccountingNode.End()).term(term);
+		}
+
+//		public void jumpTo(int dest) {
+//			appender.jumpTo(target(pc, dest));
+//		}
+
+		public Target target(int offset) {
+			if (offset == 0) {
+				throw new IllegalArgumentException();
+			}
+
+			Target jmpTarget = pcToLabel.get(pc + offset);
+
+			if (offset < 0) {
+				// this is a backward jump
+
+				Target tgt = new Target();
+				NodeAppender appender = new NodeAppender(tgt);
+				appender.append(new AccountingNode.Flush())
+						.jumpTo(jmpTarget);
+
+				return tgt;
+			}
+			else {
+				return jmpTarget;
+			}
+		}
+
+		public void jumpToOffset(int offset) {
+			appender.jumpTo(target(offset));
+		}
+
+		public void toNext() {
+			jumpToOffset(1);
+		}
+
 	}
 
-	public void translate(Prototype prototype, int insn, int pc, int line, ReadOnlyArray<Target> pcToLabel) {
+	public void translate(int pc) {
+		MyNodeAppender appender = new MyNodeAppender(pc);
+
+		int line = prototype.getLineAtPC(pc);
+
+		if (line > 0) {
+			appender.append(new LineInfo(line));
+		}
+
+		appender.append(new AccountingNode.TickBefore());
+
+		translateBody(appender, prototype.getCode().get(pc));
+	}
+
+	private void translateBody(MyNodeAppender appender, int insn) {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
 		int b = OpCode.arg_B(insn);
@@ -45,26 +112,21 @@ public class LuaInstructionToNodeTranslator {
 		int c = OpCode.arg_C(insn);
 		int sbx = OpCode.arg_sBx(insn);
 
-		NodeAppender tail = new NodeAppender(pcToLabel.get(pc));
-
-		// prefix
-		tail.append(new LineInfo(line)).append(new AccountingNode.TickBefore());
-
 		switch (opcode) {
 			case OpCode.MOVE:
-				tail.append(new Move(a, b)).jumpTo(pcToLabel.get(pc + 1));
+				appender.append(new Move(a, b)).toNext();
 				break;
 
 			case OpCode.LOADK:
-				tail.append(new LoadK(prototype, a, bx)).jumpTo(pcToLabel.get(pc + 1));
+				appender.append(new LoadK(prototype, a, bx)).toNext();
 				break;
 
 			case OpCode.LOADNIL:
-				tail.append(new LoadNil(a, b)).jumpTo(pcToLabel.get(pc + 1));
+				appender.append(new LoadNil(a, b)).toNext();
 				break;
 
 			case OpCode.LOADBOOL:
-				tail.append(new LoadBool(a, b)).jumpTo(pcToLabel.get(pc + (c != 0 ? 2 : 1)));
+				appender.append(new LoadBool(a, b)).jumpToOffset(c != 0 ? 2 : 1);
 				break;
 
 			case OpCode.ADD:
@@ -79,117 +141,117 @@ public class LuaInstructionToNodeTranslator {
 			case OpCode.BXOR:
 			case OpCode.SHL:
 			case OpCode.SHR:
-				tail.append(new BinOp(
+				appender.append(new BinOp(
 						prototype,
 						BinOpType.fromOpcode(opcode),
 						a,
 						registerOrConst(b),
-						registerOrConst(c))).jumpTo(pcToLabel.get(pc + 1));
+						registerOrConst(c))).toNext();
 				break;
 
 			case OpCode.UNM:
 			case OpCode.BNOT:
 			case OpCode.NOT:
 			case OpCode.LEN:
-				tail.append(new UnOp(
+				appender.append(new UnOp(
 						prototype,
 						UnOpType.fromOpcode(opcode),
 						a,
-						b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+						b)).toNext();
 				break;
 
 			case OpCode.CONCAT:
-				tail.append(new Concat(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new Concat(a, b, c)).toNext();
 				break;
 
 
 			case OpCode.JMP:
 				if (a > 0) {
-					tail.append(new CloseUpvalues(a - 1));
+					appender.append(new CloseUpvalues(a - 1));
 				}
-				tail.jumpTo(jmp(pc, pc + sbx + 1, pcToLabel));
+				appender.jumpToOffset(sbx + 1);
 				break;
 
 			case OpCode.EQ:
-				tail.branch(new Eq(
-						pcToLabel.get(pc + 1),
-						pcToLabel.get(pc + 2),
+				appender.branch(new Eq(
+						appender.target(1),
+						appender.target(2),
 						a == 0,
 						registerOrConst(b),
 						registerOrConst(c)));
 				break;
 
 			case OpCode.LT:
-				tail.branch(new Lt(
-						pcToLabel.get(pc + 1),
-						pcToLabel.get(pc + 2),
+				appender.branch(new Lt(
+						appender.target(1),
+						appender.target(2),
 						a == 0,
 						registerOrConst(b),
 						registerOrConst(c)));
 				break;
 
 			case OpCode.LE:
-				tail.branch(new Le(
-						pcToLabel.get(pc + 1),
-						pcToLabel.get(pc + 2),
+				appender.branch(new Le(
+						appender.target(1),
+						appender.target(2),
 						a == 0,
 						registerOrConst(b),
 						registerOrConst(c)));
 				break;
 
 			case OpCode.CALL:
-				tail.append(new Call(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new Call(a, b, c)).toNext();
 				break;
 
 			case OpCode.FORPREP:
-				tail.append(new ForPrep(a, registerOrConst(b))).jumpTo(jmp(pc, pc + sbx + 1, pcToLabel));
+				appender.append(new ForPrep(a, registerOrConst(b))).jumpToOffset(sbx + 1);
 				break;
 
 			case OpCode.TAILCALL:
-				tail.append(new AccountingNode.End()).term(new TailCall(a, b, c));
+				appender.term(new TailCall(a, b, c));
 				break;
 
 			case OpCode.RETURN:
-				tail.append(new AccountingNode.End()).term(new Return(a, b));
+				appender.term(new Return(a, b));
 				break;
 
 			case OpCode.FORLOOP: {
-				Target cont = jmp(pc, pc + sbx + 1, pcToLabel);
-				Target exit = jmp(pc, pc + 1, pcToLabel);
-				tail.branch(new ForLoop(cont, exit, a, sbx));
+				Target cont = appender.target(sbx + 1);
+				Target exit = appender.target(1);
+				appender.branch(new ForLoop(cont, exit, a, sbx));
 			}
 				break;
 
 			case OpCode.CLOSURE:
-				tail.append(new Closure(prototype, a, b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new Closure(prototype, a, b)).toNext();
 				break;
 
 			case OpCode.GETUPVAL:
-				tail.append(new GetUpVal(a, b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new GetUpVal(a, b)).toNext();
 				break;
 
 			case OpCode.GETTABUP:
-				tail.append(new GetTabUp(a, b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new GetTabUp(a, b)).toNext();
 				break;
 
 			case OpCode.GETTABLE:
-				tail.append(new GetTable(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new GetTable(a, b, c)).toNext();
 				break;
 
 			case OpCode.SETTABUP:
-				tail.append(new SetTabUp(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new SetTabUp(a, b, c)).toNext();
 				break;
 
 			case OpCode.SETUPVAL:
-				tail.append(new SetUpVal(a, b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new SetUpVal(a, b)).toNext();
 				break;
 
 			case OpCode.SETTABLE:
-				tail.append(new SetTable(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new SetTable(a, b, c)).toNext();
 				break;
 
 			case OpCode.NEWTABLE:
-				tail.append(new NewTable(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
+				appender.append(new NewTable(a, b, c)).toNext();
 				break;
 
 			case OpCode.SELF:
@@ -201,8 +263,6 @@ public class LuaInstructionToNodeTranslator {
 //			default: ownNode = null;
 			default: throw new UnsupportedOperationException("Unsupported opcode: " + opcode);
 		}
-
-		Check.isNull(tail.get());
 
 	}
 

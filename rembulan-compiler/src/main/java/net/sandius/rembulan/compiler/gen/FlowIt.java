@@ -55,10 +55,10 @@ public class FlowIt {
 
 		ReadOnlyArray<Target> pcLabels = ReadOnlyArray.wrap(targets);
 
-		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator();
+		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator(prototype, pcLabels);
 
 		for (int pc = 0; pc < pcLabels.size(); pc++) {
-			translator.translate(prototype, code.get(pc), pc, prototype.getLineAtPC(pc), pcLabels);
+			translator.translate(pc);
 		}
 
 //		System.out.println("[");
