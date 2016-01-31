@@ -166,7 +166,45 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			return op.toString() + "(" + dest + "," + b + "," + c + ")";
+			return op.toString() + opType(inSlots()).toSuffix() + "(" + dest + "," + b + "," + c + ")";
+		}
+
+		private NumOpType opType(Slots in) {
+			SlotType lType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : in.getType(b);
+			SlotType rType = c < 0 ? constantType(prototype.getConstants().get(-c - 1)) : in.getType(c);
+
+			if (lType.isNumber() && rType.isNumber()) {
+				boolean lInteger = lType == SlotType.NUMBER_INTEGER;
+				boolean rInteger = rType == SlotType.NUMBER_INTEGER;
+
+				boolean lFloat = lType == SlotType.NUMBER_FLOAT;
+				boolean rFloat = rType == SlotType.NUMBER_FLOAT;
+
+				switch (op) {
+					case ADD:
+					case SUB:
+					case MUL:
+					case MOD:
+					case IDIV:
+						if (lInteger && rInteger) return NumOpType.Integer;
+						else if (lFloat || rFloat) return NumOpType.Float;
+						else return NumOpType.Number;
+
+					case DIV:
+					case POW:
+						return NumOpType.Float;
+
+					case BAND:
+					case BOR:
+					case BXOR:
+					case SHL:
+					case SHR:
+						return NumOpType.Integer;
+				}
+			}
+
+			// we might be calling a metamethod
+			return NumOpType.Any;
 		}
 
 		@Override
@@ -335,9 +373,29 @@ public class LuaInstruction {
 
 	}
 
+	public enum NumOpType {
+		Integer,
+		Float,
+		Number,
+		Any;
+
+		public String toSuffix() {
+			switch (this) {
+				case Integer: return "_i";
+				case Float:   return "_f";
+				case Number:  return "_N";
+				case Any:
+				default:      return "";
+			}
+		}
+	}
+
 	public static class ForPrep extends Linear {
 		public final int a;
 		public final int b;
+
+		private enum LoopType {
+		}
 
 		public ForPrep(int a, int b) {
 			this.a = a;
@@ -346,11 +404,10 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			return "FORPREP(" + a + "," + b + ")";
+			return "FORPREP" + loopType(inSlots()).toSuffix() + "(" + a + "," + b + ")";
 		}
 
-		@Override
-		protected Slots effect(Slots in) {
+		private NumOpType loopType(Slots in) {
 			SlotType a0 = in.getType(a + 0);
 			SlotType a1 = in.getType(a + 1);
 			SlotType a2 = in.getType(a + 2);
@@ -359,28 +416,28 @@ public class LuaInstruction {
 					&& a1 == SlotType.NUMBER_INTEGER
 					&& a2 == SlotType.NUMBER_INTEGER) {
 
-				// integer loop
-				return in.updateType(a + 0, SlotType.NUMBER_INTEGER)
-						.updateType(a + 1, SlotType.NUMBER_INTEGER)
-						.updateType(a + 2, SlotType.NUMBER_INTEGER)
-						.updateType(a + 3, SlotType.NUMBER_INTEGER);
+				return NumOpType.Integer;
 			}
 			else if (a0.isNumber()
 					&& a1.isNumber()
 					&& a2.isNumber()) {
 
-				// float loop
-				return in.updateType(a + 0, SlotType.NUMBER_FLOAT)
-						.updateType(a + 1, SlotType.NUMBER_FLOAT)
-						.updateType(a + 2, SlotType.NUMBER_FLOAT)
-						.updateType(a + 3, SlotType.NUMBER_FLOAT);
+				return NumOpType.Float;
 			}
 			else {
-				// unknown, but numeric loop
-				return in.updateType(a + 0, SlotType.NUMBER)
-						.updateType(a + 1, SlotType.NUMBER)
-						.updateType(a + 2, SlotType.NUMBER)
-						.updateType(a + 3, SlotType.NUMBER);
+				// unable to determine at compile-time, we can nevertheless expect
+				// this to be a numeric loop -- will throw an error otherwise
+				return NumOpType.Number;
+			}
+		}
+
+		@Override
+		protected Slots effect(Slots in) {
+			NumOpType tpe = loopType(in);
+			switch (tpe) {
+				case Integer: return in.updateType(a + 3, SlotType.NUMBER_INTEGER);
+				case Float:   return in.updateType(a + 3, SlotType.NUMBER_FLOAT);
+				default:      return in.updateType(a + 3, SlotType.NUMBER);
 			}
 		}
 
@@ -617,6 +674,8 @@ public class LuaInstruction {
 		public String toString() {
 			return "FORLOOP(" + a + "," + sbx + ")";
 		}
+
+		// TODO: can also be specialised
 
 	}
 
