@@ -1,7 +1,5 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
-
 public interface Src extends Node {
 
 	Sink next();
@@ -11,7 +9,5 @@ public interface Src extends Node {
 	void appendSink(Sink that);
 
 	Src appendLinear(Linear that);
-
-	Slots outSlots();
 
 }

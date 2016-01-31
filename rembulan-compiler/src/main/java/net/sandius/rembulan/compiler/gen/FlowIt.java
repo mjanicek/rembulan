@@ -66,7 +66,8 @@ public class FlowIt {
 //		}
 //		System.out.println("]");
 
-		callEntry = new Entry("main", pcLabels.get(0));
+		Slots entrySlots = Slots.entrySlots(prototype.getMaximumStackSize(), prototype.getNumberOfParameters());
+		callEntry = new Entry("main", entrySlots, pcLabels.get(0));
 
 		resumePoints = new HashSet<>();
 
@@ -281,14 +282,11 @@ public class FlowIt {
 
 		clearSlots();
 
-		Slots entrySlots = entrySlots();
-
 		Queue<Node> workList = new ArrayDeque<>();
 
 		// push entry point's slots to the immediate successors
 		for (Node n : edges.get(callEntry).out) {
-
-			if (n.pushSlots(entrySlots)) {
+			if (n.pushSlots(callEntry.outSlots())) {
 				workList.add(n);
 			}
 		}
@@ -300,7 +298,7 @@ public class FlowIt {
 			assert (n.inSlots() != null);
 
 			// compute effect and push it to outputs
-			Slots o = n.effect(n.inSlots());
+			Slots o = n.outSlots();
 
 			for (Node m : edges.get(n).out) {
 				if (m.pushSlots(o)) {
@@ -422,14 +420,6 @@ public class FlowIt {
 			entry.accept(visitor);
 		}
 		return Collections.unmodifiableMap(inDegree);
-	}
-
-	private Slots entrySlots() {
-		Slots s = Slots.init(prototype.getMaximumStackSize());
-		for (int i = 0; i < prototype.getNumberOfParameters(); i++) {
-			s = s.updateType(i, Slots.SlotType.ANY);
-		}
-		return s;
 	}
 
 }

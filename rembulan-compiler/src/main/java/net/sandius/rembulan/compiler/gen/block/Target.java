@@ -113,12 +113,7 @@ public class Target implements Node, Src {
 
 	@Override
 	public Slots outSlots() {
-		return effect(inSlots);
-	}
-
-	@Override
-	public Slots effect(Slots in) {
-		return in;
+		return inSlots();
 	}
 
 	@Override

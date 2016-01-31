@@ -62,13 +62,13 @@ public class UnconditionalJump implements Node, Sink, Jump {
 	}
 
 	@Override
-	public Slots effect(Slots in) {
-		return in;
+	public Slots inSlots() {
+		return inSlots;
 	}
 
 	@Override
-	public Slots inSlots() {
-		return inSlots;
+	public Slots outSlots() {
+		return inSlots();
 	}
 
 	@Override

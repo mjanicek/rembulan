@@ -103,14 +103,16 @@ public abstract class Linear implements Node, Sink, Src {
 		}
 	}
 
-	@Override
-	public Slots effect(Slots in) {
-		return in;
-	}
+	protected abstract Slots effect(Slots in);
 
 	@Override
 	public Slots inSlots() {
 		return inSlots;
+	}
+
+	@Override
+	public Slots outSlots() {
+		return effect(inSlots());
 	}
 
 	@Override
@@ -128,11 +130,6 @@ public abstract class Linear implements Node, Sink, Src {
 	@Override
 	public void clearSlots() {
 		inSlots = null;
-	}
-
-	@Override
-	public Slots outSlots() {
-		return effect(inSlots());
 	}
 
 }

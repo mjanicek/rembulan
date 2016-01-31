@@ -19,7 +19,7 @@ public class Capture extends Linear implements LocalVariableEffect {
 	}
 
 	@Override
-	public Slots effect(Slots in) {
+	protected Slots effect(Slots in) {
 		Slots s = in;
 		for (int i = 0; i < indices.length(); i++) {
 			s = s.capture(indices.get(i));

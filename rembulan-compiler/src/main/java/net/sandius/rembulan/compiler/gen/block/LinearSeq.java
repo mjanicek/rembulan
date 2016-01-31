@@ -90,9 +90,9 @@ public class LinearSeq extends Linear {
 	}
 
 	@Override
-	public Slots effect(Slots in) {
+	protected Slots effect(Slots in) {
 		Slots s = in;
-		for (Node n : nodes()) {
+		for (Linear n : nodes()) {
 			s = n.effect(s);
 		}
 		return s;
@@ -134,6 +134,11 @@ public class LinearSeq extends Linear {
 	}
 
 	public static class Sentinel extends Linear {
+
+		@Override
+		protected Slots effect(Slots in) {
+			return in;
+		}
 
 	}
 

@@ -6,16 +6,21 @@ import net.sandius.rembulan.util.Check;
 public class Entry implements Node, Jump {
 
 	public final String name;
+	private final Slots entrySlots;
+
 	private Target target;
 
-	public Entry(String name, Target target) {
+	public Entry(String name, Slots entrySlots, Target target) {
 		Check.notNull(target);
+		Check.notNull(entrySlots);
+
 		this.name = name;
+		this.entrySlots = entrySlots;
 		this.target = target;
 	}
 
-	public Entry(Target target) {
-		this(null, target);
+	public Entry(Slots entrySlots, Target target) {
+		this(null, entrySlots, target);
 	}
 
 	@Override
@@ -43,20 +48,18 @@ public class Entry implements Node, Jump {
 	}
 
 	@Override
-	public Slots effect(Slots in) {
-		// TODO: is this correct?
-		return in;
-	}
-
-	@Override
 	public Slots inSlots() {
 		return null;
 	}
 
 	@Override
+	public Slots outSlots() {
+		return entrySlots;
+	}
+
+	@Override
 	public boolean pushSlots(Slots s) {
-		// no-op
-		return false;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override

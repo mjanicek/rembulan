@@ -38,13 +38,13 @@ public abstract class Exit implements Node, Sink {
 	}
 
 	@Override
-	public Slots effect(Slots in) {
-		return in;
+	public Slots inSlots() {
+		return inSlots;
 	}
 
 	@Override
-	public Slots inSlots() {
-		return inSlots;
+	public Slots outSlots() {
+		return null;
 	}
 
 	@Override

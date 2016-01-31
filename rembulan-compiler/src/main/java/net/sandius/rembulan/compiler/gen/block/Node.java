@@ -6,9 +6,9 @@ public interface Node {
 
 	void accept(NodeVisitor visitor);
 
-	Slots effect(Slots in);
-
 	Slots inSlots();
+
+	Slots outSlots();
 
 	boolean pushSlots(Slots s);
 

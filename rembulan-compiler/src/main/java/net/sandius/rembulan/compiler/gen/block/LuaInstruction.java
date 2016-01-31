@@ -35,7 +35,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			return in.updateType(dest, in.getType(src));
 		}
 
@@ -60,7 +60,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			return in.updateType(dest, constantType(prototype.getConstants().get(kIndex)));
 		}
 
@@ -81,7 +81,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			Slots s = in;
 			for (int i = dest; i <= dest + lastOffset; i++) {
 				s = s.updateType(i, SlotType.NIL);
@@ -106,7 +106,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			return in.updateType(dest, SlotType.BOOLEAN);
 		}
 	}
@@ -170,7 +170,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			SlotType lType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : in.getType(b);
 			SlotType rType = c < 0 ? constantType(prototype.getConstants().get(-c - 1)) : in.getType(c);
 
@@ -237,7 +237,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			SlotType argType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : in.getType(b);
 
 			SlotType resultType = SlotType.ANY;  // assume we'll be calling a metamethod
@@ -282,7 +282,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			throw new UnsupportedOperationException();  // TODO
 		}
 
@@ -306,7 +306,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			Slots s = in;
 
 			// Since we don't know what the called function does, we must
@@ -350,7 +350,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			SlotType a0 = in.getType(a + 0);
 			SlotType a1 = in.getType(a + 1);
 			SlotType a2 = in.getType(a + 2);
@@ -402,7 +402,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			return in.updateType(a, SlotType.ANY);
 		}
 
@@ -423,7 +423,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			return in.updateType(a, SlotType.ANY);
 		}
 
@@ -447,7 +447,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			return in.updateType(a, SlotType.ANY);
 		}
 
@@ -471,7 +471,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			// TODO: this might have a possible effect?
 			return in;
 		}
@@ -493,7 +493,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			// TODO: this might have a possible effect?
 			return in;
 		}
@@ -517,7 +517,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			return in;
 		}
 
@@ -540,7 +540,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			return in.updateType(a, SlotType.TABLE);
 		}
 
@@ -639,7 +639,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots in) {
+		protected Slots effect(Slots in) {
 			Slots s = in.updateType(dest, SlotType.FUNCTION);
 
 			Prototype p = prototype.getNestedPrototypes().get(index);
@@ -685,11 +685,6 @@ public class LuaInstruction {
 		@Override
 		public String toString() {
 			return "TAILCALL(" + a + "," + b + "," + c + ")";
-		}
-
-		@Override
-		public Slots effect(Slots in) {
-			return in;  // TODO
 		}
 
 	}

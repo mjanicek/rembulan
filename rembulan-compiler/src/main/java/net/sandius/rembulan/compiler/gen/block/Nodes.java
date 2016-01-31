@@ -70,13 +70,13 @@ public abstract class Nodes {
 			}
 
 			@Override
-			public Slots effect(Slots in) {
-				return in;
+			public Slots inSlots() {
+				throw new UnsupportedOperationException();  // TODO
 			}
 
 			@Override
-			public Slots inSlots() {
-				throw new UnsupportedOperationException();  // TODO
+			public Slots outSlots() {
+				throw new UnsupportedOperationException();
 			}
 
 			@Override
@@ -124,11 +124,6 @@ public abstract class Nodes {
 				Check.notNull(that);
 				appendSink(that);
 				return that;
-			}
-
-			@Override
-			public Slots effect(Slots in) {
-				return in;
 			}
 
 			@Override

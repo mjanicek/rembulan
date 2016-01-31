@@ -1,6 +1,13 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Slots;
+
 public abstract class AccountingNode extends Linear {
+
+	@Override
+	protected Slots effect(Slots in) {
+		return in;
+	}
 
 	public static class Sum extends AccountingNode {
 
