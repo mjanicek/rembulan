@@ -84,8 +84,20 @@ public abstract class Branch implements Node, Sink, Jump {
 	}
 
 	@Override
-	public void pushSlots(Slots s) {
-		inSlots = s;
+	public boolean pushSlots(Slots s) {
+		Check.notNull(s);
+		if (!s.equals(inSlots)) {
+			inSlots = s;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public void clearSlots() {
+		inSlots = null;
 	}
 
 }

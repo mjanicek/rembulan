@@ -116,12 +116,12 @@ object AnalysisRunner {
     System.out.println("Analysis took %.1f ms".format((after - before) / 1000000.0))
 
     val flowEdges = flow.reachabilityGraph.toMap
-    val flowStates = flow.slots.toMap
+//    val flowStates = flow.slots.toMap
 
     case class MyNode(node: Node) {
       require (node != null)
       override def toString = {
-        val sx = flowStates(node)
+        val sx = node.inSlots
         val in = if (sx != null) "[" + sx.toString + "]" else "(none)"
 
         "  " + in + "  \n" + node.toString

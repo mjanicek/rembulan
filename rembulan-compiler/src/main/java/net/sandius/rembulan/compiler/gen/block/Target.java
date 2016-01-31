@@ -122,9 +122,22 @@ public class Target implements Node, Src {
 	}
 
 	@Override
-	public void pushSlots(Slots in) {
+	public boolean pushSlots(Slots in) {
 		Check.notNull(in);
-		inSlots = inSlots == null ? in : inSlots.join(in);
+		Slots o = inSlots;
+		Slots n = inSlots == null ? in : inSlots.join(in);
+		if (!n.equals(o)) {
+			inSlots = n;
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	@Override
+	public void clearSlots() {
+		inSlots = null;
 	}
 
 }

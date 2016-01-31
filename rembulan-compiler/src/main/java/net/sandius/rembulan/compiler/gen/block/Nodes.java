@@ -80,8 +80,13 @@ public abstract class Nodes {
 			}
 
 			@Override
-			public void pushSlots(Slots s) {
+			public boolean pushSlots(Slots s) {
 				throw new UnsupportedOperationException();
+			}
+
+			@Override
+			public void clearSlots() {
+				throw new UnsupportedOperationException();  // TODO
 			}
 
 		};
@@ -132,7 +137,12 @@ public abstract class Nodes {
 			}
 
 			@Override
-			public void pushSlots(Slots s) {
+			public boolean pushSlots(Slots s) {
+				throw new UnsupportedOperationException();  // TODO
+			}
+
+			@Override
+			public void clearSlots() {
 				throw new UnsupportedOperationException();  // TODO
 			}
 

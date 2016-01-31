@@ -10,6 +10,8 @@ public interface Node {
 
 	Slots inSlots();
 
-	void pushSlots(Slots s);
+	boolean pushSlots(Slots s);
+
+	void clearSlots();
 
 }

@@ -54,7 +54,13 @@ public class Entry implements Node, Jump {
 	}
 
 	@Override
-	public void pushSlots(Slots s) {
+	public boolean pushSlots(Slots s) {
+		// no-op
+		return false;
+	}
+
+	@Override
+	public void clearSlots() {
 		// no-op
 	}
 

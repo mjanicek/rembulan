@@ -39,7 +39,6 @@ public class FlowIt {
 	public Set<ResumptionPoint> resumePoints;
 
 	public Map<Node, Edges> reachabilityGraph;
-	public Map<Node, Slots> slots;
 
 	public FlowIt(Prototype prototype) {
 		this.prototype = prototype;
@@ -223,13 +222,13 @@ public class FlowIt {
 	public void insertCaptureNodes() {
 		for (Node n : reachabilityGraph.keySet()) {
 			if (n instanceof Sink && !(n instanceof LocalVariableEffect)) {
-				Slots s_n = slots.get(n);
+				Slots s_n = n.inSlots();
 
 				if (s_n != null) {
 					IntBuffer uncaptured = new IntBuffer();
 
 					for (Node m : reachabilityGraph.get(n).out) {
-						Slots s_m = slots.get(m);
+						Slots s_m = m.inSlots();
 
 						for (int i = 0; i < s_n.size(); i++) {
 							if (!s_n.getState(i).isCaptured() && s_m.getState(i).isCaptured()) {
@@ -265,36 +264,22 @@ public class FlowIt {
 		}
 	}
 
-	private Map<Node, Slots> initSlots() {
-		Map<Node, Slots> slots = new HashMap<>();
+	private void clearSlots() {
 		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			slots.put(n, null);
+			n.clearSlots();
 		}
-		return slots;
 	}
 
-	private boolean joinWith(Map<Node, Slots> slots, Node n, Slots addIn) {
-		Check.notNull(slots);
+	private boolean joinWith(Node n, Slots addIn) {
+		Check.notNull(n);
 		Check.notNull(addIn);
-
-		Slots oldIn = slots.get(n);
-		Slots newIn = oldIn == null ? addIn : oldIn.join(addIn);
-		if (!newIn.equals(oldIn)) {
-			slots.put(n, newIn);
-			return true;
-		}
-		else {
-			return false;
-		}
+		return n.pushSlots(addIn);
 	}
 
 	public void updateDataFlow() {
-		slots = dataFlow();
-	}
-
-	public Map<Node, Slots> dataFlow() {
 		Map<Node, Edges> edges = reachabilityEdges(Collections.singleton(callEntry));
-		Map<Node, Slots> slots = initSlots();
+
+		clearSlots();
 
 		Slots entrySlots = entrySlots();
 
@@ -302,7 +287,8 @@ public class FlowIt {
 
 		// push entry point's slots to the immediate successors
 		for (Node n : edges.get(callEntry).out) {
-			if (joinWith(slots, n, entrySlots)) {
+
+			if (n.pushSlots(entrySlots)) {
 				workList.add(n);
 			}
 		}
@@ -311,19 +297,18 @@ public class FlowIt {
 			Node n = workList.remove();
 			assert (n != null);
 
-			assert (slots.get(n) != null);
+			assert (n.inSlots() != null);
 
 			// compute effect and push it to outputs
-			Slots o = n.effect(slots.get(n));
+			Slots o = n.effect(n.inSlots());
+
 			for (Node m : edges.get(n).out) {
-				if (joinWith(slots, m, o)) {
+				if (m.pushSlots(o)) {
 					workList.add(m);
 				}
 			}
 
 		}
-
-		return slots;
 	}
 
 	private Map<Node, Edges> reachabilityEdges(Iterable<Entry> entryPoints) {
