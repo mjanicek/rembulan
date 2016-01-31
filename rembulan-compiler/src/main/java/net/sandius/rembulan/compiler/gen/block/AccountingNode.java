@@ -2,26 +2,26 @@ package net.sandius.rembulan.compiler.gen.block;
 
 public abstract class AccountingNode extends Linear {
 
-	public static class Sum extends AccountingNode {
+	public static class Add extends AccountingNode {
 
 		public final int cost;
 
-		public Sum(int cost) {
+		public Add(int cost) {
 			this.cost = cost;
 		}
 
 		@Override
 		public String toString() {
-			return "CPU-Sum(" + cost + ")";
+			return "CPU.Add(" + cost + ")";
 		}
 
 	}
 
-	public static class Tick extends AccountingNode {
+	public static class TickBefore extends AccountingNode {
 
 		@Override
 		public String toString() {
-			return "CPU-Tick";
+			return "CPU.TickBefore";
 		}
 
 	}
@@ -30,7 +30,7 @@ public abstract class AccountingNode extends Linear {
 
 		@Override
 		public String toString() {
-			return "CPU-Accounting-End";
+			return "CPU.Accounting-End";
 		}
 
 	}

@@ -98,7 +98,7 @@ public class FlowIt {
 		// add capture nodes
 		insertCaptureNodes();
 
-		addResumptionPoints();
+//		addResumptionPoints();
 
 		makeBlocks();
 
@@ -132,12 +132,12 @@ public class FlowIt {
 			for (Linear n : seq.nodes()) {
 				if (n instanceof AccountingNode) {
 					AccountingNode an = (AccountingNode) n;
-					if (n instanceof AccountingNode.Tick) {
+					if (n instanceof AccountingNode.TickBefore) {
 						cost += 1;
 						toBeRemoved.add(an);
 					}
-					else if (n instanceof AccountingNode.Sum) {
-						cost += ((AccountingNode.Sum) n).cost;
+					else if (n instanceof AccountingNode.Add) {
+						cost += ((AccountingNode.Add) n).cost;
 						toBeRemoved.add(an);
 					}
 				}
@@ -150,7 +150,7 @@ public class FlowIt {
 
 			if (cost > 0) {
 				// insert cost node at the beginning
-				seq.insertAtBeginning(new AccountingNode.Sum(cost));
+				seq.insertAtBeginning(new AccountingNode.Add(cost));
 			}
 		}
 

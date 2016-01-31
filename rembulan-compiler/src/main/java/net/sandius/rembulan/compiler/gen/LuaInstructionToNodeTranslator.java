@@ -29,7 +29,7 @@ public class LuaInstructionToNodeTranslator {
 		NodeAppender tail = new NodeAppender(pcToLabel.get(pc));
 
 		// prefix
-		tail.append(new LineInfo(line)).append(new AccountingNode.Tick());
+		tail.append(new LineInfo(line)).append(new AccountingNode.TickBefore());
 
 		switch (opcode) {
 			case OpCode.MOVE:
