@@ -79,6 +79,11 @@ public abstract class Nodes {
 				throw new UnsupportedOperationException();  // TODO
 			}
 
+			@Override
+			public void pushSlots(Slots s) {
+				throw new UnsupportedOperationException();
+			}
+
 		};
 	}
 

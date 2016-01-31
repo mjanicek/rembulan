@@ -6,13 +6,16 @@ import net.sandius.rembulan.util.Check;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Target implements Node, Src {
+public class Target implements Node, Src, SuperSink {
+
+	private Slots inSlots;
 
 	private final String name;
 	private final Map<Jump, Integer> in;
 	private Sink next;
 
 	public Target(String name) {
+		this.inSlots = null;
 		this.name = name;
 		this.in = new HashMap<>();
 		this.next = Nodes.DUMMY_SINK;
@@ -104,13 +107,24 @@ public class Target implements Node, Src {
 	}
 
 	@Override
+	public Slots inSlots() {
+		return inSlots;
+	}
+
+	@Override
+	public Slots outSlots() {
+		return effect(inSlots);
+	}
+
+	@Override
 	public Slots effect(Slots in) {
 		return in;
 	}
 
 	@Override
-	public Slots outSlots() {
-		throw new UnsupportedOperationException();  // TODO
+	public void pushSlots(Slots in) {
+		Check.notNull(in);
+		inSlots = inSlots == null ? in : inSlots.join(in);
 	}
 
 }

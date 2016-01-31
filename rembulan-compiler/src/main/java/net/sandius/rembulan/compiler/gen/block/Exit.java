@@ -5,9 +5,12 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class Exit implements Node, Sink {
 
+	private Slots inSlots;
+
 	private Src prev;
 
 	public Exit() {
+		this.inSlots = null;
 		this.prev = Nodes.DUMMY_SRC;
 	}
 
@@ -41,7 +44,12 @@ public abstract class Exit implements Node, Sink {
 
 	@Override
 	public Slots inSlots() {
-		throw new UnsupportedOperationException();
+		return inSlots;
+	}
+
+	@Override
+	public void pushSlots(Slots s) {
+		inSlots = s;
 	}
 
 }

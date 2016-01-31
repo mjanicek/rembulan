@@ -5,6 +5,8 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class Branch implements Node, Sink, Jump {
 
+	private Slots inSlots;
+
 	private Src prev;
 	private Target trueBranch;
 	private Target falseBranch;
@@ -13,6 +15,7 @@ public abstract class Branch implements Node, Sink, Jump {
 		Check.notNull(trueBranch);
 		Check.notNull(falseBranch);
 
+		this.inSlots = null;
 		this.prev = Nodes.DUMMY_SRC;
 		this.trueBranch = trueBranch;
 		trueBranch.inc(this);
@@ -77,7 +80,12 @@ public abstract class Branch implements Node, Sink, Jump {
 
 	@Override
 	public Slots inSlots() {
-		throw new UnsupportedOperationException();  // TODO
+		return inSlots;
+	}
+
+	@Override
+	public void pushSlots(Slots s) {
+		inSlots = s;
 	}
 
 }

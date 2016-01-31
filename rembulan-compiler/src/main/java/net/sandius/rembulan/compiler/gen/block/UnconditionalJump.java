@@ -5,11 +5,14 @@ import net.sandius.rembulan.util.Check;
 
 public class UnconditionalJump implements Node, Sink, Jump {
 
+	private Slots inSlots;
+
 	private Src prev;
 	private Target target;
 
 	public UnconditionalJump(Target target) {
 		Check.notNull(target);
+		this.inSlots = null;
 		this.prev = Nodes.DUMMY_SRC;
 		this.target = target;
 		target.inc(this);
@@ -65,7 +68,12 @@ public class UnconditionalJump implements Node, Sink, Jump {
 
 	@Override
 	public Slots inSlots() {
-		throw new UnsupportedOperationException();  // TODO
+		return inSlots;
+	}
+
+	@Override
+	public void pushSlots(Slots s) {
+		inSlots = s;
 	}
 
 }

@@ -5,10 +5,13 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class Linear implements Node, Sink, Src {
 
+	private Slots inSlots;
+
 	private Src prev;
 	private Sink next;
 
 	public Linear() {
+		this.inSlots = inSlots;
 		this.prev = Nodes.DUMMY_SRC;
 		this.next = Nodes.DUMMY_SINK;
 	}
@@ -107,7 +110,12 @@ public abstract class Linear implements Node, Sink, Src {
 
 	@Override
 	public Slots inSlots() {
-		throw new UnsupportedOperationException();  // TODO
+		return inSlots;
+	}
+
+	@Override
+	public void pushSlots(Slots s) {
+		inSlots = s;
 	}
 
 	@Override
