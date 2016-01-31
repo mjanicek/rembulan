@@ -1,7 +1,5 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
-
 public class LineInfo extends Linear {
 
 	public final int line;
@@ -13,11 +11,6 @@ public class LineInfo extends Linear {
 	@Override
 	public String toString() {
 		return "Line(" + line + ")";
-	}
-
-	@Override
-	protected Slots effect(Slots in) {
-		return in;
 	}
 
 }
