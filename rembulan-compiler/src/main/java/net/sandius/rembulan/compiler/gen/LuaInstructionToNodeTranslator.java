@@ -18,6 +18,25 @@ public class LuaInstructionToNodeTranslator {
 		return OpCode.isK(i) ? -1 - OpCode.indexK(i) : i;
 	}
 
+	private Target jmp(int pc, int dest, ReadOnlyArray<Target> pcToLabel) {
+
+		Target jmpTarget = pcToLabel.get(dest);
+
+		if (dest < pc) {
+			// this is a backward jump
+
+			Target tgt = new Target();
+			NodeAppender appender = new NodeAppender(tgt);
+			appender.append(new AccountingNode.Flush())
+					.jumpTo(jmpTarget);
+
+			return tgt;
+		}
+		else {
+			return jmpTarget;
+		}
+	}
+
 	public void translate(Prototype prototype, int insn, int pc, int line, ReadOnlyArray<Target> pcToLabel) {
 		int opcode = OpCode.opCode(insn);
 		int a = OpCode.arg_A(insn);
@@ -76,11 +95,11 @@ public class LuaInstructionToNodeTranslator {
 						prototype,
 						UnOpType.fromOpcode(opcode),
 						a,
-						b)).jumpTo(pcToLabel.get(pc + 1));
+						b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.CONCAT:
-				tail.append(new Concat(a, b, c)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new Concat(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 
@@ -88,7 +107,7 @@ public class LuaInstructionToNodeTranslator {
 				if (a > 0) {
 					tail.append(new CloseUpvalues(a - 1));
 				}
-				tail.jumpTo(pcToLabel.get(pc + sbx + 1));
+				tail.jumpTo(jmp(pc, pc + sbx + 1, pcToLabel));
 				break;
 
 			case OpCode.EQ:
@@ -119,11 +138,11 @@ public class LuaInstructionToNodeTranslator {
 				break;
 
 			case OpCode.CALL:
-				tail.append(new Call(a, b, c)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new Call(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.FORPREP:
-				tail.append(new ForPrep(a, registerOrConst(b))).jumpTo(pcToLabel.get(pc + sbx + 1));
+				tail.append(new ForPrep(a, registerOrConst(b))).jumpTo(jmp(pc, pc + sbx + 1, pcToLabel));
 				break;
 
 			case OpCode.TAILCALL:
@@ -135,42 +154,42 @@ public class LuaInstructionToNodeTranslator {
 				break;
 
 			case OpCode.FORLOOP: {
-				Target cont = pcToLabel.get(pc + sbx + 1);
-				Target exit = pcToLabel.get(pc + 1);
+				Target cont = jmp(pc, pc + sbx + 1, pcToLabel);
+				Target exit = jmp(pc, pc + 1, pcToLabel);
 				tail.branch(new ForLoop(cont, exit, a, sbx));
 			}
 				break;
 
 			case OpCode.CLOSURE:
-				tail.append(new Closure(prototype, a, b)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new Closure(prototype, a, b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.GETUPVAL:
-				tail.append(new GetUpVal(a, b)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new GetUpVal(a, b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.GETTABUP:
-				tail.append(new GetTabUp(a, b)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new GetTabUp(a, b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.GETTABLE:
-				tail.append(new GetTable(a, b, c)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new GetTable(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.SETTABUP:
-				tail.append(new SetTabUp(a, b, c)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new SetTabUp(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.SETUPVAL:
-				tail.append(new SetUpVal(a, b)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new SetUpVal(a, b)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.SETTABLE:
-				tail.append(new SetTable(a, b, c)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new SetTable(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.NEWTABLE:
-				tail.append(new NewTable(a, b, c)).jumpTo(pcToLabel.get(pc + 1));
+				tail.append(new NewTable(a, b, c)).jumpTo(jmp(pc, pc + 1, pcToLabel));
 				break;
 
 			case OpCode.SELF:

@@ -26,6 +26,15 @@ public abstract class AccountingNode extends Linear {
 
 	}
 
+	public static class Flush extends AccountingNode {
+
+		@Override
+		public String toString() {
+			return "CPU.Flush";
+		}
+
+	}
+
 	public static class End extends AccountingNode {
 
 		@Override
