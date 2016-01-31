@@ -6,7 +6,7 @@ import net.sandius.rembulan.util.Check;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Target implements Node, Src, SuperSink {
+public class Target implements Node, Src {
 
 	private Slots inSlots;
 

@@ -48,4 +48,14 @@ public class Entry implements Node, Jump {
 		return in;
 	}
 
+	@Override
+	public Slots inSlots() {
+		return null;
+	}
+
+	@Override
+	public void pushSlots(Slots s) {
+		// no-op
+	}
+
 }

@@ -127,6 +127,16 @@ public abstract class Nodes {
 			}
 
 			@Override
+			public Slots inSlots() {
+				throw new UnsupportedOperationException();  // TODO
+			}
+
+			@Override
+			public void pushSlots(Slots s) {
+				throw new UnsupportedOperationException();  // TODO
+			}
+
+			@Override
 			public Slots outSlots() {
 				throw new UnsupportedOperationException();  // TODO
 			}

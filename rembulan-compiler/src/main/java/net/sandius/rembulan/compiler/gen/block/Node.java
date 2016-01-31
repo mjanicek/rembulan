@@ -8,4 +8,8 @@ public interface Node {
 
 	Slots effect(Slots in);
 
+	Slots inSlots();
+
+	void pushSlots(Slots s);
+
 }
