@@ -12,14 +12,12 @@ import static net.sandius.rembulan.compiler.gen.block.LuaInstruction.registerOrC
 
 public class AppenderEmitter implements InstructionEmitter {
 
-	private final int pc;
 	private final LuaInstructionToNodeTranslator.MyNodeAppender appender;
 
 	private final Prototype prototype;
 
-	public AppenderEmitter(Prototype prototype, int pc, LuaInstructionToNodeTranslator.MyNodeAppender appender) {
+	public AppenderEmitter(Prototype prototype, LuaInstructionToNodeTranslator.MyNodeAppender appender) {
 	    this.prototype = prototype;
-		this.pc = pc;
 		this.appender = Objects.requireNonNull(appender);
 	}
 

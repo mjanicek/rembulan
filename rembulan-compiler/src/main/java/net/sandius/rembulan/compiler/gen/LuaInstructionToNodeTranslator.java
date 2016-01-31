@@ -93,7 +93,7 @@ public class LuaInstructionToNodeTranslator {
 
 		appender.append(new AccountingNode.TickBefore());
 
-		InstructionDispatch.dispatch(new AppenderEmitter(prototype, pc, appender), prototype.getCode().get(pc));
+		InstructionDispatch.dispatch(new AppenderEmitter(prototype, appender), prototype.getCode().get(pc));
 	}
 
 }

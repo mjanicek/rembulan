@@ -2,6 +2,7 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.util.Check;
 
+@Deprecated
 public class NodeAppender {
 
 	private Src src;
