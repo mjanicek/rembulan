@@ -293,6 +293,10 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_CALL(int a, int b, int c) {
+		// TODO: check whether this might be needed
+//		if (c == 0) {
+//			appender.append(new CloseUpvalues(a));
+//		}
 		appender.append(new LuaInstruction.Call(a, b, c)).toNext();
 	}
 

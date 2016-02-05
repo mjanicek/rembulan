@@ -56,6 +56,18 @@ public abstract class Check {
 		}
 	}
 
+	public static void isTrue(boolean b) {
+		if (!b) {
+			throw new IllegalArgumentException("condition is false");
+		}
+	}
+
+	public static void isFalse(boolean b) {
+		if (b) {
+			throw new IllegalArgumentException("condition is true");
+		}
+	}
+
 	public static void nonNegative(int n) {
 		gt(n, -1);
 	}

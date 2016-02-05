@@ -262,9 +262,12 @@ public class FlowIt {
 						Slots s_m = m.inSlots();
 
 						for (int i = 0; i < s_n.size(); i++) {
-							if (!s_n.getState(i).isCaptured() && s_m.getState(i).isCaptured()) {
-								// need to capture i
-								uncaptured.append(i);
+							// FIXME: double-check this condition
+							if (s_n.isValidIndex(i) && s_m.isValidIndex(i)) {
+								if (!s_n.getState(i).isCaptured() && s_m.getState(i).isCaptured()) {
+									// need to capture i
+									uncaptured.append(i);
+								}
 							}
 						}
 					}
