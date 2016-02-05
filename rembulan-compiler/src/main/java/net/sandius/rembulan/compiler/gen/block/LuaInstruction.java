@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.ArgTypes;
 import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.compiler.gen.Slots.SlotType;
@@ -25,6 +26,17 @@ public class LuaInstruction {
 		else {
 			throw new IllegalStateException("Unknown constant: " + k);
 		}
+	}
+
+	public static ArgTypes argTypesFromSlots(Slots s, int from, int count) {
+		int num = count > 0 ? count - 1 : s.varargPosition() - from;
+
+		SlotType[] args = new SlotType[num];
+		for (int i = 0; i < num; i++) {
+			args[i] = s.getType(from + i);
+		}
+
+		return new ArgTypes(ReadOnlyArray.wrap(args), count <= 0);
 	}
 
 	public static class Move extends Linear {
@@ -332,15 +344,8 @@ public class LuaInstruction {
 		@Override
 		public ReturnType returnType() {
 			SlotType targetType = inSlots().getType(a);
-
-			int num = b > 0 ? b - 1 : inSlots().varargPosition() - (a + 1);
-
-			SlotType[] args = new SlotType[num];
-			for (int i = 0; i < num; i++) {
-				args[i] = inSlots().getType(a + 1 + i);
-			}
-
-			return new ReturnType.TailCallReturnType(targetType, ReadOnlyArray.wrap(args), b == 0);
+			ArgTypes argTypes = argTypesFromSlots(inSlots(), a + 1, b);
+			return new ReturnType.TailCallReturnType(targetType, argTypes);
 		}
 
 	}
@@ -363,14 +368,7 @@ public class LuaInstruction {
 
 		@Override
 		public ReturnType returnType() {
-			int num = b > 0 ? b - 1 : inSlots().varargPosition() - a;
-
-			SlotType[] args = new SlotType[num];
-			for (int i = 0; i < num; i++) {
-				args[i] = inSlots().getType(a + i);
-			}
-
-			return new ReturnType.ConcreteReturnType(ReadOnlyArray.wrap(args), b == 0);
+			return new ReturnType.ConcreteReturnType(argTypesFromSlots(inSlots(), a, b));
 		}
 
 	}
