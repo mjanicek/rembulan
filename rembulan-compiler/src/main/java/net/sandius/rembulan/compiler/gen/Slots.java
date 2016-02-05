@@ -56,6 +56,23 @@ public class Slots {
 			}
 		}
 
+		public static String toString(SlotType type) {
+			switch (type) {
+				case ANY: return "A";
+				case NIL: return "-";
+				case BOOLEAN: return "B";
+				case NUMBER: return "N";
+				case NUMBER_INTEGER: return "i";
+				case NUMBER_FLOAT: return "f";
+				case STRING: return "S";
+				case FUNCTION: return "F";
+				case TABLE: return "T";
+				case THREAD: return "C";
+				default:
+				throw new IllegalArgumentException("Unknown type: " + type);
+			}
+		}
+
 	}
 
 	private final ReadOnlyArray<SlotState> states;
@@ -109,19 +126,7 @@ public class Slots {
 			if (state == SlotState.CAPTURED) {
 				bld.append('^');
 			}
-			switch (type) {
-				case ANY: bld.append("A"); break;
-				case NIL: bld.append("-"); break;
-				case BOOLEAN: bld.append("B"); break;
-				case NUMBER: bld.append("N"); break;
-				case NUMBER_INTEGER: bld.append("i"); break;
-				case NUMBER_FLOAT: bld.append("f"); break;
-				case STRING: bld.append("S"); break;
-				case FUNCTION: bld.append("F"); break;
-				case TABLE: bld.append("T"); break;
-				case THREAD: bld.append("C"); break;
-				default: bld.append('?'); break;
-			}
+			bld.append(SlotType.toString(type));
 		}
 
 		if (varargPosition() >= 0) {

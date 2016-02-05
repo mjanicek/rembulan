@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
@@ -46,6 +47,8 @@ public abstract class Exit implements Node, Sink {
 	public Slots outSlots() {
 		return null;
 	}
+
+	public abstract ReturnType returnType();
 
 	@Override
 	public boolean pushSlots(Slots s) {

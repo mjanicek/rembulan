@@ -5,7 +5,7 @@ import java.io.PrintWriter
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 import net.sandius.rembulan.compiler.gen.{Slots, FlowIt}
-import net.sandius.rembulan.compiler.gen.block.Node
+import net.sandius.rembulan.compiler.gen.block.{Exit, Node}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
 
@@ -177,10 +177,17 @@ object AnalysisRunner {
       }
     }
 
+    def outValue(node: Node): String = {
+      node match {
+        case ex: Exit => ex.returnType().toString()
+        case n => slotsToString(n.outSlots())
+      }
+    }
+
     case class MyNode(node: Node) {
       require (node != null)
       override def toString = {
-        "  " + slotsToString(node.inSlots()) + " -> " + slotsToString(node.outSlots()) + "  \n" + node.toString
+        "  " + slotsToString(node.inSlots()) + " -> " + outValue(node) + "  \n" + node.toString
       }
     }
 

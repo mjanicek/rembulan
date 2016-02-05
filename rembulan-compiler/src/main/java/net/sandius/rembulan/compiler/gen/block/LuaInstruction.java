@@ -1,10 +1,12 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.compiler.gen.Slots.SlotType;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.Objects;
 
@@ -312,6 +314,20 @@ public class LuaInstruction {
 			return "TAILCALL" + suffix + "(" + a + "," + b + ")";
 		}
 
+		@Override
+		public ReturnType returnType() {
+			SlotType targetType = inSlots().getType(a);
+
+			int num = b > 0 ? b - 1 : inSlots().varargPosition() - (a + 1);
+
+			SlotType[] args = new SlotType[num];
+			for (int i = 0; i < num; i++) {
+				args[i] = inSlots().getType(a + 1 + i);
+			}
+
+			return new ReturnType.TailCallReturnType(targetType, ReadOnlyArray.wrap(args), b == 0);
+		}
+
 	}
 
 
@@ -328,6 +344,18 @@ public class LuaInstruction {
 		public String toString() {
 			String suffix = b > 0 ? "_fix" : "_var";
 			return "RETURN" + suffix + "(" + a + "," + b + ")";
+		}
+
+		@Override
+		public ReturnType returnType() {
+			int num = b > 0 ? b - 1 : inSlots().varargPosition() - a;
+
+			SlotType[] args = new SlotType[num];
+			for (int i = 0; i < num; i++) {
+				args[i] = inSlots().getType(a + i);
+			}
+
+			return new ReturnType.ConcreteReturnType(ReadOnlyArray.wrap(args), b == 0);
 		}
 
 	}
