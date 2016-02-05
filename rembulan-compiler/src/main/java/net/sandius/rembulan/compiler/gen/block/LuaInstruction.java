@@ -267,31 +267,24 @@ public class LuaInstruction {
 		protected Slots effect(Slots in) {
 			Slots s = in;
 
-
-			if (b > 0) {
-				// (b - 1) is the exact number of arguments
-				// TODO anything here?
-			}
-			else {
-				if (!s.hasVarargs()) {
-					throw new IllegalStateException("varargs expected on stack");
-				}
+			if (b == 0 && !s.hasVarargs()) {
+				throw new IllegalStateException("varargs expected on stack");
 			}
 
 			// Since we don't know what the called function does, we must
 			// assume that it may change any open upvalue.
-			for (int i = 0; i < in.size(); i++) {
-				// FIXME: re-add this!!!
-//				if (s.getState(i).isCaptured()) {
-//					s = s.updateType(i, SlotType.ANY);
-//				}
+			for (int i = 0; i < s.fixedSize(); i++) {
+				if (s.getState(i).isCaptured()) {
+					s = s.updateType(i, SlotType.ANY);
+				}
 			}
 
 			if (c > 0) {
 				s = s.consumeVarargs();
+
 				// (c - 1) is the exact number of result values
-				for (int i = a; i < a + c - 1; i++) {
-					s = s.updateType(i, SlotType.ANY);
+				for (int i = 0; i < c - 1; i++) {
+					s = s.updateType(a + i, SlotType.ANY);
 				}
 			}
 			else {

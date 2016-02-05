@@ -178,6 +178,10 @@ public class Slots {
 		return varargPosition >= 0;
 	}
 
+	public int fixedSize() {
+		return varargPosition < 0 ? size() : varargPosition;
+	}
+
 	public boolean isValidIndex(int idx) {
 		return idx >= 0 && idx < size() && (varargPosition < 0 || idx < varargPosition);
 	}
