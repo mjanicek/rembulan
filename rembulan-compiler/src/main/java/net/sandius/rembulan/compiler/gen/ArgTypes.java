@@ -15,6 +15,14 @@ public class ArgTypes extends ReturnType {
 		this.varargs = varargs;
 	}
 
+	public static ArgTypes init(int numArgs, boolean vararg) {
+		SlotType[] types = new SlotType[numArgs];
+		for (int i = 0; i < numArgs; i++) {
+			types[i] = SlotType.ANY;
+		}
+		return new ArgTypes(ReadOnlyArray.wrap(types), vararg);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -51,6 +59,17 @@ public class ArgTypes extends ReturnType {
 
 	public boolean hasVarargs() {
 		return varargs;
+	}
+
+	public Slots toSlots(int size) {
+		Slots s = Slots.init(size);
+		for (int i = 0; i < types().size(); i++) {
+			s = s.updateType(i, types().get(i));
+		}
+//		if (hasVarargs()) {
+//			s = s.setVarargs(types().size());
+//		}
+		return s;
 	}
 
 }

@@ -69,8 +69,7 @@ public class FlowIt {
 //		}
 //		System.out.println("]");
 
-		Slots entrySlots = Slots.entrySlots(prototype.getMaximumStackSize(), prototype.getNumberOfParameters());
-		callEntry = new Entry("main", entrySlots, pcLabels.get(0));
+		callEntry = new Entry("main", ArgTypes.init(prototype.getNumberOfParameters(), prototype.isVararg()), prototype.getMaximumStackSize(), pcLabels.get(0));
 
 		resumePoints = new HashSet<>();
 

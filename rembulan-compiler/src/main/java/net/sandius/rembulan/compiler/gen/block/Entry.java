@@ -1,26 +1,29 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.ArgTypes;
 import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.util.Check;
 
 public class Entry implements Node, Jump {
 
 	public final String name;
-	private final Slots entrySlots;
+	private final ArgTypes argTypes;
+	private final int slotSize;
 
 	private Target target;
 
-	public Entry(String name, Slots entrySlots, Target target) {
+	public Entry(String name, ArgTypes argTypes, int slotSize, Target target) {
 		Check.notNull(target);
-		Check.notNull(entrySlots);
+		Check.notNull(argTypes);
 
 		this.name = name;
-		this.entrySlots = entrySlots;
+		this.argTypes = argTypes;
+		this.slotSize = slotSize;
 		this.target = target;
 	}
 
-	public Entry(Slots entrySlots, Target target) {
-		this(null, entrySlots, target);
+	public Entry(ArgTypes argTypes, int slotSize, Target target) {
+		this(null, argTypes, slotSize, target);
 	}
 
 	@Override
@@ -47,6 +50,10 @@ public class Entry implements Node, Jump {
 		}
 	}
 
+	public ArgTypes arguments() {
+		return argTypes;
+	}
+
 	@Override
 	public Slots inSlots() {
 		return null;
@@ -54,7 +61,7 @@ public class Entry implements Node, Jump {
 
 	@Override
 	public Slots outSlots() {
-		return entrySlots;
+		return argTypes.toSlots(slotSize);
 	}
 
 	@Override

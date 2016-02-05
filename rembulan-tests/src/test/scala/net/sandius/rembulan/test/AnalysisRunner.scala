@@ -5,7 +5,7 @@ import java.io.PrintWriter
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 import net.sandius.rembulan.compiler.gen.{Slots, FlowIt}
-import net.sandius.rembulan.compiler.gen.block.{Exit, Node}
+import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
 
@@ -177,18 +177,23 @@ object AnalysisRunner {
       }
     }
 
+    def inValue(node: Node): String = {
+      node match {
+        case ent: Entry => ent.arguments().toString
+        case n => slotsToString(n.outSlots())
+      }
+    }
+
     def outValue(node: Node): String = {
       node match {
-        case ex: Exit => ex.returnType().toString()
+        case ex: Exit => ex.returnType().toString
         case n => slotsToString(n.outSlots())
       }
     }
 
     case class MyNode(node: Node) {
       require (node != null)
-      override def toString = {
-        "  " + slotsToString(node.inSlots()) + " -> " + outValue(node) + "  \n" + node.toString
-      }
+      override def toString = "  " + inValue(node) + " -> " + outValue(node) + "  \n" + node.toString
     }
 
     val vertices = flowEdges.keySet map { MyNode }

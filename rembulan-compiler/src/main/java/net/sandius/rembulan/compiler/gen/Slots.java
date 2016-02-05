@@ -150,14 +150,6 @@ public class Slots {
 		return new Slots(ReadOnlyArray.wrap(states), ReadOnlyArray.wrap(types), -1);
 	}
 
-	public static Slots entrySlots(int stackSize, int numArgs) {
-		Slots s = Slots.init(stackSize);
-		for (int i = 0; i < numArgs; i++) {
-			s = s.updateType(i, Slots.SlotType.ANY);
-		}
-		return s;
-	}
-
 	public int size() {
 		return states.size();
 	}
