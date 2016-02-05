@@ -130,6 +130,13 @@ object AnalysisRunner {
           """
     }
 
+    object VarargFunctionCalls extends Fragment {
+      code =
+          """local f = function(...) return ... end
+            |return true, f(...)
+          """
+    }
+
   }
 
   def printFlow(proto: Prototype, main: Boolean = true): Unit = {
@@ -206,7 +213,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = NilTestInlining
+    val program = VarargFunctionCalls
 
     println(program.code)
 

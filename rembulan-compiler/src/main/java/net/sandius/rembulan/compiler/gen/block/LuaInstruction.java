@@ -235,9 +235,18 @@ public class LuaInstruction {
 			this.c = c;
 		}
 
+		private boolean onFuncObject(Slots s) {
+			return s.getType(a) == SlotType.FUNCTION;
+		}
+
+
 		@Override
 		public String toString() {
-			return "CALL(" + a + "," + b + "," + c + ")";
+			String suffix = onFuncObject(inSlots()) ? "_F" : "_mt";
+			suffix += b > 0 ? "_fix" : "_var";
+			suffix += c > 0 ? "_fix" : "_var";
+
+			return "CALL" + suffix + "(" + a + "," + b + "," + c + ")";
 		}
 
 		@Override
@@ -683,7 +692,8 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			return "RETURN(" + a + "," + b + ")";
+			String suffix = b > 0 ? "_fix" : "_var";
+			return "RETURN" + suffix + "(" + a + "," + b + ")";
 		}
 
 
