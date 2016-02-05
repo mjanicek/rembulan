@@ -242,11 +242,26 @@ public class LuaInstruction {
 			return s.getType(a) == SlotType.FUNCTION;
 		}
 
+		private String argString(Slots s) {
+			int num = b > 0 ? b - 1 : inSlots().varargPosition() - (a + 1);
+
+			StringBuilder bld = new StringBuilder();
+			for (int i = 0; i < num; i++) {
+				bld.append(SlotType.toString(s.getType(a + 1 + i)));
+			}
+
+			if (b == 0) {
+				bld.append("+");
+			}
+
+			return bld.toString();
+		}
+
 		@Override
 		public String toString() {
 			String suffix = onFuncObject(inSlots()) ? "_F" : "_mt";
-			suffix += b > 0 ? "_fix" : "_var";
-			suffix += c > 0 ? "_fix" : "_var";
+			suffix += "_" + argString(inSlots());
+			suffix += c > 0 ? "_" + (c - 1) : "_var";
 
 			return "CALL" + suffix + "(" + a + "," + b + "," + c + ")";
 		}
