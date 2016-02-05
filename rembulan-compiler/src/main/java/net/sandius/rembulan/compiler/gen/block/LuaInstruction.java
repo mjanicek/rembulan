@@ -580,6 +580,24 @@ public class LuaInstruction {
 			return "TEST" + suffix + "(" + a + "," + (c != 0 ? "true" : "false") + ")";
 		}
 
+		@Override
+		public Boolean canBeInlined() {
+			SlotType tpe = inSlots().getType(a);
+
+			switch (tpe) {
+				case BOOLEAN:
+				case ANY:
+					return null;
+
+				case NIL:
+					return Boolean.FALSE;
+
+				default:
+					return Boolean.TRUE;
+			}
+
+		}
+
 	}
 
 	public static class TestSet extends Branch {

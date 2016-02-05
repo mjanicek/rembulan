@@ -100,5 +100,22 @@ public abstract class Branch implements Node, Sink, Jump {
 		inSlots = null;
 	}
 
+	public void inline(boolean branch) {
+		Target target = branch ? trueBranch() : falseBranch();
+
+		// disconnect both branches
+		trueBranch().dec(this);
+		falseBranch().dec(this);
+
+		UnconditionalJump jmp = new UnconditionalJump(target);
+		this.prev().appendSink(jmp);
+
+		jmp.tryInlining();
+	}
+
+	public Boolean canBeInlined() {
+		return null;
+	}
+
 }
 

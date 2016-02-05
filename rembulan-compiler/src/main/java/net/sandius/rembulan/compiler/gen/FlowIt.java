@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.AccountingNode;
+import net.sandius.rembulan.compiler.gen.block.Branch;
 import net.sandius.rembulan.compiler.gen.block.Capture;
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.HookNode;
@@ -94,6 +95,8 @@ public class FlowIt {
 
 		updateReachability();
 		updateDataFlow();
+
+		inlineBranches();
 
 		// add capture nodes
 		insertCaptureNodes();
@@ -193,11 +196,20 @@ public class FlowIt {
 
 	private void inlineInnerJumps() {
 		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof Target) {
-				Target t = (Target) n;
-				UnconditionalJump jmp = t.optIncomingJump();
-				if (jmp != null) {
-					Nodes.inline(jmp);
+			if (n instanceof UnconditionalJump) {
+				((UnconditionalJump) n).tryInlining();
+			}
+		}
+	}
+
+	private void inlineBranches() {
+		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
+			if (n instanceof Branch) {
+				Branch b = (Branch) n;
+				Boolean inline = b.canBeInlined();
+				if (inline != null) {
+					// we can transform this to an unconditional jump
+					b.inline(inline.booleanValue());
 				}
 			}
 		}

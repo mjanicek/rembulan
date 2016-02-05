@@ -88,4 +88,12 @@ public class UnconditionalJump implements Node, Sink, Jump {
 		inSlots = null;
 	}
 
+	public boolean tryInlining() {
+		if (target().optIncomingJump() == this) {
+			Nodes.inline(this);
+			return true;
+		}
+		return false;
+	}
+
 }
