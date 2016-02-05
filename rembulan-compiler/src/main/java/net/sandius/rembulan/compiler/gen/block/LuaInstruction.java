@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.compiler.gen.Slots.SlotType;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Check;
 
 import java.util.Objects;
 
@@ -239,7 +240,6 @@ public class LuaInstruction {
 			return s.getType(a) == SlotType.FUNCTION;
 		}
 
-
 		@Override
 		public String toString() {
 			String suffix = onFuncObject(inSlots()) ? "_F" : "_mt";
@@ -275,6 +275,48 @@ public class LuaInstruction {
 			}
 
 			return s;
+		}
+
+	}
+
+	public static class TailCall extends Exit {
+		public final int a;
+		public final int b;
+
+		public TailCall(int a, int b, int c) {
+			Check.isEq(c, 0);
+			this.a = a;
+			this.b = b;
+		}
+
+		private boolean onFuncObject(Slots s) {
+			return s.getType(a) == SlotType.FUNCTION;
+		}
+
+		@Override
+		public String toString() {
+			String suffix = onFuncObject(inSlots()) ? "_F" : "_mt";
+			suffix += b > 0 ? "_fix" : "_var";
+
+			return "TAILCALL" + suffix + "(" + a + "," + b + ")";
+		}
+
+	}
+
+
+	public static class Return extends Exit {
+		public final int a;
+		public final int b;
+
+		public Return(int a, int b) {
+			this.a = a;
+			this.b = b;
+		}
+
+		@Override
+		public String toString() {
+			String suffix = b > 0 ? "_fix" : "_var";
+			return "RETURN" + suffix + "(" + a + "," + b + ")";
 		}
 
 	}
@@ -677,42 +719,6 @@ public class LuaInstruction {
 			}
 
 			return s;
-		}
-
-	}
-
-	public static class Return extends Exit {
-		public final int a;
-		public final int b;
-
-		public Return(int a, int b) {
-			this.a = a;
-			this.b = b;
-		}
-
-		@Override
-		public String toString() {
-			String suffix = b > 0 ? "_fix" : "_var";
-			return "RETURN" + suffix + "(" + a + "," + b + ")";
-		}
-
-
-	}
-
-	public static class TailCall extends Exit {
-		public final int a;
-		public final int b;
-		public final int c;
-
-		public TailCall(int a, int b, int c) {
-			this.a = a;
-			this.b = b;
-			this.c = c;
-		}
-
-		@Override
-		public String toString() {
-			return "TAILCALL(" + a + "," + b + "," + c + ")";
 		}
 
 	}

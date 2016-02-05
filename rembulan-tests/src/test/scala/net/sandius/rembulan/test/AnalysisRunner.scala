@@ -137,6 +137,18 @@ object AnalysisRunner {
           """
     }
 
+    object VarargFunctionCalls2 extends Fragment {
+      code =
+          """local x = ...
+            |local f = function(...) return ... end
+            |if x then
+            |  return f(...)
+            |else
+            |  return true, f(...)
+            |end
+          """
+    }
+
   }
 
   def printFlow(proto: Prototype, main: Boolean = true): Unit = {
@@ -213,7 +225,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = VarargFunctionCalls
+    val program = VarargFunctionCalls2
 
     println(program.code)
 
