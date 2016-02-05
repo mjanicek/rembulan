@@ -332,7 +332,7 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_VARARG(int a, int b) {
-		throw new UnsupportedOperationException();  // TODO
+		appender.append(new LuaInstruction.Vararg(a, b)).toNext();
 	}
 
 	@Override

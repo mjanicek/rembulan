@@ -97,6 +97,17 @@ object AnalysisRunner {
           """
     }
 
+    object Varargs extends Fragment {
+      code =
+          """local a, b = ...
+            |if a > 0 then
+            |  return b, a
+            |else
+            |  return a, b
+            |end
+          """
+    }
+
   }
 
   def printFlow(proto: Prototype, main: Boolean = true): Unit = {
@@ -173,7 +184,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = Upvalues1
+    val program = Varargs
 
     println(program.code)
 

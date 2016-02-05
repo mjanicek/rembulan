@@ -640,4 +640,36 @@ public class LuaInstruction {
 
 	}
 
+	public static class Vararg extends Linear {
+		public final int a;
+		public final int b;
+
+		public Vararg(int a, int b) {
+			this.a = a;
+			this.b = b;
+		}
+
+		@Override
+		public String toString() {
+			return "VARARG(" + a + "," + b + ")";
+		}
+
+		@Override
+		public Slots effect(Slots in) {
+			Slots s = in;
+			if (b > 0) {
+				// (b - 1) is the number of values
+				for (int i = 0; i < b - 1; i++) {
+					s = s.updateType(a + i, SlotType.ANY);
+				}
+				return s;
+			}
+			else {
+				// all varargs
+				throw new UnsupportedOperationException();
+			}
+		}
+
+	}
+
 }
