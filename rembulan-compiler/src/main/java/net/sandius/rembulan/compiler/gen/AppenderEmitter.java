@@ -245,8 +245,8 @@ public class AppenderEmitter implements InstructionEmitter {
 	@Override
 	public void l_EQ(int a, int b, int c) {
 		appender.branch(new LuaInstruction.Eq(
-				appender.target(1),
 				appender.target(2),
+				appender.target(1),
 				a == 0,
 				registerOrConst(b),
 				registerOrConst(c)));
@@ -255,8 +255,8 @@ public class AppenderEmitter implements InstructionEmitter {
 	@Override
 	public void l_LT(int a, int b, int c) {
 		appender.branch(new LuaInstruction.Lt(
-				appender.target(1),
 				appender.target(2),
+				appender.target(1),
 				a == 0,
 				registerOrConst(b),
 				registerOrConst(c)));
@@ -265,8 +265,8 @@ public class AppenderEmitter implements InstructionEmitter {
 	@Override
 	public void l_LE(int a, int b, int c) {
 		appender.branch(new LuaInstruction.Le(
-				appender.target(1),
 				appender.target(2),
+				appender.target(1),
 				a == 0,
 				registerOrConst(b),
 				registerOrConst(c)));
@@ -274,12 +274,21 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_TEST(int a, int c) {
-		throw new UnsupportedOperationException();  // TODO
+		appender.branch(new LuaInstruction.Test(
+				appender.target(2),
+				appender.target(1),
+				a,
+				c));
 	}
 
 	@Override
 	public void l_TESTSET(int a, int b, int c) {
-		throw new UnsupportedOperationException();  // TODO
+		appender.branch(new LuaInstruction.TestSet(
+				appender.target(2),
+				appender.target(1),
+				a,
+				b,
+				c));
 	}
 
 	@Override

@@ -552,6 +552,55 @@ public class LuaInstruction {
 
 	}
 
+	public static class Test extends Branch {
+		public final int a;
+		public final int c;
+
+		// coerce register #a to a boolean and compare to c
+
+		public Test(Target trueBranch, Target falseBranch, int a, int c) {
+			super(trueBranch, falseBranch);
+			this.a = a;
+			this.c = c;
+		}
+
+		@Override
+		public String toString() {
+			String suffix;
+
+			SlotType tpe = inSlots().getType(a);
+
+			switch (tpe) {
+				case BOOLEAN:  suffix = "_B"; break;  // simple boolean comparison, do branch
+				case ANY:      suffix = "_coerce"; break;  // coerce, compare, do branch
+				case NIL:      suffix = "_false"; break;  // automatically false
+				default:       suffix = "_true"; break;  // automatically true
+			}
+
+			return "TEST" + suffix + "(" + a + "," + (c != 0 ? "true" : "false") + ")";
+		}
+
+	}
+
+	public static class TestSet extends Branch {
+		public final int a;
+		public final int b;
+		public final int c;
+
+		public TestSet(Target trueBranch, Target falseBranch, int a, int b, int c) {
+			super(trueBranch, falseBranch);
+			this.a = a;
+			this.b = b;
+			this.c = c;
+		}
+
+		@Override
+		public String toString() {
+			return "TESTSET(" + a + "," + "," + b + "," + c + ")";
+		}
+
+	}
+
 	public static class ForLoop extends Branch {
 		public final int a;
 		public final int sbx;
@@ -651,7 +700,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			return "VARARG(" + a + "," + b + ")";
+			return "VARARG" + (b > 0 ? "_det" : "_indet") + "(" + a + "," + b + ")";
 		}
 
 		@Override
@@ -666,7 +715,9 @@ public class LuaInstruction {
 			}
 			else {
 				// all varargs
-				throw new UnsupportedOperationException();
+				// TODO
+				return in;
+//				throw new UnsupportedOperationException();
 			}
 		}
 

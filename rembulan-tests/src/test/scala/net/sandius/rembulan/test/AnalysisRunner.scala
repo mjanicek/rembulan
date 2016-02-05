@@ -97,13 +97,35 @@ object AnalysisRunner {
           """
     }
 
-    object Varargs extends Fragment {
+    object DeterminateVarargs extends Fragment {
       code =
           """local a, b = ...
             |if a > 0 then
             |  return b, a
             |else
             |  return a, b
+            |end
+          """
+    }
+
+    object IndeterminateVarargs extends Fragment {
+      code =
+          """local a = ...
+            |if a then
+            |  return ...
+            |else
+            |  return false, ...
+            |end
+          """
+    }
+
+    object NilTestInlining extends Fragment {
+      code =
+          """local a
+            |if a then
+            |  return true
+            |else
+            |  return false
             |end
           """
     }
@@ -184,7 +206,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = Varargs
+    val program = NilTestInlining
 
     println(program.code)
 
