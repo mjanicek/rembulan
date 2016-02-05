@@ -39,7 +39,7 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_LOADBOOL(int a, int b, int c) {
-		appender.append(new LuaInstruction.LoadBool(a, b)).jumpToOffset(c != 0 ? 2 : 1);
+		appender.append(new LuaInstruction.LoadBool(a, b != 0)).jumpToOffset(c != 0 ? 2 : 1);
 	}
 
 	@Override

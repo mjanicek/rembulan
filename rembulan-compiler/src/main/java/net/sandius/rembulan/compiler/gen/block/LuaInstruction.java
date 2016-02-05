@@ -97,16 +97,16 @@ public class LuaInstruction {
 
 	public static class LoadBool extends Linear {
 		public final int dest;
-		public final int arg;
+		public final boolean value;
 
-		public LoadBool(int dest, int arg) {
+		public LoadBool(int dest, boolean value) {
 			this.dest = dest;
-			this.arg = arg;
+			this.value = value;
 		}
 
 		@Override
 		public String toString() {
-			return "LOADBOOL(" + dest + "," + arg + ")";
+			return "LOADBOOL(" + dest + "," + value + ")";
 		}
 
 		@Override
