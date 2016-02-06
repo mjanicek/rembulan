@@ -4,12 +4,10 @@ import net.sandius.rembulan.compiler.gen.block.BinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.CloseUpvalues;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
-import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Check;
 
 import java.util.Objects;
-
-import static net.sandius.rembulan.compiler.gen.block.LuaInstruction.registerOrConst;
 
 public class AppenderEmitter implements InstructionEmitter {
 
@@ -39,7 +37,7 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_LOADBOOL(int a, int b, int c) {
-		appender.append(new LuaInstruction.LoadBool(a, b != 0)).jumpToOffset(c != 0 ? 2 : 1);
+		appender.append(new LuaInstruction.LoadBool(a, b)).jumpToOffset(c != 0 ? 2 : 1);
 	}
 
 	@Override
@@ -54,7 +52,7 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_GETTABUP(int a, int b, int c) {
-		appender.append(new LuaInstruction.GetTabUp(a, b)).toNext();
+		appender.append(new LuaInstruction.GetTabUp(a, b, c)).toNext();
 	}
 
 	@Override
@@ -84,151 +82,87 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_SELF(int a, int b, int c) {
-		throw new UnsupportedOperationException();  // TODO
+		appender.append(new LuaInstruction.Self(a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_ADD(int a, int b, int c) {
-		appender.append(new BinaryOperation.Add(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.Add(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SUB(int a, int b, int c) {
-		appender.append(new BinaryOperation.Sub(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.Sub(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_MUL(int a, int b, int c) {
-		appender.append(new BinaryOperation.Mul(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.Mul(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_MOD(int a, int b, int c) {
-		appender.append(new BinaryOperation.Mod(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.Mod(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_POW(int a, int b, int c) {
-		appender.append(new BinaryOperation.Pow(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.Pow(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_DIV(int a, int b, int c) {
-		appender.append(new BinaryOperation.Div(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.Div(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_IDIV(int a, int b, int c) {
-		appender.append(new BinaryOperation.IDiv(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.IDiv(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BAND(int a, int b, int c) {
-		appender.append(new BinaryOperation.BAnd(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.BAnd(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BOR(int a, int b, int c) {
-		appender.append(new BinaryOperation.BOr(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.BOr(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BXOR(int a, int b, int c) {
-		appender.append(new BinaryOperation.BXor(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.BXor(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SHL(int a, int b, int c) {
-		appender.append(new BinaryOperation.Shl(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.Shl(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SHR(int a, int b, int c) {
-		appender.append(new BinaryOperation.Shr(
-				prototype,
-				a,
-				LuaInstruction.registerOrConst(b),
-				LuaInstruction.registerOrConst(c))).toNext();
+		appender.append(new BinaryOperation.Shr(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_UNM(int a, int b) {
-		appender.append(new LuaInstruction.UnOp(
-				prototype,
-				LuaInstruction.UnOpType.UNM,
-				a,
-				b)).toNext();
+		appender.append(new LuaInstruction.UnOp(prototype, LuaInstruction.UnOpType.UNM, a, b)).toNext();
 	}
 
 	@Override
 	public void l_BNOT(int a, int b) {
-		appender.append(new LuaInstruction.UnOp(
-				prototype,
-				LuaInstruction.UnOpType.BNOT,
-				a,
-				b)).toNext();
+		appender.append(new LuaInstruction.UnOp(prototype, LuaInstruction.UnOpType.BNOT, a, b)).toNext();
 	}
 
 	@Override
 	public void l_NOT(int a, int b) {
-		appender.append(new LuaInstruction.UnOp(
-				prototype,
-				LuaInstruction.UnOpType.NOT,
-				a,
-				b)).toNext();
+		appender.append(new LuaInstruction.UnOp(prototype, LuaInstruction.UnOpType.NOT, a, b)).toNext();
 	}
 
 	@Override
 	public void l_LEN(int a, int b) {
-		appender.append(new LuaInstruction.UnOp(
-				prototype,
-				LuaInstruction.UnOpType.LEN,
-				a,
-				b)).toNext();
+		appender.append(new LuaInstruction.UnOp(prototype, LuaInstruction.UnOpType.LEN, a, b)).toNext();
 	}
 
 	@Override
@@ -244,51 +178,28 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_EQ(int a, int b, int c) {
-		appender.branch(new LuaInstruction.Eq(
-				appender.target(2),
-				appender.target(1),
-				a == 0,
-				registerOrConst(b),
-				registerOrConst(c)));
+		appender.branch(new LuaInstruction.Eq(appender.target(2), appender.target(1), a, b, c));
 	}
 
 	@Override
 	public void l_LT(int a, int b, int c) {
-		appender.branch(new LuaInstruction.Lt(
-				appender.target(2),
-				appender.target(1),
-				a == 0,
-				registerOrConst(b),
-				registerOrConst(c)));
+		appender.branch(new LuaInstruction.Lt(appender.target(2), appender.target(1), a, b, c));
 	}
 
 	@Override
 	public void l_LE(int a, int b, int c) {
-		appender.branch(new LuaInstruction.Le(
-				appender.target(2),
-				appender.target(1),
-				a == 0,
-				registerOrConst(b),
-				registerOrConst(c)));
+		appender.branch(new LuaInstruction.Le(appender.target(2), appender.target(1), a, b, c));
 	}
 
 	@Override
 	public void l_TEST(int a, int c) {
-		appender.branch(new LuaInstruction.Test(
-				appender.target(2),
-				appender.target(1),
-				a,
-				c));
+		// TODO: check the branches -- TEST is evaluating boolean *in*equality
+		appender.branch(new LuaInstruction.Test(appender.target(2), appender.target(1), a, c));
 	}
 
 	@Override
 	public void l_TESTSET(int a, int b, int c) {
-		appender.branch(new LuaInstruction.TestSet(
-				appender.target(2),
-				appender.target(1),
-				a,
-				b,
-				c));
+		appender.branch(new LuaInstruction.TestSet(appender.target(2), appender.target(1), a, b, c));
 	}
 
 	@Override
@@ -302,7 +213,8 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_TAILCALL(int a, int b, int c) {
-		appender.term(new LuaInstruction.TailCall(a, b, c));
+		Check.isEq(c, 0);
+		appender.term(new LuaInstruction.TailCall(a, b));
 	}
 
 	@Override
@@ -312,14 +224,11 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_FORLOOP(int a, int sbx) {
-		Target cont = appender.target(sbx + 1);
-		Target exit = appender.target(1);
-		appender.branch(new LuaInstruction.ForLoop(cont, exit, a, sbx));
+		appender.branch(new LuaInstruction.ForLoop(appender.target(sbx + 1), appender.target(1), a));
 	}
 
 	@Override
 	public void l_FORPREP(int a, int sbx) {
-		// TODO
 		appender.append(new LuaInstruction.ForPrep(a)).jumpToOffset(sbx + 1);
 	}
 

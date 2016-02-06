@@ -11,32 +11,32 @@ public abstract class BinaryOperation extends Linear {
 
 	public final Prototype prototype;
 
-	public final int dest;
-	public final int b;
-	public final int c;
+	public final int r_dest;
+	public final int rk_left;
+	public final int rk_right;
 
-	public BinaryOperation(Prototype prototype, int dest, int b, int c) {
+	public BinaryOperation(Prototype prototype, int a, int b, int c) {
 		this.prototype = Objects.requireNonNull(prototype);
-		this.dest = dest;
-		this.b = b;
-		this.c = c;
+		this.r_dest = a;
+		this.rk_left = LuaInstruction.registerOrConst(b);
+		this.rk_right = LuaInstruction.registerOrConst(c);
 	}
 
 	protected abstract String name();
 
 	@Override
 	public String toString() {
-		return name() + opType(inSlots()).toSuffix() + "(" + dest + "," + b + "," + c + ")";
+		return name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
 	}
 
-	protected Slots.SlotType slotType(Slots in, int idx) {
-		return idx < 0 ? LuaInstruction.constantType(prototype.getConstants().get(-idx - 1)) : in.getType(idx);
+	protected Slots.SlotType slotType(Slots s, int idx) {
+		return idx < 0 ? LuaInstruction.constantType(prototype.getConstants().get(-idx - 1)) : s.getType(idx);
 	}
 
 	protected abstract NumOpType opType(SlotType l, SlotType r);
 
-	protected NumOpType opType(Slots in) {
-		return opType(slotType(in, b), slotType(in, c));
+	protected NumOpType opType(Slots s) {
+		return opType(slotType(s, rk_left), slotType(s, rk_right));
 	}
 
 	private static NumOpType mayBeInteger(SlotType l, SlotType r) {
@@ -61,14 +61,8 @@ public abstract class BinaryOperation extends Linear {
 	}
 
 	@Override
-	protected Slots effect(Slots in) {
-		switch (opType(in)) {
-			case Integer:  return in.updateType(dest, Slots.SlotType.NUMBER_INTEGER);
-			case Float:    return in.updateType(dest, Slots.SlotType.NUMBER_FLOAT);
-			case Number:   return in.updateType(dest, Slots.SlotType.NUMBER);
-			case Any:
-			default:       return in.updateType(dest, Slots.SlotType.ANY);
-		}
+	protected Slots effect(Slots s) {
+		return s.updateType(r_dest, opType(s).toSlotType());
 	}
 
 	public static class Add extends BinaryOperation {
