@@ -1,31 +1,26 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.IntSet;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 public class Slots {
 
-	private enum SlotState {
-
-		FRESH,
-		CAPTURED;
-
-	}
-
-	private final ReadOnlyArray<SlotState> states;
 	private final ReadOnlyArray<SlotType> types;
+	private final IntSet captured;
 	private final int varargPosition;  // first index of varargs; if negative, no varargs in slots
 
-	private Slots(ReadOnlyArray<SlotState> states, ReadOnlyArray<SlotType> types, int varargPosition) {
-		Check.notNull(states);
+	private Slots(ReadOnlyArray<SlotType> types, IntSet captured, int varargPosition) {
 		Check.notNull(types);
-		Check.isEq(states.size(), types.size());
+		Check.notNull(captured);
 
-		int size = states.size();
+		int size = types.size();
 		if (varargPosition >= 0) Check.inRange(varargPosition, 0, size - 1);
 
-		this.states = states;
+		Check.inRange(captured.size(), 0, size - 1);
+
 		this.types = types;
+		this.captured = captured;
 		this.varargPosition = varargPosition;
 	}
 
@@ -38,15 +33,15 @@ public class Slots {
 
 		// FIXME: vararg position!
 
-		return states.shallowEquals(that.states) && types.shallowEquals(that.types);
+		return types.shallowEquals(that.types) && this.captured.equals(that.captured);
 	}
 
 	@Override
 	public int hashCode() {
 		// FIXME: vararg position!
 
-		int result = states.shallowHashCode();
-		result = 31 * result + states.shallowHashCode();
+		int result = types.shallowHashCode();
+		result = 31 * result + captured.hashCode();
 		return result;
 	}
 
@@ -75,19 +70,17 @@ public class Slots {
 	public static Slots init(int size) {
 		Check.nonNegative(size);
 
-		SlotState[] states = new SlotState[size];
 		SlotType[] types = new SlotType[size];
 
 		for (int i = 0; i < size; i++) {
-			states[i] = SlotState.FRESH;
 			types[i] = SlotType.NIL;
 		}
 
-		return new Slots(ReadOnlyArray.wrap(states), ReadOnlyArray.wrap(types), -1);
+		return new Slots(ReadOnlyArray.wrap(types), IntSet.empty(), -1);
 	}
 
 	public int size() {
-		return states.size();
+		return types.size();
 	}
 
 	public ReadOnlyArray<SlotType> types() {
@@ -112,18 +105,18 @@ public class Slots {
 
 	public boolean isCaptured(int idx) {
 		Check.isTrue(isValidIndex(idx));
-		return states.get(idx) == SlotState.CAPTURED;
+		return captured.contains(idx);
 	}
 
-	public Slots updateState(int idx, boolean captured) {
+	public Slots updateState(int idx, boolean cap) {
 		Check.isTrue(isValidIndex(idx));
 
-		if (isCaptured(idx) == captured) {
+		if (isCaptured(idx) == cap) {
 			// no-op
 			return this;
 		}
 		else {
-			return new Slots(states.update(idx, captured ? SlotState.CAPTURED : SlotState.FRESH), types, varargPosition);
+			return new Slots(types, cap ? captured.plus(idx) : captured.minus(idx), varargPosition);
 		}
 	}
 
@@ -149,7 +142,7 @@ public class Slots {
 			return this;
 		}
 		else {
-			return new Slots(states, types.update(idx, type), varargPosition);
+			return new Slots(types.update(idx, type), captured, varargPosition);
 		}
 	}
 
@@ -176,7 +169,7 @@ public class Slots {
 	}
 
 	public Slots consumeVarargs() {
-		return new Slots(states, types, -1);
+		return new Slots(types, captured, -1);
 	}
 
 	public Slots setVarargs(int position) {
@@ -190,7 +183,7 @@ public class Slots {
 			s = s.updateType(i, SlotType.NIL);
 		}
 
-		return new Slots(s.states, s.types, position);
+		return new Slots(s.types, s.captured, position);
 	}
 
 }
