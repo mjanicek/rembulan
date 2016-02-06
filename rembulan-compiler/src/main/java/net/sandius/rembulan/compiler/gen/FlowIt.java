@@ -263,7 +263,7 @@ public class FlowIt {
 						for (int i = 0; i < s_n.size(); i++) {
 							// FIXME: double-check this condition
 							if (s_n.isValidIndex(i) && s_m.isValidIndex(i)) {
-								if (!s_n.getState(i).isCaptured() && s_m.getState(i).isCaptured()) {
+								if (!s_n.isCaptured(i) && s_m.isCaptured(i)) {
 									// need to capture i
 									uncaptured.append(i);
 								}

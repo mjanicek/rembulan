@@ -591,7 +591,7 @@ public class LuaInstruction {
 			// Since we don't know what the called function does, we must
 			// assume that it may change any open upvalue.
 			for (int i = 0; i < s.fixedSize(); i++) {
-				if (s.getState(i).isCaptured()) {
+				if (s.isCaptured(i)) {
 					s = s.updateType(i, SlotType.ANY);
 				}
 			}

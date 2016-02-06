@@ -5,18 +5,10 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 
 public class Slots {
 
-	public enum SlotState {
+	private enum SlotState {
 
 		FRESH,
 		CAPTURED;
-
-		public boolean isFresh() {
-			return this == FRESH;
-		}
-
-		public boolean isCaptured() {
-			return this == CAPTURED;
-		}
 
 	}
 
@@ -65,10 +57,9 @@ public class Slots {
 		int numRegularSlots = varargPosition() < 0 ? size() : Math.min(size(), varargPosition());
 
 		for (int i = 0; i < numRegularSlots; i++) {
-			SlotState state = getState(i);
 			SlotType type = getType(i);
 
-			if (state == SlotState.CAPTURED) {
+			if (isCaptured(i)) {
 				bld.append('^');
 			}
 			bld.append(SlotType.toString(type));
@@ -99,10 +90,6 @@ public class Slots {
 		return states.size();
 	}
 
-	public ReadOnlyArray<SlotState> states() {
-		return states;
-	}
-
 	public ReadOnlyArray<SlotType> types() {
 		return types;
 	}
@@ -123,30 +110,29 @@ public class Slots {
 		return idx >= 0 && idx < size() && (varargPosition < 0 || idx < varargPosition);
 	}
 
-	public SlotState getState(int idx) {
+	public boolean isCaptured(int idx) {
 		Check.isTrue(isValidIndex(idx));
-		return states.get(idx);
+		return states.get(idx) == SlotState.CAPTURED;
 	}
 
-	public Slots updateState(int idx, SlotState to) {
-		Check.notNull(to);
+	public Slots updateState(int idx, boolean captured) {
 		Check.isTrue(isValidIndex(idx));
 
-		if (getState(idx).equals(to)) {
+		if (isCaptured(idx) == captured) {
 			// no-op
 			return this;
 		}
 		else {
-			return new Slots(states.update(idx, to), types, varargPosition);
+			return new Slots(states.update(idx, captured ? SlotState.CAPTURED : SlotState.FRESH), types, varargPosition);
 		}
 	}
 
 	public Slots capture(int idx) {
-		return updateState(idx, SlotState.CAPTURED);
+		return updateState(idx, true);
 	}
 
 	public Slots freshen(int idx) {
-		return updateState(idx, SlotState.FRESH);
+		return updateState(idx, false);
 	}
 
 	public SlotType getType(int idx) {
@@ -181,7 +167,7 @@ public class Slots {
 		}
 
 		for (int i = 0; i < size(); i++) {
-			if (that.getState(i).isCaptured()) {
+			if (that.isCaptured(i)) {
 				s = s.capture(i);
 			}
 		}
@@ -200,7 +186,7 @@ public class Slots {
 		Slots s = this.hasVarargs() ? this.consumeVarargs() : this;
 
 		for (int i = position; i < size(); i++) {
-			Check.isFalse(s.getState(i).isCaptured());  // FIXME
+			Check.isFalse(s.isCaptured(i));  // FIXME
 			s = s.updateType(i, SlotType.NIL);
 		}
 
