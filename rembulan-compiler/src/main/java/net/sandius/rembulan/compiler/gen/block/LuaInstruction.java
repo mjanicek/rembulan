@@ -2,8 +2,8 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.ArgTypes;
 import net.sandius.rembulan.compiler.gen.ReturnType;
+import net.sandius.rembulan.compiler.gen.SlotType;
 import net.sandius.rembulan.compiler.gen.Slots;
-import net.sandius.rembulan.compiler.gen.Slots.SlotType;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.PrototypePrinter;
@@ -51,7 +51,7 @@ public class LuaInstruction {
 				case Float:    return SlotType.NUMBER_FLOAT;
 				case Number:   return SlotType.NUMBER;
 				case Any:
-				default:       return Slots.SlotType.ANY;
+				default:       return SlotType.ANY;
 			}
 		}
 

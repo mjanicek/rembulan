@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.SlotType;
 import net.sandius.rembulan.compiler.gen.Slots;
-import net.sandius.rembulan.compiler.gen.Slots.SlotType;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction.NumOpType;
 import net.sandius.rembulan.lbc.Prototype;
 
@@ -29,7 +29,7 @@ public abstract class BinaryOperation extends Linear {
 		return name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
 	}
 
-	protected Slots.SlotType slotType(Slots s, int idx) {
+	protected SlotType slotType(Slots s, int idx) {
 		return idx < 0 ? LuaInstruction.constantType(prototype.getConstants().get(-idx - 1)) : s.getType(idx);
 	}
 
@@ -77,7 +77,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mayBeInteger(l, r);
 		}
 
@@ -95,7 +95,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mayBeInteger(l, r);
 		}
 
@@ -113,7 +113,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mayBeInteger(l, r);
 		}
 
@@ -131,7 +131,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mayBeInteger(l, r);
 		}
 
@@ -149,7 +149,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mustBeFloat(l, r);
 		}
 
@@ -167,7 +167,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mustBeFloat(l, r);
 		}
 
@@ -185,7 +185,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mayBeInteger(l, r);
 		}
 
@@ -203,7 +203,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mustBeInteger(l, r);
 		}
 
@@ -221,7 +221,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mustBeInteger(l, r);
 		}
 
@@ -239,7 +239,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mustBeInteger(l, r);
 		}
 
@@ -257,7 +257,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mustBeInteger(l, r);
 		}
 
@@ -275,7 +275,7 @@ public abstract class BinaryOperation extends Linear {
 		}
 
 		@Override
-		protected NumOpType opType(Slots.SlotType l, Slots.SlotType r) {
+		protected NumOpType opType(SlotType l, SlotType r) {
 			return mustBeInteger(l, r);
 		}
 

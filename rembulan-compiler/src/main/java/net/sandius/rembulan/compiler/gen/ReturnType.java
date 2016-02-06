@@ -1,6 +1,5 @@
 package net.sandius.rembulan.compiler.gen;
 
-import net.sandius.rembulan.compiler.gen.Slots.SlotType;
 import net.sandius.rembulan.util.Check;
 
 public abstract class ReturnType {
