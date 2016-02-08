@@ -504,16 +504,18 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix;
-
 			SlotType tpe = inSlots().getType(r_index);
 
-			switch (tpe) {
-				case BOOLEAN:  suffix = "_B"; break;  // simple boolean comparison, do branch
-				case ANY:      suffix = "_coerce"; break;  // coerce, compare, do branch
-				case NIL:      suffix = "_false"; break;  // automatically false
-				default:       suffix = "_true"; break;  // automatically true
-			}
+			String suffix = (tpe == SlotType.BOOLEAN
+					? "_B"  // simple boolean comparison, do branch
+					: (tpe == SlotType.ANY
+							? "_coerce"  // coerce, compare, do branch
+							: (tpe == SlotType.NIL
+									? "_false"  // automatically false
+									: "_true"  // automatically true
+							)
+					)
+			);
 
 			return "TEST" + suffix + "(" + r_index + "," + value + ")";
 		}
@@ -522,17 +524,9 @@ public class LuaInstruction {
 		public Boolean canBeInlined() {
 			SlotType tpe = inSlots().getType(r_index);
 
-			switch (tpe) {
-				case BOOLEAN:
-				case ANY:
-					return null;
-
-				case NIL:
-					return Boolean.FALSE;
-
-				default:
-					return Boolean.TRUE;
-			}
+			if (tpe == SlotType.BOOLEAN || tpe == SlotType.ANY) return null;
+			else if (tpe == SlotType.NIL) return Boolean.FALSE;
+			else return Boolean.TRUE;
 		}
 
 	}
