@@ -1,7 +1,5 @@
 package net.sandius.rembulan.compiler.gen;
 
-import net.sandius.rembulan.core.Function;
-
 import java.util.Objects;
 
 public abstract class SlotType {
