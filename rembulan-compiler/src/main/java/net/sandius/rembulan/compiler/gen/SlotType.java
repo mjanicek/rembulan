@@ -22,18 +22,13 @@ public enum SlotType {
 		return that == ANY || this == that || (that == NUMBER && (this == NUMBER_INTEGER || this == NUMBER_FLOAT));
 	}
 
-	@Deprecated
-	public boolean isNumber() {
-		return this.isSubtypeOrEqualTo(NUMBER);
-	}
-
 	public SlotType join(SlotType that) {
 		Check.notNull(that);
 		if (this == that) {
 			return this;
 		}
 		else {
-			if (this.isNumber() && that.isNumber()) {
+			if (this.isSubtypeOrEqualTo(NUMBER) && that.isSubtypeOrEqualTo(NUMBER)) {
 				return NUMBER;
 			}
 			else {

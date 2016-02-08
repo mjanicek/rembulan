@@ -40,7 +40,7 @@ public abstract class BinaryOperation extends Linear {
 	}
 
 	private static NumOpType mayBeInteger(SlotType l, SlotType r) {
-		if (l.isNumber() && r.isNumber()) {
+		if (l.isSubtypeOrEqualTo(SlotType.NUMBER) && r.isSubtypeOrEqualTo(SlotType.NUMBER)) {
 			if (l == SlotType.NUMBER_INTEGER && r == SlotType.NUMBER_INTEGER) return NumOpType.Integer;
 			else if (l == SlotType.NUMBER_FLOAT || r == SlotType.NUMBER_FLOAT) return NumOpType.Float;
 			else return NumOpType.Number;
@@ -51,12 +51,12 @@ public abstract class BinaryOperation extends Linear {
 	}
 
 	private static NumOpType mustBeFloat(SlotType l, SlotType r) {
-		if (l.isNumber() && r.isNumber()) return NumOpType.Float;
+		if (l.isSubtypeOrEqualTo(SlotType.NUMBER) && r.isSubtypeOrEqualTo(SlotType.NUMBER)) return NumOpType.Float;
 		else return NumOpType.Any;
 	}
 
 	private static NumOpType mustBeInteger(SlotType l, SlotType r) {
-		if (l.isNumber() && r.isNumber()) return NumOpType.Integer;
+		if (l.isSubtypeOrEqualTo(SlotType.NUMBER) && r.isSubtypeOrEqualTo(SlotType.NUMBER)) return NumOpType.Integer;
 		else return NumOpType.Any;
 	}
 
