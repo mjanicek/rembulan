@@ -1,5 +1,7 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.core.Function;
+
 import java.util.Objects;
 
 public abstract class SlotType {
@@ -26,7 +28,7 @@ public abstract class SlotType {
 	public static final SlotType NUMBER_INTEGER = new ConcreteType(NUMBER, "integer", "i");
 	public static final SlotType NUMBER_FLOAT = new ConcreteType(NUMBER, "float", "f");
 	public static final SlotType STRING = new ConcreteType(ANY, "string", "S");
-	public static final SlotType FUNCTION = new ConcreteType(ANY, "function", "F");
+	public static final FunctionType FUNCTION = new FunctionType(ArgTypes.vararg(), ArgTypes.vararg());
 	public static final SlotType TABLE = new ConcreteType(ANY, "table", "T");
 	public static final SlotType THREAD = new ConcreteType(ANY, "thread", "C");
 
@@ -49,14 +51,37 @@ public abstract class SlotType {
 
 	}
 
-	private static class ConcreteType extends SlotType {
+	private static abstract class AbstractConcreteType extends SlotType {
 
-		private final SlotType supertype;
+		protected final SlotType supertype;
+
+		protected AbstractConcreteType(SlotType supertype) {
+			this.supertype = Objects.requireNonNull(supertype);
+		}
+
+		public SlotType supertype() {
+			return supertype;
+		}
+
+		@Override
+		public boolean isSubtypeOrEqualTo(SlotType that) {
+			return this == that || this.supertype().isSubtypeOrEqualTo(that);
+		}
+
+		@Override
+		public SlotType join(SlotType that) {
+			return this == that ? this : (this.isSubtypeOrEqualTo(that) ? that : this.supertype().join(that));
+		}
+
+	}
+
+	private static class ConcreteType extends AbstractConcreteType {
+
 		private final String name;
 		private final String shortName;
 
 		private ConcreteType(SlotType supertype, String name, String shortName) {
-			this.supertype = Objects.requireNonNull(supertype);
+			super(supertype);
 			this.name = Objects.requireNonNull(name);
 			this.shortName = Objects.requireNonNull(shortName);
 		}
@@ -66,15 +91,31 @@ public abstract class SlotType {
 			return shortName;
 		}
 
-		@Override
-		public boolean isSubtypeOrEqualTo(SlotType that) {
-			return this == that || this.supertype.isSubtypeOrEqualTo(that);
+	}
+
+	public static class FunctionType extends AbstractConcreteType {
+
+		protected final ArgTypes argTypes;
+		protected final ArgTypes returnTypes;
+
+		private FunctionType(ArgTypes arg, ArgTypes ret) {
+			super(ANY);
+			this.argTypes = Objects.requireNonNull(arg);
+			this.returnTypes = Objects.requireNonNull(ret);
 		}
 
 		@Override
-		public SlotType join(SlotType that) {
-			Objects.requireNonNull(that);
-			return this == that ? this : (this.isSubtypeOrEqualTo(that) ? that : this.supertype.join(that));
+		public String toString() {
+			if (argumentTypes().isVarargOnly() && returnTypes().isVarargOnly()) return "F";
+			else return "F(" + argumentTypes().toString() + ";" + returnTypes().toString() + ")";
+		}
+
+		public ArgTypes argumentTypes() {
+			return argTypes;
+		}
+
+		public ArgTypes returnTypes() {
+			return returnTypes;
 		}
 
 	}

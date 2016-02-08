@@ -22,6 +22,12 @@ public class ArgTypes extends ReturnType {
 		return new ArgTypes(ReadOnlyArray.wrap(types), vararg);
 	}
 
+	private static final ArgTypes VARARG_ONLY = new ArgTypes(ReadOnlyArray.wrap(new SlotType[0]), true);
+
+	public static ArgTypes vararg() {
+		return VARARG_ONLY;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -69,6 +75,10 @@ public class ArgTypes extends ReturnType {
 //			s = s.setVarargs(types().size());
 //		}
 		return s;
+	}
+
+	public boolean isVarargOnly() {
+		return types().isEmpty() && hasVarargs();
 	}
 
 }
