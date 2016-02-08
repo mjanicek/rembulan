@@ -17,8 +17,14 @@ public enum SlotType {
 
 	// TODO: number-as-string, string-as-number, true, false, actual constant values?
 
+	public boolean isSubtypeOrEqualTo(SlotType that) {
+		Check.notNull(that);
+		return that == ANY || this == that || (that == NUMBER && (this == NUMBER_INTEGER || this == NUMBER_FLOAT));
+	}
+
+	@Deprecated
 	public boolean isNumber() {
-		return this == NUMBER || this == NUMBER_INTEGER || this == NUMBER_FLOAT;
+		return this.isSubtypeOrEqualTo(NUMBER);
 	}
 
 	public SlotType join(SlotType that) {
