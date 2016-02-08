@@ -109,6 +109,10 @@ public class FlowIt {
 
 	}
 
+	public SlotType.FunctionType functionType() {
+		return SlotType.FunctionType.of(prototype.getNumberOfParameters(), prototype.isVararg());
+	}
+
 	public void insertHooks() {
 		// the call hook
 		Target oldEntryTarget = callEntry.target();

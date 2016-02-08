@@ -102,10 +102,18 @@ public abstract class SlotType {
 			this.returnTypes = Objects.requireNonNull(ret);
 		}
 
+		public static FunctionType of(int numArgs, boolean vararg) {
+			return new FunctionType(ArgTypes.init(numArgs, vararg), ArgTypes.vararg());
+		}
+
 		@Override
 		public String toString() {
 			if (argumentTypes().isVarargOnly() && returnTypes().isVarargOnly()) return "F";
 			else return "F(" + argumentTypes().toString() + ";" + returnTypes().toString() + ")";
+		}
+
+		public String toExplicitString() {
+			return "(" + argumentTypes().toString() + ") -> (" + returnTypes().toString() + ")";
 		}
 
 		public ArgTypes argumentTypes() {

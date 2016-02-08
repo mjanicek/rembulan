@@ -226,6 +226,8 @@ object AnalysisRunner {
     }
 
     println()
+    println("Type: " + flow.functionType().toExplicitString)
+    println()
     println(ascii)
 
     val it = proto.getNestedPrototypes.iterator()
