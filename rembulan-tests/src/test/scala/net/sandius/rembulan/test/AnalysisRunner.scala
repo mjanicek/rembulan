@@ -151,6 +151,14 @@ object AnalysisRunner {
 
   }
 
+  def timed[A](name: String)(body: => A): A = {
+    val before = System.nanoTime()
+    val result = body
+    val after = System.nanoTime()
+    System.out.println("%s took %.1f ms".format(name, (after - before) / 1000000.0))
+    result
+  }
+
   def printFlow(proto: Prototype, main: Boolean = true): Unit = {
     if (main) {
       println("Main (" + PrototypePrinter.pseudoAddr(proto) + "):")
@@ -160,12 +168,11 @@ object AnalysisRunner {
       println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
     }
 
-    val before = System.nanoTime()
-    val flow = new FlowIt(proto)
-    flow.go()
-    val after = System.nanoTime()
-
-    System.out.println("Analysis took %.1f ms".format((after - before) / 1000000.0))
+    val flow = timed("Analysis") {
+      val f = new FlowIt(proto)
+      f.go()
+      f
+    }
 
     val flowEdges = flow.reachabilityGraph.toMap
 //    val flowStates = flow.slots.toMap
@@ -214,7 +221,10 @@ object AnalysisRunner {
 //      println("\t" + r.toString + " : " + "[" + flowStates(r) + "]")
 //    }
 
-    val ascii = GraphLayout.renderGraph(graph)
+    val ascii = timed("Graph layout") {
+      GraphLayout.renderGraph(graph)
+    }
+
     println()
     println(ascii)
 
