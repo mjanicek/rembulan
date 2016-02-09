@@ -42,7 +42,7 @@ public abstract class SlotType {
 
 		@Override
 		public boolean isSubtypeOrEqualTo(SlotType that) {
-			return this == that;
+			return this.equals(that);
 		}
 
 		@Override
@@ -71,7 +71,7 @@ public abstract class SlotType {
 
 		@Override
 		public boolean isSubtypeOrEqualTo(SlotType that) {
-			return this == that || this.supertype().isSubtypeOrEqualTo(that);
+			return this.equals(that) || this.supertype().isSubtypeOrEqualTo(that);
 		}
 
 		@Override
@@ -120,6 +120,23 @@ public abstract class SlotType {
 			super(ANY);
 			this.argTypes = Objects.requireNonNull(arg);
 			this.returnTypes = Objects.requireNonNull(ret);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			FunctionType that = (FunctionType) o;
+
+			return argTypes.equals(that.argTypes) && returnTypes.equals(that.returnTypes);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = argTypes.hashCode();
+			result = 31 * result + returnTypes.hashCode();
+			return result;
 		}
 
 		public static FunctionType of(int numArgs, boolean vararg) {
