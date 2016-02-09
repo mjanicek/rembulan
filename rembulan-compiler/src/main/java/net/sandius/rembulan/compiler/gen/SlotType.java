@@ -51,7 +51,13 @@ public abstract class SlotType {
 
 		@Override
 		public boolean isSubtypeOf(SlotType that) {
-			return this.equals(that);
+			return that.isSupertypeOf(this);
+		}
+
+		@Override
+		public boolean isSupertypeOf(SlotType that) {
+			Objects.requireNonNull(that);
+			return true;
 		}
 
 		@Override
