@@ -51,7 +51,7 @@ public abstract class SlotType {
 
 		@Override
 		public boolean isSubtypeOf(SlotType that) {
-			return that.isSupertypeOf(this);
+			return this.equals(that) || that.isSupertypeOf(this);
 		}
 
 		@Override
