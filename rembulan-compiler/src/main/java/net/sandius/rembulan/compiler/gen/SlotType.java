@@ -38,7 +38,7 @@ public abstract class SlotType {
 	public static final SlotType NUMBER_INTEGER = new ConcreteType(NUMBER, "integer", "i");
 	public static final SlotType NUMBER_FLOAT = new ConcreteType(NUMBER, "float", "f");
 	public static final SlotType STRING = new ConcreteType(ANY, "string", "S");
-	public static final FunctionType FUNCTION = new FunctionType(ArgTypes.empty().withVararg(), ArgTypes.empty().withVararg());
+	public static final FunctionType FUNCTION = new FunctionType(ArgTypes.vararg(), ArgTypes.vararg());
 	public static final SlotType TABLE = new ConcreteType(ANY, "table", "T");
 	public static final SlotType THREAD = new ConcreteType(ANY, "thread", "C");
 
@@ -152,10 +152,6 @@ public abstract class SlotType {
 			int result = argTypes.hashCode();
 			result = 31 * result + returnTypes.hashCode();
 			return result;
-		}
-
-		public static FunctionType of(int numArgs, boolean vararg) {
-			return new FunctionType(ArgTypes.init(numArgs, vararg), ArgTypes.empty().withVararg());
 		}
 
 		public static FunctionType of(ArgTypes arg, ArgTypes ret) {

@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.gen.block.AccountingNode;
 import net.sandius.rembulan.compiler.gen.block.Branch;
 import net.sandius.rembulan.compiler.gen.block.Capture;
 import net.sandius.rembulan.compiler.gen.block.Entry;
+import net.sandius.rembulan.compiler.gen.block.Exit;
 import net.sandius.rembulan.compiler.gen.block.HookNode;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.Linear;
@@ -13,7 +14,6 @@ import net.sandius.rembulan.compiler.gen.block.LocalVariableEffect;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
-import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
 import net.sandius.rembulan.compiler.gen.block.Target;
@@ -43,6 +43,8 @@ public class FlowIt {
 
 	public Map<Node, Edges> reachabilityGraph;
 
+	private ArgTypes returnType;
+
 	public FlowIt(Prototype prototype) {
 		this.prototype = prototype;
 	}
@@ -68,6 +70,8 @@ public class FlowIt {
 //			System.out.println(i + ": " + label.toString());
 //		}
 //		System.out.println("]");
+
+		returnType = ArgTypes.vararg();
 
 		callEntry = new Entry("main", ArgTypes.init(prototype.getNumberOfParameters(), prototype.isVararg()), prototype.getMaximumStackSize(), pcLabels.get(0));
 
@@ -107,10 +111,36 @@ public class FlowIt {
 		updateReachability();
 		updateDataFlow();
 
+		computeReturnType();
 	}
 
 	public SlotType.FunctionType functionType() {
-		return SlotType.FunctionType.of(prototype.getNumberOfParameters(), prototype.isVararg());
+		return SlotType.FunctionType.of(ArgTypes.init(prototype.getNumberOfParameters(), prototype.isVararg()), returnType);
+	}
+
+	private static ArgTypes returnTypeToArgTypes(ReturnType rt) {
+		if (rt instanceof ReturnType.ConcreteReturnType) {
+			return ((ReturnType.ConcreteReturnType) rt).argTypes;
+		}
+		else if (rt instanceof ReturnType.TailCallReturnType) {
+			return ArgTypes.vararg();  // TODO
+		}
+		else {
+			throw new IllegalStateException("unknown return type: " + rt.toString());
+		}
+	}
+
+	private void computeReturnType() {
+		ArgTypes ret = null;
+
+		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
+			if (n instanceof Exit) {
+				ArgTypes at = returnTypeToArgTypes(((Exit) n).returnType());
+				ret = ret != null ? ret.join(at) : at;
+			}
+		}
+
+		returnType = ret != null ? ret : ArgTypes.vararg();
 	}
 
 	public void insertHooks() {
