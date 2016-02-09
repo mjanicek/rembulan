@@ -199,6 +199,20 @@ object AnalysisRunner {
           """
     }
 
+    object LocalUpvalue extends Fragment {
+      code =
+          """local function f()
+            |  local x = 1
+            |  local function g()
+            |    return x * x
+            |  end
+            |  return g()
+            |end
+            |
+            |return f()  -- equivalent to return 1
+          """
+    }
+
   }
 
   def timed[A](name: String)(body: => A): A = {
@@ -299,7 +313,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = FunctionCalls3
+    val program = LocalUpvalue
 
     println(program.code)
 
