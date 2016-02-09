@@ -149,6 +149,56 @@ object AnalysisRunner {
           """
     }
 
+    object FunctionCalls extends Fragment {
+      code =
+          """local function f(x, y)
+            |  return x + y
+            |end
+            |
+            |return f(1, 2)
+          """
+    }
+
+    object FunctionCalls2 extends Fragment {
+      code =
+          """local function abs(x)
+            |  local function f(x, acc)
+            |    if x > 0 then
+            |      return f(x - 1, acc + 1)
+            |    elseif x < 0 then
+            |      return f(x + 1, acc + 1)
+            |    else
+            |      return acc
+            |    end
+            |  end
+            |  local v = f(x, 0)
+            |  return v
+            |end
+            |
+            |return abs(20)
+          """
+    }
+
+    object FunctionCalls3 extends Fragment {
+      code =
+          """local function abs(x)
+            |  local function f(g, x, acc)
+            |    if x > 0 then
+            |      return f(g, x - 1, acc + 1)
+            |    elseif x < 0 then
+            |      return f(g, x + 1, acc + 1)
+            |    else
+            |      return acc
+            |    end
+            |  end
+            |  local v = f(f, x, 0)
+            |  return v
+            |end
+            |
+            |return abs(20)
+          """
+    }
+
   }
 
   def timed[A](name: String)(body: => A): A = {
@@ -249,7 +299,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = VarargFunctionCalls2
+    val program = FunctionCalls3
 
     println(program.code)
 
