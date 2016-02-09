@@ -184,9 +184,9 @@ object AnalysisRunner {
           """local function abs(x)
             |  local function f(g, x, acc)
             |    if x > 0 then
-            |      return f(g, x - 1, acc + 1)
+            |      return g(g, x - 1, acc + 1)
             |    elseif x < 0 then
-            |      return f(g, x + 1, acc + 1)
+            |      return g(g, x + 1, acc + 1)
             |    else
             |      return acc
             |    end
