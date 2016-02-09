@@ -14,6 +14,9 @@ public abstract class SlotType {
 
 	public abstract SlotType join(SlotType that);
 
+	// may return null to indicate that no meet exists
+	public abstract SlotType meet(SlotType that);
+
 	@Deprecated
 	public static String toString(SlotType type) {
 		return type.toString();
@@ -26,7 +29,7 @@ public abstract class SlotType {
 	public static final SlotType NUMBER_INTEGER = new ConcreteType(NUMBER, "integer", "i");
 	public static final SlotType NUMBER_FLOAT = new ConcreteType(NUMBER, "float", "f");
 	public static final SlotType STRING = new ConcreteType(ANY, "string", "S");
-	public static final FunctionType FUNCTION = new FunctionType(ArgTypes.vararg(), ArgTypes.vararg());
+	public static final FunctionType FUNCTION = new FunctionType(ArgTypes.empty().withVararg(), ArgTypes.empty().withVararg());
 	public static final SlotType TABLE = new ConcreteType(ANY, "table", "T");
 	public static final SlotType THREAD = new ConcreteType(ANY, "thread", "C");
 
@@ -45,6 +48,11 @@ public abstract class SlotType {
 		@Override
 		public SlotType join(SlotType that) {
 			return this;
+		}
+
+		@Override
+		public SlotType meet(SlotType that) {
+			return that;
 		}
 
 	}
@@ -68,7 +76,19 @@ public abstract class SlotType {
 
 		@Override
 		public SlotType join(SlotType that) {
-			return this == that ? this : (this.isSubtypeOrEqualTo(that) ? that : this.supertype().join(that));
+			Objects.requireNonNull(that);
+
+			if (that.isSubtypeOrEqualTo(this)) return this;
+			else return this.supertype().join(that);
+		}
+
+		@Override
+		public SlotType meet(SlotType that) {
+			Objects.requireNonNull(that);
+
+			if (this.isSubtypeOrEqualTo(that)) return this;
+			else if (that.isSubtypeOrEqualTo(this)) return that;
+			else return null;
 		}
 
 	}
@@ -103,7 +123,11 @@ public abstract class SlotType {
 		}
 
 		public static FunctionType of(int numArgs, boolean vararg) {
-			return new FunctionType(ArgTypes.init(numArgs, vararg), ArgTypes.vararg());
+			return new FunctionType(ArgTypes.init(numArgs, vararg), ArgTypes.empty().withVararg());
+		}
+
+		public static FunctionType of(ArgTypes arg, ArgTypes ret) {
+			return new FunctionType(arg, ret);
 		}
 
 		@Override
@@ -122,6 +146,67 @@ public abstract class SlotType {
 
 		public ArgTypes returnTypes() {
 			return returnTypes;
+		}
+
+		@Override
+		public boolean isSubtypeOrEqualTo(SlotType that) {
+			Objects.requireNonNull(that);
+
+			if (this.equals(that)) {
+				return true;
+			}
+			if (that instanceof FunctionType) {
+				FunctionType ft = (FunctionType) that;
+
+				return ft.argumentTypes().isSubsumedBy(this.argumentTypes())
+						&& this.returnTypes().isSubsumedBy(ft.returnTypes());
+			}
+			else {
+				return this.supertype().isSubtypeOrEqualTo(that);
+			}
+		}
+
+		@Override
+		public SlotType join(SlotType that) {
+			Objects.requireNonNull(that);
+
+			if (this.isSubtypeOrEqualTo(that)) {
+				return that;
+			}
+			else if (that instanceof FunctionType) {
+				FunctionType ft = (FunctionType) that;
+
+				ArgTypes arg = this.argumentTypes().meet(ft.argumentTypes());
+				ArgTypes ret = this.returnTypes().join(ft.returnTypes());
+
+				return arg != null && ret != null ? new FunctionType(arg, ret) : null;
+			}
+			else {
+				return this.supertype().join(that);
+			}
+		}
+
+		@Override
+		public SlotType meet(SlotType that) {
+			Objects.requireNonNull(that);
+
+			if (this.isSubtypeOrEqualTo(that)) {
+				return this;
+			}
+			else if (that.isSubtypeOrEqualTo(this)) {
+				return that;
+			}
+			else if (that instanceof FunctionType) {
+				FunctionType ft = (FunctionType) that;
+
+				ArgTypes arg = this.argumentTypes().join(ft.argumentTypes());
+				ArgTypes ret = this.returnTypes().meet(ft.returnTypes());
+
+				return arg != null && ret != null ? new FunctionType(arg, ret) : null;
+			}
+			else {
+				return null;
+			}
 		}
 
 	}

@@ -3,6 +3,8 @@ package net.sandius.rembulan.compiler.gen;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
+import java.util.ArrayList;
+
 public class ArgTypes {
 
 	public final ReadOnlyArray<SlotType> types;
@@ -22,10 +24,23 @@ public class ArgTypes {
 		return new ArgTypes(ReadOnlyArray.wrap(types), vararg);
 	}
 
-	private static final ArgTypes VARARG_ONLY = new ArgTypes(ReadOnlyArray.wrap(new SlotType[0]), true);
+	private static final ArgTypes EMPTY_FIXED = new ArgTypes(ReadOnlyArray.wrap(new SlotType[0]), false);
+	private static final ArgTypes EMPTY_VARARG = new ArgTypes(ReadOnlyArray.wrap(new SlotType[0]), true);
+
+	public static ArgTypes empty() {
+		return EMPTY_FIXED;
+	}
 
 	public static ArgTypes vararg() {
-		return VARARG_ONLY;
+		return EMPTY_VARARG;
+	}
+
+	public static ArgTypes of(SlotType... fixed) {
+		return new ArgTypes(ReadOnlyArray.wrap(fixed), false);
+	}
+
+	public ArgTypes withVararg() {
+		return hasVarargs() ? this : new ArgTypes(types, true);
 	}
 
 	@Override
@@ -79,6 +94,59 @@ public class ArgTypes {
 
 	public boolean isVarargOnly() {
 		return types().isEmpty() && hasVarargs();
+	}
+
+	public SlotType get(int idx) {
+		Check.nonNegative(idx);
+
+		if (idx < types().size()) return types().get(idx);  // it's a fixed arg
+		else if (hasVarargs()) return SlotType.ANY;  // it's a vararg
+		else return SlotType.NIL;  // it's not there
+	}
+
+	public boolean isSubsumedBy(ArgTypes that) {
+		Check.notNull(that);
+
+		// that is more general than this
+
+		for (int i = 0; i < Math.max(this.types().size(), that.types().size()); i++) {
+			if (!this.get(i).isSubtypeOrEqualTo(that.get(i))) {
+				return false;
+			}
+		}
+
+		return that.hasVarargs() || !this.hasVarargs();
+	}
+
+	public ArgTypes join(ArgTypes that) {
+		Check.notNull(that);
+
+		ArrayList<SlotType> fix = new ArrayList<>();
+
+		for (int i = 0; i < Math.max(this.types().size(), that.types().size()); i++) {
+			fix.add(this.get(i).join(that.get(i)));
+		}
+
+		return new ArgTypes(ReadOnlyArray.fromCollection(SlotType.class, fix), this.hasVarargs() || that.hasVarargs());
+	}
+
+	// returns null to indicate that no meet exists
+	public ArgTypes meet(ArgTypes that) {
+		Check.notNull(that);
+
+		ArrayList<SlotType> fix = new ArrayList<>();
+
+		for (int i = 0; i < Math.max(this.types().size(), that.types().size()); i++) {
+			SlotType m = this.get(i).meet(that.get(i));
+			if (m != null) {
+				fix.add(m);
+			}
+			else {
+				return null;
+			}
+		}
+
+		return new ArgTypes(ReadOnlyArray.fromCollection(SlotType.class, fix), this.hasVarargs() && that.hasVarargs());
 	}
 
 }
