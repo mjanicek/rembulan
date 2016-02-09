@@ -10,11 +10,20 @@ public abstract class SlotType {
 
 	// TODO: number-as-string, string-as-number, true, false, actual constant values?
 
-	public abstract boolean isSubtypeOrEqualTo(SlotType that);
+	// return true iff type(this) =< type(that)
+	public abstract boolean isSubtypeOf(SlotType that);
 
+	// return true iff type(this) >= type(that)
+	public boolean isSupertypeOf(SlotType that) {
+		return that.isSubtypeOf(this);
+	}
+
+	// return the most specific type that is more general than both this and that,
+	// or null if such type does not exist
 	public abstract SlotType join(SlotType that);
 
-	// may return null to indicate that no meet exists
+	// return the most general type that is more specific than both this and that,
+	// or null if such type does not exist
 	public abstract SlotType meet(SlotType that);
 
 	@Deprecated
@@ -41,7 +50,7 @@ public abstract class SlotType {
 		}
 
 		@Override
-		public boolean isSubtypeOrEqualTo(SlotType that) {
+		public boolean isSubtypeOf(SlotType that) {
 			return this.equals(that);
 		}
 
@@ -70,15 +79,15 @@ public abstract class SlotType {
 		}
 
 		@Override
-		public boolean isSubtypeOrEqualTo(SlotType that) {
-			return this.equals(that) || this.supertype().isSubtypeOrEqualTo(that);
+		public boolean isSubtypeOf(SlotType that) {
+			return this.equals(that) || this.supertype().isSubtypeOf(that);
 		}
 
 		@Override
 		public SlotType join(SlotType that) {
 			Objects.requireNonNull(that);
 
-			if (that.isSubtypeOrEqualTo(this)) return this;
+			if (that.isSubtypeOf(this)) return this;
 			else return this.supertype().join(that);
 		}
 
@@ -86,8 +95,8 @@ public abstract class SlotType {
 		public SlotType meet(SlotType that) {
 			Objects.requireNonNull(that);
 
-			if (this.isSubtypeOrEqualTo(that)) return this;
-			else if (that.isSubtypeOrEqualTo(this)) return that;
+			if (this.isSubtypeOf(that)) return this;
+			else if (that.isSubtypeOf(this)) return that;
 			else return null;
 		}
 
@@ -166,7 +175,7 @@ public abstract class SlotType {
 		}
 
 		@Override
-		public boolean isSubtypeOrEqualTo(SlotType that) {
+		public boolean isSubtypeOf(SlotType that) {
 			Objects.requireNonNull(that);
 
 			if (this.equals(that)) {
@@ -179,7 +188,7 @@ public abstract class SlotType {
 						&& this.returnTypes().isSubsumedBy(ft.returnTypes());
 			}
 			else {
-				return this.supertype().isSubtypeOrEqualTo(that);
+				return this.supertype().isSubtypeOf(that);
 			}
 		}
 
@@ -187,7 +196,7 @@ public abstract class SlotType {
 		public SlotType join(SlotType that) {
 			Objects.requireNonNull(that);
 
-			if (this.isSubtypeOrEqualTo(that)) {
+			if (this.isSubtypeOf(that)) {
 				return that;
 			}
 			else if (that instanceof FunctionType) {
@@ -207,10 +216,10 @@ public abstract class SlotType {
 		public SlotType meet(SlotType that) {
 			Objects.requireNonNull(that);
 
-			if (this.isSubtypeOrEqualTo(that)) {
+			if (this.isSubtypeOf(that)) {
 				return this;
 			}
-			else if (that.isSubtypeOrEqualTo(this)) {
+			else if (that.isSubtypeOf(this)) {
 				return that;
 			}
 			else if (that instanceof FunctionType) {

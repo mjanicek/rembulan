@@ -110,7 +110,7 @@ public class ArgTypes {
 		// that is more general than this
 
 		for (int i = 0; i < Math.max(this.types().size(), that.types().size()); i++) {
-			if (!this.get(i).isSubtypeOrEqualTo(that.get(i))) {
+			if (!this.get(i).isSubtypeOf(that.get(i))) {
 				return false;
 			}
 		}

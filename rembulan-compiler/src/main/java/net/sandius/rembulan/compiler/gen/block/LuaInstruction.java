@@ -373,7 +373,7 @@ public class LuaInstruction {
 
 			switch (op) {
 				case UNM:
-					if (argType.isSubtypeOrEqualTo(SlotType.NUMBER)) resultType = argType;
+					if (argType.isSubtypeOf(SlotType.NUMBER)) resultType = argType;
 					break;
 
 				case BNOT:
@@ -414,7 +414,7 @@ public class LuaInstruction {
 		private boolean allStringable(Slots s) {
 			for (int i = r_begin; i <= r_end; i++) {
 				SlotType tpe = s.getType(i);
-				if (!(tpe == SlotType.STRING || tpe.isSubtypeOrEqualTo(SlotType.NUMBER))) {
+				if (!(tpe == SlotType.STRING || tpe.isSubtypeOf(SlotType.NUMBER))) {
 					return false;
 				}
 			}
@@ -703,9 +703,9 @@ public class LuaInstruction {
 
 				return NumOpType.Integer;
 			}
-			else if (a0.isSubtypeOrEqualTo(SlotType.NUMBER)
-					&& a1.isSubtypeOrEqualTo(SlotType.NUMBER)
-					&& a2.isSubtypeOrEqualTo(SlotType.NUMBER)) {
+			else if (a0.isSubtypeOf(SlotType.NUMBER)
+					&& a1.isSubtypeOf(SlotType.NUMBER)
+					&& a2.isSubtypeOf(SlotType.NUMBER)) {
 
 				if (a0 == SlotType.NUMBER_FLOAT
 						|| a1 == SlotType.NUMBER_FLOAT
@@ -727,7 +727,7 @@ public class LuaInstruction {
 		@Override
 		protected Slots effect(Slots s) {
 			SlotType tpe = loopType(s).toSlotType();
-			return s.updateType(r_base + 3, tpe.isSubtypeOrEqualTo(SlotType.NUMBER)
+			return s.updateType(r_base + 3, tpe.isSubtypeOf(SlotType.NUMBER)
 					? tpe  // we know at compile-time that it's numeric
 					: SlotType.NUMBER  // got something else -- may throw an exception at runtime!
 			);
