@@ -4,6 +4,10 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class ReturnType {
 
+	private ReturnType() {
+		// not to be extended by the outside world
+	}
+
 	public static class ConcreteReturnType extends ReturnType {
 
 		public final ArgTypes argTypes;

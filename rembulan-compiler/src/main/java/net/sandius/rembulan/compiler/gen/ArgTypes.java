@@ -3,7 +3,7 @@ package net.sandius.rembulan.compiler.gen;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-public class ArgTypes extends ReturnType {
+public class ArgTypes {
 
 	public final ReadOnlyArray<SlotType> types;
 	public final boolean varargs;
