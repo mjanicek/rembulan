@@ -187,7 +187,7 @@ object AnalysisRunner {
     def inValue(node: Node): String = {
       node match {
         case ent: Entry => ent.arguments().toString
-        case n => slotsToString(n.outSlots())
+        case n => slotsToString(n.inSlots())
       }
     }
 
