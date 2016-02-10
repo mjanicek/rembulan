@@ -154,8 +154,7 @@ public abstract class Type {
 
 		@Override
 		public String toString() {
-			if (argumentTypes().isVarargOnly() && returnTypes().isVarargOnly()) return "F";
-			else return "F(" + argumentTypes().toString() + ";" + returnTypes().toString() + ")";
+			return "F(" + argumentTypes().toString() + ";" + returnTypes().toString() + ")";
 		}
 
 		public String toExplicitString() {
