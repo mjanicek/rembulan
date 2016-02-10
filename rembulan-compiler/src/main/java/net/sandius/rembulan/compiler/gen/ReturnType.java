@@ -41,10 +41,10 @@ public abstract class ReturnType {
 
 	public static class TailCallReturnType extends ReturnType {
 
-		public final SlotType target;
+		public final Type target;
 		public final ArgTypes argTypes;
 
-		public TailCallReturnType(SlotType target, ArgTypes argTypes) {
+		public TailCallReturnType(Type target, ArgTypes argTypes) {
 			Check.notNull(target);
 			Check.notNull(argTypes);
 			this.target = target;
@@ -70,7 +70,7 @@ public abstract class ReturnType {
 
 		@Override
 		public String toString() {
-			return SlotType.toString(target) + "(" + argTypes + ")";
+			return Type.toString(target) + "(" + argTypes + ")";
 		}
 
 	}

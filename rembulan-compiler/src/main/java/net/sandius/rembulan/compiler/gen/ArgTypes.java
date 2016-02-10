@@ -7,25 +7,25 @@ import java.util.ArrayList;
 
 public class ArgTypes {
 
-	public final ReadOnlyArray<SlotType> types;
+	public final ReadOnlyArray<Type> types;
 	public final boolean varargs;
 
-	public ArgTypes(ReadOnlyArray<SlotType> types, boolean varargs) {
+	public ArgTypes(ReadOnlyArray<Type> types, boolean varargs) {
 		Check.notNull(types);
 		this.types = types;
 		this.varargs = varargs;
 	}
 
 	public static ArgTypes init(int numArgs, boolean vararg) {
-		SlotType[] types = new SlotType[numArgs];
+		Type[] types = new Type[numArgs];
 		for (int i = 0; i < numArgs; i++) {
-			types[i] = SlotType.ANY;
+			types[i] = Type.ANY;
 		}
 		return new ArgTypes(ReadOnlyArray.wrap(types), vararg);
 	}
 
-	private static final ArgTypes EMPTY_FIXED = new ArgTypes(ReadOnlyArray.wrap(new SlotType[0]), false);
-	private static final ArgTypes EMPTY_VARARG = new ArgTypes(ReadOnlyArray.wrap(new SlotType[0]), true);
+	private static final ArgTypes EMPTY_FIXED = new ArgTypes(ReadOnlyArray.wrap(new Type[0]), false);
+	private static final ArgTypes EMPTY_VARARG = new ArgTypes(ReadOnlyArray.wrap(new Type[0]), true);
 
 	public static ArgTypes empty() {
 		return EMPTY_FIXED;
@@ -35,7 +35,7 @@ public class ArgTypes {
 		return EMPTY_VARARG;
 	}
 
-	public static ArgTypes of(SlotType... fixed) {
+	public static ArgTypes of(Type... fixed) {
 		return new ArgTypes(ReadOnlyArray.wrap(fixed), false);
 	}
 
@@ -65,7 +65,7 @@ public class ArgTypes {
 	public String toString() {
 		StringBuilder bld = new StringBuilder();
 		for (int i = 0; i < types.size(); i++) {
-			bld.append(SlotType.toString(types.get(i)));
+			bld.append(Type.toString(types.get(i)));
 		}
 		if (varargs) {
 			bld.append("+");
@@ -73,7 +73,7 @@ public class ArgTypes {
 		return bld.toString();
 	}
 
-	public ReadOnlyArray<SlotType> types() {
+	public ReadOnlyArray<Type> types() {
 		return types;
 	}
 
@@ -96,12 +96,12 @@ public class ArgTypes {
 		return types().isEmpty() && hasVarargs();
 	}
 
-	public SlotType get(int idx) {
+	public Type get(int idx) {
 		Check.nonNegative(idx);
 
 		if (idx < types().size()) return types().get(idx);  // it's a fixed arg
-		else if (hasVarargs()) return SlotType.ANY;  // it's a vararg
-		else return SlotType.NIL;  // it's not there
+		else if (hasVarargs()) return Type.ANY;  // it's a vararg
+		else return Type.NIL;  // it's not there
 	}
 
 	public boolean isSubsumedBy(ArgTypes that) {
@@ -121,23 +121,23 @@ public class ArgTypes {
 	public ArgTypes join(ArgTypes that) {
 		Check.notNull(that);
 
-		ArrayList<SlotType> fix = new ArrayList<>();
+		ArrayList<Type> fix = new ArrayList<>();
 
 		for (int i = 0; i < Math.max(this.types().size(), that.types().size()); i++) {
 			fix.add(this.get(i).join(that.get(i)));
 		}
 
-		return new ArgTypes(ReadOnlyArray.fromCollection(SlotType.class, fix), this.hasVarargs() || that.hasVarargs());
+		return new ArgTypes(ReadOnlyArray.fromCollection(Type.class, fix), this.hasVarargs() || that.hasVarargs());
 	}
 
 	// returns null to indicate that no meet exists
 	public ArgTypes meet(ArgTypes that) {
 		Check.notNull(that);
 
-		ArrayList<SlotType> fix = new ArrayList<>();
+		ArrayList<Type> fix = new ArrayList<>();
 
 		for (int i = 0; i < Math.max(this.types().size(), that.types().size()); i++) {
-			SlotType m = this.get(i).meet(that.get(i));
+			Type m = this.get(i).meet(that.get(i));
 			if (m != null) {
 				fix.add(m);
 			}
@@ -146,7 +146,7 @@ public class ArgTypes {
 			}
 		}
 
-		return new ArgTypes(ReadOnlyArray.fromCollection(SlotType.class, fix), this.hasVarargs() && that.hasVarargs());
+		return new ArgTypes(ReadOnlyArray.fromCollection(Type.class, fix), this.hasVarargs() && that.hasVarargs());
 	}
 
 }

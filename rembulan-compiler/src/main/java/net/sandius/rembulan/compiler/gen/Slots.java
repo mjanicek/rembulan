@@ -6,11 +6,11 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 
 public class Slots {
 
-	private final ReadOnlyArray<SlotType> types;
+	private final ReadOnlyArray<Type> types;
 	private final IntSet captured;
 	private final int varargPosition;  // first index of varargs; if negative, no varargs in slots
 
-	private Slots(ReadOnlyArray<SlotType> types, IntSet captured, int varargPosition) {
+	private Slots(ReadOnlyArray<Type> types, IntSet captured, int varargPosition) {
 		Check.notNull(types);
 		Check.notNull(captured);
 
@@ -52,12 +52,12 @@ public class Slots {
 		int numRegularSlots = varargPosition() < 0 ? size() : Math.min(size(), varargPosition());
 
 		for (int i = 0; i < numRegularSlots; i++) {
-			SlotType type = getType(i);
+			Type type = getType(i);
 
 			if (isCaptured(i)) {
 				bld.append('^');
 			}
-			bld.append(SlotType.toString(type));
+			bld.append(Type.toString(type));
 		}
 
 		if (varargPosition() >= 0) {
@@ -70,10 +70,10 @@ public class Slots {
 	public static Slots init(int size) {
 		Check.nonNegative(size);
 
-		SlotType[] types = new SlotType[size];
+		Type[] types = new Type[size];
 
 		for (int i = 0; i < size; i++) {
-			types[i] = SlotType.NIL;
+			types[i] = Type.NIL;
 		}
 
 		return new Slots(ReadOnlyArray.wrap(types), IntSet.empty(), -1);
@@ -83,7 +83,7 @@ public class Slots {
 		return types.size();
 	}
 
-	public ReadOnlyArray<SlotType> types() {
+	public ReadOnlyArray<Type> types() {
 		return types;
 	}
 
@@ -128,12 +128,12 @@ public class Slots {
 		return updateState(idx, false);
 	}
 
-	public SlotType getType(int idx) {
+	public Type getType(int idx) {
 		Check.isTrue(isValidIndex(idx));
 		return types.get(idx);
 	}
 
-	public Slots updateType(int idx, SlotType type) {
+	public Slots updateType(int idx, Type type) {
 		Check.notNull(type);
 		Check.isTrue(isValidIndex(idx));
 
@@ -146,7 +146,7 @@ public class Slots {
 		}
 	}
 
-	public Slots join(int idx, SlotType type) {
+	public Slots join(int idx, Type type) {
 		return updateType(idx, getType(idx).join(type));
 	}
 
@@ -180,7 +180,7 @@ public class Slots {
 
 		for (int i = position; i < size(); i++) {
 			Check.isFalse(s.isCaptured(i));  // FIXME
-			s = s.updateType(i, SlotType.NIL);
+			s = s.updateType(i, Type.NIL);
 		}
 
 		return new Slots(s.types, s.captured, position);

@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.ArgTypes;
 import net.sandius.rembulan.compiler.gen.ReturnType;
-import net.sandius.rembulan.compiler.gen.SlotType;
+import net.sandius.rembulan.compiler.gen.Type;
 import net.sandius.rembulan.compiler.gen.Slots;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
@@ -17,12 +17,12 @@ public class LuaInstruction {
 		return OpCode.isK(i) ? -1 - OpCode.indexK(i) : i;
 	}
 
-	public static SlotType constantType(Object k) {
-		if (k == null) return SlotType.NIL;
-		else if (k instanceof Boolean) return SlotType.BOOLEAN;
-		else if (k instanceof Double || k instanceof Float) return SlotType.NUMBER_FLOAT;
-		else if (k instanceof Number) return SlotType.NUMBER_INTEGER;
-		else if (k instanceof String) return SlotType.STRING;
+	public static Type constantType(Object k) {
+		if (k == null) return Type.NIL;
+		else if (k instanceof Boolean) return Type.BOOLEAN;
+		else if (k instanceof Double || k instanceof Float) return Type.NUMBER_FLOAT;
+		else if (k instanceof Number) return Type.NUMBER_INTEGER;
+		else if (k instanceof String) return Type.STRING;
 		else {
 			throw new IllegalStateException("Unknown constant: " + k);
 		}
@@ -31,7 +31,7 @@ public class LuaInstruction {
 	public static ArgTypes argTypesFromSlots(Slots s, int from, int count) {
 		int num = count > 0 ? count - 1 : s.varargPosition() - from;
 
-		SlotType[] args = new SlotType[num];
+		Type[] args = new Type[num];
 		for (int i = 0; i < num; i++) {
 			args[i] = s.getType(from + i);
 		}
@@ -45,13 +45,13 @@ public class LuaInstruction {
 		Number,
 		Any;
 
-		public SlotType toSlotType() {
+		public Type toSlotType() {
 			switch (this) {
-				case Integer:  return SlotType.NUMBER_INTEGER;
-				case Float:    return SlotType.NUMBER_FLOAT;
-				case Number:   return SlotType.NUMBER;
+				case Integer:  return Type.NUMBER_INTEGER;
+				case Float:    return Type.NUMBER_FLOAT;
+				case Number:   return Type.NUMBER;
 				case Any:
-				default:       return SlotType.ANY;
+				default:       return Type.ANY;
 			}
 		}
 
@@ -132,7 +132,7 @@ public class LuaInstruction {
 
 		@Override
 		protected Slots effect(Slots s) {
-			return s.updateType(r_dest, SlotType.BOOLEAN);
+			return s.updateType(r_dest, Type.BOOLEAN);
 		}
 	}
 
@@ -154,7 +154,7 @@ public class LuaInstruction {
 		@Override
 		protected Slots effect(Slots s) {
 			for (int i = 0; i < count; i++) {
-				s = s.updateType(r_dest + i, SlotType.NIL);
+				s = s.updateType(r_dest + i, Type.NIL);
 			}
 			return s;
 		}
@@ -178,7 +178,7 @@ public class LuaInstruction {
 
 		@Override
 		protected Slots effect(Slots s) {
-			return s.updateType(r_dest, SlotType.ANY);
+			return s.updateType(r_dest, Type.ANY);
 		}
 
 	}
@@ -202,7 +202,7 @@ public class LuaInstruction {
 
 		@Override
 		protected Slots effect(Slots s) {
-			return s.updateType(r_dest, SlotType.ANY);
+			return s.updateType(r_dest, Type.ANY);
 		}
 
 	}
@@ -221,13 +221,13 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tab) == SlotType.FUNCTION ? "_T" : "";
+			String suffix = inSlots().getType(r_tab) == Type.FUNCTION ? "_T" : "";
 			return "GETTABLE" + suffix + "(" + r_dest + "," + r_tab + "," + rk_key + ")";
 		}
 
 		@Override
 		protected Slots effect(Slots s) {
-			return s.updateType(r_dest, SlotType.ANY);
+			return s.updateType(r_dest, Type.ANY);
 		}
 
 	}
@@ -282,7 +282,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = (inSlots().getType(r_tab) == SlotType.TABLE ? "_T" : "");
+			String suffix = (inSlots().getType(r_tab) == Type.TABLE ? "_T" : "");
 			return "SETTABLE" + suffix + "(" + r_tab + "," + rk_key + "," + rk_value + ")";
 		}
 
@@ -309,7 +309,7 @@ public class LuaInstruction {
 
 		@Override
 		protected Slots effect(Slots s) {
-			return s.updateType(r_dest, SlotType.TABLE);
+			return s.updateType(r_dest, Type.TABLE);
 		}
 
 	}
@@ -328,14 +328,14 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_self) == SlotType.TABLE ? "_T" : "";
+			String suffix = inSlots().getType(r_self) == Type.TABLE ? "_T" : "";
 			return "SELF" + suffix + "(" + r_dest + "," + r_self + "," + rk_key + ")";
 		}
 
 		@Override
 		protected Slots effect(Slots s) {
 			return s.updateType(r_dest + 1, s.getType(r_self))
-					.updateType(r_dest, SlotType.ANY);
+					.updateType(r_dest, Type.ANY);
 		}
 
 	}
@@ -367,25 +367,25 @@ public class LuaInstruction {
 
 		@Override
 		protected Slots effect(Slots s) {
-			SlotType argType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : s.getType(b);
+			Type argType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : s.getType(b);
 
-			SlotType resultType = SlotType.ANY;  // assume we'll be calling a metamethod
+			Type resultType = Type.ANY;  // assume we'll be calling a metamethod
 
 			switch (op) {
 				case UNM:
-					if (argType.isSubtypeOf(SlotType.NUMBER)) resultType = argType;
+					if (argType.isSubtypeOf(Type.NUMBER)) resultType = argType;
 					break;
 
 				case BNOT:
-					if (argType == SlotType.NUMBER_INTEGER) resultType = argType;
+					if (argType == Type.NUMBER_INTEGER) resultType = argType;
 					break;
 
 				case NOT:
-					resultType = SlotType.BOOLEAN;
+					resultType = Type.BOOLEAN;
 					break;
 
 				case LEN:
-					if (argType == SlotType.STRING) resultType = SlotType.NUMBER_INTEGER;
+					if (argType == Type.STRING) resultType = Type.NUMBER_INTEGER;
 					break;
 			}
 
@@ -413,8 +413,8 @@ public class LuaInstruction {
 
 		private boolean allStringable(Slots s) {
 			for (int i = r_begin; i <= r_end; i++) {
-				SlotType tpe = s.getType(i);
-				if (!(tpe == SlotType.STRING || tpe.isSubtypeOf(SlotType.NUMBER))) {
+				Type tpe = s.getType(i);
+				if (!(tpe == Type.STRING || tpe.isSubtypeOf(Type.NUMBER))) {
 					return false;
 				}
 			}
@@ -423,7 +423,7 @@ public class LuaInstruction {
 
 		@Override
 		protected Slots effect(Slots s) {
-			return s.updateType(r_dest, allStringable(s) ? SlotType.STRING : SlotType.ANY);
+			return s.updateType(r_dest, allStringable(s) ? Type.STRING : Type.ANY);
 		}
 
 	}
@@ -504,13 +504,13 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			SlotType tpe = inSlots().getType(r_index);
+			Type tpe = inSlots().getType(r_index);
 
-			String suffix = (tpe == SlotType.BOOLEAN
+			String suffix = (tpe == Type.BOOLEAN
 					? "_B"  // simple boolean comparison, do branch
-					: (tpe == SlotType.ANY
+					: (tpe == Type.ANY
 							? "_coerce"  // coerce, compare, do branch
-							: (tpe == SlotType.NIL
+							: (tpe == Type.NIL
 									? "_false"  // automatically false
 									: "_true"  // automatically true
 							)
@@ -522,10 +522,10 @@ public class LuaInstruction {
 
 		@Override
 		public Boolean canBeInlined() {
-			SlotType tpe = inSlots().getType(r_index);
+			Type tpe = inSlots().getType(r_index);
 
-			if (tpe == SlotType.BOOLEAN || tpe == SlotType.ANY) return null;
-			else if (tpe == SlotType.NIL) return Boolean.FALSE;
+			if (tpe == Type.BOOLEAN || tpe == Type.ANY) return null;
+			else if (tpe == Type.NIL) return Boolean.FALSE;
 			else return Boolean.TRUE;
 		}
 
@@ -568,7 +568,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tgt) == SlotType.FUNCTION ? "_F" : "_mt";
+			String suffix = inSlots().getType(r_tgt) == Type.FUNCTION ? "_F" : "_mt";
 			suffix += "_" + argTypesFromSlots(inSlots(), r_tgt + 1, b);
 			suffix += c > 0 ? "_" + (c - 1) : "_var";
 
@@ -586,7 +586,7 @@ public class LuaInstruction {
 			// assume that it may change any open upvalue.
 			for (int i = 0; i < s.fixedSize(); i++) {
 				if (s.isCaptured(i)) {
-					s = s.updateType(i, SlotType.ANY);
+					s = s.updateType(i, Type.ANY);
 				}
 			}
 
@@ -595,7 +595,7 @@ public class LuaInstruction {
 
 				// (c - 1) is the exact number of result values
 				for (int i = 0; i < c - 1; i++) {
-					s = s.updateType(r_tgt + i, SlotType.ANY);
+					s = s.updateType(r_tgt + i, Type.ANY);
 				}
 			}
 			else {
@@ -620,7 +620,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tgt) == SlotType.FUNCTION ? "_F" : "_mt";
+			String suffix = inSlots().getType(r_tgt) == Type.FUNCTION ? "_F" : "_mt";
 			suffix += "_" + argTypesFromSlots(inSlots(), r_tgt + 1, b);
 
 			return "TAILCALL" + suffix + "(" + r_tgt + "," + b + ")";
@@ -628,7 +628,7 @@ public class LuaInstruction {
 
 		@Override
 		public ReturnType returnType() {
-			SlotType targetType = inSlots().getType(r_tgt);
+			Type targetType = inSlots().getType(r_tgt);
 			ArgTypes argTypes = argTypesFromSlots(inSlots(), r_tgt + 1, b);
 			return new ReturnType.TailCallReturnType(targetType, argTypes);
 		}
@@ -693,23 +693,23 @@ public class LuaInstruction {
 		}
 
 		private NumOpType loopType(Slots s) {
-			SlotType a0 = s.getType(r_base + 0);
-			SlotType a1 = s.getType(r_base + 1);
-			SlotType a2 = s.getType(r_base + 2);
+			Type a0 = s.getType(r_base + 0);
+			Type a1 = s.getType(r_base + 1);
+			Type a2 = s.getType(r_base + 2);
 
-			if (a0 == SlotType.NUMBER_INTEGER
-					&& a1 == SlotType.NUMBER_INTEGER
-					&& a2 == SlotType.NUMBER_INTEGER) {
+			if (a0 == Type.NUMBER_INTEGER
+					&& a1 == Type.NUMBER_INTEGER
+					&& a2 == Type.NUMBER_INTEGER) {
 
 				return NumOpType.Integer;
 			}
-			else if (a0.isSubtypeOf(SlotType.NUMBER)
-					&& a1.isSubtypeOf(SlotType.NUMBER)
-					&& a2.isSubtypeOf(SlotType.NUMBER)) {
+			else if (a0.isSubtypeOf(Type.NUMBER)
+					&& a1.isSubtypeOf(Type.NUMBER)
+					&& a2.isSubtypeOf(Type.NUMBER)) {
 
-				if (a0 == SlotType.NUMBER_FLOAT
-						|| a1 == SlotType.NUMBER_FLOAT
-						|| a2 == SlotType.NUMBER_FLOAT) {
+				if (a0 == Type.NUMBER_FLOAT
+						|| a1 == Type.NUMBER_FLOAT
+						|| a2 == Type.NUMBER_FLOAT) {
 					return NumOpType.Float;
 				}
 				else {
@@ -726,10 +726,10 @@ public class LuaInstruction {
 
 		@Override
 		protected Slots effect(Slots s) {
-			SlotType tpe = loopType(s).toSlotType();
-			return s.updateType(r_base + 3, tpe.isSubtypeOf(SlotType.NUMBER)
+			Type tpe = loopType(s).toSlotType();
+			return s.updateType(r_base + 3, tpe.isSubtypeOf(Type.NUMBER)
 					? tpe  // we know at compile-time that it's numeric
-					: SlotType.NUMBER  // got something else -- may throw an exception at runtime!
+					: Type.NUMBER  // got something else -- may throw an exception at runtime!
 			);
 		}
 
@@ -758,7 +758,7 @@ public class LuaInstruction {
 
 		@Override
 		protected Slots effect(Slots s) {
-			s = s.updateType(r_dest, SlotType.FUNCTION);
+			s = s.updateType(r_dest, Type.FUNCTION);
 
 			for (Prototype.UpvalueDesc uvd : prototype.getUpValueDescriptions()) {
 				if (uvd.inStack) {
@@ -791,7 +791,7 @@ public class LuaInstruction {
 			if (b > 0) {
 				// (b - 1) is the number of values
 				for (int i = 0; i < b - 1; i++) {
-					s = s.updateType(r_base + i, SlotType.ANY);
+					s = s.updateType(r_base + i, Type.ANY);
 				}
 				return s;
 			}

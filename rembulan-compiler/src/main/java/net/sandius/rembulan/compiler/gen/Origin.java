@@ -2,13 +2,13 @@ package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.util.Check;
 
-public abstract class ValueOrigin {
+public abstract class Origin {
 
-	private ValueOrigin() {
+	private Origin() {
 		// not to be extended by the outside world
 	}
 
-	public static class Argument extends ValueOrigin {
+	public static class Argument extends Origin {
 
 		public final int index;
 
@@ -39,7 +39,7 @@ public abstract class ValueOrigin {
 
 	}
 
-	public static class Constant extends ValueOrigin {
+	public static class Constant extends Origin {
 
 		public final int index;
 
@@ -69,7 +69,7 @@ public abstract class ValueOrigin {
 
 	}
 
-	public static class Computed extends ValueOrigin {
+	public static class Computed extends Origin {
 
 		@Override
 		public String toString() {

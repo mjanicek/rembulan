@@ -114,8 +114,8 @@ public class FlowIt {
 		computeReturnType();
 	}
 
-	public SlotType.FunctionType functionType() {
-		return SlotType.FunctionType.of(ArgTypes.init(prototype.getNumberOfParameters(), prototype.isVararg()), returnType);
+	public Type.FunctionType functionType() {
+		return Type.FunctionType.of(ArgTypes.init(prototype.getNumberOfParameters(), prototype.isVararg()), returnType);
 	}
 
 	private static ArgTypes returnTypeToArgTypes(ReturnType rt) {
