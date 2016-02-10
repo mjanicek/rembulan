@@ -55,12 +55,22 @@ public class SlotState {
 			Slot slot = get(i);
 
 			if (isCaptured(i)) {
-				bld.append('^');
+				bld.append('{');
 			}
 			bld.append(slot.toString());
+			if (isCaptured(i)) {
+				bld.append('}');
+			}
+
+			if (i + 1 < numRegularSlots) {
+				bld.append(',');
+			}
 		}
 
 		if (varargPosition() >= 0) {
+			if (numRegularSlots > 0) {
+				bld.append(',');
+			}
 			bld.append("+");
 		}
 

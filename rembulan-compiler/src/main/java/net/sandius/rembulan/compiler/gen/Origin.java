@@ -34,7 +34,7 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "arg_" + index;
+			return "#" + index;
 		}
 
 	}
@@ -64,7 +64,7 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "k_" + index;
+			return "^" + index;
 		}
 
 	}
