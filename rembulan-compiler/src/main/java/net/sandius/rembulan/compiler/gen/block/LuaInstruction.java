@@ -1,5 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Origin;
+import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.TypeSeq;
 import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Type;
@@ -85,7 +87,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.updateType(r_dest, s.getType(r_src));
+			return s.update(r_dest, s.get(r_src));
 		}
 
 	}
@@ -110,7 +112,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.updateType(r_dest, constantType(prototype.getConstants().get(constIndex)));
+			return s.update(r_dest, new Slot(new Origin.Constant(constIndex), constantType(prototype.getConstants().get(constIndex))));
 		}
 
 	}
@@ -132,6 +134,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
+			// TODO: origin
 			return s.updateType(r_dest, Type.BOOLEAN);
 		}
 	}
@@ -154,6 +157,7 @@ public class LuaInstruction {
 		@Override
 		protected SlotState effect(SlotState s) {
 			for (int i = 0; i < count; i++) {
+				// TODO: origin
 				s = s.updateType(r_dest + i, Type.NIL);
 			}
 			return s;
