@@ -38,7 +38,7 @@ public abstract class Type {
 	public static final Type NUMBER_INTEGER = new ConcreteType(NUMBER, "integer", "i");
 	public static final Type NUMBER_FLOAT = new ConcreteType(NUMBER, "float", "f");
 	public static final Type STRING = new ConcreteType(ANY, "string", "S");
-	public static final FunctionType FUNCTION = new FunctionType(ArgTypes.vararg(), ArgTypes.vararg());
+	public static final FunctionType FUNCTION = new FunctionType(TypeSeq.vararg(), TypeSeq.vararg());
 	public static final Type TABLE = new ConcreteType(ANY, "table", "T");
 	public static final Type THREAD = new ConcreteType(ANY, "thread", "C");
 
@@ -122,12 +122,12 @@ public abstract class Type {
 
 	public static class FunctionType extends AbstractConcreteType {
 
-		protected final ArgTypes argTypes;
-		protected final ArgTypes returnTypes;
+		protected final TypeSeq typeSeq;
+		protected final TypeSeq returnTypes;
 
-		private FunctionType(ArgTypes arg, ArgTypes ret) {
+		private FunctionType(TypeSeq arg, TypeSeq ret) {
 			super(ANY);
-			this.argTypes = Objects.requireNonNull(arg);
+			this.typeSeq = Objects.requireNonNull(arg);
 			this.returnTypes = Objects.requireNonNull(ret);
 		}
 
@@ -138,17 +138,17 @@ public abstract class Type {
 
 			FunctionType that = (FunctionType) o;
 
-			return argTypes.equals(that.argTypes) && returnTypes.equals(that.returnTypes);
+			return typeSeq.equals(that.typeSeq) && returnTypes.equals(that.returnTypes);
 		}
 
 		@Override
 		public int hashCode() {
-			int result = argTypes.hashCode();
+			int result = typeSeq.hashCode();
 			result = 31 * result + returnTypes.hashCode();
 			return result;
 		}
 
-		public static FunctionType of(ArgTypes arg, ArgTypes ret) {
+		public static FunctionType of(TypeSeq arg, TypeSeq ret) {
 			return new FunctionType(arg, ret);
 		}
 
@@ -162,11 +162,11 @@ public abstract class Type {
 			return "(" + argumentTypes().toString() + ") -> (" + returnTypes().toString() + ")";
 		}
 
-		public ArgTypes argumentTypes() {
-			return argTypes;
+		public TypeSeq argumentTypes() {
+			return typeSeq;
 		}
 
-		public ArgTypes returnTypes() {
+		public TypeSeq returnTypes() {
 			return returnTypes;
 		}
 
@@ -198,8 +198,8 @@ public abstract class Type {
 			else if (that instanceof FunctionType) {
 				FunctionType ft = (FunctionType) that;
 
-				ArgTypes arg = this.argumentTypes().meet(ft.argumentTypes());
-				ArgTypes ret = this.returnTypes().join(ft.returnTypes());
+				TypeSeq arg = this.argumentTypes().meet(ft.argumentTypes());
+				TypeSeq ret = this.returnTypes().join(ft.returnTypes());
 
 				return arg != null && ret != null ? new FunctionType(arg, ret) : null;
 			}
@@ -221,8 +221,8 @@ public abstract class Type {
 			else if (that instanceof FunctionType) {
 				FunctionType ft = (FunctionType) that;
 
-				ArgTypes arg = this.argumentTypes().join(ft.argumentTypes());
-				ArgTypes ret = this.returnTypes().meet(ft.returnTypes());
+				TypeSeq arg = this.argumentTypes().join(ft.argumentTypes());
+				TypeSeq ret = this.returnTypes().meet(ft.returnTypes());
 
 				return arg != null && ret != null ? new FunctionType(arg, ret) : null;
 			}

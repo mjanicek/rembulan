@@ -43,7 +43,7 @@ public class FlowIt {
 
 	public Map<Node, Edges> reachabilityGraph;
 
-	private ArgTypes returnType;
+	private TypeSeq returnType;
 
 	public FlowIt(Prototype prototype) {
 		this.prototype = prototype;
@@ -71,9 +71,9 @@ public class FlowIt {
 //		}
 //		System.out.println("]");
 
-		returnType = ArgTypes.vararg();
+		returnType = TypeSeq.vararg();
 
-		callEntry = new Entry("main", ArgTypes.init(prototype.getNumberOfParameters(), prototype.isVararg()), prototype.getMaximumStackSize(), pcLabels.get(0));
+		callEntry = new Entry("main", TypeSeq.init(prototype.getNumberOfParameters(), prototype.isVararg()), prototype.getMaximumStackSize(), pcLabels.get(0));
 
 		resumePoints = new HashSet<>();
 
@@ -115,15 +115,15 @@ public class FlowIt {
 	}
 
 	public Type.FunctionType functionType() {
-		return Type.FunctionType.of(ArgTypes.init(prototype.getNumberOfParameters(), prototype.isVararg()), returnType);
+		return Type.FunctionType.of(TypeSeq.init(prototype.getNumberOfParameters(), prototype.isVararg()), returnType);
 	}
 
-	private static ArgTypes returnTypeToArgTypes(ReturnType rt) {
+	private static TypeSeq returnTypeToArgTypes(ReturnType rt) {
 		if (rt instanceof ReturnType.ConcreteReturnType) {
-			return ((ReturnType.ConcreteReturnType) rt).argTypes;
+			return ((ReturnType.ConcreteReturnType) rt).typeSeq;
 		}
 		else if (rt instanceof ReturnType.TailCallReturnType) {
-			return ArgTypes.vararg();  // TODO
+			return TypeSeq.vararg();  // TODO
 		}
 		else {
 			throw new IllegalStateException("unknown return type: " + rt.toString());
@@ -131,16 +131,16 @@ public class FlowIt {
 	}
 
 	private void computeReturnType() {
-		ArgTypes ret = null;
+		TypeSeq ret = null;
 
 		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
 			if (n instanceof Exit) {
-				ArgTypes at = returnTypeToArgTypes(((Exit) n).returnType());
+				TypeSeq at = returnTypeToArgTypes(((Exit) n).returnType());
 				ret = ret != null ? ret.join(at) : at;
 			}
 		}
 
-		returnType = ret != null ? ret : ArgTypes.vararg();
+		returnType = ret != null ? ret : TypeSeq.vararg();
 	}
 
 	public void insertHooks() {

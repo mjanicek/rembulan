@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.ArgTypes;
+import net.sandius.rembulan.compiler.gen.TypeSeq;
 import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Type;
 import net.sandius.rembulan.compiler.gen.SlotState;
@@ -28,7 +28,7 @@ public class LuaInstruction {
 		}
 	}
 
-	public static ArgTypes argTypesFromSlots(SlotState s, int from, int count) {
+	public static TypeSeq argTypesFromSlots(SlotState s, int from, int count) {
 		int num = count > 0 ? count - 1 : s.varargPosition() - from;
 
 		Type[] args = new Type[num];
@@ -36,7 +36,7 @@ public class LuaInstruction {
 			args[i] = s.getType(from + i);
 		}
 
-		return new ArgTypes(ReadOnlyArray.wrap(args), count <= 0);
+		return new TypeSeq(ReadOnlyArray.wrap(args), count <= 0);
 	}
 
 	public enum NumOpType {
@@ -629,8 +629,8 @@ public class LuaInstruction {
 		@Override
 		public ReturnType returnType() {
 			Type targetType = inSlots().getType(r_tgt);
-			ArgTypes argTypes = argTypesFromSlots(inSlots(), r_tgt + 1, b);
-			return new ReturnType.TailCallReturnType(targetType, argTypes);
+			TypeSeq typeSeq = argTypesFromSlots(inSlots(), r_tgt + 1, b);
+			return new ReturnType.TailCallReturnType(targetType, typeSeq);
 		}
 
 	}

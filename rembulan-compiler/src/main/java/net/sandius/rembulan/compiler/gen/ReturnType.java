@@ -10,11 +10,11 @@ public abstract class ReturnType {
 
 	public static class ConcreteReturnType extends ReturnType {
 
-		public final ArgTypes argTypes;
+		public final TypeSeq typeSeq;
 
-		public ConcreteReturnType(ArgTypes argTypes) {
-			Check.notNull(argTypes);
-			this.argTypes = argTypes;
+		public ConcreteReturnType(TypeSeq typeSeq) {
+			Check.notNull(typeSeq);
+			this.typeSeq = typeSeq;
 		}
 
 		@Override
@@ -24,17 +24,17 @@ public abstract class ReturnType {
 
 			ConcreteReturnType that = (ConcreteReturnType) o;
 
-			return argTypes.equals(that.argTypes);
+			return typeSeq.equals(that.typeSeq);
 		}
 
 		@Override
 		public int hashCode() {
-			return argTypes.hashCode();
+			return typeSeq.hashCode();
 		}
 
 		@Override
 		public String toString() {
-			return argTypes.toString();
+			return typeSeq.toString();
 		}
 
 	}
@@ -42,13 +42,13 @@ public abstract class ReturnType {
 	public static class TailCallReturnType extends ReturnType {
 
 		public final Type target;
-		public final ArgTypes argTypes;
+		public final TypeSeq typeSeq;
 
-		public TailCallReturnType(Type target, ArgTypes argTypes) {
+		public TailCallReturnType(Type target, TypeSeq typeSeq) {
 			Check.notNull(target);
-			Check.notNull(argTypes);
+			Check.notNull(typeSeq);
 			this.target = target;
-			this.argTypes = argTypes;
+			this.typeSeq = typeSeq;
 		}
 
 		@Override
@@ -58,19 +58,19 @@ public abstract class ReturnType {
 
 			TailCallReturnType that = (TailCallReturnType) o;
 
-			return target == that.target && argTypes.equals(that.argTypes);
+			return target == that.target && typeSeq.equals(that.typeSeq);
 		}
 
 		@Override
 		public int hashCode() {
 			int result = target.hashCode();
-			result = 31 * result + argTypes.hashCode();
+			result = 31 * result + typeSeq.hashCode();
 			return result;
 		}
 
 		@Override
 		public String toString() {
-			return Type.toString(target) + "(" + argTypes + ")";
+			return Type.toString(target) + "(" + typeSeq + ")";
 		}
 
 	}
