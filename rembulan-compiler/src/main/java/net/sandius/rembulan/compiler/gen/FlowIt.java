@@ -73,7 +73,7 @@ public class FlowIt {
 
 		returnType = TypeSeq.vararg();
 
-		callEntry = new Entry("main", TypeSeq.init(prototype.getNumberOfParameters(), prototype.isVararg()), prototype.getMaximumStackSize(), pcLabels.get(0));
+		callEntry = new Entry("main", entryTypeSeq(), prototype.getMaximumStackSize(), pcLabels.get(0));
 
 		resumePoints = new HashSet<>();
 
@@ -114,8 +114,17 @@ public class FlowIt {
 		computeReturnType();
 	}
 
+	private TypeSeq entryTypeSeq() {
+		Type[] types = new Type[prototype.getNumberOfParameters()];
+		for (int i = 0; i < types.length; i++) {
+			types[i] = Type.ANY;
+		}
+		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
+	}
+
+
 	public Type.FunctionType functionType() {
-		return Type.FunctionType.of(TypeSeq.init(prototype.getNumberOfParameters(), prototype.isVararg()), returnType);
+		return Type.FunctionType.of(entryTypeSeq(), returnType);
 	}
 
 	private static TypeSeq returnTypeToArgTypes(ReturnType rt) {

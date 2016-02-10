@@ -16,14 +16,6 @@ public class TypeSeq {
 		this.varargs = varargs;
 	}
 
-	public static TypeSeq init(int numArgs, boolean vararg) {
-		Type[] types = new Type[numArgs];
-		for (int i = 0; i < numArgs; i++) {
-			types[i] = Type.ANY;
-		}
-		return new TypeSeq(ReadOnlyArray.wrap(types), vararg);
-	}
-
 	private static final TypeSeq EMPTY_FIXED = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), false);
 	private static final TypeSeq EMPTY_VARARG = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), true);
 
@@ -79,17 +71,6 @@ public class TypeSeq {
 
 	public boolean hasVarargs() {
 		return varargs;
-	}
-
-	public SlotState toSlots(int size) {
-		SlotState s = SlotState.init(size);
-		for (int i = 0; i < fixed().size(); i++) {
-			s = s.updateType(i, fixed().get(i));
-		}
-//		if (hasVarargs()) {
-//			s = s.setVarargs(fixed().size());
-//		}
-		return s;
 	}
 
 	public boolean isVarargOnly() {

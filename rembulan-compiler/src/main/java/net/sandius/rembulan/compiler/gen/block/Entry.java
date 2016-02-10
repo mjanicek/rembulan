@@ -61,7 +61,7 @@ public class Entry implements Node, Jump {
 
 	@Override
 	public SlotState outSlots() {
-		return typeSeq.toSlots(slotSize);
+		return SlotState.fromFixedTypes(typeSeq, slotSize);
 	}
 
 	@Override

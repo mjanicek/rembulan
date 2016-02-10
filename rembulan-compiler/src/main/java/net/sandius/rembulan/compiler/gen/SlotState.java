@@ -79,6 +79,17 @@ public class SlotState {
 		return new SlotState(ReadOnlyArray.wrap(slots), IntSet.empty(), -1);
 	}
 
+	// ignores the vararg part
+	public static SlotState fromFixedTypes(TypeSeq ts, int size) {
+		SlotState slots = SlotState.init(size);
+
+		for (int i = 0; i < Math.min(ts.fixed().size(), size); i++) {
+			slots = slots.update(i, new Slot(new Origin.Argument(i), ts.fixed().get(i)));
+		}
+
+		return slots;
+	}
+
 	public int size() {
 		return fixedSlots.size();
 	}
@@ -134,18 +145,22 @@ public class SlotState {
 		return fixedSlots.get(idx).type();
 	}
 
-	public SlotState updateType(int idx, Type type) {
-		Check.notNull(type);
+	public SlotState update(int idx, Slot slot) {
+		Check.notNull(slot);
 		Check.isTrue(isValidIndex(idx));
 
-		if (getType(idx).equals(type)) {
+		if (get(idx).equals(slot)) {
 			// no-op
 			return this;
 		}
 		else {
-			Slot s = fixedSlots.get(idx);
-			return new SlotState(fixedSlots.update(idx, new Slot(s.origin(), type)), captured, varargPosition);
+			return new SlotState(fixedSlots.update(idx, slot), captured, varargPosition);
 		}
+	}
+
+	public SlotState updateType(int idx, Type type) {
+		Slot s = fixedSlots.get(idx);
+		return update(idx, new Slot(s.origin(), type));
 	}
 
 	public SlotState join(int idx, Type type) {
