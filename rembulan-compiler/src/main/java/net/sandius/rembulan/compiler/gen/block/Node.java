@@ -1,16 +1,16 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 
 public interface Node {
 
 	void accept(NodeVisitor visitor);
 
-	Slots inSlots();
+	SlotState inSlots();
 
-	Slots outSlots();
+	SlotState outSlots();
 
-	boolean pushSlots(Slots s);
+	boolean pushSlots(SlotState s);
 
 	void clearSlots();
 

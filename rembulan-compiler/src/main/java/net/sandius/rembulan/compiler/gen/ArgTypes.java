@@ -81,8 +81,8 @@ public class ArgTypes {
 		return varargs;
 	}
 
-	public Slots toSlots(int size) {
-		Slots s = Slots.init(size);
+	public SlotState toSlots(int size) {
+		SlotState s = SlotState.init(size);
 		for (int i = 0; i < types().size(); i++) {
 			s = s.updateType(i, types().get(i));
 		}

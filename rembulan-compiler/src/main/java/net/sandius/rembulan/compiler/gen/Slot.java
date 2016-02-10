@@ -2,12 +2,12 @@ package net.sandius.rembulan.compiler.gen;
 
 import java.util.Objects;
 
-public class SlotWithOrigin {
+public class Slot {
 
 	protected final Origin origin;
 	protected final Type type;
 
-	public SlotWithOrigin(Origin origin, Type type) {
+	public Slot(Origin origin, Type type) {
 		this.origin = Objects.requireNonNull(origin);
 		this.type = Objects.requireNonNull(type);
 	}
@@ -17,7 +17,7 @@ public class SlotWithOrigin {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		SlotWithOrigin that = (SlotWithOrigin) o;
+		Slot that = (Slot) o;
 
 		return origin.equals(that.origin) && type.equals(that.type);
 	}

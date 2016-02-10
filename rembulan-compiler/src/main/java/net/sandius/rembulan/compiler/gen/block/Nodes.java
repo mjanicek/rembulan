@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
 public abstract class Nodes {
@@ -70,17 +70,17 @@ public abstract class Nodes {
 			}
 
 			@Override
-			public Slots inSlots() {
+			public SlotState inSlots() {
 				throw new UnsupportedOperationException();  // TODO
 			}
 
 			@Override
-			public Slots outSlots() {
+			public SlotState outSlots() {
 				throw new UnsupportedOperationException();
 			}
 
 			@Override
-			public boolean pushSlots(Slots s) {
+			public boolean pushSlots(SlotState s) {
 				throw new UnsupportedOperationException();
 			}
 
@@ -127,12 +127,12 @@ public abstract class Nodes {
 			}
 
 			@Override
-			public Slots inSlots() {
+			public SlotState inSlots() {
 				throw new UnsupportedOperationException();  // TODO
 			}
 
 			@Override
-			public boolean pushSlots(Slots s) {
+			public boolean pushSlots(SlotState s) {
 				throw new UnsupportedOperationException();  // TODO
 			}
 
@@ -142,7 +142,7 @@ public abstract class Nodes {
 			}
 
 			@Override
-			public Slots outSlots() {
+			public SlotState outSlots() {
 				throw new UnsupportedOperationException();  // TODO
 			}
 

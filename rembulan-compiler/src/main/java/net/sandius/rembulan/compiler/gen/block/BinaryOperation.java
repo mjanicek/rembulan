@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.Type;
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction.NumOpType;
 import net.sandius.rembulan.lbc.Prototype;
 
@@ -29,13 +29,13 @@ public abstract class BinaryOperation extends Linear {
 		return name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
 	}
 
-	protected Type slotType(Slots s, int idx) {
+	protected Type slotType(SlotState s, int idx) {
 		return idx < 0 ? LuaInstruction.constantType(prototype.getConstants().get(-idx - 1)) : s.getType(idx);
 	}
 
 	protected abstract NumOpType opType(Type l, Type r);
 
-	protected NumOpType opType(Slots s) {
+	protected NumOpType opType(SlotState s) {
 		return opType(slotType(s, rk_left), slotType(s, rk_right));
 	}
 
@@ -61,7 +61,7 @@ public abstract class BinaryOperation extends Linear {
 	}
 
 	@Override
-	protected Slots effect(Slots s) {
+	protected SlotState effect(SlotState s) {
 		return s.updateType(r_dest, opType(s).toSlotType());
 	}
 

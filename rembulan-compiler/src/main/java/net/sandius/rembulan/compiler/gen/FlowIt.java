@@ -286,13 +286,13 @@ public class FlowIt {
 	public void insertCaptureNodes() {
 		for (Node n : reachabilityGraph.keySet()) {
 			if (n instanceof Sink && !(n instanceof LocalVariableEffect)) {
-				Slots s_n = n.inSlots();
+				SlotState s_n = n.inSlots();
 
 				if (s_n != null) {
 					IntBuffer uncaptured = new IntBuffer();
 
 					for (Node m : reachabilityGraph.get(n).out) {
-						Slots s_m = m.inSlots();
+						SlotState s_m = m.inSlots();
 
 						for (int i = 0; i < s_n.size(); i++) {
 							// FIXME: double-check this condition
@@ -337,7 +337,7 @@ public class FlowIt {
 		}
 	}
 
-	private boolean joinWith(Node n, Slots addIn) {
+	private boolean joinWith(Node n, SlotState addIn) {
 		Check.notNull(n);
 		Check.notNull(addIn);
 		return n.pushSlots(addIn);
@@ -364,7 +364,7 @@ public class FlowIt {
 			assert (n.inSlots() != null);
 
 			// compute effect and push it to outputs
-			Slots o = n.outSlots();
+			SlotState o = n.outSlots();
 
 			for (Node m : edges.get(n).out) {
 				if (m.pushSlots(o)) {

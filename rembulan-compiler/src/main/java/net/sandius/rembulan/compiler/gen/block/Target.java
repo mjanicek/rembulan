@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
 import java.util.HashMap;
@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class Target implements Node, Src {
 
-	private Slots inSlots;
+	private SlotState inSlots;
 
 	private final String name;
 	private final Map<Jump, Integer> in;
@@ -107,20 +107,20 @@ public class Target implements Node, Src {
 	}
 
 	@Override
-	public Slots inSlots() {
+	public SlotState inSlots() {
 		return inSlots;
 	}
 
 	@Override
-	public Slots outSlots() {
+	public SlotState outSlots() {
 		return inSlots();
 	}
 
 	@Override
-	public boolean pushSlots(Slots in) {
+	public boolean pushSlots(SlotState in) {
 		Check.notNull(in);
-		Slots o = inSlots;
-		Slots n = inSlots == null ? in : inSlots.join(in);
+		SlotState o = inSlots;
+		SlotState n = inSlots == null ? in : inSlots.join(in);
 		if (!n.equals(o)) {
 			inSlots = n;
 			return true;

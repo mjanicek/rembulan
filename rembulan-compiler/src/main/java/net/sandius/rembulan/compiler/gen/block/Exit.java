@@ -1,12 +1,12 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.ReturnType;
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
 public abstract class Exit implements Node, Sink {
 
-	private Slots inSlots;
+	private SlotState inSlots;
 
 	private Src prev;
 
@@ -39,19 +39,19 @@ public abstract class Exit implements Node, Sink {
 	}
 
 	@Override
-	public Slots inSlots() {
+	public SlotState inSlots() {
 		return inSlots;
 	}
 
 	@Override
-	public Slots outSlots() {
+	public SlotState outSlots() {
 		return null;
 	}
 
 	public abstract ReturnType returnType();
 
 	@Override
-	public boolean pushSlots(Slots s) {
+	public boolean pushSlots(SlotState s) {
 		Check.notNull(s);
 		if (!s.equals(inSlots)) {
 			inSlots = s;

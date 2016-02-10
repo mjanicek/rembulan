@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
 public class CloseUpvalues extends Linear implements LocalVariableEffect {
@@ -18,8 +18,8 @@ public class CloseUpvalues extends Linear implements LocalVariableEffect {
 	}
 
 	@Override
-	public Slots effect(Slots in) {
-		Slots s = in;
+	public SlotState effect(SlotState in) {
+		SlotState s = in;
 		for (int i = fromIndex; i < in.size(); i++) {
 			s = s.freshen(i);
 		}

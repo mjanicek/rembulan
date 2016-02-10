@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
-import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Iterator;
@@ -90,8 +89,8 @@ public class LinearSeq extends Linear {
 	}
 
 	@Override
-	protected Slots effect(Slots in) {
-		Slots s = in;
+	protected SlotState effect(SlotState in) {
+		SlotState s = in;
 		for (Linear n : nodes()) {
 			s = n.effect(s);
 		}
@@ -136,7 +135,7 @@ public class LinearSeq extends Linear {
 	public static class Sentinel extends Linear {
 
 		@Override
-		protected Slots effect(Slots in) {
+		protected SlotState effect(SlotState in) {
 			return in;
 		}
 

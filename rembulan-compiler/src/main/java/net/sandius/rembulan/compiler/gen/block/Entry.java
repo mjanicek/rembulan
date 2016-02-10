@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.ArgTypes;
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
 public class Entry implements Node, Jump {
@@ -55,17 +55,17 @@ public class Entry implements Node, Jump {
 	}
 
 	@Override
-	public Slots inSlots() {
+	public SlotState inSlots() {
 		return null;
 	}
 
 	@Override
-	public Slots outSlots() {
+	public SlotState outSlots() {
 		return argTypes.toSlots(slotSize);
 	}
 
 	@Override
-	public boolean pushSlots(Slots s) {
+	public boolean pushSlots(SlotState s) {
 		throw new UnsupportedOperationException();
 	}
 

@@ -4,7 +4,7 @@ import java.io.PrintWriter
 
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
-import net.sandius.rembulan.compiler.gen.{Slots, FlowIt}
+import net.sandius.rembulan.compiler.gen.{SlotState, FlowIt}
 import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
@@ -241,7 +241,7 @@ object AnalysisRunner {
     val flowEdges = flow.reachabilityGraph.toMap
 //    val flowStates = flow.slots.toMap
 
-    def slotsToString(slots: Slots): String = {
+    def slotsToString(slots: SlotState): String = {
       Option(slots) match {
         case Some(s) => s"[$s]"
         case None => "(none)"

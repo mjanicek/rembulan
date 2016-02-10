@@ -1,11 +1,11 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
 public abstract class Branch implements Node, Sink, Jump {
 
-	private Slots inSlots;
+	private SlotState inSlots;
 
 	private Src prev;
 	private Target trueBranch;
@@ -74,17 +74,17 @@ public abstract class Branch implements Node, Sink, Jump {
 	}
 
 	@Override
-	public Slots inSlots() {
+	public SlotState inSlots() {
 		return inSlots;
 	}
 
 	@Override
-	public Slots outSlots() {
+	public SlotState outSlots() {
 		return inSlots();
 	}
 
 	@Override
-	public boolean pushSlots(Slots s) {
+	public boolean pushSlots(SlotState s) {
 		Check.notNull(s);
 		if (!s.equals(inSlots)) {
 			inSlots = s;

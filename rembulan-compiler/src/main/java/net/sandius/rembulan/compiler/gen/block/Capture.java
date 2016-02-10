@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntContainer;
 import net.sandius.rembulan.util.IntSet;
@@ -20,8 +20,8 @@ public class Capture extends Linear implements LocalVariableEffect {
 	}
 
 	@Override
-	protected Slots effect(Slots in) {
-		Slots s = in;
+	protected SlotState effect(SlotState in) {
+		SlotState s = in;
 		for (int i = 0; i < indices.length(); i++) {
 			s = s.capture(indices.get(i));
 		}

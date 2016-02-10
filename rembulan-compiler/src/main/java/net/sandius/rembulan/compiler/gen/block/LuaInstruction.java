@@ -3,7 +3,7 @@ package net.sandius.rembulan.compiler.gen.block;
 import net.sandius.rembulan.compiler.gen.ArgTypes;
 import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Type;
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.PrototypePrinter;
@@ -28,7 +28,7 @@ public class LuaInstruction {
 		}
 	}
 
-	public static ArgTypes argTypesFromSlots(Slots s, int from, int count) {
+	public static ArgTypes argTypesFromSlots(SlotState s, int from, int count) {
 		int num = count > 0 ? count - 1 : s.varargPosition() - from;
 
 		Type[] args = new Type[num];
@@ -84,7 +84,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest, s.getType(r_src));
 		}
 
@@ -109,7 +109,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest, constantType(prototype.getConstants().get(constIndex)));
 		}
 
@@ -131,7 +131,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest, Type.BOOLEAN);
 		}
 	}
@@ -152,7 +152,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			for (int i = 0; i < count; i++) {
 				s = s.updateType(r_dest + i, Type.NIL);
 			}
@@ -177,7 +177,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest, Type.ANY);
 		}
 
@@ -201,7 +201,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest, Type.ANY);
 		}
 
@@ -226,7 +226,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest, Type.ANY);
 		}
 
@@ -308,7 +308,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest, Type.TABLE);
 		}
 
@@ -333,7 +333,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest + 1, s.getType(r_self))
 					.updateType(r_dest, Type.ANY);
 		}
@@ -366,7 +366,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			Type argType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : s.getType(b);
 
 			Type resultType = Type.ANY;  // assume we'll be calling a metamethod
@@ -411,7 +411,7 @@ public class LuaInstruction {
 			return "CONCAT" + suffix + "(" + r_dest + "," + r_begin + ".." + r_end + ")";
 		}
 
-		private boolean allStringable(Slots s) {
+		private boolean allStringable(SlotState s) {
 			for (int i = r_begin; i <= r_end; i++) {
 				Type tpe = s.getType(i);
 				if (!(tpe == Type.STRING || tpe.isSubtypeOf(Type.NUMBER))) {
@@ -422,7 +422,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			return s.updateType(r_dest, allStringable(s) ? Type.STRING : Type.ANY);
 		}
 
@@ -576,7 +576,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 
 			if (b == 0 && !s.hasVarargs()) {
 				throw new IllegalStateException("varargs expected on stack");
@@ -692,7 +692,7 @@ public class LuaInstruction {
 			return "FORPREP" + loopType(inSlots()).toSuffix() + "(" + r_base + ")";
 		}
 
-		private NumOpType loopType(Slots s) {
+		private NumOpType loopType(SlotState s) {
 			Type a0 = s.getType(r_base + 0);
 			Type a1 = s.getType(r_base + 1);
 			Type a2 = s.getType(r_base + 2);
@@ -725,7 +725,7 @@ public class LuaInstruction {
 		// TODO: do we convert all values in (r_base + 0) ... (r_base + 2) to the loop type?
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			Type tpe = loopType(s).toSlotType();
 			return s.updateType(r_base + 3, tpe.isSubtypeOf(Type.NUMBER)
 					? tpe  // we know at compile-time that it's numeric
@@ -757,7 +757,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		protected Slots effect(Slots s) {
+		protected SlotState effect(SlotState s) {
 			s = s.updateType(r_dest, Type.FUNCTION);
 
 			for (Prototype.UpvalueDesc uvd : prototype.getUpValueDescriptions()) {
@@ -787,7 +787,7 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Slots effect(Slots s) {
+		public SlotState effect(SlotState s) {
 			if (b > 0) {
 				// (b - 1) is the number of values
 				for (int i = 0; i < b - 1; i++) {

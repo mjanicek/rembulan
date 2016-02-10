@@ -4,13 +4,13 @@ import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntSet;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-public class Slots {
+public class SlotState {
 
 	private final ReadOnlyArray<Type> types;
 	private final IntSet captured;
 	private final int varargPosition;  // first index of varargs; if negative, no varargs in slots
 
-	private Slots(ReadOnlyArray<Type> types, IntSet captured, int varargPosition) {
+	private SlotState(ReadOnlyArray<Type> types, IntSet captured, int varargPosition) {
 		Check.notNull(types);
 		Check.notNull(captured);
 
@@ -29,7 +29,7 @@ public class Slots {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		Slots that = (Slots) o;
+		SlotState that = (SlotState) o;
 
 		// FIXME: vararg position!
 
@@ -67,7 +67,7 @@ public class Slots {
 		return bld.toString();
 	}
 
-	public static Slots init(int size) {
+	public static SlotState init(int size) {
 		Check.nonNegative(size);
 
 		Type[] types = new Type[size];
@@ -76,7 +76,7 @@ public class Slots {
 			types[i] = Type.NIL;
 		}
 
-		return new Slots(ReadOnlyArray.wrap(types), IntSet.empty(), -1);
+		return new SlotState(ReadOnlyArray.wrap(types), IntSet.empty(), -1);
 	}
 
 	public int size() {
@@ -108,7 +108,7 @@ public class Slots {
 		return captured.contains(idx);
 	}
 
-	public Slots updateState(int idx, boolean cap) {
+	public SlotState updateState(int idx, boolean cap) {
 		Check.isTrue(isValidIndex(idx));
 
 		if (isCaptured(idx) == cap) {
@@ -116,15 +116,15 @@ public class Slots {
 			return this;
 		}
 		else {
-			return new Slots(types, cap ? captured.plus(idx) : captured.minus(idx), varargPosition);
+			return new SlotState(types, cap ? captured.plus(idx) : captured.minus(idx), varargPosition);
 		}
 	}
 
-	public Slots capture(int idx) {
+	public SlotState capture(int idx) {
 		return updateState(idx, true);
 	}
 
-	public Slots freshen(int idx) {
+	public SlotState freshen(int idx) {
 		return updateState(idx, false);
 	}
 
@@ -133,7 +133,7 @@ public class Slots {
 		return types.get(idx);
 	}
 
-	public Slots updateType(int idx, Type type) {
+	public SlotState updateType(int idx, Type type) {
 		Check.notNull(type);
 		Check.isTrue(isValidIndex(idx));
 
@@ -142,19 +142,19 @@ public class Slots {
 			return this;
 		}
 		else {
-			return new Slots(types.update(idx, type), captured, varargPosition);
+			return new SlotState(types.update(idx, type), captured, varargPosition);
 		}
 	}
 
-	public Slots join(int idx, Type type) {
+	public SlotState join(int idx, Type type) {
 		return updateType(idx, getType(idx).join(type));
 	}
 
-	public Slots join(Slots that) {
+	public SlotState join(SlotState that) {
 		Check.notNull(that);
 		Check.isEq(this.size(), that.size());
 
-		Slots s = this;
+		SlotState s = this;
 		for (int i = 0; i < size(); i++) {
 			s = s.join(i, that.getType(i));
 		}
@@ -168,22 +168,22 @@ public class Slots {
 		return s;
 	}
 
-	public Slots consumeVarargs() {
-		return new Slots(types, captured, -1);
+	public SlotState consumeVarargs() {
+		return new SlotState(types, captured, -1);
 	}
 
-	public Slots setVarargs(int position) {
+	public SlotState setVarargs(int position) {
 		Check.nonNegative(position);
 //		Check.isFalse(hasVarargs());
 
-		Slots s = this.hasVarargs() ? this.consumeVarargs() : this;
+		SlotState s = this.hasVarargs() ? this.consumeVarargs() : this;
 
 		for (int i = position; i < size(); i++) {
 			Check.isFalse(s.isCaptured(i));  // FIXME
 			s = s.updateType(i, Type.NIL);
 		}
 
-		return new Slots(s.types, s.captured, position);
+		return new SlotState(s.types, s.captured, position);
 	}
 
 }

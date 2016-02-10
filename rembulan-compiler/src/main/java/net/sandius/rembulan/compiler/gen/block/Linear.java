@@ -1,11 +1,11 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
 public abstract class Linear implements Node, Sink, Src {
 
-	private Slots inSlots;
+	private SlotState inSlots;
 
 	private Src prev;
 	private Sink next;
@@ -103,22 +103,22 @@ public abstract class Linear implements Node, Sink, Src {
 		}
 	}
 
-	protected Slots effect(Slots in) {
+	protected SlotState effect(SlotState in) {
 		return in;
 	}
 
 	@Override
-	public Slots inSlots() {
+	public SlotState inSlots() {
 		return inSlots;
 	}
 
 	@Override
-	public Slots outSlots() {
+	public SlotState outSlots() {
 		return effect(inSlots());
 	}
 
 	@Override
-	public boolean pushSlots(Slots s) {
+	public boolean pushSlots(SlotState s) {
 		Check.notNull(s);
 		if (!s.equals(inSlots)) {
 			inSlots = s;

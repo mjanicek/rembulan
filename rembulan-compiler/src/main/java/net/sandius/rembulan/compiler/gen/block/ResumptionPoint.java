@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.Slots;
+import net.sandius.rembulan.compiler.gen.SlotState;
 
 public class ResumptionPoint extends Linear {
 
@@ -10,7 +10,7 @@ public class ResumptionPoint extends Linear {
 	}
 
 	@Override
-	protected Slots effect(Slots in) {
+	protected SlotState effect(SlotState in) {
 		return in;
 	}
 
