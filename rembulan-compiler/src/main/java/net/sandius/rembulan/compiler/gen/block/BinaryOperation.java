@@ -1,5 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.Origin;
+import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.Type;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction.NumOpType;
@@ -62,7 +64,7 @@ public abstract class BinaryOperation extends Linear {
 
 	@Override
 	protected SlotState effect(SlotState s) {
-		return s.updateType(r_dest, opType(s).toSlotType());
+		return s.update(r_dest, new Slot(new Origin.Computed(), opType(s).toSlotType()));
 	}
 
 	public static class Add extends BinaryOperation {
