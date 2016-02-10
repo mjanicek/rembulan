@@ -78,4 +78,23 @@ public abstract class Origin {
 
 	}
 
+	public static Entry entry() {
+		return Entry.INSTANCE;
+	}
+
+	public static class Entry extends Origin {
+
+		public static final Entry INSTANCE = new Entry();
+
+		private Entry() {
+			// not to be instantiated directly
+		}
+
+		@Override
+		public String toString() {
+			return "_";
+		}
+
+	}
+
 }

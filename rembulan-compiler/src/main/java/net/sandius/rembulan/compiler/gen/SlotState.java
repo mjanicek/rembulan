@@ -73,7 +73,7 @@ public class SlotState {
 		Slot[] slots = new Slot[size];
 
 		for (int i = 0; i < size; i++) {
-			slots[i] = new Slot(new Origin.Computed(), Type.NIL);
+			slots[i] = new Slot(Origin.entry(), Type.NIL);
 		}
 
 		return new SlotState(ReadOnlyArray.wrap(slots), IntSet.empty(), -1);
