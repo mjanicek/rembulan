@@ -133,6 +133,7 @@ public abstract class Origin {
 
 	}
 
+	// TODO: add references to predecessors? might complicate equality computation...
 	public static class Computed extends Origin {
 
 		@Override
