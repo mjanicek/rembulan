@@ -6,20 +6,20 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 
 public class SlotState {
 
-	private final ReadOnlyArray<Type> types;
+	private final ReadOnlyArray<Slot> fixedSlots;
 	private final IntSet captured;
 	private final int varargPosition;  // first index of varargs; if negative, no varargs in slots
 
-	private SlotState(ReadOnlyArray<Type> types, IntSet captured, int varargPosition) {
-		Check.notNull(types);
+	private SlotState(ReadOnlyArray<Slot> fixedSlots, IntSet captured, int varargPosition) {
+		Check.notNull(fixedSlots);
 		Check.notNull(captured);
 
-		int size = types.size();
+		int size = fixedSlots.size();
 		if (varargPosition >= 0) Check.inRange(varargPosition, 0, size - 1);
 
 		Check.inRange(captured.size(), 0, size - 1);
 
-		this.types = types;
+		this.fixedSlots = fixedSlots;
 		this.captured = captured;
 		this.varargPosition = varargPosition;
 	}
@@ -33,14 +33,14 @@ public class SlotState {
 
 		// FIXME: vararg position!
 
-		return types.shallowEquals(that.types) && this.captured.equals(that.captured);
+		return fixedSlots.shallowEquals(that.fixedSlots) && this.captured.equals(that.captured);
 	}
 
 	@Override
 	public int hashCode() {
 		// FIXME: vararg position!
 
-		int result = types.shallowHashCode();
+		int result = fixedSlots.shallowHashCode();
 		result = 31 * result + captured.hashCode();
 		return result;
 	}
@@ -52,12 +52,12 @@ public class SlotState {
 		int numRegularSlots = varargPosition() < 0 ? size() : Math.min(size(), varargPosition());
 
 		for (int i = 0; i < numRegularSlots; i++) {
-			Type type = getType(i);
+			Slot slot = get(i);
 
 			if (isCaptured(i)) {
 				bld.append('^');
 			}
-			bld.append(Type.toString(type));
+			bld.append(slot.toString());
 		}
 
 		if (varargPosition() >= 0) {
@@ -70,21 +70,17 @@ public class SlotState {
 	public static SlotState init(int size) {
 		Check.nonNegative(size);
 
-		Type[] types = new Type[size];
+		Slot[] slots = new Slot[size];
 
 		for (int i = 0; i < size; i++) {
-			types[i] = Type.NIL;
+			slots[i] = new Slot(new Origin.Computed(), Type.NIL);
 		}
 
-		return new SlotState(ReadOnlyArray.wrap(types), IntSet.empty(), -1);
+		return new SlotState(ReadOnlyArray.wrap(slots), IntSet.empty(), -1);
 	}
 
 	public int size() {
-		return types.size();
-	}
-
-	public ReadOnlyArray<Type> types() {
-		return types;
+		return fixedSlots.size();
 	}
 
 	public int varargPosition() {
@@ -97,6 +93,11 @@ public class SlotState {
 
 	public int fixedSize() {
 		return varargPosition < 0 ? size() : varargPosition;
+	}
+
+	public Slot get(int idx) {
+		Check.isTrue(isValidIndex(idx));
+		return fixedSlots.get(idx);
 	}
 
 	public boolean isValidIndex(int idx) {
@@ -116,7 +117,7 @@ public class SlotState {
 			return this;
 		}
 		else {
-			return new SlotState(types, cap ? captured.plus(idx) : captured.minus(idx), varargPosition);
+			return new SlotState(fixedSlots, cap ? captured.plus(idx) : captured.minus(idx), varargPosition);
 		}
 	}
 
@@ -130,7 +131,7 @@ public class SlotState {
 
 	public Type getType(int idx) {
 		Check.isTrue(isValidIndex(idx));
-		return types.get(idx);
+		return fixedSlots.get(idx).type();
 	}
 
 	public SlotState updateType(int idx, Type type) {
@@ -142,7 +143,8 @@ public class SlotState {
 			return this;
 		}
 		else {
-			return new SlotState(types.update(idx, type), captured, varargPosition);
+			Slot s = fixedSlots.get(idx);
+			return new SlotState(fixedSlots.update(idx, new Slot(s.origin(), type)), captured, varargPosition);
 		}
 	}
 
@@ -169,7 +171,7 @@ public class SlotState {
 	}
 
 	public SlotState consumeVarargs() {
-		return new SlotState(types, captured, -1);
+		return new SlotState(fixedSlots, captured, -1);
 	}
 
 	public SlotState setVarargs(int position) {
@@ -183,7 +185,7 @@ public class SlotState {
 			s = s.updateType(i, Type.NIL);
 		}
 
-		return new SlotState(s.types, s.captured, position);
+		return new SlotState(s.fixedSlots, s.captured, position);
 	}
 
 }
