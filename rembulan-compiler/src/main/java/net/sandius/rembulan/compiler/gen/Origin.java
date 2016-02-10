@@ -68,7 +68,7 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "^" + index;
+			return "$" + index;
 		}
 
 	}
@@ -98,7 +98,37 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "$" + PrototypePrinter.pseudoAddr(prototype);
+			return "*" + PrototypePrinter.pseudoAddr(prototype);
+		}
+
+	}
+
+	public static class Upvalue extends Origin {
+
+		public final int index;
+
+		public Upvalue(int index) {
+			Check.nonNegative(index);
+			this.index = index;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Upvalue constant = (Upvalue) o;
+			return index == constant.index;
+		}
+
+		@Override
+		public int hashCode() {
+			return index;
+		}
+
+		@Override
+		public String toString() {
+			return "^" + index;
 		}
 
 	}

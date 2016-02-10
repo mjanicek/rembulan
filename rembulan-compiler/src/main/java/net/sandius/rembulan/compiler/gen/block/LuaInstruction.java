@@ -182,7 +182,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.updateType(r_dest, Type.ANY);
+			return s.update(r_dest, new Slot(new Origin.Upvalue(upvalueIndex), Type.ANY));
 		}
 
 	}
