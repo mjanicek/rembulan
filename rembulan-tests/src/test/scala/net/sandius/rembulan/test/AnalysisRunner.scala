@@ -297,12 +297,24 @@ object AnalysisRunner {
 //      println("\t" + r.toString + " : " + "[" + flowStates(r) + "]")
 //    }
 
+    val outcalls = flow.callSites.toMap mapValues { _.toSet }
+
     val ascii = timed("Graph layout") {
       GraphLayout.renderGraph(graph)
     }
 
     println()
     println("Type: " + flow.functionType().toExplicitString)
+    println()
+    println("Outbound calls: {")
+    for (p <- outcalls.keys) {
+      println("\t" + PrototypePrinter.pseudoAddr(p) + " {")
+      for (args <- outcalls(p)) {
+        println("\t\t" + "(" + args + ")")
+      }
+      println("\t}")
+    }
+    println("}")
     println()
     println(ascii)
 

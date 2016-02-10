@@ -11,6 +11,7 @@ import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
 import net.sandius.rembulan.compiler.gen.block.LocalVariableEffect;
+import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
@@ -31,6 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
@@ -42,6 +44,8 @@ public class FlowIt {
 	public Set<ResumptionPoint> resumePoints;
 
 	public Map<Node, Edges> reachabilityGraph;
+
+	public Map<Prototype, Set<TypeSeq>> callSites;
 
 	private TypeSeq returnType;
 
@@ -77,6 +81,8 @@ public class FlowIt {
 
 		resumePoints = new HashSet<>();
 
+		callSites = new HashMap<>();
+
 		insertHooks();
 
 		inlineInnerJumps();
@@ -106,12 +112,91 @@ public class FlowIt {
 
 //		addResumptionPoints();
 
+		computeCallSites();
+
 		makeBlocks();
 
 		updateReachability();
 		updateDataFlow();
 
 		computeReturnType();
+	}
+
+	private void clearCallSite(Prototype target) {
+		Objects.requireNonNull(target);
+
+		Set<TypeSeq> cs = callSites.get(target);
+
+		if (cs != null) {
+			cs.clear();
+		}
+		else {
+			callSites.put(target, new HashSet<TypeSeq>());
+		}
+	}
+
+	private void addCallSite(Prototype target, TypeSeq args) {
+		Objects.requireNonNull(target);
+		Objects.requireNonNull(args);
+
+		Set<TypeSeq> cs = callSites.get(target);
+
+		if (cs != null) {
+			cs.add(args);
+		}
+		else {
+			Set<TypeSeq> s = new HashSet<>();
+			s.add(args);
+
+			callSites.put(target, s);
+		}
+	}
+
+	private Iterable<TypeSeq> callSitesFor(Prototype target) {
+		Objects.requireNonNull(target);
+
+		Set<TypeSeq> cs = callSites.get(target);
+
+		if (cs != null) {
+			return Collections.unmodifiableSet(cs);
+		}
+		else {
+			return Collections.emptySet();
+		}
+	}
+
+	private void computeCallSites() {
+		callSites.clear();
+
+//		for (Prototype np : prototype.getNestedPrototypes()) {
+//			clearCallSite(np);
+//		}
+
+		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
+			if (n instanceof LuaInstruction.Call) {
+				LuaInstruction.Call c = (LuaInstruction.Call) n;
+
+				Slot target = c.callTarget(c.inSlots());
+
+				if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
+					Prototype proto = ((Origin.Closure) target.origin()).prototype;
+					TypeSeq args = c.callArguments(c.inSlots());
+					addCallSite(proto, args);
+				}
+			}
+			// FIXME: remove code duplication -- this could simply be an interface
+			else if (n instanceof LuaInstruction.TailCall) {
+				LuaInstruction.TailCall tc = (LuaInstruction.TailCall) n;
+
+				Slot target = tc.callTarget(tc.inSlots());
+
+				if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
+					Prototype proto = ((Origin.Closure) target.origin()).prototype;
+					TypeSeq args = tc.callArguments(tc.inSlots());
+					addCallSite(proto, args);
+				}
+			}
+		}
 	}
 
 	private TypeSeq entryTypeSeq() {

@@ -572,8 +572,8 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tgt) == Type.FUNCTION ? "_F" : "_mt";
-			suffix += "_" + argTypesFromSlots(inSlots(), r_tgt + 1, b);
+			String suffix = callTarget(inSlots()).type() instanceof Type.FunctionType ? "_F" : "_mt";
+			suffix += "_" + callArguments(inSlots());
 			suffix += c > 0 ? "_" + (c - 1) : "_var";
 
 			return "CALL" + suffix + "(" + r_tgt + "," + b + "," + c + ")";
@@ -610,6 +610,14 @@ public class LuaInstruction {
 			return s;
 		}
 
+		public Slot callTarget(SlotState s) {
+			return s.get(r_tgt);
+		}
+
+		public TypeSeq callArguments(SlotState s) {
+			return argTypesFromSlots(s, r_tgt + 1, b);
+		}
+
 	}
 
 	public static class TailCall extends Exit {
@@ -632,9 +640,17 @@ public class LuaInstruction {
 
 		@Override
 		public ReturnType returnType() {
-			Type targetType = inSlots().getType(r_tgt);
-			TypeSeq typeSeq = argTypesFromSlots(inSlots(), r_tgt + 1, b);
+			Type targetType = callTarget(inSlots()).type();
+			TypeSeq typeSeq = callArguments(inSlots());
 			return new ReturnType.TailCallReturnType(targetType, typeSeq);
+		}
+
+		public Slot callTarget(SlotState s) {
+			return s.get(r_tgt);
+		}
+
+		public TypeSeq callArguments(SlotState s) {
+			return argTypesFromSlots(s, r_tgt + 1, b);
 		}
 
 	}
