@@ -243,7 +243,7 @@ object AnalysisRunner {
 
     def slotsToString(slots: SlotState): String = {
       Option(slots) match {
-        case Some(s) => s"[$s]"
+        case Some(s) => "[" + s.toString(",\t") + "]"
         case None => "(none)"
       }
     }
@@ -264,7 +264,19 @@ object AnalysisRunner {
 
     case class MyNode(node: Node) {
       require (node != null)
-      override def toString = "  " + inValue(node) + " -> " + outValue(node) + "  \n" + node.toString
+      override def toString = {
+        val in = inValue(node)
+        val out = outValue(node)
+
+        val inOut = Util.tabulate(("in:  " + in) :: ("out: " + out) :: Nil, "  ", "\t")
+        val ns = node.toString
+
+        val width = math.max((inOut map { _.length }).max, (ns.split("\n") map { _.length }).max)
+
+        val sep = Util.fillStr("-", width)
+
+        inOut.mkString("\n") + "\n" + sep + "\n" + ns
+      }
     }
 
     val vertices = flowEdges.keySet map { MyNode }

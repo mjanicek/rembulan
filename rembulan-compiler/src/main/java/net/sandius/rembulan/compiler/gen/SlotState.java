@@ -47,6 +47,10 @@ public class SlotState {
 
 	@Override
 	public String toString() {
+		return toString(",");
+	}
+
+	public String toString(String separator) {
 		StringBuilder bld = new StringBuilder();
 
 		int numRegularSlots = varargPosition() < 0 ? size() : Math.min(size(), varargPosition());
@@ -63,13 +67,13 @@ public class SlotState {
 			}
 
 			if (i + 1 < numRegularSlots) {
-				bld.append(',');
+				bld.append(separator);
 			}
 		}
 
 		if (varargPosition() >= 0) {
 			if (numRegularSlots > 0) {
-				bld.append(',');
+				bld.append(separator);
 			}
 			bld.append("+");
 		}

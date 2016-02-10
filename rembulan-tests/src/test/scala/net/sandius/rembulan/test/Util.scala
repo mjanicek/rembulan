@@ -19,8 +19,8 @@ object Util {
     if (s.length >= width) s else s + fillStr(" ", width - s.length)
   }
 
-  def tabulate(lines: Seq[String], tab: String): Seq[String] = {
-    val tabbedLines = for (l <- lines) yield l.split("\t").toSeq
+  def tabulate(lines: Seq[String], tab: String, separator: String): Seq[String] = {
+    val tabbedLines = for (l <- lines) yield l.split(separator).toSeq
     val numCols = (tabbedLines map { _.size }).max
     val matrix = tabbedLines map { tl => tl ++ Seq.fill[String](numCols - tl.size)("") }
 
