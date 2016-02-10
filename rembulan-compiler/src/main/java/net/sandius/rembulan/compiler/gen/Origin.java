@@ -1,6 +1,10 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.lbc.PrototypePrinter;
 import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 public abstract class Origin {
 
@@ -65,6 +69,36 @@ public abstract class Origin {
 		@Override
 		public String toString() {
 			return "^" + index;
+		}
+
+	}
+
+	public static class Closure extends Origin {
+
+		public final Prototype prototype;
+
+		public Closure(Prototype prototype) {
+			this.prototype = Objects.requireNonNull(prototype);
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Closure closure = (Closure) o;
+
+			return prototype.equals(closure.prototype);
+		}
+
+		@Override
+		public int hashCode() {
+			return prototype.hashCode();
+		}
+
+		@Override
+		public String toString() {
+			return "$" + PrototypePrinter.pseudoAddr(prototype);
 		}
 
 	}

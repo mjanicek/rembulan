@@ -762,7 +762,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			s = s.updateType(r_dest, Type.FUNCTION);
+			s = s.update(r_dest, new Slot(new Origin.Closure(prototype), Type.FUNCTION));
 
 			for (Prototype.UpvalueDesc uvd : prototype.getUpValueDescriptions()) {
 				if (uvd.inStack) {
