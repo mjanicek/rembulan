@@ -99,7 +99,7 @@ public abstract class UnaryOperation extends Linear {
 
 		@Override
 		protected Type resultType(Type in) {
-			return in == Type.TABLE || in == Type.STRING ? Type.NUMBER_INTEGER : Type.ANY;
+			return in == Type.STRING ? Type.NUMBER_INTEGER : Type.ANY;
 		}
 
 	}
