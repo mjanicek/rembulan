@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.gen.block.BinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.CloseUpvalues;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
+import net.sandius.rembulan.compiler.gen.block.UnaryOperation;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 
@@ -147,22 +148,22 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_UNM(int a, int b) {
-		appender.append(new LuaInstruction.UnOp(prototype, LuaInstruction.UnOpType.UNM, a, b)).toNext();
+		appender.append(new UnaryOperation.Unm(a, b)).toNext();
 	}
 
 	@Override
 	public void l_BNOT(int a, int b) {
-		appender.append(new LuaInstruction.UnOp(prototype, LuaInstruction.UnOpType.BNOT, a, b)).toNext();
+		appender.append(new UnaryOperation.BNot(a, b)).toNext();
 	}
 
 	@Override
 	public void l_NOT(int a, int b) {
-		appender.append(new LuaInstruction.UnOp(prototype, LuaInstruction.UnOpType.NOT, a, b)).toNext();
+		appender.append(new UnaryOperation.Not(a, b)).toNext();
 	}
 
 	@Override
 	public void l_LEN(int a, int b) {
-		appender.append(new LuaInstruction.UnOp(prototype, LuaInstruction.UnOpType.LEN, a, b)).toNext();
+		appender.append(new UnaryOperation.Len(a, b)).toNext();
 	}
 
 	@Override

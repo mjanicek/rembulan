@@ -344,59 +344,6 @@ public class LuaInstruction {
 
 	}
 
-	public enum UnOpType {
-		UNM, BNOT, NOT, LEN;
-	}
-
-	// TODO
-	public static class UnOp extends Linear {
-
-		public final Prototype prototype;
-
-		public final UnOpType op;
-		public final int dest;
-		public final int b;
-
-		public UnOp(Prototype prototype, UnOpType op, int dest, int b) {
-			this.prototype = Objects.requireNonNull(prototype);
-			this.op = Objects.requireNonNull(op);
-			this.dest = dest;
-			this.b = b;
-		}
-
-		@Override
-		public String toString() {
-			return op.toString() + "(" + dest + "," + b + ")";
-		}
-
-		@Override
-		protected SlotState effect(SlotState s) {
-			Type argType = b < 0 ? constantType(prototype.getConstants().get(-b - 1)) : s.getType(b);
-
-			Type resultType = Type.ANY;  // assume we'll be calling a metamethod
-
-			switch (op) {
-				case UNM:
-					if (argType.isSubtypeOf(Type.NUMBER)) resultType = argType;
-					break;
-
-				case BNOT:
-					if (argType == Type.NUMBER_INTEGER) resultType = argType;
-					break;
-
-				case NOT:
-					resultType = Type.BOOLEAN;
-					break;
-
-				case LEN:
-					if (argType == Type.STRING) resultType = Type.NUMBER_INTEGER;
-					break;
-			}
-
-			return s.updateType(dest, resultType);
-		}
-	}
-
 	public static class Concat extends Linear {
 
 		public final int r_dest;
