@@ -108,40 +108,6 @@ public class CompiledPrototype {
 	}
 
 	@Deprecated
-	private Iterable<Node> reachableNodes(Node from) {
-		return reachability(from).keySet();
-	}
-
-	@Deprecated
-	private Map<Node, Integer> reachability(Node from) {
-		final Map<Node, Integer> inDegree = new HashMap<>();
-
-		NodeVisitor visitor = new NodeVisitor() {
-
-			@Override
-			public boolean visitNode(Node n) {
-				if (inDegree.containsKey(n)) {
-					inDegree.put(n, inDegree.get(n) + 1);
-					return false;
-				}
-				else {
-					inDegree.put(n, 1);
-					return true;
-				}
-			}
-
-			@Override
-			public void visitEdge(Node from, Node to) {
-				// no-op
-			}
-
-		};
-
-		from.accept(visitor);
-
-		return Collections.unmodifiableMap(inDegree);
-	}
-
 	private Map<Node, Edges> reachabilityEdges(Node from) {
 		final Map<Node, Integer> timesVisited = new HashMap<>();
 		final Map<Node, Edges> edges = new HashMap<>();
@@ -218,7 +184,7 @@ public class CompiledPrototype {
 	}
 
 	private void clearSlots() {
-		for (Node n : reachableNodes(callEntry)) {
+		for (Node n : Nodes.reachableNodes(callEntry)) {
 			n.clearSlots();
 		}
 	}
@@ -270,7 +236,7 @@ public class CompiledPrototype {
 	}
 
 	public void inlineInnerJumps() {
-		for (Node n : reachableNodes(callEntry)) {
+		for (Node n : Nodes.reachableNodes(callEntry)) {
 			if (n instanceof UnconditionalJump) {
 				((UnconditionalJump) n).tryInlining();
 			}
@@ -278,7 +244,7 @@ public class CompiledPrototype {
 	}
 
 	public void inlineBranches() {
-		for (Node n : reachableNodes(callEntry)) {
+		for (Node n : Nodes.reachableNodes(callEntry)) {
 			if (n instanceof Branch) {
 				Branch b = (Branch) n;
 				Boolean inline = b.canBeInlined();
@@ -291,7 +257,7 @@ public class CompiledPrototype {
 	}
 
 	public void makeBlocks() {
-		for (Node n : reachableNodes(callEntry)) {
+		for (Node n : Nodes.reachableNodes(callEntry)) {
 			if (n instanceof Target) {
 				Target t = (Target) n;
 				if (t.next() instanceof Linear) {
@@ -305,7 +271,7 @@ public class CompiledPrototype {
 	}
 
 	private void addResumptionPoints() {
-		for (Node n : reachableNodes(callEntry)) {
+		for (Node n : Nodes.reachableNodes(callEntry)) {
 			if (n instanceof AccountingNode) {
 				insertResumptionAfter((AccountingNode) n);
 			}

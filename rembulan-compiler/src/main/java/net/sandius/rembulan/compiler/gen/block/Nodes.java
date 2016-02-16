@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler.gen.block;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -189,6 +190,32 @@ public abstract class Nodes {
 				}
 			}
 		});
+	}
+
+	public static Set<Node> reachableNodes(Node from) {
+		final Set<Node> visited = new HashSet<>();
+
+		NodeVisitor visitor = new NodeVisitor() {
+			@Override
+			public boolean visitNode(Node n) {
+				if (visited.contains(n)) {
+					return false;
+				}
+				else {
+					visited.add(n);
+					return true;
+				}
+			}
+
+			@Override
+			public void visitEdge(Node from, Node to) {
+				// no-op
+			}
+		};
+
+		from.accept(visitor);
+
+		return Collections.unmodifiableSet(visited);
 	}
 
 }
