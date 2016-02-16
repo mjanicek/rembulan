@@ -12,8 +12,10 @@ import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
 import net.sandius.rembulan.compiler.gen.block.LocalVariableEffect;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.Node;
+import net.sandius.rembulan.compiler.gen.block.NodeAction;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
 import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
+import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
 import net.sandius.rembulan.compiler.gen.block.Target;
@@ -74,43 +76,10 @@ public class CompiledPrototype {
 		return Type.FunctionType.of(actualParameters(), returnType());
 	}
 
-	public interface NodeAction {
-
-		void visit(Node n);
-
-	}
-
-	// should not modify the underlying graph!
-	public void traverseOnce(final NodeAction na) {
-		final Set<Node> visited = new HashSet<>();
-
-		NodeVisitor nv = new NodeVisitor() {
-			@Override
-			public boolean visitNode(Node node) {
-				if (visited.contains(node)) {
-					return false;
-				}
-				else {
-					visited.add(node);
-					na.visit(node);
-					return true;
-				}
-			}
-
-			@Override
-			public void visitEdge(Node from, Node to) {
-				// no-op
-			}
-
-		};
-
-		callEntry.accept(nv);
-	}
-
 	public void computeCallSites() {
 		callSites.clear();
 
-		traverseOnce(new NodeAction() {
+		Nodes.traverseOnce(callEntry, new NodeAction() {
 			@Override
 			public void visit(Node n) {
 				if (n instanceof LuaInstruction.CallInstruction) {
@@ -276,8 +245,7 @@ public class CompiledPrototype {
 	public void computeReturnType() {
 		final Ptr<TypeSeq> ret = new Ptr<>();
 
-		traverseOnce(new NodeAction() {
-
+		Nodes.traverseOnce(callEntry, new NodeAction() {
 			@Override
 			public void visit(Node n) {
 				if (n instanceof Exit) {
@@ -285,7 +253,6 @@ public class CompiledPrototype {
 					ret.set(!ret.isNull() ? ret.get().join(at) : at);
 				}
 			}
-
 		});
 
 		returnType = !ret.isNull() ? ret.get() : TypeSeq.vararg();
@@ -303,18 +270,6 @@ public class CompiledPrototype {
 		callEntry.setTarget(newEntryTarget);
 
 		// TODO: return hooks
-	}
-
-	public void applyTransformation(final LinearSeqTransformation tf) {
-		traverseOnce(new NodeAction() {
-			@Override
-			public void visit(Node n) {
-				if (n instanceof LinearSeq) {
-					LinearSeq seq = (LinearSeq) n;
-					seq.apply(tf);
-				}
-			}
-		});
 	}
 
 	public void inlineInnerJumps() {
@@ -361,7 +316,7 @@ public class CompiledPrototype {
 	}
 
 	public void dissolveBlocks() {
-		applyTransformation(new LinearSeqTransformation() {
+		Nodes.applyTransformation(callEntry, new LinearSeqTransformation() {
 			@Override
 			public void apply(LinearSeq seq) {
 				seq.dissolve();

@@ -1,39 +1,24 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.AccountingNode;
-import net.sandius.rembulan.compiler.gen.block.Branch;
-import net.sandius.rembulan.compiler.gen.block.Capture;
 import net.sandius.rembulan.compiler.gen.block.Entry;
-import net.sandius.rembulan.compiler.gen.block.Exit;
-import net.sandius.rembulan.compiler.gen.block.HookNode;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
-import net.sandius.rembulan.compiler.gen.block.LocalVariableEffect;
-import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.Node;
-import net.sandius.rembulan.compiler.gen.block.NodeAppender;
-import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
-import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
-import net.sandius.rembulan.compiler.gen.block.Sink;
+import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.Target;
-import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
-import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.Set;
 
 public class FlowIt {
@@ -88,10 +73,10 @@ public class FlowIt {
 		cp.inlineInnerJumps();
 		cp.makeBlocks();
 
-		cp.applyTransformation(new CollectCPUAccounting());
+		Nodes.applyTransformation(cp.callEntry, new CollectCPUAccounting());
 
 		// remove repeated line info nodes
-		cp.applyTransformation(new RemoveRedundantLineNodes());
+		Nodes.applyTransformation(cp.callEntry, new RemoveRedundantLineNodes());
 
 		// dissolve blocks
 		cp.dissolveBlocks();

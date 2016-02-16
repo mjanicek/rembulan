@@ -3,6 +3,9 @@ package net.sandius.rembulan.compiler.gen.block;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public abstract class Nodes {
 
 	private Nodes() {
@@ -147,6 +150,45 @@ public abstract class Nodes {
 			}
 
 		};
+	}
+
+	// should not modify the underlying graph!
+	public static void traverseOnce(Node from, final NodeAction na) {
+		final Set<Node> visited = new HashSet<>();
+
+		NodeVisitor nv = new NodeVisitor() {
+			@Override
+			public boolean visitNode(Node node) {
+				if (visited.contains(node)) {
+					return false;
+				}
+				else {
+					visited.add(node);
+					na.visit(node);
+					return true;
+				}
+			}
+
+			@Override
+			public void visitEdge(Node from, Node to) {
+				// no-op
+			}
+
+		};
+
+		from.accept(nv);
+	}
+
+	public static void applyTransformation(Node from, final LinearSeqTransformation tf) {
+		Nodes.traverseOnce(from, new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof LinearSeq) {
+					LinearSeq seq = (LinearSeq) n;
+					seq.apply(tf);
+				}
+			}
+		});
 	}
 
 }
