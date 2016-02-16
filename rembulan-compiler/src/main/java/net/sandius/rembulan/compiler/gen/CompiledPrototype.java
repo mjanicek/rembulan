@@ -73,19 +73,6 @@ public class CompiledPrototype {
 		return Type.FunctionType.of(actualParameters(), returnType());
 	}
 
-	private void clearCallSite(Prototype target) {
-		Objects.requireNonNull(target);
-
-		Set<TypeSeq> cs = callSites.get(target);
-
-		if (cs != null) {
-			cs.clear();
-		}
-		else {
-			callSites.put(target, new HashSet<TypeSeq>());
-		}
-	}
-
 	private void addCallSite(Prototype target, TypeSeq args) {
 		Objects.requireNonNull(target);
 		Objects.requireNonNull(args);
@@ -103,25 +90,8 @@ public class CompiledPrototype {
 		}
 	}
 
-	private Iterable<TypeSeq> callSitesFor(Prototype target) {
-		Objects.requireNonNull(target);
-
-		Set<TypeSeq> cs = callSites.get(target);
-
-		if (cs != null) {
-			return Collections.unmodifiableSet(cs);
-		}
-		else {
-			return Collections.emptySet();
-		}
-	}
-
 	public void computeCallSites() {
 		callSites.clear();
-
-//		for (Prototype np : prototype.getNestedPrototypes()) {
-//			clearCallSite(np);
-//		}
 
 		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
 			if (n instanceof LuaInstruction.Call) {
