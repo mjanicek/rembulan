@@ -238,9 +238,6 @@ object AnalysisRunner {
       f
     }
 
-    val flowEdges = flow.reachabilityGraph.toMap
-//    val flowStates = flow.slots.toMap
-
     def slotsToString(slots: SlotState): String = {
       Option(slots) match {
         case Some(s) => "[" + s.toString(",\t") + "]"
@@ -279,17 +276,13 @@ object AnalysisRunner {
       }
     }
 
-    val vertices = flowEdges.keySet map { MyNode }
-    val in = (for ((n, es) <- flowEdges) yield (es.in.toSet map { e: Node => (e, n) })).flatten
-    val out = (for ((n, es) <- flowEdges) yield (es.out.toSet map { e: Node => (n, e) })).flatten
-//      val edges = (in ++ out).toSet
-    val edges0 = (in ++ out).toSet
-    val edges = edges0 map { case (u, v) => (MyNode(u), MyNode(v)) }
-
+    val flowGraph = flow.nodeGraph
+    val vs = flowGraph.vertices().toSet
+    val es = flowGraph.edges().toSet map { p: net.sandius.rembulan.util.Pair[Node, Node] => (p.first, p.second) }
 
     val graph = Graph(
-      vertices = vertices,
-      edges = edges.toList
+      vertices = vs map { MyNode },
+      edges = (es map { case (u, v) => (MyNode(u), MyNode(v)) }).toList
     )
 
 //    println("Resume points:")

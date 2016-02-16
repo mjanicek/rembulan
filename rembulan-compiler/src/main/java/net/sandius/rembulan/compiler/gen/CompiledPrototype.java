@@ -14,15 +14,15 @@ import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeAction;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
-import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
-import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.Graph;
 import net.sandius.rembulan.util.IntBuffer;
+import net.sandius.rembulan.util.Pair;
 import net.sandius.rembulan.util.Ptr;
 
 import java.util.ArrayDeque;
@@ -44,10 +44,9 @@ public class CompiledPrototype {
 	public Entry callEntry;
 	public Set<ResumptionPoint> resumePoints;
 
-	public Map<Node, Edges> reachabilityGraph;
-
 	public Map<Prototype, Set<TypeSeq>> callSites;
 
+	@Deprecated
 	public static class Edges {
 		// FIXME: may in principle be multisets
 		public final Set<Node> in;
@@ -107,52 +106,32 @@ public class CompiledPrototype {
 		});
 	}
 
+	public Graph<Node> nodeGraph() {
+		return Nodes.toGraph(callEntry);
+	}
+
 	@Deprecated
-	private Map<Node, Edges> reachabilityEdges(Node from) {
-		final Map<Node, Integer> timesVisited = new HashMap<>();
+	private static Map<Node, Edges> reachabilityEdges(Graph<Node> g) {
+
 		final Map<Node, Edges> edges = new HashMap<>();
 
-		NodeVisitor visitor = new NodeVisitor() {
+		for (Node n : g.vertices()) {
+			Edges es = new Edges();
+			edges.put(n, es);
+		}
 
-			@Override
-			public boolean visitNode(Node node) {
-				if (timesVisited.containsKey(node)) {
-					timesVisited.put(node, timesVisited.get(node) + 1);
-					return false;
-				}
-				else {
-					timesVisited.put(node, 1);
-					if (!edges.containsKey(node)) {
-						edges.put(node, new Edges());
-					}
-					return true;
-				}
-			}
-
-			@Override
-			public void visitEdge(Node from, Node to) {
-				if (!edges.containsKey(from)) {
-					edges.put(from, new Edges());
-				}
-				if (!edges.containsKey(to)) {
-					edges.put(to, new Edges());
-				}
-
-				Edges fromEdges = edges.get(from);
-				Edges toEdges = edges.get(to);
-
-				fromEdges.out.add(to);
-				toEdges.in.add(from);
-			}
-		};
-
-		from.accept(visitor);
+		for (Pair<Node, Node> e : g.edges()) {
+			Node u = e.first();
+			Node v = e.second();
+			edges.get(u).out.add(v);
+			edges.get(v).in.add(u);
+		}
 
 		return Collections.unmodifiableMap(edges);
 	}
 
 	public void updateDataFlow() {
-		Map<Node, Edges> edges = reachabilityEdges(callEntry);
+		Map<Node, Edges> edges = reachabilityEdges(nodeGraph());
 
 		clearSlots();
 
@@ -187,10 +166,6 @@ public class CompiledPrototype {
 		for (Node n : Nodes.reachableNodes(callEntry)) {
 			n.clearSlots();
 		}
-	}
-
-	public void updateReachability() {
-		reachabilityGraph = reachabilityEdges(callEntry);
 	}
 
 	private static TypeSeq returnTypeToArgTypes(ReturnType rt) {
@@ -288,14 +263,16 @@ public class CompiledPrototype {
 	}
 
 	public void insertCaptureNodes() {
-		for (Node n : reachabilityGraph.keySet()) {
+		Map<Node, Edges> rg = reachabilityEdges(nodeGraph());
+
+		for (Node n : rg.keySet()) {
 			if (n instanceof Sink && !(n instanceof LocalVariableEffect)) {
 				SlotState s_n = n.inSlots();
 
 				if (s_n != null) {
 					IntBuffer uncaptured = new IntBuffer();
 
-					for (Node m : reachabilityGraph.get(n).out) {
+					for (Node m : rg.get(n).out) {
 						SlotState s_m = m.inSlots();
 
 						for (int i = 0; i < s_n.size(); i++) {

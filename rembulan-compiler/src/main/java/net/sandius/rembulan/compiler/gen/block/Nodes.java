@@ -2,6 +2,8 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.Graph;
+import net.sandius.rembulan.util.Pair;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -216,6 +218,36 @@ public abstract class Nodes {
 		from.accept(visitor);
 
 		return Collections.unmodifiableSet(visited);
+	}
+
+	public static Graph<Node> toGraph(Node from) {
+
+		final Set<Node> vertices = new HashSet<>();
+		final Set<Pair<Node, Node>> edges = new HashSet<>();
+
+		NodeVisitor visitor = new NodeVisitor() {
+
+			@Override
+			public boolean visitNode(Node node) {
+				if (vertices.contains(node)) {
+					return false;
+				}
+				else {
+					vertices.add(node);
+					return true;
+				}
+			}
+
+			@Override
+			public void visitEdge(Node from, Node to) {
+				Pair<Node, Node> edge = new Pair<>(from, to);
+				edges.add(edge);
+			}
+		};
+
+		from.accept(visitor);
+
+		return Graph.wrap(Collections.unmodifiableSet(vertices), Collections.unmodifiableSet(edges));
 	}
 
 }

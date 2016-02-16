@@ -10,9 +10,13 @@ public class Graph<T> {
 	protected final Set<T> vertices;
 	protected final Set<Pair<T, T>> edges;
 
-	public Graph(Set<T> vertices, Set<Pair<T, T>> edges) {
+	private Graph(Set<T> vertices, Set<Pair<T, T>> edges) {
 		this.vertices = Objects.requireNonNull(vertices);
 		this.edges = Objects.requireNonNull(edges);
+	}
+
+	public static <T> Graph<T> wrap(Set<T> vertices, Set<Pair<T, T>> edges) {
+		return new Graph(vertices, edges);
 	}
 
 	public static <T> Graph<T> immutableCopyFrom(Iterable<T> vertices, Iterable<Pair<T, T>> edges) {
@@ -27,7 +31,7 @@ public class Graph<T> {
 			es.add(e);
 		}
 
-		return new Graph<T>(Collections.unmodifiableSet(vs), Collections.unmodifiableSet(es));
+		return wrap(Collections.unmodifiableSet(vs), Collections.unmodifiableSet(es));
 	}
 
 	@Override

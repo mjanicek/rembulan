@@ -10,6 +10,7 @@ import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Graph;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
@@ -87,7 +88,6 @@ public class FlowIt {
 //		System.out.println();
 //		printNodes(entryPoints);
 
-		cp.updateReachability();
 		cp.updateDataFlow();
 
 		cp.inlineBranches();
@@ -101,7 +101,6 @@ public class FlowIt {
 
 		cp.makeBlocks();
 
-		cp.updateReachability();
 		cp.updateDataFlow();
 
 		cp.computeReturnType();
@@ -115,8 +114,8 @@ public class FlowIt {
 	}
 
 	@Deprecated
-	public Map<Node, CompiledPrototype.Edges> reachabilityGraph() {
-		return mainUnit.generic().reachabilityGraph;
+	public Graph<Node> nodeGraph() {
+		return mainUnit.generic().nodeGraph();
 	}
 
 	@Deprecated
