@@ -38,25 +38,29 @@ import java.util.Set;
 
 public class FlowIt {
 
-	public final Prototype prototype;
+	private final Map<Prototype, Unit> units;
 
-	private final Unit unit;
-
-	public Entry callEntry;
-	public Set<ResumptionPoint> resumePoints;
-
-	public Map<Node, Edges> reachabilityGraph;
-
-	public Map<Prototype, Set<TypeSeq>> callSites;
-
-	private TypeSeq returnType;
+	@Deprecated
+	private final Unit mainUnit;
 
 	public FlowIt(Prototype prototype) {
-		this.prototype = Objects.requireNonNull(prototype);
-		this.unit = new Unit(prototype);
+		Objects.requireNonNull(prototype);
+
+		units = new HashMap<>();
+
+		mainUnit = new Unit(prototype);
+		units.put(prototype, mainUnit);
 	}
 
+	@Deprecated
 	public void go() {
+		goGeneric(mainUnit);
+	}
+
+	public void goGeneric(Unit unit) {
+		Prototype prototype = unit.prototype;
+		CompiledPrototype cp = new CompiledPrototype(prototype, unit.genericParameters());
+
 		IntVector code = prototype.getCode();
 		Target[] targets = new Target[code.length()];
 		for (int pc = 0; pc < targets.length; pc++) {
@@ -71,33 +75,26 @@ public class FlowIt {
 			translator.translate(pc);
 		}
 
-//		System.out.println("[");
-//		for (int i = 0; i < pcLabels.size(); i++) {
-//			NLabel label = pcLabels.get(i);
-//			System.out.println(i + ": " + label.toString());
-//		}
-//		System.out.println("]");
+		cp.returnType = TypeSeq.vararg();
 
-		returnType = TypeSeq.vararg();
+		cp.callEntry = new Entry("main", unit.genericParameters(), prototype.getMaximumStackSize(), pcLabels.get(0));
 
-		callEntry = new Entry("main", unit.genericParameters(), prototype.getMaximumStackSize(), pcLabels.get(0));
+		cp.resumePoints = new HashSet<>();
 
-		resumePoints = new HashSet<>();
+		cp.callSites = new HashMap<>();
 
-		callSites = new HashMap<>();
+		cp.insertHooks();
 
-		insertHooks();
+		cp.inlineInnerJumps();
+		cp.makeBlocks();
 
-		inlineInnerJumps();
-		makeBlocks();
-
-		applyTransformation(new CollectCPUAccounting());
+		cp.applyTransformation(new CollectCPUAccounting());
 
 		// remove repeated line info nodes
-		applyTransformation(new RemoveRedundantLineNodes());
+		cp.applyTransformation(new RemoveRedundantLineNodes());
 
 		// dissolve blocks
-		dissolveBlocks();
+		cp.dissolveBlocks();
 
 		// remove all line info nodes
 //		applyTransformation(entryPoints, new LinearSeqTransformation.Remove(Predicates.isClass(LineInfo.class)));
@@ -105,147 +102,41 @@ public class FlowIt {
 //		System.out.println();
 //		printNodes(entryPoints);
 
-		updateReachability();
-		updateDataFlow();
+		cp.updateReachability();
+		cp.updateDataFlow();
 
-		inlineBranches();
+		cp.inlineBranches();
 
 		// add capture nodes
-		insertCaptureNodes();
+		cp.insertCaptureNodes();
 
 //		addResumptionPoints();
 
-		computeCallSites();
+		cp.computeCallSites();
 
-		makeBlocks();
+		cp.makeBlocks();
 
-		updateReachability();
-		updateDataFlow();
+		cp.updateReachability();
+		cp.updateDataFlow();
 
-		computeReturnType();
+		cp.computeReturnType();
 
-		unit.setGeneric(returnType);
-	}
-
-	private void clearCallSite(Prototype target) {
-		Objects.requireNonNull(target);
-
-		Set<TypeSeq> cs = callSites.get(target);
-
-		if (cs != null) {
-			cs.clear();
-		}
-		else {
-			callSites.put(target, new HashSet<TypeSeq>());
-		}
-	}
-
-	private void addCallSite(Prototype target, TypeSeq args) {
-		Objects.requireNonNull(target);
-		Objects.requireNonNull(args);
-
-		Set<TypeSeq> cs = callSites.get(target);
-
-		if (cs != null) {
-			cs.add(args);
-		}
-		else {
-			Set<TypeSeq> s = new HashSet<>();
-			s.add(args);
-
-			callSites.put(target, s);
-		}
-	}
-
-	private Iterable<TypeSeq> callSitesFor(Prototype target) {
-		Objects.requireNonNull(target);
-
-		Set<TypeSeq> cs = callSites.get(target);
-
-		if (cs != null) {
-			return Collections.unmodifiableSet(cs);
-		}
-		else {
-			return Collections.emptySet();
-		}
-	}
-
-	private void computeCallSites() {
-		callSites.clear();
-
-//		for (Prototype np : prototype.getNestedPrototypes()) {
-//			clearCallSite(np);
-//		}
-
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof LuaInstruction.Call) {
-				LuaInstruction.Call c = (LuaInstruction.Call) n;
-
-				Slot target = c.callTarget(c.inSlots());
-
-				if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
-					Prototype proto = ((Origin.Closure) target.origin()).prototype;
-					TypeSeq args = c.callArguments(c.inSlots());
-					addCallSite(proto, args);
-				}
-			}
-			// FIXME: remove code duplication -- this could simply be an interface
-			else if (n instanceof LuaInstruction.TailCall) {
-				LuaInstruction.TailCall tc = (LuaInstruction.TailCall) n;
-
-				Slot target = tc.callTarget(tc.inSlots());
-
-				if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
-					Prototype proto = ((Origin.Closure) target.origin()).prototype;
-					TypeSeq args = tc.callArguments(tc.inSlots());
-					addCallSite(proto, args);
-				}
-			}
-		}
+		unit.setGeneric(cp);
 	}
 
 	@Deprecated
 	public Type.FunctionType functionType() {
-		return unit.generic().functionType();
+		return mainUnit.generic().functionType();
 	}
 
-	private static TypeSeq returnTypeToArgTypes(ReturnType rt) {
-		if (rt instanceof ReturnType.ConcreteReturnType) {
-			return ((ReturnType.ConcreteReturnType) rt).typeSeq;
-		}
-		else if (rt instanceof ReturnType.TailCallReturnType) {
-			return TypeSeq.vararg();  // TODO
-		}
-		else {
-			throw new IllegalStateException("unknown return type: " + rt.toString());
-		}
+	@Deprecated
+	public Map<Node, CompiledPrototype.Edges> reachabilityGraph() {
+		return mainUnit.generic().reachabilityGraph;
 	}
 
-	private void computeReturnType() {
-		TypeSeq ret = null;
-
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof Exit) {
-				TypeSeq at = returnTypeToArgTypes(((Exit) n).returnType());
-				ret = ret != null ? ret.join(at) : at;
-			}
-		}
-
-		returnType = ret != null ? ret : TypeSeq.vararg();
-	}
-
-	public void insertHooks() {
-		// the call hook
-		Target oldEntryTarget = callEntry.target();
-		Target newEntryTarget = new Target();
-		NodeAppender appender = new NodeAppender(newEntryTarget);
-		appender
-				.append(new HookNode.Call())
-				.jumpTo(oldEntryTarget);
-
-		callEntry.setTarget(newEntryTarget);
-
-		// TODO: return hooks
+	@Deprecated
+	public Map<Prototype, Set<TypeSeq>> callSites() {
+		return mainUnit.generic().callSites;
 	}
 
 	private static class CollectCPUAccounting extends LinearSeqTransformation {
@@ -307,276 +198,6 @@ public class FlowIt {
 
 		}
 
-	}
-
-	private void applyTransformation(LinearSeqTransformation tf) {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof LinearSeq) {
-				LinearSeq seq = (LinearSeq) n;
-				seq.apply(tf);
-			}
-		}
-	}
-
-	private void inlineInnerJumps() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof UnconditionalJump) {
-				((UnconditionalJump) n).tryInlining();
-			}
-		}
-	}
-
-	private void inlineBranches() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof Branch) {
-				Branch b = (Branch) n;
-				Boolean inline = b.canBeInlined();
-				if (inline != null) {
-					// we can transform this to an unconditional jump
-					b.inline(inline.booleanValue());
-				}
-			}
-		}
-	}
-
-	private void makeBlocks() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof Target) {
-				Target t = (Target) n;
-				if (t.next() instanceof Linear) {
-					// only insert blocks where they have a chance to grow
-					LinearSeq block = new LinearSeq();
-					block.insertAfter(t);
-					block.grow();
-				}
-			}
-		}
-	}
-
-	private void addResumptionPoints() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof AccountingNode) {
-				insertResumptionAfter((AccountingNode) n);
-			}
-		}
-	}
-
-	private void dissolveBlocks() {
-		applyTransformation(new LinearSeqTransformation() {
-			@Override
-			public void apply(LinearSeq seq) {
-				seq.dissolve();
-			}
-		});
-	}
-
-	public void updateReachability() {
-		reachabilityGraph = reachabilityEdges(Collections.singleton(callEntry));
-	}
-
-	public void insertCaptureNodes() {
-		for (Node n : reachabilityGraph.keySet()) {
-			if (n instanceof Sink && !(n instanceof LocalVariableEffect)) {
-				SlotState s_n = n.inSlots();
-
-				if (s_n != null) {
-					IntBuffer uncaptured = new IntBuffer();
-
-					for (Node m : reachabilityGraph.get(n).out) {
-						SlotState s_m = m.inSlots();
-
-						for (int i = 0; i < s_n.size(); i++) {
-							// FIXME: double-check this condition
-							if (s_n.isValidIndex(i) && s_m.isValidIndex(i)) {
-								if (!s_n.isCaptured(i) && s_m.isCaptured(i)) {
-									// need to capture i
-									uncaptured.append(i);
-								}
-							}
-						}
-					}
-
-					if (!uncaptured.isEmpty()) {
-						Capture captureNode = new Capture(uncaptured.toVector());
-						captureNode.insertBefore((Sink) n);
-					}
-				}
-			}
-		}
-	}
-
-	public void insertResumptionAfter(Linear n) {
-		ResumptionPoint resume = new ResumptionPoint();
-		resume.insertAfter(n);
-		resumePoints.add(resume);
-	}
-
-	public static class Edges {
-		// FIXME: may in principle be multisets
-		public final Set<Node> in;
-		public final Set<Node> out;
-
-		public Edges() {
-			this.in = new HashSet<>();
-			this.out = new HashSet<>();
-		}
-	}
-
-	private void clearSlots() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			n.clearSlots();
-		}
-	}
-
-	private boolean joinWith(Node n, SlotState addIn) {
-		Check.notNull(n);
-		Check.notNull(addIn);
-		return n.pushSlots(addIn);
-	}
-
-	public void updateDataFlow() {
-		Map<Node, Edges> edges = reachabilityEdges(Collections.singleton(callEntry));
-
-		clearSlots();
-
-		Queue<Node> workList = new ArrayDeque<>();
-
-		// push entry point's slots to the immediate successors
-		for (Node n : edges.get(callEntry).out) {
-			if (n.pushSlots(callEntry.outSlots())) {
-				workList.add(n);
-			}
-		}
-
-		while (!workList.isEmpty()) {
-			Node n = workList.remove();
-			assert (n != null);
-
-			assert (n.inSlots() != null);
-
-			// compute effect and push it to outputs
-			SlotState o = n.outSlots();
-
-			for (Node m : edges.get(n).out) {
-				if (m.pushSlots(o)) {
-					workList.add(m);
-				}
-			}
-
-		}
-	}
-
-	private Map<Node, Edges> reachabilityEdges(Iterable<Entry> entryPoints) {
-		final Map<Node, Integer> timesVisited = new HashMap<>();
-		final Map<Node, Edges> edges = new HashMap<>();
-
-		NodeVisitor visitor = new NodeVisitor() {
-
-			@Override
-			public boolean visitNode(Node node) {
-				if (timesVisited.containsKey(node)) {
-					timesVisited.put(node, timesVisited.get(node) + 1);
-					return false;
-				}
-				else {
-					timesVisited.put(node, 1);
-					if (!edges.containsKey(node)) {
-						edges.put(node, new Edges());
-					}
-					return true;
-				}
-			}
-
-			@Override
-			public void visitEdge(Node from, Node to) {
-				if (!edges.containsKey(from)) {
-					edges.put(from, new Edges());
-				}
-				if (!edges.containsKey(to)) {
-					edges.put(to, new Edges());
-				}
-
-				Edges fromEdges = edges.get(from);
-				Edges toEdges = edges.get(to);
-
-				fromEdges.out.add(to);
-				toEdges.in.add(from);
-			}
-		};
-
-		for (Entry entry : entryPoints) {
-			entry.accept(visitor);
-		}
-
-		return Collections.unmodifiableMap(edges);
-	}
-
-	private void printNodes(Iterable<Entry> entryPoints) {
-		ArrayList<Node> nodes = new ArrayList<>();
-		Map<Node, Edges> edges = reachabilityEdges(entryPoints);
-
-		for (Node n : edges.keySet()) {
-			nodes.add(n);
-		}
-
-		System.out.println("[");
-		for (int i = 0; i < nodes.size(); i++) {
-			Node n = nodes.get(i);
-			Edges e = edges.get(n);
-
-			System.out.print("\t" + i + ": ");
-			System.out.print("{ ");
-			for (Node m : e.in) {
-				int idx = nodes.indexOf(m);
-				System.out.print(idx + " ");
-			}
-			System.out.print("} -> ");
-
-			System.out.print(n.toString());
-
-			System.out.print(" -> { ");
-			for (Node m : e.out) {
-				int idx = nodes.indexOf(m);
-				System.out.print(idx + " ");
-			}
-			System.out.print("}");
-			System.out.println();
-		}
-		System.out.println("]");
-	}
-
-	private Iterable<Node> reachableNodes(Iterable<Entry> entryPoints) {
-		return reachability(entryPoints).keySet();
-	}
-
-	private Map<Node, Integer> reachability(Iterable<Entry> entryPoints) {
-		final Map<Node, Integer> inDegree = new HashMap<>();
-
-		NodeVisitor visitor = new NodeVisitor() {
-
-			@Override
-			public boolean visitNode(Node n) {
-				if (inDegree.containsKey(n)) {
-					inDegree.put(n, inDegree.get(n) + 1);
-					return false;
-				}
-				else {
-					inDegree.put(n, 1);
-					return true;
-				}
-			}
-
-			@Override
-			public void visitEdge(Node from, Node to) {
-				// no-op
-			}
-
-		};
-
-		for (Entry entry : entryPoints) {
-			entry.accept(visitor);
-		}
-		return Collections.unmodifiableMap(inDegree);
 	}
 
 }

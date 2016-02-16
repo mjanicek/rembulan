@@ -29,32 +29,8 @@ public class Unit {
 		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
 	}
 
-	public void setGeneric(TypeSeq returnType) {
-		this.generic = new CompiledPrototype(genericParameters(), returnType);
-	}
-
-	public class CompiledPrototype {
-
-		private final TypeSeq actualParameters;
-		private final TypeSeq returnType;
-
-		protected CompiledPrototype(TypeSeq actualParameters, TypeSeq returnType) {
-			this.actualParameters = Objects.requireNonNull(actualParameters);
-			this.returnType = Objects.requireNonNull(returnType);
-		}
-
-		public TypeSeq actualParameters() {
-			return actualParameters;
-		}
-
-		public TypeSeq returnType() {
-			return returnType;
-		}
-
-		public Type.FunctionType functionType() {
-			return Type.FunctionType.of(actualParameters(), returnType());
-		}
-
+	public void setGeneric(CompiledPrototype cp) {
+		this.generic = cp;
 	}
 
 }
