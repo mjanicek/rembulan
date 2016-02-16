@@ -1,5 +1,7 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.util.PartialOrderComparisonResult;
+
 import java.util.Objects;
 
 public abstract class Type {
@@ -11,9 +13,11 @@ public abstract class Type {
 	// TODO: number-as-string, string-as-number, true, false, actual constant values?
 
 	// return true iff type(this) =< type(that)
+	// must return true if this.equals(that).
 	public abstract boolean isSubtypeOf(Type that);
 
 	// return true iff type(this) >= type(that)
+	// must return true if this.equals(that).
 	public boolean isSupertypeOf(Type that) {
 		return that.isSubtypeOf(this);
 	}
@@ -29,6 +33,31 @@ public abstract class Type {
 	@Deprecated
 	public static String toString(Type type) {
 		return type.toString();
+	}
+
+	// compare this to that, returning:
+	//   EQUAL if this.equals(that);
+	//   LESSER_THAN if this.isSubtypeOf(that) && !this.equals(that);
+	//   GREATER_THAN if that.isSubtypeOf(this) && !this.equals(that);
+	//   NOT_COMPARABLE if !this.isSubtypeOf(that) && !that.isSubtypeOf(that).
+	public PartialOrderComparisonResult compareTo(Type that) {
+		Objects.requireNonNull(that);
+		if (this.isSubtypeOf(that)) {
+			if (this.equals(that)) {
+				return PartialOrderComparisonResult.EQUAL;
+			}
+			else {
+				return PartialOrderComparisonResult.LESSER_THAN;
+			}
+		}
+		else {
+			if (that.isSubtypeOf(this)) {
+				return PartialOrderComparisonResult.GREATER_THAN;
+			}
+			else {
+				return PartialOrderComparisonResult.NOT_COMPARABLE;
+			}
+		}
 	}
 
 	public static final Type ANY = new AnyType();
