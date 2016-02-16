@@ -108,12 +108,12 @@ public class CompiledPrototype {
 	}
 
 	@Deprecated
-	private Iterable<Node> reachableNodes(Iterable<Entry> entryPoints) {
-		return reachability(entryPoints).keySet();
+	private Iterable<Node> reachableNodes(Node from) {
+		return reachability(from).keySet();
 	}
 
 	@Deprecated
-	private Map<Node, Integer> reachability(Iterable<Entry> entryPoints) {
+	private Map<Node, Integer> reachability(Node from) {
 		final Map<Node, Integer> inDegree = new HashMap<>();
 
 		NodeVisitor visitor = new NodeVisitor() {
@@ -137,13 +137,12 @@ public class CompiledPrototype {
 
 		};
 
-		for (Entry entry : entryPoints) {
-			entry.accept(visitor);
-		}
+		from.accept(visitor);
+
 		return Collections.unmodifiableMap(inDegree);
 	}
 
-	private Map<Node, Edges> reachabilityEdges(Iterable<Entry> entryPoints) {
+	private Map<Node, Edges> reachabilityEdges(Node from) {
 		final Map<Node, Integer> timesVisited = new HashMap<>();
 		final Map<Node, Edges> edges = new HashMap<>();
 
@@ -181,15 +180,13 @@ public class CompiledPrototype {
 			}
 		};
 
-		for (Entry entry : entryPoints) {
-			entry.accept(visitor);
-		}
+		from.accept(visitor);
 
 		return Collections.unmodifiableMap(edges);
 	}
 
 	public void updateDataFlow() {
-		Map<Node, Edges> edges = reachabilityEdges(Collections.singleton(callEntry));
+		Map<Node, Edges> edges = reachabilityEdges(callEntry);
 
 		clearSlots();
 
@@ -221,13 +218,13 @@ public class CompiledPrototype {
 	}
 
 	private void clearSlots() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
+		for (Node n : reachableNodes(callEntry)) {
 			n.clearSlots();
 		}
 	}
 
 	public void updateReachability() {
-		reachabilityGraph = reachabilityEdges(Collections.singleton(callEntry));
+		reachabilityGraph = reachabilityEdges(callEntry);
 	}
 
 	private static TypeSeq returnTypeToArgTypes(ReturnType rt) {
@@ -273,7 +270,7 @@ public class CompiledPrototype {
 	}
 
 	public void inlineInnerJumps() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
+		for (Node n : reachableNodes(callEntry)) {
 			if (n instanceof UnconditionalJump) {
 				((UnconditionalJump) n).tryInlining();
 			}
@@ -281,7 +278,7 @@ public class CompiledPrototype {
 	}
 
 	public void inlineBranches() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
+		for (Node n : reachableNodes(callEntry)) {
 			if (n instanceof Branch) {
 				Branch b = (Branch) n;
 				Boolean inline = b.canBeInlined();
@@ -294,7 +291,7 @@ public class CompiledPrototype {
 	}
 
 	public void makeBlocks() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
+		for (Node n : reachableNodes(callEntry)) {
 			if (n instanceof Target) {
 				Target t = (Target) n;
 				if (t.next() instanceof Linear) {
@@ -308,7 +305,7 @@ public class CompiledPrototype {
 	}
 
 	private void addResumptionPoints() {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
+		for (Node n : reachableNodes(callEntry)) {
 			if (n instanceof AccountingNode) {
 				insertResumptionAfter((AccountingNode) n);
 			}
