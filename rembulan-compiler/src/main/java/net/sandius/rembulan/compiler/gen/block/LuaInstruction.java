@@ -505,7 +505,15 @@ public class LuaInstruction {
 
 	}
 
-	public static class Call extends Linear {
+	public interface CallInstruction {
+
+		Slot callTarget();
+
+		TypeSeq callArguments();
+
+	}
+
+	public static class Call extends Linear implements CallInstruction {
 
 		public final int r_tgt;
 		public final int b;
@@ -519,8 +527,8 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = callTarget(inSlots()).type() instanceof Type.FunctionType ? "_F" : "_mt";
-			suffix += "_" + callArguments(inSlots());
+			String suffix = callTarget().type() instanceof Type.FunctionType ? "_F" : "_mt";
+			suffix += "_" + callArguments();
 			suffix += c > 0 ? "_" + (c - 1) : "_var";
 
 			return "CALL" + suffix + "(" + r_tgt + "," + b + "," + c + ")";
@@ -557,17 +565,19 @@ public class LuaInstruction {
 			return s;
 		}
 
-		public Slot callTarget(SlotState s) {
-			return s.get(r_tgt);
+		@Override
+		public Slot callTarget() {
+			return inSlots().get(r_tgt);
 		}
 
-		public TypeSeq callArguments(SlotState s) {
-			return argTypesFromSlots(s, r_tgt + 1, b);
+		@Override
+		public TypeSeq callArguments() {
+			return argTypesFromSlots(inSlots(), r_tgt + 1, b);
 		}
 
 	}
 
-	public static class TailCall extends Exit {
+	public static class TailCall extends Exit implements CallInstruction {
 
 		public final int r_tgt;
 		public final int b;
@@ -587,17 +597,19 @@ public class LuaInstruction {
 
 		@Override
 		public ReturnType returnType() {
-			Type targetType = callTarget(inSlots()).type();
-			TypeSeq typeSeq = callArguments(inSlots());
+			Type targetType = callTarget().type();
+			TypeSeq typeSeq = callArguments();
 			return new ReturnType.TailCallReturnType(targetType, typeSeq);
 		}
 
-		public Slot callTarget(SlotState s) {
-			return s.get(r_tgt);
+		@Override
+		public Slot callTarget() {
+			return inSlots().get(r_tgt);
 		}
 
-		public TypeSeq callArguments(SlotState s) {
-			return argTypesFromSlots(s, r_tgt + 1, b);
+		@Override
+		public TypeSeq callArguments() {
+			return argTypesFromSlots(inSlots(), r_tgt + 1, b);
 		}
 
 	}

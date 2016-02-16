@@ -73,48 +73,29 @@ public class CompiledPrototype {
 		return Type.FunctionType.of(actualParameters(), returnType());
 	}
 
-	private void addCallSite(Prototype target, TypeSeq args) {
-		Objects.requireNonNull(target);
-		Objects.requireNonNull(args);
-
-		Set<TypeSeq> cs = callSites.get(target);
-
-		if (cs != null) {
-			cs.add(args);
-		}
-		else {
-			Set<TypeSeq> s = new HashSet<>();
-			s.add(args);
-
-			callSites.put(target, s);
-		}
-	}
-
 	public void computeCallSites() {
 		callSites.clear();
 
 		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof LuaInstruction.Call) {
-				LuaInstruction.Call c = (LuaInstruction.Call) n;
+			if (n instanceof LuaInstruction.CallInstruction) {
+				LuaInstruction.CallInstruction c = (LuaInstruction.CallInstruction) n;
 
-				Slot target = c.callTarget(c.inSlots());
-
-				if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
-					Prototype proto = ((Origin.Closure) target.origin()).prototype;
-					TypeSeq args = c.callArguments(c.inSlots());
-					addCallSite(proto, args);
-				}
-			}
-			// FIXME: remove code duplication -- this could simply be an interface
-			else if (n instanceof LuaInstruction.TailCall) {
-				LuaInstruction.TailCall tc = (LuaInstruction.TailCall) n;
-
-				Slot target = tc.callTarget(tc.inSlots());
+				Slot target = c.callTarget();
 
 				if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
 					Prototype proto = ((Origin.Closure) target.origin()).prototype;
-					TypeSeq args = tc.callArguments(tc.inSlots());
-					addCallSite(proto, args);
+					TypeSeq args = c.callArguments();
+
+					// add to call sites
+					Set<TypeSeq> cs = callSites.get(proto);
+					if (cs != null) {
+						cs.add(args);
+					}
+					else {
+						Set<TypeSeq> s = new HashSet<>();
+						s.add(args);
+						callSites.put(proto, s);
+					}
 				}
 			}
 		}
