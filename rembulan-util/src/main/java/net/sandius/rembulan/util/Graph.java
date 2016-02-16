@@ -1,5 +1,6 @@
 package net.sandius.rembulan.util;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -14,7 +15,7 @@ public class Graph<T> {
 		this.edges = Objects.requireNonNull(edges);
 	}
 
-	public static <T> Graph<T> copyFrom(Iterable<T> vertices, Iterable<Pair<T, T>> edges) {
+	public static <T> Graph<T> immutableCopyFrom(Iterable<T> vertices, Iterable<Pair<T, T>> edges) {
 		Set<T> vs = new HashSet<>();
 		Set<Pair<T, T>> es = new HashSet<>();
 
@@ -26,7 +27,7 @@ public class Graph<T> {
 			es.add(e);
 		}
 
-		return new Graph<T>(vs, es);
+		return new Graph<T>(Collections.unmodifiableSet(vs), Collections.unmodifiableSet(es));
 	}
 
 	@Override
