@@ -324,10 +324,4 @@ public class CompiledPrototype {
 		resumePoints.add(resume);
 	}
 
-	private boolean joinWith(Node n, SlotState addIn) {
-		Check.notNull(n);
-		Check.notNull(addIn);
-		return n.pushSlots(addIn);
-	}
-
 }
