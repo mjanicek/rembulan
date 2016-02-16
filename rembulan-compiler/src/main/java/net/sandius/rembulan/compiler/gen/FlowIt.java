@@ -40,6 +40,8 @@ public class FlowIt {
 
 	public final Prototype prototype;
 
+	private final Unit unit;
+
 	public Entry callEntry;
 	public Set<ResumptionPoint> resumePoints;
 
@@ -50,7 +52,8 @@ public class FlowIt {
 	private TypeSeq returnType;
 
 	public FlowIt(Prototype prototype) {
-		this.prototype = prototype;
+		this.prototype = Objects.requireNonNull(prototype);
+		this.unit = new Unit(prototype);
 	}
 
 	public void go() {
@@ -77,7 +80,7 @@ public class FlowIt {
 
 		returnType = TypeSeq.vararg();
 
-		callEntry = new Entry("main", entryTypeSeq(), prototype.getMaximumStackSize(), pcLabels.get(0));
+		callEntry = new Entry("main", unit.genericParameters(), prototype.getMaximumStackSize(), pcLabels.get(0));
 
 		resumePoints = new HashSet<>();
 
@@ -120,6 +123,8 @@ public class FlowIt {
 		updateDataFlow();
 
 		computeReturnType();
+
+		unit.setGeneric(returnType);
 	}
 
 	private void clearCallSite(Prototype target) {
@@ -199,17 +204,9 @@ public class FlowIt {
 		}
 	}
 
-	private TypeSeq entryTypeSeq() {
-		Type[] types = new Type[prototype.getNumberOfParameters()];
-		for (int i = 0; i < types.length; i++) {
-			types[i] = Type.ANY;
-		}
-		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
-	}
-
-
+	@Deprecated
 	public Type.FunctionType functionType() {
-		return Type.FunctionType.of(entryTypeSeq(), returnType);
+		return unit.generic().functionType();
 	}
 
 	private static TypeSeq returnTypeToArgTypes(ReturnType rt) {
