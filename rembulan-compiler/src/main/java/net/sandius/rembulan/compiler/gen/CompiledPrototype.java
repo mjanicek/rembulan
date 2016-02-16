@@ -21,6 +21,7 @@ import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntBuffer;
+import net.sandius.rembulan.util.Ptr;
 
 import java.util.ArrayDeque;
 import java.util.Collections;
@@ -73,38 +74,76 @@ public class CompiledPrototype {
 		return Type.FunctionType.of(actualParameters(), returnType());
 	}
 
+	public interface NodeAction {
+
+		void visit(Node n);
+
+	}
+
+	// should not modify the underlying graph!
+	public void traverseOnce(final NodeAction na) {
+		final Set<Node> visited = new HashSet<>();
+
+		NodeVisitor nv = new NodeVisitor() {
+			@Override
+			public boolean visitNode(Node node) {
+				if (visited.contains(node)) {
+					return false;
+				}
+				else {
+					visited.add(node);
+					na.visit(node);
+					return true;
+				}
+			}
+
+			@Override
+			public void visitEdge(Node from, Node to) {
+				// no-op
+			}
+
+		};
+
+		callEntry.accept(nv);
+	}
+
 	public void computeCallSites() {
 		callSites.clear();
 
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof LuaInstruction.CallInstruction) {
-				LuaInstruction.CallInstruction c = (LuaInstruction.CallInstruction) n;
+		traverseOnce(new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof LuaInstruction.CallInstruction) {
+					LuaInstruction.CallInstruction c = (LuaInstruction.CallInstruction) n;
 
-				Slot target = c.callTarget();
+					Slot target = c.callTarget();
 
-				if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
-					Prototype proto = ((Origin.Closure) target.origin()).prototype;
-					TypeSeq args = c.callArguments();
+					if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
+						Prototype proto = ((Origin.Closure) target.origin()).prototype;
+						TypeSeq args = c.callArguments();
 
-					// add to call sites
-					Set<TypeSeq> cs = callSites.get(proto);
-					if (cs != null) {
-						cs.add(args);
-					}
-					else {
-						Set<TypeSeq> s = new HashSet<>();
-						s.add(args);
-						callSites.put(proto, s);
+						// add to call sites
+						Set<TypeSeq> cs = callSites.get(proto);
+						if (cs != null) {
+							cs.add(args);
+						}
+						else {
+							Set<TypeSeq> s = new HashSet<>();
+							s.add(args);
+							callSites.put(proto, s);
+						}
 					}
 				}
 			}
-		}
+		});
 	}
 
+	@Deprecated
 	private Iterable<Node> reachableNodes(Iterable<Entry> entryPoints) {
 		return reachability(entryPoints).keySet();
 	}
 
+	@Deprecated
 	private Map<Node, Integer> reachability(Iterable<Entry> entryPoints) {
 		final Map<Node, Integer> inDegree = new HashMap<>();
 
@@ -235,16 +274,21 @@ public class CompiledPrototype {
 	}
 
 	public void computeReturnType() {
-		TypeSeq ret = null;
+		final Ptr<TypeSeq> ret = new Ptr<>();
 
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof Exit) {
-				TypeSeq at = returnTypeToArgTypes(((Exit) n).returnType());
-				ret = ret != null ? ret.join(at) : at;
+		traverseOnce(new NodeAction() {
+
+			@Override
+			public void visit(Node n) {
+				if (n instanceof Exit) {
+					TypeSeq at = returnTypeToArgTypes(((Exit) n).returnType());
+					ret.set(!ret.isNull() ? ret.get().join(at) : at);
+				}
 			}
-		}
 
-		returnType = ret != null ? ret : TypeSeq.vararg();
+		});
+
+		returnType = !ret.isNull() ? ret.get() : TypeSeq.vararg();
 	}
 
 	public void insertHooks() {
@@ -261,13 +305,16 @@ public class CompiledPrototype {
 		// TODO: return hooks
 	}
 
-	public void applyTransformation(LinearSeqTransformation tf) {
-		for (Node n : reachableNodes(Collections.singleton(callEntry))) {
-			if (n instanceof LinearSeq) {
-				LinearSeq seq = (LinearSeq) n;
-				seq.apply(tf);
+	public void applyTransformation(final LinearSeqTransformation tf) {
+		traverseOnce(new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof LinearSeq) {
+					LinearSeq seq = (LinearSeq) n;
+					seq.apply(tf);
+				}
 			}
-		}
+		});
 	}
 
 	public void inlineInnerJumps() {
