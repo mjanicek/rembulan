@@ -163,9 +163,12 @@ public class CompiledPrototype {
 	}
 
 	private void clearSlots() {
-		for (Node n : Nodes.reachableNodes(callEntry)) {
-			n.clearSlots();
-		}
+		Nodes.traverseOnce(callEntry, new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				n.clearSlots();
+			}
+		});
 	}
 
 	private static TypeSeq returnTypeToArgTypes(ReturnType rt) {
@@ -211,46 +214,58 @@ public class CompiledPrototype {
 	}
 
 	public void inlineInnerJumps() {
-		for (Node n : Nodes.reachableNodes(callEntry)) {
-			if (n instanceof UnconditionalJump) {
-				((UnconditionalJump) n).tryInlining();
+		Nodes.traverseOnce(callEntry, new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof UnconditionalJump) {
+					((UnconditionalJump) n).tryInlining();
+				}
 			}
-		}
+		});
 	}
 
 	public void inlineBranches() {
-		for (Node n : Nodes.reachableNodes(callEntry)) {
-			if (n instanceof Branch) {
-				Branch b = (Branch) n;
-				Boolean inline = b.canBeInlined();
-				if (inline != null) {
-					// we can transform this to an unconditional jump
-					b.inline(inline.booleanValue());
+		Nodes.traverseOnce(callEntry, new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof Branch) {
+					Branch b = (Branch) n;
+					Boolean inline = b.canBeInlined();
+					if (inline != null) {
+						// we can transform this to an unconditional jump
+						b.inline(inline.booleanValue());
+					}
 				}
 			}
-		}
+		});
 	}
 
 	public void makeBlocks() {
-		for (Node n : Nodes.reachableNodes(callEntry)) {
-			if (n instanceof Target) {
-				Target t = (Target) n;
-				if (t.next() instanceof Linear) {
-					// only insert blocks where they have a chance to grow
-					LinearSeq block = new LinearSeq();
-					block.insertAfter(t);
-					block.grow();
+		Nodes.traverseOnce(callEntry, new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof Target) {
+					Target t = (Target) n;
+					if (t.next() instanceof Linear) {
+						// only insert blocks where they have a chance to grow
+						LinearSeq block = new LinearSeq();
+						block.insertAfter(t);
+						block.grow();
+					}
 				}
 			}
-		}
+		});
 	}
 
 	private void addResumptionPoints() {
-		for (Node n : Nodes.reachableNodes(callEntry)) {
-			if (n instanceof AccountingNode) {
-				insertResumptionAfter((AccountingNode) n);
+		Nodes.traverseOnce(callEntry, new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof AccountingNode) {
+					insertResumptionAfter((AccountingNode) n);
+				}
 			}
-		}
+		});
 	}
 
 	public void dissolveBlocks() {
