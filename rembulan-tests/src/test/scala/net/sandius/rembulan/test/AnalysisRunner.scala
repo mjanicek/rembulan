@@ -46,6 +46,18 @@ object AnalysisRunner {
           """
     }
 
+    object Upvalues3 extends Fragment {
+      code =
+          """local x, y
+            |if g then
+            |  y = function() return x end
+            |else
+            |  x = function() return y end
+            |end
+            |return x or y
+          """
+    }
+
 
     object BlockLocals extends Fragment {
       code =
@@ -330,7 +342,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = LocalUpvalue
+    val program = Upvalues3
 
     println(program.code)
 
