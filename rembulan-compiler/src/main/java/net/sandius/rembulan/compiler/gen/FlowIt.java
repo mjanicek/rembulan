@@ -1,26 +1,19 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.AccountingNode;
-import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
-import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
-import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.lbc.Prototype;
-import net.sandius.rembulan.util.Graph;
-import net.sandius.rembulan.util.IntVector;
-import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 
 public class FlowIt {
 
@@ -31,6 +24,10 @@ public class FlowIt {
 	public FlowIt(Prototype prototype) {
 		this.prototype = Objects.requireNonNull(prototype);
 		this.units = new HashMap<>();
+	}
+
+	public Iterable<Unit> units() {
+		return Collections.unmodifiableCollection(units.values());
 	}
 
 	@Deprecated
@@ -96,23 +93,8 @@ public class FlowIt {
 		cp.computeReturnType();
 	}
 
-	protected Unit mainUnit() {
+	public Unit mainUnit() {
 		return units.get(prototype);
-	}
-
-	@Deprecated
-	public Type.FunctionType functionType() {
-		return mainUnit().generic().functionType();
-	}
-
-	@Deprecated
-	public Graph<Node> nodeGraph() {
-		return mainUnit().generic().nodeGraph();
-	}
-
-	@Deprecated
-	public Map<Prototype, Set<TypeSeq>> callSites() {
-		return mainUnit().generic().callSites();
 	}
 
 	private static class CollectCPUAccounting extends LinearSeqTransformation {

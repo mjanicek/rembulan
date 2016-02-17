@@ -23,11 +23,9 @@ import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Graph;
 import net.sandius.rembulan.util.IntBuffer;
-import net.sandius.rembulan.util.Pair;
 import net.sandius.rembulan.util.Ptr;
 
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

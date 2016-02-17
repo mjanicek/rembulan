@@ -4,9 +4,10 @@ import java.io.PrintWriter
 
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
-import net.sandius.rembulan.compiler.gen.{SlotState, FlowIt}
 import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
-import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
+import net.sandius.rembulan.compiler.gen.{FlowIt, SlotState}
+import net.sandius.rembulan.compiler.{gen => rembulan}
+import net.sandius.rembulan.lbc.{PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
 
 import scala.collection.JavaConversions._
@@ -235,19 +236,16 @@ object AnalysisRunner {
     result
   }
 
-  def printFlow(proto: Prototype, main: Boolean = true): Unit = {
+  def printFlow(unit: rembulan.Unit, main: Boolean = true): Unit = {
+    val proto = unit.prototype
+    val cp = unit.generic()
+
     if (main) {
       println("Main (" + PrototypePrinter.pseudoAddr(proto) + "):")
     }
     else {
       println()
       println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
-    }
-
-    val flow = timed("Analysis") {
-      val f = new FlowIt(proto)
-      f.go()
-      f
     }
 
     def slotsToString(slots: SlotState): String = {
@@ -288,7 +286,7 @@ object AnalysisRunner {
       }
     }
 
-    val flowGraph = flow.nodeGraph
+    val flowGraph = cp.nodeGraph
     val vs = flowGraph.vertices().toSet
     val es = flowGraph.edges().toSet map { p: net.sandius.rembulan.util.Pair[Node, Node] => (p.first, p.second) }
 
@@ -302,14 +300,14 @@ object AnalysisRunner {
 //      println("\t" + r.toString + " : " + "[" + flowStates(r) + "]")
 //    }
 
-    val outcalls = flow.callSites.toMap mapValues { _.toSet }
+    val outcalls = cp.callSites.toMap mapValues { _.toSet }
 
     val ascii = timed("Graph layout") {
       GraphLayout.renderGraph(graph)
     }
 
     println()
-    println("Type: " + flow.functionType().toExplicitString)
+    println("Type: " + cp.functionType().toExplicitString)
     println()
     println("Outbound calls: {")
     for (p <- outcalls.keys) {
@@ -323,11 +321,6 @@ object AnalysisRunner {
     println()
     println(ascii)
 
-    val it = proto.getNestedPrototypes.iterator()
-    while (it.hasNext) {
-      val child = it.next()
-      printFlow(child, false)
-    }
   }
 
   def main(args: Array[String]): Unit = {
@@ -356,7 +349,15 @@ object AnalysisRunner {
     println("------------")
     println()
 
-    printFlow(proto)
+    val flow = timed("Analysis") {
+      val f = new FlowIt(proto)
+      f.go()
+      f
+    }
+
+    for (u <- flow.units) {
+      printFlow(u, u.prototype == proto)
+    }
 
   }
 
