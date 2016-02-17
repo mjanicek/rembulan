@@ -6,7 +6,6 @@ import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 
@@ -66,8 +65,8 @@ public class Unit {
 		return cp;
 	}
 
-	public void setGeneric(CompiledPrototype cp) {
-		this.generic = cp;
+	public void initGeneric() {
+		this.generic = makeCompiledPrototype(genericParameters());
 	}
 
 }

@@ -24,30 +24,42 @@ import java.util.Set;
 
 public class FlowIt {
 
+	private final Prototype prototype;
+
 	private final Map<Prototype, Unit> units;
 
-	@Deprecated
-	private final Unit mainUnit;
-
-	@Deprecated
-	private Map<Prototype, Set<TypeSeq>> callSites;
-
 	public FlowIt(Prototype prototype) {
-		Objects.requireNonNull(prototype);
-
-		units = new HashMap<>();
-
-		mainUnit = new Unit(prototype);
-		units.put(prototype, mainUnit);
+		this.prototype = Objects.requireNonNull(prototype);
+		this.units = new HashMap<>();
 	}
 
 	@Deprecated
 	public void go() {
-		goGeneric(mainUnit);
+		addUnits(prototype);
+
+		for (Unit u : units.values()) {
+			processGeneric(u);
+		}
 	}
 
-	public void goGeneric(Unit unit) {
-		CompiledPrototype cp = unit.makeCompiledPrototype(unit.genericParameters());
+	private void addUnits(Prototype prototype) {
+		if (!units.containsKey(prototype)) {
+			Unit u = initUnit(prototype);
+			units.put(prototype, u);
+			for (Prototype np : prototype.getNestedPrototypes()) {
+				addUnits(np);
+			}
+		}
+	}
+
+	private Unit initUnit(Prototype prototype) {
+		Unit unit = new Unit(prototype);
+		unit.initGeneric();
+		return unit;
+	}
+
+	private void processGeneric(Unit unit) {
+		CompiledPrototype cp = unit.generic();
 
 		cp.insertHooks();
 
@@ -77,31 +89,30 @@ public class FlowIt {
 
 //		addResumptionPoints();
 
-		Map<Prototype, Set<TypeSeq>> callSites = cp.callSites();
-		this.callSites = callSites;
-
 		cp.makeBlocks();
 
 		cp.updateDataFlow();
 
 		cp.computeReturnType();
+	}
 
-		unit.setGeneric(cp);
+	protected Unit mainUnit() {
+		return units.get(prototype);
 	}
 
 	@Deprecated
 	public Type.FunctionType functionType() {
-		return mainUnit.generic().functionType();
+		return mainUnit().generic().functionType();
 	}
 
 	@Deprecated
 	public Graph<Node> nodeGraph() {
-		return mainUnit.generic().nodeGraph();
+		return mainUnit().generic().nodeGraph();
 	}
 
 	@Deprecated
 	public Map<Prototype, Set<TypeSeq>> callSites() {
-		return callSites;
+		return mainUnit().generic().callSites();
 	}
 
 	private static class CollectCPUAccounting extends LinearSeqTransformation {
