@@ -7,7 +7,7 @@ import com.github.mdr.ascii.layout._
 import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
 import net.sandius.rembulan.compiler.gen.{SuffixingClassNameGenerator, FlowIt, SlotState}
 import net.sandius.rembulan.compiler.{gen => rembulan}
-import net.sandius.rembulan.lbc.{PrototypePrinter, PrototypePrinterVisitor}
+import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
 
 import scala.collection.JavaConversions._
@@ -230,7 +230,11 @@ object AnalysisRunner {
 
   }
 
-  def printFlow(unit: rembulan.Unit, main: Boolean = true): Unit = {
+  def unitForPrototype(flow: FlowIt, prototype: Prototype): rembulan.Unit = {
+    (flow.units().find { _.prototype == prototype }).get
+  }
+
+  def printFlow(unit: rembulan.Unit, flow: FlowIt, main: Boolean = true): Unit = {
     val proto = unit.prototype
     val cp = unit.generic()
 
@@ -288,8 +292,6 @@ object AnalysisRunner {
 //      println("\t" + r.toString + " : " + "[" + flowStates(r) + "]")
 //    }
 
-    val outcalls = cp.callSites.toMap mapValues { _.toSet }
-
     val ascii = timed("Graph layout") {
       GraphLayout.renderGraph(graph)
     }
@@ -297,15 +299,20 @@ object AnalysisRunner {
     println()
     println("Type: " + cp.functionType().toExplicitString)
     println()
-    println("Outbound calls: {")
-    for (p <- outcalls.keys) {
-      println("\t" + PrototypePrinter.pseudoAddr(p) + " {")
-      for (args <- outcalls(p)) {
-        println("\t\t" + "(" + args + ")")
-      }
-      println("\t}")
+
+    val outcalls = cp.callSites.toMap mapValues { _.toSet }
+    val ocs = for (p <- outcalls.keys; args <- outcalls(p)) yield (p, args)
+
+    if (ocs.isEmpty) {
+      println("No static in-chunk calls.")
     }
-    println("}")
+    else {
+      println(ocs.size + " static in-chunk call(s):")
+      for ((p, args) <- ocs) {
+        println("\tto  " + unitForPrototype(flow, p).name + "  with  (" + args.toString + ")")
+      }
+    }
+
     println()
     println(ascii)
 
@@ -323,7 +330,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = Upvalues3
+    val program = LocalUpvalue
 
     println(program.code)
 
@@ -345,7 +352,7 @@ object AnalysisRunner {
 
     for (u <- flow.units.toSeq.sortBy { _.name }) {
       println()
-      printFlow(u, u.prototype == proto)
+      printFlow(u, flow, u.prototype == proto)
     }
 
   }
