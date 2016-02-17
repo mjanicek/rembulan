@@ -131,12 +131,19 @@ public class CompiledPrototype {
 		return Collections.unmodifiableMap(edges);
 	}
 
-	private class Pusher extends NodeVisitor {
+	// perform an action in all successors of the node n
+	public abstract class NodeSuccessorAction extends NodeVisitor {
+
 		private final Node n;
-		private final Queue<Node> workList;
-		public Pusher(Node n, Queue<Node> workList) {
+
+		public NodeSuccessorAction(Node n) {
 			this.n = n;
-			this.workList = workList;
+		}
+
+		public abstract void visitSuccessor(Node node);
+
+		protected Node selfNode() {
+			return n;
 		}
 
 		@Override
@@ -145,10 +152,24 @@ public class CompiledPrototype {
 				return true;
 			}
 			else {
-				if (node.pushSlots(n.outSlots())) {
-					workList.add(node);
-				}
+				visitSuccessor(node);
 				return false;
+			}
+		}
+
+	}
+
+	private class Pusher extends NodeSuccessorAction {
+		private final Queue<Node> workList;
+		public Pusher(Node n, Queue<Node> workList) {
+			super(n);
+			this.workList = workList;
+		}
+
+		@Override
+		public void visitSuccessor(Node node) {
+			if (node.pushSlots(selfNode().outSlots())) {
+				workList.add(node);
 			}
 		}
 
