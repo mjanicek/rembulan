@@ -441,6 +441,7 @@ public class LuaInstruction {
 
 	}
 
+	/*	A C	if not (R(A) <=> C) then pc++			*/
 	public static class Test extends Branch {
 		public final int r_index;
 		public final boolean value;
@@ -487,21 +488,45 @@ public class LuaInstruction {
 	/*	A B C	if (R(B) <=> C) then R(A) := R(B) else pc++	*/
 	public static class TestSet extends Branch {
 
-		public final int a;
-		public final int b;
-		public final int c;
+		public final int r_set;
+		public final int r_test;
+		public final boolean value;
 
 		public TestSet(Target trueBranch, Target falseBranch, int a, int b, int c) {
 			super(trueBranch, falseBranch);
-			this.a = a;
-			this.b = b;
-			this.c = c;
+			this.r_set = a;
+			this.r_test = b;
+			this.value = (c != 0);
 		}
 
 		@Override
 		public String toString() {
-			return "TESTSET(" + a + "," + b + "," + c + ")";
+			Type tpe = inSlots().getType(r_test);
+
+			String suffix = (tpe == Type.BOOLEAN
+					? "_B"  // simple boolean comparison, do branch
+					: (tpe == Type.ANY
+							? "_coerce"  // coerce, compare, do branch
+							: (tpe == Type.NIL
+									? "_false"  // automatically false
+									: "_true"  // automatically true
+							)
+					)
+			);
+
+			return "TESTSET" + suffix + "(" + r_set + "," + r_test + "," + value + ")";
 		}
+
+		@Override
+		public Boolean canBeInlined() {
+			Type tpe = inSlots().getType(r_test);
+
+			if (tpe == Type.BOOLEAN || tpe == Type.ANY) return null;
+			else if (tpe == Type.NIL) return Boolean.FALSE;
+			else return Boolean.TRUE;
+		}
+
+		// TODO: effect on the true branch
 
 	}
 
