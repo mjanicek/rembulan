@@ -16,7 +16,7 @@ public class Graph<T> {
 	}
 
 	public static <T> Graph<T> wrap(Set<T> vertices, Set<Pair<T, T>> edges) {
-		return new Graph(vertices, edges);
+		return new Graph<T>(vertices, edges);
 	}
 
 	public static <T> Graph<T> immutableCopyFrom(Iterable<T> vertices, Iterable<Pair<T, T>> edges) {
