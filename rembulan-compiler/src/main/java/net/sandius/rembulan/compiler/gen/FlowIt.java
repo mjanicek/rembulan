@@ -11,6 +11,7 @@ import net.sandius.rembulan.lbc.Prototype;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,28 +36,32 @@ public class FlowIt {
 
 	@Deprecated
 	public void go() {
-		addUnits(prototype, nameGenerator);
+		List<Unit> us = new LinkedList<>();
 
-		for (Unit u : units.values()) {
+		addUnits(prototype, us, nameGenerator);
+
+		for (Unit u : us) {
+			System.out.println("Processing " + u.name() + "...");
 			processGeneric(u);
 		}
 	}
 
-	private void addUnits(Prototype prototype, ClassNameGenerator nameGen) {
+	private void addUnits(Prototype prototype, List<Unit> us, ClassNameGenerator nameGen) {
 		if (!units.containsKey(prototype)) {
 			Unit u = initUnit(prototype, nameGen.className());
 			units.put(prototype, u);
+			us.add(0, u);
 
 			for (int i = 0; i < prototype.getNestedPrototypes().size(); i++) {
 				Prototype np = prototype.getNestedPrototypes().get(i);
-				addUnits(np, nameGen.child(i));
+				addUnits(np, us, nameGen.child(i));
 			}
 		}
 	}
 
 	private Unit initUnit(Prototype prototype, String name) {
 		Unit unit = new Unit(prototype, name);
-		unit.initGeneric();
+		unit.initGeneric(units);
 		return unit;
 	}
 

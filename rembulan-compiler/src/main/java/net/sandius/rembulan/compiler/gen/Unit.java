@@ -7,6 +7,7 @@ import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Objects;
 
 public class Unit {
@@ -39,11 +40,7 @@ public class Unit {
 		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
 	}
 
-	public Entry makeGenericNodes() {
-		return makeNodes(genericParameters());
-	}
-
-	public Entry makeNodes(TypeSeq params) {
+	public Entry makeNodes(TypeSeq params, Map<Prototype, Unit> units) {
 		IntVector code = prototype.getCode();
 		Target[] targets = new Target[code.length()];
 		for (int pc = 0; pc < targets.length; pc++) {
@@ -52,7 +49,7 @@ public class Unit {
 
 		ReadOnlyArray<Target> pcLabels = ReadOnlyArray.wrap(targets);
 
-		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator(prototype, pcLabels);
+		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator(prototype, pcLabels, units);
 
 		for (int pc = 0; pc < pcLabels.size(); pc++) {
 			translator.translate(pc);
@@ -63,16 +60,16 @@ public class Unit {
 		return new Entry("main_" + suffix, params, prototype.getMaximumStackSize(), pcLabels.get(0));
 	}
 
-	public CompiledPrototype makeCompiledPrototype(TypeSeq params) {
+	public CompiledPrototype makeCompiledPrototype(TypeSeq params, Map<Prototype, Unit> units) {
 		CompiledPrototype cp = new CompiledPrototype(prototype, params);
-		cp.callEntry = makeNodes(params);
+		cp.callEntry = makeNodes(params, units);
 		cp.returnType = TypeSeq.vararg();
 		cp.resumePoints = new HashSet<>();
 		return cp;
 	}
 
-	public void initGeneric() {
-		this.generic = makeCompiledPrototype(genericParameters());
+	public void initGeneric(Map<Prototype, Unit> units) {
+		this.generic = makeCompiledPrototype(genericParameters(), units);
 	}
 
 }

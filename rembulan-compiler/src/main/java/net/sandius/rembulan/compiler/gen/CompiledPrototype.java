@@ -174,7 +174,14 @@ public class CompiledPrototype {
 			return ((ReturnType.ConcreteReturnType) rt).typeSeq;
 		}
 		else if (rt instanceof ReturnType.TailCallReturnType) {
-			return TypeSeq.vararg();  // TODO
+			Type targetType = ((ReturnType.TailCallReturnType) rt).target;
+			if (targetType instanceof Type.FunctionType) {
+				Type.FunctionType ft = (Type.FunctionType) targetType;
+				return ft.returnTypes();
+			}
+			else {
+				return TypeSeq.vararg();
+			}
 		}
 		else {
 			throw new IllegalStateException("unknown return type: " + rt.toString());

@@ -6,11 +6,13 @@ import net.sandius.rembulan.compiler.gen.TypeSeq;
 import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Type;
 import net.sandius.rembulan.compiler.gen.SlotState;
+import net.sandius.rembulan.compiler.gen.Unit;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.PrototypePrinter;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
+import java.util.Map;
 import java.util.Objects;
 
 public class LuaInstruction {
@@ -617,7 +619,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tgt) == Type.FUNCTION ? "_F" : "_mt";
+			String suffix = inSlots().getType(r_tgt) instanceof Type.FunctionType ? "_F" : "_mt";
 			suffix += "_" + argTypesFromSlots(inSlots(), r_tgt + 1, b);
 
 			return "TAILCALL" + suffix + "(" + r_tgt + "," + b + ")";
@@ -753,9 +755,12 @@ public class LuaInstruction {
 		public final int r_dest;
 		public final Prototype prototype;
 
-		public Closure(Prototype parent, int a, int bx) {
+		public final Map<Prototype, Unit> units;
+
+		public Closure(Prototype parent, Map<Prototype, Unit> units, int a, int bx) {
 			this.r_dest = a;
 			this.prototype = parent.getNestedPrototypes().get(bx);
+			this.units = units;
 		}
 
 		@Override
@@ -765,7 +770,9 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			s = s.update(r_dest, new Slot(new Origin.Closure(prototype), Type.FUNCTION));
+			Type.FunctionType tpe = units.containsKey(prototype) ? units.get(prototype).generic().functionType() : Type.FUNCTION;
+
+			s = s.update(r_dest, new Slot(new Origin.Closure(prototype), tpe));
 
 			for (Prototype.UpvalueDesc uvd : prototype.getUpValueDescriptions()) {
 				if (uvd.inStack) {

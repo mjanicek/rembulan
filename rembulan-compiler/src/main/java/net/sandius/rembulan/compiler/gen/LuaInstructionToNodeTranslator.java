@@ -11,17 +11,23 @@ import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
+import java.util.Map;
+
 public class LuaInstructionToNodeTranslator {
 
 	private final Prototype prototype;
 	private final ReadOnlyArray<Target> pcToLabel;
+
+	private final Map<Prototype, Unit> units;
 	
-	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel) {
+	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel, Map<Prototype, Unit> units) {
 		Check.notNull(prototype);
 		Check.notNull(pcToLabel);
+		Check.notNull(units);
 
 		this.prototype = prototype;
 		this.pcToLabel = pcToLabel;
+		this.units = units;
 	}
 	
 	public class MyNodeAppender {
@@ -36,6 +42,10 @@ public class LuaInstructionToNodeTranslator {
 		public MyNodeAppender append(Linear lin) {
 			appender.append(lin);
 			return this;
+		}
+
+		public Map<Prototype, Unit> units() {
+			return units;
 		}
 
 		public void branch(Branch branch) {
