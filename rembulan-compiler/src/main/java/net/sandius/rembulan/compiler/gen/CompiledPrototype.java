@@ -310,37 +310,49 @@ public class CompiledPrototype {
 		});
 	}
 
+	public Iterable<Node> successors(Node n) {
+		final Set<Node> result = new HashSet<>();
+		n.accept(new NodeSuccessorAction(n) {
+			@Override
+			public void visitSuccessor(Node node) {
+				result.add(node);
+			}
+		});
+		return result;
+	}
+
 	public void insertCaptureNodes() {
-		Map<Node, Edges> rg = reachabilityEdges(nodeGraph());
+		Nodes.traverseOnce(callEntry, new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof Sink && !(n instanceof LocalVariableEffect)) {
+					SlotState s_n = n.inSlots();
 
-		for (Node n : rg.keySet()) {
-			if (n instanceof Sink && !(n instanceof LocalVariableEffect)) {
-				SlotState s_n = n.inSlots();
+					if (s_n != null) {
+						IntBuffer uncaptured = new IntBuffer();
 
-				if (s_n != null) {
-					IntBuffer uncaptured = new IntBuffer();
+						for (Node m : successors(n)) {
+							SlotState s_m = m.inSlots();
 
-					for (Node m : rg.get(n).out) {
-						SlotState s_m = m.inSlots();
-
-						for (int i = 0; i < s_n.size(); i++) {
-							// FIXME: double-check this condition
-							if (s_n.isValidIndex(i) && s_m.isValidIndex(i)) {
-								if (!s_n.isCaptured(i) && s_m.isCaptured(i)) {
-									// need to capture i
-									uncaptured.append(i);
+							for (int i = 0; i < s_n.size(); i++) {
+								// FIXME: double-check this condition
+								if (s_n.isValidIndex(i) && s_m.isValidIndex(i)) {
+									if (!s_n.isCaptured(i) && s_m.isCaptured(i)) {
+										// need to capture i
+										uncaptured.append(i);
+									}
 								}
 							}
 						}
-					}
 
-					if (!uncaptured.isEmpty()) {
-						Capture captureNode = new Capture(uncaptured.toVector());
-						captureNode.insertBefore((Sink) n);
+						if (!uncaptured.isEmpty()) {
+							Capture captureNode = new Capture(uncaptured.toVector());
+							captureNode.insertBefore((Sink) n);
+						}
 					}
 				}
 			}
-		}
+		});
 	}
 
 	public void insertResumptionAfter(Linear n) {
