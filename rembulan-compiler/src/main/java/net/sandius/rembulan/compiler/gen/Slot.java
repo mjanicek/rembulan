@@ -12,6 +12,10 @@ public class Slot {
 		this.type = Objects.requireNonNull(type);
 	}
 
+	public static Slot of(Origin origin, Type type) {
+		return new Slot(origin, type);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;

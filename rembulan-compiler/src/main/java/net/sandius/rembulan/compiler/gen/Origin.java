@@ -12,6 +12,11 @@ public abstract class Origin {
 		// not to be extended by the outside world
 	}
 
+	public Origin join(Origin that) {
+		Objects.requireNonNull(that);
+		return this.equals(that) ? this : new Multi();
+	}
+
 	public static class Argument extends Origin {
 
 		public final int index;
@@ -141,6 +146,13 @@ public abstract class Origin {
 			return "_" + Integer.toHexString(this.hashCode());
 		}
 
+	}
+
+	public static class Multi extends Origin {
+		@Override
+		public String toString() {
+			return "&";
+		}
 	}
 
 	public static Entry entry() {

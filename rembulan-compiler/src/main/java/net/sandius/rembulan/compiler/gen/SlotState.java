@@ -4,6 +4,8 @@ import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntSet;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
+import java.util.Objects;
+
 public class SlotState {
 
 	private final ReadOnlyArray<Slot> fixedSlots;
@@ -154,9 +156,9 @@ public class SlotState {
 		return updateState(idx, false);
 	}
 
+	@Deprecated
 	public Type getType(int idx) {
-		Check.isTrue(isValidIndex(idx));
-		return fixedSlots.get(idx).type();
+		return get(idx).type();
 	}
 
 	public SlotState update(int idx, Slot slot) {
@@ -172,13 +174,16 @@ public class SlotState {
 		}
 	}
 
+	@Deprecated
 	public SlotState updateType(int idx, Type type) {
 		Slot s = fixedSlots.get(idx);
 		return update(idx, new Slot(s.origin(), type));
 	}
 
-	public SlotState join(int idx, Type type) {
-		return updateType(idx, getType(idx).join(type));
+	public SlotState join(int idx, Slot slot) {
+		Origin o = get(idx).origin().join(slot.origin());
+		Type t = get(idx).type().join(slot.type());
+		return update(idx, Slot.of(o, t));
 	}
 
 	public SlotState join(SlotState that) {
@@ -187,7 +192,7 @@ public class SlotState {
 
 		SlotState s = this;
 		for (int i = 0; i < size(); i++) {
-			s = s.join(i, that.getType(i));
+			s = s.join(i, that.get(i));
 		}
 
 		for (int i = 0; i < size(); i++) {
