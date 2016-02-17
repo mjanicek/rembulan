@@ -228,6 +228,17 @@ object AnalysisRunner {
           """
     }
 
+    object ReturningAFunction extends Fragment {
+      code =
+          """local function f()
+            |  return function(x) return not not x, x end
+            |end
+            |
+            |return f()()
+          """
+
+    }
+
   }
 
   def unitForPrototype(flow: FlowIt, prototype: Prototype): rembulan.Unit = {
@@ -330,7 +341,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = LocalUpvalue
+    val program = ReturningAFunction
 
     println(program.code)
 

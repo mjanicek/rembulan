@@ -579,12 +579,15 @@ public class LuaInstruction {
 				}
 			}
 
+			Type targetType = s.getType(r_tgt);
+			TypeSeq retType = targetType instanceof Type.FunctionType ? ((Type.FunctionType) targetType).returnTypes() : TypeSeq.vararg();
+
 			if (c > 0) {
 				s = s.consumeVarargs();
 
 				// (c - 1) is the exact number of result values
 				for (int i = 0; i < c - 1; i++) {
-					s = s.updateType(r_tgt + i, Type.ANY);
+					s = s.updateType(r_tgt + i, retType.get(i));
 				}
 			}
 			else {
