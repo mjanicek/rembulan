@@ -60,33 +60,42 @@ public class CompiledPrototype {
 		return Type.FunctionType.of(actualParameters(), returnType());
 	}
 
+	private void collectCallSite(Node n, Map<Prototype, Set<TypeSeq>> callSites) {
+		if (n instanceof LinearSeq) {
+			for (Node m : ((LinearSeq) n).nodes()) {
+				collectCallSite(m, callSites);
+			}
+		}
+		else if (n instanceof LuaInstruction.CallInstruction) {
+			LuaInstruction.CallInstruction c = (LuaInstruction.CallInstruction) n;
+
+			Slot target = c.callTarget();
+
+			if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
+				Prototype proto = ((Origin.Closure) target.origin()).prototype;
+				TypeSeq args = c.callArguments();
+
+				// add to call sites
+				Set<TypeSeq> cs = callSites.get(proto);
+				if (cs != null) {
+					cs.add(args);
+				}
+				else {
+					Set<TypeSeq> s = new HashSet<>();
+					s.add(args);
+					callSites.put(proto, s);
+				}
+			}
+		}
+	}
+
 	public Map<Prototype, Set<TypeSeq>> callSites() {
 		final Map<Prototype, Set<TypeSeq>> callSites = new HashMap<>();
 
 		Nodes.traverseOnce(callEntry, new NodeAction() {
 			@Override
 			public void visit(Node n) {
-				if (n instanceof LuaInstruction.CallInstruction) {
-					LuaInstruction.CallInstruction c = (LuaInstruction.CallInstruction) n;
-
-					Slot target = c.callTarget();
-
-					if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
-						Prototype proto = ((Origin.Closure) target.origin()).prototype;
-						TypeSeq args = c.callArguments();
-
-						// add to call sites
-						Set<TypeSeq> cs = callSites.get(proto);
-						if (cs != null) {
-							cs.add(args);
-						}
-						else {
-							Set<TypeSeq> s = new HashSet<>();
-							s.add(args);
-							callSites.put(proto, s);
-						}
-					}
-				}
+				collectCallSite(n, callSites);
 			}
 		});
 
