@@ -28,7 +28,7 @@ public abstract class UnaryOperation extends Linear {
 
 	@Override
 	protected SlotState effect(SlotState s) {
-		return s.update(r_dest, new Slot(new Origin.Computed(), resultType(s.getType(r_arg))));
+		return s.update(r_dest, Slot.of(new Origin.Computed(), resultType(s.getType(r_arg))));
 	}
 
 	public static class Unm extends UnaryOperation {

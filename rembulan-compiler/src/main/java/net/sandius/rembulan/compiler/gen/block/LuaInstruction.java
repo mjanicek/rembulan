@@ -114,7 +114,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, new Slot(new Origin.Constant(constIndex), constantType(prototype.getConstants().get(constIndex))));
+			return s.update(r_dest, Slot.of(new Origin.Constant(constIndex), constantType(prototype.getConstants().get(constIndex))));
 		}
 
 	}
@@ -182,7 +182,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, new Slot(new Origin.Upvalue(upvalueIndex), Type.ANY));
+			return s.update(r_dest, Slot.of(new Origin.Upvalue(upvalueIndex), Type.ANY));
 		}
 
 	}
@@ -774,7 +774,7 @@ public class LuaInstruction {
 		protected SlotState effect(SlotState s) {
 			Type.FunctionType tpe = units.containsKey(prototype) ? units.get(prototype).generic().functionType() : Type.FUNCTION;
 
-			s = s.update(r_dest, new Slot(new Origin.Closure(prototype), tpe));
+			s = s.update(r_dest, Slot.of(new Origin.Closure(prototype), tpe));
 
 			for (Prototype.UpvalueDesc uvd : prototype.getUpValueDescriptions()) {
 				if (uvd.inStack) {

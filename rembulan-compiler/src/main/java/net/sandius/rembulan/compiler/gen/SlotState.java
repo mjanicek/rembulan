@@ -89,7 +89,7 @@ public class SlotState {
 		Slot[] slots = new Slot[size];
 
 		for (int i = 0; i < size; i++) {
-			slots[i] = new Slot(Origin.entry(), Type.NIL);
+			slots[i] = Slot.of(Origin.entry(), Type.NIL);
 		}
 
 		return new SlotState(ReadOnlyArray.wrap(slots), IntSet.empty(), -1);
@@ -100,7 +100,7 @@ public class SlotState {
 		SlotState slots = SlotState.init(size);
 
 		for (int i = 0; i < Math.min(ts.fixed().size(), size); i++) {
-			slots = slots.update(i, new Slot(new Origin.Argument(i), ts.fixed().get(i)));
+			slots = slots.update(i, Slot.of(new Origin.Argument(i), ts.fixed().get(i)));
 		}
 
 		return slots;

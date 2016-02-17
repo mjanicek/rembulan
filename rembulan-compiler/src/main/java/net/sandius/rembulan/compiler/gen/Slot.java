@@ -9,7 +9,7 @@ public class Slot {
 
 	public static final Slot NIL_SLOT = Slot.of(Origin.NilConstant.INSTANCE, Type.NIL);
 
-	public Slot(Origin origin, Type type) {
+	protected Slot(Origin origin, Type type) {
 		this.origin = Objects.requireNonNull(origin);
 		this.type = Objects.requireNonNull(type);
 	}
