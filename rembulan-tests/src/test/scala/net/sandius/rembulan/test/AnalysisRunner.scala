@@ -14,6 +14,8 @@ import scala.collection.JavaConversions._
 
 object AnalysisRunner {
 
+  import Util._
+
   object fragments {
 
     object IfThenElse extends Fragment {
@@ -226,14 +228,6 @@ object AnalysisRunner {
           """
     }
 
-  }
-
-  def timed[A](name: String)(body: => A): A = {
-    val before = System.nanoTime()
-    val result = body
-    val after = System.nanoTime()
-    System.out.println("%s took %.1f ms".format(name, (after - before) / 1000000.0))
-    result
   }
 
   def printFlow(unit: rembulan.Unit, main: Boolean = true): Unit = {
