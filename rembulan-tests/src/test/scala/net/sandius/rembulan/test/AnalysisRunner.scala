@@ -234,13 +234,7 @@ object AnalysisRunner {
     val proto = unit.prototype
     val cp = unit.generic()
 
-    if (main) {
-      println("Main (" + PrototypePrinter.pseudoAddr(proto) + "): " + unit.name)
-    }
-    else {
-      println()
-      println("Child (" + PrototypePrinter.pseudoAddr(proto) + "): " + unit.name)
-    }
+    println((if (main) "Main" else "Child") + " (" + PrototypePrinter.pseudoAddr(proto) + "): " + unit.name)
 
     def slotsToString(slots: SlotState): String = {
       Option(slots) match {
@@ -349,7 +343,8 @@ object AnalysisRunner {
       f
     }
 
-    for (u <- flow.units) {
+    for (u <- flow.units.toSeq.sortBy { _.name }) {
+      println()
       printFlow(u, u.prototype == proto)
     }
 
