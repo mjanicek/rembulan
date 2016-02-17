@@ -4,6 +4,8 @@ import net.sandius.rembulan.compiler.gen.block.BinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.CloseUpvalues;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
+import net.sandius.rembulan.compiler.gen.block.NodeAppender;
+import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnaryOperation;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -192,15 +194,24 @@ public class AppenderEmitter implements InstructionEmitter {
 		appender.branch(new LuaInstruction.Le(appender.target(2), appender.target(1), a, b, c));
 	}
 
+	/*	A C	if not (R(A) <=> C) then pc++			*/
 	@Override
 	public void l_TEST(int a, int c) {
 		// TODO: check the branches -- TEST is evaluating boolean *in*equality
 		appender.branch(new LuaInstruction.Test(appender.target(2), appender.target(1), a, c));
 	}
 
+	// we're translating this a TEST followed by MOVE in the true branch
+	/*	A B C	if (R(B) <=> C) then R(A) := R(B) else pc++	*/
 	@Override
 	public void l_TESTSET(int a, int b, int c) {
-		appender.branch(new LuaInstruction.TestSet(appender.target(2), appender.target(1), a, b, c));
+		Target trueBranch = new Target();
+		NodeAppender app = new NodeAppender(trueBranch);
+		app.append(new LuaInstruction.Move(a, b));  // this is the R(A) := R(B)
+		app.jumpTo(appender.target(1));
+
+		// TEST checks for *in*equality, so our true branch is TEST's false branch
+		appender.branch(new LuaInstruction.Test(appender.target(2), trueBranch, b, c));
 	}
 
 	@Override

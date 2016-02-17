@@ -485,7 +485,9 @@ public class LuaInstruction {
 
 	// TODO
 	// FIXME: this changes the way we think about value propagation!
+	// Not used: translated as a TEST followed by MOVE in the true branch
 	/*	A B C	if (R(B) <=> C) then R(A) := R(B) else pc++	*/
+/*
 	public static class TestSet extends Branch {
 
 		public final int r_set;
@@ -529,6 +531,7 @@ public class LuaInstruction {
 		// TODO: effect on the true branch
 
 	}
+*/
 
 	public interface CallInstruction {
 
