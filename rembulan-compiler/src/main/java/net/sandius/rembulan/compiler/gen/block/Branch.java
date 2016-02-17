@@ -113,8 +113,14 @@ public abstract class Branch implements Node, Sink, Jump {
 		jmp.tryInlining();
 	}
 
-	public Boolean canBeInlined() {
-		return null;
+	public InlineTarget canBeInlined() {
+		return InlineTarget.CANNOT_BE_INLINED;
+	}
+
+	public enum InlineTarget {
+		CANNOT_BE_INLINED,
+		TRUE_BRANCH,
+		FALSE_BRANCH
 	}
 
 }

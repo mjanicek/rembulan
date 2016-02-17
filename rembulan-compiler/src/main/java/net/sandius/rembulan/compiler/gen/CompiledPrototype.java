@@ -245,10 +245,11 @@ public class CompiledPrototype {
 			public void visit(Node n) {
 				if (n instanceof Branch) {
 					Branch b = (Branch) n;
-					Boolean inline = b.canBeInlined();
-					if (inline != null) {
-						// we can transform this to an unconditional jump
-						b.inline(inline.booleanValue());
+					Branch.InlineTarget it = b.canBeInlined();
+					switch (it) {
+						case TRUE_BRANCH:  b.inline(true); break;
+						case FALSE_BRANCH: b.inline(false); break;
+						default:  // no-op
 					}
 				}
 			}

@@ -473,12 +473,12 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Boolean canBeInlined() {
+		public InlineTarget canBeInlined() {
 			Type tpe = inSlots().getType(r_index);
 
-			if (tpe == Type.BOOLEAN || tpe == Type.ANY) return null;
-			else if (tpe == Type.NIL) return Boolean.FALSE;
-			else return Boolean.TRUE;
+			if (tpe == Type.BOOLEAN || tpe == Type.ANY) return InlineTarget.CANNOT_BE_INLINED;
+			else if (tpe == Type.NIL) return InlineTarget.FALSE_BRANCH;
+			else return InlineTarget.TRUE_BRANCH;
 		}
 
 	}
@@ -518,12 +518,12 @@ public class LuaInstruction {
 		}
 
 		@Override
-		public Boolean canBeInlined() {
+		public InlineTarget canBeInlined() {
 			Type tpe = inSlots().getType(r_test);
 
-			if (tpe == Type.BOOLEAN || tpe == Type.ANY) return null;
-			else if (tpe == Type.NIL) return Boolean.FALSE;
-			else return Boolean.TRUE;
+			if (tpe == Type.BOOLEAN || tpe == Type.ANY) return InlineTarget.CANNOT_BE_INLINED;
+			else if (tpe == Type.NIL) return InlineTarget.FALSE_BRANCH;
+			else return InlineTarget.TRUE_BRANCH;
 		}
 
 		// TODO: effect on the true branch
