@@ -14,6 +14,7 @@ import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeAction;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
+import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
@@ -130,19 +131,40 @@ public class CompiledPrototype {
 		return Collections.unmodifiableMap(edges);
 	}
 
-	public void updateDataFlow() {
-		Map<Node, Edges> edges = reachabilityEdges(nodeGraph());
+	private class Pusher implements NodeVisitor {
+		private final Node n;
+		private final Queue<Node> workList;
+		public Pusher(Node n, Queue<Node> workList) {
+			this.n = n;
+			this.workList = workList;
+		}
 
+		@Override
+		public boolean visitNode(Node node) {
+			if (node == n) {
+				return true;
+			}
+			else {
+				if (node.pushSlots(n.outSlots())) {
+					workList.add(node);
+				}
+				return false;
+			}
+		}
+
+		@Override
+		public void visitEdge(Node from, Node to) {
+			// no-op
+		}
+	}
+
+	public void updateDataFlow() {
 		clearSlots();
 
 		Queue<Node> workList = new ArrayDeque<>();
 
 		// push entry point's slots to the immediate successors
-		for (Node n : edges.get(callEntry).out) {
-			if (n.pushSlots(callEntry.outSlots())) {
-				workList.add(n);
-			}
-		}
+		callEntry.accept(new Pusher(callEntry, workList));
 
 		while (!workList.isEmpty()) {
 			Node n = workList.remove();
@@ -151,14 +173,7 @@ public class CompiledPrototype {
 			assert (n.inSlots() != null);
 
 			// compute effect and push it to outputs
-			SlotState o = n.outSlots();
-
-			for (Node m : edges.get(n).out) {
-				if (m.pushSlots(o)) {
-					workList.add(m);
-				}
-			}
-
+			n.accept(new Pusher(n, workList));
 		}
 	}
 
