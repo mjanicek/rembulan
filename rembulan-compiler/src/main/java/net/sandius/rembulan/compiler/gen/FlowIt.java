@@ -19,10 +19,13 @@ public class FlowIt {
 
 	private final Prototype prototype;
 
+	private final ClassNameGenerator nameGenerator;
+
 	private final Map<Prototype, Unit> units;
 
-	public FlowIt(Prototype prototype) {
+	public FlowIt(Prototype prototype, ClassNameGenerator nameGenerator) {
 		this.prototype = Objects.requireNonNull(prototype);
+		this.nameGenerator = Objects.requireNonNull(nameGenerator);
 		this.units = new HashMap<>();
 	}
 
@@ -32,25 +35,27 @@ public class FlowIt {
 
 	@Deprecated
 	public void go() {
-		addUnits(prototype);
+		addUnits(prototype, nameGenerator);
 
 		for (Unit u : units.values()) {
 			processGeneric(u);
 		}
 	}
 
-	private void addUnits(Prototype prototype) {
+	private void addUnits(Prototype prototype, ClassNameGenerator nameGen) {
 		if (!units.containsKey(prototype)) {
-			Unit u = initUnit(prototype);
+			Unit u = initUnit(prototype, nameGen.className());
 			units.put(prototype, u);
-			for (Prototype np : prototype.getNestedPrototypes()) {
-				addUnits(np);
+
+			for (int i = 0; i < prototype.getNestedPrototypes().size(); i++) {
+				Prototype np = prototype.getNestedPrototypes().get(i);
+				addUnits(np, nameGen.child(i));
 			}
 		}
 	}
 
-	private Unit initUnit(Prototype prototype) {
-		Unit unit = new Unit(prototype);
+	private Unit initUnit(Prototype prototype, String name) {
+		Unit unit = new Unit(prototype, name);
 		unit.initGeneric();
 		return unit;
 	}

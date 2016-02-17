@@ -5,7 +5,7 @@ import java.io.PrintWriter
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
-import net.sandius.rembulan.compiler.gen.{FlowIt, SlotState}
+import net.sandius.rembulan.compiler.gen.{SuffixingClassNameGenerator, FlowIt, SlotState}
 import net.sandius.rembulan.compiler.{gen => rembulan}
 import net.sandius.rembulan.lbc.{PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
@@ -241,11 +241,11 @@ object AnalysisRunner {
     val cp = unit.generic()
 
     if (main) {
-      println("Main (" + PrototypePrinter.pseudoAddr(proto) + "):")
+      println("Main (" + PrototypePrinter.pseudoAddr(proto) + "): " + unit.name)
     }
     else {
       println()
-      println("Child (" + PrototypePrinter.pseudoAddr(proto) + "):")
+      println("Child (" + PrototypePrinter.pseudoAddr(proto) + "): " + unit.name)
     }
 
     def slotsToString(slots: SlotState): String = {
@@ -350,7 +350,7 @@ object AnalysisRunner {
     println()
 
     val flow = timed("Analysis") {
-      val f = new FlowIt(proto)
+      val f = new FlowIt(proto, new SuffixingClassNameGenerator("test"))
       f.go()
       f
     }

@@ -12,13 +12,19 @@ import java.util.Objects;
 public class Unit {
 
 	public final Prototype prototype;
+	public final String name;
 
 	private CompiledPrototype generic;
 
-	public Unit(Prototype prototype) {
+	public Unit(Prototype prototype, String name) {
 		this.prototype = Objects.requireNonNull(prototype);
+		this.name = name;
 
 		this.generic = null;
+	}
+
+	public String name() {
+		return name;
 	}
 
 	public CompiledPrototype generic() {
