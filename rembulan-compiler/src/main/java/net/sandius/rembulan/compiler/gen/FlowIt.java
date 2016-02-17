@@ -44,30 +44,7 @@ public class FlowIt {
 	}
 
 	public void goGeneric(Unit unit) {
-		Prototype prototype = unit.prototype;
-		CompiledPrototype cp = new CompiledPrototype(prototype, unit.genericParameters());
-
-		IntVector code = prototype.getCode();
-		Target[] targets = new Target[code.length()];
-		for (int pc = 0; pc < targets.length; pc++) {
-			targets[pc] = new Target(Integer.toString(pc + 1));
-		}
-
-		ReadOnlyArray<Target> pcLabels = ReadOnlyArray.wrap(targets);
-
-		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator(prototype, pcLabels);
-
-		for (int pc = 0; pc < pcLabels.size(); pc++) {
-			translator.translate(pc);
-		}
-
-		cp.returnType = TypeSeq.vararg();
-
-		cp.callEntry = new Entry("main", unit.genericParameters(), prototype.getMaximumStackSize(), pcLabels.get(0));
-
-		cp.resumePoints = new HashSet<>();
-
-		cp.callSites = new HashMap<>();
+		CompiledPrototype cp = unit.makeCompiledPrototype(unit.genericParameters());
 
 		cp.insertHooks();
 
