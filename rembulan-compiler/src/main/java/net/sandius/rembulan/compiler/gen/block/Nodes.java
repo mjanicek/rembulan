@@ -171,12 +171,6 @@ public abstract class Nodes {
 					return true;
 				}
 			}
-
-			@Override
-			public void visitEdge(Node from, Node to) {
-				// no-op
-			}
-
 		};
 
 		from.accept(nv);
@@ -207,11 +201,6 @@ public abstract class Nodes {
 					visited.add(n);
 					return true;
 				}
-			}
-
-			@Override
-			public void visitEdge(Node from, Node to) {
-				// no-op
 			}
 		};
 

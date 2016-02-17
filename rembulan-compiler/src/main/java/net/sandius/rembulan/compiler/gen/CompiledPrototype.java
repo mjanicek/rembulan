@@ -131,7 +131,7 @@ public class CompiledPrototype {
 		return Collections.unmodifiableMap(edges);
 	}
 
-	private class Pusher implements NodeVisitor {
+	private class Pusher extends NodeVisitor {
 		private final Node n;
 		private final Queue<Node> workList;
 		public Pusher(Node n, Queue<Node> workList) {
@@ -152,10 +152,6 @@ public class CompiledPrototype {
 			}
 		}
 
-		@Override
-		public void visitEdge(Node from, Node to) {
-			// no-op
-		}
 	}
 
 	public void updateDataFlow() {

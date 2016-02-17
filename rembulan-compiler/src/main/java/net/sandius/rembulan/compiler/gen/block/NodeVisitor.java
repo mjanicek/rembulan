@@ -1,9 +1,11 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-public interface NodeVisitor {
+public abstract class NodeVisitor {
 
-	boolean visitNode(Node node);
+	public abstract boolean visitNode(Node node);
 
-	void visitEdge(Node from, Node to);
+	public void visitEdge(Node from, Node to) {
+
+	}
 
 }
