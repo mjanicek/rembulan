@@ -500,7 +500,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			return "TESTSET(" + a + "," + "," + b + "," + c + ")";
+			return "TESTSET(" + a + "," + b + "," + c + ")";
 		}
 
 	}
