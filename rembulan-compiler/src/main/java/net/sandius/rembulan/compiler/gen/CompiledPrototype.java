@@ -47,18 +47,6 @@ public class CompiledPrototype {
 
 	public Map<Prototype, Set<TypeSeq>> callSites;
 
-	@Deprecated
-	public static class Edges {
-		// FIXME: may in principle be multisets
-		public final Set<Node> in;
-		public final Set<Node> out;
-
-		public Edges() {
-			this.in = new HashSet<>();
-			this.out = new HashSet<>();
-		}
-	}
-
 	protected CompiledPrototype(Prototype prototype, TypeSeq actualParameters) {
 		this.prototype = Objects.requireNonNull(prototype);
 		this.actualParameters = Objects.requireNonNull(actualParameters);
@@ -109,26 +97,6 @@ public class CompiledPrototype {
 
 	public Graph<Node> nodeGraph() {
 		return Nodes.toGraph(callEntry);
-	}
-
-	@Deprecated
-	private static Map<Node, Edges> reachabilityEdges(Graph<Node> g) {
-
-		final Map<Node, Edges> edges = new HashMap<>();
-
-		for (Node n : g.vertices()) {
-			Edges es = new Edges();
-			edges.put(n, es);
-		}
-
-		for (Pair<Node, Node> e : g.edges()) {
-			Node u = e.first();
-			Node v = e.second();
-			edges.get(u).out.add(v);
-			edges.get(v).in.add(u);
-		}
-
-		return Collections.unmodifiableMap(edges);
 	}
 
 	// perform an action in all successors of the node n
