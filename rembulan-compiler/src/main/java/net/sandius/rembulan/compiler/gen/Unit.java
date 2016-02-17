@@ -63,7 +63,6 @@ public class Unit {
 		cp.callEntry = makeNodes(params);
 		cp.returnType = TypeSeq.vararg();
 		cp.resumePoints = new HashSet<>();
-		cp.callSites = new HashMap<>();
 		return cp;
 	}
 

@@ -29,6 +29,9 @@ public class FlowIt {
 	@Deprecated
 	private final Unit mainUnit;
 
+	@Deprecated
+	private Map<Prototype, Set<TypeSeq>> callSites;
+
 	public FlowIt(Prototype prototype) {
 		Objects.requireNonNull(prototype);
 
@@ -74,7 +77,8 @@ public class FlowIt {
 
 //		addResumptionPoints();
 
-		cp.computeCallSites();
+		Map<Prototype, Set<TypeSeq>> callSites = cp.callSites();
+		this.callSites = callSites;
 
 		cp.makeBlocks();
 
@@ -97,7 +101,7 @@ public class FlowIt {
 
 	@Deprecated
 	public Map<Prototype, Set<TypeSeq>> callSites() {
-		return mainUnit.generic().callSites;
+		return callSites;
 	}
 
 	private static class CollectCPUAccounting extends LinearSeqTransformation {

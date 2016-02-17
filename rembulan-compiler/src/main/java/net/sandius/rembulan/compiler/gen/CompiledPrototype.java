@@ -45,8 +45,6 @@ public class CompiledPrototype {
 	public Entry callEntry;
 	public Set<ResumptionPoint> resumePoints;
 
-	public Map<Prototype, Set<TypeSeq>> callSites;
-
 	protected CompiledPrototype(Prototype prototype, TypeSeq actualParameters) {
 		this.prototype = Objects.requireNonNull(prototype);
 		this.actualParameters = Objects.requireNonNull(actualParameters);
@@ -64,8 +62,8 @@ public class CompiledPrototype {
 		return Type.FunctionType.of(actualParameters(), returnType());
 	}
 
-	public void computeCallSites() {
-		callSites.clear();
+	public Map<Prototype, Set<TypeSeq>> callSites() {
+		final Map<Prototype, Set<TypeSeq>> callSites = new HashMap<>();
 
 		Nodes.traverseOnce(callEntry, new NodeAction() {
 			@Override
@@ -93,6 +91,8 @@ public class CompiledPrototype {
 				}
 			}
 		});
+
+		return callSites;
 	}
 
 	public Graph<Node> nodeGraph() {
