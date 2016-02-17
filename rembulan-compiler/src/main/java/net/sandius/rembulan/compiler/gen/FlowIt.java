@@ -50,7 +50,7 @@ public class FlowIt {
 		if (!units.containsKey(prototype)) {
 			Unit u = initUnit(prototype, nameGen.className());
 			units.put(prototype, u);
-			us.add(0, u);
+			us.add(0, u);  // prepending in order to ensure that nested prototypes are processed before their parent
 
 			for (int i = 0; i < prototype.getNestedPrototypes().size(); i++) {
 				Prototype np = prototype.getNestedPrototypes().get(i);
