@@ -174,12 +174,6 @@ public class SlotState {
 		}
 	}
 
-	@Deprecated
-	public SlotState updateType(int idx, Type type) {
-		Slot s = fixedSlots.get(idx);
-		return update(idx, new Slot(s.origin(), type));
-	}
-
 	public SlotState join(int idx, Slot slot) {
 		Origin o = get(idx).origin().join(slot.origin());
 		Type t = get(idx).type().join(slot.type());
@@ -216,7 +210,7 @@ public class SlotState {
 
 		for (int i = position; i < size(); i++) {
 			Check.isFalse(s.isCaptured(i));  // FIXME
-			s = s.updateType(i, Type.NIL);
+			s = s.update(i, Slot.NIL_SLOT);
 		}
 
 		return new SlotState(s.fixedSlots, s.captured, position);

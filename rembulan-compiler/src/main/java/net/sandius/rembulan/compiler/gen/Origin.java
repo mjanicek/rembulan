@@ -78,6 +78,57 @@ public abstract class Origin {
 
 	}
 
+	public static class NilConstant extends Origin {
+
+		public static final NilConstant INSTANCE = new NilConstant();
+
+		private NilConstant() {
+		}
+
+		@Override
+		public String toString() {
+			return "-";
+		}
+
+	}
+
+	public static class BooleanConstant extends Origin {
+
+		public final boolean value;
+
+		public static final BooleanConstant TRUE = new BooleanConstant(true);
+		public static final BooleanConstant FALSE = new BooleanConstant(false);
+
+		private BooleanConstant(boolean value) {
+			this.value = value;
+		}
+
+		public static BooleanConstant fromBoolean(boolean value) {
+			return value ? TRUE : FALSE;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			BooleanConstant that = (BooleanConstant) o;
+
+			return value == that.value;
+		}
+
+		@Override
+		public int hashCode() {
+			return (value ? 1 : 0);
+		}
+
+		@Override
+		public String toString() {
+			return "$" + value;
+		}
+
+	}
+
 	public static class Closure extends Origin {
 
 		public final Prototype prototype;

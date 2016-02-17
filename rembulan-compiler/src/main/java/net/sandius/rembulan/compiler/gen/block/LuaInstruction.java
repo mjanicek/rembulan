@@ -136,8 +136,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			// TODO: origin
-			return s.updateType(r_dest, Type.BOOLEAN);
+			return s.update(r_dest, Slot.of(Origin.BooleanConstant.fromBoolean(value), Type.BOOLEAN));
 		}
 	}
 
@@ -159,8 +158,7 @@ public class LuaInstruction {
 		@Override
 		protected SlotState effect(SlotState s) {
 			for (int i = 0; i < count; i++) {
-				// TODO: origin
-				s = s.updateType(r_dest + i, Type.NIL);
+				s = s.update(r_dest + i, Slot.NIL_SLOT);
 			}
 			return s;
 		}
@@ -208,7 +206,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.updateType(r_dest, Type.ANY);
+			return s.update(r_dest, Slot.of(new Origin.Computed(), Type.ANY));
 		}
 
 	}
@@ -233,7 +231,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.updateType(r_dest, Type.ANY);
+			return s.update(r_dest, Slot.of(new Origin.Computed(), Type.ANY));
 		}
 
 	}
@@ -315,7 +313,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.updateType(r_dest, Type.TABLE);
+			return s.update(r_dest, Slot.of(new Origin.Computed(), Type.TABLE));
 		}
 
 	}
@@ -340,8 +338,8 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.updateType(r_dest + 1, s.getType(r_self))
-					.updateType(r_dest, Type.ANY);
+			return s.update(r_dest + 1, s.get(r_self))
+					.update(r_dest, Slot.of(new Origin.Computed(), Type.ANY));
 		}
 
 	}
@@ -376,7 +374,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.updateType(r_dest, allStringable(s) ? Type.STRING : Type.ANY);
+			return s.update(r_dest, Slot.of(new Origin.Computed(), allStringable(s) ? Type.STRING : Type.ANY));
 		}
 
 	}
@@ -575,7 +573,7 @@ public class LuaInstruction {
 			// assume that it may change any open upvalue.
 			for (int i = 0; i < s.fixedSize(); i++) {
 				if (s.isCaptured(i)) {
-					s = s.updateType(i, Type.ANY);
+					s = s.update(i, Slot.of(new Origin.Computed(), Type.ANY));
 				}
 			}
 
@@ -587,7 +585,7 @@ public class LuaInstruction {
 
 				// (c - 1) is the exact number of result values
 				for (int i = 0; i < c - 1; i++) {
-					s = s.updateType(r_tgt + i, retType.get(i));
+					s = s.update(r_tgt + i, Slot.of(new Origin.Computed(), retType.get(i)));
 				}
 			}
 			else {
@@ -739,10 +737,11 @@ public class LuaInstruction {
 		@Override
 		protected SlotState effect(SlotState s) {
 			Type tpe = loopType(s).toSlotType();
-			return s.updateType(r_base + 3, tpe.isSubtypeOf(Type.NUMBER)
+
+			return s.update(r_base + 3, Slot.of(new Origin.Computed(), tpe.isSubtypeOf(Type.NUMBER)
 					? tpe  // we know at compile-time that it's numeric
 					: Type.NUMBER  // got something else -- may throw an exception at runtime!
-			);
+			));
 		}
 
 	}
@@ -808,7 +807,7 @@ public class LuaInstruction {
 			if (b > 0) {
 				// (b - 1) is the number of values
 				for (int i = 0; i < b - 1; i++) {
-					s = s.updateType(r_base + i, Type.ANY);
+					s = s.update(r_base + i, Slot.of(new Origin.Computed(), Type.ANY));  // TODO: vararg origin?
 				}
 				return s;
 			}
