@@ -60,7 +60,7 @@ public abstract class Type {
 		}
 	}
 
-	public static final Type ANY = new AnyType();
+	public static final Type ANY = new TopType();
 	public static final Type NIL = new ConcreteType(ANY, "nil", "-");
 	public static final Type BOOLEAN = new ConcreteType(ANY, "boolean", "B");
 	public static final Type NUMBER = new ConcreteType(ANY, "number", "N");
@@ -71,7 +71,11 @@ public abstract class Type {
 	public static final Type TABLE = new ConcreteType(ANY, "table", "T");
 	public static final Type THREAD = new ConcreteType(ANY, "thread", "C");
 
-	private static class AnyType extends Type {
+	private static class TopType extends Type {
+
+		private TopType() {
+			// not to be instantiated by the outside world
+		}
 
 		@Override
 		public String toString() {
