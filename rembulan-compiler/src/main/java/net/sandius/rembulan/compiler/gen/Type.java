@@ -69,7 +69,6 @@ public abstract class Type {
 	public static final Type STRING = new ConcreteType(ANY, "string", "S");
 	public static final FunctionType FUNCTION = new FunctionType(TypeSeq.vararg(), TypeSeq.vararg());
 	public static final Type TABLE = new ConcreteType(ANY, "table", "T");
-	public static final Type THREAD = new ConcreteType(ANY, "thread", "C");
 
 	private static class TopType extends Type {
 
