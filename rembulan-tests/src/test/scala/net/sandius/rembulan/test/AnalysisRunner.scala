@@ -236,7 +236,24 @@ object AnalysisRunner {
             |
             |return f()()
           """
+    }
 
+    object IncompatibleFunctions extends Fragment {
+      code =
+          """local f
+            |if x then
+            |  f = function(x, y)
+            |    local z = x or y
+            |    return not not z, z
+            |  end
+            |else
+            |  f = function()
+            |    return x
+            |  end
+            |end
+            |
+            |return f(42)
+          """
     }
 
   }
