@@ -6,7 +6,7 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.ArrayList;
 
-public class TypeSeq {
+public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
 	public final ReadOnlyArray<Type> fixed;
 	public final boolean varargs;
@@ -171,6 +171,32 @@ public class TypeSeq {
 		if (this.hasVarargs() && !that.hasVarargs()) return PartialOrderComparisonResult.GREATER_THAN;
 		else if (!this.hasVarargs() && that.hasVarargs()) return PartialOrderComparisonResult.LESSER_THAN;
 		else return PartialOrderComparisonResult.EQUAL;
+	}
+
+	@Override
+	public boolean isConsistentWith(TypeSeq that) {
+		Check.notNull(that);
+
+		for (int i = 0; i < Math.max(this.fixed().size(), that.fixed().size()); i++) {
+			if (!this.get(i).isConsistentWith(that.get(i))) {
+				return false;
+			}
+		}
+
+		return this.hasVarargs() == that.hasVarargs();
+	}
+
+	@Override
+	public boolean isConsistentSubtypeOf(TypeSeq that) {
+		Check.notNull(that);
+
+		for (int i = 0; i < Math.max(this.fixed().size(), that.fixed().size()); i++) {
+			if (!this.get(i).isConsistentSubtypeOf(that.get(i))) {
+				return false;
+			}
+		}
+
+		return that.hasVarargs() || !this.hasVarargs();
 	}
 
 }

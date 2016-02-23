@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.PartialOrderComparisonResult;
 
 import java.util.Objects;
 
-public abstract class Type {
+public abstract class Type implements GradualTypeLike<Type> {
 
 	private Type() {
 		// not to be instantiated by the outside world
@@ -12,14 +12,22 @@ public abstract class Type {
 
 	// TODO: number-as-string, string-as-number, true, false, actual constant values?
 
-	// return true iff type(this) =< type(that)
+	// standard subtyping relation
 	// must return true if this.equals(that).
 	public abstract boolean isSubtypeOf(Type that);
 
-	// return true iff type(this) >= type(that)
-	// must return true if this.equals(that).
-	public boolean isSupertypeOf(Type that) {
-		return that.isSubtypeOf(this);
+	// consistency relation
+	@Override
+	public boolean isConsistentWith(Type that) {
+		return this.restrict(that).equals(that.restrict(this));
+	}
+
+	public abstract Type restrict(Type that);
+
+	// return true iff type(this) ~< type(that)
+	@Override
+	public boolean isConsistentSubtypeOf(Type that) {
+		return this.restrict(that).isSubtypeOf(that.restrict(this));
 	}
 
 	// return the most specific type that is more general than both this and that,
@@ -60,17 +68,20 @@ public abstract class Type {
 		}
 	}
 
-	public static final Type ANY = new TopType();
-	public static final Type NIL = new ConcreteType(ANY, "nil", "-");
-	public static final Type BOOLEAN = new ConcreteType(ANY, "boolean", "B");
-	public static final Type NUMBER = new ConcreteType(ANY, "number", "N");
-	public static final Type NUMBER_INTEGER = new ConcreteType(NUMBER, "integer", "i");
-	public static final Type NUMBER_FLOAT = new ConcreteType(NUMBER, "float", "f");
-	public static final Type STRING = new ConcreteType(ANY, "string", "S");
+	public static final TopType ANY = TopType.INSTANCE;
+	public static final DynamicType DYNAMIC = DynamicType.INSTANCE;
+	public static final BaseType NIL = new BaseType("nil", "-");
+	public static final BaseType BOOLEAN = new BaseType("boolean", "B");
+	public static final BaseType NUMBER = new BaseType("number", "N");
+	public static final BaseType NUMBER_INTEGER = new BaseType(NUMBER, "integer", "i");
+	public static final BaseType NUMBER_FLOAT = new BaseType(NUMBER, "float", "f");
+	public static final BaseType STRING = new BaseType("string", "S");
+	public static final BaseType TABLE = new BaseType("table", "T");
 	public static final FunctionType FUNCTION = new FunctionType(TypeSeq.vararg(), TypeSeq.vararg());
-	public static final Type TABLE = new ConcreteType(ANY, "table", "T");
 
-	private static class TopType extends Type {
+	public static final class TopType extends Type {
+
+		public static final TopType INSTANCE = new TopType();
 
 		private TopType() {
 			// not to be instantiated by the outside world
@@ -87,6 +98,11 @@ public abstract class Type {
 		}
 
 		@Override
+		public Type restrict(Type that) {
+			return that.equals(DynamicType.INSTANCE) ? that : this;
+		}
+
+		@Override
 		public Type join(Type that) {
 			return this;
 		}
@@ -98,21 +114,66 @@ public abstract class Type {
 
 	}
 
-	private static abstract class AbstractConcreteType extends Type {
+	public static final class DynamicType extends Type {
 
-		protected final Type supertype;
+		public static final DynamicType INSTANCE = new DynamicType();
 
-		protected AbstractConcreteType(Type supertype) {
-			this.supertype = Objects.requireNonNull(supertype);
+		private DynamicType() {
+			// not to be instantiated by the outside world
+		}
+
+		@Override
+		public String toString() {
+			return "?";
+		}
+
+		@Override
+		public boolean isSubtypeOf(Type that) {
+			return this.equals(that);
+		}
+
+		@Override
+		public Type restrict(Type that) {
+			return this;
+		}
+
+		@Override
+		public Type join(Type that) {
+			return this;
+		}
+
+		@Override
+		public Type meet(Type that) {
+			return this;
+		}
+
+	}
+
+	private abstract static class ConcreteType extends Type {
+
+		protected final ConcreteType supertype;
+
+		protected ConcreteType(ConcreteType supertype) {
+			this.supertype = supertype;
+		}
+
+		protected ConcreteType() {
+			this(null);
 		}
 
 		public Type supertype() {
-			return supertype;
+			return supertype != null ? supertype : TopType.INSTANCE;
 		}
 
 		@Override
 		public boolean isSubtypeOf(Type that) {
 			return this.equals(that) || this.supertype().isSubtypeOf(that);
+		}
+
+		@Override
+		public Type restrict(Type that) {
+			if (that.equals(DYNAMIC)) return that;
+			else return this;
 		}
 
 		@Override
@@ -134,15 +195,19 @@ public abstract class Type {
 
 	}
 
-	private static class ConcreteType extends AbstractConcreteType {
+	public static class BaseType extends ConcreteType {
 
 		private final String name;
 		private final String shortName;
 
-		private ConcreteType(Type supertype, String name, String shortName) {
+		private BaseType(ConcreteType supertype, String name, String shortName) {
 			super(supertype);
 			this.name = Objects.requireNonNull(name);
 			this.shortName = Objects.requireNonNull(shortName);
+		}
+
+		private BaseType(String name, String shortName) {
+			this(null, name, shortName);
 		}
 
 		@Override
@@ -152,13 +217,13 @@ public abstract class Type {
 
 	}
 
-	public static class FunctionType extends AbstractConcreteType {
+	public static class FunctionType extends ConcreteType {
 
 		protected final TypeSeq typeSeq;
 		protected final TypeSeq returnTypes;
 
 		private FunctionType(TypeSeq arg, TypeSeq ret) {
-			super(ANY);
+			super();
 			this.typeSeq = Objects.requireNonNull(arg);
 			this.returnTypes = Objects.requireNonNull(ret);
 		}
@@ -259,6 +324,19 @@ public abstract class Type {
 			}
 			else {
 				return null;
+			}
+		}
+
+		@Override
+		public boolean isConsistentWith(Type that) {
+			if (that instanceof FunctionType) {
+				FunctionType thatFunc = (FunctionType) that;
+
+				return this.argumentTypes().isConsistentWith(thatFunc.argumentTypes())
+						&& this.returnTypes().isConsistentWith(thatFunc.returnTypes());
+			}
+			else {
+				return super.isConsistentWith(that);
 			}
 		}
 
