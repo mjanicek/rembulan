@@ -59,7 +59,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	public String toString() {
 		StringBuilder bld = new StringBuilder();
 		for (int i = 0; i < fixed.size(); i++) {
-			bld.append(Type.toString(fixed.get(i)));
+			bld.append(fixed.get(i).toString());
 		}
 		if (varargs) {
 			bld.append("+");

@@ -72,7 +72,7 @@ public abstract class ReturnType {
 
 		@Override
 		public String toString() {
-			return Type.toString(target) + "(" + typeSeq + ")";
+			return target.toString() + "(" + typeSeq + ")";
 		}
 
 	}

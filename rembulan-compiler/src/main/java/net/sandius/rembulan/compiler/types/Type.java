@@ -37,11 +37,6 @@ public abstract class Type implements GradualTypeLike<Type> {
 	// or null if such type does not exist
 	public abstract Type meet(Type that);
 
-	@Deprecated
-	public static String toString(Type type) {
-		return type.toString();
-	}
-
 	// compare this to that, returning:
 	//   EQUAL if this.equals(that);
 	//   LESSER_THAN if this.isSubtypeOf(that) && !this.equals(that);
