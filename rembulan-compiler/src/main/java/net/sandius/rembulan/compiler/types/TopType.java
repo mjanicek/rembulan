@@ -33,4 +33,8 @@ public final class TopType extends Type {
 		return that;
 	}
 
+	public BaseType newSubtype(String name, String tag) {
+		return new BaseType(null, name, tag);
+	}
+
 }
