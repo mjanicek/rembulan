@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.gen;
+package net.sandius.rembulan.compiler.types;
 
 public interface GradualTypeLike<T> {
 

@@ -1,5 +1,6 @@
-package net.sandius.rembulan.compiler.gen;
+package net.sandius.rembulan.compiler.types;
 
+import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.PartialOrderComparisonResult;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -82,8 +83,8 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		Check.nonNegative(idx);
 
 		if (idx < fixed().size()) return fixed().get(idx);  // it's a fixed arg
-		else if (hasVarargs()) return Type.ANY;  // it's a vararg
-		else return Type.NIL;  // it's not there
+		else if (hasVarargs()) return LuaTypes.ANY;  // it's a vararg
+		else return LuaTypes.NIL;  // it's not there
 	}
 
 	public boolean isSubsumedBy(TypeSeq that) {

@@ -1,10 +1,10 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntSet;
 import net.sandius.rembulan.util.ReadOnlyArray;
-
-import java.util.Objects;
 
 public class SlotState {
 
@@ -89,7 +89,7 @@ public class SlotState {
 		Slot[] slots = new Slot[size];
 
 		for (int i = 0; i < size; i++) {
-			slots[i] = Slot.of(Origin.entry(), Type.NIL);
+			slots[i] = Slot.of(Origin.entry(), LuaTypes.NIL);
 		}
 
 		return new SlotState(ReadOnlyArray.wrap(slots), IntSet.empty(), -1);

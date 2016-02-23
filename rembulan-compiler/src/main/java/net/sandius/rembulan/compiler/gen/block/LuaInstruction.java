@@ -1,10 +1,12 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.Slot;
-import net.sandius.rembulan.compiler.gen.TypeSeq;
+import net.sandius.rembulan.compiler.types.FunctionType;
+import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.compiler.gen.ReturnType;
-import net.sandius.rembulan.compiler.gen.Type;
+import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.Unit;
 import net.sandius.rembulan.lbc.OpCode;
@@ -22,11 +24,11 @@ public class LuaInstruction {
 	}
 
 	public static Type constantType(Object k) {
-		if (k == null) return Type.NIL;
-		else if (k instanceof Boolean) return Type.BOOLEAN;
-		else if (k instanceof Double || k instanceof Float) return Type.NUMBER_FLOAT;
-		else if (k instanceof Number) return Type.NUMBER_INTEGER;
-		else if (k instanceof String) return Type.STRING;
+		if (k == null) return LuaTypes.NIL;
+		else if (k instanceof Boolean) return LuaTypes.BOOLEAN;
+		else if (k instanceof Double || k instanceof Float) return LuaTypes.NUMBER_FLOAT;
+		else if (k instanceof Number) return LuaTypes.NUMBER_INTEGER;
+		else if (k instanceof String) return LuaTypes.STRING;
 		else {
 			throw new IllegalStateException("Unknown constant: " + k);
 		}
@@ -51,11 +53,11 @@ public class LuaInstruction {
 
 		public Type toSlotType() {
 			switch (this) {
-				case Integer:  return Type.NUMBER_INTEGER;
-				case Float:    return Type.NUMBER_FLOAT;
-				case Number:   return Type.NUMBER;
+				case Integer:  return LuaTypes.NUMBER_INTEGER;
+				case Float:    return LuaTypes.NUMBER_FLOAT;
+				case Number:   return LuaTypes.NUMBER;
 				case Any:
-				default:       return Type.ANY;
+				default:       return LuaTypes.ANY;
 			}
 		}
 
@@ -136,7 +138,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, Slot.of(Origin.BooleanConstant.fromBoolean(value), Type.BOOLEAN));
+			return s.update(r_dest, Slot.of(Origin.BooleanConstant.fromBoolean(value), LuaTypes.BOOLEAN));
 		}
 	}
 
@@ -182,7 +184,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, Slot.of(new Origin.Upvalue(upvalueIndex), Type.ANY));
+			return s.update(r_dest, Slot.of(new Origin.Upvalue(upvalueIndex), LuaTypes.ANY));
 		}
 
 	}
@@ -206,7 +208,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, Slot.of(new Origin.Computed(), Type.ANY));
+			return s.update(r_dest, Slot.of(new Origin.Computed(), LuaTypes.ANY));
 		}
 
 	}
@@ -225,13 +227,13 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tab) == Type.FUNCTION ? "_T" : "";
+			String suffix = inSlots().getType(r_tab) == LuaTypes.TABLE ? "_T" : "";
 			return "GETTABLE" + suffix + "(" + r_dest + "," + r_tab + "," + rk_key + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, Slot.of(new Origin.Computed(), Type.ANY));
+			return s.update(r_dest, Slot.of(new Origin.Computed(), LuaTypes.ANY));
 		}
 
 	}
@@ -286,7 +288,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = (inSlots().getType(r_tab) == Type.TABLE ? "_T" : "");
+			String suffix = (inSlots().getType(r_tab) == LuaTypes.TABLE ? "_T" : "");
 			return "SETTABLE" + suffix + "(" + r_tab + "," + rk_key + "," + rk_value + ")";
 		}
 
@@ -313,7 +315,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, Slot.of(new Origin.Computed(), Type.TABLE));
+			return s.update(r_dest, Slot.of(new Origin.Computed(), LuaTypes.TABLE));
 		}
 
 	}
@@ -332,14 +334,14 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_self) == Type.TABLE ? "_T" : "";
+			String suffix = inSlots().getType(r_self) == LuaTypes.TABLE ? "_T" : "";
 			return "SELF" + suffix + "(" + r_dest + "," + r_self + "," + rk_key + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest + 1, s.get(r_self))
-					.update(r_dest, Slot.of(new Origin.Computed(), Type.ANY));
+					.update(r_dest, Slot.of(new Origin.Computed(), LuaTypes.ANY));
 		}
 
 	}
@@ -365,7 +367,7 @@ public class LuaInstruction {
 		private boolean allStringable(SlotState s) {
 			for (int i = r_begin; i <= r_end; i++) {
 				Type tpe = s.getType(i);
-				if (!(tpe == Type.STRING || tpe.isSubtypeOf(Type.NUMBER))) {
+				if (!(tpe == LuaTypes.STRING || tpe.isSubtypeOf(LuaTypes.NUMBER))) {
 					return false;
 				}
 			}
@@ -374,7 +376,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, Slot.of(new Origin.Computed(), allStringable(s) ? Type.STRING : Type.ANY));
+			return s.update(r_dest, Slot.of(new Origin.Computed(), allStringable(s) ? LuaTypes.STRING : LuaTypes.ANY));
 		}
 
 	}
@@ -458,11 +460,11 @@ public class LuaInstruction {
 		public String toString() {
 			Type tpe = inSlots().getType(r_index);
 
-			String suffix = (tpe == Type.BOOLEAN
+			String suffix = (tpe == LuaTypes.BOOLEAN
 					? "_B"  // simple boolean comparison, do branch
-					: (tpe == Type.ANY
+					: (tpe == LuaTypes.ANY
 							? "_coerce"  // coerce, compare, do branch
-							: (tpe == Type.NIL
+							: (tpe == LuaTypes.NIL
 									? "_false"  // automatically false
 									: "_true"  // automatically true
 							)
@@ -476,8 +478,8 @@ public class LuaInstruction {
 		public InlineTarget canBeInlined() {
 			Type tpe = inSlots().getType(r_index);
 
-			if (tpe == Type.BOOLEAN || tpe == Type.ANY) return InlineTarget.CANNOT_BE_INLINED;
-			else if (tpe == Type.NIL) return InlineTarget.FALSE_BRANCH;
+			if (tpe == LuaTypes.BOOLEAN || tpe == LuaTypes.ANY) return InlineTarget.CANNOT_BE_INLINED;
+			else if (tpe == LuaTypes.NIL) return InlineTarget.FALSE_BRANCH;
 			else return InlineTarget.TRUE_BRANCH;
 		}
 
@@ -555,7 +557,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = callTarget().type() instanceof Type.FunctionType ? "_F" : "_mt";
+			String suffix = callTarget().type() instanceof FunctionType ? "_F" : "_mt";
 			suffix += "_" + callArguments();
 			suffix += c > 0 ? "_" + (c - 1) : "_var";
 
@@ -573,12 +575,12 @@ public class LuaInstruction {
 			// assume that it may change any open upvalue.
 			for (int i = 0; i < s.fixedSize(); i++) {
 				if (s.isCaptured(i)) {
-					s = s.update(i, Slot.of(new Origin.Computed(), Type.ANY));
+					s = s.update(i, Slot.of(new Origin.Computed(), LuaTypes.ANY));
 				}
 			}
 
 			Type targetType = s.getType(r_tgt);
-			TypeSeq retType = targetType instanceof Type.FunctionType ? ((Type.FunctionType) targetType).returnTypes() : TypeSeq.vararg();
+			TypeSeq retType = targetType instanceof FunctionType ? ((FunctionType) targetType).returnTypes() : TypeSeq.vararg();
 
 			if (c > 0) {
 				s = s.consumeVarargs();
@@ -620,7 +622,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tgt) instanceof Type.FunctionType ? "_F" : "_mt";
+			String suffix = inSlots().getType(r_tgt) instanceof FunctionType ? "_F" : "_mt";
 			suffix += "_" + argTypesFromSlots(inSlots(), r_tgt + 1, b);
 
 			return "TAILCALL" + suffix + "(" + r_tgt + "," + b + ")";
@@ -707,19 +709,19 @@ public class LuaInstruction {
 			Type a1 = s.getType(r_base + 1);
 			Type a2 = s.getType(r_base + 2);
 
-			if (a0 == Type.NUMBER_INTEGER
-					&& a1 == Type.NUMBER_INTEGER
-					&& a2 == Type.NUMBER_INTEGER) {
+			if (a0 == LuaTypes.NUMBER_INTEGER
+					&& a1 == LuaTypes.NUMBER_INTEGER
+					&& a2 == LuaTypes.NUMBER_INTEGER) {
 
 				return NumOpType.Integer;
 			}
-			else if (a0.isSubtypeOf(Type.NUMBER)
-					&& a1.isSubtypeOf(Type.NUMBER)
-					&& a2.isSubtypeOf(Type.NUMBER)) {
+			else if (a0.isSubtypeOf(LuaTypes.NUMBER)
+					&& a1.isSubtypeOf(LuaTypes.NUMBER)
+					&& a2.isSubtypeOf(LuaTypes.NUMBER)) {
 
-				if (a0 == Type.NUMBER_FLOAT
-						|| a1 == Type.NUMBER_FLOAT
-						|| a2 == Type.NUMBER_FLOAT) {
+				if (a0 == LuaTypes.NUMBER_FLOAT
+						|| a1 == LuaTypes.NUMBER_FLOAT
+						|| a2 == LuaTypes.NUMBER_FLOAT) {
 					return NumOpType.Float;
 				}
 				else {
@@ -738,9 +740,9 @@ public class LuaInstruction {
 		protected SlotState effect(SlotState s) {
 			Type tpe = loopType(s).toSlotType();
 
-			return s.update(r_base + 3, Slot.of(new Origin.Computed(), tpe.isSubtypeOf(Type.NUMBER)
+			return s.update(r_base + 3, Slot.of(new Origin.Computed(), tpe.isSubtypeOf(LuaTypes.NUMBER)
 					? tpe  // we know at compile-time that it's numeric
-					: Type.NUMBER  // got something else -- may throw an exception at runtime!
+					: LuaTypes.NUMBER  // got something else -- may throw an exception at runtime!
 			));
 		}
 
@@ -772,7 +774,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			Type.FunctionType tpe = units.containsKey(prototype) ? units.get(prototype).generic().functionType() : Type.FUNCTION;
+			FunctionType tpe = units.containsKey(prototype) ? units.get(prototype).generic().functionType() : LuaTypes.FUNCTION;
 
 			s = s.update(r_dest, Slot.of(new Origin.Closure(prototype), tpe));
 
@@ -807,7 +809,7 @@ public class LuaInstruction {
 			if (b > 0) {
 				// (b - 1) is the number of values
 				for (int i = 0; i < b - 1; i++) {
-					s = s.update(r_base + i, Slot.of(new Origin.Computed(), Type.ANY));  // TODO: vararg origin?
+					s = s.update(r_base + i, Slot.of(new Origin.Computed(), LuaTypes.ANY));  // TODO: vararg origin?
 				}
 				return s;
 			}

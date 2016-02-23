@@ -20,6 +20,9 @@ import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.gen.block.UnconditionalJump;
+import net.sandius.rembulan.compiler.types.FunctionType;
+import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Graph;
 import net.sandius.rembulan.util.IntBuffer;
@@ -56,8 +59,8 @@ public class CompiledPrototype {
 		return returnType;
 	}
 
-	public Type.FunctionType functionType() {
-		return Type.FunctionType.of(actualParameters(), returnType());
+	public FunctionType functionType() {
+		return FunctionType.of(actualParameters(), returnType());
 	}
 
 	private void collectCallSite(Node n, Map<Prototype, Set<TypeSeq>> callSites) {
@@ -71,7 +74,7 @@ public class CompiledPrototype {
 
 			Slot target = c.callTarget();
 
-			if (target.type() instanceof Type.FunctionType && target.origin() instanceof Origin.Closure) {
+			if (target.type() instanceof FunctionType && target.origin() instanceof Origin.Closure) {
 				Prototype proto = ((Origin.Closure) target.origin()).prototype;
 				TypeSeq args = c.callArguments();
 
@@ -184,8 +187,8 @@ public class CompiledPrototype {
 		}
 		else if (rt instanceof ReturnType.TailCallReturnType) {
 			Type targetType = ((ReturnType.TailCallReturnType) rt).target;
-			if (targetType instanceof Type.FunctionType) {
-				Type.FunctionType ft = (Type.FunctionType) targetType;
+			if (targetType instanceof FunctionType) {
+				FunctionType ft = (FunctionType) targetType;
 				return ft.returnTypes();
 			}
 			else {

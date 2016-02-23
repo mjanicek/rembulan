@@ -1,8 +1,9 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.Slot;
-import net.sandius.rembulan.compiler.gen.Type;
+import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction.NumOpType;
 import net.sandius.rembulan.lbc.Prototype;
@@ -42,9 +43,9 @@ public abstract class BinaryOperation extends Linear {
 	}
 
 	private static NumOpType mayBeInteger(Type l, Type r) {
-		if (l.isSubtypeOf(Type.NUMBER) && r.isSubtypeOf(Type.NUMBER)) {
-			if (l == Type.NUMBER_INTEGER && r == Type.NUMBER_INTEGER) return NumOpType.Integer;
-			else if (l == Type.NUMBER_FLOAT || r == Type.NUMBER_FLOAT) return NumOpType.Float;
+		if (l.isSubtypeOf(LuaTypes.NUMBER) && r.isSubtypeOf(LuaTypes.NUMBER)) {
+			if (l == LuaTypes.NUMBER_INTEGER && r == LuaTypes.NUMBER_INTEGER) return NumOpType.Integer;
+			else if (l == LuaTypes.NUMBER_FLOAT || r == LuaTypes.NUMBER_FLOAT) return NumOpType.Float;
 			else return NumOpType.Number;
 		}
 		else {
@@ -53,12 +54,12 @@ public abstract class BinaryOperation extends Linear {
 	}
 
 	private static NumOpType mustBeFloat(Type l, Type r) {
-		if (l.isSubtypeOf(Type.NUMBER) && r.isSubtypeOf(Type.NUMBER)) return NumOpType.Float;
+		if (l.isSubtypeOf(LuaTypes.NUMBER) && r.isSubtypeOf(LuaTypes.NUMBER)) return NumOpType.Float;
 		else return NumOpType.Any;
 	}
 
 	private static NumOpType mustBeInteger(Type l, Type r) {
-		if (l.isSubtypeOf(Type.NUMBER) && r.isSubtypeOf(Type.NUMBER)) return NumOpType.Integer;
+		if (l.isSubtypeOf(LuaTypes.NUMBER) && r.isSubtypeOf(LuaTypes.NUMBER)) return NumOpType.Integer;
 		else return NumOpType.Any;
 	}
 

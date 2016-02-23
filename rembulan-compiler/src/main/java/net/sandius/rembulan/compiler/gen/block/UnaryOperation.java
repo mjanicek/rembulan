@@ -1,9 +1,10 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
-import net.sandius.rembulan.compiler.gen.Type;
+import net.sandius.rembulan.compiler.types.Type;
 
 public abstract class UnaryOperation extends Linear {
 
@@ -22,7 +23,7 @@ public abstract class UnaryOperation extends Linear {
 	@Override
 	public String toString() {
 		Type rt = resultType(inSlots().getType(r_arg));
-		String suffix = rt != Type.ANY ? "_" + rt : "";
+		String suffix = rt != LuaTypes.ANY ? "_" + rt : "";
 		return name() + suffix + "(" + r_dest + "," + r_arg + ")";
 	}
 
@@ -44,7 +45,7 @@ public abstract class UnaryOperation extends Linear {
 
 		@Override
 		protected Type resultType(Type in) {
-			return in.isSubtypeOf(Type.NUMBER) ? in : Type.ANY;
+			return in.isSubtypeOf(LuaTypes.NUMBER) ? in : LuaTypes.ANY;
 		}
 
 	}
@@ -63,7 +64,7 @@ public abstract class UnaryOperation extends Linear {
 		@Override
 		protected Type resultType(Type in) {
 			// TODO: for constants, we could determine whether the argument is coercible to integer -> need access ot it
-			return in == Type.NUMBER_INTEGER ? Type.NUMBER_INTEGER : Type.ANY;
+			return in == LuaTypes.NUMBER_INTEGER ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY;
 		}
 
 	}
@@ -81,7 +82,7 @@ public abstract class UnaryOperation extends Linear {
 
 		@Override
 		protected Type resultType(Type in) {
-			return Type.BOOLEAN;
+			return LuaTypes.BOOLEAN;
 		}
 
 	}
@@ -99,7 +100,7 @@ public abstract class UnaryOperation extends Linear {
 
 		@Override
 		protected Type resultType(Type in) {
-			return in == Type.STRING ? Type.NUMBER_INTEGER : Type.ANY;
+			return in == LuaTypes.STRING ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY;
 		}
 
 	}

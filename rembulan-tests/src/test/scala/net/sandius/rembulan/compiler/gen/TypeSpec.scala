@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen
 
+import net.sandius.rembulan.compiler.types.{FunctionType, GradualTypeLike, TypeSeq, Type}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{MustMatchers, FunSpec}
@@ -7,7 +8,7 @@ import org.scalatest.{MustMatchers, FunSpec}
 @RunWith(classOf[JUnitRunner])
 class TypeSpec extends FunSpec with MustMatchers {
 
-  import Type._
+  import LuaTypes._
 
   def consistency[T <: GradualTypeLike[T]](l: T, r: T, expected: Boolean) {
 

@@ -2,6 +2,8 @@ package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.Target;
+import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -35,7 +37,7 @@ public class Unit {
 	public TypeSeq genericParameters() {
 		Type[] types = new Type[prototype.getNumberOfParameters()];
 		for (int i = 0; i < types.length; i++) {
-			types[i] = Type.ANY;
+			types[i] = LuaTypes.ANY;
 		}
 		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
 	}
