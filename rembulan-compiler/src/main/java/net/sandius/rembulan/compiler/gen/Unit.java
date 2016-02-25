@@ -37,7 +37,7 @@ public class Unit {
 	public TypeSeq genericParameters() {
 		Type[] types = new Type[prototype.getNumberOfParameters()];
 		for (int i = 0; i < types.length; i++) {
-			types[i] = LuaTypes.ANY;
+			types[i] = LuaTypes.DYNAMIC;
 		}
 		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
 	}
