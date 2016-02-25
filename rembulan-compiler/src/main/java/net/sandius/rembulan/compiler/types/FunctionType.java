@@ -137,9 +137,9 @@ public class FunctionType extends ConcreteType {
 		}
 	}
 
-	@Override
-	public Type unionWith(Type that) {
-		return this.restrict(that).join(that.restrict(this));
-	}
+//	@Override
+//	public Type unionWith(Type that) {
+//		return this.restrict(that).join(that.restrict(this));
+//	}
 
 }

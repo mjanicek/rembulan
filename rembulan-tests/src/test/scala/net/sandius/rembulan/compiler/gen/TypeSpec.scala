@@ -90,8 +90,7 @@ class TypeSpec extends FunSpec with MustMatchers {
     r !~< l
   }
 
-  def union(l: Type, r: Type): Type = {
-    var result: Type = null
+  def union(l: Type, r: Type) {
     describe ("union of " + l + " and " + r) {
       if (l == r) {
         val t = l unionWith  r
@@ -100,7 +99,13 @@ class TypeSpec extends FunSpec with MustMatchers {
           t must not be null
         }
 
-        result = t
+        it ("is a consistent supertype of the LEFT argument") {
+          l ~< t
+        }
+
+        it ("is a consistent supertype of the RIGHT argument") {
+          r ~< t
+        }
       }
       else {
         val lr = l unionWith r
@@ -116,10 +121,14 @@ class TypeSpec extends FunSpec with MustMatchers {
           rl mustEqual lr
         }
 
-        result = lr
+        val t = lr
+
+        describe ("correctness:") {
+          l ~< t
+          r ~< t
+        }
       }
     }
-    result
   }
 
   val D_D = T(DYNAMIC) -> T(DYNAMIC)
@@ -255,10 +264,11 @@ class TypeSpec extends FunSpec with MustMatchers {
 
   describe ("type union:") {
 
-    val j = union(AA_A, D_D)
+    union(AA_A, D_D)
 
-    strict_lt(AA_A, j)
-    equivalent(D_D, j)
+    union(ANY, BOOLEAN)
+    union(NUMBER, NUMBER_INTEGER)
+    union(NUMBER_FLOAT, NUMBER_INTEGER)
 
   }
 

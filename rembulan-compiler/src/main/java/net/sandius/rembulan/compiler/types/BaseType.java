@@ -26,15 +26,15 @@ public class BaseType extends ConcreteType {
 		return shortName;
 	}
 
-	@Override
-	public Type unionWith(Type that) {
-		if (this.isSubtypeOf(that)) return that;
-		else if (that.isSubtypeOf(this)) return this;
-		else {
-			Type t = this.join(that);
-			if (t != null) return t;
-			else return DynamicType.INSTANCE;  // FIXME: is this correct?
-		}
-	}
+//	@Override
+//	public Type unionWith(Type that) {
+//		if (this.isSubtypeOf(that)) return that;
+//		else if (that.isSubtypeOf(this)) return this;
+//		else {
+//			Type t = this.join(that);
+//			if (t != null) return t;
+//			else return DynamicType.INSTANCE;  // FIXME: is this correct?
+//		}
+//	}
 
 }

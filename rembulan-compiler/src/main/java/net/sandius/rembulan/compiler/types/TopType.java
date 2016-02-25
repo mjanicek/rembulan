@@ -37,9 +37,9 @@ public final class TopType extends Type {
 		return that;
 	}
 
-	@Override
-	public Type unionWith(Type that) {
-		return this;
-	}
+//	@Override
+//	public Type unionWith(Type that) {
+//		return this;
+//	}
 
 }

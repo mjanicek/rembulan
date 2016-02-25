@@ -33,9 +33,9 @@ public final class BottomType extends Type {
 		return this;
 	}
 
-	@Override
-	public Type unionWith(Type that) {
-		return that;
-	}
+//	@Override
+//	public Type unionWith(Type that) {
+//		return that;
+//	}
 
 }

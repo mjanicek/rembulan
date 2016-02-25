@@ -40,7 +40,9 @@ public abstract class Type implements GradualTypeLike<Type> {
 	public abstract Type meet(Type that);
 
 	// return a type T such that this.isConsistentSubtypeOf(T) && that.isConsistentSubtypeOf(T)
-	public abstract Type unionWith(Type that);
+	public Type unionWith(Type that) {
+		return this.restrict(that).join(that.restrict(this));
+	}
 
 	// compare this to that, returning:
 	//   EQUAL if this.equals(that);
