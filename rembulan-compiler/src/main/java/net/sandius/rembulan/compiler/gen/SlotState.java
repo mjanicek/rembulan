@@ -174,19 +174,19 @@ public class SlotState {
 		}
 	}
 
-	public SlotState join(int idx, Slot slot) {
+	public SlotState merge(int idx, Slot slot) {
 		Origin o = get(idx).origin().join(slot.origin());
 		Type t = get(idx).type().unionWith(slot.type());
 		return update(idx, Slot.of(o, t));
 	}
 
-	public SlotState join(SlotState that) {
+	public SlotState merge(SlotState that) {
 		Check.notNull(that);
 		Check.isEq(this.size(), that.size());
 
 		SlotState s = this;
 		for (int i = 0; i < size(); i++) {
-			s = s.join(i, that.get(i));
+			s = s.merge(i, that.get(i));
 		}
 
 		for (int i = 0; i < size(); i++) {

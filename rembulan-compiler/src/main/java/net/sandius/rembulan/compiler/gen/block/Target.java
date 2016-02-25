@@ -120,7 +120,7 @@ public class Target implements Node, Src {
 	public boolean pushSlots(SlotState in) {
 		Check.notNull(in);
 		SlotState o = inSlots;
-		SlotState n = inSlots == null ? in : inSlots.join(in);
+		SlotState n = inSlots == null ? in : inSlots.merge(in);
 		if (!n.equals(o)) {
 			inSlots = n;
 			return true;
