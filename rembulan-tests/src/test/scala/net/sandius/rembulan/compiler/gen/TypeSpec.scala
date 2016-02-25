@@ -140,6 +140,7 @@ class TypeSpec extends FunSpec with MustMatchers {
   }
 
   val D_D = T(DYNAMIC) -> T(DYNAMIC)
+  val DD_D = T(DYNAMIC, DYNAMIC) -> T(DYNAMIC)
   val Dv_D = T(DYNAMIC).+ -> T(DYNAMIC)
   val A_A = T(ANY) -> T(ANY)
   val DDv_D = T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)
@@ -273,6 +274,8 @@ class TypeSpec extends FunSpec with MustMatchers {
   describe ("type union:") {
 
     union(AA_A, D_D, T(DYNAMIC, NIL) -> T(DYNAMIC))
+    union(DD_D, D_D, DD_D)
+    union(DDv_D, D_D, DD_D)
 
     union(ANY, DYNAMIC, DYNAMIC)
     union(NIL, DYNAMIC, DYNAMIC)
