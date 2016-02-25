@@ -139,7 +139,7 @@ public class FunctionType extends ConcreteType {
 
 	@Override
 	public Type unionWith(Type that) {
-		return this.join(that);  // TODO
+		return this.restrict(that).join(that.restrict(this));
 	}
 
 }
