@@ -84,14 +84,6 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		return fixed;
 	}
 
-//	public boolean hasVarargs() {
-//		return !tailType.equals(LuaTypes.NIL);
-//	}
-
-//	public boolean isVarargOnly() {
-//		return fixed().isEmpty() && hasVarargs();
-//	}
-
 	public Type get(int idx) {
 		Check.nonNegative(idx);
 		return idx < fixed().size() ? fixed().get(idx) : tailType;
