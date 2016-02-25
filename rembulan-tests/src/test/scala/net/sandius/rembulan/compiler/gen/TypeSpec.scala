@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen
 
 import net.sandius.rembulan.compiler.types.{FunctionType, GradualTypeLike, TypeSeq, Type}
+import net.sandius.rembulan.util.ReadOnlyArray
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{MustMatchers, FunSpec}
@@ -62,7 +63,32 @@ class TypeSpec extends FunSpec with MustMatchers {
 
   implicit class RichType(val self: Type) extends Gradual[Type] with Subtypable
 
-  implicit class RichTypeSeq(val self: TypeSeq) extends Gradual[TypeSeq]
+  implicit class RichTypeSeq(val self: TypeSeq) extends Gradual[TypeSeq] {
+    def + = self.withVararg()
+    def ->(that: TypeSeq) = FunctionType.of(self, that)
+  }
+
+  object T {
+    def apply(ts: Type*): TypeSeq = new TypeSeq(ReadOnlyArray.wrap(ts.toArray), false)
+  }
+
+  def equivalent(l: Type, r: Type) {
+    l ~ r
+    l ~< r
+    r ~< l
+  }
+
+  def strict_lt(l: Type, r: Type) {
+    l !~ r
+    l ~< r
+    r !~< l
+  }
+
+  def not_comparable(l: Type, r: Type) {
+    l !~ r
+    l !~< r
+    r !~< l
+  }
 
   describe ("consistency:") {
 
@@ -82,7 +108,10 @@ class TypeSpec extends FunSpec with MustMatchers {
       NUMBER ~ DYNAMIC
       NUMBER_INTEGER !~ NIL
 
-      FunctionType.of(TypeSeq.of(DYNAMIC, DYNAMIC), TypeSeq.of(BOOLEAN, ANY)) ~ FunctionType.of(TypeSeq.of(DYNAMIC, DYNAMIC), TypeSeq.of(DYNAMIC, ANY))
+      (T(DYNAMIC, DYNAMIC) -> T(BOOLEAN, ANY)) ~ (T(DYNAMIC, DYNAMIC) -> T(DYNAMIC, ANY))
+
+      (T(DYNAMIC) -> T(NUMBER)) ~ (T(STRING) -> T(DYNAMIC))
+      (T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)) ~ (T(NUMBER, NUMBER).+ -> T(NUMBER))
 
     }
 
@@ -134,6 +163,41 @@ class TypeSpec extends FunSpec with MustMatchers {
 
       NIL ~< DYNAMIC
       DYNAMIC ~< NIL
+
+      (T(NUMBER_INTEGER) -> T(DYNAMIC)) ~< (T(DYNAMIC) -> T(NUMBER_INTEGER))
+
+      (T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)) ~< (T(NUMBER, NUMBER) -> T(NUMBER))
+      (T(NUMBER, NUMBER) -> T(NUMBER)) !~< (T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC))
+
+      val D_D = T(DYNAMIC) -> T(DYNAMIC)
+      val Dv_D = T(DYNAMIC).+ -> T(DYNAMIC)
+      val A_A = T(ANY) -> T(ANY)
+      val DDv_D = T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)
+      val NNv_N = T(NUMBER, NUMBER).+ -> T(NUMBER)
+
+      val v_A = T().+ -> T(ANY)
+      val v_v = T().+ -> T().+
+      val AA_A = T(ANY, ANY) -> T(ANY)
+      val NN_N = T(NUMBER, NUMBER) -> T(NUMBER)
+      val NN_A = T(NUMBER, NUMBER) -> T(ANY)
+      val ii_i = T(NUMBER_INTEGER, NUMBER_INTEGER) -> T(NUMBER_INTEGER)
+      val ff_f = T(NUMBER_FLOAT, NUMBER_FLOAT) -> T(NUMBER_FLOAT)
+
+      strict_lt(v_A, v_v)
+      strict_lt(v_A, A_A)
+      not_comparable(v_v, A_A)
+
+      strict_lt(D_D, ANY)
+      equivalent(NNv_N, DDv_D)
+
+      strict_lt(v_A, AA_A)
+      strict_lt(AA_A, NN_A)
+      strict_lt(NN_N, NN_A)
+      not_comparable(AA_A, NN_N)
+
+      equivalent(Dv_D, v_A)
+      strict_lt(Dv_D, D_D)
+      strict_lt(v_A, D_D)
 
     }
 
