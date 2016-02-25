@@ -10,12 +10,19 @@ import java.util.ArrayList;
 public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
 	protected final ReadOnlyArray<Type> fixed;
-	protected final boolean varargs;
+	protected final Type tailType;
 
-	public TypeSeq(ReadOnlyArray<Type> fixed, boolean varargs) {
+	@Deprecated
+	public TypeSeq(ReadOnlyArray<Type> fixed, Type tailType) {
 		Check.notNull(fixed);
+		Check.notNull(tailType);
 		this.fixed = fixed;
-		this.varargs = varargs;
+		this.tailType = tailType;
+	}
+
+	@Deprecated
+	public TypeSeq(ReadOnlyArray<Type> fixed, boolean varargs) {
+		this(fixed, varargs ? LuaTypes.ANY : LuaTypes.NIL);
 	}
 
 	private static final TypeSeq EMPTY_FIXED = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), false);
@@ -44,14 +51,13 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
 		TypeSeq that = (TypeSeq) o;
 
-		if (varargs != that.varargs) return false;
-		return fixed.equals(that.fixed);
+		return this.tailType.equals(that.tailType) && this.fixed.equals(that.fixed);
 	}
 
 	@Override
 	public int hashCode() {
 		int result = fixed.shallowHashCode();
-		result = 31 * result + (varargs ? 1 : 0);
+		result = 31 * result + tailType.hashCode();
 		return result;
 	}
 
@@ -61,8 +67,15 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		for (int i = 0; i < fixed.size(); i++) {
 			bld.append(fixed.get(i).toString());
 		}
-		if (varargs) {
+
+		if (tailType.equals(LuaTypes.ANY)) {
 			bld.append("+");
+		}
+		else if (tailType.equals(LuaTypes.NIL)) {
+			// do nothing
+		}
+		else {
+			bld.append(tailType.toString()).append("*");
 		}
 		return bld.toString();
 	}
@@ -72,7 +85,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	}
 
 	public boolean hasVarargs() {
-		return varargs;
+		return !tailType.equals(LuaTypes.NIL);
 	}
 
 	public boolean isVarargOnly() {
