@@ -12,7 +12,6 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	protected final ReadOnlyArray<Type> fixed;
 	protected final Type tailType;
 
-	@Deprecated
 	public TypeSeq(ReadOnlyArray<Type> fixed, Type tailType) {
 		Check.notNull(fixed);
 		Check.notNull(tailType);
