@@ -273,15 +273,17 @@ class TypeSpec extends FunSpec with MustMatchers {
 
   describe ("type union:") {
 
-    union(AA_A, D_D, T(DYNAMIC, NIL) -> T(DYNAMIC))
-    union(DD_D, D_D, DD_D)
-    union(DDv_D, D_D, DD_D)
-
     union(ANY, DYNAMIC, DYNAMIC)
     union(NIL, DYNAMIC, DYNAMIC)
     union(ANY, BOOLEAN, ANY)
     union(NUMBER, NUMBER_INTEGER, NUMBER)
     union(NUMBER_FLOAT, NUMBER_INTEGER, NUMBER)
+
+    union(AA_A, D_D, T(DYNAMIC, NIL) -> T(DYNAMIC))
+    union(DD_D, D_D, DD_D)
+    union(DDv_D, D_D, DD_D)
+
+    union(T(NUMBER_INTEGER, NUMBER_FLOAT) -> T(BOOLEAN, STRING), T().+ -> T().+, T(NUMBER_INTEGER, NUMBER_FLOAT) -> T(ANY, ANY).+)
 
   }
 
