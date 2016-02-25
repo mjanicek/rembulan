@@ -139,7 +139,7 @@ public class FunctionType extends ConcreteType {
 
 	@Override
 	public Type unionWith(Type that) {
-		throw new UnsupportedOperationException();
+		return this.join(that);  // TODO
 	}
 
 }
