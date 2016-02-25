@@ -9,8 +9,8 @@ import java.util.ArrayList;
 
 public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
-	public final ReadOnlyArray<Type> fixed;
-	public final boolean varargs;
+	protected final ReadOnlyArray<Type> fixed;
+	protected final boolean varargs;
 
 	public TypeSeq(ReadOnlyArray<Type> fixed, boolean varargs) {
 		Check.notNull(fixed);
