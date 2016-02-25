@@ -31,11 +31,16 @@ public abstract class Type implements GradualTypeLike<Type> {
 
 	// return the most specific type that is more general than both this and that,
 	// or null if such type does not exist
+	@Deprecated
 	public abstract Type join(Type that);
 
 	// return the most general type that is more specific than both this and that,
 	// or null if such type does not exist
+	@Deprecated
 	public abstract Type meet(Type that);
+
+	// return a type T such that this.isConsistentSubtypeOf(T) && that.isConsistentSubtypeOf(T)
+	public abstract Type unionWith(Type that);
 
 	// compare this to that, returning:
 	//   EQUAL if this.equals(that);

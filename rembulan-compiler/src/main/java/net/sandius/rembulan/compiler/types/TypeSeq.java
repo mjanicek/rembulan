@@ -187,6 +187,18 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		return this.hasVarargs() == that.hasVarargs();
 	}
 
+	public TypeSeq restrict(TypeSeq that) {
+		Check.notNull(that);
+
+		ArrayList<Type> ts = new ArrayList<>();
+
+		for (int i = 0; i < Math.max(this.fixed().size(), that.fixed().size()); i++) {
+			ts.add(this.get(i).restrict(that.get(i)));
+		}
+
+		return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, ts), this.hasVarargs());
+	}
+
 	@Override
 	public boolean isConsistentSubtypeOf(TypeSeq that) {
 		Check.notNull(that);

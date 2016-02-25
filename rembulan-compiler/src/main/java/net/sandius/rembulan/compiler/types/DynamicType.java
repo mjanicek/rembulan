@@ -33,4 +33,9 @@ public final class DynamicType extends Type {
 		return this;
 	}
 
+	@Override
+	public Type unionWith(Type that) {
+		return this;
+	}
+
 }

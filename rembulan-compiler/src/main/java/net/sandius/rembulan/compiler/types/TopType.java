@@ -8,6 +8,10 @@ public final class TopType extends Type {
 		// not to be instantiated by the outside world
 	}
 
+	public BaseType newSubtype(String name, String tag) {
+		return new BaseType(null, name, tag);
+	}
+
 	@Override
 	public String toString() {
 		return "A";
@@ -33,8 +37,9 @@ public final class TopType extends Type {
 		return that;
 	}
 
-	public BaseType newSubtype(String name, String tag) {
-		return new BaseType(null, name, tag);
+	@Override
+	public Type unionWith(Type that) {
+		return this;
 	}
 
 }

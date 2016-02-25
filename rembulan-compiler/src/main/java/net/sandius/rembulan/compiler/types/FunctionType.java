@@ -113,6 +113,18 @@ public class FunctionType extends ConcreteType {
 	}
 
 	@Override
+	public Type restrict(Type that) {
+		if (that instanceof FunctionType) {
+			FunctionType thatFt = (FunctionType) that;
+			return FunctionType.of(this.argumentTypes().restrict(thatFt.argumentTypes()),
+					this.returnTypes().restrict(thatFt.returnTypes()));
+		}
+		else {
+			return that instanceof DynamicType ? that : this;
+		}
+	}
+
+	@Override
 	public boolean isConsistentWith(Type that) {
 		if (that instanceof FunctionType) {
 			FunctionType thatFunc = (FunctionType) that;
@@ -123,6 +135,11 @@ public class FunctionType extends ConcreteType {
 		else {
 			return super.isConsistentWith(that);
 		}
+	}
+
+	@Override
+	public Type unionWith(Type that) {
+		throw new UnsupportedOperationException();
 	}
 
 }
