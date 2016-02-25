@@ -41,7 +41,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	}
 
 	public TypeSeq withVararg() {
-		return hasVarargs() ? this : new TypeSeq(fixed, true);
+		return new TypeSeq(fixed, LuaTypes.ANY);
 	}
 
 	@Override
@@ -84,20 +84,17 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		return fixed;
 	}
 
-	public boolean hasVarargs() {
-		return !tailType.equals(LuaTypes.NIL);
-	}
+//	public boolean hasVarargs() {
+//		return !tailType.equals(LuaTypes.NIL);
+//	}
 
-	public boolean isVarargOnly() {
-		return fixed().isEmpty() && hasVarargs();
-	}
+//	public boolean isVarargOnly() {
+//		return fixed().isEmpty() && hasVarargs();
+//	}
 
 	public Type get(int idx) {
 		Check.nonNegative(idx);
-
-		if (idx < fixed().size()) return fixed().get(idx);  // it's a fixed arg
-		else if (hasVarargs()) return LuaTypes.ANY;  // it's a vararg
-		else return LuaTypes.NIL;  // it's not there
+		return idx < fixed().size() ? fixed().get(idx) : tailType;
 	}
 
 	public boolean isSubsumedBy(TypeSeq that) {
@@ -111,7 +108,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 			}
 		}
 
-		return that.hasVarargs() || !this.hasVarargs();
+		return this.tailType.isSubtypeOf(that.tailType);
 	}
 
 	public TypeSeq join(TypeSeq that) {
@@ -120,10 +117,23 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		ArrayList<Type> fix = new ArrayList<>();
 
 		for (int i = 0; i < Math.max(this.fixed().size(), that.fixed().size()); i++) {
-			fix.add(this.get(i).join(that.get(i)));
+			Type j = this.get(i).join(that.get(i));
+			if (j != null) {
+				fix.add(j);
+			}
+			else {
+				return null;
+			}
 		}
 
-		return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, fix), this.hasVarargs() || that.hasVarargs());
+		Type tt = this.tailType.join(that.tailType);
+
+		if (tt != null) {
+			return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, fix), tt);
+		}
+		else {
+			return null;
+		}
 	}
 
 	// returns null to indicate that no meet exists
@@ -142,7 +152,14 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 			}
 		}
 
-		return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, fix), this.hasVarargs() && that.hasVarargs());
+		Type tt = this.tailType.meet(that.tailType);
+
+		if (tt != null) {
+			return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, fix), tt);
+		}
+		else {
+			return null;
+		}
 	}
 
 	// Let < be the subtyping relation, and if seq is a TypeSeq and i is an index (a non-negative
@@ -178,13 +195,15 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 			}
 		}
 
-		if (result != null) {
+		PartialOrderComparisonResult tr =  this.tailType.compareTo(that.tailType);
+
+		if (result != null && tr.isDefined()) {
+			// tr doesn't ruin the result
 			return result;
 		}
-
-		if (this.hasVarargs() && !that.hasVarargs()) return PartialOrderComparisonResult.GREATER_THAN;
-		else if (!this.hasVarargs() && that.hasVarargs()) return PartialOrderComparisonResult.LESSER_THAN;
-		else return PartialOrderComparisonResult.EQUAL;
+		else {
+			return tr;
+		}
 	}
 
 	@Override
@@ -197,7 +216,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 			}
 		}
 
-		return this.hasVarargs() == that.hasVarargs();
+		return this.tailType.isConsistentWith(that.tailType);
 	}
 
 	public TypeSeq restrict(TypeSeq that) {
@@ -209,7 +228,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 			ts.add(this.get(i).restrict(that.get(i)));
 		}
 
-		return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, ts), this.hasVarargs());
+		return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, ts), this.tailType.restrict(that.tailType));
 	}
 
 	@Override
@@ -222,7 +241,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 			}
 		}
 
-		return that.hasVarargs() || !this.hasVarargs();
+		return this.tailType.isConsistentSubtypeOf(that.tailType);
 	}
 
 }
