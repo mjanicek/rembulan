@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.types.BaseType;
 import net.sandius.rembulan.compiler.types.DynamicType;
 import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.TopType;
+import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 
 public class LuaTypes {
@@ -12,7 +13,7 @@ public class LuaTypes {
 
 	public static final DynamicType DYNAMIC = DynamicType.INSTANCE;
 
-	public static final BaseType NIL = ANY.newSubtype("nil", "-");
+	public static final Type NIL = ANY.newSubtype("nil", "-");
 	public static final BaseType BOOLEAN = ANY.newSubtype("boolean", "B");
 	public static final BaseType NUMBER = ANY.newSubtype("number", "N");
 	public static final BaseType NUMBER_INTEGER = NUMBER.newSubtype("integer", "i");
