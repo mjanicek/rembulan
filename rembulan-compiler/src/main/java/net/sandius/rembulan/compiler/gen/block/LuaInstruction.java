@@ -227,7 +227,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tab) == LuaTypes.TABLE ? "_T" : "";
+			String suffix = inSlots().getType(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "";
 			return "GETTABLE" + suffix + "(" + r_dest + "," + r_tab + "," + rk_key + ")";
 		}
 
@@ -288,7 +288,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = (inSlots().getType(r_tab) == LuaTypes.TABLE ? "_T" : "");
+			String suffix = (inSlots().getType(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "");
 			return "SETTABLE" + suffix + "(" + r_tab + "," + rk_key + "," + rk_value + ")";
 		}
 
@@ -334,7 +334,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_self) == LuaTypes.TABLE ? "_T" : "";
+			String suffix = inSlots().getType(r_self).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "";
 			return "SELF" + suffix + "(" + r_dest + "," + r_self + "," + rk_key + ")";
 		}
 
@@ -367,7 +367,7 @@ public class LuaInstruction {
 		private boolean allStringable(SlotState s) {
 			for (int i = r_begin; i <= r_end; i++) {
 				Type tpe = s.getType(i);
-				if (!(tpe == LuaTypes.STRING || tpe.isSubtypeOf(LuaTypes.NUMBER))) {
+				if (!(tpe.isSubtypeOf(LuaTypes.STRING) || tpe.isSubtypeOf(LuaTypes.NUMBER))) {
 					return false;
 				}
 			}
@@ -460,11 +460,11 @@ public class LuaInstruction {
 		public String toString() {
 			Type tpe = inSlots().getType(r_index);
 
-			String suffix = (tpe == LuaTypes.BOOLEAN
+			String suffix = (tpe.isSubtypeOf(LuaTypes.BOOLEAN)
 					? "_B"  // simple boolean comparison, do branch
-					: (tpe == LuaTypes.ANY
+					: (tpe.equals(LuaTypes.ANY)
 							? "_coerce"  // coerce, compare, do branch
-							: (tpe == LuaTypes.NIL
+							: (tpe.equals(LuaTypes.NIL)
 									? "_false"  // automatically false
 									: "_true"  // automatically true
 							)
@@ -478,8 +478,8 @@ public class LuaInstruction {
 		public InlineTarget canBeInlined() {
 			Type tpe = inSlots().getType(r_index);
 
-			if (tpe == LuaTypes.BOOLEAN || tpe == LuaTypes.ANY) return InlineTarget.CANNOT_BE_INLINED;
-			else if (tpe == LuaTypes.NIL) return InlineTarget.FALSE_BRANCH;
+			if (tpe.equals(LuaTypes.BOOLEAN) || tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) return InlineTarget.CANNOT_BE_INLINED;
+			else if (tpe.equals(LuaTypes.NIL)) return InlineTarget.FALSE_BRANCH;
 			else return InlineTarget.TRUE_BRANCH;
 		}
 
@@ -709,9 +709,9 @@ public class LuaInstruction {
 			Type a1 = s.getType(r_base + 1);
 			Type a2 = s.getType(r_base + 2);
 
-			if (a0 == LuaTypes.NUMBER_INTEGER
-					&& a1 == LuaTypes.NUMBER_INTEGER
-					&& a2 == LuaTypes.NUMBER_INTEGER) {
+			if (a0.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+					&& a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+					&& a2.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 
 				return NumOpType.Integer;
 			}
@@ -719,9 +719,9 @@ public class LuaInstruction {
 					&& a1.isSubtypeOf(LuaTypes.NUMBER)
 					&& a2.isSubtypeOf(LuaTypes.NUMBER)) {
 
-				if (a0 == LuaTypes.NUMBER_FLOAT
-						|| a1 == LuaTypes.NUMBER_FLOAT
-						|| a2 == LuaTypes.NUMBER_FLOAT) {
+				if (a0.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
+						|| a1.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
+						|| a2.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
 					return NumOpType.Float;
 				}
 				else {
