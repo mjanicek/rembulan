@@ -176,7 +176,7 @@ public class SlotState {
 
 	public SlotState join(int idx, Slot slot) {
 		Origin o = get(idx).origin().join(slot.origin());
-		Type t = get(idx).type().join(slot.type());
+		Type t = get(idx).type().unionWith(slot.type());
 		return update(idx, Slot.of(o, t));
 	}
 
