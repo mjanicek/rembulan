@@ -1,45 +1,41 @@
 package net.sandius.rembulan.compiler.types;
 
-public final class TopType extends Type {
+public final class BottomType extends Type {
 
-	public static final TopType INSTANCE = new TopType();
+	public static final BottomType INSTANCE = new BottomType();
 
-	private TopType() {
+	private BottomType() {
 		// not to be instantiated by the outside world
-	}
-
-	public BaseType newSubtype(String name, String tag) {
-		return new BaseType(null, name, tag);
 	}
 
 	@Override
 	public String toString() {
-		return "⊤";
+		return "⊥";
 	}
 
 	@Override
 	public boolean isSubtypeOf(Type that) {
-		return this.equals(that);
+		return true;
 	}
 
 	@Override
 	public Type restrict(Type that) {
-		return that.equals(DynamicType.INSTANCE) ? that : this;
+		return that instanceof DynamicType ? that : this;
 	}
 
 	@Override
 	public Type join(Type that) {
-		return this;
-	}
-
-	@Override
-	public Type meet(Type that) {
 		return that;
 	}
 
 	@Override
-	public Type unionWith(Type that) {
+	public Type meet(Type that) {
 		return this;
+	}
+
+	@Override
+	public Type unionWith(Type that) {
+		return that;
 	}
 
 }
