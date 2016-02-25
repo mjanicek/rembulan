@@ -94,7 +94,7 @@ class TypeSpec extends FunSpec with MustMatchers {
     var result: Type = null
     describe ("union of " + l + " and " + r) {
       if (l == r) {
-        val t = l join r
+        val t = l unionWith  r
 
         it ("exists") {
           t must not be null
@@ -103,8 +103,8 @@ class TypeSpec extends FunSpec with MustMatchers {
         result = t
       }
       else {
-        val lr = l join r
-        val rl = r join l
+        val lr = l unionWith r
+        val rl = r unionWith l
 
         it ("exists") {
           lr must not be null
