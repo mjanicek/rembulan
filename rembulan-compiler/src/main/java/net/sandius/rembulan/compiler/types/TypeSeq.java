@@ -24,15 +24,17 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		this(fixed, varargs ? LuaTypes.ANY : LuaTypes.NIL);
 	}
 
-	private static final TypeSeq EMPTY_FIXED = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), false);
-	private static final TypeSeq EMPTY_VARARG = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), true);
+//	private static final TypeSeq EMPTY_FIXED = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), false);
+//	private static final TypeSeq EMPTY_VARARG = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), true);
 
 	public static TypeSeq empty() {
-		return EMPTY_FIXED;
+//		return EMPTY_FIXED;
+		return of();
 	}
 
 	public static TypeSeq vararg() {
-		return EMPTY_VARARG;
+//		return EMPTY_VARARG;
+		return of().withVararg();
 	}
 
 	public static TypeSeq of(Type... fixed) {
