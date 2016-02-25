@@ -90,6 +90,52 @@ class TypeSpec extends FunSpec with MustMatchers {
     r !~< l
   }
 
+  def union(l: Type, r: Type): Type = {
+    var result: Type = null
+    describe ("union of " + l + " and " + r) {
+      if (l == r) {
+        val t = l join r
+
+        it ("exists") {
+          t must not be null
+        }
+
+        result = t
+      }
+      else {
+        val lr = l join r
+        val rl = r join l
+
+        it ("exists") {
+          lr must not be null
+          rl must not be null
+        }
+
+        it ("is symmetric") {
+          lr mustEqual rl
+          rl mustEqual lr
+        }
+
+        result = lr
+      }
+    }
+    result
+  }
+
+  val D_D = T(DYNAMIC) -> T(DYNAMIC)
+  val Dv_D = T(DYNAMIC).+ -> T(DYNAMIC)
+  val A_A = T(ANY) -> T(ANY)
+  val DDv_D = T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)
+  val NNv_N = T(NUMBER, NUMBER).+ -> T(NUMBER)
+
+  val v_A = T().+ -> T(ANY)
+  val v_v = T().+ -> T().+
+  val AA_A = T(ANY, ANY) -> T(ANY)
+  val NN_N = T(NUMBER, NUMBER) -> T(NUMBER)
+  val NN_A = T(NUMBER, NUMBER) -> T(ANY)
+  val ii_i = T(NUMBER_INTEGER, NUMBER_INTEGER) -> T(NUMBER_INTEGER)
+  val ff_f = T(NUMBER_FLOAT, NUMBER_FLOAT) -> T(NUMBER_FLOAT)
+
   describe ("consistency:") {
 
     describe ("simple type") {
@@ -169,20 +215,6 @@ class TypeSpec extends FunSpec with MustMatchers {
       (T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)) ~< (T(NUMBER, NUMBER) -> T(NUMBER))
       (T(NUMBER, NUMBER) -> T(NUMBER)) !~< (T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC))
 
-      val D_D = T(DYNAMIC) -> T(DYNAMIC)
-      val Dv_D = T(DYNAMIC).+ -> T(DYNAMIC)
-      val A_A = T(ANY) -> T(ANY)
-      val DDv_D = T(DYNAMIC, DYNAMIC).+ -> T(DYNAMIC)
-      val NNv_N = T(NUMBER, NUMBER).+ -> T(NUMBER)
-
-      val v_A = T().+ -> T(ANY)
-      val v_v = T().+ -> T().+
-      val AA_A = T(ANY, ANY) -> T(ANY)
-      val NN_N = T(NUMBER, NUMBER) -> T(NUMBER)
-      val NN_A = T(NUMBER, NUMBER) -> T(ANY)
-      val ii_i = T(NUMBER_INTEGER, NUMBER_INTEGER) -> T(NUMBER_INTEGER)
-      val ff_f = T(NUMBER_FLOAT, NUMBER_FLOAT) -> T(NUMBER_FLOAT)
-
       strict_lt(v_A, v_v)
       strict_lt(v_A, A_A)
       not_comparable(v_v, A_A)
@@ -218,6 +250,15 @@ class TypeSpec extends FunSpec with MustMatchers {
       TypeSeq.of(NUMBER_FLOAT, DYNAMIC) ~< TypeSeq.of(DYNAMIC, NUMBER_INTEGER)
 
     }
+
+  }
+
+  describe ("type union:") {
+
+    val j = union(AA_A, D_D)
+
+    strict_lt(AA_A, j)
+    equivalent(D_D, j)
 
   }
 
