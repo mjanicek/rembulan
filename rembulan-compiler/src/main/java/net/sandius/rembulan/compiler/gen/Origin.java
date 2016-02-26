@@ -47,7 +47,7 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "#" + index;
+			return "arg_" + index;
 		}
 
 	}
@@ -77,7 +77,7 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "$" + index;
+			return "const_" + index;
 		}
 
 	}
@@ -91,7 +91,7 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "-";
+			return "$nil";
 		}
 
 	}
@@ -158,7 +158,7 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "*" + PrototypePrinter.pseudoAddr(prototype);
+			return "closure_" + Integer.toHexString(System.identityHashCode(prototype));
 		}
 
 	}
@@ -188,7 +188,7 @@ public abstract class Origin {
 
 		@Override
 		public String toString() {
-			return "^" + index;
+			return "upvalue_" + index;
 		}
 
 	}
