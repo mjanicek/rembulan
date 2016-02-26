@@ -23,7 +23,7 @@ public class SlotState {
 
 		this.fixedSlots = fixedSlots;
 		this.captured = captured;
-		this.varargPosition = varargPosition;
+		this.varargPosition = varargPosition < 0 ? -1 : varargPosition;
 	}
 
 	@Override
@@ -33,17 +33,16 @@ public class SlotState {
 
 		SlotState that = (SlotState) o;
 
-		// FIXME: vararg position!
-
-		return fixedSlots.shallowEquals(that.fixedSlots) && this.captured.equals(that.captured);
+		return this.varargPosition == that.varargPosition
+				&& this.fixedSlots.equals(that.fixedSlots)
+				&& this.captured.equals(that.captured);
 	}
 
 	@Override
 	public int hashCode() {
-		// FIXME: vararg position!
-
-		int result = fixedSlots.shallowHashCode();
+		int result = fixedSlots.hashCode();
 		result = 31 * result + captured.hashCode();
+		result = 31 * result + varargPosition;
 		return result;
 	}
 
