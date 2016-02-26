@@ -86,7 +86,8 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			return "MOVE(" + r_dest + "," + r_src + ")";
+			boolean nop = inSlots().slotAt(r_src).equals(inSlots().slotAt(r_dest));
+			return "MOVE" + (nop ? "_nop" : "") + "(" + r_dest + "," + r_src + ")";
 		}
 
 		@Override
