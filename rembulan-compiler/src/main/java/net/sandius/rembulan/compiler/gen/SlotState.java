@@ -175,7 +175,7 @@ public class SlotState {
 	}
 
 	public SlotState merge(int idx, Slot slot) {
-		Origin o = get(idx).origin().join(slot.origin());
+		Origin o = get(idx).origin().merge(slot.origin());
 		Type t = get(idx).type().unionWith(slot.type());
 		return update(idx, Slot.of(o, t));
 	}

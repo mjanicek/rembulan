@@ -16,7 +16,7 @@ public abstract class Origin {
 		// not to be extended by the outside world
 	}
 
-	public Origin join(Origin that) {
+	public Origin merge(Origin that) {
 		Objects.requireNonNull(that);
 		return this.equals(that) ? this : Multi.of(this, that);
 	}
