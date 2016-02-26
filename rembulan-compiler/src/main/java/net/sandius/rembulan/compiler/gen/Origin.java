@@ -196,11 +196,15 @@ public abstract class Origin {
 	// TODO: add references to predecessors? might complicate equality computation...
 	public static class Computed extends Origin {
 
-		private final Object cause;
+		private final Object where;
 
-		public Computed(Object cause) {
-			Check.notNull(cause);
-			this.cause = cause;
+		private Computed(Object where) {
+			Check.notNull(where);
+			this.where = where;
+		}
+
+		public static Computed in(Object where) {
+			return new Computed(where);
 		}
 
 		@Override
@@ -210,13 +214,12 @@ public abstract class Origin {
 
 			Computed that = (Computed) o;
 
-//			return this.cause == that.cause;
-			return cause.equals(that.cause);
+			return where.equals(that.where);
 		}
 
 		@Override
 		public int hashCode() {
-			return cause.hashCode();
+			return where.hashCode();
 		}
 
 		@Override

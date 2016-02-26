@@ -65,7 +65,7 @@ public abstract class BinaryOperation extends Linear {
 
 	@Override
 	protected SlotState effect(SlotState s) {
-		return s.update(r_dest, Slot.of(new Origin.Computed(this), opType(s).toSlotType()));
+		return s.update(r_dest, Slot.of(Origin.Computed.in(this), opType(s).toSlotType()));
 	}
 
 	public static class Add extends BinaryOperation {
