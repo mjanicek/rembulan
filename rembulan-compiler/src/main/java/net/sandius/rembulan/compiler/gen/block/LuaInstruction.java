@@ -39,7 +39,7 @@ public class LuaInstruction {
 
 		Type[] args = new Type[num];
 		for (int i = 0; i < num; i++) {
-			args[i] = s.getType(from + i);
+			args[i] = s.typeAt(from + i);
 		}
 
 		return new TypeSeq(ReadOnlyArray.wrap(args), count <= 0);
@@ -91,7 +91,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, s.get(r_src));
+			return s.update(r_dest, s.slotAt(r_src));
 		}
 
 	}
@@ -227,7 +227,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "";
+			String suffix = inSlots().typeAt(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "";
 			return "GETTABLE" + suffix + "(" + r_dest + "," + r_tab + "," + rk_key + ")";
 		}
 
@@ -288,7 +288,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = (inSlots().getType(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "");
+			String suffix = (inSlots().typeAt(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "");
 			return "SETTABLE" + suffix + "(" + r_tab + "," + rk_key + "," + rk_value + ")";
 		}
 
@@ -334,13 +334,13 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_self).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "";
+			String suffix = inSlots().typeAt(r_self).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "";
 			return "SELF" + suffix + "(" + r_dest + "," + r_self + "," + rk_key + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest + 1, s.get(r_self))
+			return s.update(r_dest + 1, s.slotAt(r_self))
 					.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.ANY));
 		}
 
@@ -366,7 +366,7 @@ public class LuaInstruction {
 
 		private boolean allStringable(SlotState s) {
 			for (int i = r_begin; i <= r_end; i++) {
-				Type tpe = s.getType(i);
+				Type tpe = s.typeAt(i);
 				if (!(tpe.isSubtypeOf(LuaTypes.STRING) || tpe.isSubtypeOf(LuaTypes.NUMBER))) {
 					return false;
 				}
@@ -458,7 +458,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			Type tpe = inSlots().getType(r_index);
+			Type tpe = inSlots().typeAt(r_index);
 
 			String suffix = (tpe.isSubtypeOf(LuaTypes.BOOLEAN)
 					? "_B"  // simple boolean comparison, do branch
@@ -476,7 +476,7 @@ public class LuaInstruction {
 
 		@Override
 		public InlineTarget canBeInlined() {
-			Type tpe = inSlots().getType(r_index);
+			Type tpe = inSlots().typeAt(r_index);
 
 			if (tpe.equals(LuaTypes.BOOLEAN) || tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) return InlineTarget.CANNOT_BE_INLINED;
 			else if (tpe.equals(LuaTypes.NIL)) return InlineTarget.FALSE_BRANCH;
@@ -579,7 +579,7 @@ public class LuaInstruction {
 				}
 			}
 
-			Type targetType = s.getType(r_tgt);
+			Type targetType = s.typeAt(r_tgt);
 			TypeSeq retType = targetType instanceof FunctionType ? ((FunctionType) targetType).returnTypes() : TypeSeq.vararg();
 
 			if (c > 0) {
@@ -600,7 +600,7 @@ public class LuaInstruction {
 
 		@Override
 		public Slot callTarget() {
-			return inSlots().get(r_tgt);
+			return inSlots().slotAt(r_tgt);
 		}
 
 		@Override
@@ -622,7 +622,7 @@ public class LuaInstruction {
 
 		@Override
 		public String toString() {
-			String suffix = inSlots().getType(r_tgt) instanceof FunctionType ? "_F" : "_mt";
+			String suffix = inSlots().typeAt(r_tgt) instanceof FunctionType ? "_F" : "_mt";
 			suffix += "_" + argTypesFromSlots(inSlots(), r_tgt + 1, b);
 
 			return "TAILCALL" + suffix + "(" + r_tgt + "," + b + ")";
@@ -637,7 +637,7 @@ public class LuaInstruction {
 
 		@Override
 		public Slot callTarget() {
-			return inSlots().get(r_tgt);
+			return inSlots().slotAt(r_tgt);
 		}
 
 		@Override
@@ -705,9 +705,9 @@ public class LuaInstruction {
 		}
 
 		private NumOpType loopType(SlotState s) {
-			Type a0 = s.getType(r_base + 0);
-			Type a1 = s.getType(r_base + 1);
-			Type a2 = s.getType(r_base + 2);
+			Type a0 = s.typeAt(r_base + 0);
+			Type a1 = s.typeAt(r_base + 1);
+			Type a2 = s.typeAt(r_base + 2);
 
 			if (a0.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
 					&& a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)

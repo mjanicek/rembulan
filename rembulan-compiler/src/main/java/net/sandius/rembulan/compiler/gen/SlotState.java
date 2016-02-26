@@ -58,7 +58,7 @@ public class SlotState {
 		int numRegularSlots = varargPosition() < 0 ? size() : Math.min(size(), varargPosition());
 
 		for (int i = 0; i < numRegularSlots; i++) {
-			Slot slot = get(i);
+			Slot slot = slotAt(i);
 
 			if (isCaptured(i)) {
 				bld.append('{');
@@ -122,9 +122,18 @@ public class SlotState {
 		return varargPosition < 0 ? size() : varargPosition;
 	}
 
-	public Slot get(int idx) {
+	@Deprecated
+	public Slot slotAt(int idx) {
 		Check.isTrue(isValidIndex(idx));
 		return fixedSlots.get(idx);
+	}
+
+	public Type typeAt(int idx) {
+		return slotAt(idx).type();
+	}
+
+	public Origin originAt(int idx) {
+		return slotAt(idx).origin();
 	}
 
 	public boolean isValidIndex(int idx) {
@@ -156,16 +165,16 @@ public class SlotState {
 		return updateState(idx, false);
 	}
 
-	@Deprecated
-	public Type getType(int idx) {
-		return get(idx).type();
+	public SlotState update(int idx, Origin origin, Type type) {
+		return update(idx, Slot.of(origin, type));
 	}
 
+	@Deprecated
 	public SlotState update(int idx, Slot slot) {
 		Check.notNull(slot);
 		Check.isTrue(isValidIndex(idx));
 
-		if (get(idx).equals(slot)) {
+		if (slotAt(idx).equals(slot)) {
 			// no-op
 			return this;
 		}
@@ -174,10 +183,8 @@ public class SlotState {
 		}
 	}
 
-	public SlotState merge(int idx, Slot slot) {
-		Origin o = get(idx).origin().merge(slot.origin());
-		Type t = get(idx).type().unionWith(slot.type());
-		return update(idx, Slot.of(o, t));
+	private SlotState merge(int idx, Origin origin, Type type) {
+		return update(idx, originAt(idx).merge(origin), typeAt(idx).unionWith(type));
 	}
 
 	public SlotState merge(SlotState that) {
@@ -186,7 +193,7 @@ public class SlotState {
 
 		SlotState s = this;
 		for (int i = 0; i < size(); i++) {
-			s = s.merge(i, that.get(i));
+			s = s.merge(i, that.originAt(i), that.typeAt(i));
 		}
 
 		for (int i = 0; i < size(); i++) {

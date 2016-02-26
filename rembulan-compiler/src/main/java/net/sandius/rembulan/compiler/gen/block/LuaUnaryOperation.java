@@ -22,14 +22,14 @@ public abstract class LuaUnaryOperation extends Linear {
 
 	@Override
 	public String toString() {
-		Type rt = resultType(inSlots().getType(r_arg));
+		Type rt = resultType(inSlots().typeAt(r_arg));
 		String suffix = rt != LuaTypes.ANY ? "_" + rt : "";
 		return name() + suffix + "(" + r_dest + "," + r_arg + ")";
 	}
 
 	@Override
 	protected SlotState effect(SlotState s) {
-		return s.update(r_dest, Slot.of(Origin.Computed.in(this), resultType(s.getType(r_arg))));
+		return s.update(r_dest, Slot.of(Origin.Computed.in(this), resultType(s.typeAt(r_arg))));
 	}
 
 	public static class Unm extends LuaUnaryOperation {

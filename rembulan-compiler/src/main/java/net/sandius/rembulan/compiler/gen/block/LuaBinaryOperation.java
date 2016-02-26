@@ -33,7 +33,7 @@ public abstract class LuaBinaryOperation extends Linear {
 	}
 
 	protected Type slotType(SlotState s, int idx) {
-		return idx < 0 ? LuaInstruction.constantType(prototype.getConstants().get(-idx - 1)) : s.getType(idx);
+		return idx < 0 ? LuaInstruction.constantType(prototype.getConstants().get(-idx - 1)) : s.typeAt(idx);
 	}
 
 	protected abstract NumOpType opType(Type l, Type r);
