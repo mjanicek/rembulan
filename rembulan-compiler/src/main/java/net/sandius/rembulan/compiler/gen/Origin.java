@@ -4,7 +4,11 @@ import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.PrototypePrinter;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Objects;
+import java.util.Set;
 
 public abstract class Origin {
 
@@ -14,7 +18,7 @@ public abstract class Origin {
 
 	public Origin join(Origin that) {
 		Objects.requireNonNull(that);
-		return this.equals(that) ? this : new Multi();
+		return this.equals(that) ? this : Multi.of(this, that);
 	}
 
 	public static class Argument extends Origin {
@@ -31,9 +35,9 @@ public abstract class Origin {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 
-			Argument argument = (Argument) o;
+			Argument that = (Argument) o;
 
-			return index == argument.index;
+			return this.index == that.index;
 		}
 
 		@Override
@@ -62,8 +66,8 @@ public abstract class Origin {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 
-			Constant constant = (Constant) o;
-			return index == constant.index;
+			Constant that = (Constant) o;
+			return this.index == that.index;
 		}
 
 		@Override
@@ -114,7 +118,7 @@ public abstract class Origin {
 
 			BooleanConstant that = (BooleanConstant) o;
 
-			return value == that.value;
+			return this.value == that.value;
 		}
 
 		@Override
@@ -142,9 +146,9 @@ public abstract class Origin {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 
-			Closure closure = (Closure) o;
+			Closure that = (Closure) o;
 
-			return prototype.equals(closure.prototype);
+			return prototype.equals(that.prototype);
 		}
 
 		@Override
@@ -173,8 +177,8 @@ public abstract class Origin {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 
-			Upvalue constant = (Upvalue) o;
-			return index == constant.index;
+			Upvalue that = (Upvalue) o;
+			return this.index == that.index;
 		}
 
 		@Override
@@ -192,6 +196,29 @@ public abstract class Origin {
 	// TODO: add references to predecessors? might complicate equality computation...
 	public static class Computed extends Origin {
 
+		private final Object cause;
+
+		public Computed(Object cause) {
+			Check.notNull(cause);
+			this.cause = cause;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Computed that = (Computed) o;
+
+//			return this.cause == that.cause;
+			return cause.equals(that.cause);
+		}
+
+		@Override
+		public int hashCode() {
+			return cause.hashCode();
+		}
+
 		@Override
 		public String toString() {
 			return "_" + Integer.toHexString(this.hashCode());
@@ -200,9 +227,65 @@ public abstract class Origin {
 	}
 
 	public static class Multi extends Origin {
+
+		private final Set<Origin> origins;
+
+		private Multi(Set<Origin> origins) {
+			Check.notNull(origins);
+			this.origins = origins;
+		}
+
+		private static void addAll(Set<Origin> dest, Origin src) {
+			if (src instanceof Multi) {
+				for (Origin o : ((Multi) src).origins) {
+					addAll(dest, o);
+				}
+			}
+			else {
+				dest.add(src);
+			}
+		}
+
+		public static Origin of(Origin... origins) {
+			Check.notNull(origins);
+			Check.gt(origins.length, 1);
+
+			Set<Origin> set = new HashSet<>();
+			for (Origin o : origins) {
+				addAll(set, o);
+			}
+
+			return new Multi(Collections.unmodifiableSet(set));
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Multi that = (Multi) o;
+
+			return this.origins.equals(that.origins);
+		}
+
+		@Override
+		public int hashCode() {
+			return origins.hashCode();
+		}
+
 		@Override
 		public String toString() {
-			return "&";
+			StringBuilder bld = new StringBuilder();
+			bld.append("[");
+			Iterator<Origin> it = origins.iterator();
+			while (it.hasNext()) {
+				Origin o = it.next();
+				bld.append(o.toString());
+				if (it.hasNext()) bld.append(";");
+			}
+			bld.append("]");
+
+			return bld.toString();
 		}
 	}
 
