@@ -164,6 +164,14 @@ object AnalysisRunner {
           """
     }
 
+    object VarargDecomposition extends Fragment {
+      code =
+          """local a, b = ...
+            |local c, d, e = a(b, ...)
+            |return d(e, ...)
+          """
+    }
+
     object FunctionCalls extends Fragment {
       code =
           """local function f(x, y)
@@ -358,7 +366,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = ReturningAFunction
+    val program = VarargDecomposition
 
     println(program.code)
 

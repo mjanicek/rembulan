@@ -809,7 +809,7 @@ public class LuaInstruction {
 			if (b > 0) {
 				// (b - 1) is the number of values
 				for (int i = 0; i < b - 1; i++) {
-					s = s.update(r_base + i, Slot.of(Origin.Computed.in(this), LuaTypes.ANY));  // TODO: vararg origin?
+					s = s.update(r_base + i, new Origin.Vararg(i), LuaTypes.ANY);
 				}
 				return s;
 			}

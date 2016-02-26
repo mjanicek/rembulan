@@ -193,7 +193,6 @@ public abstract class Origin {
 
 	}
 
-	// TODO: add references to predecessors? might complicate equality computation...
 	public static class Computed extends Origin {
 
 		private final Object where;
@@ -307,6 +306,36 @@ public abstract class Origin {
 		@Override
 		public String toString() {
 			return "_";
+		}
+
+	}
+
+	public static class Vararg extends Origin {
+
+		public final int index;
+
+		public Vararg(int index) {
+			this.index = index;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Vararg that = (Vararg) o;
+
+			return this.index == that.index;
+		}
+
+		@Override
+		public int hashCode() {
+			return index;
+		}
+
+		@Override
+		public String toString() {
+			return "vararg_" + index;
 		}
 
 	}
