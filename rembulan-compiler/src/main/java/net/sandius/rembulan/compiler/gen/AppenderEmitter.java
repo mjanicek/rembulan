@@ -1,12 +1,12 @@
 package net.sandius.rembulan.compiler.gen;
 
-import net.sandius.rembulan.compiler.gen.block.BinaryOperation;
+import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.CloseUpvalues;
 import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
 import net.sandius.rembulan.compiler.gen.block.Target;
-import net.sandius.rembulan.compiler.gen.block.UnaryOperation;
+import net.sandius.rembulan.compiler.gen.block.LuaUnaryOperation;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 
@@ -90,82 +90,82 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_ADD(int a, int b, int c) {
-		appender.append(new BinaryOperation.Add(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Add(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SUB(int a, int b, int c) {
-		appender.append(new BinaryOperation.Sub(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Sub(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_MUL(int a, int b, int c) {
-		appender.append(new BinaryOperation.Mul(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Mul(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_MOD(int a, int b, int c) {
-		appender.append(new BinaryOperation.Mod(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Mod(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_POW(int a, int b, int c) {
-		appender.append(new BinaryOperation.Pow(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Pow(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_DIV(int a, int b, int c) {
-		appender.append(new BinaryOperation.Div(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Div(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_IDIV(int a, int b, int c) {
-		appender.append(new BinaryOperation.IDiv(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.IDiv(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BAND(int a, int b, int c) {
-		appender.append(new BinaryOperation.BAnd(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.BAnd(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BOR(int a, int b, int c) {
-		appender.append(new BinaryOperation.BOr(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.BOr(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BXOR(int a, int b, int c) {
-		appender.append(new BinaryOperation.BXor(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.BXor(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SHL(int a, int b, int c) {
-		appender.append(new BinaryOperation.Shl(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Shl(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SHR(int a, int b, int c) {
-		appender.append(new BinaryOperation.Shr(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Shr(prototype, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_UNM(int a, int b) {
-		appender.append(new UnaryOperation.Unm(a, b)).toNext();
+		appender.append(new LuaUnaryOperation.Unm(a, b)).toNext();
 	}
 
 	@Override
 	public void l_BNOT(int a, int b) {
-		appender.append(new UnaryOperation.BNot(a, b)).toNext();
+		appender.append(new LuaUnaryOperation.BNot(a, b)).toNext();
 	}
 
 	@Override
 	public void l_NOT(int a, int b) {
-		appender.append(new UnaryOperation.Not(a, b)).toNext();
+		appender.append(new LuaUnaryOperation.Not(a, b)).toNext();
 	}
 
 	@Override
 	public void l_LEN(int a, int b) {
-		appender.append(new UnaryOperation.Len(a, b)).toNext();
+		appender.append(new LuaUnaryOperation.Len(a, b)).toNext();
 	}
 
 	@Override

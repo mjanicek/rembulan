@@ -10,7 +10,7 @@ import net.sandius.rembulan.lbc.Prototype;
 
 import java.util.Objects;
 
-public abstract class BinaryOperation extends Linear {
+public abstract class LuaBinaryOperation extends Linear {
 
 	public final Prototype prototype;
 
@@ -18,7 +18,7 @@ public abstract class BinaryOperation extends Linear {
 	public final int rk_left;
 	public final int rk_right;
 
-	public BinaryOperation(Prototype prototype, int a, int b, int c) {
+	public LuaBinaryOperation(Prototype prototype, int a, int b, int c) {
 		this.prototype = Objects.requireNonNull(prototype);
 		this.r_dest = a;
 		this.rk_left = LuaInstruction.registerOrConst(b);
@@ -68,7 +68,7 @@ public abstract class BinaryOperation extends Linear {
 		return s.update(r_dest, Slot.of(Origin.Computed.in(this), opType(s).toSlotType()));
 	}
 
-	public static class Add extends BinaryOperation {
+	public static class Add extends LuaBinaryOperation {
 
 		public Add(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -86,7 +86,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class Sub extends BinaryOperation {
+	public static class Sub extends LuaBinaryOperation {
 
 		public Sub(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -104,7 +104,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class Mul extends BinaryOperation {
+	public static class Mul extends LuaBinaryOperation {
 
 		public Mul(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -122,7 +122,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class Mod extends BinaryOperation {
+	public static class Mod extends LuaBinaryOperation {
 
 		public Mod(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -140,7 +140,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class Pow extends BinaryOperation {
+	public static class Pow extends LuaBinaryOperation {
 
 		public Pow(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -158,7 +158,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class Div extends BinaryOperation {
+	public static class Div extends LuaBinaryOperation {
 
 		public Div(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -176,7 +176,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class IDiv extends BinaryOperation {
+	public static class IDiv extends LuaBinaryOperation {
 
 		public IDiv(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -194,7 +194,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class BAnd extends BinaryOperation {
+	public static class BAnd extends LuaBinaryOperation {
 
 		public BAnd(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -212,7 +212,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class BOr extends BinaryOperation {
+	public static class BOr extends LuaBinaryOperation {
 
 		public BOr(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -230,7 +230,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class BXor extends BinaryOperation {
+	public static class BXor extends LuaBinaryOperation {
 
 		public BXor(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -248,7 +248,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class Shl extends BinaryOperation {
+	public static class Shl extends LuaBinaryOperation {
 
 		public Shl(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);
@@ -266,7 +266,7 @@ public abstract class BinaryOperation extends Linear {
 
 	}
 
-	public static class Shr extends BinaryOperation {
+	public static class Shr extends LuaBinaryOperation {
 
 		public Shr(Prototype prototype, int dest, int b, int c) {
 			super(prototype, dest, b, c);

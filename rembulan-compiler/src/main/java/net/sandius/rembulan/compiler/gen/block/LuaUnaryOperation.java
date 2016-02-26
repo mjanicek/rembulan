@@ -6,12 +6,12 @@ import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
 
-public abstract class UnaryOperation extends Linear {
+public abstract class LuaUnaryOperation extends Linear {
 
 	public final int r_dest;
 	public final int r_arg;
 
-	private UnaryOperation(int a, int b) {
+	private LuaUnaryOperation(int a, int b) {
 		this.r_dest = a;
 		this.r_arg = b;
 	}
@@ -32,7 +32,7 @@ public abstract class UnaryOperation extends Linear {
 		return s.update(r_dest, Slot.of(Origin.Computed.in(this), resultType(s.getType(r_arg))));
 	}
 
-	public static class Unm extends UnaryOperation {
+	public static class Unm extends LuaUnaryOperation {
 
 		public Unm(int dest, int b) {
 			super(dest, b);
@@ -50,7 +50,7 @@ public abstract class UnaryOperation extends Linear {
 
 	}
 
-	public static class BNot extends UnaryOperation {
+	public static class BNot extends LuaUnaryOperation {
 
 		public BNot(int dest, int b) {
 			super(dest, b);
@@ -69,7 +69,7 @@ public abstract class UnaryOperation extends Linear {
 
 	}
 
-	public static class Not extends UnaryOperation {
+	public static class Not extends LuaUnaryOperation {
 
 		public Not(int dest, int b) {
 			super(dest, b);
@@ -87,7 +87,7 @@ public abstract class UnaryOperation extends Linear {
 
 	}
 
-	public static class Len extends UnaryOperation {
+	public static class Len extends LuaUnaryOperation {
 
 		public Len(int dest, int b) {
 			super(dest, b);
