@@ -44,8 +44,8 @@ public abstract class BinaryOperation extends Linear {
 
 	private static NumOpType mayBeInteger(Type l, Type r) {
 		if (l.isSubtypeOf(LuaTypes.NUMBER) && r.isSubtypeOf(LuaTypes.NUMBER)) {
-			if (l == LuaTypes.NUMBER_INTEGER && r == LuaTypes.NUMBER_INTEGER) return NumOpType.Integer;
-			else if (l == LuaTypes.NUMBER_FLOAT || r == LuaTypes.NUMBER_FLOAT) return NumOpType.Float;
+			if (l.isSubtypeOf(LuaTypes.NUMBER_INTEGER) && r.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) return NumOpType.Integer;
+			else if (l.isSubtypeOf(LuaTypes.NUMBER_FLOAT) || r.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) return NumOpType.Float;
 			else return NumOpType.Number;
 		}
 		else {

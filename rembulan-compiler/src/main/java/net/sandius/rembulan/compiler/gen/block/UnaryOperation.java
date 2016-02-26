@@ -64,7 +64,7 @@ public abstract class UnaryOperation extends Linear {
 		@Override
 		protected Type resultType(Type in) {
 			// TODO: for constants, we could determine whether the argument is coercible to integer -> need access ot it
-			return in == LuaTypes.NUMBER_INTEGER ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY;
+			return in.isSubtypeOf(LuaTypes.NUMBER_INTEGER) ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY;
 		}
 
 	}
@@ -100,7 +100,7 @@ public abstract class UnaryOperation extends Linear {
 
 		@Override
 		protected Type resultType(Type in) {
-			return in == LuaTypes.STRING ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY;
+			return in.isSubtypeOf(LuaTypes.STRING) ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY;
 		}
 
 	}
