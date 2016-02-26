@@ -336,6 +336,22 @@ object AnalysisRunner {
     println("Type: " + cp.functionType().toExplicitString)
     println()
 
+    val fields = {
+      val uvds = unit.prototype.getUpValueDescriptions
+      (for (i <- 0 until uvds.size) yield uvds.get(i)).toList
+    }
+
+    fields match {
+      case Nil =>
+        println("No fields.")
+      case fs =>
+        println("Fields:")
+        for (uvd <- fs) {
+          println("\tupvalue: (" + uvd.toString + ")")
+        }
+    }
+    println()
+
     val outcalls = cp.callSites.toMap mapValues { _.toSet }
     val ocs = for (p <- outcalls.keys; args <- outcalls(p)) yield (p, args)
 
