@@ -587,7 +587,7 @@ public class LuaInstruction {
 
 				// (c - 1) is the exact number of result values
 				for (int i = 0; i < c - 1; i++) {
-					s = s.update(r_tgt + i, Slot.of(Origin.Computed.in(this), retType.get(i)));
+					s = s.update(r_tgt + i, new Origin.CallResult(this, i), retType.get(i));
 				}
 			}
 			else {

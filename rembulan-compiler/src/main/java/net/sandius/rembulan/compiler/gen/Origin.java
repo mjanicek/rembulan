@@ -340,4 +340,38 @@ public abstract class Origin {
 
 	}
 
+	public static class CallResult extends Origin {
+
+		public final Object where;
+		public final int index;
+
+		public CallResult(Object where, int index) {
+			this.where = Objects.requireNonNull(where);
+			this.index = index;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			CallResult that = (CallResult) o;
+
+			return index == that.index && where.equals(that.where);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = where.hashCode();
+			result = 31 * result + index;
+			return result;
+		}
+
+		@Override
+		public String toString() {
+			return "call_" + Integer.toHexString(where.hashCode()) + "_" + index;
+		}
+
+	}
+
 }
