@@ -12,14 +12,14 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 import java.util.HashSet;
 import java.util.Map;
 
-public class Unit {
+public class CompilationUnit {
 
 	public final Prototype prototype;
 	public final String name;
 
 	private CompiledPrototype generic;
 
-	public Unit(Prototype prototype, String name) {
+	public CompilationUnit(Prototype prototype, String name) {
 		this.prototype = Check.notNull(prototype);
 		this.name = name;
 
@@ -42,7 +42,7 @@ public class Unit {
 		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
 	}
 
-	public Entry makeNodes(TypeSeq params, Map<Prototype, Unit> units) {
+	public Entry makeNodes(TypeSeq params, Map<Prototype, CompilationUnit> units) {
 		IntVector code = prototype.getCode();
 		Target[] targets = new Target[code.length()];
 		for (int pc = 0; pc < targets.length; pc++) {
@@ -62,7 +62,7 @@ public class Unit {
 		return new Entry("main_" + suffix, params, prototype.getMaximumStackSize(), pcLabels.get(0));
 	}
 
-	public CompiledPrototype makeCompiledPrototype(TypeSeq params, Map<Prototype, Unit> units) {
+	public CompiledPrototype makeCompiledPrototype(TypeSeq params, Map<Prototype, CompilationUnit> units) {
 		CompiledPrototype cp = new CompiledPrototype(prototype, params);
 		cp.callEntry = makeNodes(params, units);
 		cp.returnType = TypeSeq.vararg();
@@ -70,7 +70,7 @@ public class Unit {
 		return cp;
 	}
 
-	public void initGeneric(Map<Prototype, Unit> units) {
+	public void initGeneric(Map<Prototype, CompilationUnit> units) {
 		this.generic = makeCompiledPrototype(genericParameters(), units);
 	}
 

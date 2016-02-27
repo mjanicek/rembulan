@@ -5,7 +5,7 @@ import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
-import net.sandius.rembulan.compiler.gen.Unit;
+import net.sandius.rembulan.compiler.gen.CompilationUnit;
 import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
@@ -760,9 +760,9 @@ public class LuaInstruction {
 		public final int r_dest;
 		public final Prototype prototype;
 
-		public final Map<Prototype, Unit> units;
+		public final Map<Prototype, CompilationUnit> units;
 
-		public Closure(Prototype parent, Map<Prototype, Unit> units, int a, int bx) {
+		public Closure(Prototype parent, Map<Prototype, CompilationUnit> units, int a, int bx) {
 			this.r_dest = a;
 			this.prototype = parent.getNestedPrototypes().get(bx);
 			this.units = units;

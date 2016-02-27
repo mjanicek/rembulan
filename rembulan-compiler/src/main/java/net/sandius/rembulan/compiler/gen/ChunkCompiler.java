@@ -16,39 +16,39 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class FlowIt {
+public class ChunkCompiler {
 
 	private final Prototype prototype;
 
 	private final ClassNameGenerator nameGenerator;
 
-	private final Map<Prototype, Unit> units;
+	private final Map<Prototype, CompilationUnit> units;
 
-	public FlowIt(Prototype prototype, ClassNameGenerator nameGenerator) {
+	public ChunkCompiler(Prototype prototype, ClassNameGenerator nameGenerator) {
 		this.prototype = Check.notNull(prototype);
 		this.nameGenerator = Check.notNull(nameGenerator);
 		this.units = new HashMap<>();
 	}
 
-	public Iterable<Unit> units() {
+	public Iterable<CompilationUnit> units() {
 		return Collections.unmodifiableCollection(units.values());
 	}
 
 	@Deprecated
 	public void go() {
-		List<Unit> us = new LinkedList<>();
+		List<CompilationUnit> us = new LinkedList<>();
 
 		addUnits(prototype, us, nameGenerator);
 
-		for (Unit u : us) {
+		for (CompilationUnit u : us) {
 			System.out.println("Processing " + u.name() + "...");
 			processGeneric(u);
 		}
 	}
 
-	private void addUnits(Prototype prototype, List<Unit> us, ClassNameGenerator nameGen) {
+	private void addUnits(Prototype prototype, List<CompilationUnit> us, ClassNameGenerator nameGen) {
 		if (!units.containsKey(prototype)) {
-			Unit u = initUnit(prototype, nameGen.className());
+			CompilationUnit u = initUnit(prototype, nameGen.className());
 			units.put(prototype, u);
 			us.add(0, u);  // prepending in order to ensure that nested prototypes are processed before their parent
 
@@ -59,14 +59,14 @@ public class FlowIt {
 		}
 	}
 
-	private Unit initUnit(Prototype prototype, String name) {
-		Unit unit = new Unit(prototype, name);
-		unit.initGeneric(units);
-		return unit;
+	private CompilationUnit initUnit(Prototype prototype, String name) {
+		CompilationUnit compilationUnit = new CompilationUnit(prototype, name);
+		compilationUnit.initGeneric(units);
+		return compilationUnit;
 	}
 
-	private void processGeneric(Unit unit) {
-		CompiledPrototype cp = unit.generic();
+	private void processGeneric(CompilationUnit compilationUnit) {
+		CompiledPrototype cp = compilationUnit.generic();
 
 		cp.insertHooks();
 
@@ -103,7 +103,7 @@ public class FlowIt {
 		cp.computeReturnType();
 	}
 
-	public Unit mainUnit() {
+	public CompilationUnit mainUnit() {
 		return units.get(prototype);
 	}
 

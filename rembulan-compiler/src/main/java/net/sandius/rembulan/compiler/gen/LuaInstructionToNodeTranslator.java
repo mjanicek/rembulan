@@ -18,9 +18,9 @@ public class LuaInstructionToNodeTranslator {
 	private final Prototype prototype;
 	private final ReadOnlyArray<Target> pcToLabel;
 
-	private final Map<Prototype, Unit> units;
+	private final Map<Prototype, CompilationUnit> units;
 	
-	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel, Map<Prototype, Unit> units) {
+	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel, Map<Prototype, CompilationUnit> units) {
 		this.prototype = Check.notNull(prototype);
 		this.pcToLabel = Check.notNull(pcToLabel);
 		this.units = Check.notNull(units);
@@ -40,7 +40,7 @@ public class LuaInstructionToNodeTranslator {
 			return this;
 		}
 
-		public Map<Prototype, Unit> units() {
+		public Map<Prototype, CompilationUnit> units() {
 			return units;
 		}
 
