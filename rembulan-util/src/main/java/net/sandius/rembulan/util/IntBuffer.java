@@ -35,6 +35,17 @@ public class IntBuffer extends IntContainer {
 		return new IntBuffer(buf, len);
 	}
 
+	public static IntBuffer from(IntIterable iterable) {
+		IntBuffer buf = empty();
+
+		IntIterator it = iterable.iterator();
+		while (it.hasNext()) {
+			buf.append(it.next());
+		}
+
+		return buf;
+	}
+
 	public static IntBuffer of(int... values) {
 		return from(values);
 	}
