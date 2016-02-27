@@ -13,10 +13,8 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	protected final Type tailType;
 
 	public TypeSeq(ReadOnlyArray<Type> fixed, Type tailType) {
-		Check.notNull(fixed);
-		Check.notNull(tailType);
-		this.fixed = fixed;
-		this.tailType = tailType;
+		this.fixed = Check.notNull(fixed);
+		this.tailType = Check.notNull(tailType);
 	}
 
 	@Deprecated

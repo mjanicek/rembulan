@@ -10,10 +10,8 @@ public class ReturnTarget {
 	private int state;
 
 	protected ReturnTarget(Registers registers, int offset) {
-		Check.notNull(registers);
-		Check.inRange(offset, 0, registers.size() - 1);
-		this.registers = registers;
-		this.idx = offset;
+		this.registers = Check.notNull(registers);
+		this.idx = Check.inRange(offset, 0, registers.size() - 1);
 
 		state = 0;
 	}

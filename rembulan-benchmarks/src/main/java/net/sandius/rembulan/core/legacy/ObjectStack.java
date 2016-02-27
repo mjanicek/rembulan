@@ -77,9 +77,7 @@ public class ObjectStack {
 		public final int offset;
 
 		protected View(ObjectStack objectStack, int offset) {
-			Check.notNull(objectStack);
-
-			this.objectStack = objectStack;
+			this.objectStack = Check.notNull(objectStack);
 			this.offset = offset;
 		}
 

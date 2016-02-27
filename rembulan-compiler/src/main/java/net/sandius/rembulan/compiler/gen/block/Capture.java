@@ -10,8 +10,7 @@ public class Capture extends Linear implements LocalVariableEffect {
 	public final IntSet indices;
 
 	public Capture(IntContainer indices) {
-		Check.notNull(indices);
-		this.indices = IntSet.empty().plus(indices);
+		this.indices = IntSet.empty().plus(Check.notNull(indices));
 	}
 
 	@Override

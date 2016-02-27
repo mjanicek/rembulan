@@ -29,9 +29,7 @@ public class PrototypeClassLoader extends ClassLoader {
 	private int index;
 
 	public PrototypeClassLoader(String rootName) {
-		Check.notNull(rootName);
-
-		this.rootName = rootName;
+		this.rootName = Check.notNull(rootName);
 		this.installed = new HashMap<>();
 		this.index = 1;
 	}

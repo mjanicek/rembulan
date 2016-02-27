@@ -198,8 +198,7 @@ public abstract class Origin {
 		private final Object where;
 
 		private Computed(Object where) {
-			Check.notNull(where);
-			this.where = where;
+			this.where = Check.notNull(where);
 		}
 
 		public static Computed in(Object where) {
@@ -233,8 +232,7 @@ public abstract class Origin {
 		private final Set<Origin> origins;
 
 		private Multi(Set<Origin> origins) {
-			Check.notNull(origins);
-			this.origins = origins;
+			this.origins = Check.notNull(origins);
 		}
 
 		private static void addAll(Set<Origin> dest, Origin src) {

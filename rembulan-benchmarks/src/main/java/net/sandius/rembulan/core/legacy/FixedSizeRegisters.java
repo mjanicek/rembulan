@@ -8,10 +8,8 @@ public class FixedSizeRegisters implements Registers {
 	private int top;
 
 	public FixedSizeRegisters(Object[] array, int top) {
-		Check.notNull(array);
-		Check.inRange(top, 0, array.length - 1);
-		this.regs = array;
-		this.top = top;
+		this.regs = Check.notNull(array);
+		this.top = Check.inRange(top, 0, array.length - 1);
 	}
 
 	public FixedSizeRegisters(int size) {

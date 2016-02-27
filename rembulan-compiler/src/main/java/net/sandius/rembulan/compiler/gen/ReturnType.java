@@ -15,8 +15,7 @@ public abstract class ReturnType {
 		public final TypeSeq typeSeq;
 
 		public ConcreteReturnType(TypeSeq typeSeq) {
-			Check.notNull(typeSeq);
-			this.typeSeq = typeSeq;
+			this.typeSeq = Check.notNull(typeSeq);
 		}
 
 		@Override
@@ -47,10 +46,8 @@ public abstract class ReturnType {
 		public final TypeSeq typeSeq;
 
 		public TailCallReturnType(Type target, TypeSeq typeSeq) {
-			Check.notNull(target);
-			Check.notNull(typeSeq);
-			this.target = target;
-			this.typeSeq = typeSeq;
+			this.target = Check.notNull(target);
+			this.typeSeq = Check.notNull(typeSeq);
 		}
 
 		@Override

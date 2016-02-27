@@ -10,8 +10,7 @@ public class DefaultUserdata extends Userdata {
 	private final Object data;
 
 	public DefaultUserdata(Object data) {
-		Check.notNull(data);
-		this.data = data;
+		this.data = Check.notNull(data);
 	}
 
 	@Override

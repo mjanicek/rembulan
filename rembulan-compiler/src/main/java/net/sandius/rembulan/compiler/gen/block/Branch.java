@@ -12,14 +12,11 @@ public abstract class Branch implements Node, Sink, Jump {
 	private Target falseBranch;
 
 	public Branch(Target trueBranch, Target falseBranch) {
-		Check.notNull(trueBranch);
-		Check.notNull(falseBranch);
-
 		this.inSlots = null;
 		this.prev = Nodes.DUMMY_SRC;
-		this.trueBranch = trueBranch;
+		this.trueBranch = Check.notNull(trueBranch);
 		trueBranch.inc(this);
-		this.falseBranch = falseBranch;
+		this.falseBranch = Check.notNull(falseBranch);
 		falseBranch.inc(this);
 	}
 
@@ -30,8 +27,7 @@ public abstract class Branch implements Node, Sink, Jump {
 
 	@Override
 	public void setPrev(Src to) {
-		Check.notNull(to);
-		this.prev = to;
+		this.prev = Check.notNull(to);
 	}
 
 	public Target trueBranch() {

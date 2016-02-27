@@ -12,7 +12,7 @@ public class ReadOnlyArray<T> implements Iterable<T> {
 	protected final T[] values;
 
 	private ReadOnlyArray(T[] values) {
-		this.values = values;
+		this.values = Check.notNull(values);
 	}
 
 	public static <T> ReadOnlyArray<T> wrap(T[] values) {

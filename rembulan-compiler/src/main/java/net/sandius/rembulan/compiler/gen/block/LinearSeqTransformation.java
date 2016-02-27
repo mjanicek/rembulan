@@ -14,8 +14,7 @@ public abstract class LinearSeqTransformation {
 		public final LinearPredicate predicate;
 
 		public Remove(LinearPredicate predicate) {
-			Check.notNull(predicate);
-			this.predicate = predicate;
+			this.predicate = Check.notNull(predicate);
 		}
 
 		@Override

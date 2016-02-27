@@ -16,17 +16,11 @@ public class CallInfo {
 	public static final int METAMETHOD = 0x2;
 
 	public CallInfo(Invokable function, int base, int ret, int pc, int numResults, int flags) {
-		Check.notNull(function);
-		Check.nonNegative(base);
-		Check.nonNegative(ret);
-		Check.nonNegative(pc);
-		Check.nonNegative(numResults);
-
-		this.function = function;
-		this.base = base;
-		this.ret = ret;
-		this.pc = pc;
-		this.numResults = numResults;
+		this.function = Check.notNull(function);
+		this.base = Check.nonNegative(base);
+		this.ret = Check.nonNegative(ret);
+		this.pc = Check.nonNegative(pc);
+		this.numResults = Check.nonNegative(numResults);
 		this.flags = flags;
 	}
 

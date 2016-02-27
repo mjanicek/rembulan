@@ -7,9 +7,8 @@ public class IntSet extends IntContainer {
 	private final int[] values;
 
 	private IntSet(int[] values) {
-		Check.notNull(values);
 		// values must be sorted
-		this.values = values;
+		this.values = Check.notNull(values);
 	}
 
 //	public static IntSet from(int[] values) {

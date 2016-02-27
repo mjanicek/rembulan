@@ -13,13 +13,10 @@ public class Entry implements Node, Jump {
 	private Target target;
 
 	public Entry(String name, TypeSeq typeSeq, int slotSize, Target target) {
-		Check.notNull(target);
-		Check.notNull(typeSeq);
-
 		this.name = name;
-		this.typeSeq = typeSeq;
-		this.slotSize = slotSize;
-		this.target = target;
+		this.typeSeq = Check.notNull(typeSeq);
+		this.slotSize = Check.nonNegative(slotSize);
+		this.target = Check.notNull(target);
 	}
 
 	public Entry(TypeSeq typeSeq, int slotSize, Target target) {

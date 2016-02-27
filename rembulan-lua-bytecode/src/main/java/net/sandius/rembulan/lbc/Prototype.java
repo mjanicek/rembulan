@@ -52,13 +52,18 @@ public class Prototype implements PrototypeVisitable {
 			boolean is_vararg,
 			int maxstacksize) {
 
-		Check.notNull(consts);
-		Check.notNull(code);
-		Check.notNull(p);
-		// lineinfo may be null
-		Check.notNull(locvars);
-		Check.notNull(upvalues);
-		// source may be null
+		this.consts = Check.notNull(consts);
+		this.code = Check.notNull(code);
+		this.p = Check.notNull(p);
+		this.lineinfo = lineinfo;  // lineinfo may be null
+		this.locvars = Check.notNull(locvars);
+		this.upvalues = Check.notNull(upvalues);
+		this.source = source;  // source may be null
+		this.linedefined = linedefined;
+		this.lastlinedefined = lastlinedefined;
+		this.numparams = numparams;
+		this.is_vararg = is_vararg;
+		this.maxstacksize = maxstacksize;
 
 		for (Object o : consts) {
 			if (!(o == null
@@ -69,19 +74,6 @@ public class Prototype implements PrototypeVisitable {
 				throw new IllegalArgumentException("Illegal constant of type " + o.getClass().getCanonicalName() + ": " + o.toString());
 			}
 		}
-
-		this.consts = consts;
-		this.code = code;
-		this.p = p;
-		this.lineinfo = lineinfo;
-		this.locvars = locvars;
-		this.upvalues = upvalues;
-		this.source = source;
-		this.linedefined = linedefined;
-		this.lastlinedefined = lastlinedefined;
-		this.numparams = numparams;
-		this.is_vararg = is_vararg;
-		this.maxstacksize = maxstacksize;
 	}
 
 	@Override

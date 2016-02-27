@@ -10,8 +10,7 @@ public class IntVector extends IntContainer {
 	private final int[] values;
 
 	private IntVector(int[] values) {
-		Check.notNull(values);
-		this.values = values;
+		this.values = Check.notNull(values);
 	}
 
 	public static IntVector wrap(int[] array) {

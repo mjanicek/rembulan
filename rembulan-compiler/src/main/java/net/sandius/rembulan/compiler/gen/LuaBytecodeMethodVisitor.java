@@ -309,8 +309,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	}
 
 	public void pushString(String s) {
-		Check.notNull(s);
-		mv.visitLdcInsn(s);
+		mv.visitLdcInsn(Check.notNull(s));
 	}
 
 	private void pushPlus(int offset) {

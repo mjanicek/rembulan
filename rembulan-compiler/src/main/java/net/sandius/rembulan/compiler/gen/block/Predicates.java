@@ -13,8 +13,7 @@ public class Predicates {
 		public final Class<T> clazz;
 
 		public IsClass(Class<T> clazz) {
-			Check.notNull(clazz);
-			this.clazz = clazz;
+			this.clazz = Check.notNull(clazz);
 		}
 
 		@Override

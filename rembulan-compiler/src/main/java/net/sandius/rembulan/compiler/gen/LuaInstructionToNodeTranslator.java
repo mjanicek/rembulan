@@ -21,13 +21,9 @@ public class LuaInstructionToNodeTranslator {
 	private final Map<Prototype, Unit> units;
 	
 	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel, Map<Prototype, Unit> units) {
-		Check.notNull(prototype);
-		Check.notNull(pcToLabel);
-		Check.notNull(units);
-
-		this.prototype = prototype;
-		this.pcToLabel = pcToLabel;
-		this.units = units;
+		this.prototype = Check.notNull(prototype);
+		this.pcToLabel = Check.notNull(pcToLabel);
+		this.units = Check.notNull(units);
 	}
 	
 	public class MyNodeAppender {

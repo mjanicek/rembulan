@@ -8,8 +8,7 @@ public class NodeAppender {
 	private Src src;
 
 	public NodeAppender(Src src) {
-		Check.notNull(src);
-		this.src = src;
+		this.src = Check.notNull(src);
 	}
 
 	public Src get() {

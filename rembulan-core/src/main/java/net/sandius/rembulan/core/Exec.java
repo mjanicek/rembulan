@@ -14,11 +14,8 @@ public class Exec {
 	private Cons<CallInfo> callStack;
 
 	public Exec(PreemptionContext preemptionContext, LuaState state) {
-		Check.notNull(preemptionContext);
-		Check.notNull(state);
-
-		this.preemptionContext = preemptionContext;
-		this.state = state;
+		this.preemptionContext = Check.notNull(preemptionContext);
+		this.state = Check.notNull(state);
 
 		callStack = null;
 	}

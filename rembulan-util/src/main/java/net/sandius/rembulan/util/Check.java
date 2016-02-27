@@ -6,28 +6,31 @@ public abstract class Check {
 		// not to be instantiated
 	}
 
-	public static void notNull(Object o) {
+	public static <T> T notNull(T o) {
 		if (o == null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("argument is null");
 		}
+		return o;
 	}
 
 	public static void isNull(Object o) {
 		if (o != null) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("argument is not null: " + o);
 		}
 	}
 
-	public static void isEq(Object a, Object b) {
+	public static <T> T isEq(T a, T b) {
 		if (a != b) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("argument " + a + " is not equal to " + b);
 		}
+		return a;
 	}
 
-	public static void isEq(int a, int b) {
+	public static int isEq(int a, int b) {
 		if (a != b) {
-			throw new IllegalArgumentException();
+			throw new IllegalArgumentException("integer " + a + " is not equal to " + b);
 		}
+		return a;
 	}
 
 	public static void numOfArgs(Object[] args, int num) {
@@ -38,22 +41,25 @@ public abstract class Check {
 		}
 	}
 
-	public static void inRange(int n, int min, int max) {
+	public static int inRange(int n, int min, int max) {
 		if (n < min && n > max) {
 			throw new IllegalArgumentException("integer " + n + " out of range: [" + min + ", " + max + "]");
 		}
+		return n;
 	}
 
-	public static void lt(int n, int limit) {
+	public static int lt(int n, int limit) {
 		if (!(n < limit)) {
-			throw new IllegalArgumentException("integer " + n + " must be lesser than " + limit);
+			throw new IllegalArgumentException("integer " + n + " is not lesser than " + limit);
 		}
+		return n;
 	}
 
-	public static void gt(int n, int limit) {
+	public static int gt(int n, int limit) {
 		if (!(n > limit)) {
-			throw new IllegalArgumentException("integer " + n + " must be greater than " + limit);
+			throw new IllegalArgumentException("integer " + n + " is not greater than " + limit);
 		}
+		return n;
 	}
 
 	public static void isTrue(boolean b) {
@@ -68,12 +74,12 @@ public abstract class Check {
 		}
 	}
 
-	public static void nonNegative(int n) {
-		gt(n, -1);
+	public static int nonNegative(int n) {
+		return gt(n, -1);
 	}
 
-	public static void positive(int n) {
-		gt(n, 0);
+	public static int positive(int n) {
+		return gt(n, 0);
 	}
 
 }

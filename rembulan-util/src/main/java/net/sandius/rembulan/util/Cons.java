@@ -10,9 +10,7 @@ public class Cons<T> {
 	public final Cons<T> cdr;
 
 	public Cons(T car, Cons<T> cdr) {
-		Check.notNull(car);
-
-		this.car = car;
+		this.car = Check.notNull(car);
 		this.cdr = cdr;
 	}
 
