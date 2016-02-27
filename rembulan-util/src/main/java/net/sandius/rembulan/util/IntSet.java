@@ -11,18 +11,43 @@ public class IntSet extends IntContainer {
 		this.values = Check.notNull(values);
 	}
 
-//	public static IntSet from(int[] values) {
-//		Check.notNull(values);
-//		int[] sorted = Arrays.copyOf(values, values.length);
-//		Arrays.sort(sorted);
-//
-//		// remove duplicates
-//
-//		return new IntSet(copy);
-//	}
-
 	public static IntSet empty() {
 		return new IntSet(new int[0]);
+	}
+
+	public static IntSet singleton(int i) {
+		return new IntSet(new int[] { i });
+	}
+
+	public static IntSet from(int[] values) {
+		Check.notNull(values);
+
+		if (values.length == 0) {
+			return empty();
+		}
+		else if (values.length == 1) {
+			return singleton(values[0]);
+		}
+		else {
+			// sort
+			int[] sorted = Arrays.copyOf(values, values.length);
+			Arrays.sort(sorted);
+
+			// skip duplicates in place
+			int uniq = 1;
+			for (int i = 1; i < sorted.length; i++) {
+				if (sorted[i] != sorted[i - 1]) {
+					sorted[uniq] = sorted[i];
+					uniq++;
+				}
+			}
+
+			return new IntSet(Arrays.copyOf(sorted, uniq));
+		}
+	}
+
+	public static IntSet from(IntContainer container) {
+		return empty().plus(container);
 	}
 
 	@Override
