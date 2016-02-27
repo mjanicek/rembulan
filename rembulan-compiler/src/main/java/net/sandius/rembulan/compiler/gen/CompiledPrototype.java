@@ -314,7 +314,7 @@ public class CompiledPrototype {
 					SlotState s_n = n.inSlots();
 
 					if (s_n != null) {
-						IntBuffer uncaptured = new IntBuffer();
+						IntBuffer uncaptured = IntBuffer.empty();
 
 						for (Node m : successors(n)) {
 							SlotState s_m = m.inSlots();

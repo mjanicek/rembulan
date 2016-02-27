@@ -34,12 +34,12 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 		this.vararg = vararg;
 		this.maxStackSize = maxStackSize;
 
-		this.code = new IntBuffer();
+		this.code = IntBuffer.empty();
 		this.consts = new ArrayList<>();
 		this.nested = new ArrayList<>();
 		this.upvalueDesc = new ArrayList<>();
 
-		this.lines = new IntBuffer();
+		this.lines = IntBuffer.empty();
 		this.upvalueNames = new ArrayList<>();
 		this.locals = new ArrayList<>();
 

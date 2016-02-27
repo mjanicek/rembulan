@@ -15,12 +15,12 @@ public class IntBuffer extends IntContainer {
 		this.len = len;
 	}
 
-	public IntBuffer(int size) {
+	private IntBuffer(int size) {
 		this(new int[size], 0);
 	}
 
-	public IntBuffer() {
-		this(DEFAULT_EMPTY_CAPACITY);
+	public static IntBuffer empty() {
+		return new IntBuffer(DEFAULT_EMPTY_CAPACITY);
 	}
 
 	public static IntBuffer from(int[] values) {
