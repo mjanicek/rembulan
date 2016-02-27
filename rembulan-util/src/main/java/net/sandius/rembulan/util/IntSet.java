@@ -46,8 +46,8 @@ public class IntSet extends IntContainer {
 		}
 	}
 
-	public static IntSet from(IntContainer container) {
-		return empty().plus(container);
+	public static IntSet from(IntIterable iterable) {
+		return empty().plus(iterable);
 	}
 
 	@Override
@@ -139,15 +139,23 @@ public class IntSet extends IntContainer {
 		}
 	}
 
-	public IntSet plus(IntContainer that) {
+	public IntSet plus(IntIterable that) {
 		Check.notNull(that);
 
 		IntSet result = this;
-		for (int i = 0; i < that.length(); i++) {
-			// FIXME: this is very inefficient for IntSets -- that can be specialised
-			result = result.plus(that.get(i));
+
+		// FIXME: this is very inefficient for IntSets -- that can be specialised
+		IntIterator it = that.iterator();
+		while (it.hasNext()) {
+			result = result.plus(it.next());
 		}
+
 		return result;
+	}
+
+	@Override
+	public IntIterator iterator() {
+		return new ArrayIntIterator(values);
 	}
 
 }

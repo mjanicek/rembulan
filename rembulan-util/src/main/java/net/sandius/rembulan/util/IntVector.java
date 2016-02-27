@@ -56,4 +56,9 @@ public class IntVector extends IntContainer {
 		return values[index];
 	}
 
+	@Override
+	public IntIterator iterator() {
+		return new ArrayIntIterator(values);
+	}
+
 }

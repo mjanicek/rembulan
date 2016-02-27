@@ -1,6 +1,6 @@
 package net.sandius.rembulan.util;
 
-public abstract class IntContainer {
+public abstract class IntContainer implements IntIterable {
 
 	public String toString(String separator) {
 		StringBuilder bld = new StringBuilder();
@@ -26,6 +26,31 @@ public abstract class IntContainer {
 
 	public boolean isEmpty() {
 		return length() == 0;
+	}
+
+	@Override
+	public IntIterator iterator() {
+		return new Iterator();
+	}
+
+	protected class Iterator implements IntIterator {
+
+		private int index;
+
+		private Iterator() {
+			this.index = 0;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return index < length();
+		}
+
+		@Override
+		public int next() {
+			return get(index++);
+		}
+
 	}
 
 }

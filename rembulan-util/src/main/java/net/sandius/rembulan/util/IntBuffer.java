@@ -99,4 +99,30 @@ public class IntBuffer extends IntContainer {
 		return IntVector.wrap(Arrays.copyOf(buf, len));
 	}
 
+	@Override
+	public IntIterator iterator() {
+		return new Iterator();
+	}
+
+	private class Iterator implements IntIterator {
+
+		private int index;
+
+		public Iterator() {
+			this.index = 0;
+		}
+
+		@Override
+		public boolean hasNext() {
+			return index < len;
+		}
+
+		@Override
+		public int next() {
+			Check.lt(index, buf.length);
+			return buf[index++];
+		}
+
+	}
+
 }
