@@ -5,7 +5,7 @@ import java.io.PrintWriter
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
 import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
-import net.sandius.rembulan.compiler.gen.{CompilationUnit, SuffixingClassNameGenerator, CompiledChunk, SlotState}
+import net.sandius.rembulan.compiler.gen._
 import net.sandius.rembulan.compiler.{gen => rembulan}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
@@ -391,15 +391,15 @@ object AnalysisRunner {
     proto.accept(new PrototypePrinterVisitor(new PrintWriter(System.out)))
 //    PrototypePrinter.print(proto, new PrintWriter(System.out))
 
+    val compiler = new ChunkCompiler()
+
     println()
     println("Control flow")
     println("------------")
     println()
 
-    val flow = timed("Analysis") {
-      val f = new CompiledChunk(proto, new SuffixingClassNameGenerator("test"))
-      f.go()
-      f
+    val flow = timed("Compile") {
+      compiler.compile(proto, new SuffixingClassNameGenerator("test"))
     }
 
     for (u <- flow.units.toSeq.sortBy { _.name }) {
