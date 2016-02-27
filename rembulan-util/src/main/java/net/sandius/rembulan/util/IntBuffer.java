@@ -50,7 +50,7 @@ public class IntBuffer extends IntContainer {
 		return from(values);
 	}
 
-	private void resize(int to) {
+	private void resizeTo(int to) {
 		Check.gt(to, len);
 		int[] nbuf = new int[to];
 		System.arraycopy(buf, 0, nbuf, 0, len);
@@ -79,37 +79,18 @@ public class IntBuffer extends IntContainer {
 		len -= 1;
 
 		if (len < buf.length / GROW_FACTOR && buf.length / GROW_FACTOR > DEFAULT_EMPTY_CAPACITY) {
-			resize(buf.length / GROW_FACTOR);
-		}
-	}
-
-	public void removeValue(int value) {
-		int i = 0;
-		while (i < len) {
-			if (buf[i] == value) {
-				removeIndex(i);
-			}
-			else {
-				i++;
-			}
-		}
-	}
-
-	public void replaceValue(int oldValue, int newValue) {
-		for (int i = 0; i < len; i++) {
-			if (buf[i] == oldValue) {
-				buf[i] = newValue;
-			}
+			resizeTo(buf.length / GROW_FACTOR);
 		}
 	}
 
 	public void clear() {
 		len = 0;
+		resizeTo(DEFAULT_EMPTY_CAPACITY);
 	}
 
 	public void append(int value) {
 		if (len + 1 >= buf.length) {
-			resize(buf.length * GROW_FACTOR);
+			resizeTo(buf.length * GROW_FACTOR);
 		}
 
 		buf[len++] = value;
