@@ -1,13 +1,13 @@
 package net.sandius.rembulan.compiler.gen;
 
-import java.util.Objects;
+import net.sandius.rembulan.util.Check;
 
 public class SuffixingClassNameGenerator implements ClassNameGenerator {
 
 	private final String base;
 
 	public SuffixingClassNameGenerator(String base) {
-		this.base = Objects.requireNonNull(base);
+		this.base = Check.notNull(base);
 	}
 
 	@Override

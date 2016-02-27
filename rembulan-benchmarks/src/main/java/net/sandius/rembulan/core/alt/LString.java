@@ -1,15 +1,14 @@
 package net.sandius.rembulan.core.alt;
 
 import net.sandius.rembulan.LuaType;
-
-import java.util.Objects;
+import net.sandius.rembulan.util.Check;
 
 public final class LString extends LValue {
 
 	public final String value;
 
 	protected LString(String value) {
-		this.value = Objects.requireNonNull(value);
+		this.value = Check.notNull(value);
 	}
 
 	public static LString valueOf(String s) {

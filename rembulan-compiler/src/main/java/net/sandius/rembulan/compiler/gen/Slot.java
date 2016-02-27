@@ -1,8 +1,7 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.types.Type;
-
-import java.util.Objects;
+import net.sandius.rembulan.util.Check;
 
 public class Slot {
 
@@ -12,8 +11,8 @@ public class Slot {
 	public static final Slot NIL_SLOT = Slot.of(Origin.NilConstant.INSTANCE, LuaTypes.NIL);
 
 	protected Slot(Origin origin, Type type) {
-		this.origin = Objects.requireNonNull(origin);
-		this.type = Objects.requireNonNull(type);
+		this.origin = Check.notNull(origin);
+		this.type = Check.notNull(type);
 	}
 
 	public static Slot of(Origin origin, Type type) {

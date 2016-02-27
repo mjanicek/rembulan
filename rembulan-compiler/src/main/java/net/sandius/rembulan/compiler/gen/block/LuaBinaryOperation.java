@@ -3,12 +3,11 @@ package net.sandius.rembulan.compiler.gen.block;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.Slot;
-import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction.NumOpType;
+import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.lbc.Prototype;
-
-import java.util.Objects;
+import net.sandius.rembulan.util.Check;
 
 public abstract class LuaBinaryOperation extends Linear {
 
@@ -19,7 +18,7 @@ public abstract class LuaBinaryOperation extends Linear {
 	public final int rk_right;
 
 	public LuaBinaryOperation(Prototype prototype, int a, int b, int c) {
-		this.prototype = Objects.requireNonNull(prototype);
+		this.prototype = Check.notNull(prototype);
 		this.r_dest = a;
 		this.rk_left = LuaInstruction.registerOrConst(b);
 		this.rk_right = LuaInstruction.registerOrConst(c);

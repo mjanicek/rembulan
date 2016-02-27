@@ -5,12 +5,12 @@ import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 
 public class Unit {
 
@@ -20,7 +20,7 @@ public class Unit {
 	private CompiledPrototype generic;
 
 	public Unit(Prototype prototype, String name) {
-		this.prototype = Objects.requireNonNull(prototype);
+		this.prototype = Check.notNull(prototype);
 		this.name = name;
 
 		this.generic = null;

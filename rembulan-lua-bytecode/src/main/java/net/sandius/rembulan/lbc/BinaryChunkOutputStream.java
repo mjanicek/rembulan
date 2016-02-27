@@ -7,7 +7,6 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteOrder;
-import java.util.Objects;
 
 public class BinaryChunkOutputStream extends FilterOutputStream {
 
@@ -32,7 +31,7 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 
 		this.strictMode = strictMode;
 
-		this.bigEndian = Objects.requireNonNull(byteOrder) == ByteOrder.BIG_ENDIAN;
+		this.bigEndian = Check.notNull(byteOrder) == ByteOrder.BIG_ENDIAN;
 
 		this.intIs32Bit = bitWidthIs32Bit(sizeOfInt);
 		this.sizeTIs32Bit = bitWidthIs32Bit(sizeOfSizeT);
@@ -209,14 +208,14 @@ public class BinaryChunkOutputStream extends FilterOutputStream {
 	}
 
 	public void writeShortString(byte[] bytes) throws IOException {
-		Objects.requireNonNull(bytes);
+		Check.notNull(bytes);
 		Check.lt(bytes.length + 1, 0xff);
 		write(bytes.length + 1);  // encoding the array size of a C-style string, i.e. including the trailing '\0'
 		writeStringBody(bytes);
 	}
 
 	public void writeLongString(byte[] bytes) throws IOException {
-		Objects.requireNonNull(bytes);
+		Check.notNull(bytes);
 		write(0xff);
 		writeSizeT(bytes.length + 1);  // encoding the array size of a C-style string, i.e. including the trailing '\0'
 		writeStringBody(bytes);

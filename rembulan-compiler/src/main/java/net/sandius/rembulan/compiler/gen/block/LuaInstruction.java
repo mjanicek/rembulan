@@ -2,20 +2,20 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
-import net.sandius.rembulan.compiler.gen.Slot;
-import net.sandius.rembulan.compiler.types.FunctionType;
-import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.compiler.gen.ReturnType;
-import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.Unit;
+import net.sandius.rembulan.compiler.types.FunctionType;
+import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.PrototypePrinter;
+import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.Map;
-import java.util.Objects;
 
 public class LuaInstruction {
 
@@ -105,7 +105,7 @@ public class LuaInstruction {
 		public final int constIndex;
 
 		public LoadK(Prototype prototype, int a, int bx) {
-			this.prototype = Objects.requireNonNull(prototype);
+			this.prototype = Check.notNull(prototype);
 			this.r_dest = a;
 			this.constIndex = bx;
 		}

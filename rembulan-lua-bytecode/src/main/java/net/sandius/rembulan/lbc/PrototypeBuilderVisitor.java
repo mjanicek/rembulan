@@ -1,11 +1,11 @@
 package net.sandius.rembulan.lbc;
 
+import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Objects;
 
 public class PrototypeBuilderVisitor extends PrototypeVisitor {
 
@@ -59,7 +59,7 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 
 		ArrayList<Prototype> nestedPrototypes = new ArrayList<>();
 		for (PrototypeBuilderVisitor visitor : nested) {
-			nestedPrototypes.add(Objects.requireNonNull(visitor.get()));
+			nestedPrototypes.add(Check.notNull(visitor.get()));
 		}
 
 		ArrayList<Prototype.UpvalueDesc> upvals = new ArrayList<>();
@@ -135,7 +135,7 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 
 	@Override
 	public void visitStringConst(String value) {
-		Objects.requireNonNull(value);
+		Check.notNull(value);
 		consts.add(value);
 	}
 
@@ -158,7 +158,7 @@ public class PrototypeBuilderVisitor extends PrototypeVisitor {
 
 	@Override
 	public void visitUpvalueName(String name) {
-		Objects.requireNonNull(name);
+		Check.notNull(name);
 		upvalueNames.add(name);
 	}
 

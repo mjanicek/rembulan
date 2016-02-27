@@ -9,7 +9,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteOrder;
-import java.util.Objects;
 
 public class BinaryChunkInputStream extends FilterInputStream {
 
@@ -30,7 +29,7 @@ public class BinaryChunkInputStream extends FilterInputStream {
 	public BinaryChunkInputStream(InputStream in, ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
 		super(in);
 
-		this.bigEndian = Objects.requireNonNull(byteOrder) == ByteOrder.BIG_ENDIAN;
+		this.bigEndian = Check.notNull(byteOrder) == ByteOrder.BIG_ENDIAN;
 
 		this.intIs32Bit = bitWidthIs32Bit("int", sizeOfInt);
 		this.sizeTIs32Bit = bitWidthIs32Bit("size_t", sizeOfSizeT);

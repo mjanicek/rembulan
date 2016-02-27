@@ -1,16 +1,14 @@
 package net.sandius.rembulan.compiler.gen;
 
-import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.CloseUpvalues;
 import net.sandius.rembulan.compiler.gen.block.Linear;
+import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
+import net.sandius.rembulan.compiler.gen.block.LuaUnaryOperation;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
 import net.sandius.rembulan.compiler.gen.block.Target;
-import net.sandius.rembulan.compiler.gen.block.LuaUnaryOperation;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
-
-import java.util.Objects;
 
 public class AppenderEmitter implements InstructionEmitter {
 
@@ -20,7 +18,7 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	public AppenderEmitter(Prototype prototype, LuaInstructionToNodeTranslator.MyNodeAppender appender) {
 	    this.prototype = prototype;
-		this.appender = Objects.requireNonNull(appender);
+		this.appender = Check.notNull(appender);
 	}
 
 	protected AppenderEmitter append(Linear lin) {

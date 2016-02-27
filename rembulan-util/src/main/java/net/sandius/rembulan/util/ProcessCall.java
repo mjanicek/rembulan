@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class ProcessCall {
 
@@ -18,7 +17,7 @@ public class ProcessCall {
 	public final InputStream err;
 
 	private ProcessCall(List<String> commandLineArgs) throws IOException {
-		Objects.requireNonNull(commandLineArgs);
+		Check.notNull(commandLineArgs);
 
 		ProcessBuilder builder = new ProcessBuilder(commandLineArgs);
 
@@ -36,7 +35,7 @@ public class ProcessCall {
 	}
 
 	public static ProcessCall doCall(String program, List<String> args) throws IOException {
-		Objects.requireNonNull(program);
+		Check.notNull(program);
 
 		ArrayList<String> commandLineArgs = new ArrayList<>();
 		commandLineArgs.add(program);

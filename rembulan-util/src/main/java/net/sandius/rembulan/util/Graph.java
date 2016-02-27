@@ -2,7 +2,6 @@ package net.sandius.rembulan.util;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 public class Graph<T> {
@@ -11,8 +10,8 @@ public class Graph<T> {
 	protected final Set<Pair<T, T>> edges;
 
 	private Graph(Set<T> vertices, Set<Pair<T, T>> edges) {
-		this.vertices = Objects.requireNonNull(vertices);
-		this.edges = Objects.requireNonNull(edges);
+		this.vertices = Check.notNull(vertices);
+		this.edges = Check.notNull(edges);
 	}
 
 	public static <T> Graph<T> wrap(Set<T> vertices, Set<Pair<T, T>> edges) {

@@ -1,8 +1,6 @@
 package net.sandius.rembulan.compiler.types;
 
-import net.sandius.rembulan.compiler.gen.LuaTypes;
-
-import java.util.Objects;
+import net.sandius.rembulan.util.Check;
 
 public abstract class ConcreteType extends Type {
 
@@ -32,7 +30,7 @@ public abstract class ConcreteType extends Type {
 
 	@Override
 	public Type join(Type that) {
-		Objects.requireNonNull(that);
+		Check.notNull(that);
 
 		if (that.isSubtypeOf(this)) return this;
 		else return this.supertype().join(that);
@@ -40,7 +38,7 @@ public abstract class ConcreteType extends Type {
 
 	@Override
 	public Type meet(Type that) {
-		Objects.requireNonNull(that);
+		Check.notNull(that);
 
 		if (this.isSubtypeOf(that)) return this;
 		else if (that.isSubtypeOf(this)) return that;

@@ -1,13 +1,11 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.lbc.Prototype;
-import net.sandius.rembulan.lbc.PrototypePrinter;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.Set;
 
 public abstract class Origin {
@@ -17,7 +15,7 @@ public abstract class Origin {
 	}
 
 	public Origin merge(Origin that) {
-		Objects.requireNonNull(that);
+		Check.notNull(that);
 		return this.equals(that) ? this : Multi.of(this, that);
 	}
 
@@ -138,7 +136,7 @@ public abstract class Origin {
 		public final Prototype prototype;
 
 		public Closure(Prototype prototype) {
-			this.prototype = Objects.requireNonNull(prototype);
+			this.prototype = Check.notNull(prototype);
 		}
 
 		@Override
@@ -344,7 +342,7 @@ public abstract class Origin {
 		public final int index;
 
 		public CallResult(Object where, int index) {
-			this.where = Objects.requireNonNull(where);
+			this.where = Check.notNull(where);
 			this.index = index;
 		}
 

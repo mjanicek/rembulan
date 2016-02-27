@@ -1,15 +1,16 @@
 package net.sandius.rembulan.lbc;
 
+import net.sandius.rembulan.util.Check;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Objects;
 
 public class PrototypeLoader implements PrototypeVisitable {
 
 	protected final BinaryChunkInputStream is;
 
 	public PrototypeLoader(BinaryChunkInputStream stream) {
-		this.is = Objects.requireNonNull(stream);
+		this.is = Check.notNull(stream);
 	}
 
 	public static PrototypeLoader fromInputStream(InputStream stream) throws IOException {

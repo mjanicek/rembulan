@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.types;
 
-import java.util.Objects;
+import net.sandius.rembulan.util.Check;
 
 public class BaseType extends ConcreteType {
 
@@ -9,8 +9,8 @@ public class BaseType extends ConcreteType {
 
 	protected BaseType(ConcreteType supertype, String name, String shortName) {
 		super(supertype);
-		this.name = Objects.requireNonNull(name);
-		this.shortName = Objects.requireNonNull(shortName);
+		this.name = Check.notNull(name);
+		this.shortName = Check.notNull(shortName);
 	}
 
 	protected BaseType(String name, String shortName) {

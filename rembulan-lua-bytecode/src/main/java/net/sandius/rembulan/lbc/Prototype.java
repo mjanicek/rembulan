@@ -4,8 +4,6 @@ import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-import java.util.Objects;
-
 public class Prototype implements PrototypeVisitable {
 
 	// TODO: split into required and optional debug part
@@ -281,7 +279,7 @@ public class Prototype implements PrototypeVisitable {
 		public final int endPC;
 
 		public LocalVariable(String name, int beginPC, int endPC) {
-			this.name = Objects.requireNonNull(name);
+			this.name = Check.notNull(name);
 			this.beginPC = beginPC;
 			this.endPC = endPC;
 		}

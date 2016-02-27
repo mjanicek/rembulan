@@ -24,6 +24,7 @@ import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Graph;
 import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.Ptr;
@@ -32,7 +33,6 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
@@ -47,8 +47,8 @@ public class CompiledPrototype {
 	public Set<ResumptionPoint> resumePoints;
 
 	protected CompiledPrototype(Prototype prototype, TypeSeq actualParameters) {
-		this.prototype = Objects.requireNonNull(prototype);
-		this.actualParameters = Objects.requireNonNull(actualParameters);
+		this.prototype = Check.notNull(prototype);
+		this.actualParameters = Check.notNull(actualParameters);
 	}
 
 	public TypeSeq actualParameters() {

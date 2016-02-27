@@ -1,7 +1,8 @@
 package net.sandius.rembulan.lbc;
 
+import net.sandius.rembulan.util.Check;
+
 import java.io.PrintWriter;
-import java.util.Objects;
 
 public class PrototypePrinterVisitor extends PrototypeVisitor {
 
@@ -9,7 +10,7 @@ public class PrototypePrinterVisitor extends PrototypeVisitor {
 
 	public PrototypePrinterVisitor(PrintWriter out) {
 		super(new PrototypeBuilderVisitor());
-		this.out = Objects.requireNonNull(out);
+		this.out = Check.notNull(out);
 	}
 
 	@Override

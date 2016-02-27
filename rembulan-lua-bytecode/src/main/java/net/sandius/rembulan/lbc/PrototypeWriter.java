@@ -5,7 +5,6 @@ import net.sandius.rembulan.util.Check;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Objects;
 
 public class PrototypeWriter extends PrototypeVisitor {
 
@@ -57,7 +56,7 @@ public class PrototypeWriter extends PrototypeVisitor {
 	}
 
 	public PrototypeWriter(BinaryChunkOutputStream out) {
-		this.out = Objects.requireNonNull(out);
+		this.out = Check.notNull(out);
 
 		this.sourceHeader = new Buffer();
 		this.sigHeader = new Buffer();

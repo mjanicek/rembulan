@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.types;
 
-import java.util.Objects;
+import net.sandius.rembulan.util.Check;
 
 public class FunctionType extends ConcreteType {
 
@@ -9,8 +9,8 @@ public class FunctionType extends ConcreteType {
 
 	private FunctionType(TypeSeq arg, TypeSeq ret) {
 		super();
-		this.typeSeq = Objects.requireNonNull(arg);
-		this.returnTypes = Objects.requireNonNull(ret);
+		this.typeSeq = Check.notNull(arg);
+		this.returnTypes = Check.notNull(ret);
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public class FunctionType extends ConcreteType {
 
 	@Override
 	public boolean isSubtypeOf(Type that) {
-		Objects.requireNonNull(that);
+		Check.notNull(that);
 
 		if (this.equals(that)) {
 			return true;
@@ -71,7 +71,7 @@ public class FunctionType extends ConcreteType {
 
 	@Override
 	public Type join(Type that) {
-		Objects.requireNonNull(that);
+		Check.notNull(that);
 
 		if (this.isSubtypeOf(that)) {
 			return that;
@@ -91,7 +91,7 @@ public class FunctionType extends ConcreteType {
 
 	@Override
 	public Type meet(Type that) {
-		Objects.requireNonNull(that);
+		Check.notNull(that);
 
 		if (this.isSubtypeOf(that)) {
 			return this;

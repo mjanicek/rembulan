@@ -1,7 +1,8 @@
 package net.sandius.rembulan.lbc;
 
+import net.sandius.rembulan.util.Check;
+
 import java.nio.ByteOrder;
-import java.util.Objects;
 
 public final class BinaryChunkFormat {
 
@@ -14,7 +15,7 @@ public final class BinaryChunkFormat {
 	public final int sizeOfLuaFloat;
 
 	public BinaryChunkFormat(ByteOrder byteOrder, int sizeOfInt, int sizeOfSizeT, int sizeOfInstruction, int sizeOfLuaInteger, int sizeOfLuaFloat) {
-		this.byteOrder = Objects.requireNonNull(byteOrder);
+		this.byteOrder = Check.notNull(byteOrder);
 		this.sizeOfInt = sizeOfInt;
 		this.sizeOfSizeT = sizeOfSizeT;
 		this.sizeOfInstruction = sizeOfInstruction;

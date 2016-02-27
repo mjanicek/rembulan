@@ -7,6 +7,7 @@ import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,7 +15,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class FlowIt {
 
@@ -25,8 +25,8 @@ public class FlowIt {
 	private final Map<Prototype, Unit> units;
 
 	public FlowIt(Prototype prototype, ClassNameGenerator nameGenerator) {
-		this.prototype = Objects.requireNonNull(prototype);
-		this.nameGenerator = Objects.requireNonNull(nameGenerator);
+		this.prototype = Check.notNull(prototype);
+		this.nameGenerator = Check.notNull(nameGenerator);
 		this.units = new HashMap<>();
 	}
 
