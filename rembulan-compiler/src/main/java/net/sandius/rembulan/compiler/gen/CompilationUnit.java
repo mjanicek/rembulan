@@ -17,11 +17,14 @@ public class CompilationUnit {
 	public final Prototype prototype;
 	public final String name;
 
+	public final CompilationContext ctx;
+
 	private CompiledPrototype generic;
 
-	public CompilationUnit(Prototype prototype, String name) {
+	public CompilationUnit(Prototype prototype, String name, CompilationContext ctx) {
 		this.prototype = Check.notNull(prototype);
 		this.name = name;
+		this.ctx = Check.notNull(ctx);
 
 		this.generic = null;
 	}
@@ -42,7 +45,7 @@ public class CompilationUnit {
 		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
 	}
 
-	public Entry makeNodes(TypeSeq params, Map<Prototype, CompilationUnit> units) {
+	public Entry makeNodes(TypeSeq params) {
 		IntVector code = prototype.getCode();
 		Target[] targets = new Target[code.length()];
 		for (int pc = 0; pc < targets.length; pc++) {
@@ -51,7 +54,7 @@ public class CompilationUnit {
 
 		ReadOnlyArray<Target> pcLabels = ReadOnlyArray.wrap(targets);
 
-		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator(prototype, pcLabels, units);
+		LuaInstructionToNodeTranslator translator = new LuaInstructionToNodeTranslator(prototype, pcLabels, ctx);
 
 		for (int pc = 0; pc < pcLabels.size(); pc++) {
 			translator.translate(pc);
@@ -62,16 +65,16 @@ public class CompilationUnit {
 		return new Entry("main_" + suffix, params, prototype.getMaximumStackSize(), pcLabels.get(0));
 	}
 
-	public CompiledPrototype makeCompiledPrototype(TypeSeq params, Map<Prototype, CompilationUnit> units) {
+	public CompiledPrototype makeCompiledPrototype(TypeSeq params) {
 		CompiledPrototype cp = new CompiledPrototype(prototype, params);
-		cp.callEntry = makeNodes(params, units);
+		cp.callEntry = makeNodes(params);
 		cp.returnType = TypeSeq.vararg();
 		cp.resumePoints = new HashSet<>();
 		return cp;
 	}
 
-	public void initGeneric(Map<Prototype, CompilationUnit> units) {
-		this.generic = makeCompiledPrototype(genericParameters(), units);
+	public void initGeneric() {
+		this.generic = makeCompiledPrototype(genericParameters());
 	}
 
 }

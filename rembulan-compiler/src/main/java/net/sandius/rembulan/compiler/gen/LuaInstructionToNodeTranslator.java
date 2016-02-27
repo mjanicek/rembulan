@@ -18,12 +18,12 @@ public class LuaInstructionToNodeTranslator {
 	private final Prototype prototype;
 	private final ReadOnlyArray<Target> pcToLabel;
 
-	private final Map<Prototype, CompilationUnit> units;
+	private final CompilationContext ctx;
 	
-	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel, Map<Prototype, CompilationUnit> units) {
+	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel, CompilationContext ctx) {
 		this.prototype = Check.notNull(prototype);
 		this.pcToLabel = Check.notNull(pcToLabel);
-		this.units = Check.notNull(units);
+		this.ctx = Check.notNull(ctx);
 	}
 	
 	public class MyNodeAppender {
@@ -40,8 +40,8 @@ public class LuaInstructionToNodeTranslator {
 			return this;
 		}
 
-		public Map<Prototype, CompilationUnit> units() {
-			return units;
+		public CompilationContext context() {
+			return ctx;
 		}
 
 		public void branch(Branch branch) {

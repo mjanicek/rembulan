@@ -259,7 +259,7 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_CLOSURE(int a, int bx) {
-		appender.append(new LuaInstruction.Closure(prototype, appender.units(), a, bx)).toNext();
+		appender.append(new LuaInstruction.Closure(prototype, appender.context(), a, bx)).toNext();
 	}
 
 	@Override

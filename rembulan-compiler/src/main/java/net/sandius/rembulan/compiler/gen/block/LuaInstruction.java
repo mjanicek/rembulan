@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CompilationContext;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.ReturnType;
@@ -760,12 +761,12 @@ public class LuaInstruction {
 		public final int r_dest;
 		public final Prototype prototype;
 
-		public final Map<Prototype, CompilationUnit> units;
+		public final CompilationContext context;
 
-		public Closure(Prototype parent, Map<Prototype, CompilationUnit> units, int a, int bx) {
+		public Closure(Prototype parent, CompilationContext context, int a, int bx) {
 			this.r_dest = a;
 			this.prototype = parent.getNestedPrototypes().get(bx);
-			this.units = units;
+			this.context = Check.notNull(context);
 		}
 
 		@Override
@@ -775,7 +776,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			FunctionType tpe = units.containsKey(prototype) ? units.get(prototype).generic().functionType() : LuaTypes.FUNCTION;
+			FunctionType tpe = context.typeOf(prototype);
 
 			s = s.update(r_dest, Slot.of(new Origin.Closure(prototype), tpe));
 

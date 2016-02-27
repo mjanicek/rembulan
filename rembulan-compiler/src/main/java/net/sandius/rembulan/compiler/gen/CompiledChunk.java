@@ -23,11 +23,13 @@ public class CompiledChunk {
 	private final ClassNameGenerator nameGenerator;
 
 	private final Map<Prototype, CompilationUnit> units;
+	private final CompilationContext ctx;
 
 	public CompiledChunk(Prototype prototype, ClassNameGenerator nameGenerator) {
 		this.prototype = Check.notNull(prototype);
 		this.nameGenerator = Check.notNull(nameGenerator);
 		this.units = new HashMap<>();
+		this.ctx = new CompilationContext(units);
 	}
 
 	public Iterable<CompilationUnit> units() {
@@ -60,8 +62,8 @@ public class CompiledChunk {
 	}
 
 	private CompilationUnit initUnit(Prototype prototype, String name) {
-		CompilationUnit compilationUnit = new CompilationUnit(prototype, name);
-		compilationUnit.initGeneric(units);
+		CompilationUnit compilationUnit = new CompilationUnit(prototype, name, ctx);
+		compilationUnit.initGeneric();
 		return compilationUnit;
 	}
 
