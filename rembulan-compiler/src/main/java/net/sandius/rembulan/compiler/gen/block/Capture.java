@@ -2,15 +2,15 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.IntContainer;
+import net.sandius.rembulan.util.IntIterable;
 import net.sandius.rembulan.util.IntSet;
 
 public class Capture extends Linear implements LocalVariableEffect {
 
 	public final IntSet indices;
 
-	public Capture(IntContainer indices) {
-		this.indices = IntSet.empty().plus(Check.notNull(indices));
+	public Capture(IntIterable indices) {
+		this.indices = IntSet.from(Check.notNull(indices));
 	}
 
 	@Override
