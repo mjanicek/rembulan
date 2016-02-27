@@ -4,25 +4,39 @@ import java.util.Arrays;
 
 public class IntBuffer extends IntContainer {
 
+	private static final int DEFAULT_EMPTY_CAPACITY = 8;
+	private static final int GROW_FACTOR = 2;
+
 	private int[] buf;
 	private int len;
 
+	private IntBuffer(int[] buf, int len) {
+		this.buf = Check.notNull(buf);
+		this.len = len;
+	}
+
 	public IntBuffer(int size) {
-		buf = new int[size];
-		len = 0;
+		this(new int[size], 0);
 	}
 
 	public IntBuffer() {
-		this(8);
+		this(DEFAULT_EMPTY_CAPACITY);
+	}
+
+	public static IntBuffer from(int[] values) {
+		int len = values.length;
+
+		int size = DEFAULT_EMPTY_CAPACITY;
+		while (len > size) size *= GROW_FACTOR;
+
+		int[] buf = new int[size];
+		System.arraycopy(values, 0, buf, 0, values.length);
+
+		return new IntBuffer(buf, len);
 	}
 
 	public static IntBuffer of(int... values) {
-		// TODO: allocate the array directly
-		IntBuffer buffer = new IntBuffer();
-		for (int i = 0; i < values.length; i++) {
-			buffer.append(values[i]);
-		}
-		return buffer;
+		return from(values);
 	}
 
 	private void resize(int to) {
@@ -52,6 +66,10 @@ public class IntBuffer extends IntContainer {
 		Check.inRange(idx, 0, len - 1);
 		System.arraycopy(buf, idx + 1, buf, idx, len - idx - 1);
 		len -= 1;
+
+		if (len < buf.length / GROW_FACTOR && buf.length / GROW_FACTOR > DEFAULT_EMPTY_CAPACITY) {
+			resize(buf.length / GROW_FACTOR);
+		}
 	}
 
 	public void removeValue(int value) {
@@ -80,7 +98,7 @@ public class IntBuffer extends IntContainer {
 
 	public void append(int value) {
 		if (len + 1 >= buf.length) {
-			resize(buf.length * 2);
+			resize(buf.length * GROW_FACTOR);
 		}
 
 		buf[len++] = value;
