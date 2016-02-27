@@ -105,7 +105,7 @@ public abstract class AbstractObjectSink implements ObjectSink {
 	@Override
 	public Object _0() {
 		return get(0);
-	};
+	}
 
 	@Override
 	public Object _1() {
