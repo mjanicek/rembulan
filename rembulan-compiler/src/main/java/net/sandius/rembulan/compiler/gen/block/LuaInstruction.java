@@ -6,7 +6,6 @@ import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
-import net.sandius.rembulan.compiler.gen.CompilationUnit;
 import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
@@ -16,23 +15,10 @@ import net.sandius.rembulan.lbc.PrototypePrinter;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-import java.util.Map;
-
 public class LuaInstruction {
 
 	public static int registerOrConst(int i) {
 		return OpCode.isK(i) ? -1 - OpCode.indexK(i) : i;
-	}
-
-	public static Type constantType(Object k) {
-		if (k == null) return LuaTypes.NIL;
-		else if (k instanceof Boolean) return LuaTypes.BOOLEAN;
-		else if (k instanceof Double || k instanceof Float) return LuaTypes.NUMBER_FLOAT;
-		else if (k instanceof Number) return LuaTypes.NUMBER_INTEGER;
-		else if (k instanceof String) return LuaTypes.STRING;
-		else {
-			throw new IllegalStateException("Unknown constant: " + k);
-		}
 	}
 
 	public static TypeSeq argTypesFromSlots(SlotState s, int from, int count) {
@@ -101,12 +87,14 @@ public class LuaInstruction {
 	public static class LoadK extends Linear {
 
 		public final Prototype prototype;
+		public final CompilationContext context;
 
 		public final int r_dest;
 		public final int constIndex;
 
-		public LoadK(Prototype prototype, int a, int bx) {
+		public LoadK(Prototype prototype, CompilationContext context, int a, int bx) {
 			this.prototype = Check.notNull(prototype);
+			this.context = Check.notNull(context);
 			this.r_dest = a;
 			this.constIndex = bx;
 		}
@@ -118,7 +106,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, Slot.of(new Origin.Constant(constIndex), constantType(prototype.getConstants().get(constIndex))));
+			return s.update(r_dest, new Origin.Constant(constIndex), context.constType(prototype, constIndex));
 		}
 
 	}

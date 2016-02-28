@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CompilationContext;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.Slot;
@@ -12,13 +13,15 @@ import net.sandius.rembulan.util.Check;
 public abstract class LuaBinaryOperation extends Linear {
 
 	public final Prototype prototype;
+	public final CompilationContext context;
 
 	public final int r_dest;
 	public final int rk_left;
 	public final int rk_right;
 
-	public LuaBinaryOperation(Prototype prototype, int a, int b, int c) {
+	public LuaBinaryOperation(Prototype prototype, CompilationContext context, int a, int b, int c) {
 		this.prototype = Check.notNull(prototype);
+		this.context = Check.notNull(context);
 		this.r_dest = a;
 		this.rk_left = LuaInstruction.registerOrConst(b);
 		this.rk_right = LuaInstruction.registerOrConst(c);
@@ -32,7 +35,7 @@ public abstract class LuaBinaryOperation extends Linear {
 	}
 
 	protected Type slotType(SlotState s, int idx) {
-		return idx < 0 ? LuaInstruction.constantType(prototype.getConstants().get(-idx - 1)) : s.typeAt(idx);
+		return idx < 0 ? context.constType(prototype, -idx - 1) : s.typeAt(idx);
 	}
 
 	protected abstract NumOpType opType(Type l, Type r);
@@ -69,8 +72,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Add extends LuaBinaryOperation {
 
-		public Add(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public Add(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -87,8 +90,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Sub extends LuaBinaryOperation {
 
-		public Sub(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public Sub(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -105,8 +108,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Mul extends LuaBinaryOperation {
 
-		public Mul(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public Mul(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -123,8 +126,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Mod extends LuaBinaryOperation {
 
-		public Mod(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public Mod(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -141,8 +144,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Pow extends LuaBinaryOperation {
 
-		public Pow(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public Pow(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -159,8 +162,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Div extends LuaBinaryOperation {
 
-		public Div(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public Div(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -177,8 +180,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class IDiv extends LuaBinaryOperation {
 
-		public IDiv(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public IDiv(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -195,8 +198,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class BAnd extends LuaBinaryOperation {
 
-		public BAnd(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public BAnd(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -213,8 +216,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class BOr extends LuaBinaryOperation {
 
-		public BOr(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public BOr(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -231,8 +234,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class BXor extends LuaBinaryOperation {
 
-		public BXor(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public BXor(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -249,8 +252,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Shl extends LuaBinaryOperation {
 
-		public Shl(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public Shl(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override
@@ -267,8 +270,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Shr extends LuaBinaryOperation {
 
-		public Shr(Prototype prototype, int dest, int b, int c) {
-			super(prototype, dest, b, c);
+		public Shr(Prototype prototype, CompilationContext context, int dest, int b, int c) {
+			super(prototype, context, dest, b, c);
 		}
 
 		@Override

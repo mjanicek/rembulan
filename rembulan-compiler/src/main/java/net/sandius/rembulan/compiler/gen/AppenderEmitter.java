@@ -33,7 +33,7 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_LOADK(int a, int bx) {
-		appender.append(new LuaInstruction.LoadK(prototype, a, bx)).toNext();
+		appender.append(new LuaInstruction.LoadK(prototype, appender.context(), a, bx)).toNext();
 	}
 
 	@Override
@@ -88,62 +88,62 @@ public class AppenderEmitter implements InstructionEmitter {
 
 	@Override
 	public void l_ADD(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Add(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Add(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SUB(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Sub(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Sub(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_MUL(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Mul(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Mul(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_MOD(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Mod(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Mod(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_POW(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Pow(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Pow(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_DIV(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Div(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Div(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_IDIV(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.IDiv(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.IDiv(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BAND(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.BAnd(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.BAnd(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BOR(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.BOr(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.BOr(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BXOR(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.BXor(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.BXor(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SHL(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Shl(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Shl(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SHR(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Shr(prototype, a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation.Shr(prototype, appender.context(), a, b, c)).toNext();
 	}
 
 	@Override
