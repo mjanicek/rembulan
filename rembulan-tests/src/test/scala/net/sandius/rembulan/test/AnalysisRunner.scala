@@ -295,6 +295,11 @@ object AnalysisRunner {
           """
     }
 
+    object JustAdd extends Fragment {
+      code =
+          """return x + 1
+          """
+    }
   }
 
   def unitForPrototype(flow: CompiledChunk, prototype: Prototype): CompilationUnit = {
@@ -413,7 +418,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = GotoLocalSlot_withX
+    val program = JustAdd
 
     println(program.code)
 

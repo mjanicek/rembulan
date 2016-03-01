@@ -120,4 +120,57 @@ public abstract class Dispatch {
 		evaluateTailCalls(state, result);
 	}
 
+	public static void index(LuaState state, ObjectSink result, Object table, Object key) throws ControlThrowable {
+		if (table instanceof Table) {
+			Table t = (Table) table;
+			Object value = t.rawget(key);
+
+			if (value != null) {
+				result.setTo(value);
+				return;
+			}
+		}
+
+		Object handler = Metatables.getMetamethod(state, Metatables.MT_INDEX, table);
+
+		if (handler == null && table instanceof Table) {
+			// key not found and no index metamethod, returning nil
+			result.setTo(null);
+			return;
+		}
+		if (handler instanceof Invokable) {
+			// call the handler
+			Invokable fn = (Invokable) handler;
+
+			fn.invoke(state, result, handler, table, key);
+			evaluateTailCalls(state, result);
+		}
+		else if (handler instanceof Table) {
+			// TODO: protect against infinite loops
+			index(state, result, handler, key);
+		}
+		else {
+			throw new IllegalOperationAttemptException("index", Value.typeOf(table).name);
+		}
+	}
+
+	public static void add(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation math = MathImplementation.math_add(a, b);
+		if (math != null) {
+			Number v = math.do_add(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b));
+			result.setTo(v);
+		}
+		else {
+			Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_ADD, a, b);
+
+			if (handler != null) {
+				call(state, result, handler, a, b);
+			}
+			else {
+				String typeName = Value.typeOf(Conversions.objectAsNumber(a) == null ? a : b).name;
+				throw new IllegalOperationAttemptException("perform arithmetic on", typeName);
+			}
+		}
+	}
+
 }
