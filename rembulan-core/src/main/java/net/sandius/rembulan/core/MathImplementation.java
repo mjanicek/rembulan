@@ -2,8 +2,8 @@ package net.sandius.rembulan.core;
 
 public abstract class MathImplementation {
 
-	public static final MathImplementation INTEGER_MATH = new IntegerMathImplementation();
-	public static final MathImplementation FLOAT_MATH = new FloatMathImplementation();
+	public static final IntegerMathImplementation INTEGER_MATH = new IntegerMathImplementation();
+	public static final FloatMathImplementation FLOAT_MATH = new FloatMathImplementation();
 
 	public abstract Number do_add(Number a, Number b);
 	public abstract Number do_sub(Number a, Number b);
@@ -11,12 +11,12 @@ public abstract class MathImplementation {
 	public static class IntegerMathImplementation extends MathImplementation {
 
 		@Override
-		public Number do_add(Number a, Number b) {
+		public Long do_add(Number a, Number b) {
 			return a.longValue() + b.longValue();
 		}
 
 		@Override
-		public Number do_sub(Number a, Number b) {
+		public Long do_sub(Number a, Number b) {
 			return a.longValue() - b.longValue();
 		}
 
@@ -25,12 +25,12 @@ public abstract class MathImplementation {
 	public static class FloatMathImplementation extends MathImplementation {
 
 		@Override
-		public Number do_add(Number a, Number b) {
+		public Double do_add(Number a, Number b) {
 			return a.doubleValue() + b.doubleValue();
 		}
 
 		@Override
-		public Number do_sub(Number a, Number b) {
+		public Double do_sub(Number a, Number b) {
 			return a.doubleValue() - b.doubleValue();
 		}
 
