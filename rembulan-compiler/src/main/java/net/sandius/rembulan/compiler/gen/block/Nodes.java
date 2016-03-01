@@ -239,4 +239,32 @@ public abstract class Nodes {
 		return Graph.wrap(Collections.unmodifiableSet(vertices), Collections.unmodifiableSet(edges));
 	}
 
+	// perform an action in all successors of the node n
+	public abstract static class NodeSuccessorAction extends NodeVisitor {
+
+		private final Node n;
+
+		public NodeSuccessorAction(Node n) {
+			this.n = n;
+		}
+
+		public abstract void visitSuccessor(Node node);
+
+		protected Node selfNode() {
+			return n;
+		}
+
+		@Override
+		public boolean visitNode(Node node) {
+			if (node == n) {
+				return true;
+			}
+			else {
+				visitSuccessor(node);
+				return false;
+			}
+		}
+
+	}
+
 }

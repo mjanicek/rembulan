@@ -109,35 +109,7 @@ public class CompiledPrototype {
 		return Nodes.toGraph(callEntry);
 	}
 
-	// perform an action in all successors of the node n
-	public abstract class NodeSuccessorAction extends NodeVisitor {
-
-		private final Node n;
-
-		public NodeSuccessorAction(Node n) {
-			this.n = n;
-		}
-
-		public abstract void visitSuccessor(Node node);
-
-		protected Node selfNode() {
-			return n;
-		}
-
-		@Override
-		public boolean visitNode(Node node) {
-			if (node == n) {
-				return true;
-			}
-			else {
-				visitSuccessor(node);
-				return false;
-			}
-		}
-
-	}
-
-	private class Pusher extends NodeSuccessorAction {
+	private class Pusher extends Nodes.NodeSuccessorAction {
 		private final Queue<Node> workList;
 		public Pusher(Node n, Queue<Node> workList) {
 			super(n);
@@ -297,7 +269,7 @@ public class CompiledPrototype {
 
 	public Iterable<Node> successors(Node n) {
 		final Set<Node> result = new HashSet<>();
-		n.accept(new NodeSuccessorAction(n) {
+		n.accept(new Nodes.NodeSuccessorAction(n) {
 			@Override
 			public void visitSuccessor(Node node) {
 				result.add(node);
