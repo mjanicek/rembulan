@@ -413,7 +413,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = GotoScopeStackRestart_withX
+    val program = GotoLocalSlot_withX
 
     println(program.code)
 
