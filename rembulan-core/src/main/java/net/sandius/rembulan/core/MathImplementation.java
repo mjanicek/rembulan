@@ -1,5 +1,7 @@
 package net.sandius.rembulan.core;
 
+import static net.sandius.rembulan.core.RawOperators.*;
+
 public abstract class MathImplementation {
 
 	public static final IntegerMathImplementation INTEGER_MATH = new IntegerMathImplementation();
@@ -12,12 +14,12 @@ public abstract class MathImplementation {
 
 		@Override
 		public Long do_add(Number a, Number b) {
-			return a.longValue() + b.longValue();
+			return rawadd(a.longValue(), b.longValue());
 		}
 
 		@Override
 		public Long do_sub(Number a, Number b) {
-			return a.longValue() - b.longValue();
+			return rawsub(a.longValue(), b.longValue());
 		}
 
 	}
@@ -26,12 +28,12 @@ public abstract class MathImplementation {
 
 		@Override
 		public Double do_add(Number a, Number b) {
-			return a.doubleValue() + b.doubleValue();
+			return rawadd(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
 		public Double do_sub(Number a, Number b) {
-			return a.doubleValue() - b.doubleValue();
+			return rawsub(a.doubleValue(), b.doubleValue());
 		}
 
 	}
