@@ -9,29 +9,15 @@ import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
-import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.ReadOnlyArray;
 
-public class LuaInstruction {
+import static net.sandius.rembulan.compiler.gen.block.LuaUtils.argTypesFromSlots;
+import static net.sandius.rembulan.compiler.gen.block.LuaUtils.registerOrConst;
 
-	public static int registerOrConst(int i) {
-		return OpCode.isK(i) ? -1 - OpCode.indexK(i) : i;
-	}
+public interface LuaInstruction {
 
-	public static TypeSeq argTypesFromSlots(SlotState s, int from, int count) {
-		int num = count > 0 ? count - 1 : s.varargPosition() - from;
-
-		Type[] args = new Type[num];
-		for (int i = 0; i < num; i++) {
-			args[i] = s.typeAt(from + i);
-		}
-
-		return new TypeSeq(ReadOnlyArray.wrap(args), count <= 0);
-	}
-
-	public enum NumOpType {
+	enum NumOpType {
 		Integer,
 		Float,
 		Number,
@@ -60,7 +46,7 @@ public class LuaInstruction {
 
 
 
-	public static class Move extends Linear {
+	class Move extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final int r_src;
@@ -83,7 +69,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class LoadK extends Linear {
+	class LoadK extends Linear implements LuaInstruction {
 
 		public final PrototypeContext context;
 
@@ -108,7 +94,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class LoadBool extends Linear {
+	class LoadBool extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final boolean value;
@@ -129,7 +115,7 @@ public class LuaInstruction {
 		}
 	}
 
-	public static class LoadNil extends Linear {
+	class LoadNil extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final int count;
@@ -154,7 +140,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class GetUpVal extends Linear {
+	class GetUpVal extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final int upvalueIndex;
@@ -176,7 +162,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class GetTabUp extends Linear {
+	class GetTabUp extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final int upvalueIndex;
@@ -200,7 +186,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class GetTable extends Linear {
+	class GetTable extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final int r_tab;
@@ -225,7 +211,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class SetTabUp extends Linear {
+	class SetTabUp extends Linear implements LuaInstruction {
 
 		public final int upvalueIndex;
 		public final int rk_key;
@@ -244,7 +230,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class SetUpVal extends Linear {
+	class SetUpVal extends Linear implements LuaInstruction {
 
 		public final int r_src;
 		public final int upvalueIndex;
@@ -261,7 +247,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class SetTable extends Linear {
+	class SetTable extends Linear implements LuaInstruction {
 
 		public final int r_tab;
 		public final int rk_key;
@@ -281,7 +267,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class NewTable extends Linear {
+	class NewTable extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final int arraySize;
@@ -307,7 +293,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Self extends Linear {
+	class Self extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final int r_self;
@@ -333,7 +319,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Concat extends Linear {
+	class Concat extends Linear implements LuaInstruction {
 
 		public final int r_dest;
 		public final int r_begin;
@@ -370,7 +356,7 @@ public class LuaInstruction {
 
 	// No explicit node for jumps
 
-	public static class Eq extends Branch {
+	class Eq extends Branch implements LuaInstruction {
 
 		public final boolean pos;
 		public final int rk_left;
@@ -390,7 +376,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Lt extends Branch {
+	class Lt extends Branch implements LuaInstruction {
 
 		public final boolean pos;
 		public final int rk_left;
@@ -410,7 +396,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Le extends Branch {
+	class Le extends Branch implements LuaInstruction {
 
 		public final boolean pos;
 		public final int rk_left;
@@ -431,7 +417,7 @@ public class LuaInstruction {
 	}
 
 	/*	A C	if not (R(A) <=> C) then pc++			*/
-	public static class Test extends Branch {
+	class Test extends Branch implements LuaInstruction {
 		public final int r_index;
 		public final boolean value;
 
@@ -477,7 +463,7 @@ public class LuaInstruction {
 	// Not used: translated as a TEST followed by MOVE in the true branch
 	/*	A B C	if (R(B) <=> C) then R(A) := R(B) else pc++	*/
 /*
-	public static class TestSet extends Branch {
+	class TestSet extends Branch implements LuaInstruction {
 
 		public final int r_set;
 		public final int r_test;
@@ -522,7 +508,7 @@ public class LuaInstruction {
 	}
 */
 
-	public interface CallInstruction {
+	interface CallInstruction extends LuaInstruction {
 
 		Slot callTarget();
 
@@ -530,7 +516,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Call extends Linear implements CallInstruction {
+	class Call extends Linear implements LuaInstruction, CallInstruction {
 
 		public final int r_tgt;
 		public final int b;
@@ -597,7 +583,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class TailCall extends Exit implements CallInstruction {
+	class TailCall extends Exit implements LuaInstruction, CallInstruction {
 
 		public final int r_tgt;
 		public final int b;
@@ -635,7 +621,7 @@ public class LuaInstruction {
 	}
 
 
-	public static class Return extends Exit {
+	class Return extends Exit implements LuaInstruction {
 
 		public final int r_from;
 		public final int b;
@@ -658,7 +644,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class ForLoop extends Branch {
+	class ForLoop extends Branch implements LuaInstruction {
 
 		public final int r_base;
 
@@ -678,7 +664,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class ForPrep extends Linear {
+	class ForPrep extends Linear implements LuaInstruction {
 
 		public final int r_base;
 
@@ -741,7 +727,7 @@ public class LuaInstruction {
 
 	// TODO: SETLIST
 
-	public static class Closure extends Linear implements LocalVariableEffect {
+	class Closure extends Linear implements LuaInstruction, LocalVariableEffect {
 
 		public final PrototypeContext context;
 
@@ -776,7 +762,7 @@ public class LuaInstruction {
 
 	}
 
-	public static class Vararg extends Linear {
+	class Vararg extends Linear implements LuaInstruction {
 
 		public final int r_base;
 		public final int b;

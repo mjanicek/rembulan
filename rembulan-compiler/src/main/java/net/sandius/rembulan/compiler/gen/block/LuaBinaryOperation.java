@@ -5,11 +5,10 @@ import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
-import net.sandius.rembulan.compiler.gen.block.LuaInstruction.NumOpType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
-public abstract class LuaBinaryOperation extends Linear {
+public abstract class LuaBinaryOperation extends Linear implements LuaInstruction {
 
 	public final PrototypeContext context;
 
@@ -20,8 +19,8 @@ public abstract class LuaBinaryOperation extends Linear {
 	public LuaBinaryOperation(PrototypeContext context, int a, int b, int c) {
 		this.context = Check.notNull(context);
 		this.r_dest = a;
-		this.rk_left = LuaInstruction.registerOrConst(b);
-		this.rk_right = LuaInstruction.registerOrConst(c);
+		this.rk_left = LuaUtils.registerOrConst(b);
+		this.rk_right = LuaUtils.registerOrConst(c);
 	}
 
 	protected abstract String name();

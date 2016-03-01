@@ -6,7 +6,7 @@ import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
 
-public abstract class LuaUnaryOperation extends Linear {
+public abstract class LuaUnaryOperation extends Linear implements LuaInstruction {
 
 	public final int r_dest;
 	public final int r_arg;
