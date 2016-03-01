@@ -66,6 +66,14 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 		return s.update(r_dest, Slot.of(Origin.Computed.in(this), opType(s).toSlotType()));
 	}
 
+	@Override
+	public boolean needsResumePoint() {
+		switch (opType(inSlots())) {
+			case Any: return true;
+			default: return false;
+		}
+	}
+
 	public static class Add extends LuaBinaryOperation {
 
 		public Add(PrototypeContext context, int dest, int b, int c) {

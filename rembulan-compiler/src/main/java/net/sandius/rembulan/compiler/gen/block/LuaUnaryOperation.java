@@ -32,6 +32,12 @@ public abstract class LuaUnaryOperation extends Linear implements LuaInstruction
 		return s.update(r_dest, Slot.of(Origin.Computed.in(this), resultType(s.typeAt(r_arg))));
 	}
 
+	@Override
+	public boolean needsResumePoint() {
+		Type rt = resultType(inSlots().typeAt(r_arg));
+		return rt.equals(LuaTypes.ANY);
+	}
+
 	public static class Unm extends LuaUnaryOperation {
 
 		public Unm(int dest, int b) {

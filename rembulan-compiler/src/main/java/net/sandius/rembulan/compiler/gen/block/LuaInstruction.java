@@ -17,6 +17,8 @@ import static net.sandius.rembulan.compiler.gen.block.LuaUtils.registerOrConst;
 
 public interface LuaInstruction {
 
+	boolean needsResumePoint();
+
 	enum NumOpType {
 		Integer,
 		Float,
@@ -67,6 +69,11 @@ public interface LuaInstruction {
 			return s.update(r_dest, s.slotAt(r_src));
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return false;
+		}
+
 	}
 
 	class LoadK extends Linear implements LuaInstruction {
@@ -92,6 +99,11 @@ public interface LuaInstruction {
 			return s.update(r_dest, new Origin.Constant(constIndex), context.constType(constIndex));
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return false;
+		}
+
 	}
 
 	class LoadBool extends Linear implements LuaInstruction {
@@ -113,6 +125,12 @@ public interface LuaInstruction {
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(Origin.BooleanConstant.fromBoolean(value), LuaTypes.BOOLEAN));
 		}
+
+		@Override
+		public boolean needsResumePoint() {
+			return false;
+		}
+
 	}
 
 	class LoadNil extends Linear implements LuaInstruction {
@@ -138,6 +156,11 @@ public interface LuaInstruction {
 			return s;
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return false;
+		}
+
 	}
 
 	class GetUpVal extends Linear implements LuaInstruction {
@@ -158,6 +181,11 @@ public interface LuaInstruction {
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(new Origin.Upvalue(upvalueIndex), LuaTypes.ANY));
+		}
+
+		@Override
+		public boolean needsResumePoint() {
+			return true;
 		}
 
 	}
@@ -182,6 +210,11 @@ public interface LuaInstruction {
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.ANY));
+		}
+
+		@Override
+		public boolean needsResumePoint() {
+			return true;
 		}
 
 	}
@@ -209,6 +242,12 @@ public interface LuaInstruction {
 			return s.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.ANY));
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			// TODO: check that this is correct -- will try a metamethod when key is not present
+			return true;
+		}
+
 	}
 
 	class SetTabUp extends Linear implements LuaInstruction {
@@ -228,6 +267,12 @@ public interface LuaInstruction {
 			return "SETTABUP(" + upvalueIndex + "," + rk_key + "," + rk_value + ")";
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			// TODO: check that this is correct -- will try a metamethod when key is (not) present?
+			return true;
+		}
+
 	}
 
 	class SetUpVal extends Linear implements LuaInstruction {
@@ -243,6 +288,11 @@ public interface LuaInstruction {
 		@Override
 		public String toString() {
 			return "SETUPVAL(" + r_src + "," + upvalueIndex + ")";
+		}
+
+		@Override
+		public boolean needsResumePoint() {
+			return false;
 		}
 
 	}
@@ -263,6 +313,12 @@ public interface LuaInstruction {
 		public String toString() {
 			String suffix = (inSlots().typeAt(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "");
 			return "SETTABLE" + suffix + "(" + r_tab + "," + rk_key + "," + rk_value + ")";
+		}
+
+		@Override
+		public boolean needsResumePoint() {
+			// TODO: check that this is correct -- will try a metamethod when key is (not) present?
+			return true;
 		}
 
 	}
@@ -291,6 +347,11 @@ public interface LuaInstruction {
 			return s.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.TABLE));
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return false;
+		}
+
 	}
 
 	class Self extends Linear implements LuaInstruction {
@@ -315,6 +376,12 @@ public interface LuaInstruction {
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest + 1, s.slotAt(r_self))
 					.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.ANY));
+		}
+
+		@Override
+		public boolean needsResumePoint() {
+			// TODO: check that this is correct -- will try a metamethod when key is (not) present?
+			return true;
 		}
 
 	}
@@ -352,6 +419,11 @@ public interface LuaInstruction {
 			return s.update(r_dest, Slot.of(Origin.Computed.in(this), allStringable(s) ? LuaTypes.STRING : LuaTypes.ANY));
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return !allStringable(inSlots());
+		}
+
 	}
 
 	// No explicit node for jumps
@@ -374,6 +446,12 @@ public interface LuaInstruction {
 			return (pos ? "EQ" : "NOT-EQ") +  "(" + rk_left + "," + rk_right + ")";
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			// TODO
+			return true;
+		}
+
 	}
 
 	class Lt extends Branch implements LuaInstruction {
@@ -394,6 +472,12 @@ public interface LuaInstruction {
 			return (pos ? "LT" : "NOT-LT") + "(" + rk_left + "," + rk_right + ")";
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			// TODO
+			return true;
+		}
+
 	}
 
 	class Le extends Branch implements LuaInstruction {
@@ -412,6 +496,12 @@ public interface LuaInstruction {
 		@Override
 		public String toString() {
 			return (pos ? "LE" : "NOT-LE") + "(" + rk_left + "," + rk_right + ")";
+		}
+
+		@Override
+		public boolean needsResumePoint() {
+			// TODO
+			return true;
 		}
 
 	}
@@ -454,6 +544,11 @@ public interface LuaInstruction {
 			if (tpe.equals(LuaTypes.BOOLEAN) || tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) return InlineTarget.CANNOT_BE_INLINED;
 			else if (tpe.equals(LuaTypes.NIL)) return InlineTarget.FALSE_BRANCH;
 			else return InlineTarget.TRUE_BRANCH;
+		}
+
+		@Override
+		public boolean needsResumePoint() {
+			return false;
 		}
 
 	}
@@ -581,6 +676,11 @@ public interface LuaInstruction {
 			return argTypesFromSlots(inSlots(), r_tgt + 1, b);
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return true;
+		}
+
 	}
 
 	class TailCall extends Exit implements LuaInstruction, CallInstruction {
@@ -618,6 +718,11 @@ public interface LuaInstruction {
 			return argTypesFromSlots(inSlots(), r_tgt + 1, b);
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return false;
+		}
+
 	}
 
 
@@ -642,6 +747,11 @@ public interface LuaInstruction {
 			return new ReturnType.ConcreteReturnType(argTypesFromSlots(inSlots(), r_from, b));
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return false;
+		}
+
 	}
 
 	class ForLoop extends Branch implements LuaInstruction {
@@ -661,6 +771,12 @@ public interface LuaInstruction {
 		// TODO: updates the register (r_base + 0), and in the true branch copies (r_base + 0) to (r_base + 3)
 
 		// TODO: can also be specialised
+
+		@Override
+		public boolean needsResumePoint() {
+			// TODO
+			return true;
+		}
 
 	}
 
@@ -719,6 +835,12 @@ public interface LuaInstruction {
 			));
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			// TODO
+			return true;
+		}
+
 	}
 
 	// TODO: TFORCALL
@@ -760,6 +882,11 @@ public interface LuaInstruction {
 			return s;
 		}
 
+		@Override
+		public boolean needsResumePoint() {
+			return false;
+		}
+
 	}
 
 	class Vararg extends Linear implements LuaInstruction {
@@ -789,6 +916,11 @@ public interface LuaInstruction {
 			else {
 				return s.setVarargs(r_base);
 			}
+		}
+
+		@Override
+		public boolean needsResumePoint() {
+			return false;
 		}
 
 	}
