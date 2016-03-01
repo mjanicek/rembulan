@@ -12,7 +12,7 @@ public class UnconditionalJump implements Node, Sink, Jump {
 
 	public UnconditionalJump(Target target) {
 		this.inSlots = null;
-		this.prev = Nodes.DUMMY_SRC;
+		this.prev = null;
 		this.target = Check.notNull(target);
 		target.inc(this);
 	}

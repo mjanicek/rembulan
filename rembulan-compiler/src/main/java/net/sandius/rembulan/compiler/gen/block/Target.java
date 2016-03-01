@@ -18,7 +18,8 @@ public class Target implements Node, Src {
 		this.inSlots = null;
 		this.name = name;
 		this.in = new HashMap<>();
-		this.next = Nodes.DUMMY_SINK;
+
+		this.next = null;
 	}
 
 	public Target() {

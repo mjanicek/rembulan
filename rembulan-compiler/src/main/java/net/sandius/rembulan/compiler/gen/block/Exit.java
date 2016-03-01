@@ -12,7 +12,7 @@ public abstract class Exit implements Node, Sink {
 
 	public Exit() {
 		this.inSlots = null;
-		this.prev = Nodes.DUMMY_SRC;
+		this.prev = null;
 	}
 
 	@Override

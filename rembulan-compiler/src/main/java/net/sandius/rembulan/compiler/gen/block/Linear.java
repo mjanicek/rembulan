@@ -11,9 +11,9 @@ public abstract class Linear implements Node, Sink, Src {
 	private Sink next;
 
 	public Linear() {
-		this.inSlots = inSlots;
-		this.prev = Nodes.DUMMY_SRC;
-		this.next = Nodes.DUMMY_SINK;
+		this.inSlots = null;
+		this.prev = null;
+		this.next = null;
 	}
 
 	@Override
@@ -78,8 +78,8 @@ public abstract class Linear implements Node, Sink, Src {
 		p.setNext(n);
 		n.setPrev(p);
 
-		this.setPrev(Nodes.DUMMY_SRC);
-		this.setNext(Nodes.DUMMY_SINK);
+		this.prev = null;
+		this.next = null;
 	}
 
 	public void replaceWith(Linear replacement) {
@@ -91,8 +91,8 @@ public abstract class Linear implements Node, Sink, Src {
 		replacement.setNext(n);
 		n.setPrev(replacement);
 
-		this.setPrev(Nodes.DUMMY_SRC);
-		this.setNext(Nodes.DUMMY_SINK);
+		this.prev = null;
+		this.next = null;
 	}
 
 	@Override
