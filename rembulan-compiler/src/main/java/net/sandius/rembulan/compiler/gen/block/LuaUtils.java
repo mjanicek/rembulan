@@ -28,4 +28,8 @@ public abstract class LuaUtils {
 		return new TypeSeq(ReadOnlyArray.wrap(args), count <= 0);
 	}
 
+	public static String prefix(LuaInstruction i) {
+		return i.needsResumePoint() ? "* " : "";
+	}
+
 }

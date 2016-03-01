@@ -6,6 +6,8 @@ import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
 
+import static net.sandius.rembulan.compiler.gen.block.LuaUtils.prefix;
+
 public abstract class LuaUnaryOperation extends Linear implements LuaInstruction {
 
 	public final int r_dest;
@@ -24,7 +26,7 @@ public abstract class LuaUnaryOperation extends Linear implements LuaInstruction
 	public String toString() {
 		Type rt = resultType(inSlots().typeAt(r_arg));
 		String suffix = rt != LuaTypes.ANY ? "_" + rt : "";
-		return name() + suffix + "(" + r_dest + "," + r_arg + ")";
+		return prefix(this) + name() + suffix + "(" + r_dest + "," + r_arg + ")";
 	}
 
 	@Override

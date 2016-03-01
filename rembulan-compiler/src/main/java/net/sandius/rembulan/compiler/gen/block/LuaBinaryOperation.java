@@ -8,6 +8,8 @@ import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
+import static net.sandius.rembulan.compiler.gen.block.LuaUtils.prefix;
+
 public abstract class LuaBinaryOperation extends Linear implements LuaInstruction {
 
 	public final PrototypeContext context;
@@ -27,7 +29,7 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 
 	@Override
 	public String toString() {
-		return name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
+		return prefix(this) + name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
 	}
 
 	protected Type slotType(SlotState s, int idx) {
