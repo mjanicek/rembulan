@@ -186,4 +186,54 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static void mul(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation m = MathImplementation.arithmetic(a, b);
+		if (m != null) {
+			result.setTo(m.do_mul(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_MUL, a, b);
+		}
+	}
+
+	public static void div(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation m = MathImplementation.arithmetic(a, b);
+		if (m != null) {
+			result.setTo(m.do_div(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_DIV, a, b);
+		}
+	}
+
+	public static void mod(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation m = MathImplementation.arithmetic(a, b);
+		if (m != null) {
+			result.setTo(m.do_mod(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_MOD, a, b);
+		}
+	}
+
+	public static void idiv(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation m = MathImplementation.arithmetic(a, b);
+		if (m != null) {
+			result.setTo(m.do_idiv(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_IDIV, a, b);
+		}
+	}
+
+	public static void pow(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation m = MathImplementation.arithmetic(a, b);
+		if (m != null) {
+			result.setTo(m.do_pow(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_POW, a, b);
+		}
+	}
+
 }

@@ -9,6 +9,11 @@ public abstract class MathImplementation {
 
 	public abstract Number do_add(Number a, Number b);
 	public abstract Number do_sub(Number a, Number b);
+	public abstract Number do_mul(Number a, Number b);
+	public abstract Double do_div(Number a, Number b);
+	public abstract Number do_mod(Number a, Number b);
+	public abstract Number do_idiv(Number a, Number b);
+	public abstract Double do_pow(Number a, Number b);
 
 	public static class IntegerMathImplementation extends MathImplementation {
 
@@ -20,6 +25,31 @@ public abstract class MathImplementation {
 		@Override
 		public Long do_sub(Number a, Number b) {
 			return rawsub(a.longValue(), b.longValue());
+		}
+
+		@Override
+		public Long do_mul(Number a, Number b) {
+			return rawmul(a.longValue(), b.longValue());
+		}
+
+		@Override
+		public Double do_div(Number a, Number b) {
+			return rawdiv(a.longValue(), b.longValue());
+		}
+
+		@Override
+		public Long do_mod(Number a, Number b) {
+			return rawmod(a.longValue(), b.longValue());
+		}
+
+		@Override
+		public Long do_idiv(Number a, Number b) {
+			return rawidiv(a.longValue(), b.longValue());
+		}
+
+		@Override
+		public Double do_pow(Number a, Number b) {
+			return rawpow(a.doubleValue(), b.doubleValue());
 		}
 
 	}
@@ -34,6 +64,31 @@ public abstract class MathImplementation {
 		@Override
 		public Double do_sub(Number a, Number b) {
 			return rawsub(a.doubleValue(), b.doubleValue());
+		}
+
+		@Override
+		public Number do_mul(Number a, Number b) {
+			return rawmul(a.doubleValue(), b.doubleValue());
+		}
+
+		@Override
+		public Double do_div(Number a, Number b) {
+			return rawdiv(a.doubleValue(), b.doubleValue());
+		}
+
+		@Override
+		public Double do_mod(Number a, Number b) {
+			return rawmod(a.doubleValue(), b.doubleValue());
+		}
+
+		@Override
+		public Double do_idiv(Number a, Number b) {
+			return rawidiv(a.doubleValue(), b.doubleValue());
+		}
+
+		@Override
+		public Double do_pow(Number a, Number b) {
+			return rawpow(a.doubleValue(), b.doubleValue());
 		}
 
 	}

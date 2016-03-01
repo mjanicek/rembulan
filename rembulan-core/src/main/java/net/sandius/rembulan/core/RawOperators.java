@@ -42,7 +42,7 @@ public abstract class RawOperators {
 		return a / b;
 	}
 
-	public static double rawmod(long a, long b) {
+	public static long rawmod(long a, long b) {
 		if (b == 0) throw new IllegalArgumentException("attempt to perform 'n%0'");
 		else return a - b * (long) Math.floor((double) a / (double) b);
 	}
@@ -60,9 +60,8 @@ public abstract class RawOperators {
 		else return (long) Math.floor((double) a / (double) b);
 	}
 
-	// arguments must not be null
-	public static Number rawpow(Number a, Number b) {
-		return Math.pow(a.doubleValue(), b.doubleValue());
+	public static double rawpow(double a, double b) {
+		return Math.pow(a, b);
 	}
 
 	public static long rawunm(long n) {
