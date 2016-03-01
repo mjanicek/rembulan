@@ -1,6 +1,5 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.CompilationContext;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
@@ -12,7 +11,6 @@ import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.Prototype;
-import net.sandius.rembulan.lbc.PrototypePrinter;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
