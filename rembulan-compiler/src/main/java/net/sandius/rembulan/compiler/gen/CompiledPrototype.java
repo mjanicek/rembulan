@@ -75,7 +75,7 @@ public class CompiledPrototype {
 			Slot target = c.callTarget();
 
 			if (target.type() instanceof FunctionType && target.origin() instanceof Origin.Closure) {
-				Prototype proto = ((Origin.Closure) target.origin()).prototype;
+				Prototype proto = prototype.getNestedPrototypes().get(((Origin.Closure) target.origin()).index);
 				TypeSeq args = c.callArguments();
 
 				// add to call sites

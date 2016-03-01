@@ -1,26 +1,23 @@
 package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.CompilationContext;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
+import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction.NumOpType;
 import net.sandius.rembulan.compiler.types.Type;
-import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 
 public abstract class LuaBinaryOperation extends Linear {
 
-	public final Prototype prototype;
-	public final CompilationContext context;
+	public final PrototypeContext context;
 
 	public final int r_dest;
 	public final int rk_left;
 	public final int rk_right;
 
-	public LuaBinaryOperation(Prototype prototype, CompilationContext context, int a, int b, int c) {
-		this.prototype = Check.notNull(prototype);
+	public LuaBinaryOperation(PrototypeContext context, int a, int b, int c) {
 		this.context = Check.notNull(context);
 		this.r_dest = a;
 		this.rk_left = LuaInstruction.registerOrConst(b);
@@ -35,7 +32,7 @@ public abstract class LuaBinaryOperation extends Linear {
 	}
 
 	protected Type slotType(SlotState s, int idx) {
-		return idx < 0 ? context.constType(prototype, -idx - 1) : s.typeAt(idx);
+		return idx < 0 ? context.constType(-idx - 1) : s.typeAt(idx);
 	}
 
 	protected abstract NumOpType opType(Type l, Type r);
@@ -72,8 +69,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Add extends LuaBinaryOperation {
 
-		public Add(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public Add(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -90,8 +87,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Sub extends LuaBinaryOperation {
 
-		public Sub(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public Sub(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -108,8 +105,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Mul extends LuaBinaryOperation {
 
-		public Mul(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public Mul(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -126,8 +123,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Mod extends LuaBinaryOperation {
 
-		public Mod(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public Mod(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -144,8 +141,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Pow extends LuaBinaryOperation {
 
-		public Pow(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public Pow(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -162,8 +159,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Div extends LuaBinaryOperation {
 
-		public Div(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public Div(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -180,8 +177,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class IDiv extends LuaBinaryOperation {
 
-		public IDiv(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public IDiv(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -198,8 +195,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class BAnd extends LuaBinaryOperation {
 
-		public BAnd(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public BAnd(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -216,8 +213,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class BOr extends LuaBinaryOperation {
 
-		public BOr(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public BOr(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -234,8 +231,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class BXor extends LuaBinaryOperation {
 
-		public BXor(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public BXor(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -252,8 +249,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Shl extends LuaBinaryOperation {
 
-		public Shl(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public Shl(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override
@@ -270,8 +267,8 @@ public abstract class LuaBinaryOperation extends Linear {
 
 	public static class Shr extends LuaBinaryOperation {
 
-		public Shr(Prototype prototype, CompilationContext context, int dest, int b, int c) {
-			super(prototype, context, dest, b, c);
+		public Shr(PrototypeContext context, int dest, int b, int c) {
+			super(context, dest, b, c);
 		}
 
 		@Override

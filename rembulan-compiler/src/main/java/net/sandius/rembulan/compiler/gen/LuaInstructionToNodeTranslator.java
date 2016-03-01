@@ -18,9 +18,9 @@ public class LuaInstructionToNodeTranslator {
 	private final Prototype prototype;
 	private final ReadOnlyArray<Target> pcToLabel;
 
-	private final CompilationContext ctx;
+	private final PrototypeContext ctx;
 	
-	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel, CompilationContext ctx) {
+	public LuaInstructionToNodeTranslator(Prototype prototype, ReadOnlyArray<Target> pcToLabel, PrototypeContext ctx) {
 		this.prototype = Check.notNull(prototype);
 		this.pcToLabel = Check.notNull(pcToLabel);
 		this.ctx = Check.notNull(ctx);
@@ -40,7 +40,7 @@ public class LuaInstructionToNodeTranslator {
 			return this;
 		}
 
-		public CompilationContext context() {
+		public PrototypeContext context() {
 			return ctx;
 		}
 

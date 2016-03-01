@@ -133,10 +133,10 @@ public abstract class Origin {
 
 	public static class Closure extends Origin {
 
-		public final Prototype prototype;
+		public final int index;
 
-		public Closure(Prototype prototype) {
-			this.prototype = Check.notNull(prototype);
+		public Closure(int index) {
+			this.index = index;
 		}
 
 		@Override
@@ -146,17 +146,17 @@ public abstract class Origin {
 
 			Closure that = (Closure) o;
 
-			return prototype.equals(that.prototype);
+			return this.index == that.index;
 		}
 
 		@Override
 		public int hashCode() {
-			return prototype.hashCode();
+			return index;
 		}
 
 		@Override
 		public String toString() {
-			return "closure_" + Integer.toHexString(System.identityHashCode(prototype));
+			return "closure_" + index;
 		}
 
 	}

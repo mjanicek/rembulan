@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler.gen.block;
 import net.sandius.rembulan.compiler.gen.CompilationContext;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
+import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.ReturnType;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
@@ -86,14 +87,12 @@ public class LuaInstruction {
 
 	public static class LoadK extends Linear {
 
-		public final Prototype prototype;
-		public final CompilationContext context;
+		public final PrototypeContext context;
 
 		public final int r_dest;
 		public final int constIndex;
 
-		public LoadK(Prototype prototype, CompilationContext context, int a, int bx) {
-			this.prototype = Check.notNull(prototype);
+		public LoadK(PrototypeContext context, int a, int bx) {
 			this.context = Check.notNull(context);
 			this.r_dest = a;
 			this.constIndex = bx;
@@ -106,7 +105,7 @@ public class LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, new Origin.Constant(constIndex), context.constType(prototype, constIndex));
+			return s.update(r_dest, new Origin.Constant(constIndex), context.constType(constIndex));
 		}
 
 	}
@@ -746,29 +745,29 @@ public class LuaInstruction {
 
 	public static class Closure extends Linear implements LocalVariableEffect {
 
+		public final PrototypeContext context;
+
 		public final int r_dest;
-		public final Prototype prototype;
+		public final int index;
 
-		public final CompilationContext context;
-
-		public Closure(Prototype parent, CompilationContext context, int a, int bx) {
-			this.r_dest = a;
-			this.prototype = parent.getNestedPrototypes().get(bx);
+		public Closure(PrototypeContext context, int a, int bx) {
 			this.context = Check.notNull(context);
+			this.r_dest = a;
+			this.index = bx;
 		}
 
 		@Override
 		public String toString() {
-			return "CLOSURE(" + r_dest + "," + PrototypePrinter.pseudoAddr(prototype) + ")";
+			return "CLOSURE(" + r_dest + "," + context.nestedPrototypeName(index) + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			FunctionType tpe = context.typeOf(prototype);
+			FunctionType tpe = context.nestedPrototypeType(index);
 
-			s = s.update(r_dest, Slot.of(new Origin.Closure(prototype), tpe));
+			s = s.update(r_dest, new Origin.Closure(index), tpe);
 
-			for (Prototype.UpvalueDesc uvd : prototype.getUpValueDescriptions()) {
+			for (Prototype.UpvalueDesc uvd : context.nestedPrototype(index).getUpValueDescriptions()) {
 				if (uvd.inStack) {
 					s = s.capture(uvd.index);
 				}

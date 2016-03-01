@@ -17,14 +17,14 @@ public class CompilationUnit {
 	public final Prototype prototype;
 	public final String name;
 
-	public final CompilationContext ctx;
+	public final PrototypeContext ctx;
 
 	private CompiledPrototype generic;
 
 	public CompilationUnit(Prototype prototype, String name, CompilationContext ctx) {
 		this.prototype = Check.notNull(prototype);
 		this.name = name;
-		this.ctx = Check.notNull(ctx);
+		this.ctx = new PrototypeContext(Check.notNull(ctx), prototype);
 
 		this.generic = null;
 	}
