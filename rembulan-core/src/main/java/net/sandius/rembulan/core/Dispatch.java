@@ -154,22 +154,35 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static void add(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		MathImplementation math = MathImplementation.math_add(a, b);
-		if (math != null) {
-			Number v = math.do_add(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b));
-			result.setTo(v);
+	private static void try_mt_arithmetic(LuaState state, ObjectSink result, String event, Object a, Object b) throws ControlThrowable {
+		Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_ADD, a, b);
+
+		if (handler != null) {
+			call(state, result, handler, a, b);
 		}
 		else {
-			Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_ADD, a, b);
+			String typeName = Value.typeOf(Conversions.objectAsNumber(a) == null ? a : b).name;
+			throw new IllegalOperationAttemptException("perform arithmetic on", typeName);
+		}
+	}
 
-			if (handler != null) {
-				call(state, result, handler, a, b);
-			}
-			else {
-				String typeName = Value.typeOf(Conversions.objectAsNumber(a) == null ? a : b).name;
-				throw new IllegalOperationAttemptException("perform arithmetic on", typeName);
-			}
+	public static void add(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation m = MathImplementation.arithmetic(a, b);
+		if (m != null) {
+			result.setTo(m.do_add(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_ADD, a, b);
+		}
+	}
+
+	public static void sub(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation m = MathImplementation.arithmetic(a, b);
+		if (m != null) {
+			result.setTo(m.do_sub(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_SUB, a, b);
 		}
 	}
 
