@@ -264,6 +264,37 @@ object AnalysisRunner {
           """
     }
 
+    // test should fail
+    object GotoLocalSlot_withX extends Fragment {
+      code =
+          """do
+            | local k = 0
+            | local x
+            | ::foo::
+            | local y
+            | assert(not y)
+            | y = true
+            | k = k + 1
+            | if k < 2 then goto foo end
+            |end
+          """
+    }
+
+    // test should fail, reported succeeding in Lua 5.2, 5.3
+    object GotoLocalSlot_withoutX extends Fragment {
+      code =
+          """do
+            | local k = 0
+            | ::foo::
+            | local y
+            | assert(not y)
+            | y = true
+            | k = k + 1
+            | if k < 2 then goto foo end
+            |end
+          """
+    }
+
   }
 
   def unitForPrototype(flow: CompiledChunk, prototype: Prototype): CompilationUnit = {
@@ -382,7 +413,7 @@ object AnalysisRunner {
     println(ploader.getVersion)
     println("------------")
 
-    val program = VarargDecomposition
+    val program = GotoScopeStackRestart_withX
 
     println(program.code)
 
