@@ -36,6 +36,10 @@ public class CompiledChunk {
 		return Collections.unmodifiableCollection(units.values());
 	}
 
+	public Iterable<CompiledClass> classes() {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
 	@Deprecated
 	public void go() {
 		List<CompilationUnit> us = new LinkedList<>();
