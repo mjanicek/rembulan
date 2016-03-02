@@ -122,10 +122,6 @@ public class Chunk {
 		cp.computeReturnType();
 	}
 
-	public CompilationUnit mainUnit() {
-		return units.get(prototype);
-	}
-
 	private static class CollectCPUAccounting extends LinearSeqTransformation {
 
 		@Override
