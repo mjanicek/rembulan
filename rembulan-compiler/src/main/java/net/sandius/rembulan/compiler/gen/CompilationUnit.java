@@ -77,4 +77,8 @@ public class CompilationUnit {
 		this.generic = makeCompiledPrototype(genericParameters());
 	}
 
+	public CompiledClass toCompiledClass() {
+		return null;  // TODO
+	}
+
 }

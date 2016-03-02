@@ -25,11 +25,14 @@ public class CompiledChunk {
 	private final Map<Prototype, CompilationUnit> units;
 	private final CompilationContext ctx;
 
+	private final List<CompiledClass> classes;
+
 	public CompiledChunk(Prototype prototype, ClassNameGenerator nameGenerator) {
 		this.prototype = Check.notNull(prototype);
 		this.nameGenerator = Check.notNull(nameGenerator);
 		this.units = new HashMap<>();
 		this.ctx = new CompilationContext(units);
+		this.classes = new LinkedList<>();
 	}
 
 	public Iterable<CompilationUnit> units() {
@@ -39,7 +42,7 @@ public class CompiledChunk {
 	// Returns classes defined in this chunk ordered in such a way that all classes are
 	// preceded by their dependencies (i.e. it's post-order).
 	public Iterable<CompiledClass> classes() {
-		throw new UnsupportedOperationException();  // TODO
+		return Collections.unmodifiableList(classes);
 	}
 
 	@Deprecated
@@ -51,6 +54,14 @@ public class CompiledChunk {
 		for (CompilationUnit u : us) {
 			System.out.println("Processing " + u.name() + "...");
 			processGeneric(u);
+
+			CompiledClass ccl = u.toCompiledClass();
+			if (ccl != null) {
+				classes.add(ccl);
+			}
+			else {
+				System.out.println("No compiled bytecode for class " + u.name());
+			}
 		}
 	}
 
