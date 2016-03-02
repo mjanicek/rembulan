@@ -15,8 +15,8 @@ object Util {
     bld.toString()
   }
 
-  def padRight(s: String, width: Int): String = {
-    if (s.length >= width) s else s + fillStr(" ", width - s.length)
+  def padRight(s: String, width: Int, pattern: String = " "): String = {
+    if (s.length >= width) s else s + fillStr(pattern, width - s.length)
   }
 
   def tabulate(lines: Seq[String], tab: String, separator: String): Seq[String] = {
@@ -37,6 +37,20 @@ object Util {
     val after = System.nanoTime()
     System.out.println("%s took %.1f ms".format(name, (after - before) / 1000000.0))
     result
+  }
+
+  def separator: String = {
+    Util.fillStr("- ", 76)
+  }
+
+  def header(text: String): String = {
+    Util.padRight("-- " + text + " ", 76, "-") + "\n"
+  }
+
+  def section(title: String)(body: => Unit): Unit = {
+    println(header(title))
+    body
+    println()
   }
 
 }

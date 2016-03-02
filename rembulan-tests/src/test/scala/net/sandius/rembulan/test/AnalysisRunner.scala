@@ -109,41 +109,41 @@ object AnalysisRunner {
 
   }
 
+  val loader = new LuaCFragmentCompiler("luac53")
+
   def main(args: Array[String]): Unit = {
 
     import BasicFragments._
 
-    val luacPath = "luac53"
-    require (luacPath != null)
-
-    val ploader = new LuaCPrototypeLoader(luacPath)
-
-    println(ploader.getVersion)
-    println("------------")
-
     val program = JustAdd
+    val proto = loader.compile(program)
 
-    println(program.code)
-
-    val proto = ploader.load(program.code)
-
-    proto.accept(new PrototypePrinterVisitor(new PrintWriter(System.out)))
-//    PrototypePrinter.print(proto, new PrintWriter(System.out))
-
-    val compiler = new ChunkCompiler()
-
-    println()
-    println("Control flow")
-    println("------------")
-    println()
-
-    val flow = timed("Compile") {
-      compiler.compile(proto, new SuffixingClassNameGenerator("test"))
+    section("LuaC version") {
+      println(loader.version)
     }
 
-    for (u <- flow.units.toSeq.sortBy { _.name }) {
-      println()
-      printFlow(u, flow, u.prototype == proto)
+    section("Program code") {
+      println(program.code)
+    }
+
+    section("Lua bytecode listing") {
+      proto.accept(new PrototypePrinterVisitor(new PrintWriter(System.out)))
+    }
+
+    section("Compilation") {
+
+      val compiler = new ChunkCompiler()
+
+      val flow = timed("Compile") {
+        compiler.compile(proto, new SuffixingClassNameGenerator("test"))
+      }
+
+      for (u <- flow.units.toSeq.sortBy { _.name }) {
+        println(separator)
+        println()
+        printFlow(u, flow, u.prototype == proto)
+      }
+
     }
 
   }
