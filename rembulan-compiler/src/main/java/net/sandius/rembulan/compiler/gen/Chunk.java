@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class CompiledChunk {
+public class Chunk {
 
 	private final Prototype prototype;
 
@@ -27,7 +27,7 @@ public class CompiledChunk {
 
 	private final List<CompiledClass> classes;
 
-	public CompiledChunk(Prototype prototype, ClassNameGenerator nameGenerator) {
+	public Chunk(Prototype prototype, ClassNameGenerator nameGenerator) {
 		this.prototype = Check.notNull(prototype);
 		this.nameGenerator = Check.notNull(nameGenerator);
 		this.units = new HashMap<>();

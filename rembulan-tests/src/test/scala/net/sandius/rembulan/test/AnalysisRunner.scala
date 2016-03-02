@@ -15,11 +15,11 @@ object AnalysisRunner {
 
   import Util._
 
-  def unitForPrototype(flow: CompiledChunk, prototype: Prototype): CompilationUnit = {
+  def unitForPrototype(flow: Chunk, prototype: Prototype): CompilationUnit = {
     (flow.units().find { _.prototype == prototype }).get
   }
 
-  def printFlow(unit: CompilationUnit, flow: CompiledChunk, main: Boolean = true): Unit = {
+  def printFlow(unit: CompilationUnit, flow: Chunk, main: Boolean = true): Unit = {
     val proto = unit.prototype
     val cp = unit.generic()
 
