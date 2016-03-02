@@ -36,6 +36,8 @@ public class CompiledChunk {
 		return Collections.unmodifiableCollection(units.values());
 	}
 
+	// Returns classes defined in this chunk ordered in such a way that all classes are
+	// preceded by their dependencies (i.e. it's post-order).
 	public Iterable<CompiledClass> classes() {
 		throw new UnsupportedOperationException();  // TODO
 	}
