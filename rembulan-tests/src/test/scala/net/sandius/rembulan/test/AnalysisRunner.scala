@@ -4,9 +4,8 @@ import java.io.PrintWriter
 
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
-import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
 import net.sandius.rembulan.compiler.gen._
-import net.sandius.rembulan.compiler.{gen => rembulan}
+import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
 import net.sandius.rembulan.parser.LuaCPrototypeLoader
 
@@ -26,33 +25,22 @@ object AnalysisRunner {
 
     println((if (main) "Main" else "Child") + " (" + PrototypePrinter.pseudoAddr(proto) + "): " + unit.name)
 
-    def slotsToString(slots: SlotState): String = {
-      Option(slots) match {
-        case Some(s) => "[" + s.toString(",\t") + "]"
-        case None => "(none)"
-      }
-    }
+    case class MyNode(node: Node) {
+      require (node != null)
 
-    def inValue(node: Node): String = {
-      node match {
+      def slotsToString(slots: SlotState) = if (slots != null) "[ " + slots.toString(",\t") + " ]" else "(none)"
+
+      def in = node match {
         case ent: Entry => ent.arguments().toString
         case n => slotsToString(n.inSlots())
       }
-    }
 
-    def outValue(node: Node): String = {
-      node match {
+      def out = node match {
         case ex: Exit => ex.returnType().toString
         case n => slotsToString(n.outSlots())
       }
-    }
 
-    case class MyNode(node: Node) {
-      require (node != null)
       override def toString = {
-        val in = inValue(node)
-        val out = outValue(node)
-
         val inOut = Util.tabulate(("in:  " + in) :: ("out: " + out) :: Nil, "  ", "\t")
         val ns = node.toString
 
@@ -83,7 +71,8 @@ object AnalysisRunner {
     }
 
     println()
-    println("Type: " + cp.functionType().toExplicitString)
+    println("Type:")
+    println("\t" + cp.functionType().toExplicitString)
     println()
 
     val fields = {
