@@ -130,12 +130,12 @@ object AnalysisRunner {
       proto.accept(new PrototypePrinterVisitor(new PrintWriter(System.out)))
     }
 
+    val compiler = new ChunkCompiler(new SuffixingClassNameGenerator("test"))
+
     section("Compilation") {
 
-      val compiler = new ChunkCompiler()
-
       val flow = timed("Compile") {
-        compiler.compile(proto, new SuffixingClassNameGenerator("test"))
+        compiler.compile(proto)
       }
 
       for (u <- flow.units.toSeq.sortBy { _.name }) {

@@ -16,7 +16,13 @@ import java.util.Map;
 
 public class ChunkCompiler {
 
-	public Chunk compile(Prototype prototype, ClassNameGenerator nameGenerator) {
+	protected final ClassNameGenerator nameGenerator;
+
+	public ChunkCompiler(ClassNameGenerator nameGenerator) {
+		this.nameGenerator = nameGenerator;
+	}
+
+	public Chunk compile(Prototype prototype) {
 		Map<Prototype, CompilationUnit> units = new HashMap<>();
 		List<CompilationUnit> us = new LinkedList<>();
 		List<CompiledClass> classes = new LinkedList<>();
@@ -43,15 +49,17 @@ public class ChunkCompiler {
 
 	private void addUnits(Map<Prototype, CompilationUnit> units, CompilationContext ctx, Prototype prototype, List<CompilationUnit> us, ClassNameGenerator nameGen) {
 		if (!units.containsKey(prototype)) {
-			CompilationUnit u = new CompilationUnit(prototype, nameGen.className(), ctx);
+			CompilationUnit u = new CompilationUnit(prototype, nameGen.next(), ctx);
 			u.initGeneric();
 
 			units.put(prototype, u);
 			us.add(0, u);  // prepending in order to ensure that nested prototypes are processed before their parent
 
+			ClassNameGenerator childNameGen = nameGen.childGenerator();
+
 			for (int i = 0; i < prototype.getNestedPrototypes().size(); i++) {
 				Prototype np = prototype.getNestedPrototypes().get(i);
-				addUnits(units, ctx, np, us, nameGen.child(i));
+				addUnits(units, ctx, np, us, childNameGen);
 			}
 		}
 	}

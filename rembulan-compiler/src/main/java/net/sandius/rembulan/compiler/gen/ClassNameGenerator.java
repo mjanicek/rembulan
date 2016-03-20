@@ -2,8 +2,8 @@ package net.sandius.rembulan.compiler.gen;
 
 public interface ClassNameGenerator {
 
-	String className();
+	String next();
 
-	ClassNameGenerator child(int idx);
+	ClassNameGenerator childGenerator();
 
 }
