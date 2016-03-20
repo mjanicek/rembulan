@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 
@@ -58,6 +59,14 @@ public class PrototypePath {
 		newIndices[indices.length()] = index;
 
 		return new PrototypePath(IntVector.wrap(newIndices));
+	}
+
+	public Prototype resolve(Prototype root) {
+		Prototype p = Check.notNull(root);
+		for (int i = 0; i < indices.length(); i++) {
+			p = p.getNestedPrototypes().get(indices.get(i));
+		}
+		return p;
 	}
 
 }
