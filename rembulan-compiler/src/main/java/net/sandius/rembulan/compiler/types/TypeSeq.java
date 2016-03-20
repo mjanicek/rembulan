@@ -17,11 +17,6 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		this.tailType = Check.notNull(tailType);
 	}
 
-	@Deprecated
-	public TypeSeq(ReadOnlyArray<Type> fixed, boolean varargs) {
-		this(fixed, varargs ? LuaTypes.ANY : LuaTypes.NIL);
-	}
-
 //	private static final TypeSeq EMPTY_FIXED = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), false);
 //	private static final TypeSeq EMPTY_VARARG = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), true);
 
@@ -36,7 +31,11 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	}
 
 	public static TypeSeq of(Type... fixed) {
-		return new TypeSeq(ReadOnlyArray.wrap(fixed), false);
+		return of(ReadOnlyArray.wrap(fixed), false);
+	}
+
+	public static TypeSeq of(ReadOnlyArray<Type> fixed, boolean vararg) {
+		return new TypeSeq(fixed, vararg ? LuaTypes.ANY : LuaTypes.NIL);
 	}
 
 	public TypeSeq withVararg() {

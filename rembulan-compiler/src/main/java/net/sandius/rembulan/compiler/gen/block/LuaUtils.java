@@ -25,7 +25,7 @@ public abstract class LuaUtils {
 			args[i] = s.typeAt(from + i);
 		}
 
-		return new TypeSeq(ReadOnlyArray.wrap(args), count <= 0);
+		return TypeSeq.of(ReadOnlyArray.wrap(args), count <= 0);
 	}
 
 	public static String prefix(LuaInstruction i) {

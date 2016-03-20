@@ -69,7 +69,7 @@ class TypeSpec extends FunSpec with MustMatchers {
   }
 
   object T {
-    def apply(ts: Type*): TypeSeq = new TypeSeq(ReadOnlyArray.wrap(ts.toArray), false)
+    def apply(ts: Type*): TypeSeq = TypeSeq.of(ReadOnlyArray.wrap(ts.toArray), false)
   }
 
   def equivalent(l: Type, r: Type) {

@@ -41,7 +41,7 @@ public class CompilationUnit {
 		for (int i = 0; i < types.length; i++) {
 			types[i] = LuaTypes.DYNAMIC;
 		}
-		return new TypeSeq(ReadOnlyArray.wrap(types), prototype.isVararg());
+		return TypeSeq.of(ReadOnlyArray.wrap(types), prototype.isVararg());
 	}
 
 	public Entry makeNodes(TypeSeq params) {
