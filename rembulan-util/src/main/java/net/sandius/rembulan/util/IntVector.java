@@ -25,9 +25,15 @@ public class IntVector extends IntContainer {
 		return wrap(values);
 	}
 
+	public void copyToArray(int[] array, int offset) {
+		Check.notNull(array);
+		Check.nonNegative(offset);
+		System.arraycopy(values, 0, array, offset, values.length);
+	}
+
 	public int[] copyToNewArray() {
 		int[] cp = new int[values.length];
-		System.arraycopy(values, 0, cp, 0, values.length);
+		copyToArray(cp, 0);
 		return cp;
 	}
 
