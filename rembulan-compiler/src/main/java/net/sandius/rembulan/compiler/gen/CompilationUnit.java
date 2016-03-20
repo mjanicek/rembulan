@@ -2,7 +2,6 @@ package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.Target;
-import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -37,11 +36,7 @@ public class CompilationUnit {
 	}
 
 	public TypeSeq genericParameters() {
-		Type[] types = new Type[prototype.getNumberOfParameters()];
-		for (int i = 0; i < types.length; i++) {
-			types[i] = LuaTypes.DYNAMIC;
-		}
-		return TypeSeq.of(ReadOnlyArray.wrap(types), prototype.isVararg());
+		return FunctionCode.genericParameterTypes(prototype.getNumberOfParameters(), prototype.isVararg());
 	}
 
 	public Entry makeNodes(TypeSeq params) {

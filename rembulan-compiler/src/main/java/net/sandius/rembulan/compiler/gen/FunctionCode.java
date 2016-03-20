@@ -27,6 +27,7 @@ import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Graph;
 import net.sandius.rembulan.util.IntBuffer;
 import net.sandius.rembulan.util.Ptr;
+import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -48,6 +49,14 @@ public class FunctionCode {
 	protected FunctionCode(Prototype prototype, TypeSeq parameterTypes) {
 		this.prototype = Check.notNull(prototype);
 		this.parameterTypes = Check.notNull(parameterTypes);
+	}
+
+	public static TypeSeq genericParameterTypes(int numOfFixedParameters, boolean vararg) {
+		Type[] types = new Type[numOfFixedParameters];
+		for (int i = 0; i < types.length; i++) {
+			types[i] = LuaTypes.DYNAMIC;
+		}
+		return TypeSeq.of(ReadOnlyArray.wrap(types), vararg);
 	}
 
 	public TypeSeq parameterTypes() {
