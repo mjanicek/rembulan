@@ -19,4 +19,8 @@ public class CompilationContext {
 		return units.containsKey(prototype) ? units.get(prototype).generic().functionType() : LuaTypes.FUNCTION;
 	}
 
+	public String prototypeClassName(Prototype prototype) {
+		return units.get(prototype).name();
+	}
+
 }

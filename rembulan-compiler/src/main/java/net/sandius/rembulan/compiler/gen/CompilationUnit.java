@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.Entry;
+import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
@@ -72,6 +73,15 @@ public class CompilationUnit {
 	}
 
 	public CompiledClass toCompiledClass() {
+		Iterable<Node> topoSorted = generic.sortTopologically();
+
+		int i = 0;
+
+		for (Node n : topoSorted) {
+			System.out.println(i + ":\t" + n.toString());
+			i += 1;
+		}
+
 		return null;  // TODO
 	}
 

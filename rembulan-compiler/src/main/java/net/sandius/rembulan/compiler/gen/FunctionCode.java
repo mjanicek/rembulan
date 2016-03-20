@@ -14,6 +14,7 @@ import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeAction;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
+import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
@@ -30,8 +31,11 @@ import net.sandius.rembulan.util.Ptr;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
@@ -324,6 +328,35 @@ public class FunctionCode {
 		ResumptionPoint resume = new ResumptionPoint();
 		resume.insertAfter(n);
 		resumePoints.add(resume);
+	}
+
+	public Iterable<Node> sortTopologically() {
+		final List<Node> cont = new ArrayList<>();
+		final Set<Node> visited = new HashSet<>();
+
+		callEntry.accept(new NodeVisitor() {
+			@Override
+			public boolean visitNode(Node node) {
+				if (!visited.contains(node)) {
+					visited.add(node);
+					if (node instanceof LinearSeq) {
+						LinearSeq seq = (LinearSeq) node;
+						for (Node n : seq.nodes()) {
+							cont.add(n);
+						}
+					}
+					else {
+						cont.add(node);
+					}
+					return true;
+				}
+				else {
+					return false;
+				}
+			}
+		});
+
+		return Collections.unmodifiableList(cont);
 	}
 
 }

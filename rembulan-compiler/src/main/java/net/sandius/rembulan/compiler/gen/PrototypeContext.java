@@ -40,7 +40,8 @@ public class PrototypeContext {
 	}
 
 	public String nestedPrototypeName(int index) {
-		return PrototypePrinter.pseudoAddr(nestedPrototype(index));
+		return compilationContext().prototypeClassName(nestedPrototype(index));
+//		return PrototypePrinter.pseudoAddr(nestedPrototype(index));
 	}
 
 	@Deprecated
