@@ -10,7 +10,6 @@ import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.HashSet;
-import java.util.Map;
 
 public class CompilationUnit {
 
@@ -19,7 +18,7 @@ public class CompilationUnit {
 
 	public final PrototypeContext ctx;
 
-	private CompiledPrototype generic;
+	private FunctionCode generic;
 
 	public CompilationUnit(Prototype prototype, String name, CompilationContext ctx) {
 		this.prototype = Check.notNull(prototype);
@@ -33,7 +32,7 @@ public class CompilationUnit {
 		return name;
 	}
 
-	public CompiledPrototype generic() {
+	public FunctionCode generic() {
 		return generic;
 	}
 
@@ -65,10 +64,10 @@ public class CompilationUnit {
 		return new Entry("main_" + suffix, params, prototype.getMaximumStackSize(), pcLabels.get(0));
 	}
 
-	public CompiledPrototype makeCompiledPrototype(TypeSeq params) {
-		CompiledPrototype cp = new CompiledPrototype(prototype, params);
+	public FunctionCode makeCompiledPrototype(TypeSeq params) {
+		FunctionCode cp = new FunctionCode(prototype, params);
 		cp.callEntry = makeNodes(params);
-		cp.returnType = TypeSeq.vararg();
+		cp.returnTypes = TypeSeq.vararg();
 		cp.resumePoints = new HashSet<>();
 		return cp;
 	}

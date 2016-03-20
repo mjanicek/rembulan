@@ -14,7 +14,6 @@ import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.NodeAction;
 import net.sandius.rembulan.compiler.gen.block.NodeAppender;
-import net.sandius.rembulan.compiler.gen.block.NodeVisitor;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
 import net.sandius.rembulan.compiler.gen.block.ResumptionPoint;
 import net.sandius.rembulan.compiler.gen.block.Sink;
@@ -36,31 +35,31 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-public class CompiledPrototype {
+public class FunctionCode {
 
 	private final Prototype prototype;
-	private final TypeSeq actualParameters;
+	private final TypeSeq parameterTypes;
 
-	public TypeSeq returnType;
+	TypeSeq returnTypes;
 
 	public Entry callEntry;
 	public Set<ResumptionPoint> resumePoints;
 
-	protected CompiledPrototype(Prototype prototype, TypeSeq actualParameters) {
+	protected FunctionCode(Prototype prototype, TypeSeq parameterTypes) {
 		this.prototype = Check.notNull(prototype);
-		this.actualParameters = Check.notNull(actualParameters);
+		this.parameterTypes = Check.notNull(parameterTypes);
 	}
 
-	public TypeSeq actualParameters() {
-		return actualParameters;
+	public TypeSeq parameterTypes() {
+		return parameterTypes;
 	}
 
-	public TypeSeq returnType() {
-		return returnType;
+	public TypeSeq returnTypes() {
+		return returnTypes;
 	}
 
 	public FunctionType functionType() {
-		return FunctionType.of(actualParameters(), returnType());
+		return FunctionType.of(parameterTypes(), returnTypes());
 	}
 
 	private void collectCallSite(Node n, Map<Prototype, Set<TypeSeq>> callSites) {
@@ -185,7 +184,7 @@ public class CompiledPrototype {
 			}
 		});
 
-		returnType = !ret.isNull() ? ret.get() : TypeSeq.vararg();
+		returnTypes = !ret.isNull() ? ret.get() : TypeSeq.vararg();
 	}
 
 	public void insertHooks() {

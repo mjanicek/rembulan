@@ -65,7 +65,7 @@ public class ChunkCompiler {
 	}
 
 	private void processGeneric(CompilationUnit compilationUnit) {
-		CompiledPrototype cp = compilationUnit.generic();
+		FunctionCode cp = compilationUnit.generic();
 
 		cp.insertHooks();
 
