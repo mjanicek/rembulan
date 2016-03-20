@@ -1,23 +1,58 @@
 package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.gen.Chunk;
-import net.sandius.rembulan.compiler.gen.CompiledClass;
+import net.sandius.rembulan.util.ByteVector;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ChunkClassLoader extends ClassLoader {
 
-	public Class<?> install(Chunk chunk) {
-		Class<?> last = null;
+	private final Map<String, ByteVector> installed;
 
-		for (CompiledClass ccl : chunk.classes()) {
-			last = defineClass(ccl);
-		}
-
-		return last;
+	public ChunkClassLoader(ClassLoader parent) {
+		super(parent);
+		this.installed = new HashMap<>();
 	}
 
-	public Class<?> defineClass(CompiledClass ccl) {
-		byte[] bytes = ccl.bytes().copyToNewArray();
-		return defineClass(ccl.name(), bytes, 0, bytes.length);
+	public ChunkClassLoader() {
+		this(ChunkClassLoader.class.getClassLoader());
+	}
+
+	public String install(Chunk chunk) {
+		Map<String, ByteVector> classes = chunk.classMap();
+
+		for (String name : classes.keySet()) {
+			if (installed.containsKey(name)) {
+				// class already installed
+				throw new IllegalArgumentException();  // TODO: throw the right exception
+			}
+
+			installed.put(name, classes.get(name));
+		}
+
+		String main = chunk.mainClassName();
+		assert (installed.containsKey(main));
+		return main;
+	}
+
+	@Override
+	protected Class<?> findClass(String name) throws ClassNotFoundException {
+		ByteVector bv = installed.get(name);
+
+		if (bv != null) {
+			// no need to keep it any longer (TODO: thread-safety)
+			installed.remove(name);
+			return defineClass(name, bv);
+		}
+		else {
+			throw new ClassNotFoundException(name);
+		}
+	}
+
+	private Class<?> defineClass(String name, ByteVector bytes) {
+		byte[] byteArray = bytes.copyToNewArray();
+		return defineClass(name, byteArray, 0, byteArray.length);
 	}
 
 }

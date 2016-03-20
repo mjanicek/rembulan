@@ -5,8 +5,8 @@ import net.sandius.rembulan.util.Check;
 
 public class CompiledClass {
 
-	public final String name;
-	public final ByteVector bytes;
+	protected final String name;
+	protected final ByteVector bytes;
 
 	public CompiledClass(String name, ByteVector bytes) {
 		this.name = Check.notNull(name);
