@@ -69,4 +69,12 @@ public class PrototypePath {
 		return p;
 	}
 
+	public String toClassName(ClassNameTranslator tr) {
+		Check.notNull(tr);
+		for (int i = 0; i < indices.length(); i++) {
+			tr = tr.child(indices.get(i));
+		}
+		return tr.className();
+	}
+
 }
