@@ -146,7 +146,7 @@ public class Target implements Node, Src {
 			e._label_here(this);
 		}
 		else {
-			e._note("label ignored: " + e._asLabel(this));
+			e._note("label ignored: " + this);
 		}
 	}
 

@@ -97,7 +97,7 @@ public class UnconditionalJump implements Node, Sink, Jump {
 
 	@Override
 	public void emit(Emit e) {
-		e._goto(e._asLabel(target));
+		e._goto(target);
 	}
 
 }

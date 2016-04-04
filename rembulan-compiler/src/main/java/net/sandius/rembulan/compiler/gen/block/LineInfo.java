@@ -15,9 +15,7 @@ public class LineInfo extends Linear {
 
 	@Override
 	public void emit(Emit e) {
-		String labelName = e._asLabel(this);
-		System.out.println(labelName);
-		System.out.println("  LINEINFO " + line + " " + labelName);
+		e._line_here(line);
 	}
 
 }

@@ -262,9 +262,7 @@ public interface LuaInstruction {
 			e._get_upvalue_value();
 			e._load_reg_or_const(rk_key, s);
 			e._save_pc(this);
-			e._invokeStatic(Dispatch.class,
-					"index",
-					e._methodSignature(void.class, LuaState.class, ObjectSink.class, Object.class, Object.class));
+			e._dispatch_index();
 			e._resumptionPoint(this);
 			e._retrieve_1();
 			e._store(r_dest, s);
@@ -826,19 +824,22 @@ public interface LuaInstruction {
 
 				switch (b - 1) {
 					case 0:
-						e._invokeInterface(ObjectSink.class, "tailCall",
-								e._methodSignature(void.class, Object.class));
+						e._tailcall_0();
 						break;
 					case 1:
 						e._load_reg(r_tgt + 1, s);
-						e._invokeInterface(ObjectSink.class, "tailCall",
-								e._methodSignature(void.class, Object.class, Object.class));
+						e._tailcall_1();
 						break;
 					case 2:
 						e._load_reg(r_tgt + 1, s);
 						e._load_reg(r_tgt + 2, s);
-						e._invokeInterface(ObjectSink.class, "tailCall",
-								e._methodSignature(void.class, Object.class, Object.class, Object.class));
+						e._tailcall_2();
+						break;
+					case 3:
+						e._load_reg(r_tgt + 1, s);
+						e._load_reg(r_tgt + 2, s);
+						e._load_reg(r_tgt + 3, s);
+						e._tailcall_3();
 						break;
 					default:
 						e._note("push " + (b - 1) + " registers into object sink, mark as tailcall");
@@ -894,19 +895,22 @@ public interface LuaInstruction {
 
 				switch (b - 1) {
 					case 0:
-						e._invokeInterface(ObjectSink.class, "reset",
-								e._methodSignature(void.class));
+						e._setret_0();
 						break;
 					case 1:
 						e._load_reg(r_from, s);
-						e._invokeInterface(ObjectSink.class, "setTo",
-								e._methodSignature(void.class, Object.class));
+						e._setret_1();
 						break;
 					case 2:
 						e._load_reg(r_from, s);
 						e._load_reg(r_from + 1, s);
-						e._invokeInterface(ObjectSink.class, "setTo",
-								e._methodSignature(void.class, Object.class, Object.class));
+						e._setret_2();
+						break;
+					case 3:
+						e._load_reg(r_from, s);
+						e._load_reg(r_from + 1, s);
+						e._load_reg(r_from + 2, s);
+						e._setret_3();
 						break;
 					default:
 						e._note("push " + (b - 1) + " registers into object sink");

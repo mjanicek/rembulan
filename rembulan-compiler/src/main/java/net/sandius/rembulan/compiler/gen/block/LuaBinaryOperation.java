@@ -90,24 +90,21 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 			case Integer:
 				e._load_reg_or_const(rk_left, s, Number.class);
 				e._load_reg_or_const(rk_right, s, Number.class);
-				e._dispatchCall(methodPrefix() + "_integer",
-						e._methodSignature(Number.class, Number.class, Number.class));
+				e._dispatch_binop(methodPrefix() + "_integer", Number.class);
 				e._store(r_dest, s);
 				break;
 
 			case Float:
 				e._load_reg_or_const(rk_left, s, Number.class);
 				e._load_reg_or_const(rk_right, s, Number.class);
-				e._dispatchCall(methodPrefix() + "_float",
-						e._methodSignature(Number.class, Number.class, Number.class));
+				e._dispatch_binop(methodPrefix() + "_float", Number.class);
 				e._store(r_dest, s);
 				break;
 
 			case Number:
 				e._load_reg_or_const(rk_left, s, Number.class);
 				e._load_reg_or_const(rk_right, s, Number.class);
-				e._dispatchCall(methodPrefix(),
-						e._methodSignature(Number.class, Number.class, Number.class));
+				e._dispatch_binop(methodPrefix(), Number.class);
 				e._store(r_dest, s);
 				break;
 
@@ -117,8 +114,7 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 				e._load_reg_or_const(rk_left, s, Object.class);
 				e._load_reg_or_const(rk_right, s, Object.class);
 				e._save_pc(this);
-				e._dispatchCall(methodPrefix(),
-						e._methodSignature(void.class, LuaState.class, ObjectSink.class, Object.class, Object.class));
+				e._dispatch_generic_mt_2(methodPrefix());
 				e._resumptionPoint(this);
 				e._loadObjectSink();
 				e._retrieve_1();

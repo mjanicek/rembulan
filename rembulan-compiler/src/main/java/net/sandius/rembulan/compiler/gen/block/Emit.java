@@ -9,15 +9,40 @@ import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.util.Check;
+import org.objectweb.asm.Label;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.Type;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class Emit {
 
 	public final int REGISTER_OFFSET = 3;
 
 	private final PrototypeContext context;
+	private final MethodVisitor visitor;
 
-	public Emit(PrototypeContext context) {
+	private final Map<Object, Label> labels;
+
+	public Emit(PrototypeContext context, MethodVisitor visitor) {
 		this.context = Check.notNull(context);
+		this.visitor = Check.notNull(visitor);
+		this.labels = new HashMap<>();
+	}
+
+	protected Label _l(Object key) {
+		Label l = labels.get(key);
+
+		if (l != null) {
+			return l;
+		}
+		else {
+			Label nl = new Label();
+			labels.put(key, nl);
+			return nl;
+		}
 	}
 
 	protected String thisClassName() {
@@ -29,19 +54,40 @@ public class Emit {
 	}
 
 	public void _dup() {
-		System.out.println("  DUP");
+		visitor.visitInsn(Opcodes.DUP);
 	}
 
 	public void _swap() {
-		System.out.println("  SWAP");
+		visitor.visitInsn(Opcodes.SWAP);
 	}
 
 	public void _push_null() {
-		System.out.println("  CONST_NULL");
+		visitor.visitInsn(Opcodes.ACONST_NULL);
 	}
 
 	public void _push_int(int i) {
-		System.out.println("  ICONST_" + i);
+		switch (i) {
+			case -1: visitor.visitInsn(Opcodes.ICONST_M1); break;
+			case 0: visitor.visitInsn(Opcodes.ICONST_0); break;
+			case 1: visitor.visitInsn(Opcodes.ICONST_1); break;
+			case 2: visitor.visitInsn(Opcodes.ICONST_2); break;
+			case 3: visitor.visitInsn(Opcodes.ICONST_3); break;
+			case 4: visitor.visitInsn(Opcodes.ICONST_4); break;
+			case 5: visitor.visitInsn(Opcodes.ICONST_5); break;
+			default: visitor.visitLdcInsn(i); break;
+		}
+	}
+
+	private void _push_long(long l) {
+		if (l == 0L) visitor.visitInsn(Opcodes.LCONST_0);
+		else if (l == 1L) visitor.visitInsn(Opcodes.LCONST_1);
+		else visitor.visitLdcInsn(l);
+	}
+
+	public void _push_double(double d) {
+		if (d == 0.0) visitor.visitInsn(Opcodes.DCONST_0);
+		else if (d == 1.0) visitor.visitInsn(Opcodes.DCONST_1);
+		else visitor.visitLdcInsn(d);
 	}
 
 	public void _load_k(int idx, Class castTo) {
@@ -51,21 +97,19 @@ public class Emit {
 			_push_null();
 		}
 		else if (k instanceof Boolean) {
-			Boolean bk = (Boolean) k;
-			System.out.println("  ICONST_" + (bk ? "1" : "0"));
-			_invokeStatic(Boolean.class, "valueOf", _methodSignature(Boolean.class, boolean.class));
+			_push_int((Boolean) k ? 1 : 0);
+			_invokeStatic(Boolean.class, "valueOf", Type.getMethodType(Type.getType(Boolean.class), Type.BOOLEAN_TYPE));
 		}
 		else if (k instanceof Double || k instanceof Float) {
-			System.out.println("  LDC " + k.toString());
-			_invokeStatic(Double.class, "valueOf", _methodSignature(Double.class, double.class));
+			_push_double(((Number) k).doubleValue());
+			_invokeStatic(Double.class, "valueOf", Type.getMethodType(Type.getType(Double.class), Type.DOUBLE_TYPE));
 		}
 		else if (k instanceof Number) {
-			System.out.println("  LDC " + k.toString());
-			_invokeStatic(Long.class, "valueOf", _methodSignature(Long.class, long.class));
+			_push_long(((Number) k).longValue());
+			_invokeStatic(Long.class, "valueOf", Type.getMethodType(Type.getType(Long.class), Type.LONG_TYPE));
 		}
 		else if (k instanceof String) {
-			String sk = (String) k;
-			System.out.println("  LDC \"" + sk + "\"");
+			visitor.visitLdcInsn((String) k);
 		}
 		else {
 			_note("load const #" + idx + " of type " + PrototypeContext.constantType(k));
@@ -83,7 +127,7 @@ public class Emit {
 	}
 
 	public void _load_reg_value(int idx) {
-		System.out.println("  ALOAD " + (REGISTER_OFFSET + idx));
+		visitor.visitVarInsn(Opcodes.ALOAD, REGISTER_OFFSET + idx);
 	}
 
 	public void _load_reg(int idx, SlotState slots, Class castTo) {
@@ -112,7 +156,7 @@ public class Emit {
 	}
 
 	public void _get_downvalue(int idx) {
-		System.out.println("  ALOAD " + (REGISTER_OFFSET + idx));
+		visitor.visitVarInsn(Opcodes.ALOAD, REGISTER_OFFSET + idx);
 		_checkCast(Upvalue.class);
 	}
 
@@ -133,7 +177,7 @@ public class Emit {
 	}
 
 	private void _store_reg_value(int r) {
-		System.out.println("  ASTORE " + (REGISTER_OFFSET + r));
+		visitor.visitVarInsn(Opcodes.ASTORE, REGISTER_OFFSET + r);
 	}
 
 	public void _store(int r, SlotState slots) {
@@ -149,10 +193,12 @@ public class Emit {
 		}
 	}
 
+	@Deprecated
 	public String _className(String cn) {
 		return cn.replace('.', '/');
 	}
 
+	@Deprecated
 	public String _classDesc(Class clazz) {
 		if (clazz.isPrimitive()) {
 			if (clazz.equals(void.class)) return "V";
@@ -176,25 +222,49 @@ public class Emit {
 		}
 	}
 
-	public void _invokeStatic(Class clazz, String methodName, String methodSignature) {
-		System.out.println("  INVOKESTATIC " + _className(clazz.getName()) + "." + methodName + " " + methodSignature);
+	public void _invokeStatic(Class clazz, String methodName, Type methodSignature) {
+		visitor.visitMethodInsn(
+				Opcodes.INVOKESTATIC,
+				Type.getInternalName(clazz),
+				methodName,
+				methodSignature.getDescriptor(),
+				false
+		);
 	}
 
-	public void _invokeVirtual(Class clazz, String methodName, String methodSignature) {
-		System.out.println("  INVOKEVIRTUAL " + _className(clazz.getName()) + "." + methodName + " " + methodSignature);
+	public void _invokeVirtual(Class clazz, String methodName, Type methodSignature) {
+		visitor.visitMethodInsn(
+				Opcodes.INVOKEVIRTUAL,
+				Type.getInternalName(clazz),
+				methodName,
+				methodSignature.getDescriptor(),
+				false
+		);
 	}
 
-	public void _invokeInterface(Class clazz, String methodName, String methodSignature) {
-		System.out.println("  INVOKEINTERFACE " + _className(clazz.getName()) + "." + methodName + " " + methodSignature);
+	public void _invokeInterface(Class clazz, String methodName, Type methodSignature) {
+		visitor.visitMethodInsn(
+				Opcodes.INVOKEINTERFACE,
+				Type.getInternalName(clazz),
+				methodName,
+				methodSignature.getDescriptor(),
+				true
+		);
 	}
 
-	public void _invokeSpecial(String className, String methodName, String methodSignature) {
-		System.out.println("  INVOKESPECIAL " + _className(className) + "." + methodName + " " + methodSignature);
+	public void _invokeSpecial(String className, String methodName, Type methodSignature) {
+		visitor.visitMethodInsn(
+				Opcodes.INVOKESPECIAL,
+				_className(className),
+				methodName,
+				methodSignature.getDescriptor(),
+				false
+		);
 	}
 
-	public void _invokeSpecial(Class clazz, String methodName, String methodSignature) {
-		_invokeSpecial(clazz.getName(), methodName, methodSignature);
-	}
+//	public void _invokeSpecial(Class clazz, String methodName, String methodSignature) {
+//		_invokeSpecial(clazz.getName(), methodName, methodSignature);
+//	}
 
 	public String _methodSignature(Class returnType, Class... parameters) {
 		StringBuilder bld = new StringBuilder();
@@ -207,37 +277,55 @@ public class Emit {
 		return bld.toString();
 	}
 
-	public void _dispatchCall(String method, String signature) {
-		_invokeStatic(Dispatch.class, method, signature);
+	public void _dispatchCall(String methodName, Type signature) {
+		_invokeStatic(Dispatch.class, methodName, signature);
+	}
+
+	public void _dispatch_binop(String name, Class clazz) {
+		Type t = Type.getType(clazz);
+		_invokeStatic(Dispatch.class, name, Type.getMethodType(t, t, t));
+	}
+
+	public void _dispatch_generic_mt_2(String name) {
+		_invokeStatic(
+				Dispatch.class,
+				name,
+				Type.getMethodType(
+					Type.VOID_TYPE,
+					Type.getType(LuaState.class),
+					Type.getType(ObjectSink.class),
+					Type.getType(Object.class),
+					Type.getType(Object.class)
+			)
+		);
+	}
+
+	public void _dispatch_index() {
+		_dispatch_generic_mt_2("index");
 	}
 
 	public void _checkCast(Class clazz) {
-		System.out.println("  CHECKCAST " + _className(clazz.getName()));
+		visitor.visitTypeInsn(Opcodes.CHECKCAST, Type.getInternalName(clazz));
 	}
 
 	public void _loadState() {
-		System.out.println("  ALOAD 0");
+		visitor.visitVarInsn(Opcodes.ALOAD, 0);
 	}
 
 	public void _loadObjectSink() {
-		System.out.println("  ALOAD 1");
+		visitor.visitVarInsn(Opcodes.ALOAD, 1);
 	}
 
 	public void _retrieve_1() {
-		_invokeVirtual(ObjectSink.class, "_1", _methodSignature(Object.class));
+		_invokeVirtual(ObjectSink.class, "_1", Type.getMethodType(Type.getType(Object.class)));
 	}
 
 	public void _save_pc(Object o) {
-		_note("save pc, resumption point is " + _asLabel(o));
-	}
-
-	public String _asLabel(Object o) {
-		return "L_" + Integer.toHexString(o.hashCode()).toUpperCase();
+		_note("save pc, resumption point is " + o.toString());
 	}
 
 	public void _resumptionPoint(Object label) {
-		System.out.println(_asLabel(label));
-		System.out.println("  FRAME SAME");  // TODO
+		_label_here(label);
 	}
 
 	public String _upvalue_field_name(int idx) {
@@ -251,25 +339,27 @@ public class Emit {
 	}
 
 	public void _get_upvalue_ref(int idx) {
-		String fieldFullName = _className(thisClassName()) + "." + _upvalue_field_name(idx);
-		String fieldType = _classDesc(Upvalue.class);
-		System.out.println("  GETFIELD " + fieldFullName + " : " + fieldType);
+		visitor.visitFieldInsn(
+				Opcodes.GETFIELD,
+				_className(thisClassName()),
+				_upvalue_field_name(idx),
+				Type.getDescriptor(Upvalue.class));
 	}
 
 	public void _get_upvalue_value() {
-		_invokeVirtual(Upvalue.class, "get", _methodSignature(Object.class));
+		_invokeVirtual(Upvalue.class, "get", Type.getMethodType(Type.getType(Object.class)));
 	}
 
 	public void _set_upvalue_value() {
-		_invokeVirtual(Upvalue.class, "set", _methodSignature(void.class, Object.class));
+		_invokeVirtual(Upvalue.class, "set", Type.getMethodType(Type.VOID_TYPE, Type.getType(Object.class)));
 	}
 
 	public void _return() {
-		System.out.println("  RETURN");
+		visitor.visitInsn(Opcodes.RETURN);
 	}
 
 	public void _new(String className) {
-		System.out.println("  NEW " + _className(className));
+		visitor.visitTypeInsn(Opcodes.NEW, _className(className));
 	}
 
 	public void _new(Class clazz) {
@@ -277,7 +367,11 @@ public class Emit {
 	}
 
 	public void _ctor(String className, Class... args) {
-		_invokeSpecial(className, "<init>", _methodSignature(void.class, args));
+		Type[] argTypes = new Type[args.length];
+		for (int i = 0; i < args.length; i++) {
+			argTypes[i] = Type.getType(args[i]);
+		}
+		_invokeSpecial(className, "<init>", Type.getMethodType(Type.VOID_TYPE, argTypes));
 	}
 
 	public void _ctor(Class clazz, Class... args) {
@@ -298,19 +392,20 @@ public class Emit {
 		_store_reg_value(idx);
 	}
 
-	public void _label_here(Object l) {
-		System.out.println(_asLabel(l));
-		System.out.println("  FRAME SAME");  // TODO
+	public void _label_here(Object identity) {
+		Label l = _l(identity);
+		visitor.visitLabel(l);
+		visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
 	}
 
 	public void _goto(Object l) {
-		System.out.println("  GOTO " + _asLabel(l));
+		visitor.visitJumpInsn(Opcodes.GOTO, _l(l));
 	}
 
 	public void _next_insn(Target t) {
 		if (t.inSize() < 2) {
 			// can be inlined, TODO: check this again
-			_note("goto ignored: " + _asLabel(t));
+			_note("goto ignored: " + t.toString());
 		}
 		else {
 			_goto(t);
@@ -319,18 +414,62 @@ public class Emit {
 
 	public void _new_table(int array, int hash) {
 		_loadState();
-		_invokeVirtual(LuaState.class, "tableFactory", _methodSignature(TableFactory.class));
+		_invokeVirtual(LuaState.class, "tableFactory", Type.getMethodType(Type.getType(TableFactory.class)));
 		_push_int(array);
 		_push_int(hash);
-		_invokeVirtual(TableFactory.class, "newTable", _methodSignature(Table.class, int.class, int.class));
+		_invokeVirtual(TableFactory.class, "newTable", Type.getMethodType(Type.getType(Table.class), Type.INT_TYPE, Type.INT_TYPE));
 	}
 
 	public void _if_null(Object target) {
-		System.out.println("  IFNULL " + _asLabel(target));
+		visitor.visitJumpInsn(Opcodes.IFNULL, _l(target));
 	}
 
 	public void _if_nonnull(Object target) {
-		System.out.println("  IFNONNULL " + _asLabel(target));
+		visitor.visitJumpInsn(Opcodes.IFNONNULL, _l(target));
+	}
+
+	public void _tailcall_0() {
+		_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE));
+	}
+
+	public void _tailcall_1() {
+		Type o = Type.getType(Object.class);
+		_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE, o));
+	}
+
+	public void _tailcall_2() {
+		Type o = Type.getType(Object.class);
+		_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE, o, o));
+	}
+
+	public void _tailcall_3() {
+		Type o = Type.getType(Object.class);
+		_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE, o, o, o));
+	}
+
+	public void _setret_0() {
+		_invokeInterface(ObjectSink.class, "reset", Type.getMethodType(Type.VOID_TYPE));
+	}
+
+	public void _setret_1() {
+		Type o = Type.getType(Object.class);
+		_invokeInterface(ObjectSink.class, "setTo", Type.getMethodType(Type.VOID_TYPE, o));
+	}
+
+	public void _setret_2() {
+		Type o = Type.getType(Object.class);
+		_invokeInterface(ObjectSink.class, "setTo", Type.getMethodType(Type.VOID_TYPE, o, o));
+	}
+
+	public void _setret_3() {
+		Type o = Type.getType(Object.class);
+		_invokeInterface(ObjectSink.class, "setTo", Type.getMethodType(Type.VOID_TYPE, o, o));
+	}
+
+	public void _line_here(int line) {
+		Label l = _l(new Object());
+		visitor.visitLabel(l);
+		visitor.visitLineNumber(line, l);
 	}
 
 }
