@@ -31,6 +31,10 @@ public class PrototypeContext {
 		}
 	}
 
+	public Object getConst(int index) {
+		return prototype.getConstants().get(index);
+	}
+
 	public Type constType(int index) {
 		return constantType(prototype.getConstants().get(index));
 	}
@@ -47,6 +51,14 @@ public class PrototypeContext {
 	@Deprecated
 	public Prototype nestedPrototype(int index) {
 		return prototype.getNestedPrototypes().get(index);
+	}
+
+	public String className() {
+		return compilationContext().prototypeClassName(prototype);
+	}
+
+	public String upvalueName(int idx) {
+		return prototype.getUpValueDescriptions().get(idx).name;
 	}
 
 }

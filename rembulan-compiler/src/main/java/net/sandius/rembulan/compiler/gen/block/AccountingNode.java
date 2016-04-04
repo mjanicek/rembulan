@@ -2,6 +2,11 @@ package net.sandius.rembulan.compiler.gen.block;
 
 public abstract class AccountingNode extends Linear {
 
+	@Override
+	public void emit(Emit e) {
+		e._note("CPU accounting node ignored");
+	}
+
 	public static class Add extends AccountingNode {
 
 		public final int cost;

@@ -71,4 +71,9 @@ public class Entry implements Node, Jump {
 		// no-op
 	}
 
+	@Override
+	public void emit(Emit e) {
+		e._note("TODO: emit " + getClass().getName() + " for " + this.toString());
+	}
+
 }

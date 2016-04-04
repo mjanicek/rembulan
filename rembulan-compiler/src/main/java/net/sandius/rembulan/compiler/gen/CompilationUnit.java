@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.compiler.gen.block.Emit;
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Target;
@@ -77,8 +78,11 @@ public class CompilationUnit {
 
 		int i = 0;
 
+		Emit e = new Emit(ctx);
+
 		for (Node n : topoSorted) {
-			System.out.println(i + ":\t" + n.toString());
+//			System.out.println("// " + i + ": " + n.toString());
+			n.emit(e);
 			i += 1;
 		}
 

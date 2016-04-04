@@ -67,4 +67,9 @@ public abstract class Exit implements Node, Sink {
 		inSlots = null;
 	}
 
+	@Override
+	public void emit(Emit e) {
+		e._note("TODO: emit " + getClass().getName() + " for " + this.toString());
+	}
+
 }

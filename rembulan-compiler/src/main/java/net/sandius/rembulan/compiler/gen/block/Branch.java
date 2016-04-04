@@ -121,5 +121,10 @@ public abstract class Branch implements Node, Sink, Jump {
 		FALSE_BRANCH
 	}
 
+	@Override
+	public void emit(Emit e) {
+		e._note("TODO: emit " + getClass().getName() + " for " + this.toString());
+	}
+
 }
 

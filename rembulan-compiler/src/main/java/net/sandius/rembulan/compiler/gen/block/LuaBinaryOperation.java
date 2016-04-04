@@ -6,6 +6,8 @@ import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.util.Check;
 
 import static net.sandius.rembulan.compiler.gen.block.LuaUtils.prefix;
@@ -76,6 +78,55 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 		}
 	}
 
+	protected abstract String methodPrefix();
+
+	@Override
+	public void emit(Emit e) {
+		SlotState s = inSlots();
+
+		NumOpType ot = opType(slotType(s, rk_left), slotType(s, rk_right));
+
+		switch (ot) {
+			case Integer:
+				e._load_reg_or_const(rk_left, s, Number.class);
+				e._load_reg_or_const(rk_right, s, Number.class);
+				e._dispatchCall(methodPrefix() + "_integer",
+						e._methodSignature(Number.class, Number.class, Number.class));
+				e._store(r_dest, s);
+				break;
+
+			case Float:
+				e._load_reg_or_const(rk_left, s, Number.class);
+				e._load_reg_or_const(rk_right, s, Number.class);
+				e._dispatchCall(methodPrefix() + "_float",
+						e._methodSignature(Number.class, Number.class, Number.class));
+				e._store(r_dest, s);
+				break;
+
+			case Number:
+				e._load_reg_or_const(rk_left, s, Number.class);
+				e._load_reg_or_const(rk_right, s, Number.class);
+				e._dispatchCall(methodPrefix(),
+						e._methodSignature(Number.class, Number.class, Number.class));
+				e._store(r_dest, s);
+				break;
+
+			case Any:
+				e._loadState();
+				e._loadObjectSink();
+				e._load_reg_or_const(rk_left, s, Object.class);
+				e._load_reg_or_const(rk_right, s, Object.class);
+				e._save_pc(this);
+				e._dispatchCall(methodPrefix(),
+						e._methodSignature(void.class, LuaState.class, ObjectSink.class, Object.class, Object.class));
+				e._resumptionPoint(this);
+				e._loadObjectSink();
+				e._retrieve_1();
+				e._store(r_dest, s);
+				break;
+		}
+	}
+
 	public static class Add extends LuaBinaryOperation {
 
 		public Add(PrototypeContext context, int dest, int b, int c) {
@@ -90,6 +141,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 		@Override
 		protected NumOpType opType(Type l, Type r) {
 			return mayBeInteger(l, r);
+		}
+
+		@Override
+		protected String methodPrefix() {
+			return "add";
 		}
 
 	}
@@ -110,6 +166,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 			return mayBeInteger(l, r);
 		}
 
+		@Override
+		protected String methodPrefix() {
+			return "sub";
+		}
+
 	}
 
 	public static class Mul extends LuaBinaryOperation {
@@ -126,6 +187,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 		@Override
 		protected NumOpType opType(Type l, Type r) {
 			return mayBeInteger(l, r);
+		}
+
+		@Override
+		protected String methodPrefix() {
+			return "mul";
 		}
 
 	}
@@ -146,6 +212,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 			return mayBeInteger(l, r);
 		}
 
+		@Override
+		protected String methodPrefix() {
+			return "mod";
+		}
+
 	}
 
 	public static class Pow extends LuaBinaryOperation {
@@ -162,6 +233,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 		@Override
 		protected NumOpType opType(Type l, Type r) {
 			return mustBeFloat(l, r);
+		}
+
+		@Override
+		protected String methodPrefix() {
+			return "pow";
 		}
 
 	}
@@ -182,6 +258,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 			return mustBeFloat(l, r);
 		}
 
+		@Override
+		protected String methodPrefix() {
+			return "div";
+		}
+
 	}
 
 	public static class IDiv extends LuaBinaryOperation {
@@ -198,6 +279,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 		@Override
 		protected NumOpType opType(Type l, Type r) {
 			return mayBeInteger(l, r);
+		}
+
+		@Override
+		protected String methodPrefix() {
+			return "idiv";
 		}
 
 	}
@@ -218,6 +304,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 			return mustBeInteger(l, r);
 		}
 
+		@Override
+		protected String methodPrefix() {
+			return "band";
+		}
+
 	}
 
 	public static class BOr extends LuaBinaryOperation {
@@ -234,6 +325,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 		@Override
 		protected NumOpType opType(Type l, Type r) {
 			return mustBeInteger(l, r);
+		}
+
+		@Override
+		protected String methodPrefix() {
+			return "bor";
 		}
 
 	}
@@ -254,6 +350,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 			return mustBeInteger(l, r);
 		}
 
+		@Override
+		protected String methodPrefix() {
+			return "bxor";
+		}
+
 	}
 
 	public static class Shl extends LuaBinaryOperation {
@@ -272,6 +373,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 			return mustBeInteger(l, r);
 		}
 
+		@Override
+		protected String methodPrefix() {
+			return "shl";
+		}
+
 	}
 
 	public static class Shr extends LuaBinaryOperation {
@@ -288,6 +394,11 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 		@Override
 		protected NumOpType opType(Type l, Type r) {
 			return mustBeInteger(l, r);
+		}
+
+		@Override
+		protected String methodPrefix() {
+			return "shr";
 		}
 
 	}

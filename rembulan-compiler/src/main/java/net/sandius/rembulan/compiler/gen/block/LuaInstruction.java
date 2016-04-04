@@ -9,6 +9,10 @@ import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
+import net.sandius.rembulan.core.Dispatch;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 
@@ -48,7 +52,6 @@ public interface LuaInstruction {
 	}
 
 
-
 	class Move extends Linear implements LuaInstruction {
 
 		public final int r_dest;
@@ -73,6 +76,13 @@ public interface LuaInstruction {
 		@Override
 		public boolean needsResumePoint() {
 			return false;
+		}
+
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+			e._load_reg(r_src, s);
+			e._store(r_dest, s);
 		}
 
 	}
@@ -103,6 +113,13 @@ public interface LuaInstruction {
 		@Override
 		public boolean needsResumePoint() {
 			return false;
+		}
+
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+			e._load_k(constIndex);
+			e._store(r_dest, s);
 		}
 
 	}
@@ -162,6 +179,15 @@ public interface LuaInstruction {
 			return false;
 		}
 
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+			for (int i = 0; i < count; i++) {
+				e._push_null();
+				e._store(r_dest + i, s);
+			}
+		}
+
 	}
 
 	class GetUpVal extends Linear implements LuaInstruction {
@@ -186,7 +212,15 @@ public interface LuaInstruction {
 
 		@Override
 		public boolean needsResumePoint() {
-			return true;
+			return false;
+		}
+
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+			e._get_upvalue_ref(upvalueIndex);
+			e._get_upvalue_value();
+			e._store(r_dest, s);
 		}
 
 	}
@@ -216,6 +250,24 @@ public interface LuaInstruction {
 		@Override
 		public boolean needsResumePoint() {
 			return true;
+		}
+
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+
+			e._loadState();
+			e._loadObjectSink();
+			e._get_upvalue_ref(upvalueIndex);
+			e._get_upvalue_value();
+			e._load_reg_or_const(rk_key, s);
+			e._save_pc(this);
+			e._invokeStatic(Dispatch.class,
+					"index",
+					e._methodSignature(void.class, LuaState.class, ObjectSink.class, Object.class, Object.class));
+			e._resumptionPoint(this);
+			e._retrieve_1();
+			e._store(r_dest, s);
 		}
 
 	}
@@ -351,6 +403,13 @@ public interface LuaInstruction {
 		@Override
 		public boolean needsResumePoint() {
 			return false;
+		}
+
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+			e._new_table(arraySize, hashSize);
+			e._store(r_dest, s);
 		}
 
 	}
@@ -552,6 +611,38 @@ public interface LuaInstruction {
 			return false;
 		}
 
+		@Override
+		public void emit(Emit e) {
+			Type tpe = inSlots().typeAt(r_index);
+
+			int ha;
+
+			if (tpe.isSubtypeOf(LuaTypes.BOOLEAN)) {
+				e._note("boolean and branch");  // TODO
+			}
+			else if (tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) {
+				// TODO: check correctness for DYNAMIC
+
+				if (value)  {
+					e._if_null(falseBranch());
+					e._next_insn(trueBranch());
+				}
+				else {
+					e._if_nonnull(falseBranch());
+					e._next_insn(trueBranch());
+				}
+
+			}
+			else if (tpe.equals(LuaTypes.NIL)) {
+				// TODO: should be inlined
+				e._goto(falseBranch());
+			}
+			else {
+				// TODO: should be inlined
+				e._goto(trueBranch());
+			}
+		}
+
 	}
 
 	// TODO
@@ -724,6 +815,45 @@ public interface LuaInstruction {
 			return false;
 		}
 
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+
+			if (b > 0) {
+				// b - 1 is the actual number of arguments
+
+				e._load_reg(r_tgt, s);
+
+				switch (b - 1) {
+					case 0:
+						e._invokeInterface(ObjectSink.class, "tailCall",
+								e._methodSignature(void.class, Object.class));
+						break;
+					case 1:
+						e._load_reg(r_tgt + 1, s);
+						e._invokeInterface(ObjectSink.class, "tailCall",
+								e._methodSignature(void.class, Object.class, Object.class));
+						break;
+					case 2:
+						e._load_reg(r_tgt + 1, s);
+						e._load_reg(r_tgt + 2, s);
+						e._invokeInterface(ObjectSink.class, "tailCall",
+								e._methodSignature(void.class, Object.class, Object.class, Object.class));
+						break;
+					default:
+						e._note("push " + (b - 1) + " registers into object sink, mark as tailcall");
+						break;
+				}
+
+				e._return();
+			}
+			else {
+				e._note("tailcall with varargs");
+			}
+
+			super.emit(e);
+		}
+
 	}
 
 
@@ -751,6 +881,44 @@ public interface LuaInstruction {
 		@Override
 		public boolean needsResumePoint() {
 			return false;
+		}
+
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+
+			if (b > 0) {
+				// b - 1 is the actual number of results
+
+				e._loadObjectSink();
+
+				switch (b - 1) {
+					case 0:
+						e._invokeInterface(ObjectSink.class, "reset",
+								e._methodSignature(void.class));
+						break;
+					case 1:
+						e._load_reg(r_from, s);
+						e._invokeInterface(ObjectSink.class, "setTo",
+								e._methodSignature(void.class, Object.class));
+						break;
+					case 2:
+						e._load_reg(r_from, s);
+						e._load_reg(r_from + 1, s);
+						e._invokeInterface(ObjectSink.class, "setTo",
+								e._methodSignature(void.class, Object.class, Object.class));
+						break;
+					default:
+						e._note("push " + (b - 1) + " registers into object sink");
+						break;
+				}
+
+				e._return();
+			}
+			else {
+				// TODO
+				e._note("return varargs");
+			}
 		}
 
 	}
@@ -886,6 +1054,44 @@ public interface LuaInstruction {
 		@Override
 		public boolean needsResumePoint() {
 			return false;
+		}
+
+		@Override
+		public void emit(Emit e) {
+			SlotState s = inSlots();
+
+			e._note("capture variables");
+
+			String closureClassName = context.nestedPrototypeName(index);
+
+			for (Prototype.UpvalueDesc uvd : context.nestedPrototype(index).getUpValueDescriptions()) {
+				if (uvd.inStack && !s.isCaptured(uvd.index)) {
+					e._capture(uvd.index);
+					s = s.capture(uvd.index);  // just marking it so that we can store properly
+				}
+			}
+
+			e._new(closureClassName);
+			e._dup();
+
+			Class[] args = new Class[context.nestedPrototype(index).getUpValueDescriptions().size()];
+			for (int i = 0; i < args.length; i++) {
+				args[i] = Upvalue.class;
+			}
+
+			for (Prototype.UpvalueDesc uvd : context.nestedPrototype(index).getUpValueDescriptions()) {
+				if (uvd.inStack) {
+					// by this point all upvalues have been captured
+					e._load_reg_value(uvd.index);
+				}
+				else {
+					e._get_upvalue_ref(uvd.index);
+				}
+			}
+
+			e._ctor(closureClassName, args);
+
+			e._store(r_dest, s);
 		}
 
 	}

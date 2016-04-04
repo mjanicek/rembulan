@@ -107,6 +107,10 @@ public class Target implements Node, Src {
 		return jmp;
 	}
 
+	public int inSize() {
+		return in.size();
+	}
+
 	@Override
 	public SlotState inSlots() {
 		return inSlots;
@@ -134,6 +138,16 @@ public class Target implements Node, Src {
 	@Override
 	public void clearSlots() {
 		inSlots = null;
+	}
+
+	@Override
+	public void emit(Emit e) {
+		if (inSize() > 1) {
+			e._label_here(this);
+		}
+		else {
+			e._note("label ignored: " + e._asLabel(this));
+		}
 	}
 
 }

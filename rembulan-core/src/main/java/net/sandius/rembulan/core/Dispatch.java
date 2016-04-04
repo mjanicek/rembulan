@@ -166,10 +166,22 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static void add(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		MathImplementation m = MathImplementation.arithmetic(a, b);
-		if (m != null) {
-			result.setTo(m.do_add(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+	public static Number add(Number a, Number b) {
+		return MathImplementation.arithmetic(a, b).do_add(a, b);
+	}
+
+	public static Number add_integer(Number a, Number b) {
+		return MathImplementation.INTEGER_MATH.do_add(a, b);
+	}
+
+	public static Number add_float(Number a, Number b) {
+		return MathImplementation.FLOAT_MATH.do_add(a, b);
+	}
+
+	public static void mt_add(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation math = MathImplementation.arithmetic(a, b);
+		if (math != null) {
+			result.setTo(math.do_add(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
 		}
 		else {
 			try_mt_arithmetic(state, result, Metatables.MT_ADD, a, b);

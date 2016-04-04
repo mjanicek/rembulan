@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler.gen.block;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntIterable;
+import net.sandius.rembulan.util.IntIterator;
 import net.sandius.rembulan.util.IntSet;
 
 public class Capture extends Linear implements LocalVariableEffect {
@@ -25,6 +26,15 @@ public class Capture extends Linear implements LocalVariableEffect {
 			s = s.capture(indices.get(i));
 		}
 		return s;
+	}
+
+	@Override
+	public void emit(Emit e) {
+		IntIterator iit = indices.iterator();
+		while (iit.hasNext()) {
+			int idx = iit.next();
+			e._capture(idx);
+		}
 	}
 
 }

@@ -134,4 +134,9 @@ public abstract class Linear implements Node, Sink, Src {
 		inSlots = null;
 	}
 
+	@Override
+	public void emit(Emit e) {
+		e._note("TODO: emit " + getClass().getName() + " for " + this.toString());
+	}
+
 }
