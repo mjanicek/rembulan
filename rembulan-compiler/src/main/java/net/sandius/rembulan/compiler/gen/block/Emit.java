@@ -521,13 +521,15 @@ public class Emit {
 	}
 
 	public void _next_insn(Target t) {
-		if (t.inSize() < 2) {
-			// can be inlined, TODO: check this again
-			_note("goto ignored: " + t.toString());
-		}
-		else {
-			_goto(t);
-		}
+		_goto(t);
+//
+//		if (t.inSize() < 2) {
+//			// can be inlined, TODO: check this again
+//			_note("goto ignored: " + t.toString());
+//		}
+//		else {
+//			_goto(t);
+//		}
 	}
 
 	public void _new_table(int array, int hash) {
