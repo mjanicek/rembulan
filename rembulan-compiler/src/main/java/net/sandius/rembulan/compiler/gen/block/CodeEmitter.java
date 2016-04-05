@@ -392,7 +392,7 @@ public class CodeEmitter {
 		visitor.visitLabel(ltotalend);
 
 		// local variable declaration
-		visitor.visitLocalVariable("this", parent.thisType().getDescriptor(), null, ltotalbegin, ltotalend, 0);
+		visitor.visitLocalVariable("this", parent.thisClassType().getDescriptor(), null, ltotalbegin, ltotalend, 0);
 		visitor.visitLocalVariable("state", Type.getDescriptor(LuaState.class), null, ltotalbegin, ltotalend, LV_STATE);
 		visitor.visitLocalVariable("sink", Type.getDescriptor(ObjectSink.class), null, ltotalbegin, ltotalend, LV_OBJECTSINK);
 		visitor.visitLocalVariable("rp", Type.INT_TYPE.getDescriptor(), null, ltotalbegin, ltotalend, LV_RESUME);
@@ -480,7 +480,7 @@ public class CodeEmitter {
 		visitor.visitFieldInsn(
 				Opcodes.GETFIELD,
 				_className(thisClassName()),
-				parent._upvalue_field_name(idx),
+				parent.getUpvalueFieldName(idx),
 				Type.getDescriptor(Upvalue.class));
 	}
 
