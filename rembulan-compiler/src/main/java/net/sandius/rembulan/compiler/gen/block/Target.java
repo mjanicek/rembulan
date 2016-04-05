@@ -142,12 +142,14 @@ public class Target implements Node, Src {
 
 	@Override
 	public void emit(Emit e) {
-		if (inSize() > 1) {
-			e._label_here(this);
-		}
-		else {
-			e._note("label ignored: " + this);
-		}
+		e._label_here(this);
+//
+//		if (inSize() > 1) {
+//			e._label_here(this);
+//		}
+//		else {
+//			e._note("label ignored: " + this);
+//		}
 	}
 
 }

@@ -256,13 +256,15 @@ public interface LuaInstruction {
 		public void emit(Emit e) {
 			SlotState s = inSlots();
 
+			e._save_pc(this);
+
 			e._loadState();
 			e._loadObjectSink();
 			e._get_upvalue_ref(upvalueIndex);
 			e._get_upvalue_value();
 			e._load_reg_or_const(rk_key, s);
-			e._save_pc(this);
 			e._dispatch_index();
+
 			e._resumptionPoint(this);
 			e._retrieve_1();
 			e._store(r_dest, s);

@@ -109,12 +109,14 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 				break;
 
 			case Any:
+				e._save_pc(this);
+
 				e._loadState();
 				e._loadObjectSink();
 				e._load_reg_or_const(rk_left, s, Object.class);
 				e._load_reg_or_const(rk_right, s, Object.class);
-				e._save_pc(this);
 				e._dispatch_generic_mt_2(methodPrefix());
+
 				e._resumptionPoint(this);
 				e._loadObjectSink();
 				e._retrieve_1();

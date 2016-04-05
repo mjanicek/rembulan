@@ -6,23 +6,21 @@ import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Invokable;
+import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.util.TraceClassVisitor;
 
 import java.io.PrintWriter;
 import java.util.HashSet;
-
-import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
-import static org.objectweb.asm.Opcodes.V1_7;
-import static sun.tools.java.RuntimeConstants.ACC_PUBLIC;
-import static sun.tools.java.RuntimeConstants.ACC_SUPER;
 
 public class CompilationUnit {
 
@@ -88,31 +86,33 @@ public class CompilationUnit {
 	public CompiledClass toCompiledClass() {
 		Iterable<Node> topoSorted = generic.sortTopologically();
 
-		int i = 0;
-
 		ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.out));
 
 		Type thisType = Type.getType(ctx.className());
 
-		cv.visit(V1_7, ACC_PUBLIC + ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Invokable.class), null);
+		cv.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Function.class), null);
 		cv.visitSource(prototype.getShortSource(), null);
 
 		Type methodType = Type.getMethodType(
 				Type.VOID_TYPE,
+				Type.getType(LuaState.class),
+				Type.getType(ObjectSink.class),
 				Type.INT_TYPE
 		);
 
-		MethodVisitor mv = cv.visitMethod(ACC_PROTECTED, "resume", methodType.getDescriptor(),
+		MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PRIVATE, "run", methodType.getDescriptor(),
 				null,
 				new String[] { Type.getInternalName(ControlThrowable.class) });
 
 		Emit e = new Emit(ctx, mv);
 
+		e._begin();
+
 		for (Node n : topoSorted) {
-//			System.out.println("// " + i + ": " + n.toString());
 			n.emit(e);
-			i += 1;
 		}
+
+		e._end();
 
 		mv.visitEnd();
 		cv.visitEnd();

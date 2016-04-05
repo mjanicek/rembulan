@@ -24,6 +24,10 @@ public abstract class ControlThrowable extends Throwable {
 		callStack.addFirst(ci);
 	}
 
+	public void push(ResumeInfo ri) {
+		throw new UnsupportedOperationException();
+	}
+
 	public void pushCall(Invokable function, int base, int ret, int pc, int numResults, int flags) {
 		push(new CallInfo(function, base, ret, pc, numResults, flags));
 	}

@@ -2,9 +2,11 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
+import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Upvalue;
@@ -14,6 +16,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,15 +24,21 @@ public class Emit {
 
 	public final int REGISTER_OFFSET = 3;
 
+	public final int LV_STATE = 0;
+	public final int LV_OBJECTSINK = 1;
+	public final int LV_RESUME = 2;
+
 	private final PrototypeContext context;
 	private final MethodVisitor visitor;
 
 	private final Map<Object, Label> labels;
+	private final ArrayList<Label> resumptionPoints;
 
 	public Emit(PrototypeContext context, MethodVisitor visitor) {
 		this.context = Check.notNull(context);
 		this.visitor = Check.notNull(visitor);
 		this.labels = new HashMap<>();
+		this.resumptionPoints = new ArrayList<>();
 	}
 
 	protected Label _l(Object key) {
@@ -309,11 +318,11 @@ public class Emit {
 	}
 
 	public void _loadState() {
-		visitor.visitVarInsn(Opcodes.ALOAD, 0);
+		visitor.visitVarInsn(Opcodes.ALOAD, LV_STATE);
 	}
 
 	public void _loadObjectSink() {
-		visitor.visitVarInsn(Opcodes.ALOAD, 1);
+		visitor.visitVarInsn(Opcodes.ALOAD, LV_OBJECTSINK);
 	}
 
 	public void _retrieve_1() {
@@ -321,11 +330,81 @@ public class Emit {
 	}
 
 	public void _save_pc(Object o) {
-		_note("save pc, resumption point is " + o.toString());
+		Label rl = _l(o);
+
+		int idx = resumptionPoints.size();
+		resumptionPoints.add(rl);
+
+		_push_int(idx);
+		visitor.visitVarInsn(Opcodes.ISTORE, LV_RESUME);
 	}
 
 	public void _resumptionPoint(Object label) {
 		_label_here(label);
+	}
+
+	private Label lswitch;
+
+	private Label lbegin;
+	private Label lerror;
+	private Label lend;
+
+	public void _begin() {
+		lswitch = new Label();
+		visitor.visitJumpInsn(Opcodes.GOTO, lswitch);
+
+		lbegin = new Label();
+		lerror = new Label();
+		resumptionPoints.add(lbegin);
+
+		visitor.visitLabel(lbegin);
+		_frame_same();
+	}
+
+	public void _end() {
+		lend = new Label();
+		visitor.visitLabel(lend);
+		_error_state();
+		_dispatch_table();
+		_resumption_handler(lbegin, lend);
+	}
+
+	protected void _error_state() {
+		visitor.visitLabel(lerror);
+		_new(IllegalStateException.class);
+		_dup();
+		_ctor(IllegalStateException.class);
+		visitor.visitInsn(Opcodes.ATHROW);
+	}
+
+	protected void _dispatch_table() {
+		visitor.visitLabel(lswitch);
+		_frame_same();
+
+		Label[] labels = resumptionPoints.toArray(new Label[0]);
+
+		visitor.visitVarInsn(Opcodes.ILOAD, LV_RESUME);
+		visitor.visitTableSwitchInsn(0, resumptionPoints.size() - 1, lerror, labels);
+	}
+
+	protected void _resumption_handler(Label begin, Label end) {
+		Label handler = new Label();
+		visitor.visitLabel(handler);
+		visitor.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) });
+
+		_new(ResumeInfo.class);
+		_dup();
+
+		// TODO: create the saved state
+		visitor.visitVarInsn(Opcodes.ILOAD, LV_RESUME);
+		_ctor(ResumeInfo.class, Object.class);  // FIXME
+
+		_invokeVirtual(ControlThrowable.class, "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)));
+
+		// rethrow
+		visitor.visitInsn(Opcodes.ATHROW);
+
+		visitor.visitTryCatchBlock(begin, end, handler, Type.getInternalName(ControlThrowable.class));
 	}
 
 	public String _upvalue_field_name(int idx) {
@@ -392,10 +471,14 @@ public class Emit {
 		_store_reg_value(idx);
 	}
 
+	private void _frame_same() {
+		visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+	}
+
 	public void _label_here(Object identity) {
 		Label l = _l(identity);
 		visitor.visitLabel(l);
-		visitor.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
+		_frame_same();
 	}
 
 	public void _goto(Object l) {
