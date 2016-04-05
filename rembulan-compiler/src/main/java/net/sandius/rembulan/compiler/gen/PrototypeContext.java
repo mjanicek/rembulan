@@ -31,6 +31,11 @@ public class PrototypeContext {
 		}
 	}
 
+	@Deprecated
+	public Prototype prototype() {
+		return prototype;
+	}
+
 	public Object getConst(int index) {
 		return prototype.getConstants().get(index);
 	}

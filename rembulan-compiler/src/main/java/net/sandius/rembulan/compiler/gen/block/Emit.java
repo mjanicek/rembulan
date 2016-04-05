@@ -11,6 +11,7 @@ import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -208,6 +209,11 @@ public class Emit {
 	}
 
 	@Deprecated
+	public String _classDesc(String cn) {
+		return "L" + _className(cn) + ";";
+	}
+
+	@Deprecated
 	public String _classDesc(Class clazz) {
 		if (clazz.isPrimitive()) {
 			if (clazz.equals(void.class)) return "V";
@@ -387,6 +393,31 @@ public class Emit {
 		visitor.visitTableSwitchInsn(0, resumptionPoints.size() - 1, lerror, labels);
 	}
 
+	protected int numOfRegisters() {
+		return context.prototype().getMaximumStackSize();
+	}
+
+	protected void _make_saved_state() {
+		_new(ResumeInfo.SavedState.class);
+		_dup();
+
+		// resumption point
+		visitor.visitVarInsn(Opcodes.ILOAD, LV_RESUME);
+
+		// registers
+		int numRegs = numOfRegisters();
+		_push_int(numRegs);
+		visitor.visitTypeInsn(Opcodes.ANEWARRAY, Type.getInternalName(Object.class));
+		for (int i = 0; i < numRegs; i++) {
+			_dup();
+			_push_int(i);
+			_load_reg_value(i);
+			visitor.visitInsn(Opcodes.AASTORE);
+		}
+
+		_ctor(Type.getType(ResumeInfo.SavedState.class), Type.INT_TYPE, ASMUtils.arrayTypeFor(Object.class));
+	}
+
 	protected void _resumption_handler(Label begin, Label end) {
 		Label handler = new Label();
 		visitor.visitLabel(handler);
@@ -395,8 +426,8 @@ public class Emit {
 		_new(ResumeInfo.class);
 		_dup();
 
-		// TODO: create the saved state
-		visitor.visitVarInsn(Opcodes.ILOAD, LV_RESUME);
+		_make_saved_state();
+
 		_ctor(ResumeInfo.class, Object.class);  // FIXME
 
 		_invokeVirtual(ControlThrowable.class, "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)));
@@ -445,12 +476,16 @@ public class Emit {
 		_new(clazz.getName());
 	}
 
+	public void _ctor(Type clazz, Type... args) {
+		_invokeSpecial(clazz.getInternalName(), "<init>", Type.getMethodType(Type.VOID_TYPE, args));
+	}
+
 	public void _ctor(String className, Class... args) {
 		Type[] argTypes = new Type[args.length];
 		for (int i = 0; i < args.length; i++) {
 			argTypes[i] = Type.getType(args[i]);
 		}
-		_invokeSpecial(className, "<init>", Type.getMethodType(Type.VOID_TYPE, argTypes));
+		_ctor(Type.getType(_classDesc(className)), argTypes);
 	}
 
 	public void _ctor(Class clazz, Class... args) {
