@@ -23,11 +23,11 @@ import java.util.Map;
 
 public class Emit {
 
-	public final int REGISTER_OFFSET = 3;
+	public final int REGISTER_OFFSET = 4;
 
-	public final int LV_STATE = 0;
-	public final int LV_OBJECTSINK = 1;
-	public final int LV_RESUME = 2;
+	public final int LV_STATE = 1;
+	public final int LV_OBJECTSINK = 2;
+	public final int LV_RESUME = 3;
 
 	private final ClassEmit parent;
 	private final PrototypeContext context;
@@ -357,11 +357,15 @@ public class Emit {
 
 	private Label lswitch;
 
+	private Label ltotalbegin;
 	private Label lbegin;
 	private Label lerror;
 	private Label lend;
 
 	public void _begin() {
+		ltotalbegin = new Label();
+		visitor.visitLabel(ltotalbegin);
+
 		lswitch = new Label();
 		visitor.visitJumpInsn(Opcodes.GOTO, lswitch);
 
@@ -383,6 +387,18 @@ public class Emit {
 		if (isResumable()) {
 			_resumption_handler(lbegin, lend);
 		}
+
+		Label ltotalend = new Label();
+		visitor.visitLabel(ltotalend);
+
+		// local variable declaration
+		visitor.visitLocalVariable("this", parent.thisType().getDescriptor(), null, ltotalbegin, ltotalend, 0);
+		visitor.visitLocalVariable("state", Type.getDescriptor(LuaState.class), null, ltotalbegin, ltotalend, LV_STATE);
+		visitor.visitLocalVariable("sink", Type.getDescriptor(ObjectSink.class), null, ltotalbegin, ltotalend, LV_OBJECTSINK);
+		visitor.visitLocalVariable("rp", Type.INT_TYPE.getDescriptor(), null, ltotalbegin, ltotalend, LV_RESUME);
+		// TODO: arguments
+
+		// TODO: maxs, maxlocals
 
 		visitor.visitEnd();
 	}
