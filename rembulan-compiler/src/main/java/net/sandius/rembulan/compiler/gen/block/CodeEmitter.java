@@ -12,8 +12,6 @@ import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.asm.ASMUtils;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FrameNode;
@@ -37,9 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.SWAP;
 
 public class CodeEmitter {
 
@@ -57,7 +52,10 @@ public class CodeEmitter {
 	private final Map<Object, LabelNode> labels;
 	private final ArrayList<LabelNode> resumptionPoints;
 
-	private final InsnList il;
+	private final InsnList resumeSwitch;
+	private final InsnList code;
+	private final InsnList errorState;
+	private final InsnList resumeHandler;
 
 	public CodeEmitter(ClassEmitter parent, PrototypeContext context) {
 		this.parent = Check.notNull(parent);
@@ -66,7 +64,11 @@ public class CodeEmitter {
 		this.resumptionPoints = new ArrayList<>();
 
 		this.methodNode = new MethodNode(ACC_PRIVATE, methodName(), methodType().getDescriptor(), null, exceptions());
-		this.il = methodNode.instructions;
+
+		resumeSwitch = new InsnList();
+		code = new InsnList();
+		errorState = new InsnList();
+		resumeHandler = new InsnList();
 	}
 
 	public MethodNode node() {
@@ -78,12 +80,14 @@ public class CodeEmitter {
 	}
 
 	private Type methodType() {
-		return Type.getMethodType(
-				Type.VOID_TYPE,
-				Type.getType(LuaState.class),
-				Type.getType(ObjectSink.class),
-				Type.INT_TYPE
-		);
+		Type[] args = new Type[3 + numOfRegisters()];
+		args[0] = Type.getType(LuaState.class);
+		args[1] = Type.getType(ObjectSink.class);
+		args[2] = Type.INT_TYPE;
+		for (int i = 3; i < args.length; i++) {
+			args[i] = Type.getType(Object.class);
+		}
+		return Type.getMethodType(Type.VOID_TYPE, args);
 	}
 
 	private String[] exceptions() {
@@ -112,44 +116,44 @@ public class CodeEmitter {
 	}
 
 	public void _dup() {
-		il.add(new InsnNode(DUP));
+		code.add(new InsnNode(DUP));
 	}
 
 	public void _swap() {
-		il.add(new InsnNode(SWAP));
+		code.add(new InsnNode(SWAP));
 	}
 
 	public void _push_this() {
-		il.add(new VarInsnNode(ALOAD, 0));
+		code.add(new VarInsnNode(ALOAD, 0));
 	}
 
 	public void _push_null() {
-		il.add(new InsnNode(ACONST_NULL));
+		code.add(new InsnNode(ACONST_NULL));
 	}
 
 	public void _push_int(int i) {
 		switch (i) {
-			case -1: il.add(new InsnNode(ICONST_M1)); break;
-			case 0: il.add(new InsnNode(ICONST_0)); break;
-			case 1: il.add(new InsnNode(ICONST_1)); break;
-			case 2: il.add(new InsnNode(ICONST_2)); break;
-			case 3: il.add(new InsnNode(ICONST_3)); break;
-			case 4: il.add(new InsnNode(ICONST_4)); break;
-			case 5: il.add(new InsnNode(ICONST_5)); break;
-			default: il.add(new LdcInsnNode(i)); break;
+			case -1: code.add(new InsnNode(ICONST_M1)); break;
+			case 0: code.add(new InsnNode(ICONST_0)); break;
+			case 1: code.add(new InsnNode(ICONST_1)); break;
+			case 2: code.add(new InsnNode(ICONST_2)); break;
+			case 3: code.add(new InsnNode(ICONST_3)); break;
+			case 4: code.add(new InsnNode(ICONST_4)); break;
+			case 5: code.add(new InsnNode(ICONST_5)); break;
+			default: code.add(new LdcInsnNode(i)); break;
 		}
 	}
 
 	private void _push_long(long l) {
-		if (l == 0L) il.add(new InsnNode(LCONST_0));
-		else if (l == 1L) il.add(new InsnNode(LCONST_1));
-		else il.add(new LdcInsnNode(l));
+		if (l == 0L) code.add(new InsnNode(LCONST_0));
+		else if (l == 1L) code.add(new InsnNode(LCONST_1));
+		else code.add(new LdcInsnNode(l));
 	}
 
 	public void _push_double(double d) {
-		if (d == 0.0) il.add(new InsnNode(DCONST_0));
-		else if (d == 1.0) il.add(new InsnNode(DCONST_1));
-		else il.add(new LdcInsnNode(d));
+		if (d == 0.0) code.add(new InsnNode(DCONST_0));
+		else if (d == 1.0) code.add(new InsnNode(DCONST_1));
+		else code.add(new LdcInsnNode(d));
 	}
 
 	public void _load_k(int idx, Class castTo) {
@@ -171,7 +175,7 @@ public class CodeEmitter {
 			_invokeStatic(Long.class, "valueOf", Type.getMethodType(Type.getType(Long.class), Type.LONG_TYPE));
 		}
 		else if (k instanceof String) {
-			il.add(new LdcInsnNode((String) k));
+			code.add(new LdcInsnNode((String) k));
 		}
 		else {
 			_note("load const #" + idx + " of type " + PrototypeContext.constantType(k));
@@ -189,7 +193,7 @@ public class CodeEmitter {
 	}
 
 	public void _load_reg_value(int idx) {
-		il.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
+		code.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
 	}
 
 	public void _load_reg(int idx, SlotState slots, Class castTo) {
@@ -218,7 +222,7 @@ public class CodeEmitter {
 	}
 
 	public void _get_downvalue(int idx) {
-		il.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
+		code.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
 		_checkCast(Upvalue.class);
 	}
 
@@ -239,7 +243,7 @@ public class CodeEmitter {
 	}
 
 	private void _store_reg_value(int r) {
-		il.add(new VarInsnNode(ASTORE, REGISTER_OFFSET + r));
+		code.add(new VarInsnNode(ASTORE, REGISTER_OFFSET + r));
 	}
 
 	public void _store(int r, SlotState slots) {
@@ -290,7 +294,7 @@ public class CodeEmitter {
 	}
 
 	public void _invokeStatic(Class clazz, String methodName, Type methodSignature) {
-		il.add(new MethodInsnNode(
+		code.add(new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(clazz),
 				methodName,
@@ -300,7 +304,7 @@ public class CodeEmitter {
 	}
 
 	public void _invokeVirtual(Class clazz, String methodName, Type methodSignature) {
-		il.add(new MethodInsnNode(
+		code.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(clazz),
 				methodName,
@@ -310,7 +314,7 @@ public class CodeEmitter {
 	}
 
 	public void _invokeInterface(Class clazz, String methodName, Type methodSignature) {
-		il.add(new MethodInsnNode(
+		code.add(new MethodInsnNode(
 				INVOKEINTERFACE,
 				Type.getInternalName(clazz),
 				methodName,
@@ -320,7 +324,7 @@ public class CodeEmitter {
 	}
 
 	public void _invokeSpecial(String className, String methodName, Type methodSignature) {
-		il.add(new MethodInsnNode(
+		code.add(new MethodInsnNode(
 				INVOKESPECIAL,
 				_className(className),
 				methodName,
@@ -372,15 +376,15 @@ public class CodeEmitter {
 	}
 
 	public void _checkCast(Class clazz) {
-		il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz)));
+		code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz)));
 	}
 
 	public void _loadState() {
-		il.add(new VarInsnNode(ALOAD, LV_STATE));
+		code.add(new VarInsnNode(ALOAD, LV_STATE));
 	}
 
 	public void _loadObjectSink() {
-		il.add(new VarInsnNode(ALOAD, LV_OBJECTSINK));
+		code.add(new VarInsnNode(ALOAD, LV_OBJECTSINK));
 	}
 
 	public void _retrieve_1() {
@@ -394,67 +398,79 @@ public class CodeEmitter {
 		resumptionPoints.add(rl);
 
 		_push_int(idx);
-		il.add(new VarInsnNode(ISTORE, LV_RESUME));
+		code.add(new VarInsnNode(ISTORE, LV_RESUME));
 	}
 
 	public void _resumptionPoint(Object label) {
 		_label_here(label);
 	}
 
-	private LabelNode lswitch;
-
-	private LabelNode ltotalbegin;
-	private LabelNode lbegin;
-	private LabelNode lerror;
-	private LabelNode lend;
+	private LabelNode l_insns_begin;
+	private LabelNode l_body_begin;
+	private LabelNode l_error_state;
+	private LabelNode l_body_end;
 
 	public void begin() {
-		ltotalbegin = new LabelNode();
-		il.add(ltotalbegin);
+		l_insns_begin = new LabelNode();
+		methodNode.instructions.add(l_insns_begin);
 
-		lswitch = new LabelNode();
-		il.add(new JumpInsnNode(GOTO, lswitch));
+		l_body_begin = new LabelNode();
+		l_error_state = new LabelNode();
+		resumptionPoints.add(l_body_begin);
 
-		lbegin = new LabelNode();
-		lerror = new LabelNode();
-		resumptionPoints.add(lbegin);
-
-		il.add(lbegin);
-		_frame_same();
+		code.add(l_body_begin);
+		_frame_same(code);
 	}
 
 	public void end() {
-		lend = new LabelNode();
-		il.add(lend);
+		l_body_end = new LabelNode();
+		code.add(l_body_end);
+
 		if (isResumable()) {
 			_error_state();
 		}
 		_dispatch_table();
 		if (isResumable()) {
-			_resumption_handler(lbegin, lend);
+			_resumption_handler(l_body_begin, l_body_end);
 		}
-
-		LabelNode ltotalend = new LabelNode();
-		il.add(ltotalend);
 
 		// local variable declaration
 
-		List<LocalVariableNode> locals = methodNode.localVariables;
-		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, ltotalbegin, ltotalend, 0));
-		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, ltotalbegin, ltotalend, LV_STATE));
-		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, ltotalbegin, ltotalend, LV_OBJECTSINK));
-		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, ltotalbegin, ltotalend, LV_RESUME));
-		// TODO: arguments
+		LabelNode l_insns_end = new LabelNode();
 
-		// TODO: maxs, maxlocals
+		List<LocalVariableNode> locals = methodNode.localVariables;
+		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, l_insns_begin, l_insns_end, 0));
+		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, l_insns_begin, l_insns_end, LV_STATE));
+		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, l_insns_begin, l_insns_end, LV_OBJECTSINK));
+		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
+
+		for (int i = 0; i < numOfRegisters(); i++) {
+			locals.add(new LocalVariableNode("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, REGISTER_OFFSET + i));
+		}
+
+		// TODO: check these
+		methodNode.maxLocals = numOfRegisters() + 4;
+		methodNode.maxStack = numOfRegisters() + 5;
+
+		methodNode.instructions.add(resumeSwitch);
+		methodNode.instructions.add(code);
+		methodNode.instructions.add(errorState);
+		methodNode.instructions.add(resumeHandler);
+
+		methodNode.instructions.add(l_insns_end);
 	}
 
 	protected void _error_state() {
-		il.add(lerror);
-		_new(IllegalStateException.class);
-		_dup();
-		_ctor(IllegalStateException.class);
-		il.add(new InsnNode(ATHROW));
+		errorState.add(l_error_state);
+		errorState.add(new TypeInsnNode(NEW, Type.getDescriptor(IllegalStateException.class)));
+		errorState.add(new InsnNode(DUP));
+		errorState.add(new MethodInsnNode(
+				INVOKESPECIAL,
+				Type.getInternalName(IllegalStateException.class),
+				"<init>",
+				Type.getMethodDescriptor(Type.VOID_TYPE),
+				false));
+		errorState.add(new InsnNode(ATHROW));
 	}
 
 	protected boolean isResumable() {
@@ -462,18 +478,11 @@ public class CodeEmitter {
 	}
 
 	protected void _dispatch_table() {
-		il.add(lswitch);
-		_frame_same();
-
 		if (isResumable()) {
 			LabelNode[] labels = resumptionPoints.toArray(new LabelNode[0]);
 
-			il.add(new VarInsnNode(ILOAD, LV_RESUME));
-			il.add(new TableSwitchInsnNode(0, resumptionPoints.size() - 1, lerror, labels));
-		}
-		else {
-			// only entry point here
-			il.add(new JumpInsnNode(GOTO, resumptionPoints.get(0)));
+			resumeSwitch.add(new VarInsnNode(ILOAD, LV_RESUME));
+			resumeSwitch.add(new TableSwitchInsnNode(0, resumptionPoints.size() - 1, l_error_state, labels));
 		}
 	}
 
@@ -486,17 +495,17 @@ public class CodeEmitter {
 		_dup();
 
 		// resumption point
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
+		code.add(new VarInsnNode(ILOAD, LV_RESUME));
 
 		// registers
 		int numRegs = numOfRegisters();
 		_push_int(numRegs);
-		il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+		code.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
 		for (int i = 0; i < numRegs; i++) {
 			_dup();
 			_push_int(i);
 			_load_reg_value(i);
-			il.add(new InsnNode(AASTORE));
+			code.add(new InsnNode(AASTORE));
 		}
 
 		_ctor(Type.getType(ResumeInfo.SavedState.class), Type.INT_TYPE, ASMUtils.arrayTypeFor(Object.class));
@@ -504,8 +513,8 @@ public class CodeEmitter {
 
 	protected void _resumption_handler(LabelNode begin, LabelNode end) {
 		LabelNode handler = new LabelNode();
-		il.add(handler);
-		il.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) }));
+		code.add(handler);
+		code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) }));
 
 		_new(ResumeInfo.class);
 		_dup();
@@ -517,13 +526,13 @@ public class CodeEmitter {
 		_invokeVirtual(ControlThrowable.class, "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)));
 
 		// rethrow
-		il.add(new InsnNode(ATHROW));
+		code.add(new InsnNode(ATHROW));
 
 		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(begin, end, handler, Type.getInternalName(ControlThrowable.class)));
 	}
 
 	public void _get_upvalue_ref(int idx) {
-		il.add(new FieldInsnNode(
+		code.add(new FieldInsnNode(
 				GETFIELD,
 				_className(thisClassName()),
 				parent.getUpvalueFieldName(idx),
@@ -539,11 +548,11 @@ public class CodeEmitter {
 	}
 
 	public void _return() {
-		il.add(new InsnNode(RETURN));
+		code.add(new InsnNode(RETURN));
 	}
 
 	public void _new(String className) {
-		il.add(new TypeInsnNode(NEW, _className(className)));
+		code.add(new TypeInsnNode(NEW, _className(className)));
 	}
 
 	public void _new(Class clazz) {
@@ -580,18 +589,18 @@ public class CodeEmitter {
 		_store_reg_value(idx);
 	}
 
-	private void _frame_same() {
+	private void _frame_same(InsnList il) {
 		il.add(new FrameNode(F_SAME, 0, null, 0, null));
 	}
 
 	public void _label_here(Object identity) {
 		LabelNode l = _l(identity);
-		il.add(l);
-		_frame_same();
+		code.add(l);
+		_frame_same(code);
 	}
 
 	public void _goto(Object l) {
-		il.add(new JumpInsnNode(GOTO, _l(l)));
+		code.add(new JumpInsnNode(GOTO, _l(l)));
 	}
 
 	public void _next_insn(Target t) {
@@ -615,11 +624,11 @@ public class CodeEmitter {
 	}
 
 	public void _if_null(Object target) {
-		il.add(new JumpInsnNode(IFNULL, _l(target)));
+		code.add(new JumpInsnNode(IFNULL, _l(target)));
 	}
 
 	public void _if_nonnull(Object target) {
-		il.add(new JumpInsnNode(IFNONNULL, _l(target)));
+		code.add(new JumpInsnNode(IFNONNULL, _l(target)));
 	}
 
 	public void _tailcall_0() {
@@ -662,8 +671,8 @@ public class CodeEmitter {
 
 	public void _line_here(int line) {
 		LabelNode l = _l(new Object());
-		il.add(l);
-		il.add(new LineNumberNode(line, l));
+		code.add(l);
+		code.add(new LineNumberNode(line, l));
 	}
 
 }
