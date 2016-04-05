@@ -1,16 +1,12 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -27,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACC_SUPER;
@@ -40,19 +35,13 @@ import static org.objectweb.asm.Opcodes.V1_7;
 public class ClassEmitter {
 
 	private final PrototypeContext context;
-	private final ClassVisitor visitor;
-
 	private final ClassNode classNode;
 
 	private final ArrayList<String> upvalueFieldNames;
 
-
-	public ClassEmitter(PrototypeContext context, ClassVisitor visitor) {
+	public ClassEmitter(PrototypeContext context) {
 		this.context = Check.notNull(context);
-		this.visitor = Check.notNull(visitor);
-
 		this.classNode = new ClassNode();
-
 		this.upvalueFieldNames = new ArrayList<>();
 	}
 
@@ -77,12 +66,10 @@ public class ClassEmitter {
 	}
 
 	public void end() {
-		visitor.visitEnd();
-		classNode.accept(visitor);
 	}
 
-	public byte[] toBytes() {
-		return null;  // TODO
+	public void accept(ClassVisitor visitor) {
+		classNode.accept(visitor);
 	}
 
 	public Type upvalueType() {

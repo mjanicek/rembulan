@@ -81,30 +81,24 @@ public class CompilationUnit {
 	public CompiledClass toCompiledClass() {
 		Iterable<Node> topoSorted = generic.sortTopologically();
 
-		ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.out));
+		ClassEmitter classEmitter = new ClassEmitter(ctx);
 
-		ClassEmitter ce = new ClassEmitter(ctx, cv);
+		classEmitter.begin();
 
-		ce.begin();
+		CodeEmitter codeEmitter = classEmitter.code();
 
-		CodeEmitter e = ce.code();
-
-		e.begin();
+		codeEmitter.begin();
 		for (Node n : topoSorted) {
-			n.emit(e);
+			n.emit(codeEmitter);
 		}
-		e.end();
+		codeEmitter.end();
 
-		ce.end();
+		classEmitter.end();
 
-		byte[] bytes = ce.toBytes();
+		ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.out));
+		classEmitter.accept(cv);
 
-		if (bytes != null) {
-			return new CompiledClass(ctx.className(), ByteVector.wrap(bytes));
-		}
-		else {
-			return null;  // TODO: throw an exception here
-		}
+		return null;
 	}
 
 }
