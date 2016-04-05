@@ -197,21 +197,8 @@ public class ClassEmitter {
 	}
 
 	public CodeEmitter code() {
-		Type methodType = Type.getMethodType(
-				Type.VOID_TYPE,
-				Type.getType(LuaState.class),
-				Type.getType(ObjectSink.class),
-				Type.INT_TYPE
-		);
-
-		MethodVisitor mv = visitor.visitMethod(ACC_PRIVATE, "run", methodType.getDescriptor(),
-				null,
-				new String[] { Type.getInternalName(ControlThrowable.class) });
-
-		CodeEmitter emitter = new CodeEmitter(this, context, mv);
-
+		CodeEmitter emitter = new CodeEmitter(this, context);
 		classNode.methods.add(emitter.node());
-
 		return emitter;
 	}
 
