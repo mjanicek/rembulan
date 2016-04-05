@@ -14,6 +14,6 @@ public interface Node {
 
 	void clearSlots();
 
-	void emit(Emit e);
+	void emit(CodeEmitter e);
 
 }

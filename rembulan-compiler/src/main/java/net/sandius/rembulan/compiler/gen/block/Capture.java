@@ -29,7 +29,7 @@ public class Capture extends Linear implements LocalVariableEffect {
 	}
 
 	@Override
-	public void emit(Emit e) {
+	public void emit(CodeEmitter e) {
 		IntIterator iit = indices.iterator();
 		while (iit.hasNext()) {
 			int idx = iit.next();

@@ -3,7 +3,7 @@ package net.sandius.rembulan.compiler.gen.block;
 public abstract class AccountingNode extends Linear {
 
 	@Override
-	public void emit(Emit e) {
+	public void emit(CodeEmitter e) {
 		e._note("CPU accounting node ignored");
 	}
 

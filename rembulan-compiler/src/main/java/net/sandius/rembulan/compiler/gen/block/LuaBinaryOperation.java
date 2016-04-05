@@ -6,8 +6,6 @@ import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.util.Check;
 
 import static net.sandius.rembulan.compiler.gen.block.LuaUtils.prefix;
@@ -81,7 +79,7 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 	protected abstract String methodPrefix();
 
 	@Override
-	public void emit(Emit e) {
+	public void emit(CodeEmitter e) {
 		SlotState s = inSlots();
 
 		NumOpType ot = opType(slotType(s, rk_left), slotType(s, rk_right));

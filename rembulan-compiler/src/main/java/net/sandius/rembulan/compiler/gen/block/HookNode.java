@@ -3,7 +3,7 @@ package net.sandius.rembulan.compiler.gen.block;
 public class HookNode extends Linear {
 
 	@Override
-	public void emit(Emit e) {
+	public void emit(CodeEmitter e) {
 		e._note("hook node ignored");
 	}
 

@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Emit {
+public class CodeEmitter {
 
 	public final int REGISTER_OFFSET = 4;
 
@@ -29,14 +29,14 @@ public class Emit {
 	public final int LV_OBJECTSINK = 2;
 	public final int LV_RESUME = 3;
 
-	private final ClassEmit parent;
+	private final ClassEmitter parent;
 	private final PrototypeContext context;
 	private final MethodVisitor visitor;
 
 	private final Map<Object, Label> labels;
 	private final ArrayList<Label> resumptionPoints;
 
-	public Emit(ClassEmit parent, PrototypeContext context, MethodVisitor visitor) {
+	public CodeEmitter(ClassEmitter parent, PrototypeContext context, MethodVisitor visitor) {
 		this.parent = Check.notNull(parent);
 		this.context = Check.notNull(context);
 		this.visitor = Check.notNull(visitor);
@@ -362,7 +362,7 @@ public class Emit {
 	private Label lerror;
 	private Label lend;
 
-	public void _begin() {
+	public void begin() {
 		ltotalbegin = new Label();
 		visitor.visitLabel(ltotalbegin);
 
@@ -377,7 +377,7 @@ public class Emit {
 		_frame_same();
 	}
 
-	public void _end() {
+	public void end() {
 		lend = new Label();
 		visitor.visitLabel(lend);
 		if (isResumable()) {

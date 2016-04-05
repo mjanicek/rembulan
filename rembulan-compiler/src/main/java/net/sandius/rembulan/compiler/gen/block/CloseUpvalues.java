@@ -28,7 +28,7 @@ public class CloseUpvalues extends Linear implements LocalVariableEffect {
 	}
 
 	@Override
-	public void emit(Emit e) {
+	public void emit(CodeEmitter e) {
 		SlotState s = inSlots();
 
 		for (int i = fromIndex; i < s.size(); i++) {

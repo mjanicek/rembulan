@@ -1,23 +1,16 @@
 package net.sandius.rembulan.compiler.gen;
 
-import net.sandius.rembulan.compiler.gen.block.ClassEmit;
-import net.sandius.rembulan.compiler.gen.block.Emit;
+import net.sandius.rembulan.compiler.gen.block.ClassEmitter;
+import net.sandius.rembulan.compiler.gen.block.CodeEmitter;
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.types.TypeSeq;
-import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
 import org.objectweb.asm.ClassVisitor;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 import org.objectweb.asm.util.TraceClassVisitor;
 
 import java.io.PrintWriter;
@@ -89,19 +82,19 @@ public class CompilationUnit {
 
 		ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.out));
 
-		ClassEmit ce = new ClassEmit(ctx, cv);
+		ClassEmitter ce = new ClassEmitter(ctx, cv);
 
-		ce._begin();
+		ce.begin();
 
-		Emit e = ce._code_emit();
+		CodeEmitter e = ce.code();
 
-		e._begin();
+		e.begin();
 		for (Node n : topoSorted) {
 			n.emit(e);
 		}
-		e._end();
+		e.end();
 
-		ce._end();
+		ce.end();
 
 		return null;  // TODO
 	}

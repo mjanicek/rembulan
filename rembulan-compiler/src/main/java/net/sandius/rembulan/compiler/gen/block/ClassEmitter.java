@@ -14,12 +14,12 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
-public class ClassEmit {
+public class ClassEmitter {
 
 	private final PrototypeContext context;
 	private final ClassVisitor visitor;
 
-	public ClassEmit(PrototypeContext context, ClassVisitor visitor) {
+	public ClassEmitter(PrototypeContext context, ClassVisitor visitor) {
 		this.context = Check.notNull(context);
 		this.visitor = Check.notNull(visitor);
 	}
@@ -28,7 +28,7 @@ public class ClassEmit {
 		return Type.getType(context.className());
 	}
 
-	public void _begin() {
+	public void begin() {
 		visitor.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, thisType().getInternalName(), null, Type.getInternalName(Function.class), null);
 		visitor.visitSource(context.prototype().getShortSource(), null);
 
@@ -36,7 +36,7 @@ public class ClassEmit {
 		_constructor();
 	}
 
-	public void _end() {
+	public void end() {
 		visitor.visitEnd();
 	}
 
@@ -95,7 +95,7 @@ public class ClassEmit {
 		mv.visitEnd();
 	}
 
-	public Emit _code_emit() {
+	public CodeEmitter code() {
 		Type methodType = Type.getMethodType(
 				Type.VOID_TYPE,
 				Type.getType(LuaState.class),
@@ -107,7 +107,7 @@ public class ClassEmit {
 				null,
 				new String[] { Type.getInternalName(ControlThrowable.class) });
 
-		return new Emit(this, context, mv);
+		return new CodeEmitter(this, context, mv);
 	}
 
 }

@@ -9,9 +9,6 @@ import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
-import net.sandius.rembulan.core.Dispatch;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -79,7 +76,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 			e._load_reg(r_src, s);
 			e._store(r_dest, s);
@@ -116,7 +113,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 			e._load_k(constIndex);
 			e._store(r_dest, s);
@@ -180,7 +177,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 			for (int i = 0; i < count; i++) {
 				e._push_null();
@@ -216,7 +213,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 			e._get_upvalue_ref(upvalueIndex);
 			e._get_upvalue_value();
@@ -253,7 +250,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 
 			e._save_pc(this);
@@ -406,7 +403,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 			e._new_table(arraySize, hashSize);
 			e._store(r_dest, s);
@@ -612,7 +609,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			Type tpe = inSlots().typeAt(r_index);
 
 			int ha;
@@ -816,7 +813,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 
 			if (b > 0) {
@@ -887,7 +884,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 
 			if (b > 0) {
@@ -1063,7 +1060,7 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(Emit e) {
+		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 
 			e._note("capture variables");

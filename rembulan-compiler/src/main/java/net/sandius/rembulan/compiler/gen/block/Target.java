@@ -141,7 +141,7 @@ public class Target implements Node, Src {
 	}
 
 	@Override
-	public void emit(Emit e) {
+	public void emit(CodeEmitter e) {
 		e._label_here(this);
 //
 //		if (inSize() > 1) {

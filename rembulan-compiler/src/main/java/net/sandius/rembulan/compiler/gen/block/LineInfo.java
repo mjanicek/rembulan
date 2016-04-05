@@ -14,7 +14,7 @@ public class LineInfo extends Linear {
 	}
 
 	@Override
-	public void emit(Emit e) {
+	public void emit(CodeEmitter e) {
 		e._line_here(line);
 	}
 
