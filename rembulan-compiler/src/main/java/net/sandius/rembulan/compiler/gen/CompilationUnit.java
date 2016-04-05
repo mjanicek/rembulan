@@ -7,6 +7,7 @@ import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -96,7 +97,14 @@ public class CompilationUnit {
 
 		ce.end();
 
-		return null;  // TODO
+		byte[] bytes = ce.toBytes();
+
+		if (bytes != null) {
+			return new CompiledClass(ctx.className(), ByteVector.wrap(bytes));
+		}
+		else {
+			return null;  // TODO: throw an exception here
+		}
 	}
 
 }

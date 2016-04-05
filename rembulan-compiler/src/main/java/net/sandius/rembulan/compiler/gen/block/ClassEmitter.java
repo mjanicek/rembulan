@@ -40,6 +40,10 @@ public class ClassEmitter {
 		visitor.visitEnd();
 	}
 
+	public byte[] toBytes() {
+		return null;  // TODO
+	}
+
 	public String _upvalue_field_name(int idx) {
 		String n = context.upvalueName(idx);
 		if (n != null) {
