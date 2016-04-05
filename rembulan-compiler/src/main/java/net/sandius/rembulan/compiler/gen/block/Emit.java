@@ -370,9 +370,13 @@ public class Emit {
 	public void _end() {
 		lend = new Label();
 		visitor.visitLabel(lend);
-		_error_state();
+		if (isResumable()) {
+			_error_state();
+		}
 		_dispatch_table();
-		_resumption_handler(lbegin, lend);
+		if (isResumable()) {
+			_resumption_handler(lbegin, lend);
+		}
 	}
 
 	protected void _error_state() {
@@ -383,14 +387,24 @@ public class Emit {
 		visitor.visitInsn(Opcodes.ATHROW);
 	}
 
+	protected boolean isResumable() {
+		return resumptionPoints.size() > 1;
+	}
+
 	protected void _dispatch_table() {
 		visitor.visitLabel(lswitch);
 		_frame_same();
 
-		Label[] labels = resumptionPoints.toArray(new Label[0]);
+		if (isResumable()) {
+			Label[] labels = resumptionPoints.toArray(new Label[0]);
 
-		visitor.visitVarInsn(Opcodes.ILOAD, LV_RESUME);
-		visitor.visitTableSwitchInsn(0, resumptionPoints.size() - 1, lerror, labels);
+			visitor.visitVarInsn(Opcodes.ILOAD, LV_RESUME);
+			visitor.visitTableSwitchInsn(0, resumptionPoints.size() - 1, lerror, labels);
+		}
+		else {
+			// only entry point here
+			visitor.visitJumpInsn(Opcodes.GOTO, resumptionPoints.get(0));
+		}
 	}
 
 	protected int numOfRegisters() {
