@@ -59,8 +59,7 @@ public class ClassEmitter {
 		classNode.access = ACC_PUBLIC + ACC_SUPER;
 		classNode.name = thisClassType().getInternalName();
 		classNode.superName = superClassType().getInternalName();
-//		classNode.sourceFile = context.prototype().getShortSource();
-		classNode.sourceFile = "something.lua";
+		classNode.sourceFile = context.prototype().getShortSource();
 
 		addUpvalueFields();
 
