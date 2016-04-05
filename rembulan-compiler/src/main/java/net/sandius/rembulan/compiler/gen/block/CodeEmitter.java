@@ -6,6 +6,7 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
@@ -131,29 +132,29 @@ public class CodeEmitter {
 		code.add(new InsnNode(ACONST_NULL));
 	}
 
-	public void _push_int(int i) {
+	public void _push_int(InsnList il, int i) {
 		switch (i) {
-			case -1: code.add(new InsnNode(ICONST_M1)); break;
-			case 0: code.add(new InsnNode(ICONST_0)); break;
-			case 1: code.add(new InsnNode(ICONST_1)); break;
-			case 2: code.add(new InsnNode(ICONST_2)); break;
-			case 3: code.add(new InsnNode(ICONST_3)); break;
-			case 4: code.add(new InsnNode(ICONST_4)); break;
-			case 5: code.add(new InsnNode(ICONST_5)); break;
-			default: code.add(new LdcInsnNode(i)); break;
+			case -1: il.add(new InsnNode(ICONST_M1)); break;
+			case 0: il.add(new InsnNode(ICONST_0)); break;
+			case 1: il.add(new InsnNode(ICONST_1)); break;
+			case 2: il.add(new InsnNode(ICONST_2)); break;
+			case 3: il.add(new InsnNode(ICONST_3)); break;
+			case 4: il.add(new InsnNode(ICONST_4)); break;
+			case 5: il.add(new InsnNode(ICONST_5)); break;
+			default: il.add(new LdcInsnNode(i)); break;
 		}
 	}
 
-	private void _push_long(long l) {
-		if (l == 0L) code.add(new InsnNode(LCONST_0));
-		else if (l == 1L) code.add(new InsnNode(LCONST_1));
-		else code.add(new LdcInsnNode(l));
+	private void _push_long(InsnList il, long l) {
+		if (l == 0L) il.add(new InsnNode(LCONST_0));
+		else if (l == 1L) il.add(new InsnNode(LCONST_1));
+		else il.add(new LdcInsnNode(l));
 	}
 
-	public void _push_double(double d) {
-		if (d == 0.0) code.add(new InsnNode(DCONST_0));
-		else if (d == 1.0) code.add(new InsnNode(DCONST_1));
-		else code.add(new LdcInsnNode(d));
+	public void _push_double(InsnList il, double d) {
+		if (d == 0.0) il.add(new InsnNode(DCONST_0));
+		else if (d == 1.0) il.add(new InsnNode(DCONST_1));
+		else il.add(new LdcInsnNode(d));
 	}
 
 	public void _load_k(int idx, Class castTo) {
@@ -163,15 +164,15 @@ public class CodeEmitter {
 			_push_null();
 		}
 		else if (k instanceof Boolean) {
-			_push_int((Boolean) k ? 1 : 0);
+			_push_int(code, (Boolean) k ? 1 : 0);
 			_invokeStatic(Boolean.class, "valueOf", Type.getMethodType(Type.getType(Boolean.class), Type.BOOLEAN_TYPE));
 		}
 		else if (k instanceof Double || k instanceof Float) {
-			_push_double(((Number) k).doubleValue());
+			_push_double(code, ((Number) k).doubleValue());
 			_invokeStatic(Double.class, "valueOf", Type.getMethodType(Type.getType(Double.class), Type.DOUBLE_TYPE));
 		}
 		else if (k instanceof Number) {
-			_push_long(((Number) k).longValue());
+			_push_long(code, ((Number) k).longValue());
 			_invokeStatic(Long.class, "valueOf", Type.getMethodType(Type.getType(Long.class), Type.LONG_TYPE));
 		}
 		else if (k instanceof String) {
@@ -194,6 +195,11 @@ public class CodeEmitter {
 
 	public void _load_reg_value(int idx) {
 		code.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
+	}
+
+	public void _load_reg_value(int idx, Class clazz) {
+		_load_reg_value(idx);
+		_checkCast(clazz);
 	}
 
 	public void _load_reg(int idx, SlotState slots, Class castTo) {
@@ -388,6 +394,7 @@ public class CodeEmitter {
 	}
 
 	public void _retrieve_1() {
+		_loadObjectSink();
 		_invokeVirtual(ObjectSink.class, "_1", Type.getMethodType(Type.getType(Object.class)));
 	}
 
@@ -397,7 +404,7 @@ public class CodeEmitter {
 		int idx = resumptionPoints.size();
 		resumptionPoints.add(rl);
 
-		_push_int(idx);
+		_push_int(code, idx);
 		code.add(new VarInsnNode(ISTORE, LV_RESUME));
 	}
 
@@ -410,12 +417,19 @@ public class CodeEmitter {
 	private LabelNode l_error_state;
 	private LabelNode l_body_end;
 
+	private LabelNode l_handler_begin;
+	private LabelNode l_handler_end;
+
 	public void begin() {
 		l_insns_begin = new LabelNode();
 		methodNode.instructions.add(l_insns_begin);
 
 		l_body_begin = new LabelNode();
 		l_error_state = new LabelNode();
+
+		l_handler_begin = new LabelNode();
+		l_handler_end = new LabelNode();
+
 		resumptionPoints.add(l_body_begin);
 
 		code.add(l_body_begin);
@@ -445,12 +459,19 @@ public class CodeEmitter {
 		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
 
 		for (int i = 0; i < numOfRegisters(); i++) {
-			locals.add(new LocalVariableNode("r_" + (i + 1), Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, REGISTER_OFFSET + i));
+			locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, REGISTER_OFFSET + i));
+		}
+
+		if (isResumable()) {
+			locals.add(new LocalVariableNode("ct", Type.getDescriptor(ControlThrowable.class), null, l_handler_begin, l_handler_end, REGISTER_OFFSET + numOfRegisters()));
 		}
 
 		// TODO: check these
-		methodNode.maxLocals = numOfRegisters() + 4;
-		methodNode.maxStack = numOfRegisters() + 5;
+//		methodNode.maxLocals = numOfRegisters() + 4;
+//		methodNode.maxStack = numOfRegisters() + 5;
+
+		methodNode.maxLocals = locals.size();
+		methodNode.maxStack = 4 + numOfRegisters() + 4;
 
 		methodNode.instructions.add(resumeSwitch);
 		methodNode.instructions.add(code);
@@ -462,7 +483,7 @@ public class CodeEmitter {
 
 	protected void _error_state() {
 		errorState.add(l_error_state);
-		errorState.add(new TypeInsnNode(NEW, Type.getDescriptor(IllegalStateException.class)));
+		errorState.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
 		errorState.add(new InsnNode(DUP));
 		errorState.add(new MethodInsnNode(
 				INVOKESPECIAL,
@@ -490,48 +511,62 @@ public class CodeEmitter {
 		return context.prototype().getMaximumStackSize();
 	}
 
-	protected void _make_saved_state() {
-		_new(ResumeInfo.SavedState.class);
-		_dup();
+	protected void _make_saved_state(InsnList il) {
+		il.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.SavedState.class)));
+		il.add(new InsnNode(DUP));
 
 		// resumption point
-		code.add(new VarInsnNode(ILOAD, LV_RESUME));
+		il.add(new VarInsnNode(ILOAD, LV_RESUME));
 
 		// registers
 		int numRegs = numOfRegisters();
-		_push_int(numRegs);
-		code.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+		_push_int(il, numRegs);
+		il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
 		for (int i = 0; i < numRegs; i++) {
-			_dup();
-			_push_int(i);
-			_load_reg_value(i);
-			code.add(new InsnNode(AASTORE));
+			il.add(new InsnNode(DUP));
+			_push_int(il, i);
+			il.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + i));
+			il.add(new InsnNode(AASTORE));
 		}
 
-		_ctor(Type.getType(ResumeInfo.SavedState.class), Type.INT_TYPE, ASMUtils.arrayTypeFor(Object.class));
+		il.add(new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(ResumeInfo.SavedState.class), "<init>", Type.getMethodType(Type.VOID_TYPE, Type.INT_TYPE, ASMUtils.arrayTypeFor(Object.class)).getDescriptor(), false));
+//		_ctor(Type.getType(ResumeInfo.SavedState.class), Type.INT_TYPE, ASMUtils.arrayTypeFor(Object.class));
 	}
 
 	protected void _resumption_handler(LabelNode begin, LabelNode end) {
-		LabelNode handler = new LabelNode();
-		code.add(handler);
-		code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) }));
+		resumeHandler.add(l_handler_begin);
+		resumeHandler.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) }));
 
-		_new(ResumeInfo.class);
-		_dup();
+		// TODO: is this required? maybe we could do all this on stack -- we'd simply DUP the exception here
+		resumeHandler.add(new VarInsnNode(ASTORE, REGISTER_OFFSET + numOfRegisters()));
+		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
 
-		_make_saved_state();
+		resumeHandler.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.class)));
+		resumeHandler.add(new InsnNode(DUP));
 
-		_ctor(ResumeInfo.class, Object.class);  // FIXME
+		resumeHandler.add(new VarInsnNode(ALOAD, 0));
+		resumeHandler.add(new TypeInsnNode(CHECKCAST, Type.getDescriptor(Resumable.class)));  // FIXME: get rid of this
+		_make_saved_state(resumeHandler);
 
-		_invokeVirtual(ControlThrowable.class, "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)));
+		resumeHandler.add(new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(ResumeInfo.class), "<init>", Type.getMethodType(Type.VOID_TYPE, Type.getType(Resumable.class), Type.getType(Object.class)).getDescriptor(), false));
+		resumeHandler.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(ControlThrowable.class), "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)).getDescriptor(), false));
+
+		// TODO: remove if not actually needed (maybe we could do all of this on stack)
+		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
 
 		// rethrow
-		code.add(new InsnNode(ATHROW));
+		resumeHandler.add(new InsnNode(ATHROW));
 
-		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(begin, end, handler, Type.getInternalName(ControlThrowable.class)));
+		resumeHandler.add(l_handler_end);
+
+		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_error_state, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_error_state, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+
+//		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(begin, end, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
 	}
 
 	public void _get_upvalue_ref(int idx) {
+		code.add(new VarInsnNode(ALOAD, 0));
 		code.add(new FieldInsnNode(
 				GETFIELD,
 				_className(thisClassName()),
@@ -618,8 +653,8 @@ public class CodeEmitter {
 	public void _new_table(int array, int hash) {
 		_loadState();
 		_invokeVirtual(LuaState.class, "tableFactory", Type.getMethodType(Type.getType(TableFactory.class)));
-		_push_int(array);
-		_push_int(hash);
+		_push_int(code, array);
+		_push_int(code, hash);
 		_invokeVirtual(TableFactory.class, "newTable", Type.getMethodType(Type.getType(Table.class), Type.INT_TYPE, Type.INT_TYPE));
 	}
 

@@ -620,6 +620,8 @@ public interface LuaInstruction {
 			else if (tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) {
 				// TODO: check correctness for DYNAMIC
 
+				e._load_reg(r_index, inSlots());
+
 				if (value)  {
 					e._if_null(falseBranch());
 					e._next_insn(trueBranch());
@@ -1085,7 +1087,7 @@ public interface LuaInstruction {
 			for (Prototype.UpvalueDesc uvd : context.nestedPrototype(index).getUpValueDescriptions()) {
 				if (uvd.inStack) {
 					// by this point all upvalues have been captured
-					e._load_reg_value(uvd.index);
+					e._load_reg_value(uvd.index, Upvalue.class);
 				}
 				else {
 					e._get_upvalue_ref(uvd.index);

@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import java.io.PrintWriter
+import java.io.{BufferedOutputStream, FileOutputStream, PrintWriter}
 
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
@@ -109,13 +109,25 @@ object AnalysisRunner {
 
   }
 
+  def dumpToFile(cc: CompiledClass): Unit = {
+    val filename = cc.name() + ".class"
+
+    println("Dumping \"" + cc.name() + "\" to \"" + filename + "\"...")
+
+    val bytes = cc.bytes().copyToNewArray()
+
+    val bos = new BufferedOutputStream(new FileOutputStream(filename, false))
+    Stream.continually(bos.write(bytes))
+    bos.close()
+  }
+
   val loader = new LuaCFragmentCompiler("luac53")
 
   def main(args: Array[String]): Unit = {
 
     import BasicFragments._
 
-    val program = JustAdd
+    val program = Upvalues3
     val proto = loader.compile(program)
 
     section("LuaC version") {
@@ -136,6 +148,11 @@ object AnalysisRunner {
 
       val flow = timed("Compile") {
         compiler.compile(proto)
+      }
+
+      // write classes to files
+      for (cc <- flow.classes()) {
+        dumpToFile(cc)
       }
 
       for (u <- flow.units.toSeq.sortBy { _.name }) {

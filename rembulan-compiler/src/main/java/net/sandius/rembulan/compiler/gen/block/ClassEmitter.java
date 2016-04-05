@@ -50,7 +50,8 @@ public class ClassEmitter {
 	}
 
 	protected Type superClassType() {
-		return Type.getType(Function.class);
+		return Type.getType(Object.class);
+//		return Type.getType(Function.class);
 	}
 
 	public void begin() {
@@ -58,7 +59,8 @@ public class ClassEmitter {
 		classNode.access = ACC_PUBLIC + ACC_SUPER;
 		classNode.name = thisClassType().getInternalName();
 		classNode.superName = superClassType().getInternalName();
-		classNode.sourceFile = context.prototype().getShortSource();
+//		classNode.sourceFile = context.prototype().getShortSource();
+		classNode.sourceFile = "something.lua";
 
 		addUpvalueFields();
 
