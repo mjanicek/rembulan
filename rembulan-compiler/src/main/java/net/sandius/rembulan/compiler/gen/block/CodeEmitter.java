@@ -16,10 +16,13 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.MethodNode;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 
 public class CodeEmitter {
 
@@ -33,6 +36,8 @@ public class CodeEmitter {
 	private final PrototypeContext context;
 	private final MethodVisitor visitor;
 
+	private final MethodNode methodNode;
+
 	private final Map<Object, Label> labels;
 	private final ArrayList<Label> resumptionPoints;
 
@@ -42,6 +47,29 @@ public class CodeEmitter {
 		this.visitor = Check.notNull(visitor);
 		this.labels = new HashMap<>();
 		this.resumptionPoints = new ArrayList<>();
+
+		this.methodNode = new MethodNode(ACC_PRIVATE, methodName(), methodType().getDescriptor(), null, exceptions());
+	}
+
+	public MethodNode node() {
+		return methodNode;
+	}
+
+	private String methodName() {
+		return "run";
+	}
+
+	private Type methodType() {
+		return Type.getMethodType(
+				Type.VOID_TYPE,
+				Type.getType(LuaState.class),
+				Type.getType(ObjectSink.class),
+				Type.INT_TYPE
+		);
+	}
+
+	private String[] exceptions() {
+		return new String[] { Type.getInternalName(ControlThrowable.class) };
 	}
 
 	protected Label _l(Object key) {

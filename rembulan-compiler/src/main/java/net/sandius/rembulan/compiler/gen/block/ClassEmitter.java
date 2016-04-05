@@ -208,7 +208,11 @@ public class ClassEmitter {
 				null,
 				new String[] { Type.getInternalName(ControlThrowable.class) });
 
-		return new CodeEmitter(this, context, mv);
+		CodeEmitter emitter = new CodeEmitter(this, context, mv);
+
+		classNode.methods.add(emitter.node());
+
+		return emitter;
 	}
 
 }
