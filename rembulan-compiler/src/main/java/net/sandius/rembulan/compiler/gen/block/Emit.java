@@ -29,13 +29,15 @@ public class Emit {
 	public final int LV_OBJECTSINK = 1;
 	public final int LV_RESUME = 2;
 
+	private final ClassEmit parent;
 	private final PrototypeContext context;
 	private final MethodVisitor visitor;
 
 	private final Map<Object, Label> labels;
 	private final ArrayList<Label> resumptionPoints;
 
-	public Emit(PrototypeContext context, MethodVisitor visitor) {
+	public Emit(ClassEmit parent, PrototypeContext context, MethodVisitor visitor) {
+		this.parent = Check.notNull(parent);
 		this.context = Check.notNull(context);
 		this.visitor = Check.notNull(visitor);
 		this.labels = new HashMap<>();
@@ -69,6 +71,10 @@ public class Emit {
 
 	public void _swap() {
 		visitor.visitInsn(Opcodes.SWAP);
+	}
+
+	public void _push_this() {
+		visitor.visitVarInsn(Opcodes.ALOAD, 0);
 	}
 
 	public void _push_null() {
@@ -377,6 +383,8 @@ public class Emit {
 		if (isResumable()) {
 			_resumption_handler(lbegin, lend);
 		}
+
+		visitor.visitEnd();
 	}
 
 	protected void _error_state() {
@@ -452,21 +460,11 @@ public class Emit {
 		visitor.visitTryCatchBlock(begin, end, handler, Type.getInternalName(ControlThrowable.class));
 	}
 
-	public String _upvalue_field_name(int idx) {
-		String n = context.upvalueName(idx);
-		if (n != null) {
-			return n;  // FIXME: make sure it's a valid name, & that it's unique!
-		}
-		else {
-			return "uv_" + idx;
-		}
-	}
-
 	public void _get_upvalue_ref(int idx) {
 		visitor.visitFieldInsn(
 				Opcodes.GETFIELD,
 				_className(thisClassName()),
-				_upvalue_field_name(idx),
+				parent._upvalue_field_name(idx),
 				Type.getDescriptor(Upvalue.class));
 	}
 

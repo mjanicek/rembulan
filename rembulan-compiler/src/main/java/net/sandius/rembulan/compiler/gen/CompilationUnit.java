@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.compiler.gen.block.ClassEmit;
 import net.sandius.rembulan.compiler.gen.block.Emit;
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.Node;
@@ -88,34 +89,19 @@ public class CompilationUnit {
 
 		ClassVisitor cv = new TraceClassVisitor(new PrintWriter(System.out));
 
-		Type thisType = Type.getType(ctx.className());
+		ClassEmit ce = new ClassEmit(ctx, cv);
 
-		cv.visit(Opcodes.V1_7, Opcodes.ACC_PUBLIC + Opcodes.ACC_SUPER, thisType.getInternalName(), null, Type.getInternalName(Function.class), null);
-		cv.visitSource(prototype.getShortSource(), null);
+		ce._begin();
 
-		Type methodType = Type.getMethodType(
-				Type.VOID_TYPE,
-				Type.getType(LuaState.class),
-				Type.getType(ObjectSink.class),
-				Type.INT_TYPE
-		);
-
-		MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PRIVATE, "run", methodType.getDescriptor(),
-				null,
-				new String[] { Type.getInternalName(ControlThrowable.class) });
-
-		Emit e = new Emit(ctx, mv);
+		Emit e = ce._code_emit();
 
 		e._begin();
-
 		for (Node n : topoSorted) {
 			n.emit(e);
 		}
-
 		e._end();
 
-		mv.visitEnd();
-		cv.visitEnd();
+		ce._end();
 
 		return null;  // TODO
 	}
