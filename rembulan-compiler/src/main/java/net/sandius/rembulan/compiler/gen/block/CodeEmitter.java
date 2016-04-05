@@ -462,16 +462,16 @@ public class CodeEmitter {
 			locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, REGISTER_OFFSET + i));
 		}
 
-		if (isResumable()) {
-			locals.add(new LocalVariableNode("ct", Type.getDescriptor(ControlThrowable.class), null, l_handler_begin, l_handler_end, REGISTER_OFFSET + numOfRegisters()));
-		}
+//		if (isResumable()) {
+//			locals.add(new LocalVariableNode("ct", Type.getDescriptor(ControlThrowable.class), null, l_handler_begin, l_handler_end, REGISTER_OFFSET + numOfRegisters()));
+//		}
 
 		// TODO: check these
 //		methodNode.maxLocals = numOfRegisters() + 4;
 //		methodNode.maxStack = numOfRegisters() + 5;
 
 		methodNode.maxLocals = locals.size();
-		methodNode.maxStack = 4 + numOfRegisters() + 4;
+		methodNode.maxStack = 4 + numOfRegisters() + 5;
 
 		methodNode.instructions.add(resumeSwitch);
 		methodNode.instructions.add(code);
@@ -537,9 +537,10 @@ public class CodeEmitter {
 		resumeHandler.add(l_handler_begin);
 		resumeHandler.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) }));
 
-		// TODO: is this required? maybe we could do all this on stack -- we'd simply DUP the exception here
-		resumeHandler.add(new VarInsnNode(ASTORE, REGISTER_OFFSET + numOfRegisters()));
-		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
+		resumeHandler.add(new InsnNode(DUP));
+//		// TODO: is this required? maybe we could do all this on stack -- we'd simply DUP the exception here
+//		resumeHandler.add(new VarInsnNode(ASTORE, REGISTER_OFFSET + numOfRegisters()));
+//		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
 
 		resumeHandler.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.class)));
 		resumeHandler.add(new InsnNode(DUP));
@@ -551,8 +552,8 @@ public class CodeEmitter {
 		resumeHandler.add(new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(ResumeInfo.class), "<init>", Type.getMethodType(Type.VOID_TYPE, Type.getType(Resumable.class), Type.getType(Object.class)).getDescriptor(), false));
 		resumeHandler.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(ControlThrowable.class), "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)).getDescriptor(), false));
 
-		// TODO: remove if not actually needed (maybe we could do all of this on stack)
-		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
+//		// TODO: remove if not actually needed (maybe we could do all of this on stack)
+//		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
 
 		// rethrow
 		resumeHandler.add(new InsnNode(ATHROW));
