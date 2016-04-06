@@ -218,6 +218,10 @@ public class ClassEmitter {
 		return ctorMethodNode;
 	}
 
+	protected ClassNode node() {
+		return classNode;
+	}
+
 	public CodeEmitter code() {
 		CodeEmitter emitter = new CodeEmitter(this, context);
 		classNode.methods.add(emitter.node());

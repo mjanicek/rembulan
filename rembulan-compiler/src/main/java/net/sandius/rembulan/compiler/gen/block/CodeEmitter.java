@@ -50,6 +50,7 @@ public class CodeEmitter {
 
 	private final MethodNode methodNode;
 	private final MethodNode resumeMethodNode;
+	private MethodNode saveStateNode;
 
 	private final Map<Object, LabelNode> labels;
 	private final ArrayList<LabelNode> resumptionPoints;
@@ -83,6 +84,8 @@ public class CodeEmitter {
 						null,
 				exceptions());
 
+		this.saveStateNode = null;
+
 		resumeSwitch = new InsnList();
 		code = new InsnList();
 		errorState = new InsnList();
@@ -95,6 +98,10 @@ public class CodeEmitter {
 
 	public MethodNode resumeNode() {
 		return resumeMethodNode;
+	}
+
+	public MethodNode saveNode() {
+		return saveStateNode;
 	}
 
 	private String methodName() {
@@ -502,6 +509,11 @@ public class CodeEmitter {
 		methodNode.instructions.add(l_insns_end);
 
 		emitResumeNode();
+
+		MethodNode save = saveStateNode();
+		if (save != null) {
+			parent.node().methods.add(save);
+		}
 	}
 
 	private void emitResumeNode() {
@@ -569,26 +581,98 @@ public class CodeEmitter {
 		return context.prototype().getMaximumStackSize();
 	}
 
-	protected void _make_saved_state(InsnList il) {
-		il.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.SavedState.class)));
-		il.add(new InsnNode(DUP));
-
-		// resumption point
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-
-		// registers
-		int numRegs = numOfRegisters();
-		_push_int(il, numRegs);
-		il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
-		for (int i = 0; i < numRegs; i++) {
-			il.add(new InsnNode(DUP));
-			_push_int(il, i);
-			il.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + i));
-			il.add(new InsnNode(AASTORE));
+	private Type saveStateType() {
+		Type[] args = new Type[1 + numOfRegisters()];
+		args[0] = Type.INT_TYPE;
+		for (int i = 1; i < args.length; i++) {
+			args[i] = Type.getType(Object.class);
 		}
+		return Type.getMethodType(Type.getType(ResumeInfo.class), args);
+	}
 
-		il.add(new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(ResumeInfo.SavedState.class), "<init>", Type.getMethodType(Type.VOID_TYPE, Type.INT_TYPE, ASMUtils.arrayTypeFor(Object.class)).getDescriptor(), false));
-//		_ctor(Type.getType(ResumeInfo.SavedState.class), Type.INT_TYPE, ASMUtils.arrayTypeFor(Object.class));
+	private String saveStateName() {
+		return "resumeInfo";
+	}
+
+	private MethodNode saveStateNode() {
+		if (isResumable()) {
+			MethodNode saveNode = new MethodNode(
+					ACC_PRIVATE,
+					saveStateName(),
+					saveStateType().getDescriptor(),
+					null,
+					null);
+
+			InsnList il = saveNode.instructions;
+			LabelNode begin = new LabelNode();
+			LabelNode end = new LabelNode();
+
+			il.add(begin);
+
+			il.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.class)));
+			il.add(new InsnNode(DUP));
+
+			il.add(new VarInsnNode(ALOAD, 0));
+
+			il.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.SavedState.class)));
+			il.add(new InsnNode(DUP));
+
+			// resumption point
+			il.add(new VarInsnNode(ILOAD, 1));
+
+			// registers
+			int numRegs = numOfRegisters();
+			_push_int(il, numRegs);
+			il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+			for (int i = 0; i < numRegs; i++) {
+				il.add(new InsnNode(DUP));
+				_push_int(il, i);
+				il.add(new VarInsnNode(ALOAD, 2 + i));
+				il.add(new InsnNode(AASTORE));
+			}
+
+			// TODO: varargs
+
+			il.add(new MethodInsnNode(
+					INVOKESPECIAL,
+					Type.getInternalName(ResumeInfo.SavedState.class),
+					"<init>",
+					Type.getMethodType(
+							Type.VOID_TYPE,
+							Type.INT_TYPE,
+							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
+					false));
+
+			il.add(new MethodInsnNode(
+					INVOKESPECIAL,
+					Type.getInternalName(ResumeInfo.class),
+					"<init>",
+					Type.getMethodType(
+							Type.VOID_TYPE,
+							Type.getType(Resumable.class),
+							Type.getType(Object.class)).getDescriptor(),
+					false));
+
+			il.add(new InsnNode(ARETURN));
+
+			il.add(end);
+
+			List<LocalVariableNode> locals = saveNode.localVariables;
+
+			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
+			locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, begin, end, 1));
+			for (int i = 0; i < numOfRegisters(); i++) {
+				locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, begin, end, 2 + i));
+			}
+
+			saveNode.maxLocals = 2 + numOfRegisters();
+			saveNode.maxStack = 7 + 3;  // 7 to get register array at top, +3 to add element to it
+
+			return saveNode;
+		}
+		else {
+			return null;
+		}
 	}
 
 	protected void _resumption_handler(LabelNode begin, LabelNode end) {
@@ -600,14 +684,22 @@ public class CodeEmitter {
 //		resumeHandler.add(new VarInsnNode(ASTORE, REGISTER_OFFSET + numOfRegisters()));
 //		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
 
-		resumeHandler.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.class)));
-		resumeHandler.add(new InsnNode(DUP));
-
 		resumeHandler.add(new VarInsnNode(ALOAD, 0));
-//		resumeHandler.add(new TypeInsnNode(CHECKCAST, Type.getDescriptor(Resumable.class)));  // FIXME: get rid of this
-		_make_saved_state(resumeHandler);
+		resumeHandler.add(new VarInsnNode(ILOAD, LV_RESUME));
+		for (int i = 0; i < numOfRegisters(); i++) {
+			resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + i));
+		}
 
-		resumeHandler.add(new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(ResumeInfo.class), "<init>", Type.getMethodType(Type.VOID_TYPE, Type.getType(Resumable.class), Type.getType(Object.class)).getDescriptor(), false));
+		resumeHandler.add(new MethodInsnNode(
+				INVOKESPECIAL,
+				_className(thisClassName()),
+				saveStateName(),
+				saveStateType().getDescriptor(),
+				false
+		));
+
+//		resumeHandler.add(new TypeInsnNode(CHECKCAST, Type.getDescriptor(Resumable.class)));  // FIXME: get rid of this
+
 		resumeHandler.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(ControlThrowable.class), "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)).getDescriptor(), false));
 
 //		// TODO: remove if not actually needed (maybe we could do all of this on stack)
