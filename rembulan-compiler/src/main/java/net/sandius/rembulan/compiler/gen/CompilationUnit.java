@@ -27,10 +27,10 @@ public class CompilationUnit {
 
 	private FunctionCode generic;
 
-	public CompilationUnit(Prototype prototype, String name, CompilationContext ctx) {
+	public CompilationUnit(Prototype prototype, Prototype parent, String name, CompilationContext ctx) {
 		this.prototype = Check.notNull(prototype);
 		this.name = name;
-		this.ctx = new PrototypeContext(Check.notNull(ctx), prototype);
+		this.ctx = new PrototypeContext(Check.notNull(ctx), prototype, parent);
 
 		this.generic = null;
 	}

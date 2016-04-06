@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
-import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -11,6 +11,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FieldNode;
+import org.objectweb.asm.tree.InnerClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
@@ -22,15 +23,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static org.objectweb.asm.Opcodes.ACC_FINAL;
-import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACC_SUPER;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.PUTFIELD;
-import static org.objectweb.asm.Opcodes.RETURN;
-import static org.objectweb.asm.Opcodes.V1_7;
+import static org.objectweb.asm.Opcodes.*;
 
 public class ClassEmitter {
 
@@ -61,6 +54,8 @@ public class ClassEmitter {
 		classNode.superName = superClassType().getInternalName();
 		classNode.sourceFile = context.prototype().getShortSource();
 
+		addInnerClassLinks();
+
 		addUpvalueFields();
 
 		classNode.methods.add(constructorNode());
@@ -79,6 +74,43 @@ public class ClassEmitter {
 
 	private String toJavaName(String n) {
 		return n;
+	}
+
+	private void addInnerClassLinks() {
+		String ownName = context.className();
+
+		// parent
+		String parent = context.parentClassName();
+		if (parent != null) {
+			// assume (parent + "$") is the prefix of ownName
+			String suffix = ownName.substring(parent.length() + 1);
+
+			classNode.innerClasses.add(new InnerClassNode(
+					CodeEmitter._className(ownName),
+					CodeEmitter._className(parent),
+					suffix,
+					ACC_PUBLIC + ACC_STATIC));
+		}
+
+		// children
+		for (Prototype child : context.prototype().getNestedPrototypes()) {
+			String childName = context.compilationContext().prototypeClassName(child);
+			if (childName != null) {
+				// assume (ownName + "$") is the prefix of childName
+				String suffix = childName.substring(ownName.length() + 1);
+
+				classNode.innerClasses.add(new InnerClassNode(
+						CodeEmitter._className(childName),
+						CodeEmitter._className(ownName),
+						suffix,
+						ACC_PUBLIC + ACC_STATIC));
+			}
+		}
+//		classNode.innerClasses
+
+		// TODO: is this actually needed?
+		// TODO: only emit when used in the code!
+		classNode.innerClasses.add(new InnerClassNode(Type.getInternalName(ResumeInfo.SavedState.class), Type.getInternalName(ResumeInfo.class), "SavedState", ACC_PUBLIC + ACC_STATIC));
 	}
 
 	private String findUniqueUpvalueName(String prefix) {

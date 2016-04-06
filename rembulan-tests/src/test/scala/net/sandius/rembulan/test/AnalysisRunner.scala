@@ -142,12 +142,12 @@ object AnalysisRunner {
       proto.accept(new PrototypePrinterVisitor(new PrintWriter(System.out)))
     }
 
-    val compiler = new ChunkCompiler(new SuffixingClassNameGenerator("test"))
+    val compiler = new ChunkCompiler()
 
     section("Compilation") {
 
       val flow = timed("Compile") {
-        compiler.compile(proto)
+        compiler.compile(proto, "test")
       }
 
       // write classes to files

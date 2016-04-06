@@ -266,17 +266,17 @@ public class CodeEmitter {
 	}
 
 	@Deprecated
-	public String _className(String cn) {
+	public static String _className(String cn) {
 		return cn.replace('.', '/');
 	}
 
 	@Deprecated
-	public String _classDesc(String cn) {
+	public static String _classDesc(String cn) {
 		return "L" + _className(cn) + ";";
 	}
 
 	@Deprecated
-	public String _classDesc(Class clazz) {
+	public static String _classDesc(Class clazz) {
 		if (clazz.isPrimitive()) {
 			if (clazz.equals(void.class)) return "V";
 			else if (clazz.equals(byte.class)) return "B";

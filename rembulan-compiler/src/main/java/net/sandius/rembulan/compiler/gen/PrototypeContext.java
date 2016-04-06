@@ -10,10 +10,12 @@ public class PrototypeContext {
 
 	private final CompilationContext compilationContext;
 	private final Prototype prototype;
+	private final Prototype parent;
 
-	public PrototypeContext(CompilationContext compilationContext, Prototype prototype) {
+	public PrototypeContext(CompilationContext compilationContext, Prototype prototype, Prototype parent) {
 		this.compilationContext = Check.notNull(compilationContext);
 		this.prototype = Check.notNull(prototype);
+		this.parent = parent;
 	}
 
 	public CompilationContext compilationContext() {
@@ -60,6 +62,15 @@ public class PrototypeContext {
 
 	public String className() {
 		return compilationContext().prototypeClassName(prototype);
+	}
+
+	public String parentClassName() {
+		if (parent != null) {
+			return compilationContext().prototypeClassName(parent);
+		}
+		else {
+			return null;
+		}
 	}
 
 	public String upvalueName(int idx) {

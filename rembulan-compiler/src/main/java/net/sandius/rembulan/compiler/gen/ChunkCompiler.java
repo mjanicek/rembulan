@@ -16,20 +16,19 @@ import java.util.Map;
 
 public class ChunkCompiler {
 
-	protected final ClassNameGenerator nameGenerator;
-
-	public ChunkCompiler(ClassNameGenerator nameGenerator) {
-		this.nameGenerator = nameGenerator;
+	public ChunkCompiler() {
 	}
 
-	public Chunk compile(Prototype prototype) {
+	public Chunk compile(Prototype prototype, String name) {
 		Map<Prototype, CompilationUnit> units = new HashMap<>();
 		List<CompilationUnit> us = new LinkedList<>();
 		List<CompiledClass> classes = new LinkedList<>();
 
 		CompilationContext ctx = new CompilationContext(units);
 
-		addUnits(units, ctx, prototype, us, nameGenerator);
+		ClassNameGenerator nameGenerator = new BaseClassNameGenerator(name);
+
+		addUnits(units, ctx, prototype, null, us, nameGenerator);
 
 		for (CompilationUnit u : us) {
 			System.out.println("Processing " + u.name() + "...");
@@ -47,9 +46,9 @@ public class ChunkCompiler {
 		return new Chunk(prototype, units, classes);
 	}
 
-	private void addUnits(Map<Prototype, CompilationUnit> units, CompilationContext ctx, Prototype prototype, List<CompilationUnit> us, ClassNameGenerator nameGen) {
+	private void addUnits(Map<Prototype, CompilationUnit> units, CompilationContext ctx, Prototype prototype, Prototype parent, List<CompilationUnit> us, ClassNameGenerator nameGen) {
 		if (!units.containsKey(prototype)) {
-			CompilationUnit u = new CompilationUnit(prototype, nameGen.next(), ctx);
+			CompilationUnit u = new CompilationUnit(prototype, parent, nameGen.next(), ctx);
 			u.initGeneric();
 
 			units.put(prototype, u);
@@ -59,7 +58,7 @@ public class ChunkCompiler {
 
 			for (int i = 0; i < prototype.getNestedPrototypes().size(); i++) {
 				Prototype np = prototype.getNestedPrototypes().get(i);
-				addUnits(units, ctx, np, us, childNameGen);
+				addUnits(units, ctx, np, prototype, us, childNameGen);
 			}
 		}
 	}
