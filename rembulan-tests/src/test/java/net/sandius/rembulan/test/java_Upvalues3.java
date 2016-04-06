@@ -29,13 +29,13 @@ public class java_Upvalues3 extends Object {
 					r_2 = sink._1();
 					if (r_2 == null) {
 						r_0 = new Upvalue(r_0);
-						r_2 = new $1((Upvalue) r_0);
+						r_2 = new f1((Upvalue) r_0);
 						r_1 = r_2;
 						r_1 = new Upvalue(r_1);
 					}
 					else {
 						r_1 = new Upvalue(r_1);
-						r_2 = new $2((Upvalue) r_1);
+						r_2 = new f2((Upvalue) r_1);
 						r_0 = r_2;
 						r_0 = new Upvalue(r_0);
 					}
@@ -58,11 +58,11 @@ public class java_Upvalues3 extends Object {
 		}
 	}
 
-	public static class $1 extends Object {
+	public static class f1 extends Object {
 
 		protected final Upvalue x;
 
-		public $1(Upvalue x) {
+		public f1(Upvalue x) {
 			super();
 			this.x = x;
 		}
@@ -74,11 +74,11 @@ public class java_Upvalues3 extends Object {
 
 	}
 
-	public static class $2 extends Object {
+	public static class f2 extends Object {
 
 		protected final Upvalue y;
 
-		public $2(Upvalue y) {
+		public f2(Upvalue y) {
 			super();
 			this.y = y;
 		}
