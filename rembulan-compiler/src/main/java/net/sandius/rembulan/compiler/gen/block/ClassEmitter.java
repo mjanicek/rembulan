@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
+import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
@@ -52,6 +53,7 @@ public class ClassEmitter {
 		classNode.access = ACC_PUBLIC + ACC_SUPER;
 		classNode.name = thisClassType().getInternalName();
 		classNode.superName = superClassType().getInternalName();
+		classNode.interfaces.add(Type.getInternalName(Resumable.class));
 		classNode.sourceFile = context.prototype().getShortSource();
 
 		addInnerClassLinks();
@@ -219,6 +221,7 @@ public class ClassEmitter {
 	public CodeEmitter code() {
 		CodeEmitter emitter = new CodeEmitter(this, context);
 		classNode.methods.add(emitter.node());
+		classNode.methods.add(emitter.resumeNode());
 		return emitter;
 	}
 

@@ -49,6 +49,7 @@ public class CodeEmitter {
 	private final PrototypeContext context;
 
 	private final MethodNode methodNode;
+	private final MethodNode resumeMethodNode;
 
 	private final Map<Object, LabelNode> labels;
 	private final ArrayList<LabelNode> resumptionPoints;
@@ -64,7 +65,23 @@ public class CodeEmitter {
 		this.labels = new HashMap<>();
 		this.resumptionPoints = new ArrayList<>();
 
-		this.methodNode = new MethodNode(ACC_PRIVATE, methodName(), methodType().getDescriptor(), null, exceptions());
+		this.methodNode = new MethodNode(
+				ACC_PRIVATE,
+				methodName(),
+				methodType().getDescriptor(),
+				null,
+				exceptions());
+
+		this.resumeMethodNode = new MethodNode(
+				ACC_PUBLIC,
+				"resume",
+				Type.getMethodType(
+						Type.VOID_TYPE,
+						Type.getType(LuaState.class),
+						Type.getType(ObjectSink.class),
+						Type.getType(Object.class)).getDescriptor(),
+						null,
+				exceptions());
 
 		resumeSwitch = new InsnList();
 		code = new InsnList();
@@ -74,6 +91,10 @@ public class CodeEmitter {
 
 	public MethodNode node() {
 		return methodNode;
+	}
+
+	public MethodNode resumeNode() {
+		return resumeMethodNode;
 	}
 
 	private String methodName() {
@@ -479,6 +500,43 @@ public class CodeEmitter {
 		methodNode.instructions.add(resumeHandler);
 
 		methodNode.instructions.add(l_insns_end);
+
+		emitResumeNode();
+	}
+
+	private void emitResumeNode() {
+//		if (isResumable()) {
+//
+//		}
+//		else
+		{
+			InsnList il = resumeMethodNode.instructions;
+			List<LocalVariableNode> locals = resumeMethodNode.localVariables;
+
+			LabelNode begin = new LabelNode();
+			LabelNode end = new LabelNode();
+
+			il.add(begin);
+			il.add(new TypeInsnNode(NEW, Type.getInternalName(UnsupportedOperationException.class)));
+			il.add(new InsnNode(DUP));
+			il.add(new MethodInsnNode(
+					INVOKESPECIAL,
+					Type.getInternalName(UnsupportedOperationException.class),
+					"<init>",
+					Type.getMethodType(
+							Type.VOID_TYPE).getDescriptor(),
+					false));
+			il.add(new InsnNode(ATHROW));
+			il.add(end);
+
+			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
+			locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, begin, end, 1));
+			locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, begin, end, 2));
+			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 3));
+
+			resumeMethodNode.maxStack = 2;
+			resumeMethodNode.maxLocals = 4;
+		}
 	}
 
 	protected void _error_state() {
@@ -546,7 +604,7 @@ public class CodeEmitter {
 		resumeHandler.add(new InsnNode(DUP));
 
 		resumeHandler.add(new VarInsnNode(ALOAD, 0));
-		resumeHandler.add(new TypeInsnNode(CHECKCAST, Type.getDescriptor(Resumable.class)));  // FIXME: get rid of this
+//		resumeHandler.add(new TypeInsnNode(CHECKCAST, Type.getDescriptor(Resumable.class)));  // FIXME: get rid of this
 		_make_saved_state(resumeHandler);
 
 		resumeHandler.add(new MethodInsnNode(INVOKESPECIAL, Type.getInternalName(ResumeInfo.class), "<init>", Type.getMethodType(Type.VOID_TYPE, Type.getType(Resumable.class), Type.getType(Object.class)).getDescriptor(), false));
