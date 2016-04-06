@@ -4,11 +4,11 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.impl.Function0;
 
-public class java_Upvalues3 extends Object {
+public class java_Upvalues3 extends Function0 {
 
 	protected final Upvalue _ENV;
 
@@ -53,12 +53,24 @@ public class java_Upvalues3 extends Object {
 			}
 		}
 		catch (ControlThrowable ct) {
-			ct.push(new ResumeInfo((Resumable) this, new ResumeInfo.SavedState(rp, new Object[] {r_0, r_1, r_2 })));
+			ct.push(new ResumeInfo(this, new ResumeInfo.SavedState(rp, new Object[] {r_0, r_1, r_2 })));
 			throw ct;
 		}
 	}
 
-	public static class f1 extends Object {
+	@Override
+	public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		ResumeInfo.SavedState ss = (ResumeInfo.SavedState) suspendedState;
+		Object[] regs = ss.registers;
+		run(state, result, ss.resumptionPoint, regs[0], regs[1], regs[2]);
+	}
+
+	@Override
+	public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
+		run(state, result, 0, null, null, null);
+	}
+
+	public static class f1 extends Function0 {
 
 		protected final Upvalue x;
 
@@ -68,13 +80,23 @@ public class java_Upvalues3 extends Object {
 		}
 
 		private void run(LuaState state, ObjectSink sink, int rp, Object r_0, Object r_1) throws ControlThrowable {
-			r_1 = x.get();
-			sink.setTo(r_1);
+			r_0 = x.get();
+			sink.setTo(r_0);
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
+			run(state, result, 0, null, null);
 		}
 
 	}
 
-	public static class f2 extends Object {
+	public static class f2 extends Function0 {
 
 		protected final Upvalue y;
 
@@ -84,8 +106,18 @@ public class java_Upvalues3 extends Object {
 		}
 
 		private void run(LuaState state, ObjectSink sink, int rp, Object r_0, Object r_1) throws ControlThrowable {
-			r_1 = y.get();
-			sink.setTo(r_1);
+			r_0 = y.get();
+			sink.setTo(r_0);
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
+			run(state, result, 0, null, null);
 		}
 
 	}

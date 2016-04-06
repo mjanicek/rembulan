@@ -1,6 +1,6 @@
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.util.ReadOnlyArray;
+import net.sandius.rembulan.util.Check;
 
 public class ResumeInfo {
 
@@ -15,17 +15,17 @@ public class ResumeInfo {
 	public static class SavedState {
 
 		public final int resumptionPoint;
-		public final ReadOnlyArray<Object> registers;
-		public final ReadOnlyArray<Object> varargs;
+		public final Object[] registers;
+		public final Object[] varargs;
 
 		public SavedState(int resumptionPoint, Object[] registers, Object[] varargs) {
 			this.resumptionPoint = resumptionPoint;
-			this.registers = ReadOnlyArray.copyFrom(registers);
-			this.varargs = ReadOnlyArray.copyFrom(varargs);
+			this.registers = Check.notNull(registers);
+			this.varargs = varargs;
 		}
 
 		public SavedState(int resumptionPoint, Object[] registers) {
-			this(resumptionPoint, registers, new Object[0]);
+			this(resumptionPoint, registers, null);
 		}
 
 	}
