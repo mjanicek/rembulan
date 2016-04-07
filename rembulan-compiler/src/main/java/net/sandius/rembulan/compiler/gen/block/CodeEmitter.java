@@ -31,6 +31,7 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -134,6 +135,10 @@ public class CodeEmitter {
 			labels.put(key, nl);
 			return nl;
 		}
+	}
+
+	protected Type thisType() {
+		return Type.getType("L" + thisClassName().replace('.', '/') + ";");
 	}
 
 	protected String thisClassName() {
@@ -255,6 +260,12 @@ public class CodeEmitter {
 		_load_reg(idx, slots, null);
 	}
 
+	public void _load_regs(int firstIdx, SlotState slots, int num) {
+		for (int i = 0; i < num; i++) {
+			_load_reg(firstIdx + i, slots);
+		}
+	}
+
 	public void _get_downvalue(int idx) {
 		code.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
 		_checkCast(Upvalue.class);
@@ -303,30 +314,6 @@ public class CodeEmitter {
 		return "L" + _className(cn) + ";";
 	}
 
-	@Deprecated
-	public static String _classDesc(Class clazz) {
-		if (clazz.isPrimitive()) {
-			if (clazz.equals(void.class)) return "V";
-			else if (clazz.equals(byte.class)) return "B";
-			else if (clazz.equals(boolean.class)) return "Z";
-			else if (clazz.equals(char.class)) return "C";
-			else if (clazz.equals(double.class)) return "D";
-			else if (clazz.equals(float.class)) return "F";
-			else if (clazz.equals(int.class)) return "I";
-			else if (clazz.equals(long.class)) return "J";
-			else if (clazz.equals(short.class)) return "S";
-			else throw new IllegalArgumentException();
-		}
-		else {
-			if (clazz.isArray()) {
-				return _className(clazz.getName());
-			}
-			else {
-				return "L" + _className(clazz.getName()) + ";";
-			}
-		}
-	}
-
 	public void _invokeStatic(Class clazz, String methodName, Type methodSignature) {
 		code.add(new MethodInsnNode(
 				INVOKESTATIC,
@@ -365,25 +352,6 @@ public class CodeEmitter {
 				methodSignature.getDescriptor(),
 				false
 		));
-	}
-
-//	public void _invokeSpecial(Class clazz, String methodName, String methodSignature) {
-//		_invokeSpecial(clazz.getName(), methodName, methodSignature);
-//	}
-
-	public String _methodSignature(Class returnType, Class... parameters) {
-		StringBuilder bld = new StringBuilder();
-		bld.append("(");
-		for (Class p : parameters) {
-			bld.append(_classDesc(p));
-		}
-		bld.append(")");
-		bld.append(_classDesc(returnType));
-		return bld.toString();
-	}
-
-	public void _dispatchCall(String methodName, Type signature) {
-		_invokeStatic(Dispatch.class, methodName, signature);
 	}
 
 	public void _dispatch_binop(String name, Class clazz) {
@@ -686,10 +654,16 @@ public class CodeEmitter {
 				_className(thisClassName()),
 				saveStateName(),
 				saveStateType().getDescriptor(),
-				false
-		));
+				false));
 
-		resumeHandler.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(ControlThrowable.class), "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)).getDescriptor(), false));
+		resumeHandler.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(ControlThrowable.class),
+				"push",
+				Type.getMethodType(
+						Type.VOID_TYPE,
+						Type.getType(ResumeInfo.class)).getDescriptor(),
+				false));
 
 		// rethrow
 		resumeHandler.add(new InsnNode(ATHROW));
@@ -798,42 +772,34 @@ public class CodeEmitter {
 		code.add(new JumpInsnNode(IFNONNULL, _l(target)));
 	}
 
-	public void _tailcall_0() {
-		_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE));
+	public void _tailcall(int num) {
+		Check.nonNegative(num);
+		if (num <= 5) {
+			Type[] a = new Type[num];
+			Arrays.fill(a, Type.getType(Object.class));
+			_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE, a));
+		}
+		else {
+			throw new UnsupportedOperationException("Tail call with " + num + " arguments");
+		}
 	}
 
-	public void _tailcall_1() {
-		Type o = Type.getType(Object.class);
-		_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE, o));
-	}
-
-	public void _tailcall_2() {
-		Type o = Type.getType(Object.class);
-		_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE, o, o));
-	}
-
-	public void _tailcall_3() {
-		Type o = Type.getType(Object.class);
-		_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE, o, o, o));
-	}
-
-	public void _setret_0() {
-		_invokeInterface(ObjectSink.class, "reset", Type.getMethodType(Type.VOID_TYPE));
-	}
-
-	public void _setret_1() {
-		Type o = Type.getType(Object.class);
-		_invokeInterface(ObjectSink.class, "setTo", Type.getMethodType(Type.VOID_TYPE, o));
-	}
-
-	public void _setret_2() {
-		Type o = Type.getType(Object.class);
-		_invokeInterface(ObjectSink.class, "setTo", Type.getMethodType(Type.VOID_TYPE, o, o));
-	}
-
-	public void _setret_3() {
-		Type o = Type.getType(Object.class);
-		_invokeInterface(ObjectSink.class, "setTo", Type.getMethodType(Type.VOID_TYPE, o, o));
+	public void _setret(int num) {
+		Check.nonNegative(num);
+		if (num == 0) {
+			_invokeInterface(ObjectSink.class, "reset", Type.getMethodType(Type.VOID_TYPE));
+		}
+		else {
+			// TODO: determine this by reading the ObjectSink interface
+			if (num <= 5) {
+				Type[] a = new Type[num];
+				Arrays.fill(a, Type.getType(Object.class));
+				_invokeInterface(ObjectSink.class, "setTo", Type.getMethodType(Type.VOID_TYPE, a));
+			}
+			else {
+				throw new UnsupportedOperationException("Return " + num + " values");
+			}
+		}
 	}
 
 	public void _line_here(int line) {

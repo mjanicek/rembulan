@@ -819,34 +819,10 @@ public interface LuaInstruction {
 			SlotState s = inSlots();
 
 			if (b > 0) {
-				// b - 1 is the actual number of arguments
-
-				e._load_reg(r_tgt, s);
-
-				switch (b - 1) {
-					case 0:
-						e._tailcall_0();
-						break;
-					case 1:
-						e._load_reg(r_tgt + 1, s);
-						e._tailcall_1();
-						break;
-					case 2:
-						e._load_reg(r_tgt + 1, s);
-						e._load_reg(r_tgt + 2, s);
-						e._tailcall_2();
-						break;
-					case 3:
-						e._load_reg(r_tgt + 1, s);
-						e._load_reg(r_tgt + 2, s);
-						e._load_reg(r_tgt + 3, s);
-						e._tailcall_3();
-						break;
-					default:
-						e._note("push " + (b - 1) + " registers into object sink, mark as tailcall");
-						break;
-				}
-
+				// b - 1 is the actual number of arguments to the tailcall
+				e._loadObjectSink();
+				e._load_regs(r_tgt, s, b);  // target is at r_tgt, plus (b - 1) arguments
+				e._tailcall(b - 1);
 				e._return();
 			}
 			else {
@@ -891,33 +867,9 @@ public interface LuaInstruction {
 
 			if (b > 0) {
 				// b - 1 is the actual number of results
-
 				e._loadObjectSink();
-
-				switch (b - 1) {
-					case 0:
-						e._setret_0();
-						break;
-					case 1:
-						e._load_reg(r_from, s);
-						e._setret_1();
-						break;
-					case 2:
-						e._load_reg(r_from, s);
-						e._load_reg(r_from + 1, s);
-						e._setret_2();
-						break;
-					case 3:
-						e._load_reg(r_from, s);
-						e._load_reg(r_from + 1, s);
-						e._load_reg(r_from + 2, s);
-						e._setret_3();
-						break;
-					default:
-						e._note("push " + (b - 1) + " registers into object sink");
-						break;
-				}
-
+				e._load_regs(r_from, s, b - 1);
+				e._setret(b - 1);
 				e._return();
 			}
 			else {
