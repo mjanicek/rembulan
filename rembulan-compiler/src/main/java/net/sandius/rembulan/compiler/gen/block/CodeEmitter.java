@@ -183,9 +183,7 @@ public class CodeEmitter {
 		code.add(new InsnNode(ACONST_NULL));
 	}
 
-	public void _load_k(int idx, Class castTo) {
-		Object k = context.getConst(idx);
-
+	public void _load_constant(Object k, Class castTo) {
 		if (k == null) {
 			_push_null();
 		}
@@ -213,6 +211,14 @@ public class CodeEmitter {
 				_checkCast(castTo);
 			}
 		}
+	}
+
+	public void _load_constant(Object k) {
+		_load_constant(k, null);
+	}
+
+	public void _load_k(int idx, Class castTo) {
+		_load_constant(context.getConst(idx), castTo);
 	}
 
 	public void _load_k(int idx) {

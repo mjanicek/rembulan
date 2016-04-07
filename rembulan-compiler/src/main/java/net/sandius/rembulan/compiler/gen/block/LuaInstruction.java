@@ -147,6 +147,13 @@ public interface LuaInstruction {
 			return false;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			SlotState s = inSlots();
+			e._load_constant(value);
+			e._store(r_dest, s);
+		}
+
 	}
 
 	class LoadNil extends Linear implements LuaInstruction {
