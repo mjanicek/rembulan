@@ -2,6 +2,13 @@ package net.sandius.rembulan.util.asm;
 
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.LdcInsnNode;
+import org.objectweb.asm.tree.MethodInsnNode;
+
+import static org.objectweb.asm.Opcodes.*;
 
 public abstract class ASMUtils {
 
@@ -28,6 +35,61 @@ public abstract class ASMUtils {
 	public static Type typeForClassName(String className) {
 		Check.notNull(className);
 		return Type.getType("L" + className.replace(".", "/") + ";");
+	}
+
+	public static AbstractInsnNode loadInt(int i) {
+		switch (i) {
+			case -1: return new InsnNode(ICONST_M1);
+			case 0:  return new InsnNode(ICONST_0);
+			case 1:  return new InsnNode(ICONST_1);
+			case 2:  return new InsnNode(ICONST_2);
+			case 3:  return new InsnNode(ICONST_3);
+			case 4:  return new InsnNode(ICONST_4);
+			case 5:  return new InsnNode(ICONST_5);
+			default: return new LdcInsnNode(i);
+		}
+	}
+
+	public static AbstractInsnNode loadLong(long l) {
+		if (l == 0L) return new InsnNode(LCONST_0);
+		else if (l == 1L) return new InsnNode(LCONST_1);
+		else return new LdcInsnNode(l);
+	}
+
+	public static AbstractInsnNode loadDouble(double d) {
+		if (d == 0.0) return new InsnNode(DCONST_0);
+		else if (d == 1.0) return new InsnNode(DCONST_1);
+		else return new LdcInsnNode(d);
+	}
+
+	public static MethodInsnNode box(Type from, Type to) {
+		return new MethodInsnNode(
+				INVOKESTATIC,
+				to.getInternalName(),
+				"valueOf",
+				Type.getMethodDescriptor(
+						to,
+						from),
+				false);
+	}
+
+	public static MethodInsnNode ctor(Type of, Type... args) {
+		return new MethodInsnNode(
+				INVOKESPECIAL,
+				of.getInternalName(),
+				"<init>",
+				Type.getMethodDescriptor(
+						Type.VOID_TYPE,
+						args),
+				false);
+	}
+
+	public static MethodInsnNode ctor(Class clazz, Class... args) {
+		Type[] argTypes = new Type[args.length];
+		for (int i = 0; i < args.length; i++) {
+			argTypes[i] = Type.getType(args[i]);
+		}
+		return ctor(Type.getType(clazz), argTypes);
 	}
 
 }
