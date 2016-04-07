@@ -264,7 +264,7 @@ public interface LuaInstruction {
 			e._dispatch_index();
 
 			e._resumptionPoint(this);
-			e._retrieve_1();
+			e._retrieve_0();
 			e._store(r_dest, s);
 		}
 

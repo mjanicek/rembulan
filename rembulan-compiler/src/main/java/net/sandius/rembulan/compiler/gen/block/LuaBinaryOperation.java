@@ -117,7 +117,7 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 
 				e._resumptionPoint(this);
 				e._loadObjectSink();
-				e._retrieve_1();
+				e._retrieve_0();
 				e._store(r_dest, s);
 				break;
 		}

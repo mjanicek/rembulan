@@ -348,10 +348,10 @@ public class CodeEmitter {
 				.push();
 	}
 
-	public void _retrieve_1() {
+	public void _retrieve_0() {
 		withObjectSink(code)
 				.push()
-				.call_get(1);
+				.call_get(0);
 	}
 
 	public void _save_pc(Object o) {

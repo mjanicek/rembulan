@@ -28,7 +28,7 @@ public class java_Upvalues3 extends Function0 {
 					rp = 1;
 					Dispatch.index(state, sink, _ENV.get(), "g");
 				case 1:
-					r_2 = sink._1();
+					r_2 = sink._0();
 					if (r_2 == null) {
 						r_0 = state.newUpvalue(r_0);
 						r_2 = new f1((Upvalue) r_0);
