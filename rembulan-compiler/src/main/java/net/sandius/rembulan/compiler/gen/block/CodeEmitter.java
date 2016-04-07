@@ -443,10 +443,8 @@ public class CodeEmitter {
 	private LabelNode l_insns_begin;
 	private LabelNode l_body_begin;
 	private LabelNode l_error_state;
-	private LabelNode l_body_end;
 
 	private LabelNode l_handler_begin;
-	private LabelNode l_handler_end;
 
 	public void begin() {
 		l_insns_begin = new LabelNode();
@@ -456,7 +454,6 @@ public class CodeEmitter {
 		l_error_state = new LabelNode();
 
 		l_handler_begin = new LabelNode();
-		l_handler_end = new LabelNode();
 
 		resumptionPoints.add(l_body_begin);
 
@@ -465,15 +462,12 @@ public class CodeEmitter {
 	}
 
 	public void end() {
-		l_body_end = new LabelNode();
-		code.add(l_body_end);
-
 		if (isResumable()) {
 			_error_state();
 		}
 		_dispatch_table();
 		if (isResumable()) {
-			_resumption_handler(l_body_begin, l_body_end);
+			_resumption_handler();
 		}
 
 		// local variable declaration
@@ -675,14 +669,11 @@ public class CodeEmitter {
 		}
 	}
 
-	protected void _resumption_handler(LabelNode begin, LabelNode end) {
+	protected void _resumption_handler() {
 		resumeHandler.add(l_handler_begin);
 		resumeHandler.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) }));
 
 		resumeHandler.add(new InsnNode(DUP));
-//		// TODO: is this required? maybe we could do all this on stack -- we'd simply DUP the exception here
-//		resumeHandler.add(new VarInsnNode(ASTORE, REGISTER_OFFSET + numOfRegisters()));
-//		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
 
 		resumeHandler.add(new VarInsnNode(ALOAD, 0));
 		resumeHandler.add(new VarInsnNode(ILOAD, LV_RESUME));
@@ -698,22 +689,12 @@ public class CodeEmitter {
 				false
 		));
 
-//		resumeHandler.add(new TypeInsnNode(CHECKCAST, Type.getDescriptor(Resumable.class)));  // FIXME: get rid of this
-
 		resumeHandler.add(new MethodInsnNode(INVOKEVIRTUAL, Type.getInternalName(ControlThrowable.class), "push", Type.getMethodType(Type.VOID_TYPE, Type.getType(ResumeInfo.class)).getDescriptor(), false));
-
-//		// TODO: remove if not actually needed (maybe we could do all of this on stack)
-//		resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + numOfRegisters()));
 
 		// rethrow
 		resumeHandler.add(new InsnNode(ATHROW));
 
-		resumeHandler.add(l_handler_end);
-
-		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_error_state, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
-		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_error_state, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
-
-//		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(begin, end, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
 	}
 
 	public void _get_upvalue_ref(int idx) {
