@@ -570,11 +570,11 @@ public class CodeEmitter {
 		for (int i = 1; i < args.length; i++) {
 			args[i] = Type.getType(Object.class);
 		}
-		return Type.getMethodType(Type.getType(ResumeInfo.class), args);
+		return Type.getMethodType(Type.getType(Object.class), args);
 	}
 
 	private String saveStateName() {
-		return "resumeInfo";
+		return "snapshot";
 	}
 
 	private MethodNode saveStateNode() {
@@ -591,11 +591,6 @@ public class CodeEmitter {
 			LabelNode end = new LabelNode();
 
 			il.add(begin);
-
-			il.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.class)));
-			il.add(new InsnNode(DUP));
-
-			il.add(new VarInsnNode(ALOAD, 0));
 
 			il.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.SavedState.class)));
 			il.add(new InsnNode(DUP));
@@ -621,11 +616,6 @@ public class CodeEmitter {
 					Type.INT_TYPE,
 					ASMUtils.arrayTypeFor(Object.class)));
 
-			il.add(ASMUtils.ctor(
-					Type.getType(ResumeInfo.class),
-					Type.getType(Resumable.class),
-					Type.getType(Object.class)));
-
 			il.add(new InsnNode(ARETURN));
 
 			il.add(end);
@@ -639,7 +629,7 @@ public class CodeEmitter {
 			}
 
 			saveNode.maxLocals = 2 + numOfRegisters();
-			saveNode.maxStack = 7 + 3;  // 7 to get register array at top, +3 to add element to it
+			saveNode.maxStack = 4 + 3;  // 4 to get register array at top, +3 to add element to it
 
 			return saveNode;
 		}
@@ -654,12 +644,14 @@ public class CodeEmitter {
 
 		resumeHandler.add(new InsnNode(DUP));
 
+		resumeHandler.add(new VarInsnNode(ALOAD, 0));  // this
+
+		// create state snapshot
 		resumeHandler.add(new VarInsnNode(ALOAD, 0));
 		resumeHandler.add(new VarInsnNode(ILOAD, LV_RESUME));
 		for (int i = 0; i < numOfRegisters(); i++) {
 			resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + i));
 		}
-
 		resumeHandler.add(new MethodInsnNode(
 				INVOKESPECIAL,
 				parent.thisClassType().getInternalName(),
@@ -667,13 +659,15 @@ public class CodeEmitter {
 				saveStateType().getDescriptor(),
 				false));
 
+		// register snapshot with the control exception
 		resumeHandler.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(ControlThrowable.class),
 				"push",
 				Type.getMethodType(
 						Type.VOID_TYPE,
-						Type.getType(ResumeInfo.class)).getDescriptor(),
+						Type.getType(Resumable.class),
+						Type.getType(Object.class)).getDescriptor(),
 				false));
 
 		// rethrow

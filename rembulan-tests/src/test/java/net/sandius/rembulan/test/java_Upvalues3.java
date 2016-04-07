@@ -53,13 +53,13 @@ public class java_Upvalues3 extends Function0 {
 			}
 		}
 		catch (ControlThrowable ct) {
-			ct.push(resumeInfo(rp, r_0, r_1, r_2));
+			ct.push(this, snapshot(rp, r_0, r_1, r_2));
 			throw ct;
 		}
 	}
 
-	private ResumeInfo resumeInfo(int rp, Object r_0, Object r_1, Object r_2) {
-		return new ResumeInfo(this, new ResumeInfo.SavedState(rp, new Object[] {r_0, r_1, r_2 }));
+	private Object snapshot(int rp, Object r_0, Object r_1, Object r_2) {
+		return new ResumeInfo.SavedState(rp, new Object[] { r_0, r_1, r_2 });
 	}
 
 	@Override
