@@ -29,6 +29,7 @@ import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -80,7 +81,7 @@ public class CodeEmitter {
 						Type.VOID_TYPE,
 						Type.getType(LuaState.class),
 						Type.getType(ObjectSink.class),
-						Type.getType(Object.class)).getDescriptor(),
+						Type.getType(Serializable.class)).getDescriptor(),
 						null,
 				exceptions());
 
@@ -570,7 +571,7 @@ public class CodeEmitter {
 		for (int i = 1; i < args.length; i++) {
 			args[i] = Type.getType(Object.class);
 		}
-		return Type.getMethodType(Type.getType(Object.class), args);
+		return Type.getMethodType(Type.getType(Serializable.class), args);
 	}
 
 	private String saveStateName() {
@@ -667,7 +668,7 @@ public class CodeEmitter {
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						Type.getType(Resumable.class),
-						Type.getType(Object.class)).getDescriptor(),
+						Type.getType(Serializable.class)).getDescriptor(),
 				false));
 
 		// rethrow
