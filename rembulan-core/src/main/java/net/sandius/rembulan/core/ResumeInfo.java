@@ -2,6 +2,8 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
+import java.io.Serializable;
+
 public class ResumeInfo {
 
 	public final Resumable function;
@@ -12,7 +14,7 @@ public class ResumeInfo {
 		this.savedState = savedState;
 	}
 
-	public static class SavedState {
+	public static class SavedState implements Serializable {
 
 		public final int resumptionPoint;
 		public final Object[] registers;

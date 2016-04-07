@@ -9,6 +9,8 @@ import net.sandius.rembulan.core.impl.Function0;
 import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.util.Ptr;
 
+import java.io.Serializable;
+
 /*
 function ()
     local function plusOne(x)
@@ -135,7 +137,7 @@ public class MinusPlus extends Function0 {
 	}
 
 	@Override
-	public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+	public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 		throw new UnsupportedOperationException();
 	}
 
@@ -202,7 +204,7 @@ public class MinusPlus extends Function0 {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -268,7 +270,7 @@ public class MinusPlus extends Function0 {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 

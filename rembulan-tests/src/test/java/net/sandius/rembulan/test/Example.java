@@ -7,6 +7,8 @@ import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.util.Ptr;
 
+import java.io.Serializable;
+
 public class Example extends Function2 {
 
 	public Example() {
@@ -64,7 +66,7 @@ public class Example extends Function2 {
 	}
 
 	@Override
-	public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+	public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 		throw new UnsupportedOperationException();
 	}
 

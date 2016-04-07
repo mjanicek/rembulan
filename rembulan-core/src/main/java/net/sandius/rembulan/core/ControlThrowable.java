@@ -2,6 +2,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -24,7 +25,7 @@ public abstract class ControlThrowable extends Throwable {
 		callStack.addFirst(ci);
 	}
 
-	public void push(Resumable resumable, Object suspendedState) {
+	public void push(Resumable resumable, Serializable suspendedState) {
 		throw new UnsupportedOperationException();  // TODO
 	}
 

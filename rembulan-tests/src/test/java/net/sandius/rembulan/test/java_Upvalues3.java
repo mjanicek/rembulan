@@ -8,6 +8,8 @@ import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.core.impl.Function0;
 
+import java.io.Serializable;
+
 public class java_Upvalues3 extends Function0 {
 
 	protected final Upvalue _ENV;
@@ -58,12 +60,12 @@ public class java_Upvalues3 extends Function0 {
 		}
 	}
 
-	private Object snapshot(int rp, Object r_0, Object r_1, Object r_2) {
+	private Serializable snapshot(int rp, Object r_0, Object r_1, Object r_2) {
 		return new ResumeInfo.SavedState(rp, new Object[] { r_0, r_1, r_2 });
 	}
 
 	@Override
-	public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+	public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 		ResumeInfo.SavedState ss = (ResumeInfo.SavedState) suspendedState;
 		Object[] regs = ss.registers;
 		run(state, result, ss.resumptionPoint, regs[0], regs[1], regs[2]);
@@ -89,7 +91,7 @@ public class java_Upvalues3 extends Function0 {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -115,7 +117,7 @@ public class java_Upvalues3 extends Function0 {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 

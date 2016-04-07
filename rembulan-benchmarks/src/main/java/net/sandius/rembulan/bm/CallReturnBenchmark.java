@@ -15,6 +15,8 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 
+import java.io.Serializable;
+
 import static net.sandius.rembulan.util.testing.Assertions.assertEquals;
 
 @Fork(1)
@@ -218,7 +220,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -254,7 +256,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -289,7 +291,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -324,7 +326,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -396,7 +398,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -436,7 +438,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -475,7 +477,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -514,7 +516,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Object suspendedState) throws ControlThrowable {
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
