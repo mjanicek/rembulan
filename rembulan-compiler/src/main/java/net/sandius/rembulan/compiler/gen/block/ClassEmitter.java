@@ -1,8 +1,17 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
+import net.sandius.rembulan.compiler.types.FunctionType;
+import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.impl.Function0;
+import net.sandius.rembulan.core.impl.Function1;
+import net.sandius.rembulan.core.impl.Function2;
+import net.sandius.rembulan.core.impl.Function3;
+import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -30,13 +39,17 @@ public class ClassEmitter {
 
 	private final PrototypeContext context;
 	private final ClassNode classNode;
+	private final int numOfParameters;
+	private final boolean isVararg;
 
 	private final ArrayList<String> upvalueFieldNames;
 
-	public ClassEmitter(PrototypeContext context) {
+	public ClassEmitter(PrototypeContext context, int numOfParameters, boolean isVararg) {
 		this.context = Check.notNull(context);
 		this.classNode = new ClassNode();
 		this.upvalueFieldNames = new ArrayList<>();
+		this.numOfParameters = numOfParameters;
+		this.isVararg = isVararg;
 	}
 
 	protected Type thisClassType() {
@@ -48,9 +61,45 @@ public class ClassEmitter {
 		return cn != null ? ASMUtils.typeForClassName(cn) : null;
 	}
 
+	protected static int kind(int num, boolean vararg) {
+		return (!vararg && num >= 0 && num < 4) ? num : -1;
+	}
+
+	// negative arg <= function is vararg
+	private static Class<? extends Function> superClassForKind(int kind) {
+		switch (kind) {
+			case 0: return Function0.class;
+			case 1: return Function1.class;
+			case 2: return Function2.class;
+			case 3: return Function3.class;
+			default: return FunctionAnyarg.class;
+		}
+	}
+
+	protected Type invokeMethodType() {
+		int k = kind(numOfParameters, isVararg);
+
+		ArrayList<Type> args = new ArrayList<>();
+		args.add(Type.getType(LuaState.class));
+		args.add(Type.getType(ObjectSink.class));
+
+		if (k < 0) {
+			args.add(ASMUtils.arrayTypeFor(Object.class));
+		}
+		else {
+			Type o = Type.getType(Object.class);
+			for (int i = 0; i < k; i++) {
+				args.add(o);
+			}
+		}
+
+		return Type.getMethodType(
+				Type.VOID_TYPE,
+				args.toArray(new Type[0]));
+	}
+
 	protected Type superClassType() {
-		return Type.getType(Object.class);
-//		return Type.getType(Function.class);
+		return Type.getType(superClassForKind(kind(numOfParameters, isVararg)));
 	}
 
 	public void begin() {
@@ -58,7 +107,6 @@ public class ClassEmitter {
 		classNode.access = ACC_PUBLIC + ACC_SUPER;
 		classNode.name = thisClassType().getInternalName();
 		classNode.superName = superClassType().getInternalName();
-		classNode.interfaces.add(Type.getInternalName(Resumable.class));
 		classNode.sourceFile = context.prototype().getShortSource();
 
 		addInnerClassLinks();
@@ -227,9 +275,10 @@ public class ClassEmitter {
 	}
 
 	public CodeEmitter code() {
-		CodeEmitter emitter = new CodeEmitter(this, context);
-		classNode.methods.add(emitter.node());
-		classNode.methods.add(emitter.resumeNode());
+		CodeEmitter emitter = new CodeEmitter(this, context, numOfParameters, isVararg);
+		classNode.methods.add(emitter.invokeMethodNode());
+		classNode.methods.add(emitter.resumeMethodNode());
+		classNode.methods.add(emitter.runMethodNode());
 		return emitter;
 	}
 

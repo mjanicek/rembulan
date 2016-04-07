@@ -49,8 +49,12 @@ public class CodeEmitter {
 	private final ClassEmitter parent;
 	private final PrototypeContext context;
 
-	private final MethodNode methodNode;
+	private final int numOfParameters;
+	private final boolean isVararg;
+
+	private final MethodNode invokeMethodNode;
 	private final MethodNode resumeMethodNode;
+	private final MethodNode runMethodNode;
 	private MethodNode saveStateNode;
 
 	private final Map<Object, LabelNode> labels;
@@ -61,16 +65,19 @@ public class CodeEmitter {
 	private final InsnList errorState;
 	private final InsnList resumeHandler;
 
-	public CodeEmitter(ClassEmitter parent, PrototypeContext context) {
+	public CodeEmitter(ClassEmitter parent, PrototypeContext context, int numOfParameters, boolean isVararg) {
 		this.parent = Check.notNull(parent);
 		this.context = Check.notNull(context);
 		this.labels = new HashMap<>();
 		this.resumptionPoints = new ArrayList<>();
 
-		this.methodNode = new MethodNode(
-				ACC_PRIVATE,
-				methodName(),
-				methodType().getDescriptor(),
+		this.numOfParameters = numOfParameters;
+		this.isVararg = isVararg;
+
+		this.invokeMethodNode = new MethodNode(
+				ACC_PUBLIC,
+				"invoke",
+				invokeMethodType().getDescriptor(),
 				null,
 				exceptions());
 
@@ -85,6 +92,13 @@ public class CodeEmitter {
 						null,
 				exceptions());
 
+		this.runMethodNode = new MethodNode(
+				ACC_PRIVATE,
+				runMethodName(),
+				runMethodType().getDescriptor(),
+				null,
+				exceptions());
+
 		this.saveStateNode = null;
 
 		resumeSwitch = new InsnList();
@@ -93,23 +107,27 @@ public class CodeEmitter {
 		resumeHandler = new InsnList();
 	}
 
-	public MethodNode node() {
-		return methodNode;
+	public MethodNode invokeMethodNode() {
+		return invokeMethodNode;
 	}
 
-	public MethodNode resumeNode() {
+	public MethodNode resumeMethodNode() {
 		return resumeMethodNode;
+	}
+
+	public MethodNode runMethodNode() {
+		return runMethodNode;
 	}
 
 	public MethodNode saveNode() {
 		return saveStateNode;
 	}
 
-	private String methodName() {
+	private String runMethodName() {
 		return "run";
 	}
 
-	private Type methodType() {
+	private Type runMethodType() {
 		Type[] args = new Type[3 + numOfRegisters()];
 		args[0] = Type.getType(LuaState.class);
 		args[1] = Type.getType(ObjectSink.class);
@@ -118,6 +136,10 @@ public class CodeEmitter {
 			args[i] = Type.getType(Object.class);
 		}
 		return Type.getMethodType(Type.VOID_TYPE, args);
+	}
+
+	private Type invokeMethodType() {
+		return parent.invokeMethodType();
 	}
 
 	private String[] exceptions() {
@@ -376,7 +398,7 @@ public class CodeEmitter {
 
 	public void begin() {
 		l_insns_begin = new LabelNode();
-		methodNode.instructions.add(l_insns_begin);
+		runMethodNode.instructions.add(l_insns_begin);
 
 		l_body_begin = new LabelNode();
 		l_error_state = new LabelNode();
@@ -402,7 +424,7 @@ public class CodeEmitter {
 
 		LabelNode l_insns_end = new LabelNode();
 
-		List<LocalVariableNode> locals = methodNode.localVariables;
+		List<LocalVariableNode> locals = runMethodNode.localVariables;
 		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, l_insns_begin, l_insns_end, 0));
 		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, l_insns_begin, l_insns_end, LV_STATE));
 		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, l_insns_begin, l_insns_end, LV_OBJECTSINK));
@@ -417,24 +439,84 @@ public class CodeEmitter {
 //		}
 
 		// TODO: check these
-//		methodNode.maxLocals = numOfRegisters() + 4;
-//		methodNode.maxStack = numOfRegisters() + 5;
+//		runMethodNode.maxLocals = numOfRegisters() + 4;
+//		runMethodNode.maxStack = numOfRegisters() + 5;
 
-		methodNode.maxLocals = locals.size();
-		methodNode.maxStack = 4 + numOfRegisters() + 5;
+		runMethodNode.maxLocals = locals.size();
+		runMethodNode.maxStack = 4 + numOfRegisters() + 5;
 
-		methodNode.instructions.add(resumeSwitch);
-		methodNode.instructions.add(code);
-		methodNode.instructions.add(errorState);
-		methodNode.instructions.add(resumeHandler);
+		runMethodNode.instructions.add(resumeSwitch);
+		runMethodNode.instructions.add(code);
+		runMethodNode.instructions.add(errorState);
+		runMethodNode.instructions.add(resumeHandler);
 
-		methodNode.instructions.add(l_insns_end);
+		runMethodNode.instructions.add(l_insns_end);
 
+		emitInvokeNode();
 		emitResumeNode();
 
 		MethodNode save = saveStateNode();
 		if (save != null) {
 			parent.node().methods.add(save);
+		}
+	}
+
+	private void emitInvokeNode() {
+		InsnList il = invokeMethodNode.instructions;
+		List<LocalVariableNode> locals = invokeMethodNode.localVariables;
+
+		LabelNode begin = new LabelNode();
+		LabelNode end = new LabelNode();
+
+		int invokeKind = ClassEmitter.kind(numOfParameters, isVararg);
+
+
+		il.add(begin);
+
+		il.add(new VarInsnNode(ALOAD, 0));  // this
+		il.add(new VarInsnNode(ALOAD, 1));  // state
+		il.add(new VarInsnNode(ALOAD, 2));  // sink
+		il.add(ASMUtils.loadInt(0));  // resumption point
+
+		if (invokeKind < 0) {
+			throw new UnsupportedOperationException(); // TODO
+		}
+		else {
+			// we have #invokeKind standalone parameters, mapping them onto #numOfRegisters
+
+			for (int i = 0; i < numOfRegisters(); i++) {
+				if (i < invokeKind) {
+					il.add(new VarInsnNode(ALOAD, 3 + i));
+				}
+				else {
+					il.add(new InsnNode(ACONST_NULL));
+				}
+			}
+		}
+
+		il.add(new MethodInsnNode(
+				INVOKESPECIAL,
+				parent.thisClassType().getInternalName(),
+				runMethodName(),
+				runMethodType().getDescriptor(),
+				false));
+		il.add(end);
+
+		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
+		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, begin, end, 1));
+		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, begin, end, 2));
+		if (invokeKind < 0) {
+			locals.add(new LocalVariableNode("args", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 3));
+
+			// TODO: maxLocals, maxStack
+		}
+		else {
+			for (int i = 0; i < invokeKind; i++) {
+				locals.add(new LocalVariableNode("arg_" + i, Type.getDescriptor(Object.class), null, begin, end, 3 + i));
+			}
+
+			invokeMethodNode.maxLocals = 3 + invokeKind;
+			invokeMethodNode.maxStack = 4 + numOfRegisters();
 		}
 	}
 
@@ -502,8 +584,8 @@ public class CodeEmitter {
 			il.add(new MethodInsnNode(
 					INVOKESPECIAL,
 					parent.thisClassType().getInternalName(),
-					methodName(),
-					methodType().getDescriptor(),
+					runMethodName(),
+					runMethodType().getDescriptor(),
 					false
 			));
 
@@ -678,7 +760,7 @@ public class CodeEmitter {
 		// rethrow
 		resumeHandler.add(new InsnNode(ATHROW));
 
-		methodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+		runMethodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
 	}
 
 	public void _get_upvalue_ref(int idx) {

@@ -82,7 +82,10 @@ public class CompilationUnit {
 	public CompiledClass toCompiledClass() {
 		Iterable<Node> topoSorted = generic.sortTopologically();
 
-		ClassEmitter classEmitter = new ClassEmitter(ctx);
+		int numFixedParams = generic.numOfFixedParameters();
+		boolean isVararg = generic.isVararg();
+
+		ClassEmitter classEmitter = new ClassEmitter(ctx, numFixedParams, isVararg);
 
 		classEmitter.begin();
 

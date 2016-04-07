@@ -82,6 +82,10 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		return fixed;
 	}
 
+	public Type tailType() {
+		return tailType;
+	}
+
 	public Type get(int idx) {
 		Check.nonNegative(idx);
 		return idx < fixed().size() ? fixed().get(idx) : tailType;

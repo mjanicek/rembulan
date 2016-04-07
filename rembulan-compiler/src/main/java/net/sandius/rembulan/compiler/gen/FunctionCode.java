@@ -74,6 +74,14 @@ public class FunctionCode {
 		return FunctionType.of(parameterTypes(), returnTypes());
 	}
 
+	public int numOfFixedParameters() {
+		return parameterTypes().fixed().size();
+	}
+
+	public boolean isVararg() {
+		return !parameterTypes().tailType().equals(LuaTypes.NIL);
+	}
+
 	private void collectCallSite(Node n, Map<Prototype, Set<TypeSeq>> callSites) {
 		if (n instanceof LinearSeq) {
 			for (Node m : ((LinearSeq) n).nodes()) {
