@@ -1018,8 +1018,6 @@ public interface LuaInstruction {
 		public void emit(CodeEmitter e) {
 			SlotState s = inSlots();
 
-			e._note("capture variables");
-
 			String closureClassName = context.nestedPrototypeName(index);
 
 			ReadOnlyArray<Prototype.UpvalueDesc> uvds = context.nestedPrototype(index).getUpValueDescriptions();
