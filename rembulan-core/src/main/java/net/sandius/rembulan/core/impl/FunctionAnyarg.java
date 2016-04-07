@@ -5,7 +5,7 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 
-public abstract class FunctionVararg extends Function {
+public abstract class FunctionAnyarg extends Function {
 
 	@Override
 	public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
