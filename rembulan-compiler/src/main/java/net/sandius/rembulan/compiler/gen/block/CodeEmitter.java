@@ -438,10 +438,83 @@ public class CodeEmitter {
 	}
 
 	private void emitResumeNode() {
-//		if (isResumable()) {
-//
-//		}
-//		else
+		if (isResumable()) {
+			InsnList il = resumeMethodNode.instructions;
+			List<LocalVariableNode> locals = resumeMethodNode.localVariables;
+
+			LabelNode begin = new LabelNode();
+			LabelNode vars = new LabelNode();
+			LabelNode end = new LabelNode();
+
+			il.add(begin);
+
+			il.add(new VarInsnNode(ALOAD, 3));
+			il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(ResumeInfo.SavedState.class)));
+
+			il.add(vars);
+
+			il.add(new VarInsnNode(ASTORE, 4));
+
+			il.add(new VarInsnNode(ALOAD, 0));  // this
+			il.add(new VarInsnNode(ALOAD, 1));  // state
+			il.add(new VarInsnNode(ALOAD, 2));  // sink
+
+			il.add(new VarInsnNode(ALOAD, 4));  // saved state
+			il.add(new FieldInsnNode(
+					GETFIELD,
+					Type.getInternalName(ResumeInfo.SavedState.class),
+					"resumptionPoint",
+					Type.INT_TYPE.getDescriptor()
+			));  // resumption point
+
+			// registers
+			if (numOfRegisters() > 0) {
+				il.add(new VarInsnNode(ALOAD, 4));
+				il.add(new FieldInsnNode(
+						GETFIELD,
+						Type.getInternalName(ResumeInfo.SavedState.class),
+						"registers",
+						ASMUtils.arrayTypeFor(Object.class).getDescriptor()
+				));
+
+				for (int i = 0; i < numOfRegisters(); i++) {
+
+					// Note: it might be more elegant to use a local variable
+					// to store the array instead of having to perform SWAPs
+
+					if (i + 1 < numOfRegisters()) {
+						il.add(new InsnNode(DUP));
+					}
+					il.add(ASMUtils.loadInt(i));
+					il.add(new InsnNode(AALOAD));
+					if (i + 1 < numOfRegisters()) {
+						il.add(new InsnNode(SWAP));
+					}
+				}
+			}
+
+			// call run(...)
+			il.add(new MethodInsnNode(
+					INVOKESPECIAL,
+					parent.thisClassType().getInternalName(),
+					methodName(),
+					methodType().getDescriptor(),
+					false
+			));
+
+			il.add(new InsnNode(RETURN));
+			il.add(end);
+
+			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
+			locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, begin, end, 1));
+			locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, begin, end, 2));
+			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 3));
+			locals.add(new LocalVariableNode("ss", Type.getDescriptor(ResumeInfo.SavedState.class), null, vars, end, 4));
+
+			resumeMethodNode.maxStack = 4 + (numOfRegisters() > 0 ? 3: 0);
+			resumeMethodNode.maxLocals = 5;
+		}
+		else
 		{
 			InsnList il = resumeMethodNode.instructions;
 			List<LocalVariableNode> locals = resumeMethodNode.localVariables;
