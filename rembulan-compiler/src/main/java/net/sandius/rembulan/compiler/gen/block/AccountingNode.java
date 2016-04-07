@@ -4,7 +4,7 @@ public abstract class AccountingNode extends Linear {
 
 	@Override
 	public void emit(CodeEmitter e) {
-		e._note("CPU accounting node ignored");
+		e._ignored(this);
 	}
 
 	public static class Add extends AccountingNode {

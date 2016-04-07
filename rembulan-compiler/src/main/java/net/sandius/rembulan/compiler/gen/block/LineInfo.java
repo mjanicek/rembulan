@@ -15,7 +15,7 @@ public class LineInfo extends Linear {
 
 	@Override
 	public void emit(CodeEmitter e) {
-		e._note("line info ignored: " + this.toString());
+		e._ignored(this);
 //		e._line_here(line);
 	}
 

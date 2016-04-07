@@ -159,8 +159,12 @@ public class CodeEmitter {
 		}
 	}
 
-	public void _note(String text) {
-		System.out.println("// " + text);
+	public void _ignored(Object o) {
+		System.out.println("// Ignored: " + o.getClass() + ": " + o.toString());
+	}
+
+	public void _missing(Object o) {
+		System.out.println("// Ignored: " + o.getClass() + ": " + o.toString());
 	}
 
 	public void _dup() {

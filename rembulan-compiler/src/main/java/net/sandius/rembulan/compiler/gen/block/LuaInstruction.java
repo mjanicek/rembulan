@@ -616,7 +616,7 @@ public interface LuaInstruction {
 			int ha;
 
 			if (tpe.isSubtypeOf(LuaTypes.BOOLEAN)) {
-				e._note("boolean and branch");  // TODO
+				e._missing(this);  // TODO
 			}
 			else if (tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) {
 				// TODO: check correctness for DYNAMIC
@@ -868,7 +868,7 @@ public interface LuaInstruction {
 				e._return();
 			}
 			else {
-				e._note("tailcall with varargs");
+				e._missing(this);
 			}
 
 			super.emit(e);
@@ -916,7 +916,7 @@ public interface LuaInstruction {
 			}
 			else {
 				// TODO
-				e._note("return varargs");
+				e._missing(this);
 			}
 		}
 

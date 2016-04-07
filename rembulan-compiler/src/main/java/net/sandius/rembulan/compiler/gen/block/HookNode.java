@@ -4,7 +4,7 @@ public class HookNode extends Linear {
 
 	@Override
 	public void emit(CodeEmitter e) {
-		e._note("hook node ignored");
+		e._ignored(this);
 	}
 
 	public static class Call extends HookNode {

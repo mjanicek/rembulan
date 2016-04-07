@@ -69,7 +69,7 @@ public abstract class Exit implements Node, Sink {
 
 	@Override
 	public void emit(CodeEmitter e) {
-		e._note("TODO: emit " + getClass().getName() + " for " + this.toString());
+		e._missing(this);
 	}
 
 }

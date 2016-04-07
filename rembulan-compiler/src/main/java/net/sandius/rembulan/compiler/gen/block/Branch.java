@@ -123,7 +123,7 @@ public abstract class Branch implements Node, Sink, Jump {
 
 	@Override
 	public void emit(CodeEmitter e) {
-		e._note("TODO: emit " + getClass().getName() + " for " + this.toString());
+		e._missing(this);
 	}
 
 }
