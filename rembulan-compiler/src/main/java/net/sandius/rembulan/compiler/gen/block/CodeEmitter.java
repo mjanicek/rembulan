@@ -136,14 +136,6 @@ public class CodeEmitter {
 		}
 	}
 
-	protected Type thisType() {
-		return Type.getType("L" + thisClassName().replace('.', '/') + ";");
-	}
-
-	protected String thisClassName() {
-		return context.className();
-	}
-
 	public void _note(String text) {
 		System.out.println("// " + text);
 	}
@@ -278,16 +270,6 @@ public class CodeEmitter {
 		}
 	}
 
-	@Deprecated
-	public static String _className(String cn) {
-		return cn.replace('.', '/');
-	}
-
-	@Deprecated
-	public static String _classDesc(String cn) {
-		return "L" + _className(cn) + ";";
-	}
-
 	public void _invokeStatic(Class clazz, String methodName, Type methodSignature) {
 		code.add(new MethodInsnNode(
 				INVOKESTATIC,
@@ -321,7 +303,7 @@ public class CodeEmitter {
 	public void _invokeSpecial(String className, String methodName, Type methodSignature) {
 		code.add(new MethodInsnNode(
 				INVOKESPECIAL,
-				_className(className),
+				ASMUtils.typeForClassName(className).getInternalName(),
 				methodName,
 				methodSignature.getDescriptor(),
 				false
@@ -607,7 +589,7 @@ public class CodeEmitter {
 
 		resumeHandler.add(new MethodInsnNode(
 				INVOKESPECIAL,
-				_className(thisClassName()),
+				parent.thisClassType().getInternalName(),
 				saveStateName(),
 				saveStateType().getDescriptor(),
 				false));
@@ -631,7 +613,7 @@ public class CodeEmitter {
 		code.add(new VarInsnNode(ALOAD, 0));
 		code.add(new FieldInsnNode(
 				GETFIELD,
-				_className(thisClassName()),
+				parent.thisClassType().getInternalName(),
 				parent.getUpvalueFieldName(idx),
 				Type.getDescriptor(Upvalue.class)));
 	}
@@ -649,7 +631,7 @@ public class CodeEmitter {
 	}
 
 	public void _new(String className) {
-		code.add(new TypeInsnNode(NEW, _className(className)));
+		code.add(new TypeInsnNode(NEW, ASMUtils.typeForClassName(className).getInternalName()));
 	}
 
 	public void _new(Class clazz) {
@@ -659,7 +641,7 @@ public class CodeEmitter {
 	public void _closure_ctor(String className, int numUpvalues) {
 		Type[] argTypes = new Type[numUpvalues];
 		Arrays.fill(argTypes, Type.getType(Upvalue.class));
-		code.add(ASMUtils.ctor(Type.getType(_classDesc(className)), argTypes));
+		code.add(ASMUtils.ctor(ASMUtils.typeForClassName(className), argTypes));
 	}
 
 	public void _capture(int idx) {

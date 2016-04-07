@@ -7,6 +7,7 @@ import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
+import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
@@ -40,7 +41,12 @@ public class ClassEmitter {
 	}
 
 	protected Type thisClassType() {
-		return Type.getType(context.className());
+		return ASMUtils.typeForClassName(context.className());
+	}
+
+	protected Type parentClassType() {
+		String cn = context.parentClassName();
+		return cn != null ? ASMUtils.typeForClassName(cn) : null;
 	}
 
 	protected Type superClassType() {
@@ -79,36 +85,38 @@ public class ClassEmitter {
 	}
 
 	private void addInnerClassLinks() {
-		String ownName = context.className();
+		String ownInternalName = thisClassType().getInternalName();
 
 		// parent
-		String parent = context.parentClassName();
-		if (parent != null) {
-			// assume (parent + "$") is the prefix of ownName
-			String suffix = ownName.substring(parent.length() + 1);
+		if (parentClassType() != null) {
+			String parentInternalName = parentClassType().getInternalName();
+
+			// assume (parentInternalName + "$") is the prefix of ownInternalName
+			String suffix = ownInternalName.substring(parentInternalName.length() + 1);
 
 			classNode.innerClasses.add(new InnerClassNode(
-					CodeEmitter._className(ownName),
-					CodeEmitter._className(parent),
+					ownInternalName,
+					parentInternalName,
 					suffix,
 					ACC_PUBLIC + ACC_STATIC));
 		}
 
 		// children
 		for (Prototype child : context.prototype().getNestedPrototypes()) {
-			String childName = context.compilationContext().prototypeClassName(child);
-			if (childName != null) {
-				// assume (ownName + "$") is the prefix of childName
-				String suffix = childName.substring(ownName.length() + 1);
+			String childClassName = context.compilationContext().prototypeClassName(child);
+			if (childClassName != null) {
+				String childInternalName = ASMUtils.typeForClassName(childClassName).getInternalName();
+
+				// assume (ownInternalName + "$") is the prefix of childName
+				String suffix = childInternalName.substring(ownInternalName.length() + 1);
 
 				classNode.innerClasses.add(new InnerClassNode(
-						CodeEmitter._className(childName),
-						CodeEmitter._className(ownName),
+						childInternalName,
+						ownInternalName,
 						suffix,
 						ACC_PUBLIC + ACC_STATIC));
 			}
 		}
-//		classNode.innerClasses
 
 		// TODO: is this actually needed?
 		// TODO: only emit when used in the code!
