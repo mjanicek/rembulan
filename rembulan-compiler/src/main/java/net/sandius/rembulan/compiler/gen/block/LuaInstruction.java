@@ -12,6 +12,7 @@ import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.ReadOnlyArray;
 
 import static net.sandius.rembulan.compiler.gen.block.LuaUtils.argTypesFromSlots;
 import static net.sandius.rembulan.compiler.gen.block.LuaUtils.prefix;
@@ -1021,7 +1022,9 @@ public interface LuaInstruction {
 
 			String closureClassName = context.nestedPrototypeName(index);
 
-			for (Prototype.UpvalueDesc uvd : context.nestedPrototype(index).getUpValueDescriptions()) {
+			ReadOnlyArray<Prototype.UpvalueDesc> uvds = context.nestedPrototype(index).getUpValueDescriptions();
+
+			for (Prototype.UpvalueDesc uvd : uvds) {
 				if (uvd.inStack && !s.isCaptured(uvd.index)) {
 					e._capture(uvd.index);
 					s = s.capture(uvd.index);  // just marking it so that we can store properly
@@ -1031,12 +1034,7 @@ public interface LuaInstruction {
 			e._new(closureClassName);
 			e._dup();
 
-			Class[] args = new Class[context.nestedPrototype(index).getUpValueDescriptions().size()];
-			for (int i = 0; i < args.length; i++) {
-				args[i] = Upvalue.class;
-			}
-
-			for (Prototype.UpvalueDesc uvd : context.nestedPrototype(index).getUpValueDescriptions()) {
+			for (Prototype.UpvalueDesc uvd : uvds) {
 				if (uvd.inStack) {
 					// by this point all upvalues have been captured
 					e._load_reg_value(uvd.index, Upvalue.class);
@@ -1046,7 +1044,7 @@ public interface LuaInstruction {
 				}
 			}
 
-			e._ctor(closureClassName, args);
+			e._closure_ctor(closureClassName, uvds.size());
 
 			e._store(r_dest, s);
 		}

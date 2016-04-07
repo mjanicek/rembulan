@@ -656,11 +656,9 @@ public class CodeEmitter {
 		_new(clazz.getName());
 	}
 
-	public void _ctor(String className, Class... args) {
-		Type[] argTypes = new Type[args.length];
-		for (int i = 0; i < args.length; i++) {
-			argTypes[i] = Type.getType(args[i]);
-		}
+	public void _closure_ctor(String className, int numUpvalues) {
+		Type[] argTypes = new Type[numUpvalues];
+		Arrays.fill(argTypes, Type.getType(Upvalue.class));
 		code.add(ASMUtils.ctor(Type.getType(_classDesc(className)), argTypes));
 	}
 
