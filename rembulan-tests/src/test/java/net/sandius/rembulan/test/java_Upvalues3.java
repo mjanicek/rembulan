@@ -4,8 +4,8 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.core.impl.Function0;
 
 import java.io.Serializable;
@@ -61,12 +61,12 @@ public class java_Upvalues3 extends Function0 {
 	}
 
 	private Serializable snapshot(int rp, Object r_0, Object r_1, Object r_2) {
-		return new ResumeInfo.SavedState(rp, new Object[] { r_0, r_1, r_2 });
+		return new DefaultSavedState(rp, new Object[] { r_0, r_1, r_2 });
 	}
 
 	@Override
 	public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
-		ResumeInfo.SavedState ss = (ResumeInfo.SavedState) suspendedState;
+		DefaultSavedState ss = (DefaultSavedState) suspendedState;
 		Object[] regs = ss.registers;
 		run(state, result, ss.resumptionPoint, regs[0], regs[1], regs[2]);
 	}

@@ -2,7 +2,6 @@ package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.core.Resumable;
-import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -118,9 +117,6 @@ public class ClassEmitter {
 			}
 		}
 
-		// TODO: is this actually needed?
-		// TODO: only emit when used in the code!
-		classNode.innerClasses.add(new InnerClassNode(Type.getInternalName(ResumeInfo.SavedState.class), Type.getInternalName(ResumeInfo.class), "SavedState", ACC_PUBLIC + ACC_STATIC));
 	}
 
 	private String findUniqueUpvalueName(String prefix) {

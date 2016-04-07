@@ -7,9 +7,9 @@ import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Resumable;
-import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.Type;
@@ -450,7 +450,7 @@ public class CodeEmitter {
 			il.add(begin);
 
 			il.add(new VarInsnNode(ALOAD, 3));
-			il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(ResumeInfo.SavedState.class)));
+			il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(DefaultSavedState.class)));
 
 			il.add(vars);
 
@@ -463,7 +463,7 @@ public class CodeEmitter {
 			il.add(new VarInsnNode(ALOAD, 4));  // saved state
 			il.add(new FieldInsnNode(
 					GETFIELD,
-					Type.getInternalName(ResumeInfo.SavedState.class),
+					Type.getInternalName(DefaultSavedState.class),
 					"resumptionPoint",
 					Type.INT_TYPE.getDescriptor()
 			));  // resumption point
@@ -473,7 +473,7 @@ public class CodeEmitter {
 				il.add(new VarInsnNode(ALOAD, 4));
 				il.add(new FieldInsnNode(
 						GETFIELD,
-						Type.getInternalName(ResumeInfo.SavedState.class),
+						Type.getInternalName(DefaultSavedState.class),
 						"registers",
 						ASMUtils.arrayTypeFor(Object.class).getDescriptor()
 				));
@@ -510,7 +510,7 @@ public class CodeEmitter {
 			locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, begin, end, 1));
 			locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, begin, end, 2));
 			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 3));
-			locals.add(new LocalVariableNode("ss", Type.getDescriptor(ResumeInfo.SavedState.class), null, vars, end, 4));
+			locals.add(new LocalVariableNode("ss", Type.getDescriptor(DefaultSavedState.class), null, vars, end, 4));
 
 			resumeMethodNode.maxStack = 4 + (numOfRegisters() > 0 ? 3: 0);
 			resumeMethodNode.maxLocals = 5;
@@ -593,7 +593,7 @@ public class CodeEmitter {
 
 			il.add(begin);
 
-			il.add(new TypeInsnNode(NEW, Type.getInternalName(ResumeInfo.SavedState.class)));
+			il.add(new TypeInsnNode(NEW, Type.getInternalName(DefaultSavedState.class)));
 			il.add(new InsnNode(DUP));
 
 			// resumption point
@@ -613,7 +613,7 @@ public class CodeEmitter {
 			// TODO: varargs
 
 			il.add(ASMUtils.ctor(
-					Type.getType(ResumeInfo.SavedState.class),
+					Type.getType(DefaultSavedState.class),
 					Type.INT_TYPE,
 					ASMUtils.arrayTypeFor(Object.class)));
 
