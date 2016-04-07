@@ -28,6 +28,14 @@ public abstract class LuaState {
 	public abstract Table threadMetatable();
 	public abstract Table lightuserdataMetatable();
 
+	public Table newTable(int array, int hash) {
+		return tableFactory().newTable(array, hash);
+	}
+
+	public Upvalue newUpvalue(Object initialValue) {
+		return new Upvalue(initialValue);
+	}
+
 	public abstract TableFactory tableFactory();
 
 	public abstract boolean shouldPreemptNow();

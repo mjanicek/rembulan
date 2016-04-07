@@ -9,7 +9,6 @@ import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.ResumeInfo;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.asm.ASMUtils;
@@ -666,10 +665,10 @@ public class CodeEmitter {
 	}
 
 	public void _capture(int idx) {
-		_new(Upvalue.class);
-		_dup();
+		LuaState_prx state = withLuaState(code);
+		state.push();
 		_load_reg_value(idx);
-		code.add(ASMUtils.ctor(Upvalue.class, Object.class));
+		state.call_newUpvalue();
 		_store_reg_value(idx);
 	}
 
@@ -708,11 +707,7 @@ public class CodeEmitter {
 	public void _new_table(int array, int hash) {
 		withLuaState(code)
 				.push()
-				.call_tableFactory();
-
-		code.add(ASMUtils.loadInt(array));
-		code.add(ASMUtils.loadInt(hash));
-		_invokeVirtual(TableFactory.class, "newTable", Type.getMethodType(Type.getType(Table.class), Type.INT_TYPE, Type.INT_TYPE));
+				.do_newTable(array, hash);
 	}
 
 	public void _if_null(Object target) {
@@ -766,13 +761,33 @@ public class CodeEmitter {
 			return this;
 		}
 
-		public LuaState_prx call_tableFactory() {
+		public LuaState_prx do_newTable(int array, int hash) {
+			push();
+
+			il.add(ASMUtils.loadInt(array));
+			il.add(ASMUtils.loadInt(hash));
+
 			il.add(new MethodInsnNode(
 					INVOKEVIRTUAL,
 					selfTpe().getInternalName(),
-					"tableFactory",
+					"newTable",
 					Type.getMethodType(
-							Type.getType(TableFactory.class)).getDescriptor(),
+							Type.getType(Table.class),
+							Type.INT_TYPE,
+							Type.INT_TYPE).getDescriptor(),
+					false));
+
+			return this;
+		}
+
+		public LuaState_prx call_newUpvalue() {
+			il.add(new MethodInsnNode(
+					INVOKEVIRTUAL,
+					selfTpe().getInternalName(),
+					"newUpvalue",
+					Type.getMethodType(
+							Type.getType(Upvalue.class),
+							Type.getType(Object.class)).getDescriptor(),
 					false));
 			return this;
 		}

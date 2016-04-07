@@ -28,16 +28,16 @@ public class java_Upvalues3 extends Function0 {
 				case 1:
 					r_2 = sink._1();
 					if (r_2 == null) {
-						r_0 = new Upvalue(r_0);
+						r_0 = state.newUpvalue(r_0);
 						r_2 = new f1((Upvalue) r_0);
 						r_1 = r_2;
-						r_1 = new Upvalue(r_1);
+						r_1 = state.newUpvalue(r_1);
 					}
 					else {
-						r_1 = new Upvalue(r_1);
+						r_1 = state.newUpvalue(r_1);
 						r_2 = new f2((Upvalue) r_1);
 						r_0 = r_2;
-						r_0 = new Upvalue(r_0);
+						r_0 = state.newUpvalue(r_0);
 					}
 					if (((Upvalue) r_0).get() != null) {
 						r_2 = ((Upvalue) r_1).get();
