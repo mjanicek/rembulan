@@ -164,7 +164,7 @@ public class CodeEmitter {
 	}
 
 	public void _missing(Object o) {
-		System.out.println("// Ignored: " + o.getClass() + ": " + o.toString());
+		throw new UnsupportedOperationException("Not implemented: " + o.getClass() + ": " + o.toString());
 	}
 
 	public void _dup() {
