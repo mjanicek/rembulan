@@ -255,6 +255,15 @@ public class CodeEmitter {
 		}
 	}
 
+	public void _pack_regs(int firstIdx, SlotState slots, int num) {
+		code.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+		for (int i = 0; i < num; i++) {
+			code.add(new InsnNode(DUP));
+			code.add(ASMUtils.loadInt(i));
+			_load_reg(firstIdx + i, slots);
+		}
+	}
+
 	public void _get_downvalue(int idx) {
 		code.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
 		_checkCast(Upvalue.class);
@@ -356,6 +365,16 @@ public class CodeEmitter {
 		_dispatch_generic_mt_2("index");
 	}
 
+	public void _dispatch_call(int kind) {
+		code.add(new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Dispatch.class),
+				"call",
+				ClassEmitter.methodTypeForKind(kind).getDescriptor(),
+				false
+		));
+	}
+
 	public void _checkCast(Class clazz) {
 		code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz)));
 	}
@@ -374,6 +393,15 @@ public class CodeEmitter {
 		withObjectSink(code)
 				.push()
 				.call_get(0);
+	}
+
+	public void _retrieve_and_store_n(int n, int firstIdx, SlotState s) {
+		ObjectSink_prx os = withObjectSink(code);
+
+		for (int i = 0; i < n; i++) {
+			os.push().call_get(i);
+			_store(firstIdx + i, s);
+		}
 	}
 
 	public void _save_pc(Object o) {

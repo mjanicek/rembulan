@@ -773,6 +773,47 @@ public interface LuaInstruction {
 			return true;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			SlotState s = inSlots();
+
+			if (b > 0) {
+				int kind = ClassEmitter.kind(b - 1,  false);
+
+				e._save_pc(this);
+
+				e._loadState();
+				e._loadObjectSink();
+				e._load_reg(r_tgt, s);
+
+				if (kind < 0) {
+					// need to pack args into an array
+					e._pack_regs(r_tgt + 1, s, b - 1);
+				}
+				else {
+					// pass args through the stack
+					e._load_regs(r_tgt + 1, s, kind);
+				}
+
+				e._dispatch_call(kind);
+			}
+			else {
+				// TODO
+				throw new UnsupportedOperationException("CALL with b == 0");
+			}
+
+			e._resumptionPoint(this);
+
+			if (c > 0) {
+				e._retrieve_and_store_n(c - 1, r_tgt, s);
+			}
+			else {
+				// TODO
+				throw new UnsupportedOperationException("CALL with c == 0");
+			}
+
+		}
+
 	}
 
 	class TailCall extends Exit implements LuaInstruction, CallInstruction {

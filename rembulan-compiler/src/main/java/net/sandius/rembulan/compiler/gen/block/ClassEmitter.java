@@ -76,19 +76,17 @@ public class ClassEmitter {
 		}
 	}
 
-	protected Type invokeMethodType() {
-		int k = kind(numOfParameters, isVararg);
-
+	protected static Type methodTypeForKind(int kind) {
 		ArrayList<Type> args = new ArrayList<>();
 		args.add(Type.getType(LuaState.class));
 		args.add(Type.getType(ObjectSink.class));
 
-		if (k < 0) {
+		if (kind < 0) {
 			args.add(ASMUtils.arrayTypeFor(Object.class));
 		}
 		else {
 			Type o = Type.getType(Object.class);
-			for (int i = 0; i < k; i++) {
+			for (int i = 0; i < kind; i++) {
 				args.add(o);
 			}
 		}
@@ -96,6 +94,10 @@ public class ClassEmitter {
 		return Type.getMethodType(
 				Type.VOID_TYPE,
 				args.toArray(new Type[0]));
+	}
+
+	protected Type invokeMethodType() {
+		return methodTypeForKind(kind(numOfParameters, isVararg));
 	}
 
 	protected Type superClassType() {
