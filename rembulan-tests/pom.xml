@@ -26,13 +26,6 @@
   <dependencies>
 
     <dependency>
-      <groupId>org.ow2.asm</groupId>
-      <artifactId>asm-util</artifactId>
-      <version>5.0.4</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>net.sandius.rembulan</groupId>
       <artifactId>rembulan-core</artifactId>
       <version>${project.parent.version}</version>
