@@ -877,8 +877,6 @@ public interface LuaInstruction {
 			else {
 				e._missing(this);
 			}
-
-			super.emit(e);
 		}
 
 	}
