@@ -67,8 +67,8 @@ public class java_Upvalues3 extends Function0 {
 	@Override
 	public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
 		DefaultSavedState ss = (DefaultSavedState) suspendedState;
-		Object[] regs = ss.registers;
-		run(state, result, ss.resumptionPoint, regs[0], regs[1], regs[2]);
+		Object[] regs = ss.registers();
+		run(state, result, ss.resumptionPoint(), regs[0], regs[1], regs[2]);
 	}
 
 	@Override

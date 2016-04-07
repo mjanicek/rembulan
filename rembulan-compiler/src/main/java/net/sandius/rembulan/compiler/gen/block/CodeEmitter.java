@@ -461,21 +461,25 @@ public class CodeEmitter {
 			il.add(new VarInsnNode(ALOAD, 2));  // sink
 
 			il.add(new VarInsnNode(ALOAD, 4));  // saved state
-			il.add(new FieldInsnNode(
-					GETFIELD,
+			il.add(new MethodInsnNode(
+					INVOKEVIRTUAL,
 					Type.getInternalName(DefaultSavedState.class),
 					"resumptionPoint",
-					Type.INT_TYPE.getDescriptor()
+					Type.getMethodDescriptor(
+							Type.INT_TYPE),
+					false
 			));  // resumption point
 
 			// registers
 			if (numOfRegisters() > 0) {
 				il.add(new VarInsnNode(ALOAD, 4));
-				il.add(new FieldInsnNode(
-						GETFIELD,
+				il.add(new MethodInsnNode(
+						INVOKEVIRTUAL,
 						Type.getInternalName(DefaultSavedState.class),
 						"registers",
-						ASMUtils.arrayTypeFor(Object.class).getDescriptor()
+						Type.getMethodDescriptor(
+								ASMUtils.arrayTypeFor(Object.class)),
+						false
 				));
 
 				for (int i = 0; i < numOfRegisters(); i++) {

@@ -87,6 +87,10 @@ public class ReadOnlyArray<T> implements Iterable<T> {
 		return size() == 0;
 	}
 
+	public T[] copyToNewArray() {
+		return Arrays.copyOf(values, values.length);
+	}
+
 	@Override
 	public Iterator<T> iterator() {
 		return new Iterator<T>() {
