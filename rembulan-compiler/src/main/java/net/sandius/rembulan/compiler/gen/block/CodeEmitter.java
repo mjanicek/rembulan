@@ -772,15 +772,16 @@ public class CodeEmitter {
 		code.add(new JumpInsnNode(IFNONNULL, _l(target)));
 	}
 
-	public void _tailcall(int num) {
-		Check.nonNegative(num);
-		if (num <= 5) {
-			Type[] a = new Type[num];
+	public void _tailcall(int numArgs) {
+		Check.nonNegative(numArgs);
+		// TODO: determine this by reading the ObjectSink interface?
+		if (numArgs <= 4) {
+			Type[] a = new Type[numArgs];
 			Arrays.fill(a, Type.getType(Object.class));
 			_invokeInterface(ObjectSink.class, "tailCall", Type.getMethodType(Type.VOID_TYPE, a));
 		}
 		else {
-			throw new UnsupportedOperationException("Tail call with " + num + " arguments");
+			throw new UnsupportedOperationException("Tail call with " + numArgs + " arguments");
 		}
 	}
 
@@ -790,7 +791,7 @@ public class CodeEmitter {
 			_invokeInterface(ObjectSink.class, "reset", Type.getMethodType(Type.VOID_TYPE));
 		}
 		else {
-			// TODO: determine this by reading the ObjectSink interface
+			// TODO: determine this by reading the ObjectSink interface?
 			if (num <= 5) {
 				Type[] a = new Type[num];
 				Arrays.fill(a, Type.getType(Object.class));
