@@ -43,16 +43,15 @@ import java.util.Set;
 public class FunctionCode {
 
 	private final Prototype prototype;
-	private final TypeSeq parameterTypes;
 
+	TypeSeq parameterTypes;
 	TypeSeq returnTypes;
 
 	public Entry callEntry;
 	public Set<ResumptionPoint> resumePoints;
 
-	protected FunctionCode(Prototype prototype, TypeSeq parameterTypes) {
+	protected FunctionCode(Prototype prototype) {
 		this.prototype = Check.notNull(prototype);
-		this.parameterTypes = Check.notNull(parameterTypes);
 	}
 
 	public static TypeSeq genericParameterTypes(int numOfFixedParameters, boolean vararg) {
@@ -182,6 +181,24 @@ public class FunctionCode {
 		else {
 			throw new IllegalStateException("unknown return type: " + rt.toString());
 		}
+	}
+
+	public void computeParameterType() {
+		// we do not rely on the prototype's isVararg flag, but rather recompute
+		// it ourselves
+
+		final Ptr<Boolean> isVararg = new Ptr<>(false);
+
+		Nodes.traverseOnce(callEntry, new NodeAction() {
+			@Override
+			public void visit(Node n) {
+				if (n instanceof LuaInstruction.Vararg) {
+					isVararg.set(true);
+				}
+			}
+		});
+
+		parameterTypes = genericParameterTypes(prototype.getNumberOfParameters(), isVararg.get());
 	}
 
 	public void computeReturnType() {

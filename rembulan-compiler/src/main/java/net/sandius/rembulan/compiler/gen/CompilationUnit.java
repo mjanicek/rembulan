@@ -43,11 +43,11 @@ public class CompilationUnit {
 		return generic;
 	}
 
-	public TypeSeq genericParameters() {
-		return FunctionCode.genericParameterTypes(prototype.getNumberOfParameters(), prototype.isVararg());
+	public TypeSeq fixedGenericParameters() {
+		return FunctionCode.genericParameterTypes(prototype.getNumberOfParameters(), false);
 	}
 
-	public Entry makeNodes(TypeSeq params) {
+	public Entry makeNodes(TypeSeq fixedParams) {
 		IntVector code = prototype.getCode();
 		Target[] targets = new Target[code.length()];
 		for (int pc = 0; pc < targets.length; pc++) {
@@ -62,21 +62,21 @@ public class CompilationUnit {
 			translator.translate(pc);
 		}
 
-		String suffix = params.toString();
+		String suffix = fixedParams.toString();
 
-		return new Entry("main_" + suffix, params, prototype.getMaximumStackSize(), pcLabels.get(0));
+		return new Entry("main_" + suffix, fixedParams, prototype.getMaximumStackSize(), pcLabels.get(0));
 	}
 
-	public FunctionCode makeCompiledPrototype(TypeSeq params) {
-		FunctionCode cp = new FunctionCode(prototype, params);
-		cp.callEntry = makeNodes(params);
+	public FunctionCode makeCompiledPrototype(TypeSeq fixedParams) {
+		FunctionCode cp = new FunctionCode(prototype);
+		cp.callEntry = makeNodes(fixedParams);
 		cp.returnTypes = TypeSeq.vararg();
 		cp.resumePoints = new HashSet<>();
 		return cp;
 	}
 
 	public void initGeneric() {
-		this.generic = makeCompiledPrototype(genericParameters());
+		this.generic = makeCompiledPrototype(fixedGenericParameters());
 	}
 
 	public CompiledClass toCompiledClass() {

@@ -98,6 +98,7 @@ public class ChunkCompiler {
 
 		cp.updateDataFlow();
 
+		cp.computeParameterType();
 		cp.computeReturnType();
 	}
 

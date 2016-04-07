@@ -12,9 +12,9 @@ public class Entry implements Node, Jump {
 
 	private Target target;
 
-	public Entry(String name, TypeSeq typeSeq, int slotSize, Target target) {
+	public Entry(String name, TypeSeq fixedParameters, int slotSize, Target target) {
 		this.name = name;
-		this.typeSeq = Check.notNull(typeSeq);
+		this.typeSeq = Check.notNull(fixedParameters);
 		this.slotSize = Check.nonNegative(slotSize);
 		this.target = Check.notNull(target);
 	}
