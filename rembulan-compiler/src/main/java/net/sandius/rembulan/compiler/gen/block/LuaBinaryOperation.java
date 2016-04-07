@@ -116,7 +116,6 @@ public abstract class LuaBinaryOperation extends Linear implements LuaInstructio
 				e._dispatch_generic_mt_2(methodPrefix());
 
 				e._resumptionPoint(this);
-				e._loadObjectSink();
 				e._retrieve_0();
 				e._store(r_dest, s);
 				break;
