@@ -125,9 +125,7 @@ object AnalysisRunner {
 
   def main(args: Array[String]): Unit = {
 
-    import BasicFragments._
-
-    val program = Upvalues3
+    val program = BasicFragments.lookup("Upvalues3").get
     val proto = loader.compile(program)
 
     section("LuaC version") {
