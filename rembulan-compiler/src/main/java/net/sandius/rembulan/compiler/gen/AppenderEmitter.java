@@ -148,22 +148,22 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 
 	@Override
 	public void l_UNM(int a, int b) {
-		appender.append(new LuaUnaryOperation.Unm(a, b)).toNext();
+		appender.append(new LuaUnaryOperation(LuaUnaryOperation.Op.UNM, a, b)).toNext();
 	}
 
 	@Override
 	public void l_BNOT(int a, int b) {
-		appender.append(new LuaUnaryOperation.BNot(a, b)).toNext();
+		appender.append(new LuaUnaryOperation(LuaUnaryOperation.Op.BNOT, a, b)).toNext();
 	}
 
 	@Override
 	public void l_NOT(int a, int b) {
-		appender.append(new LuaUnaryOperation.Not(a, b)).toNext();
+		appender.append(new LuaUnaryOperation(LuaUnaryOperation.Op.NOT, a, b)).toNext();
 	}
 
 	@Override
 	public void l_LEN(int a, int b) {
-		appender.append(new LuaUnaryOperation.Len(a, b)).toNext();
+		appender.append(new LuaUnaryOperation(LuaUnaryOperation.Op.LEN, a, b)).toNext();
 	}
 
 	@Override
