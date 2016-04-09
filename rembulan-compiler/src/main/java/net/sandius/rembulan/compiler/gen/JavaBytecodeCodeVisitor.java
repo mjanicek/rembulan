@@ -77,7 +77,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSetUpVal(Object id, SlotState st, int r_src, int upvalueIndex) {
-		throw new UnsupportedOperationException();  // TODO
+		e._get_upvalue_ref(upvalueIndex);
+		e._load_reg(r_src, st);
+		e._set_upvalue_value();
 	}
 
 	@Override
