@@ -542,20 +542,21 @@ public class CodeEmitter {
 		il.add(new VarInsnNode(ALOAD, 2));  // sink
 		il.add(ASMUtils.loadInt(0));  // resumption point
 
-		if (invokeKind < 0) {
-			throw new UnsupportedOperationException(); // TODO
-		}
-		else {
-			// we have #invokeKind standalone parameters, mapping them onto #numOfRegisters
+		if (invokeKind > 0) {
+			// we have (invokeKind - 1) standalone parameters, mapping them onto #numOfRegisters
 
 			for (int i = 0; i < numOfRegisters(); i++) {
-				if (i < invokeKind) {
+				if (i < invokeKind - 1) {
 					il.add(new VarInsnNode(ALOAD, 3 + i));
 				}
 				else {
 					il.add(new InsnNode(ACONST_NULL));
 				}
 			}
+		}
+		else {
+			// variable number of parameters
+			throw new UnsupportedOperationException(); // TODO
 		}
 
 		il.add(new MethodInsnNode(

@@ -205,13 +205,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			e._loadObjectSink();
 			e._load_reg(r_tgt, st);
 
-			if (kind < 0) {
-				// need to pack args into an array
+			if (kind == 0) {
+				// pack args into an array
 				e._pack_regs(r_tgt + 1, st, b - 1);
 			}
 			else {
-				// pass args through the stack
-				e._load_regs(r_tgt + 1, st, kind);
+				// pass (kind - 1) args through the stack
+				e._load_regs(r_tgt + 1, st, kind - 1);
 			}
 
 			e._dispatch_call(kind);
