@@ -67,7 +67,17 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitGetTable(Object id, SlotState st, int r_dest, int r_tab, int rk_key) {
-		throw new UnsupportedOperationException();  // TODO
+		e._save_pc(this);
+
+		e._loadState();
+		e._loadObjectSink();
+		e._load_reg(r_tab, st);
+		e._load_reg_or_const(rk_key, st);
+		e._dispatch_index();
+
+		e._resumptionPoint(this);
+		e._retrieve_0();
+		e._store(r_dest, st);
 	}
 
 	@Override
@@ -94,7 +104,16 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSetTable(Object id, SlotState st, int r_tab, int rk_key, int rk_value) {
-		throw new UnsupportedOperationException();  // TODO
+		e._save_pc(this);
+
+		e._loadState();
+		e._loadObjectSink();
+		e._load_reg(r_tab, st);
+		e._load_reg_or_const(rk_key, st);
+		e._load_reg_or_const(rk_value, st);
+		e._dispatch_newindex();
+
+		e._resumptionPoint(this);
 	}
 
 	@Override
