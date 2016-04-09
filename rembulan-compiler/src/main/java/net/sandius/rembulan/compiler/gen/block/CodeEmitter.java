@@ -906,7 +906,6 @@ public class CodeEmitter {
 
 	public void _new_table(int array, int hash) {
 		withLuaState(code)
-				.push()
 				.do_newTable(array, hash);
 	}
 
