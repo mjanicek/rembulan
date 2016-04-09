@@ -2,6 +2,26 @@ package net.sandius.rembulan.test
 
 object BasicFragments extends FragmentBundle {
 
+  fragment ("JustX") {
+    """return x
+    """
+  }
+
+  fragment ("NotX") {
+    """return not x
+    """
+  }
+
+  fragment ("NotTrue") {
+    """return not true
+    """
+  }
+
+  fragment ("NotNotX") {
+    """return not not x
+    """
+  }
+
   fragment ("JustAdd") {
     """return x + 1
     """
