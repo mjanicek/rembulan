@@ -142,64 +142,107 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		e._store(r_dest, st);
 	}
 
+	private void binaryOperation(String method, StaticMathImplementation staticMath, SlotState s, int r_dest, int rk_left, int rk_right) {
+		LuaInstruction.NumOpType ot = staticMath.opType(
+				LuaBinaryOperation.slotType(e.context(), s, rk_left),
+				LuaBinaryOperation.slotType(e.context(), s, rk_right));
+
+		switch (ot) {
+			case Integer:
+				e._load_reg_or_const(rk_left, s, Number.class);
+				e._load_reg_or_const(rk_right, s, Number.class);
+				e._dispatch_binop(method + "_integer", Number.class);
+				e._store(r_dest, s);
+				break;
+
+			case Float:
+				e._load_reg_or_const(rk_left, s, Number.class);
+				e._load_reg_or_const(rk_right, s, Number.class);
+				e._dispatch_binop(method + "_float", Number.class);
+				e._store(r_dest, s);
+				break;
+
+			case Number:
+				e._load_reg_or_const(rk_left, s, Number.class);
+				e._load_reg_or_const(rk_right, s, Number.class);
+				e._dispatch_binop(method, Number.class);
+				e._store(r_dest, s);
+				break;
+
+			case Any:
+				e._save_pc(this);
+
+				e._loadState();
+				e._loadObjectSink();
+				e._load_reg_or_const(rk_left, s, Object.class);
+				e._load_reg_or_const(rk_right, s, Object.class);
+				e._dispatch_generic_mt_2(method);
+
+				e._resumptionPoint(this);
+				e._retrieve_0();
+				e._store(r_dest, s);
+				break;
+		}
+	}
+
 	@Override
 	public void visitAdd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("add", LuaBinaryOperation.Add.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitSub(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("sub", LuaBinaryOperation.Sub.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitMul(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("mul", LuaBinaryOperation.Mul.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitMod(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("mod", LuaBinaryOperation.Mod.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitPow(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("pow", LuaBinaryOperation.Pow.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("div", LuaBinaryOperation.Div.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitIDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("idiv", LuaBinaryOperation.IDiv.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBAnd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("band", LuaBinaryOperation.BAnd.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("bor", LuaBinaryOperation.BOr.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBXOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("bxor", LuaBinaryOperation.BXor.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitShl(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("shl", LuaBinaryOperation.Shl.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitShr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		throw new UnsupportedOperationException();  // TODO
+		binaryOperation("shr", LuaBinaryOperation.Shr.MATH, st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
