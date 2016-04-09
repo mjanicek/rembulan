@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.CodeVisitor;
-import net.sandius.rembulan.compiler.gen.JavaBytecodeCodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;

@@ -1,8 +1,8 @@
-package net.sandius.rembulan.compiler.gen;
+package net.sandius.rembulan.compiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.block.ClassEmitter;
-import net.sandius.rembulan.compiler.gen.block.CodeEmitter;
-import net.sandius.rembulan.compiler.gen.block.InvokeKind;
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
+import net.sandius.rembulan.compiler.gen.LuaTypes;
+import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
