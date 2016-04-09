@@ -26,6 +26,14 @@ public abstract class CodeVisitor {
 
 	public abstract void visitSelf(Object id, SlotState st, int r_dest, int r_self, int rk_key);
 
+	public abstract void visitUnm(Object id, SlotState st, int r_dest, int r_arg);
+
+	public abstract void visitBNot(Object id, SlotState st, int r_dest, int r_arg);
+
+	public abstract void visitNot(Object id, SlotState st, int r_dest, int r_arg);
+
+	public abstract void visitLen(Object id, SlotState st, int r_dest, int r_arg);
+
 	public abstract void visitConcat(Object id, SlotState st, int r_dest, int r_begin, int r_end);
 
 	public abstract void visitEq(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity);

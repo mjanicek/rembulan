@@ -56,6 +56,11 @@ public abstract class LuaUnaryOperation extends Linear implements LuaInstruction
 			return in.isSubtypeOf(LuaTypes.NUMBER) ? in : LuaTypes.ANY;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitUnm(this, inSlots(), r_dest, r_arg);
+		}
+
 	}
 
 	public static class BNot extends LuaUnaryOperation {
@@ -73,6 +78,11 @@ public abstract class LuaUnaryOperation extends Linear implements LuaInstruction
 		protected Type resultType(Type in) {
 			// TODO: for constants, we could determine whether the argument is coercible to integer -> need access ot it
 			return in.isSubtypeOf(LuaTypes.NUMBER_INTEGER) ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY;
+		}
+
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitBNot(this, inSlots(), r_dest, r_arg);
 		}
 
 	}
@@ -95,8 +105,7 @@ public abstract class LuaUnaryOperation extends Linear implements LuaInstruction
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._not(r_arg, r_dest, s);
+			e.codeVisitor().visitNot(this, inSlots(), r_dest, r_arg);
 		}
 
 	}
@@ -115,6 +124,11 @@ public abstract class LuaUnaryOperation extends Linear implements LuaInstruction
 		@Override
 		protected Type resultType(Type in) {
 			return in.isSubtypeOf(LuaTypes.STRING) ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY;
+		}
+
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitLen(this, inSlots(), r_dest, r_arg);
 		}
 
 	}

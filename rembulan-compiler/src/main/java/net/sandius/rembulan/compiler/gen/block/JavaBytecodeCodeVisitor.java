@@ -143,6 +143,26 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	}
 
 	@Override
+	public void visitUnm(Object id, SlotState st, int r_dest, int r_arg) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitBNot(Object id, SlotState st, int r_dest, int r_arg) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitNot(Object id, SlotState st, int r_dest, int r_arg) {
+		e._not(r_arg, r_dest, st);
+	}
+
+	@Override
+	public void visitLen(Object id, SlotState st, int r_dest, int r_arg) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
 	public void visitConcat(Object id, SlotState st, int r_dest, int r_begin, int r_end) {
 		throw new UnsupportedOperationException();  // TODO
 	}
