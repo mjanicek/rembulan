@@ -88,62 +88,62 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 
 	@Override
 	public void l_ADD(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Add(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.ADD, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SUB(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Sub(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.SUB, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_MUL(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Mul(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.MUL, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_MOD(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Mod(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.MOD, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_POW(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Pow(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.POW, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_DIV(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Div(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.DIV, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_IDIV(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.IDiv(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.IDIV, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BAND(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.BAnd(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.BAND, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BOR(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.BOr(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.BOR, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_BXOR(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.BXor(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.BXOR, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SHL(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Shl(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.SHL, a, b, c)).toNext();
 	}
 
 	@Override
 	public void l_SHR(int a, int b, int c) {
-		appender.append(new LuaBinaryOperation.Shr(appender.context(), a, b, c)).toNext();
+		appender.append(new LuaBinaryOperation(appender.context(), LuaBinaryOperation.Op.SHR, a, b, c)).toNext();
 	}
 
 	@Override

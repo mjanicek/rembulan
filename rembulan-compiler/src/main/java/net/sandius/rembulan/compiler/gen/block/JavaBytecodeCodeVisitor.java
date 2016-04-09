@@ -187,62 +187,62 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitAdd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("add", LuaBinaryOperation.Add.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("add", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.ADD), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitSub(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("sub", LuaBinaryOperation.Sub.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("sub", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SUB), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitMul(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("mul", LuaBinaryOperation.Mul.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("mul", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.MUL), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitMod(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("mod", LuaBinaryOperation.Mod.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("mod", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.MOD), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitPow(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("pow", LuaBinaryOperation.Pow.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("pow", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.POW), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("div", LuaBinaryOperation.Div.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("div", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.DIV), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitIDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("idiv", LuaBinaryOperation.IDiv.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("idiv", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.IDIV), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBAnd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("band", LuaBinaryOperation.BAnd.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("band", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BAND), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("bor", LuaBinaryOperation.BOr.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("bor", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BOR), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBXOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("bxor", LuaBinaryOperation.BXor.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("bxor", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BXOR), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitShl(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("shl", LuaBinaryOperation.Shl.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("shl", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SHL), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitShr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("shr", LuaBinaryOperation.Shr.MATH, st, r_dest, rk_left, rk_right);
+		binaryOperation("shr", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SHR), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
