@@ -7,7 +7,6 @@ import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
-import static net.sandius.rembulan.compiler.gen.block.LuaUtils.prefix;
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MAY_BE_INTEGER;
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_FLOAT;
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_INTEGER;
@@ -58,7 +57,7 @@ public class LuaBinaryOperation extends Linear implements LuaInstruction {
 
 	@Override
 	public String toString() {
-		return prefix(this) + name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
+		return name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
 	}
 
 	protected static Type slotType(PrototypeContext context, SlotState slots, int rk) {
@@ -72,14 +71,6 @@ public class LuaBinaryOperation extends Linear implements LuaInstruction {
 	@Override
 	protected SlotState effect(SlotState s) {
 		return s.update(r_dest, Slot.of(Origin.Computed.in(this), opType(s).toSlotType()));
-	}
-
-	@Override
-	public boolean needsResumePoint() {
-		switch (opType(inSlots())) {
-			case Any: return true;
-			default: return false;
-		}
 	}
 
 	@Override

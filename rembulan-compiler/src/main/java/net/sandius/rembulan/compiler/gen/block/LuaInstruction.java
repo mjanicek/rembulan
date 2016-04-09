@@ -13,12 +13,9 @@ import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 
 import static net.sandius.rembulan.compiler.gen.block.LuaUtils.argTypesFromSlots;
-import static net.sandius.rembulan.compiler.gen.block.LuaUtils.prefix;
 import static net.sandius.rembulan.compiler.gen.block.LuaUtils.registerOrConst;
 
 public interface LuaInstruction {
-
-	boolean needsResumePoint();
 
 	enum NumOpType {
 		Integer,
@@ -61,17 +58,12 @@ public interface LuaInstruction {
 		@Override
 		public String toString() {
 			boolean nop = inSlots().slotAt(r_src).equals(inSlots().slotAt(r_dest));
-			return prefix(this) + "MOVE" + (nop ? "_nop" : "") + "(" + r_dest + "," + r_src + ")";
+			return "MOVE" + (nop ? "_nop" : "") + "(" + r_dest + "," + r_src + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, s.slotAt(r_src));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -96,17 +88,12 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "LOADK(" + r_dest + "," + constIndex + ")";
+			return "LOADK(" + r_dest + "," + constIndex + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, new Origin.Constant(constIndex), context.constType(constIndex));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -128,17 +115,12 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "LOADBOOL(" + r_dest + "," + value + ")";
+			return "LOADBOOL(" + r_dest + "," + value + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(Origin.BooleanConstant.fromBoolean(value), LuaTypes.BOOLEAN));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -160,7 +142,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "LOADNIL(" + r_dest + "," + (count - 1) + ")";
+			return "LOADNIL(" + r_dest + "," + (count - 1) + ")";
 		}
 
 		@Override
@@ -169,11 +151,6 @@ public interface LuaInstruction {
 				s = s.update(r_dest + i, Slot.NIL_SLOT);
 			}
 			return s;
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -195,17 +172,12 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "GETUPVAL(" + r_dest + "," + upvalueIndex + ")";
+			return "GETUPVAL(" + r_dest + "," + upvalueIndex + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(new Origin.Upvalue(upvalueIndex), LuaTypes.ANY));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -229,17 +201,12 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "GETTABUP(" + r_dest + "," + upvalueIndex + "," + rk_key + ")";
+			return "GETTABUP(" + r_dest + "," + upvalueIndex + "," + rk_key + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.ANY));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return true;
 		}
 
 		@Override
@@ -264,18 +231,12 @@ public interface LuaInstruction {
 		@Override
 		public String toString() {
 			String suffix = inSlots().typeAt(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "";
-			return prefix(this) + "GETTABLE" + suffix + "(" + r_dest + "," + r_tab + "," + rk_key + ")";
+			return "GETTABLE" + suffix + "(" + r_dest + "," + r_tab + "," + rk_key + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.ANY));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			// TODO: check that this is correct -- will try a metamethod when key is not present
-			return true;
 		}
 
 		@Override
@@ -299,13 +260,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "SETTABUP(" + upvalueIndex + "," + rk_key + "," + rk_value + ")";
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			// TODO: check that this is correct -- will try a metamethod when key is (not) present?
-			return true;
+			return "SETTABUP(" + upvalueIndex + "," + rk_key + "," + rk_value + ")";
 		}
 
 		@Override
@@ -327,12 +282,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "SETUPVAL(" + r_src + "," + upvalueIndex + ")";
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
+			return "SETUPVAL(" + r_src + "," + upvalueIndex + ")";
 		}
 
 		@Override
@@ -357,13 +307,7 @@ public interface LuaInstruction {
 		@Override
 		public String toString() {
 			String suffix = (inSlots().typeAt(r_tab).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "");
-			return prefix(this) + "SETTABLE" + suffix + "(" + r_tab + "," + rk_key + "," + rk_value + ")";
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			// TODO: check that this is correct -- will try a metamethod when key is (not) present?
-			return true;
+			return "SETTABLE" + suffix + "(" + r_tab + "," + rk_key + "," + rk_value + ")";
 		}
 
 		@Override
@@ -389,17 +333,12 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "NEWTABLE(" + r_dest + ",array=" + arraySize + ",hash=" + hashSize + ")";
+			return "NEWTABLE(" + r_dest + ",array=" + arraySize + ",hash=" + hashSize + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.TABLE));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -424,19 +363,13 @@ public interface LuaInstruction {
 		@Override
 		public String toString() {
 			String suffix = inSlots().typeAt(r_self).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "";
-			return prefix(this) + "SELF" + suffix + "(" + r_dest + "," + r_self + "," + rk_key + ")";
+			return "SELF" + suffix + "(" + r_dest + "," + r_self + "," + rk_key + ")";
 		}
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest + 1, s.slotAt(r_self))
 					.update(r_dest, Slot.of(Origin.Computed.in(this), LuaTypes.ANY));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			// TODO: check that this is correct -- will try a metamethod when key is (not) present?
-			return true;
 		}
 
 		@Override
@@ -461,7 +394,7 @@ public interface LuaInstruction {
 		@Override
 		public String toString() {
 			String suffix = allStringable(inSlots()) ? "_S" : "";
-			return prefix(this) + "CONCAT" + suffix + "(" + r_dest + "," + r_begin + ".." + r_end + ")";
+			return "CONCAT" + suffix + "(" + r_dest + "," + r_begin + ".." + r_end + ")";
 		}
 
 		private boolean allStringable(SlotState s) {
@@ -477,11 +410,6 @@ public interface LuaInstruction {
 		@Override
 		protected SlotState effect(SlotState s) {
 			return s.update(r_dest, Slot.of(Origin.Computed.in(this), allStringable(s) ? LuaTypes.STRING : LuaTypes.ANY));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return !allStringable(inSlots());
 		}
 
 		@Override
@@ -508,13 +436,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + (pos ? "EQ" : "NOT-EQ") +  "(" + rk_left + "," + rk_right + ")";
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			// TODO
-			return true;
+			return (pos ? "EQ" : "NOT-EQ") +  "(" + rk_left + "," + rk_right + ")";
 		}
 
 		@Override
@@ -539,13 +461,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + (pos ? "LT" : "NOT-LT") + "(" + rk_left + "," + rk_right + ")";
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			// TODO
-			return true;
+			return (pos ? "LT" : "NOT-LT") + "(" + rk_left + "," + rk_right + ")";
 		}
 
 		@Override
@@ -570,13 +486,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + (pos ? "LE" : "NOT-LE") + "(" + rk_left + "," + rk_right + ")";
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			// TODO
-			return true;
+			return (pos ? "LE" : "NOT-LE") + "(" + rk_left + "," + rk_right + ")";
 		}
 
 		@Override
@@ -614,7 +524,7 @@ public interface LuaInstruction {
 					)
 			);
 
-			return prefix(this) + "TEST" + suffix + "(" + r_index + "," + value + ")";
+			return "TEST" + suffix + "(" + r_index + "," + value + ")";
 		}
 
 		@Override
@@ -624,11 +534,6 @@ public interface LuaInstruction {
 			if (tpe.equals(LuaTypes.BOOLEAN) || tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) return InlineTarget.CANNOT_BE_INLINED;
 			else if (tpe.equals(LuaTypes.NIL)) return InlineTarget.FALSE_BRANCH;
 			else return InlineTarget.TRUE_BRANCH;
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -714,7 +619,7 @@ public interface LuaInstruction {
 			suffix += "_" + callArguments();
 			suffix += c > 0 ? "_" + (c - 1) : "_var";
 
-			return prefix(this) + "CALL" + suffix + "(" + r_tgt + "," + b + "," + c + ")";
+			return "CALL" + suffix + "(" + r_tgt + "," + b + "," + c + ")";
 		}
 
 		@Override
@@ -762,11 +667,6 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public boolean needsResumePoint() {
-			return true;
-		}
-
-		@Override
 		public void emit(CodeEmitter e) {
 			e.codeVisitor().visitCall(this, inSlots(), r_tgt, b, c);
 		}
@@ -788,7 +688,7 @@ public interface LuaInstruction {
 			String suffix = inSlots().typeAt(r_tgt) instanceof FunctionType ? "_F" : "_mt";
 			suffix += "_" + argTypesFromSlots(inSlots(), r_tgt + 1, b);
 
-			return prefix(this) + "TAILCALL" + suffix + "(" + r_tgt + "," + b + ")";
+			return "TAILCALL" + suffix + "(" + r_tgt + "," + b + ")";
 		}
 
 		@Override
@@ -806,11 +706,6 @@ public interface LuaInstruction {
 		@Override
 		public TypeSeq callArguments() {
 			return argTypesFromSlots(inSlots(), r_tgt + 1, b);
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -834,17 +729,12 @@ public interface LuaInstruction {
 		@Override
 		public String toString() {
 			String suffix = b > 0 ? "_fix" : "_var";
-			return prefix(this) + "RETURN" + suffix + "(" + r_from + "," + b + ")";
+			return "RETURN" + suffix + "(" + r_from + "," + b + ")";
 		}
 
 		@Override
 		public ReturnType returnType() {
 			return new ReturnType.ConcreteReturnType(argTypesFromSlots(inSlots(), r_from, b));
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -865,18 +755,12 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "FORLOOP(" + r_base + ")";
+			return "FORLOOP(" + r_base + ")";
 		}
 
 		// TODO: updates the register (r_base + 0), and in the true branch copies (r_base + 0) to (r_base + 3)
 
 		// TODO: can also be specialised
-
-		@Override
-		public boolean needsResumePoint() {
-			// TODO
-			return true;
-		}
 
 		@Override
 		public void emit(CodeEmitter e) {
@@ -895,7 +779,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "FORPREP" + loopType(inSlots()).toSuffix() + "(" + r_base + ")";
+			return "FORPREP" + loopType(inSlots()).toSuffix() + "(" + r_base + ")";
 		}
 
 		private NumOpType loopType(SlotState s) {
@@ -941,12 +825,6 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public boolean needsResumePoint() {
-			// TODO
-			return true;
-		}
-
-		@Override
 		public void emit(CodeEmitter e) {
 			e.codeVisitor().visitForPrep(this, inSlots(), r_base);
 		}
@@ -974,7 +852,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "CLOSURE(" + r_dest + "," + context.nestedPrototypeName(index) + ")";
+			return "CLOSURE(" + r_dest + "," + context.nestedPrototypeName(index) + ")";
 		}
 
 		@Override
@@ -990,11 +868,6 @@ public interface LuaInstruction {
 			}
 
 			return s;
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
@@ -1016,7 +889,7 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return prefix(this) + "VARARG" + (b > 0 ? "_det" : "_indet") + "(" + r_base + "," + b + ")";
+			return "VARARG" + (b > 0 ? "_det" : "_indet") + "(" + r_base + "," + b + ")";
 		}
 
 		@Override
@@ -1031,11 +904,6 @@ public interface LuaInstruction {
 			else {
 				return s.setVarargs(r_base);
 			}
-		}
-
-		@Override
-		public boolean needsResumePoint() {
-			return false;
 		}
 
 		@Override
