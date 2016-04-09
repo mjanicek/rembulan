@@ -21,7 +21,7 @@ import org.objectweb.asm.Type;
 import static org.objectweb.asm.Opcodes.*;
 
 @Deprecated
-public class LuaBytecodeMethodVisitor extends MethodVisitor implements InstructionEmitter {
+public class LuaBytecodeMethodVisitor extends MethodVisitor implements LuaInstructionVisitor {
 
 	private static Type REGISTERS_TYPE = ASMUtils.arrayTypeFor(Object.class);
 	private static final int REGISTER_OFFSET = 4;
@@ -48,7 +48,7 @@ public class LuaBytecodeMethodVisitor extends MethodVisitor implements Instructi
 	private Label[] l_pc_end;
 	private Label[] l_pc_preempt_handler;
 
-	protected InstructionEmitter ie;
+	protected LuaInstructionVisitor ie;
 
 	public static void emitConstructor(ClassVisitor cv, Type thisType) {
 		Type ctorType = Type.getMethodType(

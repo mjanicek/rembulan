@@ -10,7 +10,7 @@ import net.sandius.rembulan.compiler.gen.block.Target;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 
-public class AppenderEmitter implements InstructionEmitter {
+public class AppenderEmitter implements LuaInstructionVisitor {
 
 	private final LuaInstructionToNodeTranslator.MyNodeAppender appender;
 

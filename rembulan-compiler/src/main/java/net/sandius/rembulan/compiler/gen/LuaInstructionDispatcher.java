@@ -2,9 +2,15 @@ package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.lbc.OpCode;
 
-public class InstructionDispatch {
+public class LuaInstructionDispatcher {
 
-	public static void dispatch(InstructionEmitter ie, int insn) {
+	private final LuaInstructionVisitor ie;
+
+	public LuaInstructionDispatcher(LuaInstructionVisitor visitor) {
+		this.ie = visitor;
+	}
+
+	public void dispatch(int insn) {
 		int oc = OpCode.opCode(insn);
 
 		int a = OpCode.arg_A(insn);

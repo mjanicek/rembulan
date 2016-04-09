@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.gen;
 
-public interface InstructionEmitter {
+public interface LuaInstructionVisitor {
 
 	void l_MOVE(int a, int b);
 	void l_LOADK(int a, int bx);

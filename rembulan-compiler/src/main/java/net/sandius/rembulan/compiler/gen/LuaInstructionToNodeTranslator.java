@@ -11,8 +11,6 @@ import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
-import java.util.Map;
-
 public class LuaInstructionToNodeTranslator {
 
 	private final Prototype prototype;
@@ -99,7 +97,8 @@ public class LuaInstructionToNodeTranslator {
 
 		appender.append(new AccountingNode.TickBefore());
 
-		InstructionDispatch.dispatch(new AppenderEmitter(prototype, appender), prototype.getCode().get(pc));
+		int insn = prototype.getCode().get(pc);
+		new LuaInstructionDispatcher(new AppenderEmitter(prototype, appender)).dispatch(insn);
 	}
 
 }
