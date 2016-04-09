@@ -101,7 +101,7 @@ public class CompilationUnit {
 
 		classEmitter.end();
 
-		ClassWriter writer = new ClassWriter(0);
+		ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
 		classEmitter.accept(writer);
 		byte[] bytes = writer.toByteArray();
 
