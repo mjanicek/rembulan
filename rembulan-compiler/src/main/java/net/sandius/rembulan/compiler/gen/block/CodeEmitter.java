@@ -447,6 +447,10 @@ public class CodeEmitter {
 
 		code.add(l_body_begin);
 		_frame_same(code);
+
+		// FIXME: the initial Target emits a label + stack frame immediately after this;
+		// that is illegal if there is no instruction in between
+		code.add(new InsnNode(NOP));
 	}
 
 	public void end() {
@@ -538,6 +542,8 @@ public class CodeEmitter {
 				runMethodName(),
 				runMethodType().getDescriptor(),
 				false));
+
+		il.add(new InsnNode(RETURN));
 		il.add(end);
 
 		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
@@ -990,7 +996,7 @@ public class CodeEmitter {
 			if (index <= 4) {
 				String methodName = "_" + index;
 				il.add(new MethodInsnNode(
-						INVOKEVIRTUAL,
+						INVOKEINTERFACE,
 						selfTpe().getInternalName(),
 						methodName,
 						Type.getMethodType(
@@ -1000,7 +1006,7 @@ public class CodeEmitter {
 			else {
 				il.add(ASMUtils.loadInt(index));
 				il.add(new MethodInsnNode(
-						INVOKEVIRTUAL,
+						INVOKEINTERFACE,
 						selfTpe().getInternalName(),
 						"get",
 						Type.getMethodType(
@@ -1015,7 +1021,7 @@ public class CodeEmitter {
 			Check.nonNegative(numValues);
 			if (numValues == 0) {
 				il.add(new MethodInsnNode(
-						INVOKEVIRTUAL,
+						INVOKEINTERFACE,
 						selfTpe().getInternalName(),
 						"reset",
 						Type.getMethodType(
@@ -1029,7 +1035,7 @@ public class CodeEmitter {
 					Arrays.fill(argTypes, Type.getType(Object.class));
 
 					il.add(new MethodInsnNode(
-							INVOKEVIRTUAL,
+							INVOKEINTERFACE,
 							selfTpe().getInternalName(),
 							"setTo",
 							Type.getMethodType(
@@ -1053,7 +1059,7 @@ public class CodeEmitter {
 				Arrays.fill(callArgTypes, Type.getType(Object.class));
 
 				il.add(new MethodInsnNode(
-						INVOKEVIRTUAL,
+						INVOKEINTERFACE,
 						selfTpe().getInternalName(),
 						"tailCall",
 						Type.getMethodType(
