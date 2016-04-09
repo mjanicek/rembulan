@@ -380,7 +380,7 @@ public class CodeEmitter {
 				INVOKESTATIC,
 				Type.getInternalName(Dispatch.class),
 				"call",
-				ClassEmitter.methodTypeForKind(kind).getDescriptor(),
+				ClassEmitter.callMethodTypeForKind(kind).getDescriptor(),
 				false
 		));
 	}
