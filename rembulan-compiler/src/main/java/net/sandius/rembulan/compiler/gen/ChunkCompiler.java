@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.compiler.Chunk;
 import net.sandius.rembulan.compiler.gen.block.AccountingNode;
 import net.sandius.rembulan.compiler.gen.block.LineInfo;
 import net.sandius.rembulan.compiler.gen.block.Linear;

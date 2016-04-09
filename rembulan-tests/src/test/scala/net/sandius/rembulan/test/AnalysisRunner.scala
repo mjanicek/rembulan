@@ -4,6 +4,7 @@ import java.io.{BufferedOutputStream, FileOutputStream, PrintWriter}
 
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
+import net.sandius.rembulan.compiler.Chunk
 import net.sandius.rembulan.compiler.gen._
 import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}

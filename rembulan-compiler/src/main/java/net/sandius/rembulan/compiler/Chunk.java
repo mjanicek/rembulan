@@ -1,5 +1,7 @@
-package net.sandius.rembulan.compiler.gen;
+package net.sandius.rembulan.compiler;
 
+import net.sandius.rembulan.compiler.gen.CompilationUnit;
+import net.sandius.rembulan.compiler.gen.CompiledClass;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;

@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen
 
+import net.sandius.rembulan.compiler.Chunk
 import net.sandius.rembulan.lbc.Prototype
 import net.sandius.rembulan.test.{BasicFragments, LuaCFragmentCompiler}
 import org.junit.runner.RunWith

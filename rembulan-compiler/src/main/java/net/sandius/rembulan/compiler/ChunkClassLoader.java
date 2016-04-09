@@ -1,6 +1,5 @@
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.compiler.gen.Chunk;
 import net.sandius.rembulan.util.ByteVector;
 
 import java.util.HashMap;
