@@ -72,7 +72,17 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSetTabUp(Object id, SlotState st, int upvalueIndex, int rk_key, int rk_value) {
-		throw new UnsupportedOperationException();  // TODO
+		e._save_pc(this);
+
+		e._loadState();
+		e._loadObjectSink();
+		e._get_upvalue_ref(upvalueIndex);
+		e._get_upvalue_value();
+		e._load_reg_or_const(rk_key, st);
+		e._load_reg_or_const(rk_value, st);
+		e._dispatch_newindex();
+
+		e._resumptionPoint(this);
 	}
 
 	@Override

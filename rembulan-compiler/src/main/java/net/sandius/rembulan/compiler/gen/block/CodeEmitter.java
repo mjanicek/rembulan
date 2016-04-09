@@ -382,6 +382,21 @@ public class CodeEmitter {
 		_dispatch_generic_mt_2("index");
 	}
 
+	public void _dispatch_newindex() {
+		_invokeStatic(
+				Dispatch.class,
+				"newindex",
+				Type.getMethodType(
+					Type.VOID_TYPE,
+					Type.getType(LuaState.class),
+					Type.getType(ObjectSink.class),
+					Type.getType(Object.class),
+					Type.getType(Object.class),
+					Type.getType(Object.class)
+			)
+		);
+	}
+
 	public void _dispatch_call(int kind) {
 		code.add(new MethodInsnNode(
 				INVOKESTATIC,

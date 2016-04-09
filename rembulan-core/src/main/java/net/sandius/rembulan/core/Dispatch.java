@@ -154,6 +154,10 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static void newindex(LuaState state, ObjectSink result, Object table, Object key, Object value) throws ControlThrowable {
+		throw new UnsupportedOperationException();  // TODO: not implemented
+	}
+
 	private static void try_mt_arithmetic(LuaState state, ObjectSink result, String event, Object a, Object b) throws ControlThrowable {
 		Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_ADD, a, b);
 
@@ -249,15 +253,15 @@ public abstract class Dispatch {
 	}
 
 	public static void eq(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		throw new UnsupportedOperationException("not implemented");
+		throw new UnsupportedOperationException();  // TODO: not implemented
 	}
 
 	public static void le(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		throw new UnsupportedOperationException("not implemented");
+		throw new UnsupportedOperationException();  // TODO: not implemented
 	}
 
 	public static void lt(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		throw new UnsupportedOperationException("not implemented");
+		throw new UnsupportedOperationException();  // TODO: not implemented
 	}
 
 }
