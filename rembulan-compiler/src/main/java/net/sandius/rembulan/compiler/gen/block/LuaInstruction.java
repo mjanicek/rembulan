@@ -517,6 +517,12 @@ public interface LuaInstruction {
 			return true;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			SlotState s = inSlots();
+			e._cmp("eq", rk_left, rk_right, pos, s, trueBranch(), falseBranch());
+		}
+
 	}
 
 	class Lt extends Branch implements LuaInstruction {
@@ -543,6 +549,12 @@ public interface LuaInstruction {
 			return true;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			SlotState s = inSlots();
+			e._cmp("lt", rk_left, rk_right, pos, s, trueBranch(), falseBranch());
+		}
+
 	}
 
 	class Le extends Branch implements LuaInstruction {
@@ -567,6 +579,12 @@ public interface LuaInstruction {
 		public boolean needsResumePoint() {
 			// TODO
 			return true;
+		}
+
+		@Override
+		public void emit(CodeEmitter e) {
+			SlotState s = inSlots();
+			e._cmp("le", rk_left, rk_right, pos, s, trueBranch(), falseBranch());
 		}
 
 	}

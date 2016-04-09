@@ -248,4 +248,16 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static void eq(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	public static void le(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
+	public static void lt(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		throw new UnsupportedOperationException("not implemented");
+	}
+
 }

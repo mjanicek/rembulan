@@ -987,6 +987,54 @@ public class CodeEmitter {
 		}
 	}
 
+	public void _cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Target trueBranch, Target falseBranch) {
+
+		// TODO: specialise
+
+		LabelNode l_jump_true = pos ? _l(trueBranch) : _l(falseBranch);
+		LabelNode l_jump_false = pos ? _l(falseBranch) : _l(trueBranch);
+
+		_save_pc(this);
+
+		_loadState();
+		_loadObjectSink();
+
+		_load_reg_or_const(rk_left, s);
+		_load_reg_or_const(rk_right, s);
+
+		code.add(new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Dispatch.class),
+				methodName,
+				Type.getMethodDescriptor(
+						Type.VOID_TYPE,
+						Type.getType(LuaState.class),
+						Type.getType(ObjectSink.class),
+						Type.getType(Object.class),
+						Type.getType(Object.class)),
+				false
+		));
+
+		_resumptionPoint(this);
+
+		_retrieve_0();
+
+		code.add(new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Conversions.class),
+				"objectToBoolean",
+				Type.getMethodDescriptor(
+						Type.BOOLEAN_TYPE,
+						Type.getType(Object.class)),
+				false));
+
+		code.add(new JumpInsnNode(IFEQ, l_jump_false));
+
+		// comparison evaluates to true => ???
+		code.add(new JumpInsnNode(GOTO, l_jump_true));
+
+	}
+
 	private static class LuaState_prx {
 
 		private final int selfIndex;
