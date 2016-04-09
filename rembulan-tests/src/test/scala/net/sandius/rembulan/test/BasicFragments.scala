@@ -89,6 +89,22 @@ object BasicFragments extends FragmentBundle {
     """
   }
 
+  fragment ("Self") {
+    """local function GET(tab, k) return tab[k] end
+      |local function SET(tab, k, v) tab[k] = v end
+      |
+      |local t = {}
+      |t.get = GET
+      |t.set = SET
+      |
+      |local before = t:get(1)
+      |t:set(1, "hello")
+      |local after = t:get(1)
+      |
+      |return before, after
+    """
+  }
+
   fragment ("BlockLocals") {
     """do
       |  local a = 0
