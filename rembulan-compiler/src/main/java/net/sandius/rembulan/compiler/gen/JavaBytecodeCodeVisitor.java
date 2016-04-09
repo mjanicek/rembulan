@@ -51,7 +51,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitGetTabUp(Object id, SlotState st, int r_dest, int upvalueIndex, int rk_key) {
-		e._save_pc(this);
+		e._save_pc(id);
 
 		e._loadState();
 		e._loadObjectSink();
@@ -60,14 +60,14 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		e._load_reg_or_const(rk_key, st);
 		e._dispatch_index();
 
-		e._resumptionPoint(this);
+		e._resumptionPoint(id);
 		e._retrieve_0();
 		e._store(r_dest, st);
 	}
 
 	@Override
 	public void visitGetTable(Object id, SlotState st, int r_dest, int r_tab, int rk_key) {
-		e._save_pc(this);
+		e._save_pc(id);
 
 		e._loadState();
 		e._loadObjectSink();
@@ -75,14 +75,14 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		e._load_reg_or_const(rk_key, st);
 		e._dispatch_index();
 
-		e._resumptionPoint(this);
+		e._resumptionPoint(id);
 		e._retrieve_0();
 		e._store(r_dest, st);
 	}
 
 	@Override
 	public void visitSetTabUp(Object id, SlotState st, int upvalueIndex, int rk_key, int rk_value) {
-		e._save_pc(this);
+		e._save_pc(id);
 
 		e._loadState();
 		e._loadObjectSink();
@@ -92,7 +92,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		e._load_reg_or_const(rk_value, st);
 		e._dispatch_newindex();
 
-		e._resumptionPoint(this);
+		e._resumptionPoint(id);
 	}
 
 	@Override
@@ -104,7 +104,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSetTable(Object id, SlotState st, int r_tab, int rk_key, int rk_value) {
-		e._save_pc(this);
+		e._save_pc(id);
 
 		e._loadState();
 		e._loadObjectSink();
@@ -113,7 +113,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		e._load_reg_or_const(rk_value, st);
 		e._dispatch_newindex();
 
-		e._resumptionPoint(this);
+		e._resumptionPoint(id);
 	}
 
 	@Override
@@ -182,10 +182,10 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitCall(Object id, SlotState st, int r_tgt, int b, int c) {
+		e._save_pc(id);
+
 		if (b > 0) {
 			int kind = ClassEmitter.kind(b - 1,  false);
-
-			e._save_pc(this);
 
 			e._loadState();
 			e._loadObjectSink();
@@ -207,7 +207,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			throw new UnsupportedOperationException("CALL with b == 0");
 		}
 
-		e._resumptionPoint(this);
+		e._resumptionPoint(id);
 
 		if (c > 0) {
 			e._retrieve_and_store_n(c - 1, r_tgt, st);
@@ -228,7 +228,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			e._return();
 		}
 		else {
-			e._missing(this);
+			e._missing(id);
 		}
 	}
 
@@ -243,7 +243,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		}
 		else {
 			// TODO
-			e._missing(this);
+			e._missing(id);
 		}
 	}
 
@@ -275,7 +275,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		for (Prototype.UpvalueDesc uvd : uvds) {
 			if (uvd.inStack) {
-				// by this point all upvalues have been captured
+				// by id point all upvalues have been captured
 				e._load_reg_value(uvd.index, Upvalue.class);
 			}
 			else {
