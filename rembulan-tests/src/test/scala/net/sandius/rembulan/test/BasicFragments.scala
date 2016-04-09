@@ -64,6 +64,30 @@ object BasicFragments extends FragmentBundle {
     """
   }
 
+  fragment ("SetUpvalue") {
+    """local x = 1
+      |
+      |local function f()
+      |  x = 123
+      |end
+      |
+      |f()
+      |return x
+    """
+  }
+
+  fragment ("SetTabUp") {
+    """x = 1
+      |return x
+    """
+  }
+
+  fragment ("Tables") {
+    """local t = {}
+      |t.self = t
+      |return t.self
+    """
+  }
 
   fragment ("BlockLocals") {
     """do
