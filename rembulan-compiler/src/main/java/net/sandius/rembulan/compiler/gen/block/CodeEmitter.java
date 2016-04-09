@@ -188,8 +188,7 @@ public class CodeEmitter {
 			_push_null();
 		}
 		else if (k instanceof Boolean) {
-			code.add(ASMUtils.loadInt((Boolean) k ? 1 : 0));
-			code.add(ASMUtils.box(Type.BOOLEAN_TYPE, Type.getType(Boolean.class)));
+			code.add(ASMUtils.loadBoxedBoolean((Boolean) k));
 		}
 		else if (k instanceof Double || k instanceof Float) {
 			code.add(ASMUtils.loadDouble(((Number) k).doubleValue()));

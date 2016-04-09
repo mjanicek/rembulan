@@ -3,6 +3,7 @@ package net.sandius.rembulan.util.asm;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -60,6 +61,14 @@ public abstract class ASMUtils {
 		if (d == 0.0) return new InsnNode(DCONST_0);
 		else if (d == 1.0) return new InsnNode(DCONST_1);
 		else return new LdcInsnNode(d);
+	}
+
+	public static AbstractInsnNode loadBoxedBoolean(boolean value) {
+		return new FieldInsnNode(
+				GETSTATIC,
+				Type.getInternalName(Boolean.class),
+				value ? "TRUE" : "FALSE",
+				Type.getDescriptor(Boolean.class));
 	}
 
 	public static MethodInsnNode box(Type from, Type to) {
