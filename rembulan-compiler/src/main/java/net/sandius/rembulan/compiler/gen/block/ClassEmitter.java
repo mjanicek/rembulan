@@ -61,7 +61,7 @@ public class ClassEmitter {
 		return cn != null ? ASMUtils.typeForClassName(cn) : null;
 	}
 
-	protected static int kind(int num, boolean vararg) {
+	public static int kind(int num, boolean vararg) {
 		return (!vararg && num >= 0 && num < 4) ? num : -1;
 	}
 

@@ -1,5 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
+import net.sandius.rembulan.compiler.gen.JavaBytecodeCodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
@@ -107,6 +109,10 @@ public class CodeEmitter {
 		code = new InsnList();
 		errorState = new InsnList();
 		resumeHandler = new InsnList();
+	}
+
+	public PrototypeContext context() {
+		return context;
 	}
 
 	public MethodNode invokeMethodNode() {
@@ -871,7 +877,7 @@ public class CodeEmitter {
 		code.add(new JumpInsnNode(GOTO, _l(l)));
 	}
 
-	public void _next_insn(Target t) {
+	public void _next_insn(Object t) {
 		_goto(t);
 //
 //		if (t.inSize() < 2) {
@@ -987,7 +993,7 @@ public class CodeEmitter {
 		}
 	}
 
-	public void _cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Target trueBranch, Target falseBranch) {
+	public void _cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
 
 		// TODO: specialise
 
@@ -1033,6 +1039,10 @@ public class CodeEmitter {
 		// comparison evaluates to true => ???
 		code.add(new JumpInsnNode(GOTO, l_jump_true));
 
+	}
+
+	public CodeVisitor codeVisitor() {
+		return new JavaBytecodeCodeVisitor(this);
 	}
 
 	private static class LuaState_prx {

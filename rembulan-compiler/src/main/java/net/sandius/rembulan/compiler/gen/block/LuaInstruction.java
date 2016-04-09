@@ -9,10 +9,8 @@ import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
-import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.ReadOnlyArray;
 
 import static net.sandius.rembulan.compiler.gen.block.LuaUtils.argTypesFromSlots;
 import static net.sandius.rembulan.compiler.gen.block.LuaUtils.prefix;
@@ -78,9 +76,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._load_reg(r_src, s);
-			e._store(r_dest, s);
+			e.codeVisitor().visitMove(this, inSlots(), r_src, r_dest);
 		}
 
 	}
@@ -115,9 +111,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._load_k(constIndex);
-			e._store(r_dest, s);
+			e.codeVisitor().visitLoadK(this, inSlots(), r_dest, constIndex);
 		}
 
 	}
@@ -149,9 +143,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._load_constant(value);
-			e._store(r_dest, s);
+			e.codeVisitor().visitLoadBool(this, inSlots(), r_dest, value);
 		}
 
 	}
@@ -186,11 +178,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			for (int i = 0; i < count; i++) {
-				e._push_null();
-				e._store(r_dest + i, s);
-			}
+			e.codeVisitor().visitLoadNil(this, inSlots(), r_dest, count);
 		}
 
 	}
@@ -222,10 +210,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._get_upvalue_ref(upvalueIndex);
-			e._get_upvalue_value();
-			e._store(r_dest, s);
+			e.codeVisitor().visitGetUpVal(this, inSlots(), r_dest, upvalueIndex);
 		}
 
 	}
@@ -259,20 +244,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-
-			e._save_pc(this);
-
-			e._loadState();
-			e._loadObjectSink();
-			e._get_upvalue_ref(upvalueIndex);
-			e._get_upvalue_value();
-			e._load_reg_or_const(rk_key, s);
-			e._dispatch_index();
-
-			e._resumptionPoint(this);
-			e._retrieve_0();
-			e._store(r_dest, s);
+			e.codeVisitor().visitGetTabUp(this, inSlots(), r_dest, upvalueIndex, rk_key);
 		}
 
 	}
@@ -306,6 +278,11 @@ public interface LuaInstruction {
 			return true;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitGetTable(this, inSlots(), r_dest, r_tab, rk_key);
+		}
+
 	}
 
 	class SetTabUp extends Linear implements LuaInstruction {
@@ -331,6 +308,11 @@ public interface LuaInstruction {
 			return true;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitSetTabUp(this, inSlots(), upvalueIndex, rk_key, rk_value);
+		}
+
 	}
 
 	class SetUpVal extends Linear implements LuaInstruction {
@@ -351,6 +333,11 @@ public interface LuaInstruction {
 		@Override
 		public boolean needsResumePoint() {
 			return false;
+		}
+
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitSetUpVal(this, inSlots(), r_src, upvalueIndex);
 		}
 
 	}
@@ -377,6 +364,11 @@ public interface LuaInstruction {
 		public boolean needsResumePoint() {
 			// TODO: check that this is correct -- will try a metamethod when key is (not) present?
 			return true;
+		}
+
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitSetTable(this, inSlots(), r_tab, rk_key, rk_value);
 		}
 
 	}
@@ -412,9 +404,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._new_table(arraySize, hashSize);
-			e._store(r_dest, s);
+			e.codeVisitor().visitNewTable(this, inSlots(), r_dest, arraySize, hashSize);
 		}
 
 	}
@@ -447,6 +437,11 @@ public interface LuaInstruction {
 		public boolean needsResumePoint() {
 			// TODO: check that this is correct -- will try a metamethod when key is (not) present?
 			return true;
+		}
+
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitSelf(this, inSlots(), r_dest, r_self, rk_key);
 		}
 
 	}
@@ -489,6 +484,11 @@ public interface LuaInstruction {
 			return !allStringable(inSlots());
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitConcat(this, inSlots(), r_dest, r_begin, r_end);
+		}
+
 	}
 
 	// No explicit node for jumps
@@ -519,8 +519,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._cmp("eq", rk_left, rk_right, pos, s, trueBranch(), falseBranch());
+			e.codeVisitor().visitEq(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
 		}
 
 	}
@@ -551,8 +550,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._cmp("lt", rk_left, rk_right, pos, s, trueBranch(), falseBranch());
+			e.codeVisitor().visitLt(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
 		}
 
 	}
@@ -583,8 +581,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-			e._cmp("le", rk_left, rk_right, pos, s, trueBranch(), falseBranch());
+			e.codeVisitor().visitLe(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
 		}
 
 	}
@@ -636,36 +633,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			Type tpe = inSlots().typeAt(r_index);
-
-			int ha;
-
-			if (tpe.isSubtypeOf(LuaTypes.BOOLEAN)) {
-				e._missing(this);  // TODO
-			}
-			else if (tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) {
-				// TODO: check correctness for DYNAMIC
-
-				e._load_reg(r_index, inSlots());
-
-				if (value)  {
-					e._if_null(falseBranch());
-					e._next_insn(trueBranch());
-				}
-				else {
-					e._if_nonnull(falseBranch());
-					e._next_insn(trueBranch());
-				}
-
-			}
-			else if (tpe.equals(LuaTypes.NIL)) {
-				// TODO: should be inlined
-				e._goto(falseBranch());
-			}
-			else {
-				// TODO: should be inlined
-				e._goto(trueBranch());
-			}
+			e.codeVisitor().visitTest(this, inSlots(), r_index, value, trueBranch(), falseBranch());
 		}
 
 	}
@@ -800,43 +768,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-
-			if (b > 0) {
-				int kind = ClassEmitter.kind(b - 1,  false);
-
-				e._save_pc(this);
-
-				e._loadState();
-				e._loadObjectSink();
-				e._load_reg(r_tgt, s);
-
-				if (kind < 0) {
-					// need to pack args into an array
-					e._pack_regs(r_tgt + 1, s, b - 1);
-				}
-				else {
-					// pass args through the stack
-					e._load_regs(r_tgt + 1, s, kind);
-				}
-
-				e._dispatch_call(kind);
-			}
-			else {
-				// TODO
-				throw new UnsupportedOperationException("CALL with b == 0");
-			}
-
-			e._resumptionPoint(this);
-
-			if (c > 0) {
-				e._retrieve_and_store_n(c - 1, r_tgt, s);
-			}
-			else {
-				// TODO
-				throw new UnsupportedOperationException("CALL with c == 0");
-			}
-
+			e.codeVisitor().visitCall(this, inSlots(), r_tgt, b, c);
 		}
 
 	}
@@ -883,18 +815,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-
-			if (b > 0) {
-				// b - 1 is the actual number of arguments to the tailcall
-				e._loadObjectSink();
-				e._load_regs(r_tgt, s, b);  // target is at r_tgt, plus (b - 1) arguments
-				e._tailcall(b - 1);
-				e._return();
-			}
-			else {
-				e._missing(this);
-			}
+			e.codeVisitor().visitTailCall(this, inSlots(), r_tgt, b);
 		}
 
 	}
@@ -928,19 +849,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-
-			if (b > 0) {
-				// b - 1 is the actual number of results
-				e._loadObjectSink();
-				e._load_regs(r_from, s, b - 1);
-				e._setret(b - 1);
-				e._return();
-			}
-			else {
-				// TODO
-				e._missing(this);
-			}
+			e.codeVisitor().visitReturn(this, inSlots(), r_from, b);
 		}
 
 	}
@@ -967,6 +876,11 @@ public interface LuaInstruction {
 		public boolean needsResumePoint() {
 			// TODO
 			return true;
+		}
+
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitForLoop(this, inSlots(), r_base);
 		}
 
 	}
@@ -1032,6 +946,11 @@ public interface LuaInstruction {
 			return true;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitForPrep(this, inSlots(), r_base);
+		}
+
 	}
 
 	// TODO: TFORCALL
@@ -1080,35 +999,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeEmitter e) {
-			SlotState s = inSlots();
-
-			String closureClassName = context.nestedPrototypeName(index);
-
-			ReadOnlyArray<Prototype.UpvalueDesc> uvds = context.nestedPrototype(index).getUpValueDescriptions();
-
-			for (Prototype.UpvalueDesc uvd : uvds) {
-				if (uvd.inStack && !s.isCaptured(uvd.index)) {
-					e._capture(uvd.index);
-					s = s.capture(uvd.index);  // just marking it so that we can store properly
-				}
-			}
-
-			e._new(closureClassName);
-			e._dup();
-
-			for (Prototype.UpvalueDesc uvd : uvds) {
-				if (uvd.inStack) {
-					// by this point all upvalues have been captured
-					e._load_reg_value(uvd.index, Upvalue.class);
-				}
-				else {
-					e._get_upvalue_ref(uvd.index);
-				}
-			}
-
-			e._closure_ctor(closureClassName, uvds.size());
-
-			e._store(r_dest, s);
+			e.codeVisitor().visitClosure(this, inSlots(), r_dest, index);
 		}
 
 	}
@@ -1145,6 +1036,11 @@ public interface LuaInstruction {
 		@Override
 		public boolean needsResumePoint() {
 			return false;
+		}
+
+		@Override
+		public void emit(CodeEmitter e) {
+			e.codeVisitor().visitVararg(this, inSlots(), r_base, b);
 		}
 
 	}
