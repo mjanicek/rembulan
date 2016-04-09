@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
@@ -72,8 +73,8 @@ public class Entry implements Node, Jump {
 	}
 
 	@Override
-	public void emit(CodeEmitter e) {
-		e._ignored(this);
+	public void emit(CodeVisitor visitor) {
+		visitor._ignored(this);
 	}
 
 }

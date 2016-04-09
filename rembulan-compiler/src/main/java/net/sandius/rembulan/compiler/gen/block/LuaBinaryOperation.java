@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.Slot;
@@ -70,20 +71,20 @@ public class LuaBinaryOperation extends Linear implements LuaInstruction {
 	}
 
 	@Override
-	public void emit(CodeEmitter e) {
+	public void emit(CodeVisitor visitor) {
 		switch (op) {
-			case ADD:  e.codeVisitor().visitAdd(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case SUB:  e.codeVisitor().visitSub(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case MUL:  e.codeVisitor().visitMul(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case MOD:  e.codeVisitor().visitMod(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case POW:  e.codeVisitor().visitPow(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case DIV:  e.codeVisitor().visitDiv(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case IDIV: e.codeVisitor().visitIDiv(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case BAND: e.codeVisitor().visitBAnd(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case BOR:  e.codeVisitor().visitBOr(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case BXOR: e.codeVisitor().visitBXOr(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case SHL:  e.codeVisitor().visitShl(this, inSlots(), r_dest, rk_left, rk_right); break;
-			case SHR:  e.codeVisitor().visitShr(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case ADD:  visitor.visitAdd(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case SUB:  visitor.visitSub(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case MUL:  visitor.visitMul(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case MOD:  visitor.visitMod(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case POW:  visitor.visitPow(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case DIV:  visitor.visitDiv(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case IDIV: visitor.visitIDiv(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case BAND: visitor.visitBAnd(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case BOR:  visitor.visitBOr(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case BXOR: visitor.visitBXOr(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case SHL:  visitor.visitShl(this, inSlots(), r_dest, rk_left, rk_right); break;
+			case SHR:  visitor.visitShr(this, inSlots(), r_dest, rk_left, rk_right); break;
 		}
 	}
 

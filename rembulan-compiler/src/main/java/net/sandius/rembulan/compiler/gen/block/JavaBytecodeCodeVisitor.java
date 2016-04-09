@@ -7,6 +7,8 @@ import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.IntIterable;
+import net.sandius.rembulan.util.IntIterator;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 public class JavaBytecodeCodeVisitor extends CodeVisitor {
@@ -15,6 +17,34 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	public JavaBytecodeCodeVisitor(CodeEmitter e) {
 		this.e = Check.notNull(e);
+	}
+
+	@Override
+	public void visitTarget(Object id) {
+		e._label_here(id);
+	}
+
+	@Override
+	public void visitJump(Object id, Object target) {
+		e._goto(target);
+	}
+
+	@Override
+	public void visitCapture(Object it, SlotState st, IntIterable indices) {
+		IntIterator iit = indices.iterator();
+		while (iit.hasNext()) {
+			int idx = iit.next();
+			e._capture(idx);
+		}
+	}
+
+	@Override
+	public void visitCloseUpvalues(Object it, SlotState st, int fromIndex) {
+		for (int i = fromIndex; i < st.size(); i++) {
+			if (st.isCaptured(i)) {
+				e._uncapture(i);
+			}
+		}
 	}
 
 	@Override

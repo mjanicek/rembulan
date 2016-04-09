@@ -1,6 +1,27 @@
 package net.sandius.rembulan.compiler.gen;
 
+import net.sandius.rembulan.util.IntIterable;
+
 public abstract class CodeVisitor {
+
+	@Deprecated
+	public void _ignored(Object id) {
+		System.out.println("// ignored: " + id.getClass().getName() + " : " + id);
+	}
+
+	@Deprecated
+	public void _missing(Object id) {
+		throw new UnsupportedOperationException("Emit not implemented: " + id.getClass().getName() + " : " + id);
+	}
+
+	public abstract void visitTarget(Object id);
+
+	public abstract void visitJump(Object id, Object target);
+
+	public abstract void visitCapture(Object it, SlotState st, IntIterable indices);
+
+	public abstract void visitCloseUpvalues(Object it, SlotState st, int fromIndex);
+
 
 	public abstract void visitMove(Object id, SlotState st, int r_src, int r_dest);
 

@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
@@ -28,14 +29,8 @@ public class CloseUpvalues extends Linear implements LocalVariableEffect {
 	}
 
 	@Override
-	public void emit(CodeEmitter e) {
-		SlotState s = inSlots();
-
-		for (int i = fromIndex; i < s.size(); i++) {
-			if (s.isCaptured(i)) {
-				e._uncapture(i);
-			}
-		}
+	public void emit(CodeVisitor visitor) {
+		visitor.visitCloseUpvalues(this, inSlots(), fromIndex);
 	}
 
 }

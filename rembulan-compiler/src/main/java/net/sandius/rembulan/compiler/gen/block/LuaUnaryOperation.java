@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.Slot;
@@ -49,12 +50,12 @@ public class LuaUnaryOperation extends Linear implements LuaInstruction {
 	}
 
 	@Override
-	public void emit(CodeEmitter e) {
+	public void emit(CodeVisitor visitor) {
 		switch (op) {
-			case UNM:  e.codeVisitor().visitUnm(this, inSlots(), r_dest, r_arg); break;
-			case BNOT: e.codeVisitor().visitBNot(this, inSlots(), r_dest, r_arg); break;
-			case NOT:  e.codeVisitor().visitNot(this, inSlots(), r_dest, r_arg); break;
-			case LEN:  e.codeVisitor().visitLen(this, inSlots(), r_dest, r_arg); break;
+			case UNM:  visitor.visitUnm(this, inSlots(), r_dest, r_arg); break;
+			case BNOT: visitor.visitBNot(this, inSlots(), r_dest, r_arg); break;
+			case NOT:  visitor.visitNot(this, inSlots(), r_dest, r_arg); break;
+			case LEN:  visitor.visitLen(this, inSlots(), r_dest, r_arg); break;
 		}
 	}
 

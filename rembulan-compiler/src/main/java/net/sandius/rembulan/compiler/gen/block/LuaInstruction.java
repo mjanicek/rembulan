@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
@@ -67,8 +68,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitMove(this, inSlots(), r_src, r_dest);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitMove(this, inSlots(), r_src, r_dest);
 		}
 
 	}
@@ -97,8 +98,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitLoadK(this, inSlots(), r_dest, constIndex);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitLoadK(this, inSlots(), r_dest, constIndex);
 		}
 
 	}
@@ -124,8 +125,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitLoadBool(this, inSlots(), r_dest, value);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitLoadBool(this, inSlots(), r_dest, value);
 		}
 
 	}
@@ -154,8 +155,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitLoadNil(this, inSlots(), r_dest, count);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitLoadNil(this, inSlots(), r_dest, count);
 		}
 
 	}
@@ -181,8 +182,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitGetUpVal(this, inSlots(), r_dest, upvalueIndex);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitGetUpVal(this, inSlots(), r_dest, upvalueIndex);
 		}
 
 	}
@@ -210,8 +211,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitGetTabUp(this, inSlots(), r_dest, upvalueIndex, rk_key);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitGetTabUp(this, inSlots(), r_dest, upvalueIndex, rk_key);
 		}
 
 	}
@@ -240,8 +241,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitGetTable(this, inSlots(), r_dest, r_tab, rk_key);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitGetTable(this, inSlots(), r_dest, r_tab, rk_key);
 		}
 
 	}
@@ -264,8 +265,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitSetTabUp(this, inSlots(), upvalueIndex, rk_key, rk_value);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitSetTabUp(this, inSlots(), upvalueIndex, rk_key, rk_value);
 		}
 
 	}
@@ -286,8 +287,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitSetUpVal(this, inSlots(), r_src, upvalueIndex);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitSetUpVal(this, inSlots(), r_src, upvalueIndex);
 		}
 
 	}
@@ -311,8 +312,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitSetTable(this, inSlots(), r_tab, rk_key, rk_value);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitSetTable(this, inSlots(), r_tab, rk_key, rk_value);
 		}
 
 	}
@@ -342,8 +343,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitNewTable(this, inSlots(), r_dest, arraySize, hashSize);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitNewTable(this, inSlots(), r_dest, arraySize, hashSize);
 		}
 
 	}
@@ -373,8 +374,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitSelf(this, inSlots(), r_dest, r_self, rk_key);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitSelf(this, inSlots(), r_dest, r_self, rk_key);
 		}
 
 	}
@@ -413,8 +414,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitConcat(this, inSlots(), r_dest, r_begin, r_end);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitConcat(this, inSlots(), r_dest, r_begin, r_end);
 		}
 
 	}
@@ -440,8 +441,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitEq(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
+		public void emit(CodeVisitor visitor) {
+			visitor.visitEq(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
 		}
 
 	}
@@ -465,8 +466,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitLt(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
+		public void emit(CodeVisitor visitor) {
+			visitor.visitLt(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
 		}
 
 	}
@@ -490,8 +491,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitLe(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
+		public void emit(CodeVisitor visitor) {
+			visitor.visitLe(this, inSlots(), pos, rk_left, rk_right, trueBranch(), falseBranch());
 		}
 
 	}
@@ -537,8 +538,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitTest(this, inSlots(), r_index, value, trueBranch(), falseBranch());
+		public void emit(CodeVisitor visitor) {
+			visitor.visitTest(this, inSlots(), r_index, value, trueBranch(), falseBranch());
 		}
 
 	}
@@ -667,8 +668,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitCall(this, inSlots(), r_tgt, b, c);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitCall(this, inSlots(), r_tgt, b, c);
 		}
 
 	}
@@ -709,8 +710,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitTailCall(this, inSlots(), r_tgt, b);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitTailCall(this, inSlots(), r_tgt, b);
 		}
 
 	}
@@ -738,8 +739,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitReturn(this, inSlots(), r_from, b);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitReturn(this, inSlots(), r_from, b);
 		}
 
 	}
@@ -763,8 +764,8 @@ public interface LuaInstruction {
 		// TODO: can also be specialised
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitForLoop(this, inSlots(), r_base);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitForLoop(this, inSlots(), r_base);
 		}
 
 	}
@@ -825,8 +826,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitForPrep(this, inSlots(), r_base);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitForPrep(this, inSlots(), r_base);
 		}
 
 	}
@@ -871,8 +872,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitClosure(this, inSlots(), r_dest, index);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitClosure(this, inSlots(), r_dest, index);
 		}
 
 	}
@@ -907,8 +908,8 @@ public interface LuaInstruction {
 		}
 
 		@Override
-		public void emit(CodeEmitter e) {
-			e.codeVisitor().visitVararg(this, inSlots(), r_base, b);
+		public void emit(CodeVisitor visitor) {
+			visitor.visitVararg(this, inSlots(), r_base, b);
 		}
 
 	}

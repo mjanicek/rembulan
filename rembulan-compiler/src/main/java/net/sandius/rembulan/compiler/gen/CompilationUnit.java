@@ -95,7 +95,7 @@ public class CompilationUnit {
 
 		codeEmitter.begin();
 		for (Node n : topoSorted) {
-			n.emit(codeEmitter);
+			n.emit(codeEmitter.codeVisitor());
 		}
 		codeEmitter.end();
 

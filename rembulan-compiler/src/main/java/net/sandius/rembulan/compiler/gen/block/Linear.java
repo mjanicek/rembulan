@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
@@ -135,8 +136,8 @@ public abstract class Linear implements Node, Sink, Src {
 	}
 
 	@Override
-	public void emit(CodeEmitter e) {
-		e._missing(this);
+	public void emit(CodeVisitor visitor) {
+		visitor._missing(this);
 	}
 
 }

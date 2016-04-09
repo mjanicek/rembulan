@@ -121,10 +121,5 @@ public abstract class Branch implements Node, Sink, Jump {
 		FALSE_BRANCH
 	}
 
-	@Override
-	public void emit(CodeEmitter e) {
-		e._missing(this);
-	}
-
 }
 

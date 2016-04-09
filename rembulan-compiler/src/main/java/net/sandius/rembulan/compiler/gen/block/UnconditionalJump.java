@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
@@ -96,8 +97,8 @@ public class UnconditionalJump implements Node, Sink, Jump {
 	}
 
 	@Override
-	public void emit(CodeEmitter e) {
-		e._goto(target);
+	public void emit(CodeVisitor visitor) {
+		visitor.visitJump(this, target);
 	}
 
 }

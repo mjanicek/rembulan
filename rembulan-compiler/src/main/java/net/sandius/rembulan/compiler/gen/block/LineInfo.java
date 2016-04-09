@@ -1,5 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
+
 public class LineInfo extends Linear {
 
 	public final int line;
@@ -14,9 +16,8 @@ public class LineInfo extends Linear {
 	}
 
 	@Override
-	public void emit(CodeEmitter e) {
-		e._ignored(this);
-//		e._line_here(line);
+	public void emit(CodeVisitor visitor) {
+		visitor._ignored(this);
 	}
 
 }

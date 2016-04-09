@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntIterable;
@@ -29,12 +30,8 @@ public class Capture extends Linear implements LocalVariableEffect {
 	}
 
 	@Override
-	public void emit(CodeEmitter e) {
-		IntIterator iit = indices.iterator();
-		while (iit.hasNext()) {
-			int idx = iit.next();
-			e._capture(idx);
-		}
+	public void emit(CodeVisitor visitor) {
+		visitor.visitCapture(this, inSlots(), indices);
 	}
 
 }

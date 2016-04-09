@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.SlotState;
 
 public interface Node {
@@ -14,6 +15,6 @@ public interface Node {
 
 	void clearSlots();
 
-	void emit(CodeEmitter e);
+	void emit(CodeVisitor visitor);
 
 }
