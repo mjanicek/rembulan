@@ -20,6 +20,7 @@ import org.objectweb.asm.Type;
 
 import static org.objectweb.asm.Opcodes.*;
 
+@Deprecated
 public class LuaBytecodeMethodVisitor extends MethodVisitor implements InstructionEmitter {
 
 	private static Type REGISTERS_TYPE = ASMUtils.arrayTypeFor(Object.class);

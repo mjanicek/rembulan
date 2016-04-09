@@ -7,6 +7,7 @@ import net.sandius.rembulan.util.ReadOnlyArray;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.*;
 
+@Deprecated
 public class IncCallInfoDump implements Opcodes {
 
 	private final Type thisType;
