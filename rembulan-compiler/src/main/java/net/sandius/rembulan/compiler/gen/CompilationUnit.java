@@ -11,8 +11,10 @@ import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 import net.sandius.rembulan.util.ReadOnlyArray;
+import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
+import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
 import java.io.PrintWriter;
@@ -99,18 +101,17 @@ public class CompilationUnit {
 
 		classEmitter.end();
 
-		ClassWriter cw = new ClassWriter(0);
-		ClassVisitor cv = new TraceClassVisitor(cw, new PrintWriter(System.out));
-		classEmitter.accept(cv);
+		ClassWriter writer = new ClassWriter(0);
+		classEmitter.accept(writer);
+		byte[] bytes = writer.toByteArray();
 
-		byte[] bytes = cw.toByteArray();
-		if (bytes != null) {
-			return new CompiledClass(ctx.className(), ByteVector.wrap(bytes));
-		}
-		else {
-			// TODO: throw an exception
-			return null;
-		}
+		// verify bytecode
+		ClassReader reader = new ClassReader(bytes);
+		ClassVisitor tracer = new TraceClassVisitor(new PrintWriter(System.out));
+		ClassVisitor checker = new CheckClassAdapter(tracer, true);
+		reader.accept(checker, 0);
+
+		return new CompiledClass(ctx.className(), ByteVector.wrap(bytes));
 	}
 
 }
