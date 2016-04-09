@@ -93,6 +93,12 @@ public abstract class LuaUnaryOperation extends Linear implements LuaInstruction
 			return LuaTypes.BOOLEAN;
 		}
 
+		@Override
+		public void emit(CodeEmitter e) {
+			SlotState s = inSlots();
+			e._not(r_arg, r_dest, s);
+		}
+
 	}
 
 	public static class Len extends LuaUnaryOperation {

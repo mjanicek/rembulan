@@ -1,8 +1,10 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
@@ -917,6 +919,72 @@ public class CodeEmitter {
 
 	private ObjectSink_prx withObjectSink(InsnList il) {
 		return new ObjectSink_prx(LV_OBJECTSINK, il);
+	}
+
+	public void _not(int r_src, int r_dest, SlotState s) {
+		if (s.typeAt(r_src).isSubtypeOf(LuaTypes.BOOLEAN)) {
+			LabelNode l_false = new LabelNode();
+			LabelNode l_store = new LabelNode();
+
+			_load_reg(r_src, s);
+
+			code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Boolean.class)));
+			code.add(new MethodInsnNode(
+					INVOKEVIRTUAL,
+					Type.getInternalName(Boolean.class),
+					"booleanValue",
+					Type.getMethodDescriptor(
+							Type.BOOLEAN_TYPE),
+					false
+			));
+
+			code.add(new JumpInsnNode(IFEQ, l_false));
+
+			// value is true, emitting false
+			code.add(ASMUtils.loadBoxedBoolean(false));
+			code.add(new JumpInsnNode(GOTO, l_store));
+
+			// value is false, emitting true
+			code.add(l_false);
+			code.add(new FrameNode(F_SAME, 0, null, 0, null));
+			code.add(ASMUtils.loadBoxedBoolean(true));
+
+			// store result
+			code.add(l_store);
+			code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(Boolean.class) }));
+			_store(r_dest, s);
+		}
+		else {
+			LabelNode l_false = new LabelNode();
+			LabelNode l_store = new LabelNode();
+
+			_load_reg(r_src, s);
+
+			code.add(new MethodInsnNode(
+					INVOKESTATIC,
+					Type.getInternalName(Conversions.class),
+					"objectToBoolean",
+					Type.getMethodDescriptor(
+							Type.BOOLEAN_TYPE,
+							Type.getType(Object.class)),
+					false));
+
+			code.add(new JumpInsnNode(IFEQ, l_false));
+
+			// value is not nil and not false => emit false
+			code.add(ASMUtils.loadBoxedBoolean(false));
+			code.add(new JumpInsnNode(GOTO, l_store));
+
+			// value is nil or false => emit true
+			code.add(l_false);
+			code.add(new FrameNode(F_SAME, 0, null, 0, null));
+			code.add(ASMUtils.loadBoxedBoolean(true));
+
+			// store result
+			code.add(l_store);
+			code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(Boolean.class) }));
+			_store(r_dest, s);
+		}
 	}
 
 	private static class LuaState_prx {
