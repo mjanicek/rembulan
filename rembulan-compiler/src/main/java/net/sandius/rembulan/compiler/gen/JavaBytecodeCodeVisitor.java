@@ -124,7 +124,21 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSelf(Object id, SlotState st, int r_dest, int r_self, int rk_key) {
-		throw new UnsupportedOperationException();  // TODO
+		e._save_pc(id);
+
+		e._loadState();
+		e._loadObjectSink();
+
+		e._load_reg(r_self, st);
+		e._dup();
+		e._store(r_dest + 1, st);
+
+		e._load_reg_or_const(rk_key, st);
+		e._dispatch_index();
+
+		e._resumptionPoint(id);
+		e._retrieve_0();
+		e._store(r_dest, st);
 	}
 
 	@Override
