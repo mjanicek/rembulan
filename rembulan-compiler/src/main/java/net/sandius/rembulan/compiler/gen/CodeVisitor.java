@@ -26,6 +26,30 @@ public abstract class CodeVisitor {
 
 	public abstract void visitSelf(Object id, SlotState st, int r_dest, int r_self, int rk_key);
 
+	public abstract void visitAdd(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitSub(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitMul(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitMod(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitPow(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitIDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitBAnd(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitBOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitBXOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitShl(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
+	public abstract void visitShr(Object id, SlotState st, int r_dest, int rk_left, int rk_right);
+
 	public abstract void visitUnm(Object id, SlotState st, int r_dest, int r_arg);
 
 	public abstract void visitBNot(Object id, SlotState st, int r_dest, int r_arg);

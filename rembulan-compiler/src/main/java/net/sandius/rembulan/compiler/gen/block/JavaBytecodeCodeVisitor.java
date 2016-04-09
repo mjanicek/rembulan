@@ -143,6 +143,66 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	}
 
 	@Override
+	public void visitAdd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitSub(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitMul(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitMod(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitPow(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitIDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitBAnd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitBOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitBXOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitShl(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
+	public void visitShr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
+		throw new UnsupportedOperationException();  // TODO
+	}
+
+	@Override
 	public void visitUnm(Object id, SlotState st, int r_dest, int r_arg) {
 		throw new UnsupportedOperationException();  // TODO
 	}
