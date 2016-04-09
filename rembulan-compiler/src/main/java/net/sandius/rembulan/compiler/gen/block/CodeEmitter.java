@@ -402,7 +402,7 @@ public class CodeEmitter {
 				INVOKESTATIC,
 				Type.getInternalName(Dispatch.class),
 				"call",
-				ClassEmitter.callMethodTypeForKind(kind).getDescriptor(),
+				InvokeKind.staticMethodType(kind).getDescriptor(),
 				false
 		));
 	}
@@ -532,7 +532,7 @@ public class CodeEmitter {
 		LabelNode begin = new LabelNode();
 		LabelNode end = new LabelNode();
 
-		int invokeKind = ClassEmitter.kind(numOfParameters, isVararg);
+		int invokeKind = InvokeKind.encode(numOfParameters, isVararg);
 
 
 		il.add(begin);

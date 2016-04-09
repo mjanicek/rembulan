@@ -1,17 +1,7 @@
 package net.sandius.rembulan.compiler.gen.block;
 
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
-import net.sandius.rembulan.compiler.types.FunctionType;
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.Upvalue;
-import net.sandius.rembulan.core.impl.Function0;
-import net.sandius.rembulan.core.impl.Function1;
-import net.sandius.rembulan.core.impl.Function2;
-import net.sandius.rembulan.core.impl.Function3;
-import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -61,67 +51,12 @@ public class ClassEmitter {
 		return cn != null ? ASMUtils.typeForClassName(cn) : null;
 	}
 
-	// 0 means variable number of parameters packed in an array
-	// n > 0 means exactly (n - 1) parameters
-	public static int kind(int num, boolean vararg) {
-		Check.nonNegative(num);
-		return (!vararg && num >= 0 && num < 4) ? num + 1 : 0;
-	}
-
-	// negative arg <= function is vararg
-	private static Class<? extends Function> superClassForKind(int kind) {
-		switch (kind) {
-			case 0: return FunctionAnyarg.class;
-			case 1: return Function0.class;
-			case 2: return Function1.class;
-			case 3: return Function2.class;
-			case 4: return Function3.class;
-			default: throw new IllegalArgumentException("No class for invoke kind: " + kind);
-		}
-	}
-
-	private static Type methodTypeForKind(boolean isStatic, int kind) {
-		Check.nonNegative(kind);
-
-		ArrayList<Type> args = new ArrayList<>();
-		args.add(Type.getType(LuaState.class));
-		args.add(Type.getType(ObjectSink.class));
-		if (isStatic) {
-			args.add(Type.getType(Object.class));
-		}
-
-		if (kind > 0) {
-			// (kind - 1) arguments
-			Type o = Type.getType(Object.class);
-			for (int i = 0; i < kind - 1; i++) {
-				args.add(o);
-			}
-		}
-		else {
-			// variable number of arguments, packed in an array
-			args.add(ASMUtils.arrayTypeFor(Object.class));
-		}
-
-		return Type.getMethodType(
-				Type.VOID_TYPE,
-				args.toArray(new Type[0]));
-	}
-
-	protected static Type methodTypeForKind(int kind) {
-		return methodTypeForKind(false, kind);
-
-	}
-
-	protected static Type callMethodTypeForKind(int kind) {
-		return methodTypeForKind(true, kind);
-	}
-
 	protected Type invokeMethodType() {
-		return methodTypeForKind(kind(numOfParameters, isVararg));
+		return InvokeKind.virtualMethodType(InvokeKind.encode(numOfParameters, isVararg));
 	}
 
 	protected Type superClassType() {
-		return Type.getType(superClassForKind(kind(numOfParameters, isVararg)));
+		return Type.getType(InvokeKind.nativeClassForKind(InvokeKind.encode(numOfParameters, isVararg)));
 	}
 
 	public void begin() {

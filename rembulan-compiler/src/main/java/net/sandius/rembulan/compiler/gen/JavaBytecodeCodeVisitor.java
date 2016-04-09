@@ -2,6 +2,7 @@ package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.block.ClassEmitter;
 import net.sandius.rembulan.compiler.gen.block.CodeEmitter;
+import net.sandius.rembulan.compiler.gen.block.InvokeKind;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
@@ -199,7 +200,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		e._save_pc(id);
 
 		if (b > 0) {
-			int kind = ClassEmitter.kind(b - 1,  false);
+			int kind = InvokeKind.encode(b - 1,  false);
 
 			e._loadState();
 			e._loadObjectSink();
