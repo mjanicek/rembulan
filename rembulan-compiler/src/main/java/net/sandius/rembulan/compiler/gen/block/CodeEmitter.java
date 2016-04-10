@@ -13,6 +13,7 @@ import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
+import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.Type;
@@ -43,11 +44,10 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class CodeEmitter {
 
-	public final int REGISTER_OFFSET = 4;
-
 	public final int LV_STATE = 1;
 	public final int LV_OBJECTSINK = 2;
 	public final int LV_RESUME = 3;
+	public final int LV_VARARGS = 4;  // index of the varargs argument, if present
 
 	private final ClassEmitter parent;
 	private final PrototypeContext context;
@@ -110,6 +110,10 @@ public class CodeEmitter {
 		resumeHandler = new InsnList();
 	}
 
+	private int registerOffset() {
+		return isVararg ? LV_VARARGS + 1 : LV_VARARGS;
+	}
+
 	public PrototypeContext context() {
 		return context;
 	}
@@ -135,14 +139,18 @@ public class CodeEmitter {
 	}
 
 	private Type runMethodType() {
-		Type[] args = new Type[3 + numOfRegisters()];
-		args[0] = Type.getType(LuaState.class);
-		args[1] = Type.getType(ObjectSink.class);
-		args[2] = Type.INT_TYPE;
-		for (int i = 3; i < args.length; i++) {
-			args[i] = Type.getType(Object.class);
+		ArrayList<Type> args = new ArrayList<>();
+
+		args.add(Type.getType(LuaState.class));
+		args.add(Type.getType(ObjectSink.class));
+		args.add(Type.INT_TYPE);
+		if (isVararg) {
+			args.add(ASMUtils.arrayTypeFor(Object.class));
 		}
-		return Type.getMethodType(Type.VOID_TYPE, args);
+		for (int i = 0; i < numOfRegisters(); i++) {
+			args.add(Type.getType(Object.class));
+		}
+		return Type.getMethodType(Type.VOID_TYPE, args.toArray(new Type[0]));
 	}
 
 	private Type invokeMethodType() {
@@ -232,7 +240,7 @@ public class CodeEmitter {
 	}
 
 	public void _load_reg_value(int idx) {
-		code.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
+		code.add(new VarInsnNode(ALOAD, registerOffset() + idx));
 	}
 
 	public void _load_reg_value(int idx, Class clazz) {
@@ -281,7 +289,7 @@ public class CodeEmitter {
 	}
 
 	public void _get_downvalue(int idx) {
-		code.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + idx));
+		code.add(new VarInsnNode(ALOAD, registerOffset() + idx));
 		_checkCast(Upvalue.class);
 	}
 
@@ -302,7 +310,7 @@ public class CodeEmitter {
 	}
 
 	private void _store_reg_value(int r) {
-		code.add(new VarInsnNode(ASTORE, REGISTER_OFFSET + r));
+		code.add(new VarInsnNode(ASTORE, registerOffset() + r));
 	}
 
 	public void _store(int r, SlotState slots) {
@@ -493,12 +501,23 @@ public class CodeEmitter {
 		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, l_insns_begin, l_insns_end, LV_OBJECTSINK));
 		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
 
+		if (isVararg) {
+			locals.add(new LocalVariableNode(
+					"varargs",
+					ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
+					null,
+					l_insns_begin,
+					l_insns_end,
+					LV_VARARGS
+					));
+		}
+
 		for (int i = 0; i < numOfRegisters(); i++) {
-			locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, REGISTER_OFFSET + i));
+			locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, registerOffset() + i));
 		}
 
 //		if (isResumable()) {
-//			locals.add(new LocalVariableNode("ct", Type.getDescriptor(ControlThrowable.class), null, l_handler_begin, l_handler_end, REGISTER_OFFSET + numOfRegisters()));
+//			locals.add(new LocalVariableNode("ct", Type.getDescriptor(ControlThrowable.class), null, l_handler_begin, l_handler_end, registerOffset() + numOfRegisters()));
 //		}
 
 		// TODO: check these
@@ -554,8 +573,42 @@ public class CodeEmitter {
 			}
 		}
 		else {
-			// variable number of parameters
-			throw new UnsupportedOperationException(); // TODO
+			// variable number of parameters, encoded in an array at position 3
+
+			il.add(new VarInsnNode(ALOAD, 3));
+			il.add(ASMUtils.loadInt(numOfParameters));
+			il.add(new MethodInsnNode(
+					INVOKESTATIC,
+					Type.getInternalName(Varargs.class),
+					"from",
+					Type.getMethodDescriptor(
+							ASMUtils.arrayTypeFor(Object.class),
+							ASMUtils.arrayTypeFor(Object.class),
+							Type.INT_TYPE),
+					false));
+
+
+			// load #numOfParameters, mapping them onto #numOfRegisters
+
+			for (int i = 0; i < numOfRegisters(); i++) {
+				if (i < numOfParameters) {
+					il.add(new VarInsnNode(ALOAD, 3));  // TODO: use dup instead?
+					il.add(ASMUtils.loadInt(i));
+					il.add(new MethodInsnNode(
+							INVOKESTATIC,
+							Type.getInternalName(Varargs.class),
+							"getElement",
+							Type.getMethodDescriptor(
+									ASMUtils.arrayTypeFor(Object.class),
+									ASMUtils.arrayTypeFor(Object.class),
+									Type.INT_TYPE),
+							false));
+				}
+				else {
+					il.add(new InsnNode(ACONST_NULL));
+				}
+			}
+
 		}
 
 		il.add(new MethodInsnNode(
@@ -617,6 +670,18 @@ public class CodeEmitter {
 							Type.INT_TYPE),
 					false
 			));  // resumption point
+
+			if (isVararg) {
+				il.add(new VarInsnNode(ALOAD, 4));
+				il.add(new MethodInsnNode(
+						INVOKEVIRTUAL,
+						Type.getInternalName(DefaultSavedState.class),
+						"varargs",
+						Type.getMethodDescriptor(
+								ASMUtils.arrayTypeFor(Object.class)),
+						false
+				));
+			}
 
 			// registers
 			if (numOfRegisters() > 0) {
@@ -718,12 +783,16 @@ public class CodeEmitter {
 	}
 
 	private Type saveStateType() {
-		Type[] args = new Type[1 + numOfRegisters()];
-		args[0] = Type.INT_TYPE;
-		for (int i = 1; i < args.length; i++) {
-			args[i] = Type.getType(Object.class);
+		ArrayList<Type> args = new ArrayList<>();
+
+		args.add(Type.INT_TYPE);
+		if (isVararg) {
+			args.add(ASMUtils.arrayTypeFor(Object.class));
 		}
-		return Type.getMethodType(Type.getType(Serializable.class), args);
+		for (int i = 0; i < numOfRegisters(); i++) {
+			args.add(Type.getType(Object.class));
+		}
+		return Type.getMethodType(Type.getType(Serializable.class), args.toArray(new Type[0]));
 	}
 
 	private String saveStateName() {
@@ -748,6 +817,8 @@ public class CodeEmitter {
 			il.add(new TypeInsnNode(NEW, Type.getInternalName(DefaultSavedState.class)));
 			il.add(new InsnNode(DUP));
 
+			int regOffset = isVararg ? 3 : 2;
+
 			// resumption point
 			il.add(new VarInsnNode(ILOAD, 1));
 
@@ -758,16 +829,28 @@ public class CodeEmitter {
 			for (int i = 0; i < numRegs; i++) {
 				il.add(new InsnNode(DUP));
 				il.add(ASMUtils.loadInt(i));
-				il.add(new VarInsnNode(ALOAD, 2 + i));
+				il.add(new VarInsnNode(ALOAD, regOffset + i));
 				il.add(new InsnNode(AASTORE));
 			}
 
-			// TODO: varargs
+			// varargs
+			if (isVararg) {
+				il.add(new VarInsnNode(ALOAD, 2));
+			}
 
-			il.add(ASMUtils.ctor(
-					Type.getType(DefaultSavedState.class),
-					Type.INT_TYPE,
-					ASMUtils.arrayTypeFor(Object.class)));
+			if (isVararg) {
+				il.add(ASMUtils.ctor(
+						Type.getType(DefaultSavedState.class),
+						Type.INT_TYPE,
+						ASMUtils.arrayTypeFor(Object.class),
+						ASMUtils.arrayTypeFor(Object.class)));
+			}
+			else {
+				il.add(ASMUtils.ctor(
+						Type.getType(DefaultSavedState.class),
+						Type.INT_TYPE,
+						ASMUtils.arrayTypeFor(Object.class)));
+			}
 
 			il.add(new InsnNode(ARETURN));
 
@@ -777,8 +860,11 @@ public class CodeEmitter {
 
 			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
 			locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, begin, end, 1));
+			if (isVararg) {
+				locals.add(new LocalVariableNode("varargs", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 2));
+			}
 			for (int i = 0; i < numOfRegisters(); i++) {
-				locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, begin, end, 2 + i));
+				locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, begin, end, regOffset + i));
 			}
 
 			saveNode.maxLocals = 2 + numOfRegisters();
@@ -802,8 +888,11 @@ public class CodeEmitter {
 		// create state snapshot
 		resumeHandler.add(new VarInsnNode(ALOAD, 0));
 		resumeHandler.add(new VarInsnNode(ILOAD, LV_RESUME));
+		if (isVararg) {
+			resumeHandler.add(new VarInsnNode(ALOAD, LV_VARARGS));
+		}
 		for (int i = 0; i < numOfRegisters(); i++) {
-			resumeHandler.add(new VarInsnNode(ALOAD, REGISTER_OFFSET + i));
+			resumeHandler.add(new VarInsnNode(ALOAD, registerOffset() + i));
 		}
 		resumeHandler.add(new MethodInsnNode(
 				INVOKESPECIAL,
@@ -1005,6 +1094,25 @@ public class CodeEmitter {
 			code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(Boolean.class) }));
 			_store(r_dest, s);
 		}
+	}
+
+	public void _push_varargs() {
+		Check.isTrue(isVararg);
+		code.add(new VarInsnNode(ALOAD, LV_VARARGS));
+	}
+
+	public void _load_vararg(int idx) {
+		code.add(ASMUtils.loadInt(idx));
+
+		code.add(new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Varargs.class),
+				"getElement",
+				Type.getMethodDescriptor(
+						Type.getType(Object.class),
+						ASMUtils.arrayTypeFor(Object.class),
+						Type.INT_TYPE),
+				false));
 	}
 
 	public void _cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {

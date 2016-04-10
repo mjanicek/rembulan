@@ -458,7 +458,26 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitVararg(Object id, SlotState st, int r_base, int b) {
-		throw new UnsupportedOperationException();  // TODO
+		if (b > 0) {
+			// determinate case: (b - 1) is the number of varargs to load
+
+			int n = b - 1;
+
+			if (n > 0) {
+				e._push_varargs();
+				for (int i = 0; i < n; i++) {
+					if (i + 1 < n) {
+						e._dup();
+					}
+					e._load_vararg(i);
+					e._store(r_base + i, st);
+				}
+			}
+		}
+		else {
+			// indeterminate case
+			throw new UnsupportedOperationException("indeterminate VARARG");  // TODO
+		}
 	}
 
 }
