@@ -191,22 +191,39 @@ public class FunctionCode {
 		}
 	}
 
+	private abstract static class AllNodeAction implements NodeAction {
+
+		public abstract void doVisit(Node n);
+
+		@Override
+		public final void visit(Node n) {
+			if (n instanceof LinearSeq) {
+				for (Node nn : ((LinearSeq) n).nodes()) {
+					visit(nn);
+				}
+			}
+			else {
+				doVisit(n);
+			}
+		}
+	}
+
 	public void computeParameterType() {
 		// we do not rely on the prototype's isVararg flag, but rather recompute
 		// it ourselves
 
-		final Ptr<Boolean> isVararg = new Ptr<>(false);
+		final boolean[] isVararg = new boolean[] { false };
 
-		Nodes.traverseOnce(callEntry, new NodeAction() {
+		Nodes.traverseOnce(callEntry, new AllNodeAction() {
 			@Override
-			public void visit(Node n) {
+			public void doVisit(Node n) {
 				if (n instanceof LuaInstruction.Vararg) {
-					isVararg.set(true);
+					isVararg[0] = true;
 				}
 			}
 		});
 
-		parameterTypes = genericParameterTypes(prototype.getNumberOfParameters(), isVararg.get());
+		parameterTypes = genericParameterTypes(prototype.getNumberOfParameters(), isVararg[0]);
 	}
 
 	public void computeReturnType() {
