@@ -1115,6 +1115,62 @@ public class CodeEmitter {
 				false));
 	}
 
+	public void _save_array_to_object_sink() {
+		withObjectSink(code).call_setToArray();
+	}
+
+	public void _setret_vararg(int fromReg, SlotState st) {
+		int varargPosition = st.varargPosition();
+
+		Check.nonNegative(varargPosition);
+
+		ObjectSink_prx os = withObjectSink(code);
+
+		int numPrepend = fromReg - varargPosition;
+
+		if (numPrepend == 0) {
+			// nothing to change, it's good as-is!
+		}
+		else if (numPrepend < 0) {
+			// there are elements to discard
+
+			os.push();
+			_dup();
+			os.call_toArray();
+
+			code.add(ASMUtils.loadInt(-numPrepend));
+			code.add(new MethodInsnNode(
+					INVOKESTATIC,
+					Type.getInternalName(Varargs.class),
+					"from",
+					Type.getMethodDescriptor(
+							ASMUtils.arrayTypeFor(Object.class),
+							ASMUtils.arrayTypeFor(Object.class),
+							Type.INT_TYPE),
+					false));
+
+			_save_array_to_object_sink();
+		}
+		else {
+			// there are elements to prepend
+
+			os.push();
+			_dup();
+			os.call_toArray();
+
+			os.push();
+			os.call_reset();
+
+			for (int i = 0; i < numPrepend; i++) {
+				os.push();
+				_load_reg(fromReg + i, st);
+				os.call_push();
+			}
+
+			os.call_addAll();
+		}
+	}
+
 	public void _cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
 
 		// TODO: specialise
@@ -1264,16 +1320,45 @@ public class CodeEmitter {
 			return this;
 		}
 
+		public ObjectSink_prx call_reset() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"reset",
+					Type.getMethodType(
+							Type.VOID_TYPE).getDescriptor(),
+					true));
+			return this;
+		}
+
+		public ObjectSink_prx call_push() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"push",
+					Type.getMethodType(
+							Type.VOID_TYPE,
+							Type.getType(Object.class)).getDescriptor(),
+					true));
+			return this;
+		}
+
+		public ObjectSink_prx call_addAll() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"addAll",
+					Type.getMethodType(
+							Type.VOID_TYPE,
+							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
+					true));
+			return this;
+		}
+
 		public ObjectSink_prx call_setTo(int numValues) {
 			Check.nonNegative(numValues);
 			if (numValues == 0) {
-				il.add(new MethodInsnNode(
-						INVOKEINTERFACE,
-						selfTpe().getInternalName(),
-						"reset",
-						Type.getMethodType(
-								Type.VOID_TYPE).getDescriptor(),
-						true));
+				call_reset();
 			}
 			else {
 				// TODO: determine this by reading the ObjectSink interface?
@@ -1295,6 +1380,41 @@ public class CodeEmitter {
 					throw new UnsupportedOperationException("Return " + numValues + " values");
 				}
 			}
+			return this;
+		}
+
+		public ObjectSink_prx call_setToArray() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"setToArray",
+					Type.getMethodType(
+							Type.VOID_TYPE,
+							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
+					true));
+			return this;
+		}
+
+		public ObjectSink_prx call_toArray() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"toArray",
+					Type.getMethodType(
+							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
+					true));
+			return this;
+		}
+
+		public ObjectSink_prx call_pushAll() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"pushAll",
+					Type.getMethodType(
+							Type.VOID_TYPE,
+							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
+					true));
 			return this;
 		}
 

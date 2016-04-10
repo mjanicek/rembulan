@@ -410,8 +410,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			e._return();
 		}
 		else {
-			// TODO
-			e._missing(id);
+			e._setret_vararg(r_from, st);
+			e._return();
 		}
 	}
 
@@ -476,7 +476,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		}
 		else {
 			// indeterminate case
-			throw new UnsupportedOperationException("indeterminate VARARG");  // TODO
+			e._loadObjectSink();
+			e._push_varargs();
+			e._save_array_to_object_sink();
 		}
 	}
 

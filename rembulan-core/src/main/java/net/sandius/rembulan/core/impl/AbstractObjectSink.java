@@ -25,6 +25,13 @@ public abstract class AbstractObjectSink implements ObjectSink {
 	}
 
 	@Override
+	public void pushAll(Object[] a) {
+		for (Object o : a) {
+			push(o);
+		}
+	}
+
+	@Override
 	public void setTo(Object a) {
 		reset();
 		push(a);
@@ -62,6 +69,14 @@ public abstract class AbstractObjectSink implements ObjectSink {
 		push(c);
 		push(d);
 		push(e);
+	}
+
+	@Override
+	public void setToArray(Object[] a) {
+		reset();
+		for (Object o : a) {
+			push(o);
+		}
 	}
 
 	@Override

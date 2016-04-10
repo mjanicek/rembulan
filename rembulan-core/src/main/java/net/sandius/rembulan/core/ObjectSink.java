@@ -13,6 +13,8 @@ public interface ObjectSink {
 
 	void push(Object o);
 
+	void pushAll(Object[] values);
+
 	void setTo(Object a);
 
 	void setTo(Object a, Object b);
@@ -22,6 +24,8 @@ public interface ObjectSink {
 	void setTo(Object a, Object b, Object c, Object d);
 
 	void setTo(Object a, Object b, Object c, Object d, Object e);
+
+	void setToArray(Object[] values);
 
 	void tailCall(Object target);
 
