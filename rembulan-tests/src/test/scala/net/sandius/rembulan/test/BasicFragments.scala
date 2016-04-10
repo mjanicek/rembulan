@@ -161,6 +161,12 @@ object BasicFragments extends FragmentBundle {
     """
   }
 
+  fragment ("ReturnVarargs") {
+    """return ...
+    """
+  }
+
+
   fragment ("IndeterminateVarargs") {
     """local a = ...
       |if a then
