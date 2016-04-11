@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.gen
 
 import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
-import net.sandius.rembulan.core.Upvalue
+import net.sandius.rembulan.core.{Dispatch, Upvalue}
 import net.sandius.rembulan.core.impl.PairCachingObjectSink
 import net.sandius.rembulan.lbc.Prototype
 import net.sandius.rembulan.test.{BasicFragments, DummyLuaState, LuaCFragmentCompiler}
@@ -55,6 +55,35 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
           }
 
           f must not be null
+        }
+
+        it ("can be executed") {
+          val classLoader = new ChunkClassLoader()
+          val name = classLoader.install(chunk)
+          val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
+
+          val state = new DummyLuaState(false)
+          val os = new PairCachingObjectSink
+
+          val env = state.newTable(0, 0)
+          val upEnv = state.newUpvalue(env)
+
+          try {
+            val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
+
+            Dispatch.call(state, os, f)
+
+            val result = os.toArray.toSeq
+            println("Execution result (" + result.size + " values):")
+            for ((v, i) <- result.zipWithIndex) {
+              println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
+            }
+          }
+          catch {
+            case ex: VerifyError => throw new IllegalStateException(ex)
+            case ex: NoSuchMethodError => throw new IllegalStateException(ex)
+          }
+
         }
 
       }
