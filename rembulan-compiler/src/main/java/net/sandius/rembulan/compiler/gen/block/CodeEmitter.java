@@ -761,6 +761,7 @@ public class CodeEmitter {
 
 	protected void _error_state() {
 		errorState.add(l_error_state);
+		errorState.add(new FrameNode(F_SAME, 0, null, 0, null));
 		errorState.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
 		errorState.add(new InsnNode(DUP));
 		errorState.add(ASMUtils.ctor(IllegalStateException.class));
