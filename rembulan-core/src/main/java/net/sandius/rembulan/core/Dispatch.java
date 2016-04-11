@@ -261,7 +261,38 @@ public abstract class Dispatch {
 	}
 
 	public static void newindex(LuaState state, ObjectSink result, Object table, Object key, Object value) throws ControlThrowable {
-		throw new UnsupportedOperationException();  // TODO: not implemented
+		if (table instanceof Table) {
+			Table t = (Table) table;
+			Object r = t.rawget(key);
+
+			if (result != null) {
+				t.rawset(key, value);
+				return;
+			}
+		}
+
+		Object handler = Metatables.getMetamethod(state, Metatables.MT_NEWINDEX, table);
+
+		if (handler == null && table instanceof Table) {
+			Table t = (Table) table;
+			t.rawset(key, value);
+			return;
+		}
+
+		if (handler instanceof Invokable) {
+			// call the handler
+			Invokable fn = (Invokable) handler;
+
+			fn.invoke(state, result, handler, table, key, value);
+			evaluateTailCalls(state, result);
+		}
+		else if (handler instanceof Table) {
+			// TODO: protect against infinite loops
+			newindex(state, result, handler, key, value);
+		}
+		else {
+			throw new IllegalOperationAttemptException("index", Value.typeOf(table).name);
+		}
 	}
 
 }
