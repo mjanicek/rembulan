@@ -1126,48 +1126,30 @@ public class CodeEmitter {
 
 		ObjectSink_prx os = withObjectSink(code);
 
-		int numPrepend = fromReg - varargPosition;
+		int n = fromReg - varargPosition;
 
-		if (numPrepend == 0) {
+		if (n == 0) {
 			// nothing to change, it's good as-is!
 		}
-		else if (numPrepend < 0) {
-			// there are elements to discard
-
+		else if (n < 0) {
+			// drop -n elements from the beginning
 			os.push();
-			_dup();
-			os.call_toArray();
-
-			code.add(ASMUtils.loadInt(-numPrepend));
-			code.add(new MethodInsnNode(
-					INVOKESTATIC,
-					Type.getInternalName(Varargs.class),
-					"from",
-					Type.getMethodDescriptor(
-							ASMUtils.arrayTypeFor(Object.class),
-							ASMUtils.arrayTypeFor(Object.class),
-							Type.INT_TYPE),
-					false));
-
-			_save_array_to_object_sink();
+			code.add(ASMUtils.loadInt(-n));
+			os.call_drop();
 		}
 		else {
-			// there are elements to prepend
-
+			// prepend n elements
 			os.push();
-			_dup();
-			os.call_toArray();
 
-			os.push();
-			os.call_reset();
-
-			for (int i = 0; i < numPrepend; i++) {
-				os.push();
+			code.add(new TypeInsnNode(NEWARRAY, ASMUtils.arrayTypeFor(Object.class).getDescriptor()));
+			for (int i = 0; i < n; i++) {
+				code.add(new InsnNode(DUP));
+				code.add(ASMUtils.loadInt(i));
 				_load_reg(fromReg + i, st);
-				os.call_push();
+				code.add(new InsnNode(AASTORE));
 			}
 
-			os.call_addAll();
+			os.call_prepend();
 		}
 	}
 
@@ -1401,6 +1383,30 @@ public class CodeEmitter {
 					selfTpe().getInternalName(),
 					"toArray",
 					Type.getMethodType(
+							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
+					true));
+			return this;
+		}
+
+		public ObjectSink_prx call_drop() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"drop",
+					Type.getMethodType(
+							Type.VOID_TYPE,
+							Type.INT_TYPE).getDescriptor(),
+					true));
+			return this;
+		}
+
+		public ObjectSink_prx call_prepend() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"prepend",
+					Type.getMethodType(
+							Type.VOID_TYPE,
 							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
 					true));
 			return this;

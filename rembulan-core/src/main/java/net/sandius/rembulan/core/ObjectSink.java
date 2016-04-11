@@ -25,6 +25,10 @@ public interface ObjectSink {
 
 	void setTo(Object a, Object b, Object c, Object d, Object e);
 
+	void drop(int i);
+
+	void prepend(Object[] values);
+
 	void setToArray(Object[] values);
 
 	void tailCall(Object target);

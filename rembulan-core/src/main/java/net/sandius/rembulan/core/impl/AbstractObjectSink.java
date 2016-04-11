@@ -72,6 +72,21 @@ public abstract class AbstractObjectSink implements ObjectSink {
 	}
 
 	@Override
+	public void drop(int i) {
+		if (i > 0) {
+			setToArray(Varargs.from(toArray(), i));
+		}
+	}
+
+	@Override
+	public void prepend(Object[] values) {
+		Object[] old = toArray();
+		reset();
+		pushAll(values);
+		pushAll(old);
+	}
+
+	@Override
 	public void setToArray(Object[] a) {
 		reset();
 		for (Object o : a) {
