@@ -50,14 +50,14 @@ public class PairCachingObjectSink extends AbstractObjectSink {
 
 	@Override
 	public void setTo(Object a, Object b, Object c) {
-		setCacheAndClearList(null, null);
+		setCacheAndClearList(a, b);
 		_var.add(c);
 		size = 3;
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c, Object d) {
-		setCacheAndClearList(null, null);
+		setCacheAndClearList(a, b);
 		_var.add(c);
 		_var.add(d);
 		size = 4;
@@ -65,7 +65,7 @@ public class PairCachingObjectSink extends AbstractObjectSink {
 
 	@Override
 	public void setTo(Object a, Object b, Object c, Object d, Object e) {
-		setCacheAndClearList(null, null);
+		setCacheAndClearList(a, b);
 		_var.add(c);
 		_var.add(d);
 		_var.add(e);
