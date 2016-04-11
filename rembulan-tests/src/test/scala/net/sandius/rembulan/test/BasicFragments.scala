@@ -27,6 +27,13 @@ object BasicFragments extends FragmentBundle {
     """
   }
 
+  fragment ("AddNumbers") {
+    """local a = 39
+      |local b = 3.0
+      |return a + b
+    """
+  }
+
   fragment ("IfThenElse") {
     """if x >= 0 and x <= 10 then print(x) end
     """
