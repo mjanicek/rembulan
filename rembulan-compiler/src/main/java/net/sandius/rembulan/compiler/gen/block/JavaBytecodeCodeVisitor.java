@@ -373,7 +373,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		else {
 			Check.isTrue(st.hasVarargs());
 
-			int n = (r_tgt + 1) - st.varargPosition();
+			int n = st.varargPosition() - (r_tgt + 1);
 
 			e._loadState();
 			e._loadObjectSink();
@@ -384,13 +384,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				e._load_object_sink_as_array();
 			}
 			else if (n < 0) {
-				// drop -n elements from the object sink
+				// drop n elements from the object sink
 				e._drop_from_object_sink(-n);
 				e._load_object_sink_as_array();
 			}
 			else {
-				// prepend n elements
-				e._load_regs(r_tgt + 1, st, n);
+				// prepend -n elements
+				e._pack_regs(r_tgt + 1, st, n);
 				e._load_object_sink_as_array();
 				e._concat_arrays();
 			}

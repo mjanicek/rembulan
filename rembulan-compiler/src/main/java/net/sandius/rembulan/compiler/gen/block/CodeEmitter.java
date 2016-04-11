@@ -280,11 +280,13 @@ public class CodeEmitter {
 	}
 
 	public void _pack_regs(int firstIdx, SlotState slots, int num) {
+		code.add(ASMUtils.loadInt(num));
 		code.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
 		for (int i = 0; i < num; i++) {
 			code.add(new InsnNode(DUP));
 			code.add(ASMUtils.loadInt(i));
 			_load_reg(firstIdx + i, slots);
+			code.add(new InsnNode(AASTORE));
 		}
 	}
 
@@ -1126,7 +1128,7 @@ public class CodeEmitter {
 
 		ObjectSink_prx os = withObjectSink(code);
 
-		int n = fromReg - varargPosition;
+		int n = varargPosition - fromReg;
 
 		if (n == 0) {
 			// nothing to change, it's good as-is!
@@ -1141,7 +1143,8 @@ public class CodeEmitter {
 			// prepend n elements
 			os.push();
 
-			code.add(new TypeInsnNode(NEWARRAY, ASMUtils.arrayTypeFor(Object.class).getDescriptor()));
+			code.add(ASMUtils.loadInt(n));
+			code.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
 			for (int i = 0; i < n; i++) {
 				code.add(new InsnNode(DUP));
 				code.add(ASMUtils.loadInt(i));
