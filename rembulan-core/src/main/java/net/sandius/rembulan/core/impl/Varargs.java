@@ -25,4 +25,11 @@ public abstract class Varargs {
 		}
 	}
 
+	public static Object[] concat(Object[] left, Object[] right) {
+		Object[] result = new Object[left.length + right.length];
+		System.arraycopy(left, 0, result, 0, left.length);
+		System.arraycopy(right, 0, result, left.length, right.length);
+		return result;
+	}
+
 }

@@ -371,8 +371,27 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			e._dispatch_call(kind);
 		}
 		else {
-			// TODO
-			throw new UnsupportedOperationException("CALL with b == 0");
+			Check.isTrue(st.hasVarargs());
+
+			int n = (r_tgt + 1) - st.varargPosition();
+
+			if (n == 0) {
+				// just take the varargs
+				e._load_object_sink_as_array();
+			}
+			else if (n < 0) {
+				// drop -n elements from the object sink
+				e._drop_from_object_sink(-n);
+				e._load_object_sink_as_array();
+			}
+			else {
+				// prepend n elements
+				e._load_regs(r_tgt + 1, st, n);
+				e._load_object_sink_as_array();
+				e._concat_arrays();
+			}
+
+			e._dispatch_call(0);
 		}
 
 		e._resumptionPoint(id);
@@ -381,8 +400,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			e._retrieve_and_store_n(c - 1, r_tgt, st);
 		}
 		else {
-			// TODO
-			throw new UnsupportedOperationException("CALL with c == 0");
+			// keep results in the object sink
+			// TODO: should all registers from r_tgt onwards be cleared?
 		}
 	}
 

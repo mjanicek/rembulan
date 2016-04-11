@@ -1153,6 +1153,31 @@ public class CodeEmitter {
 		}
 	}
 
+	public void _load_object_sink_as_array() {
+		withObjectSink(code).push().call_toArray();
+	}
+
+	public void _drop_from_object_sink(int n) {
+		ObjectSink_prx os = withObjectSink(code);
+
+		os.push();
+		code.add(ASMUtils.loadInt(n));
+		os.call_drop();
+	}
+
+
+	public void _concat_arrays() {
+		code.add(new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Varargs.class),
+				"concat",
+				Type.getMethodDescriptor(
+						ASMUtils.arrayTypeFor(Object.class),
+						ASMUtils.arrayTypeFor(Object.class),
+						ASMUtils.arrayTypeFor(Object.class)),
+				false));
+	}
+
 	public void _cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
 
 		// TODO: specialise
