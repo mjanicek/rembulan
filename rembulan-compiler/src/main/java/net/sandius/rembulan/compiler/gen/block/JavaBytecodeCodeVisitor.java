@@ -375,6 +375,10 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 			int n = (r_tgt + 1) - st.varargPosition();
 
+			e._loadState();
+			e._loadObjectSink();
+			e._load_reg(r_tgt, st);
+
 			if (n == 0) {
 				// just take the varargs
 				e._load_object_sink_as_array();
@@ -416,7 +420,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			e._return();
 		}
 		else {
-			e._missing(id);
+			e._tailcall_vararg(r_tgt, st);
+			e._return();
 		}
 	}
 

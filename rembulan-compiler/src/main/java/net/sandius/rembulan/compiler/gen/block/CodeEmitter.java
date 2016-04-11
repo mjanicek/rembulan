@@ -1153,6 +1153,11 @@ public class CodeEmitter {
 		}
 	}
 
+	public void _tailcall_vararg(int fromReg, SlotState st) {
+		_setret_vararg(fromReg, st);
+		withObjectSink(code).push().call_markAsTailCall();
+	}
+
 	public void _load_object_sink_as_array() {
 		withObjectSink(code).push().call_toArray();
 	}
@@ -1469,6 +1474,17 @@ public class CodeEmitter {
 				// TODO: iterate and push
 				throw new UnsupportedOperationException("Tail call with " + numCallArgs + " arguments");
 			}
+			return this;
+		}
+
+		public ObjectSink_prx call_markAsTailCall() {
+			il.add(new MethodInsnNode(
+					INVOKEINTERFACE,
+					selfTpe().getInternalName(),
+					"markAsTailCall",
+					Type.getMethodType(
+							Type.VOID_TYPE).getDescriptor(),
+					true));
 			return this;
 		}
 
