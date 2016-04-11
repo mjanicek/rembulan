@@ -397,6 +397,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		e._resumptionPoint(id);
 
 		if (c > 0) {
+			st = st.consumeVarargs();
 			e._retrieve_and_store_n(c - 1, r_tgt, st);
 		}
 		else {
