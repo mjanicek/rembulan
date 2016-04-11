@@ -1,129 +1,61 @@
 package net.sandius.rembulan.test
 
-import java.io.PrintWriter
-
-import net.sandius.rembulan.compiler.PrototypeClassLoader
+import net.sandius.rembulan.compiler.ChunkClassLoader
+import net.sandius.rembulan.compiler.gen.ChunkCompiler
 import net.sandius.rembulan.core._
-import net.sandius.rembulan.lbc.PrototypePrinter
-import net.sandius.rembulan.parser.LuaCPrototypeLoader
-import net.sandius.rembulan.util.Cons
+import net.sandius.rembulan.core.impl.PairCachingObjectSink
 import net.sandius.rembulan.{core => lua}
 
 object Runner {
 
-  def consToList[A](cons: Cons[A]): List[A] = {
-    if (cons == null) Nil else cons.car :: consToList(cons.cdr)
-  }
+  import Util._
 
-  def inspect(idx: Int, coro: Coroutine, callStack: Cons[CallInfo], cpuTime: Int): Unit = {
-//    val os = coro.getObjectStack
-//    var max = 0
-//    for (i <- 0 until os.getMaxSize) {
-//      if (os.get(i) != null) {
-//        max = i
-//      }
-//    }
-
-    println(idx + ": {")
-    println("\tCPU time: " + cpuTime)
-    println("\tObject stack: (not available)")
-//    println("\tObject stack: " + (for (i <- 0 to max) yield i + ":[" + os.get(i) + "]").mkString(" "))
-    println("\tCall stack: {")
-    val cs = consToList(callStack)
-    if (cs.nonEmpty) {
-      println((for (ci <- cs) yield "\t\t" + ci).mkString("\n"))
-    }
-    println("\t\t// bottom")
-    println("\t}")
-
-    println("}")
-  }
-
-  def doRun(func: lua.Invokable, args: AnyRef*): Unit = {
-    val st = DummyLuaState.newDummy(true)
-    val coro = st.getCurrentCoroutine
-//    val addr = coro.getObjectStack.rootView()
-
-//    for ((v, idx) <- args.zipWithIndex) {
-//      addr.set(idx, v)
-//    }
-
-    LuaState.setCurrentState(st)
-
-    var cpuTime = 0
-
-    val preempt = new PreemptionContext {
-      override def withdraw(cost: Int) = {
-        cpuTime += cost
-        throw new Preempted
-      }
-    }
-
-    val exec = new Exec(preempt, st)
-
-    exec.pushCall(new CallInfo(func, 0, 0, 0, 0, 0))
-
-    var idx = 0
-
-    inspect(idx, coro, exec.getCallStack, cpuTime)
-
-    while (exec.isPaused) {
-      exec.resume()
-      idx += 1
-      inspect(idx, coro, exec.getCallStack, cpuTime)
-    }
-
-    LuaState.unsetCurrentState()
-  }
+  val loader = new LuaCFragmentCompiler("luac53")
 
   def main(args: Array[String]): Unit = {
-//    val luacPath = System.getProperty("pathToLuaC")
-    val luacPath = "luac53"
-    require (luacPath != null)
 
-    val ploader = new LuaCPrototypeLoader(luacPath)
+    val program = BasicFragments.lookup("JustX").get
+    val proto = loader.compile(program)
 
-    val program =
-      """local f = function (x)
-        |    return x + 1
-        |end
-        |return -1 + f(3) + 39
-      """.stripMargin
+    section("LuaC version") {
+      println(loader.version)
+    }
 
-//    val program =
-//      """local f = 0
-//        |f(1)
-//      """.stripMargin
+    section("Program code") {
+      println(program.code)
+    }
 
-//    val program =
-//      """local f = function (x, y)
-//        |    return x + y
-//        |end
-//        |return -1 + f(1, 3) + 39
-//      """.stripMargin
+    val compiler = new ChunkCompiler()
+    val classLoader = new ChunkClassLoader()
 
-//    val program =
-//      """local f = function (x, y, z)
-//        |    return x + y + z
-//        |end
-//        |return -1 + f(1, 1, 2) + 39
-//      """.stripMargin
+    section ("Compilation") {
 
-    System.err.println(program)
+      val chunk = timed("Compile") {
+        compiler.compile(proto, "test")
+      }
 
-    val proto = ploader.load(program)
+      val name = classLoader.install(chunk)
+      val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
-    PrototypePrinter.print(proto, new PrintWriter(System.err))
+      val state = new DummyLuaState(false)
+      val os = new PairCachingObjectSink
 
-    val name = "lua.tmp.FortyTwo"
+      val env = state.newTable(0, 0)
+      val upEnv = state.newUpvalue(env)
 
-    val loader = new PrototypeClassLoader(name)
-    val mainChunk = loader.install(proto)
+      val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
 
-    val clazz = loader.findClass(mainChunk).asInstanceOf[Class[lua.Invokable]]
-    val func = clazz.getConstructor().newInstance()
+      section("Call") {
+        timed("Call") {
+          Dispatch.call(state, os, f)
+        }
+      }
 
-    doRun(func)
+      section("Result") {
+        println(os.toArray.mkString(", "))
+      }
+
+    }
   }
 
 }
