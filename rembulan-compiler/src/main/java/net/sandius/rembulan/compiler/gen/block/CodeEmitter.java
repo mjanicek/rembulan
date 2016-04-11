@@ -1187,14 +1187,14 @@ public class CodeEmitter {
 				false));
 	}
 
-	public void _cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
+	public void _cmp(Object id, String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
 
 		// TODO: specialise
 
 		LabelNode l_jump_true = pos ? _l(trueBranch) : _l(falseBranch);
 		LabelNode l_jump_false = pos ? _l(falseBranch) : _l(trueBranch);
 
-		_save_pc(this);
+		_save_pc(id);
 
 		_loadState();
 		_loadObjectSink();
@@ -1215,7 +1215,7 @@ public class CodeEmitter {
 				false
 		));
 
-		_resumptionPoint(this);
+		_resumptionPoint(id);
 
 		_retrieve_0();
 

@@ -172,7 +172,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		e._store(r_dest, st);
 	}
 
-	private void binaryOperation(String method, StaticMathImplementation staticMath, SlotState s, int r_dest, int rk_left, int rk_right) {
+	private void binaryOperation(Object id, String method, StaticMathImplementation staticMath, SlotState s, int r_dest, int rk_left, int rk_right) {
 		LuaInstruction.NumOpType ot = staticMath.opType(
 				LuaBinaryOperation.slotType(e.context(), s, rk_left),
 				LuaBinaryOperation.slotType(e.context(), s, rk_right));
@@ -200,7 +200,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				break;
 
 			case Any:
-				e._save_pc(this);
+				e._save_pc(id);
 
 				e._loadState();
 				e._loadObjectSink();
@@ -208,7 +208,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				e._load_reg_or_const(rk_right, s, Object.class);
 				e._dispatch_generic_mt_2(method);
 
-				e._resumptionPoint(this);
+				e._resumptionPoint(id);
 				e._retrieve_0();
 				e._store(r_dest, s);
 				break;
@@ -217,62 +217,62 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitAdd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("add", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.ADD), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "add", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.ADD), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitSub(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("sub", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SUB), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "sub", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SUB), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitMul(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("mul", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.MUL), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "mul", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.MUL), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitMod(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("mod", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.MOD), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "mod", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.MOD), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitPow(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("pow", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.POW), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "pow", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.POW), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("div", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.DIV), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "div", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.DIV), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitIDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("idiv", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.IDIV), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "idiv", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.IDIV), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBAnd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("band", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BAND), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "band", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BAND), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("bor", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BOR), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "bor", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BOR), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitBXOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("bxor", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BXOR), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "bxor", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.BXOR), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitShl(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("shl", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SHL), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "shl", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SHL), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
 	public void visitShr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		binaryOperation("shr", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SHR), st, r_dest, rk_left, rk_right);
+		binaryOperation(id, "shr", LuaBinaryOperation.mathForOp(LuaBinaryOperation.Op.SHR), st, r_dest, rk_left, rk_right);
 	}
 
 	@Override
@@ -302,17 +302,17 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitEq(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp("eq", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		e._cmp(id, "eq", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
 	}
 
 	@Override
 	public void visitLe(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp("le", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		e._cmp(id, "le", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
 	}
 
 	@Override
 	public void visitLt(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp("lt", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		e._cmp(id, "lt", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
 	}
 
 	@Override
