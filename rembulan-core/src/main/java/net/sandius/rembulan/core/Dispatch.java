@@ -120,44 +120,6 @@ public abstract class Dispatch {
 		evaluateTailCalls(state, result);
 	}
 
-	public static void index(LuaState state, ObjectSink result, Object table, Object key) throws ControlThrowable {
-		if (table instanceof Table) {
-			Table t = (Table) table;
-			Object value = t.rawget(key);
-
-			if (value != null) {
-				result.setTo(value);
-				return;
-			}
-		}
-
-		Object handler = Metatables.getMetamethod(state, Metatables.MT_INDEX, table);
-
-		if (handler == null && table instanceof Table) {
-			// key not found and no index metamethod, returning nil
-			result.setTo(null);
-			return;
-		}
-		if (handler instanceof Invokable) {
-			// call the handler
-			Invokable fn = (Invokable) handler;
-
-			fn.invoke(state, result, handler, table, key);
-			evaluateTailCalls(state, result);
-		}
-		else if (handler instanceof Table) {
-			// TODO: protect against infinite loops
-			index(state, result, handler, key);
-		}
-		else {
-			throw new IllegalOperationAttemptException("index", Value.typeOf(table).name);
-		}
-	}
-
-	public static void newindex(LuaState state, ObjectSink result, Object table, Object key, Object value) throws ControlThrowable {
-		throw new UnsupportedOperationException();  // TODO: not implemented
-	}
-
 	private static void try_mt_arithmetic(LuaState state, ObjectSink result, String event, Object a, Object b) throws ControlThrowable {
 		Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_ADD, a, b);
 
@@ -167,6 +129,16 @@ public abstract class Dispatch {
 		else {
 			String typeName = Value.typeOf(Conversions.objectAsNumber(a) == null ? a : b).name;
 			throw new IllegalOperationAttemptException("perform arithmetic on", typeName);
+		}
+	}
+
+	public static void add(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		MathImplementation math = MathImplementation.arithmetic(a, b);
+		if (math != null) {
+			result.setTo(math.do_add(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_ADD, a, b);
 		}
 	}
 
@@ -180,16 +152,6 @@ public abstract class Dispatch {
 
 	public static Number add_float(Number a, Number b) {
 		return MathImplementation.FLOAT_MATH.do_add(a, b);
-	}
-
-	public static void mt_add(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		MathImplementation math = MathImplementation.arithmetic(a, b);
-		if (math != null) {
-			result.setTo(math.do_add(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
-		}
-		else {
-			try_mt_arithmetic(state, result, Metatables.MT_ADD, a, b);
-		}
 	}
 
 	public static void sub(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -261,6 +223,44 @@ public abstract class Dispatch {
 	}
 
 	public static void lt(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		throw new UnsupportedOperationException();  // TODO: not implemented
+	}
+
+	public static void index(LuaState state, ObjectSink result, Object table, Object key) throws ControlThrowable {
+		if (table instanceof Table) {
+			Table t = (Table) table;
+			Object value = t.rawget(key);
+
+			if (value != null) {
+				result.setTo(value);
+				return;
+			}
+		}
+
+		Object handler = Metatables.getMetamethod(state, Metatables.MT_INDEX, table);
+
+		if (handler == null && table instanceof Table) {
+			// key not found and no index metamethod, returning nil
+			result.setTo(null);
+			return;
+		}
+		if (handler instanceof Invokable) {
+			// call the handler
+			Invokable fn = (Invokable) handler;
+
+			fn.invoke(state, result, handler, table, key);
+			evaluateTailCalls(state, result);
+		}
+		else if (handler instanceof Table) {
+			// TODO: protect against infinite loops
+			index(state, result, handler, key);
+		}
+		else {
+			throw new IllegalOperationAttemptException("index", Value.typeOf(table).name);
+		}
+	}
+
+	public static void newindex(LuaState state, ObjectSink result, Object table, Object key, Object value) throws ControlThrowable {
 		throw new UnsupportedOperationException();  // TODO: not implemented
 	}
 
