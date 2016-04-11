@@ -214,6 +214,17 @@ public abstract class Dispatch {
 		}
 	}
 
+	private static void try_mt_comparison(LuaState state, ObjectSink result, String event, Object a, Object b) throws ControlThrowable {
+		Object handler = Metatables.binaryHandlerFor(state, event, a, b);
+
+		if (handler != null) {
+			call(state, result, handler, a, b);
+		}
+		else {
+			throw new IllegalOperationAttemptException("attempt to compare " + Value.typeOf(a).name + " with " + Value.typeOf(b).name);
+		}
+	}
+
 	public static void eq(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		throw new UnsupportedOperationException();  // TODO: not implemented
 	}
@@ -223,7 +234,13 @@ public abstract class Dispatch {
 	}
 
 	public static void lt(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		throw new UnsupportedOperationException();  // TODO: not implemented
+		ComparisonImplementation c = ComparisonImplementation.of(a, b);
+		if (c != null) {
+			result.setTo(c.do_lt(a, b));
+		}
+		else {
+			try_mt_comparison(state, result, Metatables.MT_LT, a, b);
+		}
 	}
 
 	public static void index(LuaState state, ObjectSink result, Object table, Object key) throws ControlThrowable {
