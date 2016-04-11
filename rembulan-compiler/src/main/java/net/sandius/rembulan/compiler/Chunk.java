@@ -46,7 +46,15 @@ public class Chunk {
 	}
 
 	public String mainClassName() {
-		throw new UnsupportedOperationException();  // TODO
+		// FIXME: this is ugly
+
+		for (CompilationUnit u : units.values()) {
+			if (u.prototype == prototype) {
+				return u.name();
+			}
+		}
+
+		throw new IllegalStateException();
 	}
 
 }
