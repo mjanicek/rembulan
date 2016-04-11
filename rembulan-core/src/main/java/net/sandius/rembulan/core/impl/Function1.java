@@ -9,7 +9,7 @@ public abstract class Function1 extends Function {
 
 	@Override
 	public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
-		invoke(state, result, null);
+		invoke(state, result, (Object) null);
 	}
 
 	@Override
