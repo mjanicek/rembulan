@@ -52,7 +52,10 @@ object Runner {
       }
 
       section("Result") {
-        println(os.toArray.mkString(", "))
+        val result = os.toArray.toSeq
+        for ((v, i) <- result.zipWithIndex) {
+          println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
+        }
       }
 
     }
