@@ -121,7 +121,7 @@ public abstract class Dispatch {
 	}
 
 	private static void try_mt_arithmetic(LuaState state, ObjectSink result, String event, Object a, Object b) throws ControlThrowable {
-		Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_ADD, a, b);
+		Object handler = Metatables.binaryHandlerFor(state, event, a, b);
 
 		if (handler != null) {
 			call(state, result, handler, a, b);
