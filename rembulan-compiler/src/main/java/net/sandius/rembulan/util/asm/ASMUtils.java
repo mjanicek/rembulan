@@ -6,6 +6,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
@@ -47,7 +48,11 @@ public abstract class ASMUtils {
 			case 3:  return new InsnNode(ICONST_3);
 			case 4:  return new InsnNode(ICONST_4);
 			case 5:  return new InsnNode(ICONST_5);
-			default: return new LdcInsnNode(i);
+			default: {
+				if (i >= Byte.MIN_VALUE && i <= Byte.MAX_VALUE) return new IntInsnNode(BIPUSH, i);
+				else if (i >= Short.MIN_VALUE && i <= Short.MAX_VALUE) return new IntInsnNode(SIPUSH, i);
+				else return new LdcInsnNode(i);
+			}
 		}
 	}
 
