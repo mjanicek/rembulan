@@ -1,5 +1,7 @@
 package net.sandius.rembulan.core;
 
+import java.io.Serializable;
+
 public abstract class Dispatch {
 
 	private Dispatch() {
@@ -214,23 +216,48 @@ public abstract class Dispatch {
 		}
 	}
 
-	private static void try_mt_comparison(LuaState state, ObjectSink result, String event, Object a, Object b) throws ControlThrowable {
-		Object handler = Metatables.binaryHandlerFor(state, event, a, b);
+	private static class ComparisonResumable implements Resumable {
 
-		if (handler != null) {
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			Boolean b = (Boolean) suspendedState;
+			boolean resultValue = Conversions.objectToBoolean(result._0());
+			result.setTo(b == resultValue);
+		}
+
+	}
+
+	private static void _call_comparison_mt(LuaState state, ObjectSink result, boolean cmpTo, Object handler, Object a, Object b) throws ControlThrowable {
+		try {
 			call(state, result, handler, a, b);
 		}
-		else {
-			throw new IllegalOperationAttemptException("attempt to compare " + Value.typeOf(a).name + " with " + Value.typeOf(b).name);
+		catch (ControlThrowable ct) {
+			// suspended in the metamethod call
+			ct.push(new ComparisonResumable(), cmpTo);
+			throw ct;
 		}
+		// not suspended: set the result, possibly flipping it
+		result.setTo(Conversions.objectToBoolean(result._0()) == cmpTo);
 	}
 
 	public static void eq(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		throw new UnsupportedOperationException();  // TODO: not implemented
-	}
+		boolean rawEqual = RawOperators.raweq(a, b);
 
-	public static void le(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
-		throw new UnsupportedOperationException();  // TODO: not implemented
+		if (!rawEqual
+				&& ((a instanceof Table && b instanceof Table)
+				|| (a instanceof Userdata && b instanceof Userdata))) {
+
+			Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_EQ, a, b);
+
+			if (handler != null) {
+				_call_comparison_mt(state, result, true, handler, a, b);
+				return;
+			}
+
+			// else keep the result as false
+		}
+
+		result.setTo(rawEqual);
 	}
 
 	public static void lt(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -239,7 +266,40 @@ public abstract class Dispatch {
 			result.setTo(c.do_lt(a, b));
 		}
 		else {
-			try_mt_comparison(state, result, Metatables.MT_LT, a, b);
+			Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_LT, a, b);
+
+			if (handler != null) {
+				_call_comparison_mt(state, result, true, handler, a, b);
+			}
+			else {
+				throw new IllegalOperationAttemptException("attempt to compare " + Value.typeOf(a).name + " with " + Value.typeOf(b).name);
+			}
+		}
+	}
+
+	public static void le(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		ComparisonImplementation c = ComparisonImplementation.of(a, b);
+		if (c != null) {
+			result.setTo(c.do_le(a, b));
+		}
+		else {
+			Object le_handler = Metatables.binaryHandlerFor(state, Metatables.MT_LE, a, b);
+
+			if (le_handler != null) {
+				_call_comparison_mt(state, result, true, le_handler, a, b);
+			}
+			else {
+				// TODO: verify that (a, b) is the order in which the metamethod is looked up
+				Object lt_handler = Metatables.binaryHandlerFor(state, Metatables.MT_LT, a, b);
+
+				if (lt_handler != null) {
+					// will be evaluating "not (b < a)"
+					_call_comparison_mt(state, result, false, lt_handler, b, a);
+				}
+				else {
+					throw new IllegalOperationAttemptException("attempt to compare " + Value.typeOf(a).name + " with " + Value.typeOf(b).name);
+				}
+			}
 		}
 	}
 
