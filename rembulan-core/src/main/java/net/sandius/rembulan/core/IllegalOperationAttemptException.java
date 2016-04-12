@@ -18,7 +18,7 @@ public class IllegalOperationAttemptException extends RuntimeException {
 	public static IllegalOperationAttemptException comparison(Object a, Object b) {
 		String ta = Value.typeOf(a).name;
 		String tb = Value.typeOf(b).name;
-		return new IllegalOperationAttemptException("attempt to compare " + ta + " with " + tb);
+		return new IllegalOperationAttemptException("compare " + ta + " with " + tb);
 	}
 
 	public static IllegalOperationAttemptException call(Object o) {
