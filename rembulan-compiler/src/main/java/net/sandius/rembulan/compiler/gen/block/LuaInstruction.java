@@ -765,7 +765,7 @@ public interface LuaInstruction {
 
 		@Override
 		public void emit(CodeVisitor visitor) {
-			visitor.visitForLoop(this, inSlots(), r_base);
+			visitor.visitForLoop(this, inSlots(), r_base, trueBranch(), falseBranch());
 		}
 
 	}

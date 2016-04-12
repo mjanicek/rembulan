@@ -436,13 +436,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visitForLoop(Object id, SlotState st, int r_base) {
-		throw new UnsupportedOperationException();  // TODO
+	public void visitForLoop(Object id, SlotState st, int r_base, Object trueBranch, Object falseBranch) {
+		e._forloop(st, r_base, trueBranch, falseBranch);
 	}
 
 	@Override
 	public void visitForPrep(Object id, SlotState st, int r_base) {
-		throw new UnsupportedOperationException();  // TODO
+		e._forprep(st, r_base);
 	}
 
 	@Override

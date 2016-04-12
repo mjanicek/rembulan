@@ -95,7 +95,7 @@ public abstract class CodeVisitor {
 
 	public abstract void visitReturn(Object id, SlotState st, int r_from, int b);
 
-	public abstract void visitForLoop(Object id, SlotState st, int r_base);
+	public abstract void visitForLoop(Object id, SlotState st, int r_base, Object trueBranch, Object falseBranch);
 
 	public abstract void visitForPrep(Object id, SlotState st, int r_base);
 

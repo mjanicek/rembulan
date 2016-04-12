@@ -195,6 +195,10 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static Number mod_integer(Number a, Number b) {
+		return MathImplementation.INTEGER_MATH.do_mod(a, b);
+	}
+
 	public static void idiv(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		MathImplementation m = MathImplementation.arithmetic(a, b);
 		if (m != null) {
@@ -203,6 +207,10 @@ public abstract class Dispatch {
 		else {
 			try_mt_arithmetic(state, result, Metatables.MT_IDIV, a, b);
 		}
+	}
+
+	public static Number idiv_integer(Number a, Number b) {
+		return MathImplementation.INTEGER_MATH.do_idiv(a, b);
 	}
 
 	public static void pow(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {

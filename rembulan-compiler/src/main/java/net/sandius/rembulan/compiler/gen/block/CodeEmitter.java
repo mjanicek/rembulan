@@ -966,6 +966,7 @@ public class CodeEmitter {
 
 	public void _uncapture(int idx) {
 		_load_reg_value(idx);
+		_checkCast(Upvalue.class);
 		_get_upvalue_value();
 		_store_reg_value(idx);
 	}
@@ -1243,6 +1244,127 @@ public class CodeEmitter {
 
 	public void _ifnonzero(Object tgt) {
 		code.add(new JumpInsnNode(IFNE, _l(tgt)));
+	}
+
+	private void _to_float(int r, SlotState st) {
+		_load_reg(r, st);
+		code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Number.class)));
+		code.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(Number.class),
+				"doubleValue",
+				Type.getMethodDescriptor(
+						Type.DOUBLE_TYPE),
+				false));
+		code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		_store(r, st);
+	}
+
+	private void _get_longValue(Class clazz) {
+		code.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(clazz),
+				"longValue",
+				Type.getMethodDescriptor(
+						Type.LONG_TYPE),
+				false));
+	}
+
+	private void _get_doubleValue(Class clazz) {
+		code.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(clazz),
+				"doubleValue",
+				Type.getMethodDescriptor(
+						Type.DOUBLE_TYPE),
+				false));
+	}
+
+	public void _forprep(SlotState st, int r_base) {
+		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_base + 0);
+		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_base + 1);
+		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_base + 2);
+
+		if (a0.isSubtypeOf(LuaTypes.NUMBER)
+				&& a1.isSubtypeOf(LuaTypes.NUMBER)
+				&& a2.isSubtypeOf(LuaTypes.NUMBER)) {
+
+			if (a0.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+					&& a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+					&& a2.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+
+				// the initial decrement
+				_load_reg(r_base, st, Number.class);
+				_get_longValue(Number.class);
+				_load_reg(r_base + 2, st, Number.class);
+				_get_longValue(Number.class);
+				code.add(new InsnNode(LSUB));
+				code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+				_store(r_base, st);
+			}
+			else {
+				if (a0.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
+						&& a1.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
+						&& a2.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
+
+					// the initial decrement
+					_load_reg(r_base, st, Number.class);
+					_get_doubleValue(Number.class);
+					_load_reg(r_base + 2, st, Number.class);
+					_get_doubleValue(Number.class);
+					code.add(new InsnNode(DSUB));
+					code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+					_store(r_base, st);
+				}
+				else {
+					// it's a mix => convert to floats
+					_to_float(r_base + 0, st);
+					_to_float(r_base + 1, st);
+					_to_float(r_base + 2, st);
+
+					throw new UnsupportedOperationException();  // TODO
+				}
+			}
+		}
+		else {
+			// may be anything -- need to try converting to number
+			throw new UnsupportedOperationException();  // TODO
+		}
+	}
+
+	public void _forloop(SlotState st, int r_base, Object trueBranch, Object falseBranch) {
+		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_base + 0);
+		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_base + 1);
+		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_base + 2);
+
+		if (a0.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+				&& a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+				&& a2.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+
+			// integer loop
+
+			// increment
+			_load_reg(r_base, st, Number.class);
+			_get_longValue(Number.class);
+			_load_reg(r_base + 2, st, Number.class);
+			_get_longValue(Number.class);
+			code.add(new InsnNode(LADD));
+			code.add(new InsnNode(DUP2));  // will re-use this value for comparison
+			code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+			_store(r_base, st);  // save into register
+			_load_reg(r_base + 1, st, Number.class);
+			_get_longValue(Number.class);
+			code.add(new InsnNode(LCMP));
+			// if stack top is negative (R[A] < R[A+1]) or zero (R[A] == R[A+1]), continue
+			code.add(new JumpInsnNode(IFGT, _l(falseBranch)));  // jump to false if >0
+			_load_reg(r_base, st);
+			_store(r_base + 3, st);
+			code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
+		}
+		else {
+			// must be floats
+			throw new UnsupportedOperationException();  // TODO
+		}
 	}
 
 	public CodeVisitor codeVisitor() {
