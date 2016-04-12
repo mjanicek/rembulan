@@ -165,6 +165,18 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static Number sub(Number a, Number b) {
+		return MathImplementation.arithmetic(a, b).do_sub(a, b);
+	}
+
+	public static Number sub_integer(Number a, Number b) {
+		return MathImplementation.INTEGER_MATH.do_sub(a, b);
+	}
+
+	public static Number sub_float(Number a, Number b) {
+		return MathImplementation.FLOAT_MATH.do_sub(a, b);
+	}
+
 	public static void mul(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		MathImplementation m = MathImplementation.arithmetic(a, b);
 		if (m != null) {
@@ -173,6 +185,18 @@ public abstract class Dispatch {
 		else {
 			try_mt_arithmetic(state, result, Metatables.MT_MUL, a, b);
 		}
+	}
+
+	public static Number mul(Number a, Number b) {
+		return MathImplementation.arithmetic(a, b).do_mul(a, b);
+	}
+
+	public static Number mul_integer(Number a, Number b) {
+		return MathImplementation.INTEGER_MATH.do_mul(a, b);
+	}
+
+	public static Number mul_float(Number a, Number b) {
+		return MathImplementation.FLOAT_MATH.do_mul(a, b);
 	}
 
 	public static void div(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -185,6 +209,18 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static Number div(Number a, Number b) {
+		return MathImplementation.arithmetic(a, b).do_div(a, b);
+	}
+
+	public static Number div_integer(Number a, Number b) {
+		return MathImplementation.INTEGER_MATH.do_div(a, b);
+	}
+
+	public static Number div_float(Number a, Number b) {
+		return MathImplementation.FLOAT_MATH.do_div(a, b);
+	}
+
 	public static void mod(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		MathImplementation m = MathImplementation.arithmetic(a, b);
 		if (m != null) {
@@ -195,8 +231,16 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static Number mod(Number a, Number b) {
+		return MathImplementation.arithmetic(a, b).do_mod(a, b);
+	}
+
 	public static Number mod_integer(Number a, Number b) {
 		return MathImplementation.INTEGER_MATH.do_mod(a, b);
+	}
+
+	public static Number mod_float(Number a, Number b) {
+		return MathImplementation.FLOAT_MATH.do_mod(a, b);
 	}
 
 	public static void idiv(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -209,8 +253,16 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static Number idiv(Number a, Number b) {
+		return MathImplementation.arithmetic(a, b).do_idiv(a, b);
+	}
+
 	public static Number idiv_integer(Number a, Number b) {
 		return MathImplementation.INTEGER_MATH.do_idiv(a, b);
+	}
+
+	public static Number idiv_float(Number a, Number b) {
+		return MathImplementation.FLOAT_MATH.do_idiv(a, b);
 	}
 
 	public static void pow(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -221,6 +273,18 @@ public abstract class Dispatch {
 		else {
 			try_mt_arithmetic(state, result, Metatables.MT_POW, a, b);
 		}
+	}
+
+	public static Number pow(Number a, Number b) {
+		return MathImplementation.arithmetic(a, b).do_pow(a, b);
+	}
+
+	public static Number pow_integer(Number a, Number b) {
+		return MathImplementation.INTEGER_MATH.do_pow(a, b);
+	}
+
+	public static Number pow_float(Number a, Number b) {
+		return MathImplementation.FLOAT_MATH.do_pow(a, b);
 	}
 
 	private static class ComparisonResumable implements Resumable {
