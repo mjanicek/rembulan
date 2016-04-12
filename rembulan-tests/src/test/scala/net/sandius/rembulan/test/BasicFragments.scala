@@ -59,6 +59,20 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   SimpleForLoop in EmptyContext succeedsWith (55)
 
+  val FloatForLoop = fragment("FloatForLoop") {
+    """local sum = 0
+      |for i = 1.0, 9.9, 0.4 do
+      |  sum = sum + i
+      |end
+      |return sum
+    """
+  }
+  expect {
+    var sum = 0.0
+    for (d <- 1.0 to 9.9 by 0.4) { sum += d }
+    FloatForLoop in EmptyContext succeedsWith (sum)
+  }
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do

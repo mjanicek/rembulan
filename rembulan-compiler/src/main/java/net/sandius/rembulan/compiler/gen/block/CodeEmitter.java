@@ -1362,8 +1362,24 @@ public class CodeEmitter {
 			code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
 		}
 		else {
-			// must be floats
-			throw new UnsupportedOperationException();  // TODO
+			// float loop
+
+			_load_reg(r_base, st, Number.class);
+			_get_doubleValue(Number.class);
+			_load_reg(r_base + 2, st, Number.class);
+			_get_doubleValue(Number.class);
+			code.add(new InsnNode(DADD));
+			code.add(new InsnNode(DUP2));  // will re-use this value for comparison
+			code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+			_store(r_base, st);  // save into register
+			_load_reg(r_base + 1, st, Number.class);
+			_get_doubleValue(Number.class);
+			code.add(new InsnNode(DCMPG));
+			// if stack top is negative (R[A] < R[A+1]) or zero (R[A] == R[A+1]), continue
+			code.add(new JumpInsnNode(IFGT, _l(falseBranch)));  // jump to false if >0
+			_load_reg(r_base, st);
+			_store(r_base + 3, st);
+			code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
 		}
 	}
 
