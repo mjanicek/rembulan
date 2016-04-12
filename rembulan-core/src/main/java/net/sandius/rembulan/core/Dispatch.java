@@ -19,7 +19,7 @@ public abstract class Dispatch {
 				return (Invokable) handler;
 			}
 			else {
-				throw new IllegalOperationAttemptException("call", Value.typeOf(target).name);
+				throw IllegalOperationAttemptException.call(target);
 			}
 		}
 	}
@@ -129,8 +129,7 @@ public abstract class Dispatch {
 			call(state, result, handler, a, b);
 		}
 		else {
-			String typeName = Value.typeOf(Conversions.objectAsNumber(a) == null ? a : b).name;
-			throw new IllegalOperationAttemptException("perform arithmetic on", typeName);
+			throw IllegalOperationAttemptException.arithmetic(a, b);
 		}
 	}
 
@@ -272,7 +271,7 @@ public abstract class Dispatch {
 				_call_comparison_mt(state, result, true, handler, a, b);
 			}
 			else {
-				throw new IllegalOperationAttemptException("attempt to compare " + Value.typeOf(a).name + " with " + Value.typeOf(b).name);
+				throw IllegalOperationAttemptException.comparison(a, b);
 			}
 		}
 	}
@@ -297,7 +296,7 @@ public abstract class Dispatch {
 					_call_comparison_mt(state, result, false, lt_handler, b, a);
 				}
 				else {
-					throw new IllegalOperationAttemptException("attempt to compare " + Value.typeOf(a).name + " with " + Value.typeOf(b).name);
+					throw IllegalOperationAttemptException.comparison(a, b);
 				}
 			}
 		}
@@ -333,7 +332,7 @@ public abstract class Dispatch {
 			index(state, result, handler, key);
 		}
 		else {
-			throw new IllegalOperationAttemptException("index", Value.typeOf(table).name);
+			throw IllegalOperationAttemptException.index(table);
 		}
 	}
 
@@ -368,7 +367,7 @@ public abstract class Dispatch {
 			newindex(state, result, handler, key, value);
 		}
 		else {
-			throw new IllegalOperationAttemptException("index", Value.typeOf(table).name);
+			throw IllegalOperationAttemptException.index(table);
 		}
 	}
 
