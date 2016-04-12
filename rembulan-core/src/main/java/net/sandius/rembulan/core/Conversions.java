@@ -55,6 +55,14 @@ public abstract class Conversions {
 						: null;
 	}
 
+	public static Number objectToNumber(Object o, String name) {
+		Number n = objectAsNumber(o);
+		if (n == null) {
+			throw new IllegalArgumentException(name + " must be a number");
+		}
+		return n;
+	}
+
 	public static Long objectAsLong(Object o) {
 		Number n = objectAsNumber(o);
 		return n != null ? numberAsLong(n) : null;

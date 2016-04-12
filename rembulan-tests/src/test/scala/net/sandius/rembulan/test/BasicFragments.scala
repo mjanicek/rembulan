@@ -73,6 +73,26 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     FloatForLoop in EmptyContext succeedsWith (sum)
   }
 
+  val MixedNumericForLoop = fragment ("MixedNumericForLoop") {
+    """local sum = 0
+      |for i = 1, 10.0 do
+      |  sum = sum + i
+      |end
+      |return sum
+    """
+  }
+  MixedNumericForLoop in EmptyContext succeedsWith (55.0)
+
+  val RuntimeDeterminedForLoop = fragment ("RuntimeDeterminedForLoop") {
+    """local sum = 0
+      |for i = 1, "10" do
+      |  sum = sum + i
+      |end
+      |return sum
+    """
+  }
+  RuntimeDeterminedForLoop in EmptyContext succeedsWith (55.0)
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do

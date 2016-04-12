@@ -1280,6 +1280,20 @@ public class CodeEmitter {
 				false));
 	}
 
+	private void _to_number(String what) {
+		Check.notNull(what);
+		code.add(new LdcInsnNode(what));
+		code.add(new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Conversions.class),
+				"objectToNumber",
+				Type.getMethodDescriptor(
+						Type.getType(Number.class),
+						Type.getType(Object.class),
+						Type.getType(String.class)),
+				false));
+	}
+
 	public void _forprep(SlotState st, int r_base) {
 		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_base + 0);
 		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_base + 1);
@@ -1303,32 +1317,47 @@ public class CodeEmitter {
 				_store(r_base, st);
 			}
 			else {
+				// will be a floating point loop
+
 				if (a0.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
 						&& a1.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
 						&& a2.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
-
-					// the initial decrement
-					_load_reg(r_base, st, Number.class);
-					_get_doubleValue(Number.class);
-					_load_reg(r_base + 2, st, Number.class);
-					_get_doubleValue(Number.class);
-					code.add(new InsnNode(DSUB));
-					code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-					_store(r_base, st);
+					// everything is set
 				}
 				else {
 					// it's a mix => convert to floats
 					_to_float(r_base + 0, st);
 					_to_float(r_base + 1, st);
 					_to_float(r_base + 2, st);
-
-					throw new UnsupportedOperationException();  // TODO
 				}
+
+				// the initial decrement
+				_load_reg(r_base, st, Number.class);
+				_get_doubleValue(Number.class);
+				_load_reg(r_base + 2, st, Number.class);
+				_get_doubleValue(Number.class);
+				code.add(new InsnNode(DSUB));
+				code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+				_store(r_base, st);
 			}
 		}
 		else {
 			// may be anything -- need to try converting to number
-			throw new UnsupportedOperationException();  // TODO
+
+			// do this in the same order as PUC Lua
+
+			_load_reg(r_base + 1, st);
+			_to_number("'for' limit");
+			_store(r_base + 1, st);
+			_load_reg(r_base + 2, st);
+			_to_number("'for' step");
+			_dup();
+			_store(r_base + 2, st);
+			_load_reg(r_base, st);
+			_to_number("'for' initial value");
+			_swap();
+			_dispatch_binop("sub_integer", Number.class);
+			_store(r_base, st);
 		}
 	}
 
