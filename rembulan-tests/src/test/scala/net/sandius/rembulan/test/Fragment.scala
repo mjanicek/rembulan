@@ -1,6 +1,10 @@
 package net.sandius.rembulan.test
 
+import org.scalatest.FunSpec
+
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.language.implicitConversions
 
 trait Fragment {
 
@@ -48,6 +52,126 @@ trait FragmentBundle {
 
   protected def fragment(name: String)(body: String): Fragment = {
     register(Fragment(name, body))
+  }
+
+}
+
+trait FragmentExpectations {
+
+  import FragmentExpectations._
+
+  protected val EmptyContext = Env.Empty
+  protected val BaseLibContext = Env.BaseLib
+
+  private val expectations = mutable.Map.empty[Fragment, mutable.Map[Env, Expect]]
+
+  def expectationFor(fragment: Fragment): Option[Map[Env, Expect]] = {
+    expectations.get(fragment) map { _.toMap }
+  }
+
+  private def addExpectation(fragment: Fragment, ctx: Env, expect: Expect): Unit = {
+    val es = expectations.getOrElseUpdate(fragment, mutable.Map.empty)
+    es(ctx) = expect
+  }
+
+  protected class RichFragment(fragment: Fragment) {
+    def in(ctx: Env) = new RichFragment.InContext(fragment, ctx)
+  }
+
+  protected object RichFragment {
+
+    class InContext(fragment: Fragment, ctx: Env) {
+      def succeedsWith(values: Any*) = {
+        addExpectation(fragment, ctx, Expect.Success(values map toRembulanValue))
+      }
+      def failsWith(clazz: Class[_ <: Throwable]) = {
+        addExpectation(fragment, ctx, Expect.Failure(clazz))
+      }
+    }
+
+  }
+
+  protected implicit def fragmentToRichFragment(frag: Fragment): RichFragment = new RichFragment(frag)
+
+  // for code structuring purposes only
+  protected def expect(body: => Unit): Unit = {
+    body
+  }
+
+}
+
+object FragmentExpectations {
+
+  sealed trait Env
+  object Env {
+    case object Empty extends Env
+    case object BaseLib extends Env
+  }
+
+  sealed trait Expect {
+    def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec): Unit
+  }
+
+  object Expect {
+    case class Success(vms: Seq[ValueMatch]) extends Expect {
+      override def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec) = {
+        actual match {
+          case Right(vs) =>
+            if (vs.size != vms.size) {
+              spec.fail("result list size does not match: expected " + vms.size + ", got " + vs.size)
+            }
+            spec.assertResult(vs.size)(vms.size)
+
+            for (((v, vm), i) <- (vs zip vms).zipWithIndex) {
+              if (!vm.matches(v)) {
+                spec.fail("value #" + i + " does not match: expected " + vm + ", got " + v)
+              }
+            }
+
+          case Left(ex) =>
+            spec.fail("Expected success, got an exception", ex)
+        }
+      }
+    }
+    case class Failure(clazz: Class[_ <: Throwable]) extends Expect {
+      override def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec) = {
+        actual match {
+          case Right(vs) =>
+            spec.fail("Expected failure, got success")
+          case Left(ex) =>
+            if (!clazz.isAssignableFrom(ex.getClass)) {
+              spec.fail("Expected exception of type " + clazz.getName + ", got " + ex.getClass.getName)
+            }
+        }
+      }
+    }
+  }
+
+  sealed trait ValueMatch {
+    def matches(o: AnyRef): Boolean
+  }
+  object ValueMatch {
+    case class Eq(v: AnyRef) extends ValueMatch {
+      override def matches(o: AnyRef) = v == o
+    }
+    case class SubtypeOf(c: Class[_]) extends ValueMatch {
+      override def matches(o: AnyRef) = if (o == null) false else c.isAssignableFrom(o.getClass)
+    }
+  }
+
+  private def toRembulanValue(v: Any): ValueMatch = {
+    import ValueMatch._
+    v match {
+      case null => Eq(null)
+      case b: Boolean => Eq(java.lang.Boolean.valueOf(b))
+      case i: Int => Eq(java.lang.Long.valueOf(i))
+      case l: Long => Eq(java.lang.Long.valueOf(l))
+      case f: Float => Eq(java.lang.Double.valueOf(f))
+      case d: Double => Eq(java.lang.Double.valueOf(d))
+      case s: String => Eq(s)
+      case c: Class[_] => SubtypeOf(c)
+      case _ => throw new IllegalArgumentException("illegal value: " + v)
+    }
   }
 
 }

@@ -4,11 +4,13 @@ import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
 import net.sandius.rembulan.core.{Dispatch, Upvalue}
 import net.sandius.rembulan.core.impl.PairCachingObjectSink
 import net.sandius.rembulan.lbc.Prototype
-import net.sandius.rembulan.test.{BasicFragments, DummyLuaState, LuaCFragmentCompiler}
+import net.sandius.rembulan.test.{BasicFragments, DummyLuaState, FragmentExpectations, LuaCFragmentCompiler}
 import net.sandius.rembulan.{core => lua}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
+
+import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
 class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
@@ -68,7 +70,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
           val env = state.newTable(0, 0)
           val upEnv = state.newUpvalue(env)
 
-          try {
+          val res: Either[Throwable, Seq[AnyRef]] = try {
             val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
 
             Dispatch.call(state, os, f)
@@ -78,10 +80,17 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
             for ((v, i) <- result.zipWithIndex) {
               println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
             }
+            Right(result)
           }
           catch {
             case ex: VerifyError => throw new IllegalStateException(ex)
             case ex: NoSuchMethodError => throw new IllegalStateException(ex)
+            case NonFatal(ex) => Left(ex)
+          }
+
+          for (ctxExp <- bundle.expectationFor(f);
+               exp <- ctxExp.get(FragmentExpectations.Env.Empty)) {
+            exp.tryMatch(res)(this)
           }
 
         }

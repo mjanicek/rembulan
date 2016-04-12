@@ -1,53 +1,64 @@
 package net.sandius.rembulan.test
 
-object BasicFragments extends FragmentBundle {
+import net.sandius.rembulan.core.IllegalOperationAttemptException
+import net.sandius.rembulan.{core => lua}
 
-  fragment ("JustX") {
+object BasicFragments extends FragmentBundle with FragmentExpectations {
+
+  val JustX = fragment ("JustX") {
     """return x
     """
   }
+  JustX in EmptyContext succeedsWith (null)
 
-  fragment ("NotX") {
+  val NotX = fragment ("NotX") {
     """return not x
     """
   }
+  NotX in EmptyContext succeedsWith (true)
 
-  fragment ("NotTrue") {
+  val NotTrue = fragment ("NotTrue") {
     """return not true
     """
   }
+  NotTrue in EmptyContext succeedsWith (false)
 
-  fragment ("NotNotX") {
+  val NotNotX = fragment ("NotNotX") {
     """return not not x
     """
   }
+  NotNotX in EmptyContext succeedsWith (false)
 
-  fragment ("JustAdd") {
+  val JustAdd = fragment ("JustAdd") {
     """return x + 1
     """
   }
+  JustAdd in EmptyContext failsWith classOf[IllegalOperationAttemptException]
 
-  fragment ("AddNumbers") {
+  val AddNumbers = fragment ("AddNumbers") {
     """local a = 39
       |local b = 3.0
       |return a + b
     """
   }
+  AddNumbers in EmptyContext succeedsWith (42.0)
 
-  fragment ("IfThenElse") {
+  val IfThenElse = fragment ("IfThenElse") {
     """if x >= 0 and x <= 10 then print(x) end
     """
   }
+  IfThenElse in EmptyContext failsWith classOf[IllegalOperationAttemptException]
 
-  fragment ("Upvalues1") {
+  val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
       |  if i % 2 == 0 then x[i // 2] = function() return i, x end end
       |end
     """
   }
+  Upvalues1 in EmptyContext succeedsWith ()
 
-  fragment ("Upvalues2") {
+  val Upvalues2 = fragment ("Upvalues2") {
     """local x
       |x = 1
       |
@@ -59,8 +70,9 @@ object BasicFragments extends FragmentBundle {
       |return sqr()
     """
   }
+  Upvalues2 in EmptyContext succeedsWith (9)
 
-  fragment ("Upvalues3") {
+  val Upvalues3 = fragment ("Upvalues3") {
     """local x, y
       |if g then
       |  y = function() return x end
@@ -70,8 +82,9 @@ object BasicFragments extends FragmentBundle {
       |return x or y
     """
   }
+  Upvalues3 in EmptyContext succeedsWith (classOf[lua.Function])
 
-  fragment ("SetUpvalue") {
+  val SetUpvalue = fragment ("SetUpvalue") {
     """local x = 1
       |
       |local function f()
@@ -82,21 +95,24 @@ object BasicFragments extends FragmentBundle {
       |return x
     """
   }
+  SetUpvalue in EmptyContext succeedsWith (123)
 
-  fragment ("SetTabUp") {
+  val SetTabUp = fragment ("SetTabUp") {
     """x = 1
       |return x
     """
   }
+  SetTabUp in EmptyContext succeedsWith (1)
 
-  fragment ("Tables") {
+  val Tables = fragment ("Tables") {
     """local t = {}
       |t.self = t
       |return t.self
     """
   }
+  Tables in EmptyContext succeedsWith (classOf[lua.Table])
 
-  fragment ("Self") {
+  val Self = fragment ("Self") {
     """local function GET(tab, k) return tab[k] end
       |local function SET(tab, k, v) tab[k] = v end
       |
@@ -111,8 +127,9 @@ object BasicFragments extends FragmentBundle {
       |return before, after
     """
   }
+  Self in EmptyContext succeedsWith (null, "hello")
 
-  fragment ("BlockLocals") {
+  val BlockLocals = fragment ("BlockLocals") {
     """do
       |  local a = 0
       |  local b = 1
@@ -123,8 +140,9 @@ object BasicFragments extends FragmentBundle {
       |end
     """
   }
+  BlockLocals in EmptyContext succeedsWith ()
 
-  fragment ("Tailcalls") {
+  val Tailcalls = fragment ("Tailcalls") {
     """function f(x)
       |  print(x)
       |  if x > 0 then
@@ -141,24 +159,27 @@ object BasicFragments extends FragmentBundle {
       |return f(3),f(-2)
     """
   }
+  Tailcalls in EmptyContext failsWith classOf[IllegalOperationAttemptException]
 
-  fragment ("FuncWith2Params") {
+  val FuncWith2Params = fragment ("FuncWith2Params") {
     """local f = function (x, y)
       |    return x + y
       |end
       |return -1 + f(1, 3) + 39
     """
   }
+  FuncWith2Params in EmptyContext succeedsWith (42)
 
-  fragment ("FuncWith3Params") {
+  val FuncWith3Params = fragment ("FuncWith3Params") {
     """local f = function (x, y, z)
       |    return x + y + z
       |end
       |return -1 + f(1, 1, 2) + 39
     """
   }
+  FuncWith3Params in EmptyContext succeedsWith (42)
 
-  fragment ("DeterminateVarargs") {
+  val DeterminateVarargs = fragment ("DeterminateVarargs") {
     """local a, b = ...
       |if a > 0 then
       |  return b, a
@@ -167,14 +188,15 @@ object BasicFragments extends FragmentBundle {
       |end
     """
   }
+  DeterminateVarargs in EmptyContext failsWith classOf[IllegalOperationAttemptException]
 
-  fragment ("ReturnVarargs") {
+  val ReturnVarargs = fragment ("ReturnVarargs") {
     """return ...
     """
   }
+  ReturnVarargs in EmptyContext succeedsWith ()
 
-
-  fragment ("IndeterminateVarargs") {
+  val IndeterminateVarargs = fragment ("IndeterminateVarargs") {
     """local a = ...
       |if a then
       |  return ...
@@ -183,8 +205,9 @@ object BasicFragments extends FragmentBundle {
       |end
     """
   }
+  IndeterminateVarargs in EmptyContext succeedsWith (false)
 
-  fragment ("NilTestInlining") {
+  val NilTestInlining = fragment ("NilTestInlining") {
     """local a
       |if a then
       |  return true
@@ -193,14 +216,16 @@ object BasicFragments extends FragmentBundle {
       |end
     """
   }
+  NilTestInlining in EmptyContext succeedsWith (false)
 
-  fragment ("VarargFunctionCalls") {
+  val VarargFunctionCalls = fragment ("VarargFunctionCalls") {
     """local f = function(...) return ... end
       |return true, f(...)
     """
   }
+  VarargFunctionCalls in EmptyContext succeedsWith (true)
 
-  fragment ("VarargFunctionCalls2") {
+  val VarargFunctionCalls2 = fragment ("VarargFunctionCalls2") {
     """local x = ...
       |local f = function(...) return ... end
       |if x then
@@ -210,15 +235,17 @@ object BasicFragments extends FragmentBundle {
       |end
     """
   }
+  VarargFunctionCalls2 in EmptyContext succeedsWith (true)
 
-  fragment ("VarargDecomposition") {
+  val VarargDecomposition = fragment ("VarargDecomposition") {
     """local a, b = ...
       |local c, d, e = a(b, ...)
       |return d(e, ...)
     """
   }
+  VarargDecomposition in EmptyContext failsWith classOf[IllegalOperationAttemptException]
 
-  fragment ("FunctionCalls") {
+  val FunctionCalls = fragment ("FunctionCalls") {
     """local function f(x, y)
       |  return x + y
       |end
@@ -226,8 +253,9 @@ object BasicFragments extends FragmentBundle {
       |return f(1, 2)
     """
   }
+  FunctionCalls in EmptyContext succeedsWith (3)
 
-  fragment ("FunctionCalls2") {
+  val FunctionCalls2 = fragment ("FunctionCalls2") {
     """local function abs(x)
       |  local function f(x, acc)
       |    if x > 0 then
@@ -245,8 +273,9 @@ object BasicFragments extends FragmentBundle {
       |return abs(20)
     """
   }
+  FunctionCalls2 in EmptyContext succeedsWith (20)
 
-  fragment ("FunctionCalls3") {
+  val FunctionCalls3 = fragment ("FunctionCalls3") {
     """local function abs(x)
       |  local function f(g, x, acc)
       |    if x > 0 then
@@ -264,8 +293,9 @@ object BasicFragments extends FragmentBundle {
       |return abs(20)
     """
   }
+  FunctionCalls3 in EmptyContext succeedsWith (20)
 
-  fragment ("LocalUpvalue") {
+  val LocalUpvalue = fragment ("LocalUpvalue") {
     """local function f()
       |  local x = 1
       |  local function g()
@@ -277,8 +307,9 @@ object BasicFragments extends FragmentBundle {
       |return f()  -- equivalent to return 1
     """
   }
+  LocalUpvalue in EmptyContext succeedsWith (1)
 
-  fragment ("ReturningAFunction") {
+  val ReturningAFunction = fragment ("ReturningAFunction") {
     """local function f()
       |  return function(x) return not not x, x end
       |end
@@ -286,8 +317,9 @@ object BasicFragments extends FragmentBundle {
       |return f()()
     """
   }
+  ReturningAFunction in EmptyContext succeedsWith (false, null)
 
-  fragment ("IncompatibleFunctions") {
+  val IncompatibleFunctions = fragment ("IncompatibleFunctions") {
     """local f
       |if x then
       |  f = function(x, y)
@@ -303,9 +335,10 @@ object BasicFragments extends FragmentBundle {
       |return f(42)
     """
   }
+  IncompatibleFunctions in EmptyContext succeedsWith (null)
 
   // test should fail
-  fragment ("GotoLocalSlot_withX") {
+  val GotoLocalSlot_withX = fragment ("GotoLocalSlot_withX") {
     """do
       | local k = 0
       | local x
@@ -318,9 +351,10 @@ object BasicFragments extends FragmentBundle {
       |end
     """
   }
+  GotoLocalSlot_withX in EmptyContext failsWith classOf[IllegalOperationAttemptException]
 
   // test should fail, reported succeeding in Lua 5.2, 5.3
-  fragment ("GotoLocalSlot_withoutX") {
+  val GotoLocalSlot_withoutX = fragment ("GotoLocalSlot_withoutX") {
     """do
       | local k = 0
       | ::foo::
@@ -332,5 +366,6 @@ object BasicFragments extends FragmentBundle {
       |end
     """
   }
+  GotoLocalSlot_withoutX in EmptyContext failsWith classOf[IllegalOperationAttemptException]
 
 }
