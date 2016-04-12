@@ -1219,20 +1219,21 @@ public class CodeEmitter {
 
 		_retrieve_0();
 
+		// assuming that _0 is of type Boolean.class
+
+		code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Boolean.class)));
 		code.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Conversions.class),
-				"objectToBoolean",
+				INVOKEVIRTUAL,
+				Type.getInternalName(Boolean.class),
+				"booleanValue",
 				Type.getMethodDescriptor(
-						Type.BOOLEAN_TYPE,
-						Type.getType(Object.class)),
+						Type.BOOLEAN_TYPE),
 				false));
 
 		code.add(new JumpInsnNode(IFEQ, l_jump_false));
 
-		// comparison evaluates to true => ???
+		// comparison evaluates to true => TODO: this could be a fall-through rather than a jump!
 		code.add(new JumpInsnNode(GOTO, l_jump_true));
-
 	}
 
 	public CodeVisitor codeVisitor() {
