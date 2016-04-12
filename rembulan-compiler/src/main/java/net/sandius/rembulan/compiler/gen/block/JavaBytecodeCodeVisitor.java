@@ -319,33 +319,28 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitTest(Object id, SlotState st, int r_index, boolean value, Object trueBranchIdentity, Object falseBranchIdentity) {
 		Type tpe = st.typeAt(r_index);
 
+		e._load_reg(r_index, st);
+
 		if (tpe.isSubtypeOf(LuaTypes.BOOLEAN)) {
-			throw new UnsupportedOperationException();  // TODO
-		}
-		else if (tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) {
-			// TODO: check correctness for DYNAMIC
-
-			e._load_reg(r_index, st);
-
-			if (value)  {
-				e._if_null(falseBranchIdentity);
-				e._next_insn(trueBranchIdentity);
-			}
-			else {
-				e._if_nonnull(falseBranchIdentity);
-				e._next_insn(trueBranchIdentity);
-			}
-
-		}
-		else if (tpe.equals(LuaTypes.NIL)) {
-			// TODO: should be inlined
-			e._goto(falseBranchIdentity);
+			e._unbox_boolean();
 		}
 		else {
-			// TODO: should be inlined
-			e._goto(trueBranchIdentity);
+			e._to_boolean();
 		}
 
+		if (value)  {
+			e._ifzero(trueBranchIdentity);
+			e._next_insn(falseBranchIdentity);
+
+//			e._ifzero(falseBranchIdentity);
+//			e._next_insn(trueBranchIdentity);
+		}
+		else {
+			e._ifnonzero(falseBranchIdentity);
+			e._next_insn(trueBranchIdentity);
+		}
+
+//		e._next_insn(trueBranchIdentity);
 	}
 
 	@Override

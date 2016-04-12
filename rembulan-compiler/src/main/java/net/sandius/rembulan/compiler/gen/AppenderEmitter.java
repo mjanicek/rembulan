@@ -196,7 +196,7 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 	@Override
 	public void l_TEST(int a, int c) {
 		// TODO: check the branches -- TEST is evaluating boolean *in*equality
-		appender.branch(new LuaInstruction.Test(appender.target(2), appender.target(1), a, c));
+		appender.branch(new LuaInstruction.Test(appender.target(1), appender.target(2), a, c));
 	}
 
 	// we're translating this a TEST followed by MOVE in the true branch

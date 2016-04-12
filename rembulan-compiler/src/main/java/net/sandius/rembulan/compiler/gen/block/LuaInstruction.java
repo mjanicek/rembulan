@@ -518,7 +518,7 @@ public interface LuaInstruction {
 					? "_B"  // simple boolean comparison, do branch
 					: (tpe.equals(LuaTypes.ANY)
 							? "_coerce"  // coerce, compare, do branch
-							: (tpe.equals(LuaTypes.NIL)
+							: (tpe.equals(LuaTypes.NIL) && value
 									? "_false"  // automatically false
 									: "_true"  // automatically true
 							)
@@ -533,8 +533,8 @@ public interface LuaInstruction {
 			Type tpe = inSlots().typeAt(r_index);
 
 			if (tpe.equals(LuaTypes.BOOLEAN) || tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) return InlineTarget.CANNOT_BE_INLINED;
-			else if (tpe.equals(LuaTypes.NIL)) return InlineTarget.FALSE_BRANCH;
-			else return InlineTarget.TRUE_BRANCH;
+			else if (tpe.equals(LuaTypes.NIL)) return value ? InlineTarget.FALSE_BRANCH : InlineTarget.TRUE_BRANCH;
+			else return value ? InlineTarget.TRUE_BRANCH : InlineTarget.FALSE_BRANCH;
 		}
 
 		@Override

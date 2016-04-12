@@ -1040,15 +1040,8 @@ public class CodeEmitter {
 
 			_load_reg(r_src, s);
 
-			code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Boolean.class)));
-			code.add(new MethodInsnNode(
-					INVOKEVIRTUAL,
-					Type.getInternalName(Boolean.class),
-					"booleanValue",
-					Type.getMethodDescriptor(
-							Type.BOOLEAN_TYPE),
-					false
-			));
+			_checkCast(Boolean.class);
+			_unbox_boolean();
 
 			code.add(new JumpInsnNode(IFEQ, l_false));
 
@@ -1072,14 +1065,7 @@ public class CodeEmitter {
 
 			_load_reg(r_src, s);
 
-			code.add(new MethodInsnNode(
-					INVOKESTATIC,
-					Type.getInternalName(Conversions.class),
-					"objectToBoolean",
-					Type.getMethodDescriptor(
-							Type.BOOLEAN_TYPE,
-							Type.getType(Object.class)),
-					false));
+			_to_boolean();
 
 			code.add(new JumpInsnNode(IFEQ, l_false));
 
@@ -1221,7 +1207,16 @@ public class CodeEmitter {
 
 		// assuming that _0 is of type Boolean.class
 
-		code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Boolean.class)));
+		_checkCast(Boolean.class);
+		_unbox_boolean();
+
+		code.add(new JumpInsnNode(IFEQ, l_jump_false));
+
+		// comparison evaluates to true => TODO: this could be a fall-through rather than a jump!
+		code.add(new JumpInsnNode(GOTO, l_jump_true));
+	}
+
+	public void _unbox_boolean() {
 		code.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(Boolean.class),
@@ -1229,11 +1224,25 @@ public class CodeEmitter {
 				Type.getMethodDescriptor(
 						Type.BOOLEAN_TYPE),
 				false));
+	}
 
-		code.add(new JumpInsnNode(IFEQ, l_jump_false));
+	public void _to_boolean() {
+		code.add(new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Conversions.class),
+				"objectToBoolean",
+				Type.getMethodDescriptor(
+						Type.BOOLEAN_TYPE,
+						Type.getType(Object.class)),
+				false));
+	}
 
-		// comparison evaluates to true => TODO: this could be a fall-through rather than a jump!
-		code.add(new JumpInsnNode(GOTO, l_jump_true));
+	public void _ifzero(Object tgt) {
+		code.add(new JumpInsnNode(IFEQ, _l(tgt)));
+	}
+
+	public void _ifnonzero(Object tgt) {
+		code.add(new JumpInsnNode(IFNE, _l(tgt)));
 	}
 
 	public CodeVisitor codeVisitor() {
