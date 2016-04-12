@@ -121,6 +121,38 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   NaNForLoop in EmptyContext succeedsWith (0)
 
+  val BitwiseOps = fragment ("BitwiseOps") {
+    """local x = 3
+      |local y = 10
+      |
+      |return x & y, x | y, x ~ y, ~x, ~y, x << y, x >> y
+    """
+  }
+  BitwiseOps in EmptyContext succeedsWith (2, 11, 9, -4, 3072, 1)
+
+  val BitwiseCoercedOps = fragment ("BitwiseCoercedOps") {
+    """local x = 3.0
+      |local y = 10.0
+      |return x & y, x | y
+    """
+  }
+  BitwiseCoercedOps in EmptyContext succeedsWith (2, 11)
+
+  val BitwiseAttemptError = fragment ("BitwiseAttemptError") {
+    """return x & y
+    """
+  }
+  BitwiseAttemptError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform bitwise operation on a nil value")
+
+  val BitwiseRepresentationError = fragment ("BitwiseRepresentationError") {
+    """local function int(x)
+      |  return x & -1
+      |end
+      |int(3.1)
+    """
+  }
+  BitwiseRepresentationError in EmptyContext failsWith (classOf[IllegalArgumentException], "number has no integer representation")
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
