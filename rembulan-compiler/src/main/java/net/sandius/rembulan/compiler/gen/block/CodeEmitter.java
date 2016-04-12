@@ -1319,17 +1319,10 @@ public class CodeEmitter {
 			else {
 				// will be a floating point loop
 
-				if (a0.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
-						&& a1.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
-						&& a2.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
-					// everything is set
-				}
-				else {
-					// it's a mix => convert to floats
-					_to_float(r_base + 0, st);
-					_to_float(r_base + 1, st);
-					_to_float(r_base + 2, st);
-				}
+				// convert to float where it may be necessary
+				if (!a0.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) _to_float(r_base + 0, st);
+				if (!a1.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) _to_float(r_base + 1, st);
+				if (!a2.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) _to_float(r_base + 2, st);
 
 				// the initial decrement
 				_load_reg(r_base, st, Number.class);
