@@ -93,6 +93,34 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   RuntimeDeterminedForLoop in EmptyContext succeedsWith (55.0)
 
+  val IllegalForLoop1 = fragment ("IllegalForLoop1") {
+    """for i = "a", "b", "c" do end
+    """
+  }
+  IllegalForLoop1 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' limit must be a number")
+
+  val IllegalForLoop2 = fragment ("IllegalForLoop2") {
+    """for i = "a", 0, "c" do end
+    """
+  }
+  IllegalForLoop2 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' step must be a number")
+
+  val IllegalForLoop3 = fragment ("IllegalForLoop3") {
+    """for i = "a", 0, 0 do end
+    """
+  }
+  IllegalForLoop3 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' initial value must be a number")
+
+  val NaNForLoop = fragment ("NaNForLoop") {
+    """local n = 0
+      |for i = 0, (0/0) do
+      |  n = n + 1.0
+      |end
+      |return n
+    """
+  }
+  NaNForLoop in EmptyContext succeedsWith (0)
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
