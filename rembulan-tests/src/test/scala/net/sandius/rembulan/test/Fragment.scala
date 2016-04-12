@@ -87,6 +87,9 @@ trait FragmentExpectations {
       def failsWith(clazz: Class[_ <: Throwable]) = {
         addExpectation(fragment, ctx, Expect.Failure(clazz))
       }
+      def failsWith(clazz: Class[_ <: Throwable], message: String) = {
+        addExpectation(fragment, ctx, Expect.Failure(clazz, Some(message)))
+      }
     }
 
   }
@@ -133,7 +136,7 @@ object FragmentExpectations {
         }
       }
     }
-    case class Failure(clazz: Class[_ <: Throwable]) extends Expect {
+    case class Failure(clazz: Class[_ <: Throwable], message: Option[String] = None) extends Expect {
       override def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec) = {
         actual match {
           case Right(vs) =>
@@ -141,6 +144,12 @@ object FragmentExpectations {
           case Left(ex) =>
             if (!clazz.isAssignableFrom(ex.getClass)) {
               spec.fail("Expected exception of type " + clazz.getName + ", got " + ex.getClass.getName)
+            }
+            val msg = ex.getMessage
+            for (expMsg <- message) {
+              if (msg != expMsg) {
+                spec.fail("Error message mismatch: expected \"" + expMsg + "\", got \"" + msg + "\"")
+              }
             }
         }
       }
