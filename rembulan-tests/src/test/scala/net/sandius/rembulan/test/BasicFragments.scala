@@ -33,7 +33,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """return x + 1
     """
   }
-  JustAdd in EmptyContext failsWith classOf[IllegalOperationAttemptException]
+  JustAdd in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform arithmetic on a nil value")
 
   val AddNumbers = fragment ("AddNumbers") {
     """local a = 39
@@ -47,7 +47,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """if x >= 0 and x <= 10 then print(x) end
     """
   }
-  IfThenElse in EmptyContext failsWith classOf[IllegalOperationAttemptException]
+  IfThenElse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare number with nil")
 
   val SimpleForLoop = fragment("SimpleForLoop") {
     """local sum = 0
@@ -231,7 +231,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |return f(3),f(-2)
     """
   }
-  Tailcalls in EmptyContext failsWith classOf[IllegalOperationAttemptException]
+  Tailcalls in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
 
   val FuncWith2Params = fragment ("FuncWith2Params") {
     """local f = function (x, y)
@@ -260,7 +260,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |end
     """
   }
-  DeterminateVarargs in EmptyContext failsWith classOf[IllegalOperationAttemptException]
+  DeterminateVarargs in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare number with nil")
 
   val ReturnVarargs = fragment ("ReturnVarargs") {
     """return ...
@@ -315,7 +315,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |return d(e, ...)
     """
   }
-  VarargDecomposition in EmptyContext failsWith classOf[IllegalOperationAttemptException]
+  VarargDecomposition in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
 
   val FunctionCalls = fragment ("FunctionCalls") {
     """local function f(x, y)
@@ -423,7 +423,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |end
     """
   }
-  GotoLocalSlot_withX in EmptyContext failsWith classOf[IllegalOperationAttemptException]
+  GotoLocalSlot_withX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
 
   // test should fail, reported succeeding in Lua 5.2, 5.3
   val GotoLocalSlot_withoutX = fragment ("GotoLocalSlot_withoutX") {
@@ -438,6 +438,6 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |end
     """
   }
-  GotoLocalSlot_withoutX in EmptyContext failsWith classOf[IllegalOperationAttemptException]
+  GotoLocalSlot_withoutX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
 
 }
