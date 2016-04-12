@@ -49,6 +49,16 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   IfThenElse in EmptyContext failsWith classOf[IllegalOperationAttemptException]
 
+  val SimpleForLoop = fragment("SimpleForLoop") {
+    """local sum = 0
+      |for i = 1, 10 do
+      |  sum = sum + i
+      |end
+      |return sum
+    """
+  }
+  SimpleForLoop in EmptyContext succeedsWith (55)
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
