@@ -55,9 +55,9 @@ public class LuaInstructionToNodeTranslator {
 //		}
 
 		public Target target(int offset) {
-			if (offset == 0) {
-				throw new IllegalArgumentException();
-			}
+//			if (offset == 0) {
+//				throw new IllegalArgumentException();
+//			}
 
 			Target jmpTarget = pcToLabel.get(pc + offset);
 
