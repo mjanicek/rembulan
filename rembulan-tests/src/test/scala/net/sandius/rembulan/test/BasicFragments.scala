@@ -176,6 +176,14 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   BitwiseCoercedOps in EmptyContext succeedsWith (2, 11)
 
+  val BitwiseStringCoercedOps = fragment ("BitwiseStringCoercedOps") {
+    """local x = "3"
+      |local y = "10.0"
+      |return x & y, x | y, x ~ y, ~x, ~y, x << y, x >> y
+    """
+  }
+  BitwiseStringCoercedOps in EmptyContext succeedsWith (2, 11, 9, -4, -11, 3072, 0)
+
   val BitwiseAttemptError = fragment ("BitwiseAttemptError") {
     """return x & y
     """
