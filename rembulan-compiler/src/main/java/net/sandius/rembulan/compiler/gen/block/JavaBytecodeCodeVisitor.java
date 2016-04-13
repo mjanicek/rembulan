@@ -282,7 +282,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitBNot(Object id, SlotState st, int r_dest, int r_arg) {
-		throw new UnsupportedOperationException();  // TODO
+		e._bnot(r_arg, r_dest, st);
 	}
 
 	@Override

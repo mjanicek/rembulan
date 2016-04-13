@@ -3,11 +3,11 @@ package net.sandius.rembulan.core;
 public class IllegalOperationAttemptException extends RuntimeException {
 
 	public IllegalOperationAttemptException(String message) {
-		super("attempt to " + message);
+		super(message);
 	}
 
 	public IllegalOperationAttemptException(String opName, String target) {
-		super("attempt to " + opName + " a " + target + " value");
+		this("attempt to " + opName + " a " + target + " value");
 	}
 
 	public static IllegalOperationAttemptException arithmetic(Object a, Object b) {
@@ -18,7 +18,7 @@ public class IllegalOperationAttemptException extends RuntimeException {
 	public static IllegalOperationAttemptException comparison(Object a, Object b) {
 		String ta = Value.typeOf(a).name;
 		String tb = Value.typeOf(b).name;
-		return new IllegalOperationAttemptException("compare " + ta + " with " + tb);
+		return new IllegalOperationAttemptException("attempt to compare " + ta + " with " + tb);
 	}
 
 	public static IllegalOperationAttemptException call(Object o) {
@@ -27,6 +27,19 @@ public class IllegalOperationAttemptException extends RuntimeException {
 
 	public static IllegalOperationAttemptException index(Object o) {
 		return new IllegalOperationAttemptException("index", Value.typeOf(o).name);
+	}
+
+	public static IllegalOperationAttemptException bitwise(Object a, Object b) {
+		Object nonNumeric = Conversions.objectAsNumber(a) == null ? a : b;
+
+		if (Conversions.objectAsNumber(nonNumeric) == null) {
+			// indeed it's not a number
+			String typeName = Value.typeOf(nonNumeric).name;
+			return new IllegalOperationAttemptException("perform bitwise operation on", typeName);
+		}
+		else {
+			return new IllegalOperationAttemptException("number has no integer representation");
+		}
 	}
 
 }

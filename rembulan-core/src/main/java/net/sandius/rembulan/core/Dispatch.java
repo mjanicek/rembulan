@@ -287,6 +287,49 @@ public abstract class Dispatch {
 		return MathImplementation.FLOAT_MATH.do_pow(a, b);
 	}
 
+	private static void try_mt_bitwise(LuaState state, ObjectSink result, String event, Object a, Object b) throws ControlThrowable {
+		Object handler = Metatables.binaryHandlerFor(state, event, a, b);
+
+		if (handler != null) {
+			call(state, result, handler, a, b);
+		}
+		else {
+			throw IllegalOperationAttemptException.bitwise(a, b);
+		}
+	}
+
+	public static void band(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		Long la = Conversions.objectAsLong(a);
+		Long lb = Conversions.objectAsLong(b);
+
+		if (la != null && lb != null) {
+			result.setTo(RawOperators.rawband(la, lb));
+		}
+		else {
+			try_mt_bitwise(state, result, Metatables.MT_BAND, a, b);
+		}
+	}
+
+	public static Number band_integer(Number a, Number b) {
+		return RawOperators.rawband(a.longValue(), b.longValue());
+	}
+
+	public static Number bor_integer(Number a, Number b) {
+		return RawOperators.rawbor(a.longValue(), b.longValue());
+	}
+
+	public static Number bxor_integer(Number a, Number b) {
+		return RawOperators.rawbxor(a.longValue(), b.longValue());
+	}
+
+	public static Number shl_integer(Number a, Number b) {
+		return RawOperators.rawshl(a.longValue(), b.longValue());
+	}
+
+	public static Number shr_integer(Number a, Number b) {
+		return RawOperators.rawshr(a.longValue(), b.longValue());
+	}
+
 	private static class ComparisonResumable implements Resumable {
 
 		@Override

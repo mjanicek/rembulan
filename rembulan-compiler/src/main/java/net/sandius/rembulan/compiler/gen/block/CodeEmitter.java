@@ -1095,6 +1095,15 @@ public class CodeEmitter {
 		}
 	}
 
+	public void _bnot(int r_src, int r_dest, SlotState s) {
+		_load_reg(r_src, s, Number.class);
+		_get_longValue(Number.class);
+		code.add(new LdcInsnNode(-1L));
+		code.add(new InsnNode(LXOR));
+		code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+		_store(r_dest, s);
+	}
+
 	public void _push_varargs() {
 		Check.isTrue(isVararg);
 		code.add(new VarInsnNode(ALOAD, LV_VARARGS));
