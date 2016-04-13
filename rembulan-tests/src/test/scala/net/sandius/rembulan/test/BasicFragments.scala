@@ -149,6 +149,16 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   NegativeStepFloatForLoop in EmptyContext succeedsWith ()
   NegativeStepFloatForLoop in BaseLibContext succeedsWith ()
 
+  val SimplifiableFloatForLoop = fragment ("SimplifiableFloatForLoop") {
+    """local step = -1.0
+      |for i = 0, 5, step do  -- loop type (negative, non-NaN) can be determined at compile time
+      |  assert(false)
+      |end
+    """
+  }
+  SimplifiableFloatForLoop in EmptyContext succeedsWith ()
+  SimplifiableFloatForLoop in BaseLibContext succeedsWith ()
+
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
       |local y = 10
