@@ -1196,9 +1196,6 @@ public class CodeEmitter {
 
 		// TODO: specialise
 
-		LabelNode l_jump_true = pos ? _l(trueBranch) : _l(falseBranch);
-		LabelNode l_jump_false = pos ? _l(falseBranch) : _l(trueBranch);
-
 		_save_pc(id);
 
 		_loadState();
@@ -1229,10 +1226,11 @@ public class CodeEmitter {
 		_checkCast(Boolean.class);
 		_unbox_boolean();
 
-		code.add(new JumpInsnNode(IFEQ, l_jump_false));
+		// compare stack top with the expected value -- branch if not equal
+		code.add(new JumpInsnNode(pos ? IFEQ : IFNE, _l(falseBranch)));
 
-		// comparison evaluates to true => TODO: this could be a fall-through rather than a jump!
-		code.add(new JumpInsnNode(GOTO, l_jump_true));
+		// TODO: this could be a fall-through rather than a jump!
+		code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
 	}
 
 	public void _unbox_boolean() {

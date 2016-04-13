@@ -430,7 +430,7 @@ public interface LuaInstruction {
 
 		public Eq(Target trueBranch, Target falseBranch, int a, int b, int c) {
 			super(trueBranch, falseBranch);
-			this.pos = (a == 0);
+			this.pos = (a != 0);
 			this.rk_left = registerOrConst(b);
 			this.rk_right = registerOrConst(c);
 		}
@@ -455,7 +455,7 @@ public interface LuaInstruction {
 
 		public Lt(Target trueBranch, Target falseBranch, int a, int b, int c) {
 			super(trueBranch, falseBranch);
-			this.pos = (a == 0);
+			this.pos = (a != 0);
 			this.rk_left = registerOrConst(b);
 			this.rk_right = registerOrConst(c);
 		}
@@ -480,7 +480,7 @@ public interface LuaInstruction {
 
 		public Le(Target trueBranch, Target falseBranch, int a, int b, int c) {
 			super(trueBranch, falseBranch);
-			this.pos = (a == 0);
+			this.pos = (a != 0);
 			this.rk_left = registerOrConst(b);
 			this.rk_right = registerOrConst(c);
 		}

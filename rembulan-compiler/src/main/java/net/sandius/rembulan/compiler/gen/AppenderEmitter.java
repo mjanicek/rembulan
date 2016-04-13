@@ -177,19 +177,22 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 				.jumpToOffset(sbx + 1);
 	}
 
+	/*	A B C	if ((RK(B) == RK(C)) ~= A) then pc++		*/
 	@Override
 	public void l_EQ(int a, int b, int c) {
-		appender.branch(new LuaInstruction.Eq(appender.target(2), appender.target(1), a, b, c));
+		appender.branch(new LuaInstruction.Eq(appender.target(1), appender.target(2), a, b, c));
 	}
 
+	/*	A B C	if ((RK(B) <  RK(C)) ~= A) then pc++  		*/
 	@Override
 	public void l_LT(int a, int b, int c) {
-		appender.branch(new LuaInstruction.Lt(appender.target(2), appender.target(1), a, b, c));
+		appender.branch(new LuaInstruction.Lt(appender.target(1), appender.target(2), a, b, c));
 	}
 
+	/**	A B C	if ((RK(B) <= RK(C)) ~= A) then pc++  		*/
 	@Override
 	public void l_LE(int a, int b, int c) {
-		appender.branch(new LuaInstruction.Le(appender.target(2), appender.target(1), a, b, c));
+		appender.branch(new LuaInstruction.Le(appender.target(1), appender.target(2), a, b, c));
 	}
 
 	/*	A C	if not (R(A) <=> C) then pc++			*/
@@ -231,6 +234,7 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 		appender.term(new LuaInstruction.Return(a, b));
 	}
 
+	/*	A sBx	R(A)+=R(A+2); if R(A) <?= R(A+1) then { pc+=sBx; R(A+3)=R(A) }*/
 	@Override
 	public void l_FORLOOP(int a, int sbx) {
 		appender.branch(new LuaInstruction.ForLoop(appender.target(sbx + 1), appender.target(1), a));
