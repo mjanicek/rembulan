@@ -128,7 +128,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |return x & y, x | y, x ~ y, ~x, ~y, x << y, x >> y
     """
   }
-  BitwiseOps in EmptyContext succeedsWith (2, 11, 9, -4, 3072, 1)
+  BitwiseOps in EmptyContext succeedsWith (2, 11, 9, -4, -11, 3072, 0)
 
   val BitwiseCoercedOps = fragment ("BitwiseCoercedOps") {
     """local x = 3.0
