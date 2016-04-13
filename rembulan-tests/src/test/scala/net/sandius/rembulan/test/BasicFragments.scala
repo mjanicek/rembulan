@@ -121,6 +121,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   NaNForLoop in EmptyContext succeedsWith (0)
 
+  val ZeroStepForLoop = fragment ("ZeroStepForLoop") {
+    """for i = 1, 10, 0 do assert(false) end
+    """
+  }
+  ZeroStepForLoop in EmptyContext succeedsWith ()
+  ZeroStepForLoop in BaseLibContext succeedsWith ()
+
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
       |local y = 10
