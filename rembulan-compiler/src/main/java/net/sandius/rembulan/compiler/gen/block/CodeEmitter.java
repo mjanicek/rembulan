@@ -1351,9 +1351,9 @@ public class CodeEmitter {
 			}
 		}
 		else {
-			// may be anything -- need to try converting to number
+			// may be anything -- force conversion of loop limits to numbers and treat this as a float loop
 
-			// do this in the same order as PUC Lua
+			// do this in the same order as PUC Lua for the same error reporting
 
 			_load_reg(r_base + 1, st);
 			_to_number("'for' limit");
@@ -1365,7 +1365,7 @@ public class CodeEmitter {
 			_load_reg(r_base, st);
 			_to_number("'for' initial value");
 			_swap();
-			_dispatch_binop("sub_integer", Number.class);
+			_dispatch_binop("sub_float", Number.class);
 			_store(r_base, st);
 		}
 	}
