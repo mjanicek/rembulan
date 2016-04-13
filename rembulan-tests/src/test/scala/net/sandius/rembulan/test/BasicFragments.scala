@@ -151,7 +151,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |int(3.1)
     """
   }
-  BitwiseRepresentationError in EmptyContext failsWith (classOf[IllegalArgumentException], "number has no integer representation")
+  BitwiseRepresentationError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "number has no integer representation")
 
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
