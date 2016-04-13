@@ -128,6 +128,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   ZeroStepForLoop in EmptyContext succeedsWith ()
   ZeroStepForLoop in BaseLibContext succeedsWith ()
 
+  val NegativeStepForLoop = fragment ("NegativeStepForLoop") {
+    """for i = 1, 10, -1 do assert(false) end
+    """
+  }
+  NegativeStepForLoop in EmptyContext succeedsWith ()
+  NegativeStepForLoop in BaseLibContext succeedsWith ()
+
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
       |local y = 10
