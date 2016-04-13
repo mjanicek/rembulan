@@ -1395,10 +1395,15 @@ public class CodeEmitter {
 		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_base + 1);  // limit
 		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_base + 2);  // step
 
-		if (a0.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
-				&& a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
-				&& a2.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+		LabelNode ascendingLoop = new LabelNode();
+		LabelNode descendingLoop = new LabelNode();
+		LabelNode storeAndContinue = new LabelNode();
 
+		boolean isIntegerLoop = a0.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+				&& a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+				&& a2.isSubtypeOf(LuaTypes.NUMBER_INTEGER);
+
+		if (isIntegerLoop) {
 			// integer loop
 
 			// increment
@@ -1417,12 +1422,11 @@ public class CodeEmitter {
 			_get_longValue(Number.class);
 			code.add(new InsnNode(LCMP));
 
-			// we now have the comparison int with the limit on the stack;
-			// to determine what the comparison value means, we need to determine what
-			// kind of loop this is
+			// Stack here: I(lcmp(index, limit))
 
-			LabelNode ascendingLoop = new LabelNode();
-			LabelNode descendingLoop = new LabelNode();
+			// We now have the integer representing the comparison of index and limit
+			// on the stack. To interpret this value, we now need to determine whether
+			// we're in an ascending or descending loop.
 
 			// compare step with zero
 			_load_reg(r_base + 2, st, Number.class);
@@ -1430,54 +1434,113 @@ public class CodeEmitter {
 			code.add(new InsnNode(LCONST_0));
 			code.add(new InsnNode(LCMP));
 
+			// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
+
 			code.add(new InsnNode(DUP));
 			code.add(new JumpInsnNode(IFGT, ascendingLoop));
 			code.add(new JumpInsnNode(IFLT, descendingLoop));
 			code.add(new InsnNode(POP));  // we won't be needing the comparison value
 			code.add(new JumpInsnNode(GOTO, _l(breakBranch)));  // zero-step: break
 
+			code.add(descendingLoop);
+			// Stack here: I(lcmp(index, limit))
+			code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
+			code.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
+			code.add(new JumpInsnNode(GOTO, storeAndContinue));
+
 			code.add(ascendingLoop);
+			// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
 			// FIXME: do we really need to dump a full frame?
 			code.add(_fullFrame(2, new Object[] { INTEGER, INTEGER }));
-
 			code.add(new InsnNode(POP));
 			code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
-
-			// continue the loop // TODO: don't duplicate
-			_load_reg(r_base, st);
-			_store(r_base + 3, st);
-			code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
-
-			code.add(descendingLoop);
-			code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
-
-			code.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
-
-			// continue the loop // TODO: don't duplicate
-			_load_reg(r_base, st);
-			_store(r_base + 3, st);
-			code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
+			// fall-through to store-and-continue
 		}
 		else {
 			// float loop
 
+			// increment index
 			_load_reg(r_base, st, Number.class);
 			_get_doubleValue(Number.class);
 			_load_reg(r_base + 2, st, Number.class);
 			_get_doubleValue(Number.class);
 			code.add(new InsnNode(DADD));
 			code.add(new InsnNode(DUP2));  // will re-use this value for comparison
+
 			code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-			_store(r_base, st);  // save into register
+			_store(r_base, st);  // save index into register
+
+			// push limit to the stack
 			_load_reg(r_base + 1, st, Number.class);
 			_get_doubleValue(Number.class);
+
+			// Stack here: D(index) D(limit)
+
+			// At this point we have the index and the limit on the stack.
+			// Next, we need to determine what kind of loop we're in. Only then can we make
+			// the comparison -- at this point we wouldn't know how to treat a possible NaN result!
+
+			LabelNode stepIsNan = new LabelNode();
+
+			// fetch the step
+			_load_reg(r_base + 2, st, Number.class);
+			_get_doubleValue(Number.class);
+			code.add(new InsnNode(DUP2));  // save it for later use
+
+			// test step for NaN
+			code.add(new InsnNode(DUP2));
+			code.add(new InsnNode(DCMPG));  // compare with self: result will be non-zero iff step is not NaN
+			code.add(new JumpInsnNode(IFNE, stepIsNan));
+
+			// Stack here: D(index) D(limit) D(step)
+
+			// compare step with 0.0
+			code.add(new InsnNode(DCONST_0));
 			code.add(new InsnNode(DCMPG));
-			// if stack top is negative (R[A] < R[A+1]) or zero (R[A] == R[A+1]), continue
-			code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // jump to false if >0
-			_load_reg(r_base, st);
-			_store(r_base + 3, st);
-			code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
+
+			// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
+
+			code.add(new InsnNode(DUP));
+			code.add(new JumpInsnNode(IFGT, ascendingLoop));
+			code.add(new JumpInsnNode(IFLT, descendingLoop));
+
+			// Stack here: D(index) D(limit)
+
+			code.add(new InsnNode(POP2));
+			code.add(new InsnNode(POP2));
+			code.add(new JumpInsnNode(GOTO, _l(breakBranch)));  // step is zero => break
+
+			// step is NaN => break
+			code.add(stepIsNan);
+			// Stack here: D(index) D(limit) D(step)
+			code.add(_fullFrame(3, new Object[] { DOUBLE, DOUBLE, DOUBLE }));
+			code.add(new InsnNode(POP2));
+			code.add(new InsnNode(POP2));
+			code.add(new InsnNode(POP2));
+			code.add(new JumpInsnNode(GOTO, _l(breakBranch)));
+
+			code.add(descendingLoop);
+			// Stack here: D(index) D(limit)
+			code.add(_fullFrame(2, new Object[] { DOUBLE, DOUBLE }));
+			code.add(new InsnNode(DCMPL));  // if index or limit is NaN, result in -1
+			code.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
+			code.add(new JumpInsnNode(GOTO, storeAndContinue));
+
+			code.add(ascendingLoop);
+			// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
+			code.add(_fullFrame(3, new Object[] { DOUBLE, DOUBLE, INTEGER }));
+			code.add(new InsnNode(POP));
+			code.add(new InsnNode(DCMPG));  // if index or limit is NaN, result in +1
+			code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
+			// fall through to store-and-continue
 		}
+
+		code.add(storeAndContinue);
+		// Stack here: empty
+		code.add(new FrameNode(F_SAME, 0, null, 0, null));
+		_load_reg(r_base, st);
+		_store(r_base + 3, st);
+		code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 	}
 
 	public CodeVisitor codeVisitor() {
