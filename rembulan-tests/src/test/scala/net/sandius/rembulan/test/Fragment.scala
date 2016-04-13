@@ -132,7 +132,7 @@ object FragmentExpectations {
             }
 
           case Left(ex) =>
-            spec.fail("Expected success, got an exception", ex)
+            spec.fail("Expected success, got an exception: " + ex.getMessage, ex)
         }
       }
     }
