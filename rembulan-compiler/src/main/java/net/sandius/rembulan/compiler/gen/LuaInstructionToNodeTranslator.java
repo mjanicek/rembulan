@@ -55,6 +55,7 @@ public class LuaInstructionToNodeTranslator {
 //		}
 
 		public Target target(int offset) {
+			// offset == 0 for empty for-loops
 //			if (offset == 0) {
 //				throw new IllegalArgumentException();
 //			}
