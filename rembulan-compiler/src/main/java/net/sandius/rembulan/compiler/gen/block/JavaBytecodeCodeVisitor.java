@@ -329,18 +329,14 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		}
 
 		if (value)  {
-			e._ifzero(trueBranchIdentity);
-			e._next_insn(falseBranchIdentity);
-
-//			e._ifzero(falseBranchIdentity);
-//			e._next_insn(trueBranchIdentity);
+			// expected to be true, i.e. non-zero
+			e._ifzero(falseBranchIdentity);
 		}
 		else {
+			// expected to be false, i.e. zero
 			e._ifnonzero(falseBranchIdentity);
-			e._next_insn(trueBranchIdentity);
 		}
-
-//		e._next_insn(trueBranchIdentity);
+		e._next_insn(trueBranchIdentity);
 	}
 
 	@Override

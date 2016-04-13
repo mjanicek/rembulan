@@ -195,7 +195,7 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 	/*	A C	if not (R(A) <=> C) then pc++			*/
 	@Override
 	public void l_TEST(int a, int c) {
-		// TODO: check the branches -- TEST is evaluating boolean *in*equality
+		// TEST is evaluating boolean *in*equality: true branch is when (R(A) <=> C)
 		appender.branch(new LuaInstruction.Test(appender.target(1), appender.target(2), a, c));
 	}
 
@@ -208,8 +208,7 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 		app.append(new LuaInstruction.Move(a, b));  // this is the R(A) := R(B)
 		app.jumpTo(appender.target(1));
 
-		// TEST checks for *in*equality, so our true branch is TEST's false branch
-		appender.branch(new LuaInstruction.Test(appender.target(2), trueBranch, b, c));
+		appender.branch(new LuaInstruction.Test(trueBranch, appender.target(2), b, c));
 	}
 
 	@Override

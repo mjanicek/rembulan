@@ -498,6 +498,7 @@ public interface LuaInstruction {
 	}
 
 	/*	A C	if not (R(A) <=> C) then pc++			*/
+	// i.e. the TRUE branch is when (to_boolean(r[r_index]) == value), FALSE otherwise
 	class Test extends Branch implements LuaInstruction {
 		public final int r_index;
 		public final boolean value;
@@ -514,13 +515,16 @@ public interface LuaInstruction {
 		public String toString() {
 			Type tpe = inSlots().typeAt(r_index);
 
+			String ifTrue = value ? "_true" : "_false";
+			String ifFalse = value ? "_false" : "_true";
+
 			String suffix = (tpe.isSubtypeOf(LuaTypes.BOOLEAN)
 					? "_B"  // simple boolean comparison, do branch
-					: (tpe.equals(LuaTypes.ANY)
+					: (tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)  // TODO: is-consistent-with(DYNAMIC) ?
 							? "_coerce"  // coerce, compare, do branch
-							: (tpe.equals(LuaTypes.NIL) && value
-									? "_false"  // automatically false
-									: "_true"  // automatically true
+							: (tpe.equals(LuaTypes.NIL)
+									? ifFalse  // tested value is false
+									: ifTrue  // tested value is true
 							)
 					)
 			);
@@ -532,9 +536,12 @@ public interface LuaInstruction {
 		public InlineTarget canBeInlined() {
 			Type tpe = inSlots().typeAt(r_index);
 
+			InlineTarget ifTrue = value ? InlineTarget.TRUE_BRANCH : InlineTarget.FALSE_BRANCH;
+			InlineTarget ifFalse = value ? InlineTarget.FALSE_BRANCH : InlineTarget.TRUE_BRANCH;
+
 			if (tpe.equals(LuaTypes.BOOLEAN) || tpe.equals(LuaTypes.ANY) || tpe.equals(LuaTypes.DYNAMIC)) return InlineTarget.CANNOT_BE_INLINED;
-			else if (tpe.equals(LuaTypes.NIL)) return value ? InlineTarget.FALSE_BRANCH : InlineTarget.TRUE_BRANCH;
-			else return value ? InlineTarget.TRUE_BRANCH : InlineTarget.FALSE_BRANCH;
+			else if (tpe.equals(LuaTypes.NIL)) return ifFalse;
+			else return ifTrue;
 		}
 
 		@Override
