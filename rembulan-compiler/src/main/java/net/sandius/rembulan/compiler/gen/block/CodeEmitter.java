@@ -1015,9 +1015,18 @@ public class CodeEmitter {
 				.call_tailCall(numArgs);
 	}
 
-	public void _setret(int num) {
-		withObjectSink(code)
-				.call_setTo(num);
+	public void _setret(int fromIndex, SlotState st, int num) {
+		ObjectSink_prx os = withObjectSink(code);
+
+		if (os.canSaveNResults(num)) {
+			_load_regs(fromIndex, st, num);
+			os.call_setTo(num);
+		}
+		else {
+			// need to pack into an array
+			_pack_regs(fromIndex, st, num);
+			os.call_setToArray();
+		}
 	}
 
 	public void _line_here(int line) {
@@ -1541,30 +1550,30 @@ public class CodeEmitter {
 			return this;
 		}
 
+		public boolean canSaveNResults(int numValues) {
+			// TODO: determine this by reading the ObjectSink interface?
+			return numValues <= 5;
+		}
+
 		public ObjectSink_prx call_setTo(int numValues) {
 			Check.nonNegative(numValues);
 			if (numValues == 0) {
 				call_reset();
 			}
 			else {
-				// TODO: determine this by reading the ObjectSink interface?
-				if (numValues <= 5) {
-					Type[] argTypes = new Type[numValues];
-					Arrays.fill(argTypes, Type.getType(Object.class));
+				Check.isTrue(canSaveNResults(numValues));
 
-					il.add(new MethodInsnNode(
-							INVOKEINTERFACE,
-							selfTpe().getInternalName(),
-							"setTo",
-							Type.getMethodType(
-									Type.VOID_TYPE,
-									argTypes).getDescriptor(),
-							true));
-				}
-				else {
-					// TODO: iterate and push
-					throw new UnsupportedOperationException("Return " + numValues + " values");
-				}
+				Type[] argTypes = new Type[numValues];
+				Arrays.fill(argTypes, Type.getType(Object.class));
+
+				il.add(new MethodInsnNode(
+						INVOKEINTERFACE,
+						selfTpe().getInternalName(),
+						"setTo",
+						Type.getMethodType(
+								Type.VOID_TYPE,
+								argTypes).getDescriptor(),
+						true));
 			}
 			return this;
 		}

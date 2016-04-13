@@ -425,8 +425,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		if (b > 0) {
 			// b - 1 is the actual number of results
 			e._loadObjectSink();
-			e._load_regs(r_from, st, b - 1);
-			e._setret(b - 1);
+			e._setret(r_from, st, b - 1);
 			e._return();
 		}
 		else {
