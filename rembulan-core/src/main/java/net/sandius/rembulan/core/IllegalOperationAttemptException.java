@@ -42,4 +42,15 @@ public class IllegalOperationAttemptException extends RuntimeException {
 		}
 	}
 
+	public static IllegalOperationAttemptException bitwise(Object o) {
+		if (Conversions.objectAsNumber(o) == null) {
+			// indeed it's not a number
+			String typeName = Value.typeOf(o).name;
+			return new IllegalOperationAttemptException("perform bitwise operation on", typeName);
+		}
+		else {
+			return new IllegalOperationAttemptException("number has no integer representation");
+		}
+	}
+
 }

@@ -314,20 +314,87 @@ public abstract class Dispatch {
 		return RawOperators.rawband(a.longValue(), b.longValue());
 	}
 
+	public static void bor(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		Long la = Conversions.objectAsLong(a);
+		Long lb = Conversions.objectAsLong(b);
+
+		if (la != null && lb != null) {
+			result.setTo(RawOperators.rawbor(la, lb));
+		}
+		else {
+			try_mt_bitwise(state, result, Metatables.MT_BOR, a, b);
+		}
+	}
+
 	public static Number bor_integer(Number a, Number b) {
 		return RawOperators.rawbor(a.longValue(), b.longValue());
+	}
+
+	public static void bxor(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		Long la = Conversions.objectAsLong(a);
+		Long lb = Conversions.objectAsLong(b);
+
+		if (la != null && lb != null) {
+			result.setTo(RawOperators.rawbxor(la, lb));
+		}
+		else {
+			try_mt_bitwise(state, result, Metatables.MT_BXOR, a, b);
+		}
 	}
 
 	public static Number bxor_integer(Number a, Number b) {
 		return RawOperators.rawbxor(a.longValue(), b.longValue());
 	}
 
+	public static void shl(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		Long la = Conversions.objectAsLong(a);
+		Long lb = Conversions.objectAsLong(b);
+
+		if (la != null && lb != null) {
+			result.setTo(RawOperators.rawshl(la, lb));
+		}
+		else {
+			try_mt_bitwise(state, result, Metatables.MT_SHL, a, b);
+		}
+	}
+
 	public static Number shl_integer(Number a, Number b) {
 		return RawOperators.rawshl(a.longValue(), b.longValue());
 	}
 
+	public static void shr(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		Long la = Conversions.objectAsLong(a);
+		Long lb = Conversions.objectAsLong(b);
+
+		if (la != null && lb != null) {
+			result.setTo(RawOperators.rawshr(la, lb));
+		}
+		else {
+			try_mt_bitwise(state, result, Metatables.MT_SHR, a, b);
+		}
+	}
+
 	public static Number shr_integer(Number a, Number b) {
 		return RawOperators.rawshr(a.longValue(), b.longValue());
+	}
+
+	public static void bnot(LuaState state, ObjectSink result, Object o) throws ControlThrowable {
+		Long lo = Conversions.objectAsLong(o);
+
+		if (lo != null) {
+			result.setTo(RawOperators.rawbnot(lo));
+		}
+		else {
+			Object handler = Metatables.getMetamethod(state, Metatables.MT_BNOT, o);
+
+			if (handler != null) {
+				call(state, result, handler, o);
+			}
+			else {
+				throw IllegalOperationAttemptException.bitwise(o);
+			}
+
+		}
 	}
 
 	private static class ComparisonResumable implements Resumable {
