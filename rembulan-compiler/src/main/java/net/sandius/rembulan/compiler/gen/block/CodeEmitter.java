@@ -1370,10 +1370,30 @@ public class CodeEmitter {
 		}
 	}
 
-	public void _forloop(SlotState st, int r_base, Object trueBranch, Object falseBranch) {
-		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_base + 0);
-		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_base + 1);
-		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_base + 2);
+	private FrameNode _fullFrame(int numStack, Object[] stack) {
+		ArrayList<Object> locals = new ArrayList<>();
+		locals.add(parent.thisClassType().getInternalName());
+		locals.add(Type.getInternalName(LuaState.class));
+		locals.add(Type.getInternalName(ObjectSink.class));
+		locals.add(INTEGER);
+		if (isVararg) {
+			locals.add(ASMUtils.arrayTypeFor(Object.class).getInternalName());
+		}
+		for (int i = 0; i < numOfRegisters(); i++) {
+			locals.add(Type.getInternalName(Object.class));
+		}
+
+		return new FrameNode(
+				F_FULL,
+				locals.size(),
+				locals.toArray(),
+				numStack, stack);
+	}
+
+	public void _forloop(SlotState st, int r_base, Object continueBranch, Object breakBranch) {
+		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_base + 0);  // index
+		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_base + 1);  // limit
+		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_base + 2);  // step
 
 		if (a0.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
 				&& a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
@@ -1388,16 +1408,55 @@ public class CodeEmitter {
 			_get_longValue(Number.class);
 			code.add(new InsnNode(LADD));
 			code.add(new InsnNode(DUP2));  // will re-use this value for comparison
+
+			// box and store
 			code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
 			_store(r_base, st);  // save into register
+
 			_load_reg(r_base + 1, st, Number.class);
 			_get_longValue(Number.class);
 			code.add(new InsnNode(LCMP));
-			// if stack top is negative (R[A] < R[A+1]) or zero (R[A] == R[A+1]), continue
-			code.add(new JumpInsnNode(IFGT, _l(falseBranch)));  // jump to false if >0
+
+			// we now have the comparison int with the limit on the stack;
+			// to determine what the comparison value means, we need to determine what
+			// kind of loop this is
+
+			LabelNode ascendingLoop = new LabelNode();
+			LabelNode descendingLoop = new LabelNode();
+
+			// compare step with zero
+			_load_reg(r_base + 2, st, Number.class);
+			_get_longValue(Number.class);
+			code.add(new InsnNode(LCONST_0));
+			code.add(new InsnNode(LCMP));
+
+			code.add(new InsnNode(DUP));
+			code.add(new JumpInsnNode(IFGT, ascendingLoop));
+			code.add(new JumpInsnNode(IFLT, descendingLoop));
+			code.add(new InsnNode(POP));  // we won't be needing the comparison value
+			code.add(new JumpInsnNode(GOTO, _l(breakBranch)));  // zero-step: break
+
+			code.add(ascendingLoop);
+			// FIXME: do we really need to dump a full frame?
+			code.add(_fullFrame(2, new Object[] { INTEGER, INTEGER }));
+
+			code.add(new InsnNode(POP));
+			code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
+
+			// continue the loop // TODO: don't duplicate
 			_load_reg(r_base, st);
 			_store(r_base + 3, st);
-			code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
+			code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
+
+			code.add(descendingLoop);
+			code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
+
+			code.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
+
+			// continue the loop // TODO: don't duplicate
+			_load_reg(r_base, st);
+			_store(r_base + 3, st);
+			code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 		}
 		else {
 			// float loop
@@ -1414,10 +1473,10 @@ public class CodeEmitter {
 			_get_doubleValue(Number.class);
 			code.add(new InsnNode(DCMPG));
 			// if stack top is negative (R[A] < R[A+1]) or zero (R[A] == R[A+1]), continue
-			code.add(new JumpInsnNode(IFGT, _l(falseBranch)));  // jump to false if >0
+			code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // jump to false if >0
 			_load_reg(r_base, st);
 			_store(r_base + 3, st);
-			code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
+			code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 		}
 	}
 
