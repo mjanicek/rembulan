@@ -153,6 +153,14 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   BitwiseRepresentationError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "number has no integer representation")
 
+  val BitwiseError = fragment ("BitwiseError") {
+    """local x = print or 1.2
+      |return 10 & x
+    """
+  }
+  BitwiseError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "number has no integer representation")
+  BitwiseError in BaseLibContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform bitwise operation on a function value")
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
