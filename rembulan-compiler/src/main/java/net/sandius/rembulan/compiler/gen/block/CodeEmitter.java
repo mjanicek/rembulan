@@ -665,18 +665,19 @@ public class CodeEmitter {
 		else {
 			// variable number of parameters, encoded in an array at position 3
 
-			il.add(new VarInsnNode(ALOAD, 3));
-			il.add(ASMUtils.loadInt(numOfParameters));
-			il.add(new MethodInsnNode(
-					INVOKESTATIC,
-					Type.getInternalName(Varargs.class),
-					"from",
-					Type.getMethodDescriptor(
-							ASMUtils.arrayTypeFor(Object.class),
-							ASMUtils.arrayTypeFor(Object.class),
-							Type.INT_TYPE),
-					false));
-
+			if (isVararg) {
+				il.add(new VarInsnNode(ALOAD, 3));
+				il.add(ASMUtils.loadInt(numOfParameters));
+				il.add(new MethodInsnNode(
+						INVOKESTATIC,
+						Type.getInternalName(Varargs.class),
+						"from",
+						Type.getMethodDescriptor(
+								ASMUtils.arrayTypeFor(Object.class),
+								ASMUtils.arrayTypeFor(Object.class),
+								Type.INT_TYPE),
+						false));
+			}
 
 			// load #numOfParameters, mapping them onto #numOfRegisters
 
@@ -689,7 +690,7 @@ public class CodeEmitter {
 							Type.getInternalName(Varargs.class),
 							"getElement",
 							Type.getMethodDescriptor(
-									ASMUtils.arrayTypeFor(Object.class),
+									Type.getType(Object.class),
 									ASMUtils.arrayTypeFor(Object.class),
 									Type.INT_TYPE),
 							false));
