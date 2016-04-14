@@ -184,136 +184,227 @@ public class CodeEmitter {
 		throw new UnsupportedOperationException("Not implemented: " + o.getClass() + ": " + o.toString());
 	}
 
+	@Deprecated
 	public void _dup() {
 		code.add(new InsnNode(DUP));
 	}
 
+	@Deprecated
 	public void _swap() {
 		code.add(new InsnNode(SWAP));
 	}
 
+	@Deprecated
 	public void _push_this() {
 		code.add(new VarInsnNode(ALOAD, 0));
 	}
 
-	public void _push_null() {
-		code.add(new InsnNode(ACONST_NULL));
+	public static AbstractInsnNode pushNull() {
+		return new InsnNode(ACONST_NULL);
 	}
 
-	public void _load_boxed_constant(Object k, Class castTo) {
+	@Deprecated
+	public void _push_null() {
+		code.add(pushNull());
+	}
+
+	public static InsnList loadBoxedConstant(Object k, Class<?> castTo) {
+		InsnList il = new InsnList();
+
 		if (k == null) {
-			_push_null();
+			il.add(pushNull());
 		}
 		else if (k instanceof Boolean) {
-			code.add(ASMUtils.loadBoxedBoolean((Boolean) k));
+			il.add(ASMUtils.loadBoxedBoolean((Boolean) k));
 		}
 		else if (k instanceof Double || k instanceof Float) {
-			code.add(ASMUtils.loadDouble(((Number) k).doubleValue()));
-			code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+			il.add(ASMUtils.loadDouble(((Number) k).doubleValue()));
+			il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 		}
 		else if (k instanceof Number) {
-			code.add(ASMUtils.loadLong(((Number) k).longValue()));
-			code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+			il.add(ASMUtils.loadLong(((Number) k).longValue()));
+			il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
 		}
 		else if (k instanceof String) {
-			code.add(new LdcInsnNode((String) k));
+			il.add(new LdcInsnNode((String) k));
 		}
 		else {
-			throw new UnsupportedOperationException("Illegal const type: " + k.getClass());
+			throw new UnsupportedOperationException("Illegal constant type: " + k.getClass());
 		}
 
 		if (castTo != null) {
+			Check.notNull(k);
 			if (!castTo.isAssignableFrom(k.getClass())) {
-				_checkCast(castTo);
+				il.add(checkCast(castTo));
 			}
 		}
+
+		return il;
 	}
 
+	public static InsnList loadBoxedConstant(Object k) {
+		return loadBoxedConstant(k, null);
+	}
+
+	@Deprecated
+	public void _load_boxed_constant(Object k, Class castTo) {
+		code.add(loadBoxedConstant(k, castTo));
+	}
+
+	@Deprecated
 	public void _load_boxed_constant(Object k) {
-		_load_boxed_constant(k, null);
+		code.add(loadBoxedConstant(k));
 	}
 
+
+	public InsnList loadConstant(int idx, Class castTo) {
+		return loadBoxedConstant(context.getConst(idx), castTo);
+	}
+
+	public InsnList loadConstant(int idx) {
+		return loadConstant(idx, null);
+	}
+
+	@Deprecated
 	public void _load_k(int idx, Class castTo) {
-		_load_boxed_constant(context.getConst(idx), castTo);
+		code.add(loadConstant(idx, castTo));
 	}
 
+	@Deprecated
 	public void _load_k(int idx) {
-		_load_k(idx, null);
+		code.add(loadConstant(idx));
 	}
 
+	public AbstractInsnNode loadRegisterValue(int registerIndex) {
+		return new VarInsnNode(ALOAD, registerOffset() + registerIndex);
+	}
+
+	@Deprecated
 	public void _load_reg_value(int idx) {
-		code.add(new VarInsnNode(ALOAD, registerOffset() + idx));
+		code.add(loadRegisterValue(idx));
 	}
 
+	public InsnList loadRegisterValue(int registerIndex, Class castTo) {
+		InsnList il = new InsnList();
+		il.add(loadRegisterValue(registerIndex));
+		il.add(checkCast(castTo));
+		return il;
+	}
+
+	@Deprecated
 	public void _load_reg_value(int idx, Class clazz) {
-		_load_reg_value(idx);
-		_checkCast(clazz);
+		code.add(loadRegisterValue(idx, clazz));
 	}
 
-	public void _load_reg(int idx, SlotState slots, Class castTo) {
+	public InsnList loadRegister(int registerIndex, SlotState slots, Class<?> castTo) {
 		Check.notNull(slots);
-		Check.nonNegative(idx);
+		Check.nonNegative(registerIndex);
 
-		if (slots.isCaptured(idx)) {
-			_get_downvalue(idx);
-			_get_upvalue_value();
+		InsnList il = new InsnList();
+
+		if (slots.isCaptured(registerIndex)) {
+			il.add(getDownvalue(registerIndex));
+			il.add(getUpvalueValue());
 		}
 		else {
-			_load_reg_value(idx);
+			il.add(loadRegisterValue(registerIndex));
 		}
 
 		Class clazz = Object.class;
 
-		if (castTo != null) {
-			if (!castTo.isAssignableFrom(clazz)) {
-				_checkCast(castTo);
-			}
+		if (castTo != null && !castTo.isAssignableFrom(clazz)) {
+			il.add(checkCast(castTo));
 		}
+
+		return il;
 	}
 
+	public InsnList loadRegister(int registerIndex, SlotState slots) {
+		return loadRegister(registerIndex, slots, null);
+	}
+
+	@Deprecated
+	public void _load_reg(int idx, SlotState slots, Class castTo) {
+		code.add(loadRegister(idx, slots, castTo));
+	}
+
+	@Deprecated
 	public void _load_reg(int idx, SlotState slots) {
-		_load_reg(idx, slots, null);
+		code.add(loadRegister(idx, slots, null));
 	}
 
+	public InsnList loadRegisters(int firstRegisterIndex, SlotState slots, int num) {
+		InsnList il = new InsnList();
+		for (int i = 0; i < num; i++) {
+			il.add(loadRegister(firstRegisterIndex + i, slots));
+		}
+		return il;
+	}
+
+	public InsnList packRegistersIntoArray(int firstRegisterIndex, SlotState slots, int num) {
+		InsnList il = new InsnList();
+
+		il.add(ASMUtils.loadInt(num));
+		il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+		for (int i = 0; i < num; i++) {
+			il.add(new InsnNode(DUP));
+			il.add(ASMUtils.loadInt(i));
+			il.add(loadRegister(firstRegisterIndex + i, slots));
+			il.add(new InsnNode(AASTORE));
+		}
+
+		return il;
+	}
+
+	@Deprecated
 	public void _load_regs(int firstIdx, SlotState slots, int num) {
-		for (int i = 0; i < num; i++) {
-			_load_reg(firstIdx + i, slots);
-		}
+		code.add(loadRegisters(firstIdx, slots, num));
 	}
 
+	@Deprecated
 	public void _pack_regs(int firstIdx, SlotState slots, int num) {
-		code.add(ASMUtils.loadInt(num));
-		code.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
-		for (int i = 0; i < num; i++) {
-			code.add(new InsnNode(DUP));
-			code.add(ASMUtils.loadInt(i));
-			_load_reg(firstIdx + i, slots);
-			code.add(new InsnNode(AASTORE));
-		}
+		code.add(packRegistersIntoArray(firstIdx, slots, num));
 	}
 
+	public InsnList getDownvalue(int idx) {
+		InsnList il = new InsnList();
+		il.add(new VarInsnNode(ALOAD, registerOffset() + idx));
+		il.add(checkCast(Upvalue.class));
+		return il;
+	}
+
+	@Deprecated
 	public void _get_downvalue(int idx) {
-		code.add(new VarInsnNode(ALOAD, registerOffset() + idx));
-		_checkCast(Upvalue.class);
+		code.add(getDownvalue(idx));
 	}
 
-	public void _load_reg_or_const(int rk, SlotState slots, Class castTo) {
+	public InsnList loadRegisterOrConstant(int rk, SlotState slots, Class castTo) {
 		Check.notNull(slots);
 
 		if (rk < 0) {
 			// it's a constant
-			_load_k(-rk - 1, castTo);
+			return loadConstant(-rk - 1, castTo);
 		}
 		else {
-			_load_reg(rk, slots, castTo);
+			return loadRegister(rk, slots, castTo);
 		}
 	}
 
-	public void _load_reg_or_const(int rk, SlotState slots) {
-		_load_reg_or_const(rk, slots, null);
+	public InsnList loadRegisterOrConstant(int rk, SlotState slots) {
+		return loadRegisterOrConstant(rk, slots, null);
 	}
 
-	private AbstractInsnNode _add_unboxed_constant(Object o, Type requiredType) {
+	@Deprecated
+	public void _load_reg_or_const(int rk, SlotState slots, Class castTo) {
+		code.add(loadRegisterOrConstant(rk, slots, castTo));
+	}
+
+	@Deprecated
+	public void _load_reg_or_const(int rk, SlotState slots) {
+		code.add(loadRegisterOrConstant(rk, slots));
+	}
+
+	private static AbstractInsnNode loadUnboxedConstant(Object o, Type requiredType) {
 		if (o instanceof Number) {
 
 			Number n = (Number) o;
@@ -370,15 +461,15 @@ public class CodeEmitter {
 		}
 	}
 
-	public AbstractInsnNode _unbox(Class clazz, Type requiredType) {
+	public static AbstractInsnNode unbox(Class clazz, Type requiredType) {
 		if (requiredType.equals(Type.LONG_TYPE)) {
-			return _longValue(clazz);
+			return longValue(clazz);
 		}
 		else if (requiredType.equals(Type.INT_TYPE)) {
-			return _intValue(clazz);
+			return intValue(clazz);
 		}
 		else if (requiredType.equals(Type.DOUBLE_TYPE)) {
-			return _doubleValue(clazz);
+			return doubleValue(clazz);
 		}
 		else {
 			throw new UnsupportedOperationException("Unsupported required type: " + requiredType);
@@ -390,32 +481,45 @@ public class CodeEmitter {
 		if (rk < 0) {
 			// it's a constant
 			Object c = context.getConst(-rk - 1);
-			code.add(_add_unboxed_constant(c, requiredType));
+			code.add(loadUnboxedConstant(c, requiredType));
 		}
 		else {
 			// it's a register
 			_load_reg(rk, slots, Number.class);
-			code.add(_unbox(Number.class, requiredType));
+			code.add(unbox(Number.class, requiredType));
 		}
 	}
 
-	private void _store_reg_value(int r) {
-		code.add(new VarInsnNode(ASTORE, registerOffset() + r));
+	private AbstractInsnNode storeRegisterValue(int registerIndex) {
+		return new VarInsnNode(ASTORE, registerOffset() + registerIndex);
 	}
 
-	public void _store(int r, SlotState slots) {
-		Check.notNull(slots);
+	public InsnList storeToRegister(int registerIndex, SlotState slots) {
+		InsnList il = new InsnList();
 
-		if (slots.isCaptured(r)) {
-			_get_downvalue(r);
-			_swap();
-			_set_upvalue_value();
+		if (slots.isCaptured(registerIndex)) {
+			il.add(getDownvalue(registerIndex));
+			il.add(new InsnNode(SWAP));
+			il.add(setUpvalueValue());
 		}
 		else {
-			_store_reg_value(r);
+			il.add(storeRegisterValue(registerIndex));
 		}
+
+		return il;
 	}
 
+	@Deprecated
+	private void _store_reg_value(int r) {
+		code.add(storeRegisterValue(r));
+	}
+
+	@Deprecated
+	public void _store(int r, SlotState slots) {
+		code.add(storeToRegister(r, slots));
+	}
+
+	@Deprecated
 	public void _invokeStatic(Class clazz, String methodName, Type methodSignature) {
 		code.add(new MethodInsnNode(
 				INVOKESTATIC,
@@ -426,6 +530,7 @@ public class CodeEmitter {
 		));
 	}
 
+	@Deprecated
 	public void _invokeVirtual(Class clazz, String methodName, Type methodSignature) {
 		code.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
@@ -436,6 +541,7 @@ public class CodeEmitter {
 		));
 	}
 
+	@Deprecated
 	public void _invokeInterface(Class clazz, String methodName, Type methodSignature) {
 		code.add(new MethodInsnNode(
 				INVOKEINTERFACE,
@@ -446,6 +552,7 @@ public class CodeEmitter {
 		));
 	}
 
+	@Deprecated
 	public void _invokeSpecial(String className, String methodName, Type methodSignature) {
 		code.add(new MethodInsnNode(
 				INVOKESPECIAL,
@@ -456,11 +563,13 @@ public class CodeEmitter {
 		));
 	}
 
+	@Deprecated
 	public void _dispatch_binop(String name, Class clazz) {
 		Type t = Type.getType(clazz);
 		_invokeStatic(Dispatch.class, name, Type.getMethodType(t, t, t));
 	}
 
+	@Deprecated
 	public void _dispatch_generic_mt_2(String name) {
 		_invokeStatic(
 				Dispatch.class,
@@ -475,10 +584,12 @@ public class CodeEmitter {
 		);
 	}
 
+	@Deprecated
 	public void _dispatch_index() {
 		_dispatch_generic_mt_2("index");
 	}
 
+	@Deprecated
 	public void _dispatch_newindex() {
 		_invokeStatic(
 				Dispatch.class,
@@ -494,6 +605,7 @@ public class CodeEmitter {
 		);
 	}
 
+	@Deprecated
 	public void _dispatch_call(int kind) {
 		code.add(new MethodInsnNode(
 				INVOKESTATIC,
@@ -504,20 +616,28 @@ public class CodeEmitter {
 		));
 	}
 
-	public void _checkCast(Class clazz) {
-		code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz)));
+	public static AbstractInsnNode checkCast(Class clazz) {
+		return new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz));
 	}
 
+	@Deprecated
+	public void _checkCast(Class clazz) {
+		code.add(checkCast(clazz));
+	}
+
+	@Deprecated
 	public void _loadState() {
 		withLuaState(code)
 				.push();
 	}
 
+	@Deprecated
 	public void _loadObjectSink() {
 		withObjectSink(code)
 				.push();
 	}
 
+	@Deprecated
 	public void _retrieve_0() {
 		withObjectSink(code)
 				.push()
@@ -1010,31 +1130,64 @@ public class CodeEmitter {
 		runMethodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
 	}
 
-	public void _get_upvalue_ref(int idx) {
-		code.add(new VarInsnNode(ALOAD, 0));
-		code.add(new FieldInsnNode(
+	public InsnList getUpvalueReference(int idx) {
+		InsnList il = new InsnList();
+		il.add(new VarInsnNode(ALOAD, 0));
+		il.add(new FieldInsnNode(
 				GETFIELD,
 				parent.thisClassType().getInternalName(),
 				parent.getUpvalueFieldName(idx),
 				Type.getDescriptor(Upvalue.class)));
+		return il;
 	}
 
+	public static AbstractInsnNode getUpvalueValue() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(Upvalue.class),
+				"get",
+				Type.getMethodDescriptor(
+						Type.getType(Object.class)),
+				false);
+	}
+
+	public static AbstractInsnNode setUpvalueValue() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(Upvalue.class),
+				"set",
+				Type.getMethodDescriptor(
+						Type.VOID_TYPE,
+						Type.getType(Object.class)),
+				false);
+	}
+
+	@Deprecated
+	public void _get_upvalue_ref(int idx) {
+		code.add(getUpvalueReference(idx));
+	}
+
+	@Deprecated
 	public void _get_upvalue_value() {
-		_invokeVirtual(Upvalue.class, "get", Type.getMethodType(Type.getType(Object.class)));
+		code.add(getUpvalueValue());
 	}
 
+	@Deprecated
 	public void _set_upvalue_value() {
-		_invokeVirtual(Upvalue.class, "set", Type.getMethodType(Type.VOID_TYPE, Type.getType(Object.class)));
+		code.add(setUpvalueValue());
 	}
 
+	@Deprecated
 	public void _return() {
 		code.add(new InsnNode(RETURN));
 	}
 
+	@Deprecated
 	public void _new(String className) {
 		code.add(new TypeInsnNode(NEW, ASMUtils.typeForClassName(className).getInternalName()));
 	}
 
+	@Deprecated
 	public void _new(Class clazz) {
 		_new(clazz.getName());
 	}
@@ -1045,35 +1198,56 @@ public class CodeEmitter {
 		code.add(ASMUtils.ctor(ASMUtils.typeForClassName(className), argTypes));
 	}
 
-	public void _capture(int idx) {
-		LuaState_prx state = withLuaState(code);
+	public InsnList captureRegister(int registerIndex) {
+		InsnList il = new InsnList();
+
+		LuaState_prx state = withLuaState(il);
 		state.push();
-		_load_reg_value(idx);
+		il.add(loadRegisterValue(registerIndex));
 		state.call_newUpvalue();
-		_store_reg_value(idx);
+		il.add(storeRegisterValue(registerIndex));
+
+		return il;
 	}
 
+	public InsnList uncaptureRegister(int registerIndex) {
+		InsnList il = new InsnList();
+
+		il.add(loadRegisterValue(registerIndex));
+		il.add(checkCast(Upvalue.class));
+		il.add(getUpvalueValue());
+		il.add(storeRegisterValue(registerIndex));
+
+		return il;
+	}
+
+	@Deprecated
+	public void _capture(int idx) {
+		code.add(captureRegister(idx));
+	}
+
+	@Deprecated
 	public void _uncapture(int idx) {
-		_load_reg_value(idx);
-		_checkCast(Upvalue.class);
-		_get_upvalue_value();
-		_store_reg_value(idx);
+		code.add(uncaptureRegister(idx));
 	}
 
 	private void _frame_same(InsnList il) {
 		il.add(new FrameNode(F_SAME, 0, null, 0, null));
 	}
 
+	@Deprecated
 	public void _label_here(Object identity) {
 		LabelNode l = _l(identity);
 		code.add(l);
 		_frame_same(code);
 	}
 
+	@Deprecated
 	public void _goto(Object l) {
 		code.add(new JumpInsnNode(GOTO, _l(l)));
 	}
 
+	@Deprecated
 	public void _next_insn(Object t) {
 		_goto(t);
 //
@@ -1086,9 +1260,18 @@ public class CodeEmitter {
 //		}
 	}
 
-	public void _new_table(int array, int hash) {
-		withLuaState(code)
+	public InsnList newTable(int array, int hash) {
+		InsnList il = new InsnList();
+
+		withLuaState(il)
 				.do_newTable(array, hash);
+
+		return il;
+	}
+
+	@Deprecated
+	public void _new_table(int array, int hash) {
+		code.add(newTable(array, hash));
 	}
 
 	public void _if_null(Object target) {
@@ -1468,25 +1651,25 @@ public class CodeEmitter {
 		code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
 	}
 
+	@Deprecated
 	public void _unbox_boolean() {
-		code.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(Boolean.class),
-				"booleanValue",
-				Type.getMethodDescriptor(
-						Type.BOOLEAN_TYPE),
-				false));
+		code.add(booleanValue());
 	}
 
-	public void _to_boolean() {
-		code.add(new MethodInsnNode(
+	public static AbstractInsnNode objectToBoolean() {
+		return new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(Conversions.class),
 				"objectToBoolean",
 				Type.getMethodDescriptor(
 						Type.BOOLEAN_TYPE,
 						Type.getType(Object.class)),
-				false));
+				false);
+	}
+
+	@Deprecated
+	public void _to_boolean() {
+		code.add(objectToBoolean());
 	}
 
 	public void _ifzero(Object tgt) {
@@ -1497,11 +1680,20 @@ public class CodeEmitter {
 		code.add(new JumpInsnNode(IFNE, _l(tgt)));
 	}
 
+	private InsnList convertRegisterToFloat(int registerIndex, SlotState st) {
+		InsnList il = new InsnList();
+
+		il.add(loadRegister(registerIndex, st, Number.class));
+		il.add(doubleValue(Number.class));
+		il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		il.add(storeToRegister(registerIndex, st));
+
+		return il;
+	}
+
+	@Deprecated
 	private void _to_float(int r, SlotState st) {
-		_load_reg(r, st, Number.class);
-		code.add(_doubleValue(Number.class));
-		code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-		_store(r, st);
+		code.add(convertRegisterToFloat(r, st));
 	}
 
 	private void _to_number(int r, SlotState st, String what) {
@@ -1510,7 +1702,17 @@ public class CodeEmitter {
 		_store(r, st);
 	}
 
-	private AbstractInsnNode _intValue(Class clazz) {
+	private static AbstractInsnNode booleanValue() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(Boolean.class),
+				"booleanValue",
+				Type.getMethodDescriptor(
+						Type.BOOLEAN_TYPE),
+				false);
+	}
+
+	private static AbstractInsnNode intValue(Class clazz) {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(clazz),
@@ -1520,7 +1722,7 @@ public class CodeEmitter {
 				false);
 	}
 
-	private AbstractInsnNode _longValue(Class clazz) {
+	private static AbstractInsnNode longValue(Class clazz) {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(clazz),
@@ -1530,7 +1732,7 @@ public class CodeEmitter {
 				false);
 	}
 
-	private AbstractInsnNode _doubleValue(Class clazz) {
+	private static AbstractInsnNode doubleValue(Class clazz) {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(clazz),
@@ -1542,17 +1744,17 @@ public class CodeEmitter {
 
 	@Deprecated
 	private void _get_intValue(Class clazz) {
-		code.add(_intValue(clazz));
+		code.add(intValue(clazz));
 	}
 
 	@Deprecated
 	private void _get_longValue(Class clazz) {
-		code.add(_longValue(clazz));
+		code.add(longValue(clazz));
 	}
 
 	@Deprecated
 	private void _get_doubleValue(Class clazz) {
-		code.add(_doubleValue(clazz));
+		code.add(doubleValue(clazz));
 	}
 
 	private void _to_number(String what) {
@@ -1583,9 +1785,9 @@ public class CodeEmitter {
 				if (!st.typeAt(r_base + 1).isSubtypeOf(LuaTypes.NUMBER)) _to_number(r_base + 1, st, "'for' limit");
 
 				_load_reg(r_base, st, Number.class);
-				code.add(_longValue(Number.class));
+				code.add(longValue(Number.class));
 				_load_reg(r_base + 2, st, Number.class);
-				code.add(_longValue(Number.class));
+				code.add(longValue(Number.class));
 				code.add(new InsnNode(LSUB));
 				code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
 				_store(r_base, st);
@@ -1602,9 +1804,9 @@ public class CodeEmitter {
 
 				// the initial decrement
 				_load_reg(r_base, st, Number.class);
-				code.add(_doubleValue(Number.class));
+				code.add(doubleValue(Number.class));
 				_load_reg(r_base + 2, st, Number.class);
-				code.add(_doubleValue(Number.class));
+				code.add(doubleValue(Number.class));
 				code.add(new InsnNode(DSUB));
 				code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 				_store(r_base, st);
@@ -1672,9 +1874,9 @@ public class CodeEmitter {
 
 				// increment
 				_load_reg(r_base, st, Number.class);
-				code.add(_longValue(Number.class));
+				code.add(longValue(Number.class));
 				_load_reg(r_base + 2, st, Number.class);
-				code.add(_longValue(Number.class));
+				code.add(longValue(Number.class));
 				code.add(new InsnNode(LADD));
 
 				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
@@ -1687,7 +1889,7 @@ public class CodeEmitter {
 
 				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 					_load_reg(r_base + 1, st, Number.class);
-					code.add(_longValue(Number.class));
+					code.add(longValue(Number.class));
 					code.add(new InsnNode(LCMP));
 
 					// Stack here: I(lcmp(index, limit))
@@ -1698,7 +1900,7 @@ public class CodeEmitter {
 
 					// compare step with zero
 					_load_reg(r_base + 2, st, Number.class);
-					code.add(_longValue(Number.class));
+					code.add(longValue(Number.class));
 					code.add(new InsnNode(LCONST_0));
 					code.add(new InsnNode(LCMP));
 
@@ -1753,9 +1955,9 @@ public class CodeEmitter {
 
 				// increment index
 				_load_reg(r_base, st, Number.class);
-				code.add(_doubleValue(Number.class));
+				code.add(doubleValue(Number.class));
 				_load_reg(r_base + 2, st, Number.class);
-				code.add(_doubleValue(Number.class));
+				code.add(doubleValue(Number.class));
 				code.add(new InsnNode(DADD));
 				code.add(new InsnNode(DUP2));  // will re-use this value for comparison
 
@@ -1764,7 +1966,7 @@ public class CodeEmitter {
 
 				// push limit to the stack
 				_load_reg(r_base + 1, st, Number.class);
-				code.add(_doubleValue(Number.class));
+				code.add(doubleValue(Number.class));
 
 				// Stack here: D(index) D(limit)
 
@@ -1776,7 +1978,7 @@ public class CodeEmitter {
 
 				// fetch the step
 				_load_reg(r_base + 2, st, Number.class);
-				code.add(_doubleValue(Number.class));
+				code.add(doubleValue(Number.class));
 				code.add(new InsnNode(DUP2));  // save it for later use
 
 				// test step for NaN
