@@ -111,6 +111,12 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   IllegalForLoop3 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' initial value must be a number")
 
+  val IllegalForLoop4 = fragment ("IllegalForLoop4") {
+    """for i = 1, "x" do end
+    """
+  }
+  IllegalForLoop4 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' limit must be a number")
+
   val NaNForLoop = fragment ("NaNForLoop") {
     """local n = 0
       |for i = 0, (0/0) do
