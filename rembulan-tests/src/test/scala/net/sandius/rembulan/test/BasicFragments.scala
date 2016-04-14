@@ -81,7 +81,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |return sum
     """
   }
-  MixedNumericForLoop in EmptyContext succeedsWith (55.0)
+  MixedNumericForLoop in EmptyContext succeedsWith (55)
 
   val RuntimeDeterminedForLoop = fragment ("RuntimeDeterminedForLoop") {
     """local sum = 0
