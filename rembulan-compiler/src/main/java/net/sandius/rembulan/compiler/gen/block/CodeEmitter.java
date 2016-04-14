@@ -18,6 +18,7 @@ import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
@@ -312,73 +313,89 @@ public class CodeEmitter {
 		_load_reg_or_const(rk, slots, null);
 	}
 
-	public void _load_reg_or_const_long(int rk, SlotState slots, Type requiredType) {
-		// FIXME: this duplicates the retrieval code!
-		if (rk < 0) {
-			// it's a constant
-			Object c = context.getConst(-rk - 1);
+	private AbstractInsnNode _add_unboxed_constant(Object o, Type requiredType) {
+		if (o instanceof Number) {
 
-			if (c instanceof Number
-					&& !(c instanceof Double || c instanceof Float)) {
+			Number n = (Number) o;
 
-				long v = ((Number) c).longValue();
+			if (n instanceof Double || n instanceof Float) {
+
+				double d = n.doubleValue();
 
 				if (requiredType.equals(Type.LONG_TYPE)) {
-					code.add(ASMUtils.loadLong(v));
+					// FIXME: which one is better?
+					return ASMUtils.loadLong(n.longValue());
+//					return ASMUtils.loadLong((long) d);
 				}
 				else if (requiredType.equals(Type.INT_TYPE)) {
-					code.add(ASMUtils.loadInt((int) v));
+					// FIXME: which one is better?
+					return ASMUtils.loadInt(n.intValue());
+//					return ASMUtils.loadLong((int) d);
 				}
 				else if (requiredType.equals(Type.DOUBLE_TYPE)) {
-					code.add(ASMUtils.loadDouble((double) v));
+					// FIXME: which one is better?
+					return ASMUtils.loadDouble(n.doubleValue());
+//					return ASMUtils.loadDouble(d);
 				}
 				else {
-					throw new IllegalArgumentException("Illegal required type: " + requiredType);
+					throw new UnsupportedOperationException("Unsupported required type: " + requiredType);
 				}
 			}
 			else {
-				throw new IllegalArgumentException("Illegal constant type: expecting an integer, got "
-						+ (c != null ? c.getClass().getName() : "null"));
+				long l = n.longValue();
+
+				if (requiredType.equals(Type.LONG_TYPE)) {
+					// FIXME: which one is better?
+					return ASMUtils.loadLong(n.longValue());
+//					return ASMUtils.loadLong(l);
+				}
+				else if (requiredType.equals(Type.INT_TYPE)) {
+					// FIXME: which one is better?
+					return ASMUtils.loadInt(n.intValue());
+//					return ASMUtils.loadLong((int) l);
+				}
+				else if (requiredType.equals(Type.DOUBLE_TYPE)) {
+					// FIXME: which one is better?
+					return ASMUtils.loadDouble(n.doubleValue());
+//					return ASMUtils.loadDouble((double) l);
+				}
+				else {
+					throw new UnsupportedOperationException("Unsupported required type: " + requiredType);
+				}
 			}
 		}
 		else {
-			// register
-			_load_reg(rk, slots, Number.class);
-
-			if (requiredType.equals(Type.LONG_TYPE)) {
-				_get_longValue(Number.class);
-			}
-			else if (requiredType.equals(Type.INT_TYPE)) {
-				_get_intValue(Number.class);
-			}
-			else if (requiredType.equals(Type.DOUBLE_TYPE)) {
-				_get_doubleValue(Number.class);
-			}
-			else {
-				throw new IllegalArgumentException("Illegal required type: " + requiredType);
-			}
+			throw new UnsupportedOperationException("Unsupported constant type: "
+					+ (o != null ? o.getClass().getName() : "null"));
 		}
 	}
 
-	public void _load_reg_or_const_double(int rk, SlotState slots) {
+	public AbstractInsnNode _unbox(Class clazz, Type requiredType) {
+		if (requiredType.equals(Type.LONG_TYPE)) {
+			return _longValue(clazz);
+		}
+		else if (requiredType.equals(Type.INT_TYPE)) {
+			return _intValue(clazz);
+		}
+		else if (requiredType.equals(Type.DOUBLE_TYPE)) {
+			return _doubleValue(clazz);
+		}
+		else {
+			throw new UnsupportedOperationException("Unsupported required type: " + requiredType);
+		}
+	}
+
+	public void _load_unboxed_reg_or_const(int rk, SlotState slots, Type requiredType) {
 		// FIXME: this duplicates the retrieval code!
 		if (rk < 0) {
 			// it's a constant
 			Object c = context.getConst(-rk - 1);
-
-			if (c instanceof Double || c instanceof Float) {
-				double v = ((Number) c).doubleValue();
-				code.add(ASMUtils.loadDouble(v));
-			}
-			else {
-				throw new IllegalArgumentException("Illegal const type: expecting a float, got "
-						+ (c != null ? c.getClass().getName() : "null"));
-			}
+			code.add(_add_unboxed_constant(c, requiredType));
 		}
 		else {
-			// register
+			// it's a register
 			_load_reg(rk, slots, Number.class);
-			_get_doubleValue(Number.class);
+			code.add(_unbox(Number.class, requiredType));
 		}
 	}
 
@@ -1229,19 +1246,19 @@ public class CodeEmitter {
 		switch (op) {
 			case DIV:
 			case POW:
-				_load_reg_or_const_long(rk_left, s, Type.DOUBLE_TYPE);
-				_load_reg_or_const_long(rk_right, s, Type.DOUBLE_TYPE);
+				_load_unboxed_reg_or_const(rk_left, s, Type.DOUBLE_TYPE);
+				_load_unboxed_reg_or_const(rk_right, s, Type.DOUBLE_TYPE);
 				break;
 
 			case SHL:
 			case SHR:
-				_load_reg_or_const_long(rk_left, s, Type.LONG_TYPE);
-				_load_reg_or_const_long(rk_right, s, Type.INT_TYPE);
+				_load_unboxed_reg_or_const(rk_left, s, Type.LONG_TYPE);
+				_load_unboxed_reg_or_const(rk_right, s, Type.INT_TYPE);
 				break;
 
 			default:
-				_load_reg_or_const_long(rk_left, s, Type.LONG_TYPE);
-				_load_reg_or_const_long(rk_right, s, Type.LONG_TYPE);
+				_load_unboxed_reg_or_const(rk_left, s, Type.LONG_TYPE);
+				_load_unboxed_reg_or_const(rk_right, s, Type.LONG_TYPE);
 				break;
 		}
 
@@ -1265,8 +1282,8 @@ public class CodeEmitter {
 	}
 
 	private void _binary_float_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
-		_load_reg_or_const_double(rk_left, s);
-		_load_reg_or_const_double(rk_right, s);
+		_load_unboxed_reg_or_const(rk_left, s, Type.DOUBLE_TYPE);
+		_load_unboxed_reg_or_const(rk_right, s, Type.DOUBLE_TYPE);
 
 		switch (op) {
 			case ADD:  _native_binop_and_box(code, DADD, false); break;
@@ -1493,34 +1510,49 @@ public class CodeEmitter {
 		_store(r, st);
 	}
 
-	private void _get_intValue(Class clazz) {
-		code.add(new MethodInsnNode(
+	private AbstractInsnNode _intValue(Class clazz) {
+		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(clazz),
 				"intValue",
 				Type.getMethodDescriptor(
 						Type.INT_TYPE),
-				false));
+				false);
 	}
 
-	private void _get_longValue(Class clazz) {
-		code.add(new MethodInsnNode(
+	private AbstractInsnNode _longValue(Class clazz) {
+		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(clazz),
 				"longValue",
 				Type.getMethodDescriptor(
 						Type.LONG_TYPE),
-				false));
+				false);
 	}
 
-	private void _get_doubleValue(Class clazz) {
-		code.add(new MethodInsnNode(
+	private AbstractInsnNode _doubleValue(Class clazz) {
+		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(clazz),
 				"doubleValue",
 				Type.getMethodDescriptor(
 						Type.DOUBLE_TYPE),
-				false));
+				false);
+	}
+
+	@Deprecated
+	private void _get_intValue(Class clazz) {
+		code.add(_intValue(clazz));
+	}
+
+	@Deprecated
+	private void _get_longValue(Class clazz) {
+		code.add(_longValue(clazz));
+	}
+
+	@Deprecated
+	private void _get_doubleValue(Class clazz) {
+		code.add(_doubleValue(clazz));
 	}
 
 	private void _to_number(String what) {
