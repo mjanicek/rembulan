@@ -161,7 +161,14 @@ object FragmentExpectations {
   }
   object ValueMatch {
     case class Eq(v: AnyRef) extends ValueMatch {
-      override def matches(o: AnyRef) = v == o
+      override def matches(o: AnyRef) = {
+        if (o == null || v == null) {
+          o eq v
+        }
+        else {
+          v.getClass == o.getClass && v == o
+        }
+      }
     }
     case class SubtypeOf(c: Class[_]) extends ValueMatch {
       override def matches(o: AnyRef) = if (o == null) false else c.isAssignableFrom(o.getClass)
