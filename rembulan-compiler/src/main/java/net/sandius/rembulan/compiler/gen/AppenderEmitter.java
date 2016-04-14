@@ -237,7 +237,12 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 	/*	A sBx	R(A)+=R(A+2); if R(A) <?= R(A+1) then { pc+=sBx; R(A+3)=R(A) }*/
 	@Override
 	public void l_FORLOOP(int a, int sbx) {
-		appender.branch(new LuaInstruction.ForLoop(appender.target(sbx + 1), appender.target(1), a));
+		// splitting this into the loop step and the local variable update in the true branch
+		Target trueBranch = new Target();
+		NodeAppender app = new NodeAppender(trueBranch);
+		app.append(new LuaInstruction.Move(a + 3, a));  // this is the R(A+3) := R(A)
+		app.jumpTo(appender.target(sbx + 1));
+		appender.branch(new LuaInstruction.ForLoop(trueBranch, appender.target(1), a));
 	}
 
 	@Override

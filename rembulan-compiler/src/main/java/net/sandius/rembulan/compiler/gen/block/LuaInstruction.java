@@ -777,9 +777,9 @@ public interface LuaInstruction {
 			return "FORLOOP(" + r_base + ")";
 		}
 
-		// TODO: updates the register (r_base + 0), and in the true branch copies (r_base + 0) to (r_base + 3)
-
 		// TODO: can also be specialised
+
+		// TODO: slot state effect: updates r[r_base]
 
 		@Override
 		public void emit(CodeVisitor visitor) {
@@ -820,7 +820,6 @@ public interface LuaInstruction {
 			s = s.update(r_base + 0, Slot.of(o, tpe));
 			s = s.update(r_base + 1, Slot.of(o, limitTpe));
 			s = s.update(r_base + 2, Slot.of(o, tpe));
-			s = s.update(r_base + 3, Slot.of(o, tpe));  // FIXME: this is actually done by FORLOOP
 
 			return s;
 		}

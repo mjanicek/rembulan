@@ -1663,7 +1663,6 @@ public class CodeEmitter {
 
 		LabelNode ascendingLoop = new LabelNode();
 		LabelNode descendingLoop = new LabelNode();
-		LabelNode storeAndContinue = new LabelNode();
 
 		LuaInstruction.NumOpType loopType = LuaInstruction.NumOpType.loopType(a0, a1, a2);
 
@@ -1715,7 +1714,7 @@ public class CodeEmitter {
 					// Stack here: I(lcmp(index, limit))
 					code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
 					code.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
-					code.add(new JumpInsnNode(GOTO, storeAndContinue));
+					code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 
 					code.add(ascendingLoop);
 					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
@@ -1723,7 +1722,7 @@ public class CodeEmitter {
 					code.add(_fullFrame(2, new Object[] { INTEGER, INTEGER }));
 					code.add(new InsnNode(POP));
 					code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
-					// fall-through to store-and-continue
+					code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 				}
 				else {
 					// limit is not statically known to be an integer
@@ -1745,7 +1744,7 @@ public class CodeEmitter {
 							false));
 
 					code.add(new JumpInsnNode(IFEQ, _l(breakBranch)));
-					// else fall-through to store-and-continue
+					code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 				}
 
 				break;
@@ -1817,7 +1816,7 @@ public class CodeEmitter {
 				code.add(_fullFrame(2, new Object[] { DOUBLE, DOUBLE }));
 				code.add(new InsnNode(DCMPL));  // if index or limit is NaN, result in -1
 				code.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
-				code.add(new JumpInsnNode(GOTO, storeAndContinue));
+				code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 
 				code.add(ascendingLoop);
 				// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
@@ -1825,7 +1824,7 @@ public class CodeEmitter {
 				code.add(new InsnNode(POP));
 				code.add(new InsnNode(DCMPG));  // if index or limit is NaN, result in +1
 				code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
-				// fall through to store-and-continue
+				code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 				break;
 
 			case Number:
@@ -1851,19 +1850,12 @@ public class CodeEmitter {
 						false));
 
 				code.add(new JumpInsnNode(IFEQ, _l(breakBranch)));
-				// else fall-through to store-and-continue
+				code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 				break;
 
 			default:
 				throw new IllegalStateException("Illegal loop type: " + loopType + " (base: " + r_base + "; slot state: " + st + ")");
 		}
-
-		code.add(storeAndContinue);
-		// Stack here: empty
-		code.add(new FrameNode(F_SAME, 0, null, 0, null));
-		_load_reg(r_base, st);
-		_store(r_base + 3, st);
-		code.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 	}
 
 	public CodeVisitor codeVisitor() {
