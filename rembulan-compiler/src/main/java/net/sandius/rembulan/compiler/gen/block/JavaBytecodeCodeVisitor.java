@@ -3,13 +3,22 @@ package net.sandius.rembulan.compiler.gen.block;
 import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.SlotState;
-import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntIterable;
 import net.sandius.rembulan.util.IntIterator;
 import net.sandius.rembulan.util.ReadOnlyArray;
+import net.sandius.rembulan.util.asm.ASMUtils;
+import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.InsnList;
+import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
+
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.NEW;
+import static org.objectweb.asm.Opcodes.RETURN;
 
 public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
@@ -17,6 +26,14 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	public JavaBytecodeCodeVisitor(CodeEmitter e) {
 		this.e = Check.notNull(e);
+	}
+
+	protected void add(InsnList il) {
+		e.code().add(il);
+	}
+
+	protected void add(AbstractInsnNode il) {
+		e.code().add(il);
 	}
 
 	@Override
@@ -34,7 +51,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		IntIterator iit = indices.iterator();
 		while (iit.hasNext()) {
 			int idx = iit.next();
-			e._capture(idx);
+			add(e.captureRegister(idx));
 		}
 	}
 
@@ -42,134 +59,130 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitCloseUpvalues(Object it, SlotState st, int fromIndex) {
 		for (int i = fromIndex; i < st.size(); i++) {
 			if (st.isCaptured(i)) {
-				e._uncapture(i);
+				add(e.uncaptureRegister(i));
 			}
 		}
 	}
 
 	@Override
 	public void visitMove(Object id, SlotState st, int r_src, int r_dest) {
-		e._load_reg(r_src, st);
-		e._store(r_dest, st);
+		add(e.loadRegister(r_src, st));
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitLoadK(Object id, SlotState st, int r_dest, int constIndex) {
-		e._load_k(constIndex);
-		e._store(r_dest, st);
+		add(e.loadConstant(constIndex));
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitLoadBool(Object id, SlotState st, int r_dest, boolean value) {
-		e._load_boxed_constant(value);
-		e._store(r_dest, st);
+		add(ASMUtils.loadBoxedBoolean(value));
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitLoadNil(Object id, SlotState st, int r_dest, int count) {
 		for (int i = 0; i < count; i++) {
-			e._push_null();
-			e._store(r_dest + i, st);
+			add(CodeEmitter.loadNull());
+			add(e.storeToRegister(r_dest + i, st));
 		}
 	}
 
 	@Override
 	public void visitGetUpVal(Object id, SlotState st, int r_dest, int upvalueIndex) {
-		e._get_upvalue_ref(upvalueIndex);
-		e._get_upvalue_value();
-		e._store(r_dest, st);
+		add(e.getUpvalueReference(upvalueIndex));
+		add(e.getUpvalueValue());
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitGetTabUp(Object id, SlotState st, int r_dest, int upvalueIndex, int rk_key) {
 		e._save_pc(id);
 
-		e._loadState();
-		e._loadObjectSink();
-		e._get_upvalue_ref(upvalueIndex);
-		e._get_upvalue_value();
-		e._load_reg_or_const(rk_key, st);
-		e._dispatch_index();
+		add(e.loadDispatchPreamble());
+		add(e.getUpvalueReference(upvalueIndex));
+		add(e.getUpvalueValue());
+		add(e.loadRegisterOrConstant(rk_key, st));
+		add(e.dispatchIndex());
 
 		e._resumptionPoint(id);
-		e._retrieve_0();
-		e._store(r_dest, st);
+		add(e.retrieve_0());
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitGetTable(Object id, SlotState st, int r_dest, int r_tab, int rk_key) {
 		e._save_pc(id);
 
-		e._loadState();
-		e._loadObjectSink();
-		e._load_reg(r_tab, st);
-		e._load_reg_or_const(rk_key, st);
-		e._dispatch_index();
+		add(e.loadDispatchPreamble());
+		add(e.loadRegister(r_tab, st));
+		add(e.loadRegisterOrConstant(rk_key, st));
+		add(e.dispatchIndex());
 
 		e._resumptionPoint(id);
-		e._retrieve_0();
-		e._store(r_dest, st);
+		add(e.retrieve_0());
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitSetTabUp(Object id, SlotState st, int upvalueIndex, int rk_key, int rk_value) {
 		e._save_pc(id);
 
-		e._loadState();
-		e._loadObjectSink();
-		e._get_upvalue_ref(upvalueIndex);
-		e._get_upvalue_value();
-		e._load_reg_or_const(rk_key, st);
-		e._load_reg_or_const(rk_value, st);
-		e._dispatch_newindex();
+		add(e.loadDispatchPreamble());
+		add(e.getUpvalueReference(upvalueIndex));
+		add(e.getUpvalueValue());
+		add(e.loadRegisterOrConstant(rk_key, st));
+		add(e.loadRegisterOrConstant(rk_value, st));
+		add(e.dispatchNewindex());
 
 		e._resumptionPoint(id);
 	}
 
 	@Override
 	public void visitSetUpVal(Object id, SlotState st, int r_src, int upvalueIndex) {
-		e._get_upvalue_ref(upvalueIndex);
-		e._load_reg(r_src, st);
-		e._set_upvalue_value();
+		add(e.getUpvalueReference(upvalueIndex));
+		add(e.loadRegister(r_src, st));
+		add(e.setUpvalueValue());
 	}
 
 	@Override
 	public void visitSetTable(Object id, SlotState st, int r_tab, int rk_key, int rk_value) {
 		e._save_pc(id);
 
-		e._loadState();
-		e._loadObjectSink();
-		e._load_reg(r_tab, st);
-		e._load_reg_or_const(rk_key, st);
-		e._load_reg_or_const(rk_value, st);
-		e._dispatch_newindex();
+		add(e.loadDispatchPreamble());
+		add(e.loadRegister(r_tab, st));
+		add(e.loadRegisterOrConstant(rk_key, st));
+		add(e.loadRegisterOrConstant(rk_value, st));
+		add(e.dispatchNewindex());
 
 		e._resumptionPoint(id);
 	}
 
 	@Override
 	public void visitNewTable(Object id, SlotState st, int r_dest, int arraySize, int hashSize) {
-		e._new_table(arraySize, hashSize);
-		e._store(r_dest, st);
+		add(e.loadLuaState());
+		add(CodeEmitter.LuaState_prx.newTable(arraySize, hashSize));
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitSelf(Object id, SlotState st, int r_dest, int r_self, int rk_key) {
 		e._save_pc(id);
 
-		e._loadState();
-		e._loadObjectSink();
+		add(e.loadDispatchPreamble());
 
-		e._load_reg(r_self, st);
-		e._dup();
-		e._store(r_dest + 1, st);
+		add(e.loadRegister(r_self, st));
+		add(new InsnNode(DUP));
+		add(e.storeToRegister(r_dest + 1, st));
 
-		e._load_reg_or_const(rk_key, st);
-		e._dispatch_index();
+		add(e.loadRegisterOrConstant(rk_key, st));
+		add(e.dispatchIndex());
 
 		e._resumptionPoint(id);
-		e._retrieve_0();
-		e._store(r_dest, st);
+		add(e.retrieve_0());
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
@@ -274,15 +287,14 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitTest(Object id, SlotState st, int r_index, boolean value, Object trueBranchIdentity, Object falseBranchIdentity) {
-		Type tpe = st.typeAt(r_index);
 
-		e._load_reg(r_index, st);
-
-		if (tpe.isSubtypeOf(LuaTypes.BOOLEAN)) {
-			e._unbox_boolean();
+		if (st.typeAt(r_index).isSubtypeOf(LuaTypes.BOOLEAN)) {
+			add(e.loadRegister(r_index, st, Boolean.class));
+			add(CodeEmitter.booleanValue());
 		}
 		else {
-			e._to_boolean();
+			add(e.loadRegister(r_index, st));
+			add(CodeEmitter.objectToBoolean());
 		}
 
 		if (value)  {
@@ -293,6 +305,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			// expected to be false, i.e. zero
 			e._ifnonzero(falseBranchIdentity);
 		}
+
 		e._next_insn(trueBranchIdentity);
 	}
 
@@ -300,57 +313,18 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitCall(Object id, SlotState st, int r_tgt, int b, int c) {
 		e._save_pc(id);
 
-		if (b > 0) {
-			int kind = InvokeKind.encode(b - 1,  false);
+		int actualKind = InvokeKind.fromLua(b);
 
-			e._loadState();
-			e._loadObjectSink();
-			e._load_reg(r_tgt, st);
-
-			if (kind == 0) {
-				// pack args into an array
-				e._pack_regs(r_tgt + 1, st, b - 1);
-			}
-			else {
-				// pass (kind - 1) args through the stack
-				e._load_regs(r_tgt + 1, st, kind - 1);
-			}
-
-			e._dispatch_call(kind);
-		}
-		else {
-			Check.isTrue(st.hasVarargs());
-
-			int n = st.varargPosition() - (r_tgt + 1);
-
-			e._loadState();
-			e._loadObjectSink();
-			e._load_reg(r_tgt, st);
-
-			if (n == 0) {
-				// just take the varargs
-				e._load_object_sink_as_array();
-			}
-			else if (n < 0) {
-				// drop n elements from the object sink
-				e._drop_from_object_sink(-n);
-				e._load_object_sink_as_array();
-			}
-			else {
-				// prepend -n elements
-				e._pack_regs(r_tgt + 1, st, n);
-				e._load_object_sink_as_array();
-				e._concat_arrays();
-			}
-
-			e._dispatch_call(0);
-		}
+		add(e.loadDispatchPreamble());
+		add(e.loadRegister(r_tgt, st));
+		add(e.mapInvokeArgumentsToKinds(r_tgt + 1, st, b, actualKind));
+		add(e.dispatchCall(actualKind));
 
 		e._resumptionPoint(id);
 
 		if (c > 0) {
 			st = st.consumeVarargs();
-			e._retrieve_and_store_n(c - 1, r_tgt, st);
+			add(e.retrieveAndStore(r_tgt, st, c - 1));
 		}
 		else {
 			// keep results in the object sink
@@ -362,14 +336,17 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitTailCall(Object id, SlotState st, int r_tgt, int b) {
 		if (b > 0) {
 			// b - 1 is the actual number of arguments to the tailcall
-			e._loadObjectSink();
-			e._load_regs(r_tgt, st, b);  // target is at r_tgt, plus (b - 1) arguments
-			e._tailcall(b - 1);
-			e._return();
+			add(e.loadObjectSink());
+			// FIXME: this needs to be remapped to an available invoke kind
+			add(e.loadRegisters(r_tgt, st, b));  // target is at r_tgt, plus (b - 1) arguments
+			add(CodeEmitter.ObjectSink_prx.tailCall(b - 1));
+			add(new InsnNode(RETURN));
 		}
 		else {
-			e._tailcall_vararg(r_tgt, st);
-			e._return();
+			add(e.setReturnValuesUpToStackTop(r_tgt, st));
+			add(e.loadObjectSink());
+			add(CodeEmitter.ObjectSink_prx.markAsTailCall());
+			add(new InsnNode(RETURN));
 		}
 	}
 
@@ -377,13 +354,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitReturn(Object id, SlotState st, int r_from, int b) {
 		if (b > 0) {
 			// b - 1 is the actual number of results
-			e._loadObjectSink();
-			e._setret(r_from, st, b - 1);
-			e._return();
+			add(e.loadObjectSink());
+			add(e.setReturnValuesFromRegisters(r_from, st, b - 1));
+			add(new InsnNode(RETURN));
 		}
 		else {
-			e._setret_vararg(r_from, st);
-			e._return();
+			add(e.setReturnValuesUpToStackTop(r_from, st));
+			add(new InsnNode(RETURN));
 		}
 	}
 
@@ -405,27 +382,29 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		for (Prototype.UpvalueDesc uvd : uvds) {
 			if (uvd.inStack && !st.isCaptured(uvd.index)) {
-				e._capture(uvd.index);
+				add(e.captureRegister(uvd.index));
 				st = st.capture(uvd.index);  // just marking it so that we can store properly
 			}
 		}
 
-		e._new(closureClassName);
-		e._dup();
+		Type closureType = ASMUtils.typeForClassName(closureClassName);
+
+		add(new TypeInsnNode(NEW, closureType.getInternalName()));
+		add(new InsnNode(DUP));
 
 		for (Prototype.UpvalueDesc uvd : uvds) {
 			if (uvd.inStack) {
-				// by id point all upvalues have been captured
-				e._load_reg_value(uvd.index, Upvalue.class);
+				// by this point all upvalues have been captured
+				add(e.loadRegisterValue(uvd.index, Upvalue.class));
 			}
 			else {
-				e._get_upvalue_ref(uvd.index);
+				add(e.getUpvalueReference(uvd.index));
 			}
 		}
 
-		e._closure_ctor(closureClassName, uvds.size());
+		add(ASMUtils.ctor(closureType, e.closureConstructorTypes(uvds.size())));
 
-		e._store(r_dest, st);
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
@@ -436,21 +415,21 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			int n = b - 1;
 
 			if (n > 0) {
-				e._push_varargs();
+				add(e.loadVarargs());
 				for (int i = 0; i < n; i++) {
 					if (i + 1 < n) {
-						e._dup();
+						add(new InsnNode(DUP));
 					}
-					e._load_vararg(i);
-					e._store(r_base + i, st);
+					add(CodeEmitter.Util_prx.getArrayElementOrNull(i));
+					add(e.storeToRegister(r_base + i, st));
 				}
 			}
 		}
 		else {
 			// indeterminate case
-			e._loadObjectSink();
-			e._push_varargs();
-			e._save_array_to_object_sink();
+			add(e.loadObjectSink());
+			add(e.loadVarargs());
+			add(CodeEmitter.ObjectSink_prx.setToArray());
 		}
 	}
 

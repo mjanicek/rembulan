@@ -184,6 +184,10 @@ public class CodeEmitter {
 		throw new UnsupportedOperationException("Not implemented: " + o.getClass() + ": " + o.toString());
 	}
 
+	public InsnList code() {
+		return code;
+	}
+
 	@Deprecated
 	public void _dup() {
 		code.add(new InsnNode(DUP));
@@ -194,25 +198,19 @@ public class CodeEmitter {
 		code.add(new InsnNode(SWAP));
 	}
 
-	@Deprecated
-	public void _push_this() {
-		code.add(new VarInsnNode(ALOAD, 0));
+	public AbstractInsnNode loadThis() {
+		return new VarInsnNode(ALOAD, 0);
 	}
 
-	public static AbstractInsnNode pushNull() {
+	public static AbstractInsnNode loadNull() {
 		return new InsnNode(ACONST_NULL);
-	}
-
-	@Deprecated
-	public void _push_null() {
-		code.add(pushNull());
 	}
 
 	public static InsnList loadBoxedConstant(Object k, Class<?> castTo) {
 		InsnList il = new InsnList();
 
 		if (k == null) {
-			il.add(pushNull());
+			il.add(loadNull());
 		}
 		else if (k instanceof Boolean) {
 			il.add(ASMUtils.loadBoxedBoolean((Boolean) k));
@@ -246,17 +244,6 @@ public class CodeEmitter {
 		return loadBoxedConstant(k, null);
 	}
 
-	@Deprecated
-	public void _load_boxed_constant(Object k, Class castTo) {
-		code.add(loadBoxedConstant(k, castTo));
-	}
-
-	@Deprecated
-	public void _load_boxed_constant(Object k) {
-		code.add(loadBoxedConstant(k));
-	}
-
-
 	public InsnList loadConstant(int idx, Class castTo) {
 		return loadBoxedConstant(context.getConst(idx), castTo);
 	}
@@ -265,23 +252,8 @@ public class CodeEmitter {
 		return loadConstant(idx, null);
 	}
 
-	@Deprecated
-	public void _load_k(int idx, Class castTo) {
-		code.add(loadConstant(idx, castTo));
-	}
-
-	@Deprecated
-	public void _load_k(int idx) {
-		code.add(loadConstant(idx));
-	}
-
 	public AbstractInsnNode loadRegisterValue(int registerIndex) {
 		return new VarInsnNode(ALOAD, registerOffset() + registerIndex);
-	}
-
-	@Deprecated
-	public void _load_reg_value(int idx) {
-		code.add(loadRegisterValue(idx));
 	}
 
 	public InsnList loadRegisterValue(int registerIndex, Class castTo) {
@@ -289,11 +261,6 @@ public class CodeEmitter {
 		il.add(loadRegisterValue(registerIndex));
 		il.add(checkCast(castTo));
 		return il;
-	}
-
-	@Deprecated
-	public void _load_reg_value(int idx, Class clazz) {
-		code.add(loadRegisterValue(idx, clazz));
 	}
 
 	public InsnList loadRegister(int registerIndex, SlotState slots, Class<?> castTo) {
@@ -355,6 +322,56 @@ public class CodeEmitter {
 
 		return il;
 	}
+
+	public InsnList packRegistersUpToStackTopIntoArray(int firstRegisterIndex, SlotState slots) {
+		Check.isTrue(slots.hasVarargs());
+
+		InsnList il = new InsnList();
+
+		int n = slots.varargPosition() - firstRegisterIndex;
+
+		if (n == 0) {
+			// just take the varargs
+			il.add(loadObjectSink());
+			il.add(ObjectSink_prx.toArray());
+		}
+		else if (n < 0) {
+			// drop n elements from the object sink
+			il.add(loadObjectSink());
+			il.add(new InsnNode(DUP));
+			il.add(ASMUtils.loadInt(-n));
+			il.add(ObjectSink_prx.drop());
+			il.add(ObjectSink_prx.toArray());
+		}
+		else {
+			// prepend n elements
+			il.add(packRegistersIntoArray(firstRegisterIndex, slots, n));
+			il.add(loadObjectSink());
+			il.add(ObjectSink_prx.toArray());
+			il.add(Util_prx.concatenateArrays());
+		}
+
+		return il;
+	}
+
+
+	// FIXME: come up with a better name
+	public InsnList mapInvokeArgumentsToKinds(int fromIndex, SlotState slots, int desired, int actual) {
+		if (desired > 0) {
+			if (actual == 0) {
+				return packRegistersIntoArray(fromIndex, slots, desired - 1);  // passing args through an array
+			}
+			else {
+				Check.isEq(desired, actual);
+				return loadRegisters(fromIndex, slots, desired - 1);  // passing args through the stack
+			}
+		}
+		else {
+			Check.isEq(desired, actual);
+			return packRegistersUpToStackTopIntoArray(fromIndex, slots);
+		}
+	}
+
 
 	@Deprecated
 	public void _load_regs(int firstIdx, SlotState slots, int num) {
@@ -569,51 +586,38 @@ public class CodeEmitter {
 		_invokeStatic(Dispatch.class, name, Type.getMethodType(t, t, t));
 	}
 
-	@Deprecated
-	public void _dispatch_generic_mt_2(String name) {
-		_invokeStatic(
-				Dispatch.class,
-				name,
-				Type.getMethodType(
-					Type.VOID_TYPE,
-					Type.getType(LuaState.class),
-					Type.getType(ObjectSink.class),
-					Type.getType(Object.class),
-					Type.getType(Object.class)
-			)
-		);
+	public AbstractInsnNode dispatchGeneric(String methodName, int numArgs) {
+		ArrayList<Type> args = new ArrayList<>();
+		args.add(Type.getType(LuaState.class));
+		args.add(Type.getType(ObjectSink.class));
+		for (int i = 0; i < numArgs; i++) {
+			args.add(Type.getType(Object.class));
+		}
+		return new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Dispatch.class),
+				methodName,
+				Type.getMethodDescriptor(
+						Type.VOID_TYPE,
+						args.toArray(new Type[0])),
+				false);
 	}
 
-	@Deprecated
-	public void _dispatch_index() {
-		_dispatch_generic_mt_2("index");
+	public AbstractInsnNode dispatchIndex() {
+		return dispatchGeneric("index", 2);
 	}
 
-	@Deprecated
-	public void _dispatch_newindex() {
-		_invokeStatic(
-				Dispatch.class,
-				"newindex",
-				Type.getMethodType(
-					Type.VOID_TYPE,
-					Type.getType(LuaState.class),
-					Type.getType(ObjectSink.class),
-					Type.getType(Object.class),
-					Type.getType(Object.class),
-					Type.getType(Object.class)
-			)
-		);
+	public AbstractInsnNode dispatchNewindex() {
+		return dispatchGeneric("newindex", 3);
 	}
 
-	@Deprecated
-	public void _dispatch_call(int kind) {
-		code.add(new MethodInsnNode(
+	public AbstractInsnNode dispatchCall(int kind) {
+		return new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(Dispatch.class),
 				"call",
 				InvokeKind.staticMethodType(kind).getDescriptor(),
-				false
-		));
+				false);
 	}
 
 	public static AbstractInsnNode checkCast(Class clazz) {
@@ -625,34 +629,61 @@ public class CodeEmitter {
 		code.add(checkCast(clazz));
 	}
 
+	public AbstractInsnNode loadLuaState() {
+		return new VarInsnNode(ALOAD, LV_STATE);
+	}
+
 	@Deprecated
 	public void _loadState() {
-		withLuaState(code)
-				.push();
+		code.add(loadLuaState());
+	}
+
+	public AbstractInsnNode loadObjectSink() {
+		return new VarInsnNode(ALOAD, LV_OBJECTSINK);
+	}
+
+	public InsnList loadDispatchPreamble() {
+		InsnList il = new InsnList();
+		il.add(loadLuaState());
+		il.add(loadObjectSink());
+		return il;
 	}
 
 	@Deprecated
 	public void _loadObjectSink() {
-		withObjectSink(code)
-				.push();
+		code.add(loadObjectSink());
+	}
+
+	public InsnList retrieve_0() {
+		InsnList il = new InsnList();
+
+		il.add(loadObjectSink());
+		il.add(ObjectSink_prx.get(0));
+
+		return il;
 	}
 
 	@Deprecated
 	public void _retrieve_0() {
-		withObjectSink(code)
-				.push()
-				.call_get(0);
+		code.add(retrieve_0());
 	}
 
-	public void _retrieve_and_store_n(int n, int firstIdx, SlotState s) {
-		ObjectSink_prx os = withObjectSink(code);
-
-		for (int i = 0; i < n; i++) {
-			os.push().call_get(i);
-			_store(firstIdx + i, s);
+	public InsnList retrieveAndStore(int firstIdx, SlotState slots, int num) {
+		InsnList il = new InsnList();
+		if (num > 0) {
+			il.add(loadObjectSink());
+			for (int i = 0; i < num; i++) {
+				if (i + 1 < num) {
+					il.add(new InsnNode(DUP));
+				}
+				il.add(ObjectSink_prx.get(i));
+				il.add(storeToRegister(firstIdx + i, slots));
+			}
 		}
+		return il;
 	}
 
+	@Deprecated
 	public void _save_pc(Object o) {
 		LabelNode rl = _l(o);
 
@@ -663,6 +694,7 @@ public class CodeEmitter {
 		code.add(new VarInsnNode(ISTORE, LV_RESUME));
 	}
 
+	@Deprecated
 	public void _resumptionPoint(Object label) {
 		_label_here(label);
 	}
@@ -787,16 +819,7 @@ public class CodeEmitter {
 
 			if (isVararg) {
 				il.add(new VarInsnNode(ALOAD, 3));
-				il.add(ASMUtils.loadInt(numOfParameters));
-				il.add(new MethodInsnNode(
-						INVOKESTATIC,
-						Type.getInternalName(Varargs.class),
-						"from",
-						Type.getMethodDescriptor(
-								ASMUtils.arrayTypeFor(Object.class),
-								ASMUtils.arrayTypeFor(Object.class),
-								Type.INT_TYPE),
-						false));
+				il.add(Util_prx.arrayFrom(numOfParameters));
 			}
 
 			// load #numOfParameters, mapping them onto #numOfRegisters
@@ -804,16 +827,7 @@ public class CodeEmitter {
 			for (int i = 0; i < numOfRegisters(); i++) {
 				if (i < numOfParameters) {
 					il.add(new VarInsnNode(ALOAD, 3));  // TODO: use dup instead?
-					il.add(ASMUtils.loadInt(i));
-					il.add(new MethodInsnNode(
-							INVOKESTATIC,
-							Type.getInternalName(Varargs.class),
-							"getElement",
-							Type.getMethodDescriptor(
-									Type.getType(Object.class),
-									ASMUtils.arrayTypeFor(Object.class),
-									Type.INT_TYPE),
-							false));
+					il.add(Util_prx.getArrayElementOrNull(i));
 				}
 				else {
 					il.add(new InsnNode(ACONST_NULL));
@@ -1141,7 +1155,7 @@ public class CodeEmitter {
 		return il;
 	}
 
-	public static AbstractInsnNode getUpvalueValue() {
+	public AbstractInsnNode getUpvalueValue() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(Upvalue.class),
@@ -1151,7 +1165,7 @@ public class CodeEmitter {
 				false);
 	}
 
-	public static AbstractInsnNode setUpvalueValue() {
+	public AbstractInsnNode setUpvalueValue() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(Upvalue.class),
@@ -1163,48 +1177,18 @@ public class CodeEmitter {
 	}
 
 	@Deprecated
-	public void _get_upvalue_ref(int idx) {
-		code.add(getUpvalueReference(idx));
-	}
-
-	@Deprecated
-	public void _get_upvalue_value() {
-		code.add(getUpvalueValue());
-	}
-
-	@Deprecated
-	public void _set_upvalue_value() {
-		code.add(setUpvalueValue());
-	}
-
-	@Deprecated
-	public void _return() {
-		code.add(new InsnNode(RETURN));
-	}
-
-	@Deprecated
-	public void _new(String className) {
-		code.add(new TypeInsnNode(NEW, ASMUtils.typeForClassName(className).getInternalName()));
-	}
-
-	@Deprecated
-	public void _new(Class clazz) {
-		_new(clazz.getName());
-	}
-
-	public void _closure_ctor(String className, int numUpvalues) {
+	public Type[] closureConstructorTypes(int numUpvalues) {
 		Type[] argTypes = new Type[numUpvalues];
 		Arrays.fill(argTypes, Type.getType(Upvalue.class));
-		code.add(ASMUtils.ctor(ASMUtils.typeForClassName(className), argTypes));
+		return argTypes;
 	}
 
 	public InsnList captureRegister(int registerIndex) {
 		InsnList il = new InsnList();
 
-		LuaState_prx state = withLuaState(il);
-		state.push();
+		il.add(loadLuaState());
 		il.add(loadRegisterValue(registerIndex));
-		state.call_newUpvalue();
+		il.add(LuaState_prx.newUpvalue());
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;
@@ -1219,16 +1203,6 @@ public class CodeEmitter {
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;
-	}
-
-	@Deprecated
-	public void _capture(int idx) {
-		code.add(captureRegister(idx));
-	}
-
-	@Deprecated
-	public void _uncapture(int idx) {
-		code.add(uncaptureRegister(idx));
 	}
 
 	private void _frame_same(InsnList il) {
@@ -1260,45 +1234,56 @@ public class CodeEmitter {
 //		}
 	}
 
-	public InsnList newTable(int array, int hash) {
+	public InsnList setReturnValuesFromRegisters(int fromRegisterIndex, SlotState st, int num) {
 		InsnList il = new InsnList();
 
-		withLuaState(il)
-				.do_newTable(array, hash);
+		if (ObjectSink_prx.canSaveNResults(num)) {
+			il.add(loadRegisters(fromRegisterIndex, st, num));
+			il.add(ObjectSink_prx.setTo(num));
+		}
+		else {
+			// need to pack into an array
+			il.add(packRegistersIntoArray(fromRegisterIndex, st, num));
+			il.add(ObjectSink_prx.setToArray());
+		}
 
 		return il;
 	}
 
-	@Deprecated
-	public void _new_table(int array, int hash) {
-		code.add(newTable(array, hash));
-	}
+	public InsnList setReturnValuesUpToStackTop(int fromRegisterIndex, SlotState st) {
+		Check.isTrue(st.hasVarargs());
 
-	public void _if_null(Object target) {
-		code.add(new JumpInsnNode(IFNULL, _l(target)));
-	}
+		InsnList il = new InsnList();
 
-	public void _if_nonnull(Object target) {
-		code.add(new JumpInsnNode(IFNONNULL, _l(target)));
-	}
+		int varargPosition = st.varargPosition();
 
-	public void _tailcall(int numArgs) {
-		withObjectSink(code)
-				.call_tailCall(numArgs);
-	}
+		int n = varargPosition - fromRegisterIndex;
 
-	public void _setret(int fromIndex, SlotState st, int num) {
-		ObjectSink_prx os = withObjectSink(code);
-
-		if (os.canSaveNResults(num)) {
-			_load_regs(fromIndex, st, num);
-			os.call_setTo(num);
+		if (n == 0) {
+			// nothing to change, it's good as-is!
+		}
+		else if (n < 0) {
+			// drop -n elements from the beginning
+			il.add(loadObjectSink());
+			il.add(ASMUtils.loadInt(-n));
+			il.add(ObjectSink_prx.drop());
 		}
 		else {
-			// need to pack into an array
-			_pack_regs(fromIndex, st, num);
-			os.call_setToArray();
+			// prepend n elements
+			il.add(loadObjectSink());
+
+			il.add(ASMUtils.loadInt(n));
+			il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+			for (int i = 0; i < n; i++) {
+				il.add(new InsnNode(DUP));
+				il.add(ASMUtils.loadInt(i));
+				il.add(loadRegister(fromRegisterIndex + i, st));
+				il.add(new InsnNode(AASTORE));
+			}
+
+			il.add(ObjectSink_prx.prepend());
 		}
+		return il;
 	}
 
 	public void _line_here(int line) {
@@ -1307,66 +1292,49 @@ public class CodeEmitter {
 		code.add(new LineNumberNode(line, l));
 	}
 
-	private LuaState_prx withLuaState(InsnList il) {
-		return new LuaState_prx(LV_STATE, il);
-	}
-
-	private ObjectSink_prx withObjectSink(InsnList il) {
-		return new ObjectSink_prx(LV_OBJECTSINK, il);
-	}
-
-	public void _not(int r_src, int r_dest, SlotState s) {
-		if (s.typeAt(r_src).isSubtypeOf(LuaTypes.BOOLEAN)) {
-			LabelNode l_false = new LabelNode();
-			LabelNode l_store = new LabelNode();
-
-			_load_reg(r_src, s);
-
-			_checkCast(Boolean.class);
-			_unbox_boolean();
-
-			code.add(new JumpInsnNode(IFEQ, l_false));
-
-			// value is true, emitting false
-			code.add(ASMUtils.loadBoxedBoolean(false));
-			code.add(new JumpInsnNode(GOTO, l_store));
-
-			// value is false, emitting true
-			code.add(l_false);
-			code.add(new FrameNode(F_SAME, 0, null, 0, null));
-			code.add(ASMUtils.loadBoxedBoolean(true));
-
-			// store result
-			code.add(l_store);
-			code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(Boolean.class) }));
-			_store(r_dest, s);
+	public InsnList loadRegisterAsBoolean(int registerIndex, SlotState slots) {
+		InsnList il = new InsnList();
+		if (slots.typeAt(registerIndex).isSubtypeOf(LuaTypes.BOOLEAN)) {
+			il.add(loadRegister(registerIndex, slots, Boolean.class));
+			il.add(booleanValue());
 		}
 		else {
-			LabelNode l_false = new LabelNode();
-			LabelNode l_store = new LabelNode();
-
-			_load_reg(r_src, s);
-
-			_to_boolean();
-
-			code.add(new JumpInsnNode(IFEQ, l_false));
-
-			// value is not nil and not false => emit false
-			code.add(ASMUtils.loadBoxedBoolean(false));
-			code.add(new JumpInsnNode(GOTO, l_store));
-
-			// value is nil or false => emit true
-			code.add(l_false);
-			code.add(new FrameNode(F_SAME, 0, null, 0, null));
-			code.add(ASMUtils.loadBoxedBoolean(true));
-
-			// store result
-			code.add(l_store);
-			code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(Boolean.class) }));
-			_store(r_dest, s);
+			il.add(loadRegister(registerIndex, slots));
+			il.add(objectToBoolean());
 		}
+		return il;
 	}
 
+	@Deprecated
+	public void _not(int r_src, int r_dest, SlotState s) {
+		LabelNode l_false = new LabelNode();
+		LabelNode l_store = new LabelNode();
+
+		code.add(loadRegisterAsBoolean(r_src, s));
+
+		// TODO: simply do the following:
+		//   add(ASMUtils.loadInt(1));
+		//   add(new InsnNode(IXOR));
+		//   add(ASMUtils.box(box(Type.BOOLEAN_TYPE, Boolean.class))
+
+		code.add(new JumpInsnNode(IFEQ, l_false));
+
+		// value is true, emitting false
+		code.add(ASMUtils.loadBoxedBoolean(false));
+		code.add(new JumpInsnNode(GOTO, l_store));
+
+		// value is false, emitting true
+		code.add(l_false);
+		code.add(new FrameNode(F_SAME, 0, null, 0, null));
+		code.add(ASMUtils.loadBoxedBoolean(true));
+
+		// store result
+		code.add(l_store);
+		code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(Boolean.class) }));
+		code.add(storeToRegister(r_dest, s));
+	}
+
+	@Deprecated
 	public void _bnot(Object id, int r_src, int r_dest, SlotState s) {
 		if (s.typeAt(r_src).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 			_load_reg(r_src, s, Number.class);
@@ -1501,13 +1469,14 @@ public class CodeEmitter {
 		_loadObjectSink();
 		_load_reg_or_const(rk_left, s, Object.class);
 		_load_reg_or_const(rk_right, s, Object.class);
-		_dispatch_generic_mt_2(method);
+		code.add(dispatchGeneric(method, 2));
 
 		_resumptionPoint(id);
 		_retrieve_0();
 		_store(r_dest, s);
 	}
 
+	@Deprecated
 	public void binaryOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
 		StaticMathImplementation staticMath = LuaBinaryOperation.mathForOp(op);
 		LuaInstruction.NumOpType ot = staticMath.opType(
@@ -1522,94 +1491,12 @@ public class CodeEmitter {
 		}
 	}
 
-	public void _push_varargs() {
+	public AbstractInsnNode loadVarargs() {
 		Check.isTrue(isVararg);
-		code.add(new VarInsnNode(ALOAD, LV_VARARGS));
+		return new VarInsnNode(ALOAD, LV_VARARGS);
 	}
 
-	public void _load_vararg(int idx) {
-		code.add(ASMUtils.loadInt(idx));
-
-		code.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Varargs.class),
-				"getElement",
-				Type.getMethodDescriptor(
-						Type.getType(Object.class),
-						ASMUtils.arrayTypeFor(Object.class),
-						Type.INT_TYPE),
-				false));
-	}
-
-	public void _save_array_to_object_sink() {
-		withObjectSink(code).call_setToArray();
-	}
-
-	public void _setret_vararg(int fromReg, SlotState st) {
-		int varargPosition = st.varargPosition();
-
-		Check.nonNegative(varargPosition);
-
-		ObjectSink_prx os = withObjectSink(code);
-
-		int n = varargPosition - fromReg;
-
-		if (n == 0) {
-			// nothing to change, it's good as-is!
-		}
-		else if (n < 0) {
-			// drop -n elements from the beginning
-			os.push();
-			code.add(ASMUtils.loadInt(-n));
-			os.call_drop();
-		}
-		else {
-			// prepend n elements
-			os.push();
-
-			code.add(ASMUtils.loadInt(n));
-			code.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
-			for (int i = 0; i < n; i++) {
-				code.add(new InsnNode(DUP));
-				code.add(ASMUtils.loadInt(i));
-				_load_reg(fromReg + i, st);
-				code.add(new InsnNode(AASTORE));
-			}
-
-			os.call_prepend();
-		}
-	}
-
-	public void _tailcall_vararg(int fromReg, SlotState st) {
-		_setret_vararg(fromReg, st);
-		withObjectSink(code).push().call_markAsTailCall();
-	}
-
-	public void _load_object_sink_as_array() {
-		withObjectSink(code).push().call_toArray();
-	}
-
-	public void _drop_from_object_sink(int n) {
-		ObjectSink_prx os = withObjectSink(code);
-
-		os.push();
-		code.add(ASMUtils.loadInt(n));
-		os.call_drop();
-	}
-
-
-	public void _concat_arrays() {
-		code.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Varargs.class),
-				"concat",
-				Type.getMethodDescriptor(
-						ASMUtils.arrayTypeFor(Object.class),
-						ASMUtils.arrayTypeFor(Object.class),
-						ASMUtils.arrayTypeFor(Object.class)),
-				false));
-	}
-
+	@Deprecated
 	public void _cmp(Object id, String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
 
 		// TODO: specialise
@@ -1672,10 +1559,12 @@ public class CodeEmitter {
 		code.add(objectToBoolean());
 	}
 
+	@Deprecated
 	public void _ifzero(Object tgt) {
 		code.add(new JumpInsnNode(IFEQ, _l(tgt)));
 	}
 
+	@Deprecated
 	public void _ifnonzero(Object tgt) {
 		code.add(new JumpInsnNode(IFNE, _l(tgt)));
 	}
@@ -1702,7 +1591,7 @@ public class CodeEmitter {
 		_store(r, st);
 	}
 
-	private static AbstractInsnNode booleanValue() {
+	public static AbstractInsnNode booleanValue() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(Boolean.class),
@@ -1858,6 +1747,7 @@ public class CodeEmitter {
 				numStack, stack);
 	}
 
+	@Deprecated
 	public void _forloop(SlotState st, int r_base, Object continueBranch, Object breakBranch) {
 		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_base + 0);  // index
 		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_base + 1);  // limit
@@ -2064,27 +1954,18 @@ public class CodeEmitter {
 		return new JavaBytecodeCodeVisitor(this);
 	}
 
-	private static class LuaState_prx {
+	public static class LuaState_prx {
 
-		private final int selfIndex;
-		private final InsnList il;
-
-		public LuaState_prx(int selfIndex, InsnList il) {
-			this.selfIndex = selfIndex;
-			this.il = il;
+		private LuaState_prx() {
+			// not to be instantiated
 		}
 
-		private Type selfTpe() {
+		private static Type selfTpe() {
 			return Type.getType(LuaState.class);
 		}
 
-		public LuaState_prx push() {
-			il.add(new VarInsnNode(ALOAD, selfIndex));
-			return this;
-		}
-
-		public LuaState_prx do_newTable(int array, int hash) {
-			push();
+		public static InsnList newTable(int array, int hash) {
+			InsnList il = new InsnList();
 
 			il.add(ASMUtils.loadInt(array));
 			il.add(ASMUtils.loadInt(hash));
@@ -2099,44 +1980,37 @@ public class CodeEmitter {
 							Type.INT_TYPE).getDescriptor(),
 					false));
 
-			return this;
+			return il;
 		}
 
-		public LuaState_prx call_newUpvalue() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode newUpvalue() {
+			return new MethodInsnNode(
 					INVOKEVIRTUAL,
 					selfTpe().getInternalName(),
 					"newUpvalue",
 					Type.getMethodType(
 							Type.getType(Upvalue.class),
 							Type.getType(Object.class)).getDescriptor(),
-					false));
-			return this;
+					false);
 		}
 
 	}
 
-	private static class ObjectSink_prx {
+	public static class ObjectSink_prx {
 
-		private final int selfIndex;
-		private final InsnList il;
-
-		public ObjectSink_prx(int selfIndex, InsnList il) {
-			this.selfIndex = selfIndex;
-			this.il = il;
+		private ObjectSink_prx() {
+			// not to be instantiated
 		}
 
-		private Type selfTpe() {
+		private static Type selfTpe() {
 			return Type.getType(ObjectSink.class);
 		}
 
-		public ObjectSink_prx push() {
-			il.add(new VarInsnNode(ALOAD, selfIndex));
-			return this;
-		}
-
-		public ObjectSink_prx call_get(int index) {
+		public static InsnList get(int index) {
 			Check.nonNegative(index);
+
+			InsnList il = new InsnList();
+
 			if (index <= 4) {
 				String methodName = "_" + index;
 				il.add(new MethodInsnNode(
@@ -2158,53 +2032,52 @@ public class CodeEmitter {
 								Type.INT_TYPE).getDescriptor(),
 						true));
 			}
-			return this;
+
+			return il;
 		}
 
-		public ObjectSink_prx call_reset() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode reset() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"reset",
 					Type.getMethodType(
 							Type.VOID_TYPE).getDescriptor(),
-					true));
-			return this;
+					true);
 		}
 
-		public ObjectSink_prx call_push() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode push() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"push",
 					Type.getMethodType(
 							Type.VOID_TYPE,
 							Type.getType(Object.class)).getDescriptor(),
-					true));
-			return this;
+					true);
 		}
 
-		public ObjectSink_prx call_addAll() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode addAll() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"addAll",
 					Type.getMethodType(
 							Type.VOID_TYPE,
 							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true));
-			return this;
+					true);
 		}
 
-		public boolean canSaveNResults(int numValues) {
+		@Deprecated
+		public static boolean canSaveNResults(int numValues) {
 			// TODO: determine this by reading the ObjectSink interface?
 			return numValues <= 5;
 		}
 
-		public ObjectSink_prx call_setTo(int numValues) {
+		public static AbstractInsnNode setTo(int numValues) {
 			Check.nonNegative(numValues);
 			if (numValues == 0) {
-				call_reset();
+				return reset();
 			}
 			else {
 				Check.isTrue(canSaveNResults(numValues));
@@ -2212,109 +2085,156 @@ public class CodeEmitter {
 				Type[] argTypes = new Type[numValues];
 				Arrays.fill(argTypes, Type.getType(Object.class));
 
-				il.add(new MethodInsnNode(
+				return new MethodInsnNode(
 						INVOKEINTERFACE,
 						selfTpe().getInternalName(),
 						"setTo",
 						Type.getMethodType(
 								Type.VOID_TYPE,
 								argTypes).getDescriptor(),
-						true));
+						true);
 			}
-			return this;
 		}
 
-		public ObjectSink_prx call_setToArray() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode setToArray() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"setToArray",
 					Type.getMethodType(
 							Type.VOID_TYPE,
 							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true));
-			return this;
+					true);
 		}
 
-		public ObjectSink_prx call_toArray() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode toArray() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"toArray",
 					Type.getMethodType(
 							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true));
-			return this;
+					true);
 		}
 
-		public ObjectSink_prx call_drop() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode drop() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"drop",
 					Type.getMethodType(
 							Type.VOID_TYPE,
 							Type.INT_TYPE).getDescriptor(),
-					true));
-			return this;
+					true);
 		}
 
-		public ObjectSink_prx call_prepend() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode prepend() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"prepend",
 					Type.getMethodType(
 							Type.VOID_TYPE,
 							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true));
-			return this;
+					true);
 		}
 
-		public ObjectSink_prx call_pushAll() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode pushAll() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"pushAll",
 					Type.getMethodType(
 							Type.VOID_TYPE,
 							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true));
-			return this;
+					true);
 		}
 
-		public ObjectSink_prx call_tailCall(int numCallArgs) {
+		public static AbstractInsnNode tailCall(int numCallArgs) {
 			Check.nonNegative(numCallArgs);
+
 			// TODO: determine this by reading the ObjectSink interface?
 			if (numCallArgs <= 4) {
 				Type[] callArgTypes = new Type[numCallArgs + 1];  // don't forget the call target
 				Arrays.fill(callArgTypes, Type.getType(Object.class));
 
-				il.add(new MethodInsnNode(
+				return new MethodInsnNode(
 						INVOKEINTERFACE,
 						selfTpe().getInternalName(),
 						"tailCall",
 						Type.getMethodType(
 								Type.VOID_TYPE,
 								callArgTypes).getDescriptor(),
-						true));
+						true);
 			}
 			else {
 				// TODO: iterate and push
 				throw new UnsupportedOperationException("Tail call with " + numCallArgs + " arguments");
 			}
-			return this;
 		}
 
-		public ObjectSink_prx call_markAsTailCall() {
-			il.add(new MethodInsnNode(
+		public static AbstractInsnNode markAsTailCall() {
+			return new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					"markAsTailCall",
 					Type.getMethodType(
 							Type.VOID_TYPE).getDescriptor(),
-					true));
-			return this;
+					true);
+		}
+
+	}
+
+	public static class Util_prx {
+
+		private Util_prx() {
+			// not to be instantiated
+		}
+
+		public static AbstractInsnNode concatenateArrays() {
+			return new MethodInsnNode(
+					INVOKESTATIC,
+					Type.getInternalName(Varargs.class),
+					"concat",
+					Type.getMethodDescriptor(
+							ASMUtils.arrayTypeFor(Object.class),
+							ASMUtils.arrayTypeFor(Object.class),
+							ASMUtils.arrayTypeFor(Object.class)),
+					false);
+		}
+
+		public static InsnList getArrayElementOrNull(int index) {
+			InsnList il = new InsnList();
+
+			il.add(ASMUtils.loadInt(index));
+			il.add(new MethodInsnNode(
+					INVOKESTATIC,
+					Type.getInternalName(Varargs.class),
+					"getElement",
+					Type.getMethodDescriptor(
+							Type.getType(Object.class),
+							ASMUtils.arrayTypeFor(Object.class),
+							Type.INT_TYPE),
+					false));
+
+			return il;
+		}
+
+		public static InsnList arrayFrom(int index) {
+			InsnList il = new InsnList();
+
+			il.add(ASMUtils.loadInt(index));
+			il.add(new MethodInsnNode(
+					INVOKESTATIC,
+					Type.getInternalName(Varargs.class),
+					"from",
+					Type.getMethodDescriptor(
+							ASMUtils.arrayTypeFor(Object.class),
+							ASMUtils.arrayTypeFor(Object.class),
+							Type.INT_TYPE),
+					false));
+
+			return il;
 		}
 
 	}

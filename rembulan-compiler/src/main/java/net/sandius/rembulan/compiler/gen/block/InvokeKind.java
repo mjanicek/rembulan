@@ -16,6 +16,8 @@ import java.util.ArrayList;
 
 public abstract class InvokeKind {
 
+	public static final int ANYARG = 0;
+
 	private InvokeKind() {
 		// not to be instantiated or extended
 	}
@@ -25,6 +27,18 @@ public abstract class InvokeKind {
 	public static int encode(int numOfFixedArgs, boolean vararg) {
 		Check.nonNegative(numOfFixedArgs);
 		return (!vararg && numOfFixedArgs >= 0 && numOfFixedArgs < 4) ? numOfFixedArgs + 1 : 0;
+	}
+
+	public static int encodeForCall(int numOfArgs) {
+		// TODO: determine via reflection: search for a method on the Invokable interface
+		// that takes a LuaState, ObjectSink and exactly #numArgs arguments.
+		// If found, return (numOfArgs + 1), otherwise return 0.
+		return encode(numOfArgs, false);
+	}
+
+	// FIXME: come up with a better name
+	public static int fromLua(int v) {
+		return v > 0 ? encode(v - 1, false) : encode(0, true);
 	}
 
 	public static Class<? extends Function> nativeClassForKind(int kind) {
