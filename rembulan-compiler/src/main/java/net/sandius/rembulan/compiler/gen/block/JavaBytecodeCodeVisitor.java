@@ -61,7 +61,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitLoadBool(Object id, SlotState st, int r_dest, boolean value) {
-		e._load_constant(value);
+		e._load_boxed_constant(value);
 		e._store(r_dest, st);
 	}
 

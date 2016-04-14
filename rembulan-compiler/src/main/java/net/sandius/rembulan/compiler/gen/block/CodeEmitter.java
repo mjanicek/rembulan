@@ -9,6 +9,7 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
@@ -198,7 +199,7 @@ public class CodeEmitter {
 		code.add(new InsnNode(ACONST_NULL));
 	}
 
-	public void _load_constant(Object k, Class castTo) {
+	public void _load_boxed_constant(Object k, Class castTo) {
 		if (k == null) {
 			_push_null();
 		}
@@ -227,12 +228,12 @@ public class CodeEmitter {
 		}
 	}
 
-	public void _load_constant(Object k) {
-		_load_constant(k, null);
+	public void _load_boxed_constant(Object k) {
+		_load_boxed_constant(k, null);
 	}
 
 	public void _load_k(int idx, Class castTo) {
-		_load_constant(context.getConst(idx), castTo);
+		_load_boxed_constant(context.getConst(idx), castTo);
 	}
 
 	public void _load_k(int idx) {
@@ -309,6 +310,76 @@ public class CodeEmitter {
 
 	public void _load_reg_or_const(int rk, SlotState slots) {
 		_load_reg_or_const(rk, slots, null);
+	}
+
+	public void _load_reg_or_const_long(int rk, SlotState slots, Type requiredType) {
+		// FIXME: this duplicates the retrieval code!
+		if (rk < 0) {
+			// it's a constant
+			Object c = context.getConst(-rk - 1);
+
+			if (c instanceof Number
+					&& !(c instanceof Double || c instanceof Float)) {
+
+				long v = ((Number) c).longValue();
+
+				if (requiredType.equals(Type.LONG_TYPE)) {
+					code.add(ASMUtils.loadLong(v));
+				}
+				else if (requiredType.equals(Type.INT_TYPE)) {
+					code.add(ASMUtils.loadInt((int) v));
+				}
+				else if (requiredType.equals(Type.DOUBLE_TYPE)) {
+					code.add(ASMUtils.loadDouble((double) v));
+				}
+				else {
+					throw new IllegalArgumentException("Illegal required type: " + requiredType);
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Illegal constant type: expecting an integer, got "
+						+ (c != null ? c.getClass().getName() : "null"));
+			}
+		}
+		else {
+			// register
+			_load_reg(rk, slots, Number.class);
+
+			if (requiredType.equals(Type.LONG_TYPE)) {
+				_get_longValue(Number.class);
+			}
+			else if (requiredType.equals(Type.INT_TYPE)) {
+				_get_intValue(Number.class);
+			}
+			else if (requiredType.equals(Type.DOUBLE_TYPE)) {
+				_get_doubleValue(Number.class);
+			}
+			else {
+				throw new IllegalArgumentException("Illegal required type: " + requiredType);
+			}
+		}
+	}
+
+	public void _load_reg_or_const_double(int rk, SlotState slots) {
+		// FIXME: this duplicates the retrieval code!
+		if (rk < 0) {
+			// it's a constant
+			Object c = context.getConst(-rk - 1);
+
+			if (c instanceof Double || c instanceof Float) {
+				double v = ((Number) c).doubleValue();
+				code.add(ASMUtils.loadDouble(v));
+			}
+			else {
+				throw new IllegalArgumentException("Illegal const type: expecting a float, got "
+						+ (c != null ? c.getClass().getName() : "null"));
+			}
+		}
+		else {
+			// register
+			_load_reg(rk, slots, Number.class);
+			_get_doubleValue(Number.class);
+		}
 	}
 
 	private void _store_reg_value(int r) {
@@ -1126,23 +1197,92 @@ public class CodeEmitter {
 		}
 	}
 
+	private void _native_binop_and_box(InsnList il, int opcode, boolean resultIsLong) {
+		il.add(new InsnNode(opcode));
+		if (resultIsLong) {
+			il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+		}
+		else {
+			il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		}
+	}
+
+	private void _raw_binop_and_box(InsnList il, String name, boolean argsAreLong, boolean resultIsLong) {
+		il.add(new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(RawOperators.class),
+				name,
+				Type.getMethodDescriptor(
+						resultIsLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE,
+						argsAreLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE,
+						argsAreLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE),
+				false));
+		if (resultIsLong) {
+			il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+		}
+		else {
+			il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		}
+	}
+
 	private void _binary_integer_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
-		String method = op.name().toLowerCase();
-		_load_reg_or_const(rk_left, s, Number.class);
-		_load_reg_or_const(rk_right, s, Number.class);
-		_dispatch_binop(method + "_integer", Number.class);
+		switch (op) {
+			case DIV:
+			case POW:
+				_load_reg_or_const_long(rk_left, s, Type.DOUBLE_TYPE);
+				_load_reg_or_const_long(rk_right, s, Type.DOUBLE_TYPE);
+				break;
+
+			case SHL:
+			case SHR:
+				_load_reg_or_const_long(rk_left, s, Type.LONG_TYPE);
+				_load_reg_or_const_long(rk_right, s, Type.INT_TYPE);
+				break;
+
+			default:
+				_load_reg_or_const_long(rk_left, s, Type.LONG_TYPE);
+				_load_reg_or_const_long(rk_right, s, Type.LONG_TYPE);
+				break;
+		}
+
+		switch (op) {
+			case ADD:  _native_binop_and_box(code, LADD, true); break;
+			case SUB:  _native_binop_and_box(code, LSUB, true); break;
+			case MUL:  _native_binop_and_box(code, LMUL, true); break;
+			case MOD:  _raw_binop_and_box(code, "rawmod", true, true); break;
+			case POW:  _raw_binop_and_box(code, "rawpow", false, false); break;
+			case DIV:  _native_binop_and_box(code, DDIV, false); break;
+			case IDIV: _raw_binop_and_box(code, "rawidiv", true, true); break;
+			case BAND: _native_binop_and_box(code, LAND, true); break;
+			case BOR:  _native_binop_and_box(code, LOR, true); break;
+			case BXOR: _native_binop_and_box(code, LXOR, true); break;
+			case SHL:  _native_binop_and_box(code, LSHL, true); break;
+			case SHR:  _native_binop_and_box(code, LUSHR, true); break;
+			default: throw new IllegalStateException("Illegal op: " + op);
+		}
+
 		_store(r_dest, s);
 	}
 
 	private void _binary_float_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
-		String method = op.name().toLowerCase();
-		_load_reg_or_const(rk_left, s, Number.class);
-		_load_reg_or_const(rk_right, s, Number.class);
-		_dispatch_binop(method + "_float", Number.class);
+		_load_reg_or_const_double(rk_left, s);
+		_load_reg_or_const_double(rk_right, s);
+
+		switch (op) {
+			case ADD:  _native_binop_and_box(code, DADD, false); break;
+			case SUB:  _native_binop_and_box(code, DSUB, false); break;
+			case MUL:  _native_binop_and_box(code, DMUL, false); break;
+			case MOD:  _raw_binop_and_box(code, "rawmod", false, false); break;
+			case POW:  _raw_binop_and_box(code, "rawpow", false, false); break;
+			case DIV:  _native_binop_and_box(code, DDIV, false); break;
+			case IDIV: _raw_binop_and_box(code, "rawidiv", false, false); break;
+			default: throw new IllegalStateException("Illegal op: " + op);
+		}
+
 		_store(r_dest, s);
 	}
 
-	private void _binary_number_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+	private void _binary_numeric_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
 		String method = op.name().toLowerCase();
 		_load_reg_or_const(rk_left, s, Number.class);
 		_load_reg_or_const(rk_right, s, Number.class);
@@ -1150,7 +1290,7 @@ public class CodeEmitter {
 		_store(r_dest, s);
 	}
 
-	private void _binary_generic_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+	private void _binary_dynamic_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
 		Object id = new Object();
 		String method = op.name().toLowerCase();
 
@@ -1174,21 +1314,10 @@ public class CodeEmitter {
 				LuaBinaryOperation.slotType(context(), s, rk_right));
 
 		switch (ot) {
-			case Integer:
-				_binary_integer_op(op, s, r_dest, rk_left, rk_right);
-				break;
-
-			case Float:
-				_binary_float_op(op, s, r_dest, rk_left, rk_right);
-				break;
-
-			case Number:
-				_binary_number_op(op, s, r_dest, rk_left, rk_right);
-				break;
-
-			case Any:
-				_binary_generic_op(op, s, r_dest, rk_left, rk_right);
-				break;
+			case Integer: _binary_integer_op(op, s, r_dest, rk_left, rk_right); break;
+			case Float:   _binary_float_op(op, s, r_dest, rk_left, rk_right); break;
+			case Number:  _binary_numeric_op(op, s, r_dest, rk_left, rk_right); break;
+			case Any:     _binary_dynamic_op(op, s, r_dest, rk_left, rk_right); break;
 		}
 	}
 
@@ -1364,6 +1493,16 @@ public class CodeEmitter {
 		_store(r, st);
 	}
 
+	private void _get_intValue(Class clazz) {
+		code.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(clazz),
+				"intValue",
+				Type.getMethodDescriptor(
+						Type.INT_TYPE),
+				false));
+	}
+
 	private void _get_longValue(Class clazz) {
 		code.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
@@ -1439,9 +1578,11 @@ public class CodeEmitter {
 			}
 		}
 		else {
-			// may be anything -- force conversion of loop limits to numbers and treat this as a float loop
+			// We were unable to statically determine loop kind: force conversion of loop
+			// parameters. Note that this does *not* imply that this is a float loop.
 
-			// do this in the same order as PUC Lua for the same error reporting
+			// Note: we process parameters in the same order as in PUC Lua to get
+			// the same error reporting.
 
 			_load_reg(r_base + 1, st);
 			_to_number("'for' limit");
@@ -1453,7 +1594,7 @@ public class CodeEmitter {
 			_load_reg(r_base, st);
 			_to_number("'for' initial value");
 			_swap();
-			_dispatch_binop("sub_float", Number.class);
+			_dispatch_binop("sub", Number.class);
 			_store(r_base, st);
 		}
 	}
@@ -1546,6 +1687,7 @@ public class CodeEmitter {
 		}
 		else {
 			// float loop
+			// FIXME: not true: it may be an integer loop, but we simply couldn't determine this at compile time!
 
 			// increment index
 			_load_reg(r_base, st, Number.class);

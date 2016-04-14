@@ -147,14 +147,6 @@ public abstract class Dispatch {
 		return MathImplementation.arithmetic(a, b).do_add(a, b);
 	}
 
-	public static Number add_integer(Number a, Number b) {
-		return MathImplementation.INTEGER_MATH.do_add(a, b);
-	}
-
-	public static Number add_float(Number a, Number b) {
-		return MathImplementation.FLOAT_MATH.do_add(a, b);
-	}
-
 	public static void sub(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		MathImplementation m = MathImplementation.arithmetic(a, b);
 		if (m != null) {
@@ -167,14 +159,6 @@ public abstract class Dispatch {
 
 	public static Number sub(Number a, Number b) {
 		return MathImplementation.arithmetic(a, b).do_sub(a, b);
-	}
-
-	public static Number sub_integer(Number a, Number b) {
-		return MathImplementation.INTEGER_MATH.do_sub(a, b);
-	}
-
-	public static Number sub_float(Number a, Number b) {
-		return MathImplementation.FLOAT_MATH.do_sub(a, b);
 	}
 
 	public static void mul(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -191,14 +175,6 @@ public abstract class Dispatch {
 		return MathImplementation.arithmetic(a, b).do_mul(a, b);
 	}
 
-	public static Number mul_integer(Number a, Number b) {
-		return MathImplementation.INTEGER_MATH.do_mul(a, b);
-	}
-
-	public static Number mul_float(Number a, Number b) {
-		return MathImplementation.FLOAT_MATH.do_mul(a, b);
-	}
-
 	public static void div(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		MathImplementation m = MathImplementation.arithmetic(a, b);
 		if (m != null) {
@@ -211,14 +187,6 @@ public abstract class Dispatch {
 
 	public static Number div(Number a, Number b) {
 		return MathImplementation.arithmetic(a, b).do_div(a, b);
-	}
-
-	public static Number div_integer(Number a, Number b) {
-		return MathImplementation.INTEGER_MATH.do_div(a, b);
-	}
-
-	public static Number div_float(Number a, Number b) {
-		return MathImplementation.FLOAT_MATH.do_div(a, b);
 	}
 
 	public static void mod(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -235,14 +203,6 @@ public abstract class Dispatch {
 		return MathImplementation.arithmetic(a, b).do_mod(a, b);
 	}
 
-	public static Number mod_integer(Number a, Number b) {
-		return MathImplementation.INTEGER_MATH.do_mod(a, b);
-	}
-
-	public static Number mod_float(Number a, Number b) {
-		return MathImplementation.FLOAT_MATH.do_mod(a, b);
-	}
-
 	public static void idiv(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		MathImplementation m = MathImplementation.arithmetic(a, b);
 		if (m != null) {
@@ -257,14 +217,6 @@ public abstract class Dispatch {
 		return MathImplementation.arithmetic(a, b).do_idiv(a, b);
 	}
 
-	public static Number idiv_integer(Number a, Number b) {
-		return MathImplementation.INTEGER_MATH.do_idiv(a, b);
-	}
-
-	public static Number idiv_float(Number a, Number b) {
-		return MathImplementation.FLOAT_MATH.do_idiv(a, b);
-	}
-
 	public static void pow(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		MathImplementation m = MathImplementation.arithmetic(a, b);
 		if (m != null) {
@@ -277,14 +229,6 @@ public abstract class Dispatch {
 
 	public static Number pow(Number a, Number b) {
 		return MathImplementation.arithmetic(a, b).do_pow(a, b);
-	}
-
-	public static Number pow_integer(Number a, Number b) {
-		return MathImplementation.INTEGER_MATH.do_pow(a, b);
-	}
-
-	public static Number pow_float(Number a, Number b) {
-		return MathImplementation.FLOAT_MATH.do_pow(a, b);
 	}
 
 	private static void try_mt_bitwise(LuaState state, ObjectSink result, String event, Object a, Object b) throws ControlThrowable {
@@ -310,10 +254,6 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static Number band_integer(Number a, Number b) {
-		return RawOperators.rawband(a.longValue(), b.longValue());
-	}
-
 	public static void bor(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
@@ -324,10 +264,6 @@ public abstract class Dispatch {
 		else {
 			try_mt_bitwise(state, result, Metatables.MT_BOR, a, b);
 		}
-	}
-
-	public static Number bor_integer(Number a, Number b) {
-		return RawOperators.rawbor(a.longValue(), b.longValue());
 	}
 
 	public static void bxor(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -342,10 +278,6 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static Number bxor_integer(Number a, Number b) {
-		return RawOperators.rawbxor(a.longValue(), b.longValue());
-	}
-
 	public static void shl(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
@@ -358,10 +290,6 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static Number shl_integer(Number a, Number b) {
-		return RawOperators.rawshl(a.longValue(), b.longValue());
-	}
-
 	public static void shr(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
@@ -372,10 +300,6 @@ public abstract class Dispatch {
 		else {
 			try_mt_bitwise(state, result, Metatables.MT_SHR, a, b);
 		}
-	}
-
-	public static Number shr_integer(Number a, Number b) {
-		return RawOperators.rawshr(a.longValue(), b.longValue());
 	}
 
 	public static void bnot(LuaState state, ObjectSink result, Object o) throws ControlThrowable {
