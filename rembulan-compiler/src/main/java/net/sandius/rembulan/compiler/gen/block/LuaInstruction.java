@@ -45,22 +45,14 @@ public interface LuaInstruction {
 		}
 
 		public static NumOpType loopType(Type index, Type limit, Type step) {
-			if (index.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
-//					&& limit.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
-					&& step.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+			NumOpType ot = StaticMathImplementation.MAY_BE_INTEGER.opType(index, step);
 
-				return NumOpType.Integer;
+			if (ot == NumOpType.Any) {
+				// unknown types: will however be converted to numbers at execution time
+				ot = NumOpType.Number;
 			}
-			else if (index.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
-//					|| limit.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
-					|| step.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
 
-				return NumOpType.Float;
-			}
-			else {
-				// exact type unknown, will however be numeric, or throw an exception at runtime
-				return NumOpType.Number;
-			}
+			return ot;
 		}
 
 	}
