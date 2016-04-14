@@ -1126,6 +1126,72 @@ public class CodeEmitter {
 		}
 	}
 
+	private void _binary_integer_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		String method = op.name().toLowerCase();
+		_load_reg_or_const(rk_left, s, Number.class);
+		_load_reg_or_const(rk_right, s, Number.class);
+		_dispatch_binop(method + "_integer", Number.class);
+		_store(r_dest, s);
+	}
+
+	private void _binary_float_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		String method = op.name().toLowerCase();
+		_load_reg_or_const(rk_left, s, Number.class);
+		_load_reg_or_const(rk_right, s, Number.class);
+		_dispatch_binop(method + "_float", Number.class);
+		_store(r_dest, s);
+	}
+
+	private void _binary_number_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		String method = op.name().toLowerCase();
+		_load_reg_or_const(rk_left, s, Number.class);
+		_load_reg_or_const(rk_right, s, Number.class);
+		_dispatch_binop(method, Number.class);
+		_store(r_dest, s);
+	}
+
+	private void _binary_generic_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		Object id = new Object();
+		String method = op.name().toLowerCase();
+
+		_save_pc(id);
+
+		_loadState();
+		_loadObjectSink();
+		_load_reg_or_const(rk_left, s, Object.class);
+		_load_reg_or_const(rk_right, s, Object.class);
+		_dispatch_generic_mt_2(method);
+
+		_resumptionPoint(id);
+		_retrieve_0();
+		_store(r_dest, s);
+	}
+
+	public void binaryOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		StaticMathImplementation staticMath = LuaBinaryOperation.mathForOp(op);
+		LuaInstruction.NumOpType ot = staticMath.opType(
+				LuaBinaryOperation.slotType(context(), s, rk_left),
+				LuaBinaryOperation.slotType(context(), s, rk_right));
+
+		switch (ot) {
+			case Integer:
+				_binary_integer_op(op, s, r_dest, rk_left, rk_right);
+				break;
+
+			case Float:
+				_binary_float_op(op, s, r_dest, rk_left, rk_right);
+				break;
+
+			case Number:
+				_binary_number_op(op, s, r_dest, rk_left, rk_right);
+				break;
+
+			case Any:
+				_binary_generic_op(op, s, r_dest, rk_left, rk_right);
+				break;
+		}
+	}
+
 	public void _push_varargs() {
 		Check.isTrue(isVararg);
 		code.add(new VarInsnNode(ALOAD, LV_VARARGS));
