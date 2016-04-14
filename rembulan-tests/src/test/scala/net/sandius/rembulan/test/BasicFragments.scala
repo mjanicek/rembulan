@@ -159,6 +159,20 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   SimplifiableFloatForLoop in EmptyContext succeedsWith ()
   SimplifiableFloatForLoop in BaseLibContext succeedsWith ()
 
+  val DynamicIntegerForLoop = fragment ("DynamicIntegerForLoop") {
+    """local function forloop(init, limit, step, f)
+      |  for i = init, limit, step do
+      |    f(i)
+      |  end
+      |end
+      |
+      |local sum = 0
+      |forloop(1, 10, 1, function(i) sum = sum + i end)
+      |return sum
+    """
+  }
+  DynamicIntegerForLoop in EmptyContext succeedsWith (55)
+
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
       |local y = 10
