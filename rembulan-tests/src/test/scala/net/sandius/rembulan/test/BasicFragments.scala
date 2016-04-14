@@ -91,7 +91,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |return sum
     """
   }
-  RuntimeDeterminedForLoop in EmptyContext succeedsWith (55.0)
+  RuntimeDeterminedForLoop in EmptyContext succeedsWith (55)
 
   val IllegalForLoop1 = fragment ("IllegalForLoop1") {
     """for i = "a", "b", "c" do end
