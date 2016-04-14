@@ -15,6 +15,10 @@ public abstract class MathImplementation {
 	public abstract Number do_idiv(Number a, Number b);
 	public abstract Double do_pow(Number a, Number b);
 
+	public abstract boolean do_eq(Number a, Number b);
+	public abstract boolean do_lt(Number a, Number b);
+	public abstract boolean do_le(Number a, Number b);
+
 	public static class IntegerMathImplementation extends MathImplementation {
 
 		@Override
@@ -50,6 +54,21 @@ public abstract class MathImplementation {
 		@Override
 		public Double do_pow(Number a, Number b) {
 			return rawpow(a.doubleValue(), b.doubleValue());
+		}
+
+		@Override
+		public boolean do_eq(Number a, Number b) {
+			return a.longValue() == b.longValue();
+		}
+
+		@Override
+		public boolean do_lt(Number a, Number b) {
+			return a.longValue() < b.longValue();
+		}
+
+		@Override
+		public boolean do_le(Number a, Number b) {
+			return a.longValue() <= b.longValue();
 		}
 
 	}
@@ -91,23 +110,42 @@ public abstract class MathImplementation {
 			return rawpow(a.doubleValue(), b.doubleValue());
 		}
 
+		@Override
+		public boolean do_eq(Number a, Number b) {
+			return a.doubleValue() == b.doubleValue();
+		}
+
+		@Override
+		public boolean do_lt(Number a, Number b) {
+			return a.doubleValue() < b.doubleValue();
+		}
+
+		@Override
+		public boolean do_le(Number a, Number b) {
+			return a.doubleValue() <= b.doubleValue();
+		}
+
 	}
 
 	public static MathImplementation arithmetic(Object a, Object b) {
 		if (a instanceof Number && b instanceof Number) {
-			if ((a instanceof Double || a instanceof Float)
-					|| (b instanceof Double || b instanceof Float)) {
-				return FLOAT_MATH;
-			}
-			else {
-				return INTEGER_MATH;
-			}
+			return arithmetic((Number) a, (Number) b);
 		}
 		else if (a instanceof String || b instanceof String) {
 			return arithmetic(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b));
 		}
 		else {
 			return null;
+		}
+	}
+
+	public static MathImplementation arithmetic(Number a, Number b) {
+		if ((a instanceof Double || a instanceof Float)
+				|| (b instanceof Double || b instanceof Float)) {
+			return FLOAT_MATH;
+		}
+		else {
+			return INTEGER_MATH;
 		}
 	}
 

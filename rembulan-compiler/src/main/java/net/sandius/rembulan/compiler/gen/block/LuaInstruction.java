@@ -43,8 +43,27 @@ public interface LuaInstruction {
 				default:      return "";
 			}
 		}
-	}
 
+		public static NumOpType loopType(Type index, Type limit, Type step) {
+			if (index.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+					&& limit.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+					&& step.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+
+				return NumOpType.Integer;
+			}
+			else if (index.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
+					|| limit.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
+					|| step.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
+
+				return NumOpType.Float;
+			}
+			else {
+				// exact type unknown, will however be numeric, or throw an exception at runtime
+				return NumOpType.Number;
+			}
+		}
+
+	}
 
 	class Move extends Linear implements LuaInstruction {
 
@@ -791,45 +810,23 @@ public interface LuaInstruction {
 		}
 
 		private NumOpType loopType(SlotState s) {
-			Type a0 = s.typeAt(r_base + 0);
-			Type a1 = s.typeAt(r_base + 1);
-			Type a2 = s.typeAt(r_base + 2);
-
-			if (a0.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
-					&& a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
-					&& a2.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-
-				return NumOpType.Integer;
-			}
-			else if (a0.isSubtypeOf(LuaTypes.NUMBER)
-					&& a1.isSubtypeOf(LuaTypes.NUMBER)
-					&& a2.isSubtypeOf(LuaTypes.NUMBER)) {
-
-				if (a0.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
-						|| a1.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
-						|| a2.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
-					return NumOpType.Float;
-				}
-				else {
-					return NumOpType.Number;
-				}
-			}
-			else {
-				// unable to determine at compile-time
-				return NumOpType.Any;
-			}
+			return NumOpType.loopType(
+					s.typeAt(r_base + 0),
+					s.typeAt(r_base + 1),
+					s.typeAt(r_base + 2));
 		}
-
-		// TODO: do we convert all values in (r_base + 0) ... (r_base + 2) to the loop type?
 
 		@Override
 		protected SlotState effect(SlotState s) {
 			Type tpe = loopType(s).toSlotType();
 
-			return s.update(r_base + 3, Slot.of(Origin.Computed.in(this), tpe.isSubtypeOf(LuaTypes.NUMBER)
-					? tpe  // we know at compile-time that it's numeric
-					: LuaTypes.NUMBER  // got something else -- may throw an exception at runtime!
-			));
+			Origin o = Origin.Computed.in(this);
+
+			for (int i = 0; i < 4; i++) {
+				s = s.update(r_base + i, Slot.of(o, tpe));
+			}
+
+			return s;
 		}
 
 		@Override

@@ -477,4 +477,28 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static boolean continueLoop(Number index, Number limit, Number step) {
+		boolean ascending;
+
+		if (step instanceof Double || step instanceof Float) {
+			double d = step.doubleValue();
+			if (d > 0.0) ascending = true;
+			else if (d < 0.0) ascending = false;
+			else return false;  // step is zero or NaN
+		}
+		else {
+			long l = step.longValue();
+			if (l > 0) ascending = true;
+			else if (l < 0) ascending = false;
+			else return false;  // step is zero
+		}
+
+		if (ascending) {
+			return MathImplementation.arithmetic(index, limit).do_le(index, limit);
+		}
+		else {
+			return MathImplementation.arithmetic(limit, index).do_le(limit, index);
+		}
+	}
+
 }
