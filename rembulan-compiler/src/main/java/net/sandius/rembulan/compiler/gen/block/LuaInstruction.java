@@ -46,13 +46,13 @@ public interface LuaInstruction {
 
 		public static NumOpType loopType(Type index, Type limit, Type step) {
 			if (index.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
-					&& limit.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
+//					&& limit.isSubtypeOf(LuaTypes.NUMBER_INTEGER)
 					&& step.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 
 				return NumOpType.Integer;
 			}
 			else if (index.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
-					|| limit.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
+//					|| limit.isSubtypeOf(LuaTypes.NUMBER_FLOAT)
 					|| step.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
 
 				return NumOpType.Float;
@@ -822,9 +822,13 @@ public interface LuaInstruction {
 
 			Origin o = Origin.Computed.in(this);
 
-			for (int i = 0; i < 4; i++) {
-				s = s.update(r_base + i, Slot.of(o, tpe));
-			}
+			Type origLimitTpe = s.typeAt(r_base + 1);
+			Type limitTpe = origLimitTpe.isSubtypeOf(LuaTypes.NUMBER) ? origLimitTpe : LuaTypes.NUMBER;
+
+			s = s.update(r_base + 0, Slot.of(o, tpe));
+			s = s.update(r_base + 1, Slot.of(o, limitTpe));
+			s = s.update(r_base + 2, Slot.of(o, tpe));
+			s = s.update(r_base + 3, Slot.of(o, tpe));  // FIXME: this is actually done by FORLOOP
 
 			return s;
 		}

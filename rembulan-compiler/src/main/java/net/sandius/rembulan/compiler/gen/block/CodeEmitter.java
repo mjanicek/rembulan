@@ -1498,16 +1498,15 @@ public class CodeEmitter {
 	}
 
 	private void _to_float(int r, SlotState st) {
-		_load_reg(r, st);
-		code.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Number.class)));
-		code.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(Number.class),
-				"doubleValue",
-				Type.getMethodDescriptor(
-						Type.DOUBLE_TYPE),
-				false));
+		_load_reg(r, st, Number.class);
+		code.add(_doubleValue(Number.class));
 		code.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		_store(r, st);
+	}
+
+	private void _to_number(int r, SlotState st, String what) {
+		_load_reg(r, st);
+		_to_number(what);
 		_store(r, st);
 	}
 
@@ -1579,6 +1578,10 @@ public class CodeEmitter {
 		switch (loopType) {
 			case Integer:
 				// the initial decrement
+
+				// convert to number if necessary
+				if (!st.typeAt(r_base + 1).isSubtypeOf(LuaTypes.NUMBER)) _to_number(r_base + 1, st, "'for' limit");
+
 				_load_reg(r_base, st, Number.class);
 				code.add(_longValue(Number.class));
 				_load_reg(r_base + 2, st, Number.class);
@@ -1589,9 +1592,12 @@ public class CodeEmitter {
 				break;
 
 			case Float:
-				// convert to float where it may be necessary
+				// convert to number if necessary
+				if (!st.typeAt(r_base + 1).isSubtypeOf(LuaTypes.NUMBER)) _to_number(r_base + 1, st, "'for' limit");
+
+				// convert to float if necessary (we are in a float loop, so both of these parameters
+				// are numbers, and at least one of them is a float)
 				if (!st.typeAt(r_base + 0).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) _to_float(r_base + 0, st);
-				if (!st.typeAt(r_base + 1).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) _to_float(r_base + 1, st);
 				if (!st.typeAt(r_base + 2).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) _to_float(r_base + 2, st);
 
 				// the initial decrement
@@ -1671,49 +1677,77 @@ public class CodeEmitter {
 				_load_reg(r_base + 2, st, Number.class);
 				code.add(_longValue(Number.class));
 				code.add(new InsnNode(LADD));
-				code.add(new InsnNode(DUP2));  // will re-use this value for comparison
+
+				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+					code.add(new InsnNode(DUP2));  // will re-use this value for comparison
+				}
 
 				// box and store
 				code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
 				_store(r_base, st);  // save into register
 
-				_load_reg(r_base + 1, st, Number.class);
-				code.add(_longValue(Number.class));
-				code.add(new InsnNode(LCMP));
+				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+					_load_reg(r_base + 1, st, Number.class);
+					code.add(_longValue(Number.class));
+					code.add(new InsnNode(LCMP));
 
-				// Stack here: I(lcmp(index, limit))
+					// Stack here: I(lcmp(index, limit))
 
-				// We now have the integer representing the comparison of index and limit
-				// on the stack. To interpret this value, we now need to determine whether
-				// we're in an ascending or descending loop.
+					// We now have the integer representing the comparison of index and limit
+					// on the stack. To interpret this value, we now need to determine whether
+					// we're in an ascending or descending loop.
 
-				// compare step with zero
-				_load_reg(r_base + 2, st, Number.class);
-				code.add(_longValue(Number.class));
-				code.add(new InsnNode(LCONST_0));
-				code.add(new InsnNode(LCMP));
+					// compare step with zero
+					_load_reg(r_base + 2, st, Number.class);
+					code.add(_longValue(Number.class));
+					code.add(new InsnNode(LCONST_0));
+					code.add(new InsnNode(LCMP));
 
-				// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
+					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
 
-				code.add(new InsnNode(DUP));
-				code.add(new JumpInsnNode(IFGT, ascendingLoop));
-				code.add(new JumpInsnNode(IFLT, descendingLoop));
-				code.add(new InsnNode(POP));  // we won't be needing the comparison value
-				code.add(new JumpInsnNode(GOTO, _l(breakBranch)));  // zero-step: break
+					code.add(new InsnNode(DUP));
+					code.add(new JumpInsnNode(IFGT, ascendingLoop));
+					code.add(new JumpInsnNode(IFLT, descendingLoop));
+					code.add(new InsnNode(POP));  // we won't be needing the comparison value
+					code.add(new JumpInsnNode(GOTO, _l(breakBranch)));  // zero-step: break
 
-				code.add(descendingLoop);
-				// Stack here: I(lcmp(index, limit))
-				code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
-				code.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
-				code.add(new JumpInsnNode(GOTO, storeAndContinue));
+					code.add(descendingLoop);
+					// Stack here: I(lcmp(index, limit))
+					code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
+					code.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
+					code.add(new JumpInsnNode(GOTO, storeAndContinue));
 
-				code.add(ascendingLoop);
-				// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
-				// FIXME: do we really need to dump a full frame?
-				code.add(_fullFrame(2, new Object[] { INTEGER, INTEGER }));
-				code.add(new InsnNode(POP));
-				code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
-				// fall-through to store-and-continue
+					code.add(ascendingLoop);
+					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
+					// FIXME: do we really need to dump a full frame?
+					code.add(_fullFrame(2, new Object[] { INTEGER, INTEGER }));
+					code.add(new InsnNode(POP));
+					code.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
+					// fall-through to store-and-continue
+				}
+				else {
+					// limit is not statically known to be an integer
+
+					// Stack here: empty
+
+					_load_reg(r_base + 0, st, Number.class);
+					_load_reg(r_base + 1, st, Number.class);
+					_load_reg(r_base + 2, st, Number.class);
+					code.add(new MethodInsnNode(
+							INVOKESTATIC,
+							Type.getInternalName(Dispatch.class),
+							"continueLoop",
+							Type.getMethodDescriptor(
+									Type.BOOLEAN_TYPE,
+									Type.getType(Number.class),
+									Type.getType(Number.class),
+									Type.getType(Number.class)),
+							false));
+
+					code.add(new JumpInsnNode(IFEQ, _l(breakBranch)));
+					// else fall-through to store-and-continue
+				}
+
 				break;
 
 			case Float:
