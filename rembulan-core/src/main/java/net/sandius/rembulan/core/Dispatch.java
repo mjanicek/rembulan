@@ -133,6 +133,17 @@ public abstract class Dispatch {
 		}
 	}
 
+	private static void try_mt_arithmetic(LuaState state, ObjectSink result, String event, Object o) throws ControlThrowable {
+		Object handler = Metatables.getMetamethod(state, event, o);
+
+		if (handler != null) {
+			call(state, result, handler, o);
+		}
+		else {
+			throw IllegalOperationAttemptException.arithmetic(o);
+		}
+	}
+
 	public static void add(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		MathImplementation math = MathImplementation.arithmetic(a, b);
 		if (math != null) {
@@ -242,6 +253,17 @@ public abstract class Dispatch {
 		}
 	}
 
+	private static void try_mt_bitwise(LuaState state, ObjectSink result, String event, Object o) throws ControlThrowable {
+		Object handler = Metatables.getMetamethod(state, event, o);
+
+		if (handler != null) {
+			call(state, result, handler, o);
+		}
+		else {
+			throw IllegalOperationAttemptException.bitwise(o);
+		}
+	}
+
 	public static void band(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
@@ -302,6 +324,21 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static void unm(LuaState state, ObjectSink result, Object o) throws ControlThrowable {
+		MathImplementation m = MathImplementation.arithmetic(o);
+
+		if (m != null) {
+			result.setTo(m.do_unm(Conversions.objectAsNumber(o)));
+		}
+		else {
+			try_mt_arithmetic(state, result, Metatables.MT_UNM, o);
+		}
+	}
+
+	public static Number unm(Number n) {
+		return MathImplementation.arithmetic(n).do_unm(n);
+	}
+
 	public static void bnot(LuaState state, ObjectSink result, Object o) throws ControlThrowable {
 		Long lo = Conversions.objectAsLong(o);
 
@@ -309,15 +346,7 @@ public abstract class Dispatch {
 			result.setTo(RawOperators.rawbnot(lo));
 		}
 		else {
-			Object handler = Metatables.getMetamethod(state, Metatables.MT_BNOT, o);
-
-			if (handler != null) {
-				call(state, result, handler, o);
-			}
-			else {
-				throw IllegalOperationAttemptException.bitwise(o);
-			}
-
+			try_mt_bitwise(state, result, Metatables.MT_BNOT, o);
 		}
 	}
 

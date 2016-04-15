@@ -85,6 +85,10 @@ public class BoxedPrimitivesMethods {
 				false);
 	}
 
+	public static MethodInsnNode box(Type from, Class to) {
+		return box(from, Type.getType(to));
+	}
+
 	public static AbstractInsnNode unbox(Class clazz, Type requiredType) {
 		if (requiredType.equals(Type.LONG_TYPE)) {
 			return BoxedPrimitivesMethods.longValue(clazz);

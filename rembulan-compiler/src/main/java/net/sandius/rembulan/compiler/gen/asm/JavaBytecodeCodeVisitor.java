@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
+import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -15,8 +16,10 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
+import static org.objectweb.asm.Opcodes.DNEG;
 import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.IXOR;
+import static org.objectweb.asm.Opcodes.LNEG;
 import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.RETURN;
 
@@ -247,7 +250,40 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitUnm(Object id, SlotState st, int r_dest, int r_arg) {
-		throw new UnsupportedOperationException();  // TODO
+		switch (StaticMathImplementation.MAY_BE_INTEGER.opType(st.typeAt(r_arg))) {
+
+			case Integer:
+				add(e.loadRegister(r_arg, st, Number.class));
+				add(BoxedPrimitivesMethods.unbox(Number.class, Type.LONG_TYPE));
+				add(new InsnNode(LNEG));
+				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
+				break;
+
+			case Float:
+				add(e.loadRegister(r_arg, st, Number.class));
+				add(BoxedPrimitivesMethods.unbox(Number.class, Type.DOUBLE_TYPE));
+				add(new InsnNode(DNEG));
+				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Double.class));
+				break;
+
+			case Number:
+				add(e.loadRegister(r_arg, st, Number.class));
+				add(DispatchMethods.numeric("unm", 1));
+				break;
+
+			case Any:
+				e._save_pc(id);
+
+				add(e.loadDispatchPreamble());
+				add(e.loadRegister(r_arg, st));
+				add(DispatchMethods.dynamic("unm", 1));
+
+				e._resumptionPoint(id);
+				add(e.retrieve_0());
+				break;
+		}
+
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override

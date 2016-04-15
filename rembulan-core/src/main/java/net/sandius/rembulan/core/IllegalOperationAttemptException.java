@@ -15,6 +15,11 @@ public class IllegalOperationAttemptException extends RuntimeException {
 		return new IllegalOperationAttemptException("perform arithmetic on", typeName);
 	}
 
+	public static IllegalOperationAttemptException arithmetic(Object o) {
+		String typeName = Value.typeOf(o).name;
+		return new IllegalOperationAttemptException("perform arithmetic on", typeName);
+	}
+
 	public static IllegalOperationAttemptException comparison(Object a, Object b) {
 		String ta = Value.typeOf(a).name;
 		String tb = Value.typeOf(b).name;

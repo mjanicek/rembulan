@@ -15,6 +15,8 @@ public abstract class MathImplementation {
 	public abstract Number do_idiv(Number a, Number b);
 	public abstract Double do_pow(Number a, Number b);
 
+	public abstract Number do_unm(Number n);
+
 	public abstract boolean do_eq(Number a, Number b);
 	public abstract boolean do_lt(Number a, Number b);
 	public abstract boolean do_le(Number a, Number b);
@@ -54,6 +56,11 @@ public abstract class MathImplementation {
 		@Override
 		public Double do_pow(Number a, Number b) {
 			return rawpow(a.doubleValue(), b.doubleValue());
+		}
+
+		@Override
+		public Number do_unm(Number n) {
+			return -n.longValue();
 		}
 
 		@Override
@@ -111,6 +118,11 @@ public abstract class MathImplementation {
 		}
 
 		@Override
+		public Number do_unm(Number n) {
+			return -n.doubleValue();
+		}
+
+		@Override
 		public boolean do_eq(Number a, Number b) {
 			return a.doubleValue() == b.doubleValue();
 		}
@@ -140,8 +152,35 @@ public abstract class MathImplementation {
 	}
 
 	public static MathImplementation arithmetic(Number a, Number b) {
-		if ((a instanceof Double || a instanceof Float)
+		if (a == null || b == null) {
+			return null;
+		}
+		else if ((a instanceof Double || a instanceof Float)
 				|| (b instanceof Double || b instanceof Float)) {
+			return FLOAT_MATH;
+		}
+		else {
+			return INTEGER_MATH;
+		}
+	}
+
+	public static MathImplementation arithmetic(Object o) {
+		if (o instanceof Number) {
+			return arithmetic((Number) o);
+		}
+		else if (o instanceof String) {
+			return arithmetic(Conversions.objectAsNumber(o));
+		}
+		else {
+			return null;
+		}
+	}
+
+	public static MathImplementation arithmetic(Number n) {
+		if (n == null) {
+			return null;
+		}
+		else if (n instanceof Double || n instanceof Float) {
 			return FLOAT_MATH;
 		}
 		else {
