@@ -227,6 +227,22 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   BitwiseError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "number has no integer representation")
   BitwiseError in BaseLibContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform bitwise operation on a function value")
 
+  val StringLength = fragment ("StringLength") {
+    """local s = "hello"
+      |return #s
+    """
+  }
+  StringLength in EmptyContext succeedsWith (5)
+
+  val SeqTableLength = fragment ("SeqTableLength") {
+    """local t = {}
+      |t[1] = "hi"
+      |t[2] = "there"
+      |return #t
+    """
+  }
+  SeqTableLength in EmptyContext succeedsWith (2)
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
