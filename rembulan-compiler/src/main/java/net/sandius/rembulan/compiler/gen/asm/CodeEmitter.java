@@ -203,7 +203,7 @@ public class CodeEmitter {
 	public InsnList loadRegisterValue(int registerIndex, Class castTo) {
 		InsnList il = new InsnList();
 		il.add(loadRegisterValue(registerIndex));
-		il.add(checkCast(castTo));
+		il.add(ASMUtils.checkCast(castTo));
 		return il;
 	}
 
@@ -224,7 +224,7 @@ public class CodeEmitter {
 		Class clazz = Object.class;
 
 		if (castTo != null && !castTo.isAssignableFrom(clazz)) {
-			il.add(checkCast(castTo));
+			il.add(ASMUtils.checkCast(castTo));
 		}
 
 		return il;
@@ -367,10 +367,6 @@ public class CodeEmitter {
 		return il;
 	}
 
-
-	public static AbstractInsnNode checkCast(Class clazz) {
-		return new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz));
-	}
 
 	public AbstractInsnNode loadLuaState() {
 		return new VarInsnNode(ALOAD, LV_STATE);

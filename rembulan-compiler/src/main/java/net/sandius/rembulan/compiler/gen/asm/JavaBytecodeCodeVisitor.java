@@ -505,7 +505,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		// assuming that _0 is of type Boolean.class
 
-		il.add(CodeEmitter.checkCast(Boolean.class));
+		il.add(ASMUtils.checkCast(Boolean.class));
 		il.add(BoxedPrimitivesMethods.booleanValue());
 
 		// compare stack top with the expected value -- branch if not equal

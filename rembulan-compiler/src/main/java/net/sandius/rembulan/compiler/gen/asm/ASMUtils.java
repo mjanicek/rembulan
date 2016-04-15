@@ -8,6 +8,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 
 import java.util.Arrays;
 
@@ -52,6 +53,10 @@ public abstract class ASMUtils {
 
 	public static FrameNode frameSame1(Class clazz) {
 		return new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(clazz) });
+	}
+
+	public static AbstractInsnNode checkCast(Class clazz) {
+		return new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz));
 	}
 
 	public static AbstractInsnNode loadInt(int i) {
