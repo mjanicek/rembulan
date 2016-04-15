@@ -96,7 +96,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	@Override
 	public void visitGetUpVal(Object id, SlotState st, int r_dest, int upvalueIndex) {
 		add(e.getUpvalueReference(upvalueIndex));
-		add(e.getUpvalueValue());
+		add(UpvalueMethods.get());
 		add(e.storeToRegister(r_dest, st));
 	}
 
@@ -106,7 +106,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		add(e.loadDispatchPreamble());
 		add(e.getUpvalueReference(upvalueIndex));
-		add(e.getUpvalueValue());
+		add(UpvalueMethods.get());
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(DispatchMethods.index());
 
@@ -135,7 +135,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		add(e.loadDispatchPreamble());
 		add(e.getUpvalueReference(upvalueIndex));
-		add(e.getUpvalueValue());
+		add(UpvalueMethods.get());
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(e.loadRegisterOrConstant(rk_value, st));
 		add(DispatchMethods.newindex());
@@ -147,7 +147,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitSetUpVal(Object id, SlotState st, int r_src, int upvalueIndex) {
 		add(e.getUpvalueReference(upvalueIndex));
 		add(e.loadRegister(r_src, st));
-		add(e.setUpvalueValue());
+		add(UpvalueMethods.set());
 	}
 
 	@Override

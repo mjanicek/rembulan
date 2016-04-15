@@ -218,8 +218,8 @@ public class CodeEmitter {
 		InsnList il = new InsnList();
 
 		if (slots.isCaptured(registerIndex)) {
-			il.add(getDownvalue(registerIndex));
-			il.add(getUpvalueValue());
+			il.add(loadRegisterValue(registerIndex, Upvalue.class));
+			il.add(UpvalueMethods.get());
 		}
 		else {
 			il.add(loadRegisterValue(registerIndex));
@@ -311,13 +311,6 @@ public class CodeEmitter {
 	}
 
 
-	public InsnList getDownvalue(int idx) {
-		InsnList il = new InsnList();
-		il.add(new VarInsnNode(ALOAD, registerOffset() + idx));
-		il.add(checkCast(Upvalue.class));
-		return il;
-	}
-
 	public InsnList loadRegisterOrConstant(int rk, SlotState slots, Class castTo) {
 		Check.notNull(slots);
 
@@ -367,9 +360,9 @@ public class CodeEmitter {
 		InsnList il = new InsnList();
 
 		if (slots.isCaptured(registerIndex)) {
-			il.add(getDownvalue(registerIndex));
+			il.add(loadRegisterValue(registerIndex, Upvalue.class));
 			il.add(new InsnNode(SWAP));
-			il.add(setUpvalueValue());
+			il.add(UpvalueMethods.set());
 		}
 		else {
 			il.add(storeRegisterValue(registerIndex));
@@ -894,27 +887,6 @@ public class CodeEmitter {
 		return il;
 	}
 
-	public AbstractInsnNode getUpvalueValue() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(Upvalue.class),
-				"get",
-				Type.getMethodDescriptor(
-						Type.getType(Object.class)),
-				false);
-	}
-
-	public AbstractInsnNode setUpvalueValue() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(Upvalue.class),
-				"set",
-				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
-						Type.getType(Object.class)),
-				false);
-	}
-
 	@Deprecated
 	public Type[] closureConstructorTypes(int numUpvalues) {
 		Type[] argTypes = new Type[numUpvalues];
@@ -936,9 +908,8 @@ public class CodeEmitter {
 	public InsnList uncaptureRegister(int registerIndex) {
 		InsnList il = new InsnList();
 
-		il.add(loadRegisterValue(registerIndex));
-		il.add(checkCast(Upvalue.class));
-		il.add(getUpvalueValue());
+		il.add(loadRegisterValue(registerIndex, Upvalue.class));
+		il.add(UpvalueMethods.get());
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;
