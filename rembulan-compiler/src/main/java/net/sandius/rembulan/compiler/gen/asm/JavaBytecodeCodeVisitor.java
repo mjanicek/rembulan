@@ -102,7 +102,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitGetTabUp(Object id, SlotState st, int r_dest, int upvalueIndex, int rk_key) {
-		e._save_pc(id);
+		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		add(rp.save());
 
 		add(e.loadDispatchPreamble());
 		add(e.getUpvalueReference(upvalueIndex));
@@ -110,28 +111,30 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(DispatchMethods.index());
 
-		e._resumptionPoint(id);
+		add(rp.resume());
 		add(e.retrieve_0());
 		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitGetTable(Object id, SlotState st, int r_dest, int r_tab, int rk_key) {
-		e._save_pc(id);
+		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		add(rp.save());
 
 		add(e.loadDispatchPreamble());
 		add(e.loadRegister(r_tab, st));
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(DispatchMethods.index());
 
-		e._resumptionPoint(id);
+		add(rp.resume());
 		add(e.retrieve_0());
 		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitSetTabUp(Object id, SlotState st, int upvalueIndex, int rk_key, int rk_value) {
-		e._save_pc(id);
+		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		add(rp.save());
 
 		add(e.loadDispatchPreamble());
 		add(e.getUpvalueReference(upvalueIndex));
@@ -140,7 +143,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadRegisterOrConstant(rk_value, st));
 		add(DispatchMethods.newindex());
 
-		e._resumptionPoint(id);
+		add(rp.resume());
 	}
 
 	@Override
@@ -152,7 +155,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSetTable(Object id, SlotState st, int r_tab, int rk_key, int rk_value) {
-		e._save_pc(id);
+		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		add(rp.save());
 
 		add(e.loadDispatchPreamble());
 		add(e.loadRegister(r_tab, st));
@@ -160,7 +164,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadRegisterOrConstant(rk_value, st));
 		add(DispatchMethods.newindex());
 
-		e._resumptionPoint(id);
+		add(rp.resume());
 	}
 
 	@Override
@@ -172,7 +176,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSelf(Object id, SlotState st, int r_dest, int r_self, int rk_key) {
-		e._save_pc(id);
+		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		add(rp.save());
 
 		add(e.loadDispatchPreamble());
 
@@ -183,7 +188,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(DispatchMethods.index());
 
-		e._resumptionPoint(id);
+		add(rp.resume());
 		add(e.retrieve_0());
 		add(e.storeToRegister(r_dest, st));
 	}
@@ -272,13 +277,14 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				break;
 
 			case Any:
-				e._save_pc(id);
+				CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+				add(rp.save());
 
 				add(e.loadDispatchPreamble());
 				add(e.loadRegister(r_arg, st));
 				add(DispatchMethods.dynamic(DispatchMethods.OP_UNM, 1));
 
-				e._resumptionPoint(id);
+				add(rp.resume());
 				add(e.retrieve_0());
 				break;
 		}
@@ -353,7 +359,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitCall(Object id, SlotState st, int r_tgt, int b, int c) {
-		e._save_pc(id);
+		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		add(rp.save());
 
 		int actualKind = InvokeKind.fromLua(b);
 
@@ -362,7 +369,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.mapInvokeArgumentsToKinds(r_tgt + 1, st, b, actualKind));
 		add(DispatchMethods.call(actualKind));
 
-		e._resumptionPoint(id);
+		add(rp.resume());
 
 		if (c > 0) {
 			st = st.consumeVarargs();

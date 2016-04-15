@@ -415,20 +415,40 @@ public class CodeEmitter {
 		return il;
 	}
 
-	@Deprecated
-	public void _save_pc(Object o) {
-		LabelNode rl = _l(o);
+	public class ResumptionPoint {
 
-		int idx = resumptionPoints.size();
-		resumptionPoints.add(rl);
+		public final int index;
 
-		code.add(ASMUtils.loadInt(idx));
-		code.add(new VarInsnNode(ISTORE, LV_RESUME));
+		private ResumptionPoint(int index) {
+			this.index = index;
+		}
+
+		public LabelNode label() {
+			return _l(this);
+		}
+
+		public InsnList save() {
+			InsnList il = new InsnList();
+			il.add(ASMUtils.loadInt(index));
+			il.add(new VarInsnNode(ISTORE, LV_RESUME));
+			return il;
+		}
+
+		public InsnList resume() {
+			InsnList il = new InsnList();
+
+			il.add(label());
+			il.add(new FrameNode(F_SAME, 0, null, 0, null));
+
+			return il;
+		}
 	}
 
-	@Deprecated
-	public void _resumptionPoint(Object label) {
-		_label_here(label);
+	public ResumptionPoint resumptionPoint() {
+		int idx = resumptionPoints.size();
+		ResumptionPoint rp = new ResumptionPoint(idx);
+		resumptionPoints.add(rp.label());
+		return rp;
 	}
 
 	private LabelNode l_insns_begin;
@@ -915,6 +935,7 @@ public class CodeEmitter {
 		return il;
 	}
 
+	@Deprecated
 	private void _frame_same(InsnList il) {
 		il.add(new FrameNode(F_SAME, 0, null, 0, null));
 	}
@@ -1026,12 +1047,14 @@ public class CodeEmitter {
 			code.add(storeToRegister(r_dest, s));
 		}
 		else {
-			_save_pc(id);
+			ResumptionPoint rp = resumptionPoint();
+			code.add(rp.save());
+
 			code.add(loadDispatchPreamble());
 			code.add(loadRegister(r_src, s));
 			code.add(DispatchMethods.dynamic(DispatchMethods.OP_BNOT, 1));
 
-			_resumptionPoint(id);
+			code.add(rp.resume());
 			code.add(retrieve_0());
 			code.add(storeToRegister(r_dest, s));
 		}
@@ -1154,15 +1177,15 @@ public class CodeEmitter {
 		Object id = new Object();
 		String method = op.name().toLowerCase();  // FIXME: brittle
 
-		_save_pc(id);
+		ResumptionPoint rp = resumptionPoint();
+		code.add(rp.save());
 
 		code.add(loadDispatchPreamble());
 		code.add(loadRegisterOrConstant(rk_left, s));
 		code.add(loadRegisterOrConstant(rk_right, s));
 		code.add(DispatchMethods.dynamic(method, 2));
 
-		_resumptionPoint(id);
-
+		code.add(rp.resume());
 		code.add(retrieve_0());
 		code.add(storeToRegister(r_dest, s));
 	}
@@ -1194,14 +1217,15 @@ public class CodeEmitter {
 
 		// TODO: specialise
 
-		_save_pc(id);
+		ResumptionPoint rp = resumptionPoint();
+		code.add(rp.save());
 
 		code.add(loadDispatchPreamble());
 		code.add(loadRegisterOrConstant(rk_left, s));
 		code.add(loadRegisterOrConstant(rk_right, s));
 		code.add(DispatchMethods.dynamic(methodName, 2));
 
-		_resumptionPoint(id);
+		code.add(rp.resume());
 		code.add(retrieve_0());
 
 		// assuming that _0 is of type Boolean.class
