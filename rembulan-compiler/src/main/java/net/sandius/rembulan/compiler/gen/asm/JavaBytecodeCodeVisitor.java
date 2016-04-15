@@ -17,6 +17,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
 import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.IXOR;
 import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.RETURN;
 
@@ -257,7 +258,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitNot(Object id, SlotState st, int r_dest, int r_arg) {
-		e._not(r_arg, r_dest, st);
+		add(e.loadRegisterAsBoolean(r_arg, st));
+
+		add(ASMUtils.loadInt(1));
+		add(new InsnNode(IXOR));
+		add(ASMUtils.box(Type.BOOLEAN_TYPE, Type.getType(Boolean.class)));
+
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override

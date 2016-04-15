@@ -1308,35 +1308,6 @@ public class CodeEmitter {
 	}
 
 	@Deprecated
-	public void _not(int r_src, int r_dest, SlotState s) {
-		LabelNode l_false = new LabelNode();
-		LabelNode l_store = new LabelNode();
-
-		code.add(loadRegisterAsBoolean(r_src, s));
-
-		// TODO: simply do the following:
-		//   add(ASMUtils.loadInt(1));
-		//   add(new InsnNode(IXOR));
-		//   add(ASMUtils.box(box(Type.BOOLEAN_TYPE, Boolean.class))
-
-		code.add(new JumpInsnNode(IFEQ, l_false));
-
-		// value is true, emitting false
-		code.add(ASMUtils.loadBoxedBoolean(false));
-		code.add(new JumpInsnNode(GOTO, l_store));
-
-		// value is false, emitting true
-		code.add(l_false);
-		code.add(new FrameNode(F_SAME, 0, null, 0, null));
-		code.add(ASMUtils.loadBoxedBoolean(true));
-
-		// store result
-		code.add(l_store);
-		code.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(Boolean.class) }));
-		code.add(storeToRegister(r_dest, s));
-	}
-
-	@Deprecated
 	public void _bnot(Object id, int r_src, int r_dest, SlotState s) {
 		if (s.typeAt(r_src).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 			_load_reg(r_src, s, Number.class);
