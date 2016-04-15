@@ -506,28 +506,22 @@ public abstract class Dispatch {
 		}
 	}
 
+	private static boolean isNonZero(MathImplementation m, Number n) {
+		return !m.do_eq(0L, n);
+	}
+
 	public static boolean continueLoop(Number index, Number limit, Number step) {
-		boolean ascending;
-
-		if (step instanceof Double || step instanceof Float) {
-			double d = step.doubleValue();
-			if (d > 0.0) ascending = true;
-			else if (d < 0.0) ascending = false;
-			else return false;  // step is zero or NaN
-		}
-		else {
-			long l = step.longValue();
-			if (l > 0) ascending = true;
-			else if (l < 0) ascending = false;
-			else return false;  // step is zero
+		MathImplementation m_step = MathImplementation.arithmetic(step, 0L);
+		if (!isNonZero(m_step, step)) {
+			return false;  // step is zero or NaN
 		}
 
-		if (ascending) {
-			return MathImplementation.arithmetic(index, limit).do_le(index, limit);
-		}
-		else {
-			return MathImplementation.arithmetic(limit, index).do_le(limit, index);
-		}
+		boolean ascending = m_step.do_lt(0L, step);
+
+		MathImplementation m_cmp = MathImplementation.arithmetic(index, limit);
+		return ascending
+				? m_cmp.do_le(index, limit)
+				: m_cmp.do_le(limit, index);
 	}
 
 }
