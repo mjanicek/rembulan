@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler.gen.asm;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
@@ -43,6 +44,14 @@ public abstract class ASMUtils {
 		Type[] result = new Type[n];
 		Arrays.fill(result, t);
 		return result;
+	}
+
+	public static FrameNode frameSame() {
+		return new FrameNode(F_SAME, 0, null, 0, null);
+	}
+
+	public static FrameNode frameSame1(Class clazz) {
+		return new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(clazz) });
 	}
 
 	public static AbstractInsnNode loadInt(int i) {

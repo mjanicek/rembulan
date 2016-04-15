@@ -8,8 +8,6 @@ import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Conversions;
-import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.RawOperators;
@@ -438,7 +436,7 @@ public class CodeEmitter {
 			InsnList il = new InsnList();
 
 			il.add(label());
-			il.add(new FrameNode(F_SAME, 0, null, 0, null));
+			il.add(ASMUtils.frameSame());
 
 			return il;
 		}
@@ -469,7 +467,7 @@ public class CodeEmitter {
 		resumptionPoints.add(l_body_begin);
 
 		code.add(l_body_begin);
-		_frame_same(code);
+		code.add(ASMUtils.frameSame());
 
 		// FIXME: the initial Target emits a label + stack frame immediately after this;
 		// that is illegal if there is no instruction in between
@@ -736,7 +734,7 @@ public class CodeEmitter {
 
 	protected void _error_state() {
 		errorState.add(l_error_state);
-		errorState.add(new FrameNode(F_SAME, 0, null, 0, null));
+		errorState.add(ASMUtils.frameSame());
 		errorState.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
 		errorState.add(new InsnNode(DUP));
 		errorState.add(ASMUtils.ctor(IllegalStateException.class));
@@ -857,7 +855,7 @@ public class CodeEmitter {
 
 	protected void _resumption_handler() {
 		resumeHandler.add(l_handler_begin);
-		resumeHandler.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { Type.getInternalName(ControlThrowable.class) }));
+		resumeHandler.add(ASMUtils.frameSame1(ControlThrowable.class));
 
 		resumeHandler.add(new InsnNode(DUP));
 
@@ -933,18 +931,6 @@ public class CodeEmitter {
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;
-	}
-
-	@Deprecated
-	private void _frame_same(InsnList il) {
-		il.add(new FrameNode(F_SAME, 0, null, 0, null));
-	}
-
-	@Deprecated
-	public void _label_here(Object identity) {
-		LabelNode l = _l(identity);
-		code.add(l);
-		_frame_same(code);
 	}
 
 	@Deprecated
@@ -1350,7 +1336,7 @@ public class CodeEmitter {
 		}
 	}
 
-	private FrameNode _fullFrame(int numStack, Object[] stack) {
+	private FrameNode fullFrame(int numStack, Object[] stack) {
 		ArrayList<Object> locals = new ArrayList<>();
 		locals.add(parent.thisClassType().getInternalName());
 		locals.add(Type.getInternalName(LuaState.class));
@@ -1436,7 +1422,7 @@ public class CodeEmitter {
 					il.add(ascendingLoop);
 					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
 					// FIXME: do we really need to dump a full frame?
-					il.add(_fullFrame(2, new Object[] { INTEGER, INTEGER }));
+					il.add(fullFrame(2, new Object[] { INTEGER, INTEGER }));
 					il.add(new InsnNode(POP));
 					il.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
 					il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
@@ -1512,7 +1498,7 @@ public class CodeEmitter {
 				// step is NaN => break
 				il.add(stepIsNan);
 				// Stack here: D(index) D(limit) D(step)
-				il.add(_fullFrame(3, new Object[] { DOUBLE, DOUBLE, DOUBLE }));
+				il.add(fullFrame(3, new Object[] { DOUBLE, DOUBLE, DOUBLE }));
 				il.add(new InsnNode(POP2));
 				il.add(new InsnNode(POP2));
 				il.add(new InsnNode(POP2));
@@ -1520,14 +1506,14 @@ public class CodeEmitter {
 
 				il.add(descendingLoop);
 				// Stack here: D(index) D(limit)
-				il.add(_fullFrame(2, new Object[] { DOUBLE, DOUBLE }));
+				il.add(fullFrame(2, new Object[] { DOUBLE, DOUBLE }));
 				il.add(new InsnNode(DCMPL));  // if index or limit is NaN, result in -1
 				il.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
 				il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 
 				il.add(ascendingLoop);
 				// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
-				il.add(_fullFrame(3, new Object[] { DOUBLE, DOUBLE, INTEGER }));
+				il.add(fullFrame(3, new Object[] { DOUBLE, DOUBLE, INTEGER }));
 				il.add(new InsnNode(POP));
 				il.add(new InsnNode(DCMPG));  // if index or limit is NaN, result in +1
 				il.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit

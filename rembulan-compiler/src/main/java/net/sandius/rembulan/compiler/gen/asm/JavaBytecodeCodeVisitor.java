@@ -41,7 +41,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitTarget(Object id) {
-		e._label_here(id);
+		add(e._l(id));
+		add(ASMUtils.frameSame());
 	}
 
 	@Override
