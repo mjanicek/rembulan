@@ -1310,32 +1310,22 @@ public class CodeEmitter {
 	@Deprecated
 	public void _bnot(Object id, int r_src, int r_dest, SlotState s) {
 		if (s.typeAt(r_src).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-			_load_reg(r_src, s, Number.class);
-			_get_longValue(Number.class);
+			code.add(loadRegister(r_src, s, Number.class));
+			code.add(longValue(Number.class));
 			code.add(new LdcInsnNode(-1L));
 			code.add(new InsnNode(LXOR));
 			code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
-			_store(r_dest, s);
+			code.add(storeToRegister(r_dest, s));
 		}
 		else {
 			_save_pc(id);
-			_loadState();
-			_loadObjectSink();
-			_load_reg(r_src, s);
-			code.add(new MethodInsnNode(
-					INVOKESTATIC,
-					Type.getInternalName(Dispatch.class),
-					"bnot",
-					Type.getMethodDescriptor(
-							Type.VOID_TYPE,
-							Type.getType(LuaState.class),
-							Type.getType(ObjectSink.class),
-							Type.getType(Object.class)),
-					false));
+			code.add(loadDispatchPreamble());
+			code.add(loadRegister(r_src, s));
+			code.add(dispatchGeneric("bnot", 1));
 
 			_resumptionPoint(id);
-			_retrieve_0();
-			_store(r_dest, s);
+			code.add(retrieve_0());
+			code.add(storeToRegister(r_dest, s));
 		}
 	}
 
