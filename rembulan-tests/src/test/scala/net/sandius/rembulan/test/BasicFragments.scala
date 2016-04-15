@@ -248,7 +248,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |return i, -i, f, -f
     """
   }
-  UnmOnNumbers in EmptyContext succeedsWith ("42", -42.0, "42.6", -42.6)
+  UnmOnNumericString in EmptyContext succeedsWith ("42", -42.0, "42.6", -42.6)
 
   val UnmOnNonNumericString = fragment ("UnmOnNonNumericString") {
     """local s = "hello"
