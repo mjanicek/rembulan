@@ -227,6 +227,42 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   BitwiseError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "number has no integer representation")
   BitwiseError in BaseLibContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform bitwise operation on a function value")
 
+  val UnmOnNumbers = fragment ("UnmOnNumbers") {
+    """local i = 42
+      |local f = 42.6
+      |local function fun()
+      |  if assert then return 314 else return 0.314 end
+      |end
+      |local n = fun()
+      |
+      |return i, -i, f, -f, n, -n
+    """
+  }
+  UnmOnNumbers in EmptyContext succeedsWith (42, -42, 42.6, -42.6, 0.314, -0.314)
+  UnmOnNumbers in BaseLibContext succeedsWith (42, -42, 42.6, -42.6, 20, -20)
+
+  val UnmOnNumericString = fragment ("UnmOnNumericString") {
+    """local i = "42"
+      |local f = "42.6"
+      |
+      |return i, -i, f, -f
+    """
+  }
+  UnmOnNumbers in EmptyContext succeedsWith ("42", -42.0, "42.6", -42.6)
+
+  val UnmOnNonNumericString = fragment ("UnmOnNonNumericString") {
+    """local s = "hello"
+      |return -s
+    """
+  }
+  UnmOnNonNumericString in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform arithmetic on a string value")
+
+  val UnmOnNil = fragment ("UnmOnNil") {
+    """return -x
+    """
+  }
+  UnmOnNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform arithmetic on a nil value")
+
   val StringLength = fragment ("StringLength") {
     """local s = "hello"
       |return #s
