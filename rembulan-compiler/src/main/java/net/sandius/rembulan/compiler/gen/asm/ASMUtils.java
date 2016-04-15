@@ -8,6 +8,8 @@ import org.objectweb.asm.tree.IntInsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
+import java.util.Arrays;
+
 import static org.objectweb.asm.Opcodes.*;
 
 public abstract class ASMUtils {
@@ -35,6 +37,12 @@ public abstract class ASMUtils {
 	public static Type typeForClassName(String className) {
 		Check.notNull(className);
 		return Type.getType("L" + className.replace(".", "/") + ";");
+	}
+
+	public static Type[] fillTypes(Type t, int n) {
+		Type[] result = new Type[n];
+		Arrays.fill(result, t);
+		return result;
 	}
 
 	public static AbstractInsnNode loadInt(int i) {
