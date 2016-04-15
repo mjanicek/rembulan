@@ -495,18 +495,22 @@ public class CodeEmitter {
 		}
 	}
 
-	public void _load_unboxed_reg_or_const(int rk, SlotState slots, Type requiredType) {
+	public InsnList loadUnboxedRegisterOrConstant(int rk, SlotState slots, Type requiredType) {
+		InsnList il = new InsnList();
+
 		// FIXME: this duplicates the retrieval code!
 		if (rk < 0) {
 			// it's a constant
 			Object c = context.getConst(-rk - 1);
-			code.add(loadUnboxedConstant(c, requiredType));
+			il.add(loadUnboxedConstant(c, requiredType));
 		}
 		else {
 			// it's a register
-			_load_reg(rk, slots, Number.class);
-			code.add(unbox(Number.class, requiredType));
+			il.add(loadRegister(rk, slots, Number.class));
+			il.add(unbox(Number.class, requiredType));
 		}
+
+		return il;
 	}
 
 	private AbstractInsnNode storeRegisterValue(int registerIndex) {
@@ -602,6 +606,19 @@ public class CodeEmitter {
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE,
 						args.toArray(new Type[0])),
+				false);
+	}
+
+	public AbstractInsnNode dispatchNumeric(String methodName, int numArgs) {
+		Type[] args = new Type[numArgs];
+		Arrays.fill(args, Type.getType(Number.class));
+		return new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Dispatch.class),
+				methodName,
+				Type.getMethodDescriptor(
+						Type.getType(Number.class),
+						args),
 				false);
 	}
 
@@ -1329,7 +1346,9 @@ public class CodeEmitter {
 		}
 	}
 
-	private void _native_binop_and_box(InsnList il, int opcode, boolean resultIsLong) {
+	private InsnList nativeBinaryOperationAndBox(int opcode, boolean resultIsLong) {
+		InsnList il = new InsnList();
+
 		il.add(new InsnNode(opcode));
 		if (resultIsLong) {
 			il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
@@ -1337,9 +1356,13 @@ public class CodeEmitter {
 		else {
 			il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 		}
+
+		return il;
 	}
 
-	private void _raw_binop_and_box(InsnList il, String name, boolean argsAreLong, boolean resultIsLong) {
+	private InsnList rawBinaryOperationAndBox(String name, boolean argsAreLong, boolean resultIsLong) {
+		InsnList il = new InsnList();
+
 		il.add(new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(RawOperators.class),
@@ -1355,101 +1378,117 @@ public class CodeEmitter {
 		else {
 			il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 		}
+		return il;
 	}
 
-	private void _binary_integer_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+	private InsnList binaryIntegerOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		InsnList il = new InsnList();
+		
 		switch (op) {
 			case DIV:
 			case POW:
-				_load_unboxed_reg_or_const(rk_left, s, Type.DOUBLE_TYPE);
-				_load_unboxed_reg_or_const(rk_right, s, Type.DOUBLE_TYPE);
+				il.add(loadUnboxedRegisterOrConstant(rk_left, s, Type.DOUBLE_TYPE));
+				il.add(loadUnboxedRegisterOrConstant(rk_right, s, Type.DOUBLE_TYPE));
 				break;
 
 			case SHL:
 			case SHR:
-				_load_unboxed_reg_or_const(rk_left, s, Type.LONG_TYPE);
-				_load_unboxed_reg_or_const(rk_right, s, Type.INT_TYPE);
+				il.add(loadUnboxedRegisterOrConstant(rk_left, s, Type.LONG_TYPE));
+				il.add(loadUnboxedRegisterOrConstant(rk_right, s, Type.INT_TYPE));
 				break;
 
 			default:
-				_load_unboxed_reg_or_const(rk_left, s, Type.LONG_TYPE);
-				_load_unboxed_reg_or_const(rk_right, s, Type.LONG_TYPE);
+				il.add(loadUnboxedRegisterOrConstant(rk_left, s, Type.LONG_TYPE));
+				il.add(loadUnboxedRegisterOrConstant(rk_right, s, Type.LONG_TYPE));
 				break;
 		}
 
 		switch (op) {
-			case ADD:  _native_binop_and_box(code, LADD, true); break;
-			case SUB:  _native_binop_and_box(code, LSUB, true); break;
-			case MUL:  _native_binop_and_box(code, LMUL, true); break;
-			case MOD:  _raw_binop_and_box(code, "rawmod", true, true); break;
-			case POW:  _raw_binop_and_box(code, "rawpow", false, false); break;
-			case DIV:  _native_binop_and_box(code, DDIV, false); break;
-			case IDIV: _raw_binop_and_box(code, "rawidiv", true, true); break;
-			case BAND: _native_binop_and_box(code, LAND, true); break;
-			case BOR:  _native_binop_and_box(code, LOR, true); break;
-			case BXOR: _native_binop_and_box(code, LXOR, true); break;
-			case SHL:  _native_binop_and_box(code, LSHL, true); break;
-			case SHR:  _native_binop_and_box(code, LUSHR, true); break;
+			case ADD:  il.add(nativeBinaryOperationAndBox(LADD, true)); break;
+			case SUB:  il.add(nativeBinaryOperationAndBox(LSUB, true)); break;
+			case MUL:  il.add(nativeBinaryOperationAndBox(LMUL, true)); break;
+			case MOD:  il.add(rawBinaryOperationAndBox("rawmod", true, true)); break;
+			case POW:  il.add(rawBinaryOperationAndBox("rawpow", false, false)); break;
+			case DIV:  il.add(nativeBinaryOperationAndBox(DDIV, false)); break;
+			case IDIV: il.add(rawBinaryOperationAndBox("rawidiv", true, true)); break;
+			case BAND: il.add(nativeBinaryOperationAndBox(LAND, true)); break;
+			case BOR:  il.add(nativeBinaryOperationAndBox(LOR, true)); break;
+			case BXOR: il.add(nativeBinaryOperationAndBox(LXOR, true)); break;
+			case SHL:  il.add(nativeBinaryOperationAndBox(LSHL, true)); break;
+			case SHR:  il.add(nativeBinaryOperationAndBox(LUSHR, true)); break;
 			default: throw new IllegalStateException("Illegal op: " + op);
 		}
 
-		_store(r_dest, s);
+		il.add(storeToRegister(r_dest, s));
+
+		return il;
 	}
 
-	private void _binary_float_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
-		_load_unboxed_reg_or_const(rk_left, s, Type.DOUBLE_TYPE);
-		_load_unboxed_reg_or_const(rk_right, s, Type.DOUBLE_TYPE);
+	private InsnList binaryFloatOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		InsnList il = new InsnList();
+
+		il.add(loadUnboxedRegisterOrConstant(rk_left, s, Type.DOUBLE_TYPE));
+		il.add(loadUnboxedRegisterOrConstant(rk_right, s, Type.DOUBLE_TYPE));
 
 		switch (op) {
-			case ADD:  _native_binop_and_box(code, DADD, false); break;
-			case SUB:  _native_binop_and_box(code, DSUB, false); break;
-			case MUL:  _native_binop_and_box(code, DMUL, false); break;
-			case MOD:  _raw_binop_and_box(code, "rawmod", false, false); break;
-			case POW:  _raw_binop_and_box(code, "rawpow", false, false); break;
-			case DIV:  _native_binop_and_box(code, DDIV, false); break;
-			case IDIV: _raw_binop_and_box(code, "rawidiv", false, false); break;
+			case ADD:  il.add(nativeBinaryOperationAndBox(DADD, false)); break;
+			case SUB:  il.add(nativeBinaryOperationAndBox(DSUB, false)); break;
+			case MUL:  il.add(nativeBinaryOperationAndBox(DMUL, false)); break;
+			case MOD:  il.add(rawBinaryOperationAndBox("rawmod", false, false)); break;
+			case POW:  il.add(rawBinaryOperationAndBox("rawpow", false, false)); break;
+			case DIV:  il.add(nativeBinaryOperationAndBox(DDIV, false)); break;
+			case IDIV: il.add(rawBinaryOperationAndBox("rawidiv", false, false)); break;
 			default: throw new IllegalStateException("Illegal op: " + op);
 		}
 
-		_store(r_dest, s);
+		il.add(storeToRegister(r_dest, s));
+
+		return il;
 	}
 
-	private void _binary_numeric_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
-		String method = op.name().toLowerCase();
-		_load_reg_or_const(rk_left, s, Number.class);
-		_load_reg_or_const(rk_right, s, Number.class);
-		_dispatch_binop(method, Number.class);
-		_store(r_dest, s);
+	private InsnList binaryNumericOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		InsnList il = new InsnList();
+
+		String method = op.name().toLowerCase();  // FIXME: brittle
+		il.add(loadRegisterOrConstant(rk_left, s, Number.class));
+		il.add(loadRegisterOrConstant(rk_right, s, Number.class));
+		il.add(dispatchNumeric(method, 2));
+		il.add(storeToRegister(r_dest, s));
+
+		return il;
 	}
 
+	@Deprecated
 	private void _binary_dynamic_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
 		Object id = new Object();
-		String method = op.name().toLowerCase();
+		String method = op.name().toLowerCase();  // FIXME: brittle
 
 		_save_pc(id);
 
-		_loadState();
-		_loadObjectSink();
-		_load_reg_or_const(rk_left, s, Object.class);
-		_load_reg_or_const(rk_right, s, Object.class);
+		code.add(loadDispatchPreamble());
+		code.add(loadRegisterOrConstant(rk_left, s));
+		code.add(loadRegisterOrConstant(rk_right, s));
 		code.add(dispatchGeneric(method, 2));
 
 		_resumptionPoint(id);
-		_retrieve_0();
-		_store(r_dest, s);
+
+		code.add(retrieve_0());
+		code.add(storeToRegister(r_dest, s));
 	}
 
 	@Deprecated
 	public void binaryOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		InsnList il = code;  // FIXME
+
 		StaticMathImplementation staticMath = LuaBinaryOperation.mathForOp(op);
 		LuaInstruction.NumOpType ot = staticMath.opType(
 				LuaBinaryOperation.slotType(context(), s, rk_left),
 				LuaBinaryOperation.slotType(context(), s, rk_right));
 
 		switch (ot) {
-			case Integer: _binary_integer_op(op, s, r_dest, rk_left, rk_right); break;
-			case Float:   _binary_float_op(op, s, r_dest, rk_left, rk_right); break;
-			case Number:  _binary_numeric_op(op, s, r_dest, rk_left, rk_right); break;
+			case Integer: code.add(binaryIntegerOperation(op, s, r_dest, rk_left, rk_right)); break;
+			case Float:   code.add(binaryFloatOperation(op, s, r_dest, rk_left, rk_right)); break;
+			case Number:  code.add(binaryNumericOperation(op, s, r_dest, rk_left, rk_right)); break;
 			case Any:     _binary_dynamic_op(op, s, r_dest, rk_left, rk_right); break;
 		}
 	}
