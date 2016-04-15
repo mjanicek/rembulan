@@ -350,6 +350,24 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static void len(LuaState state, ObjectSink result, Object o) throws ControlThrowable {
+		if (o instanceof String) {
+			result.setTo((long) RawOperators.stringLen((String) o));
+		}
+		else {
+			Object handler = Metatables.getMetamethod(state, Metatables.MT_LEN, o);
+			if (handler != null) {
+				call(state, result, handler, o);
+			}
+			else if (o instanceof Table) {
+				result.setTo((long) ((Table) o).rawlen());
+			}
+			else {
+				throw IllegalOperationAttemptException.length(o);
+			}
+		}
+	}
+
 	private static class ComparisonResumable implements Resumable {
 
 		@Override

@@ -58,4 +58,9 @@ public class IllegalOperationAttemptException extends RuntimeException {
 		}
 	}
 
+	public static IllegalOperationAttemptException length(Object o) {
+		String typeName = Value.typeOf(o).name;
+		return new IllegalOperationAttemptException("attempt to get length of a " + typeName + " value");
+	}
+
 }

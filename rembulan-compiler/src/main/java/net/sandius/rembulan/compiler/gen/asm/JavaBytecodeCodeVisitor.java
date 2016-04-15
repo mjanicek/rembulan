@@ -481,7 +481,32 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitLen(Object id, SlotState st, int r_dest, int r_arg) {
-		throw new UnsupportedOperationException();  // TODO
+		if (st.typeAt(r_arg).isSubtypeOf(LuaTypes.STRING)) {
+			add(e.loadRegister(r_arg, st, String.class));
+			add(new MethodInsnNode(
+					INVOKESTATIC,
+					Type.getInternalName(RawOperators.class),
+					"stringLen",
+					Type.getMethodDescriptor(
+							Type.INT_TYPE,
+							Type.getType(String.class)),
+					false));
+			add(new InsnNode(I2L));
+			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
+		}
+		else {
+			CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+			add(rp.save());
+
+			add(e.loadDispatchPreamble());
+			add(e.loadRegister(r_arg, st));
+			add(DispatchMethods.dynamic(DispatchMethods.OP_LEN, 1));
+
+			add(rp.resume());
+			add(e.retrieve_0());
+		}
+
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
