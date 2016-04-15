@@ -1486,9 +1486,9 @@ public class CodeEmitter {
 				LuaBinaryOperation.slotType(context(), s, rk_right));
 
 		switch (ot) {
-			case Integer: code.add(binaryIntegerOperation(op, s, r_dest, rk_left, rk_right)); break;
-			case Float:   code.add(binaryFloatOperation(op, s, r_dest, rk_left, rk_right)); break;
-			case Number:  code.add(binaryNumericOperation(op, s, r_dest, rk_left, rk_right)); break;
+			case Integer: il.add(binaryIntegerOperation(op, s, r_dest, rk_left, rk_right)); break;
+			case Float:   il.add(binaryFloatOperation(op, s, r_dest, rk_left, rk_right)); break;
+			case Number:  il.add(binaryNumericOperation(op, s, r_dest, rk_left, rk_right)); break;
 			case Any:     _binary_dynamic_op(op, s, r_dest, rk_left, rk_right); break;
 		}
 	}
