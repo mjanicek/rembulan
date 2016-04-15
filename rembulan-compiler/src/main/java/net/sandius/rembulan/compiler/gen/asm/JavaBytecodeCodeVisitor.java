@@ -6,7 +6,6 @@ import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
-import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -14,12 +13,10 @@ import net.sandius.rembulan.util.IntIterable;
 import net.sandius.rembulan.util.IntIterator;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -212,15 +209,10 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	protected InsnList rawBinaryOperationAndBox(String name, boolean argsAreLong, boolean resultIsLong) {
 		InsnList il = new InsnList();
 
-		il.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(RawOperators.class),
+		il.add(OperatorMethods.rawBinaryOperator(
 				name,
-				Type.getMethodDescriptor(
-						resultIsLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE,
-						argsAreLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE,
-						argsAreLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE),
-				false));
+				resultIsLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE,
+				argsAreLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE));
 		if (resultIsLong) {
 			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
 		}
@@ -483,14 +475,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitLen(Object id, SlotState st, int r_dest, int r_arg) {
 		if (st.typeAt(r_arg).isSubtypeOf(LuaTypes.STRING)) {
 			add(e.loadRegister(r_arg, st, String.class));
-			add(new MethodInsnNode(
-					INVOKESTATIC,
-					Type.getInternalName(RawOperators.class),
-					"stringLen",
-					Type.getMethodDescriptor(
-							Type.INT_TYPE,
-							Type.getType(String.class)),
-					false));
+			add(OperatorMethods.stringLen());
 			add(new InsnNode(I2L));
 			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
 		}
