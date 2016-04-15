@@ -10,37 +10,37 @@ public abstract class RawOperators {
 
 	// Arithmetic operators
 
-	public static long rawadd(long a, long b) {
-		return a + b;
-	}
+//	public static long rawadd(long a, long b) {
+//		return a + b;
+//	}
+//
+//	public static double rawadd(double a, double b) {
+//		return a + b;
+//	}
+//
+//	public static long rawsub(long a, long b) {
+//		return a - b;
+//	}
+//
+//	public static double rawsub(double a, double b) {
+//		return a - b;
+//	}
+//
+//	public static long rawmul(long a, long b) {
+//		return a * b;
+//	}
+//
+//	public static double rawmul(double a, double b) {
+//		return a * b;
+//	}
 
-	public static double rawadd(double a, double b) {
-		return a + b;
-	}
-
-	public static long rawsub(long a, long b) {
-		return a - b;
-	}
-
-	public static double rawsub(double a, double b) {
-		return a - b;
-	}
-
-	public static long rawmul(long a, long b) {
-		return a * b;
-	}
-
-	public static double rawmul(double a, double b) {
-		return a * b;
-	}
-
-	public static double rawdiv(long a, long b) {
-		return ((double) a) / ((double) b);
-	}
-
-	public static double rawdiv(double a, double b) {
-		return a / b;
-	}
+//	public static double rawdiv(long a, long b) {
+//		return ((double) a) / ((double) b);
+//	}
+//
+//	public static double rawdiv(double a, double b) {
+//		return a / b;
+//	}
 
 	public static long rawmod(long a, long b) {
 		if (b == 0) throw new IllegalArgumentException("attempt to perform 'n%0'");
@@ -64,39 +64,39 @@ public abstract class RawOperators {
 		return Math.pow(a, b);
 	}
 
-	public static long rawunm(long n) {
-		return -n;
-	}
-
-	public static double rawunm(double n) {
-		return -n;
-	}
+//	public static long rawunm(long n) {
+//		return -n;
+//	}
+//
+//	public static double rawunm(double n) {
+//		return -n;
+//	}
 
 	// Bitwise operators
 
-	public static Number rawband(long la, long lb) {
-		return la & lb;
-	}
-
-	public static Number rawbor(long la, long lb) {
-		return la | lb;
-	}
-
-	public static Number rawbxor(long la, long lb) {
-		return la ^ lb;
-	}
-
-	public static Number rawbnot(long ln) {
-		return ~ln;
-	}
-
-	public static Number rawshl(long la, long lb) {
-		return la << lb;
-	}
-
-	public static Number rawshr(long la, long lb) {
-		return la >>> lb;
-	}
+//	public static Number rawband(long la, long lb) {
+//		return la & lb;
+//	}
+//
+//	public static Number rawbor(long la, long lb) {
+//		return la | lb;
+//	}
+//
+//	public static Number rawbxor(long la, long lb) {
+//		return la ^ lb;
+//	}
+//
+//	public static Number rawbnot(long ln) {
+//		return ~ln;
+//	}
+//
+//	public static Number rawshl(long la, long lb) {
+//		return la << lb;
+//	}
+//
+//	public static Number rawshr(long la, long lb) {
+//		return la >>> lb;
+//	}
 
 	// Comparison operators
 

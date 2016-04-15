@@ -28,14 +28,12 @@ public abstract class AltOperators {
 
 		@Override
 		public Number add(Number a, Number b) {
-			return RawOperators.rawadd(a.longValue(), b.longValue());
-//			return a.longValue() + b.longValue();
+			return a.longValue() + b.longValue();
 		}
 
 		@Override
 		public Number sub(Number a, Number b) {
-			return RawOperators.rawsub(a.longValue(), b.longValue());
-//			return a.longValue() - b.longValue();
+			return a.longValue() - b.longValue();
 		}
 
 		@Override
@@ -50,14 +48,12 @@ public abstract class AltOperators {
 
 		@Override
 		public Number add(Number a, Number b) {
-			return RawOperators.rawadd(a.doubleValue(), b.doubleValue());
-//			return a.doubleValue() + b.doubleValue();
+			return a.doubleValue() + b.doubleValue();
 		}
 
 		@Override
 		public Number sub(Number a, Number b) {
-			return RawOperators.rawsub(a.doubleValue(), b.doubleValue());
-//			return a.doubleValue() - b.doubleValue();
+			return a.doubleValue() - b.doubleValue();
 		}
 
 		@Override

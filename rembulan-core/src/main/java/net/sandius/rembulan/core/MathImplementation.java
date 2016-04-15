@@ -25,22 +25,22 @@ public abstract class MathImplementation {
 
 		@Override
 		public Long do_add(Number a, Number b) {
-			return rawadd(a.longValue(), b.longValue());
+			return a.longValue() + b.longValue();
 		}
 
 		@Override
 		public Long do_sub(Number a, Number b) {
-			return rawsub(a.longValue(), b.longValue());
+			return a.longValue() - b.longValue();
 		}
 
 		@Override
 		public Long do_mul(Number a, Number b) {
-			return rawmul(a.longValue(), b.longValue());
+			return a.longValue() * b.longValue();
 		}
 
 		@Override
 		public Double do_div(Number a, Number b) {
-			return rawdiv(a.longValue(), b.longValue());
+			return a.doubleValue() / b.doubleValue();
 		}
 
 		@Override
@@ -84,22 +84,22 @@ public abstract class MathImplementation {
 
 		@Override
 		public Double do_add(Number a, Number b) {
-			return rawadd(a.doubleValue(), b.doubleValue());
+			return a.doubleValue() + b.doubleValue();
 		}
 
 		@Override
 		public Double do_sub(Number a, Number b) {
-			return rawsub(a.doubleValue(), b.doubleValue());
+			return a.doubleValue() - b.doubleValue();
 		}
 
 		@Override
 		public Number do_mul(Number a, Number b) {
-			return rawmul(a.doubleValue(), b.doubleValue());
+			return a.doubleValue() * b.doubleValue();
 		}
 
 		@Override
 		public Double do_div(Number a, Number b) {
-			return rawdiv(a.doubleValue(), b.doubleValue());
+			return a.doubleValue() / b.doubleValue();
 		}
 
 		@Override

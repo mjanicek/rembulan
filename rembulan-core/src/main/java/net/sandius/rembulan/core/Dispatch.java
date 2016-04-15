@@ -269,7 +269,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.objectAsLong(b);
 
 		if (la != null && lb != null) {
-			result.setTo(RawOperators.rawband(la, lb));
+			result.setTo(la & lb);
 		}
 		else {
 			try_mt_bitwise(state, result, Metatables.MT_BAND, a, b);
@@ -281,7 +281,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.objectAsLong(b);
 
 		if (la != null && lb != null) {
-			result.setTo(RawOperators.rawbor(la, lb));
+			result.setTo(la | lb);
 		}
 		else {
 			try_mt_bitwise(state, result, Metatables.MT_BOR, a, b);
@@ -293,7 +293,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.objectAsLong(b);
 
 		if (la != null && lb != null) {
-			result.setTo(RawOperators.rawbxor(la, lb));
+			result.setTo(la ^ lb);
 		}
 		else {
 			try_mt_bitwise(state, result, Metatables.MT_BXOR, a, b);
@@ -305,7 +305,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.objectAsLong(b);
 
 		if (la != null && lb != null) {
-			result.setTo(RawOperators.rawshl(la, lb));
+			result.setTo(la << lb);
 		}
 		else {
 			try_mt_bitwise(state, result, Metatables.MT_SHL, a, b);
@@ -317,7 +317,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.objectAsLong(b);
 
 		if (la != null && lb != null) {
-			result.setTo(RawOperators.rawshr(la, lb));
+			result.setTo(la >>> lb);
 		}
 		else {
 			try_mt_bitwise(state, result, Metatables.MT_SHR, a, b);
@@ -343,7 +343,7 @@ public abstract class Dispatch {
 		Long lo = Conversions.objectAsLong(o);
 
 		if (lo != null) {
-			result.setTo(RawOperators.rawbnot(lo));
+			result.setTo(~lo);
 		}
 		else {
 			try_mt_bitwise(state, result, Metatables.MT_BNOT, o);

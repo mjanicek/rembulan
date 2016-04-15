@@ -2,6 +2,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
+@Deprecated
 public class Operators {
 
 	public static Object tryMetamethodCall(LuaState state, String event, Object a, Object b) {
@@ -62,29 +63,29 @@ public class Operators {
 	public static Object add(LuaState state, Object a, Object b) {
 		if (Value.isInteger(a)) {
 			if (Value.isInteger(b)) {
-				return RawOperators.rawadd(Value.toInteger(a), Value.toInteger(b));
+				return Value.toInteger(a) + Value.toInteger(b);
 			}
 			else if (Value.isFloat(b)) {
-				return RawOperators.rawadd(Value.toInteger(a), Value.toFloat(b));
+				return Value.toInteger(a) + Value.toFloat(b);
 			}
 			else if (b instanceof String) {
 				Double db = Conversions.stringAsDouble((String) b);
 				if (db != null) {
-					return RawOperators.rawadd(Value.toInteger(a), db);
+					return Value.toInteger(a) + db;
 				}
 			}
 		}
 		else if (Value.isFloat(a)) {
 			if (Value.isInteger(b)) {
-				return RawOperators.rawadd(Value.toFloat(a), Value.toInteger(b));
+				return Value.toFloat(a) + Value.toInteger(b);
 			}
 			else if (Value.isFloat(b)) {
-				return RawOperators.rawadd(Value.toFloat(a), Value.toFloat(b));
+				return Value.toFloat(a) + Value.toFloat(b);
 			}
 			else if (b instanceof String) {
 				Double db = Conversions.stringAsDouble((String) b);
 				if (db != null) {
-					return RawOperators.rawadd(Value.toFloat(a), db);
+					return Value.toFloat(a) + db;
 				}
 			}
 		}
@@ -92,15 +93,15 @@ public class Operators {
 			Double da = Conversions.stringAsDouble((String) a);
 			if (da != null) {
 				if (Value.isInteger(b)) {
-					return RawOperators.rawadd(da, Value.toInteger(b));
+					return da + Value.toInteger(b);
 				}
 				else if (Value.isFloat(b)) {
-					return RawOperators.rawadd(da, Value.toFloat(b));
+					return da + Value.toFloat(b);
 				}
 				else if (b instanceof String) {
 					Double db = Conversions.stringAsDouble((String) b);
 					if (db != null) {
-						return RawOperators.rawadd(da, db);
+						return da + db;
 					}
 				}
 			}
@@ -112,29 +113,29 @@ public class Operators {
 	public static Object sub(LuaState state, Object a, Object b) {
 		if (Value.isInteger(a)) {
 			if (Value.isInteger(b)) {
-				return RawOperators.rawsub(Value.toInteger(a), Value.toInteger(b));
+				return Value.toInteger(a) - Value.toInteger(b);
 			}
 			else if (Value.isFloat(b)) {
-				return RawOperators.rawsub(Value.toInteger(a), Value.toFloat(b));
+				return Value.toInteger(a) - Value.toFloat(b);
 			}
 			else if (b instanceof String) {
 				Double db = Conversions.stringAsDouble((String) b);
 				if (db != null) {
-					return RawOperators.rawsub(Value.toInteger(a), db);
+					return Value.toInteger(a) - db;
 				}
 			}
 		}
 		else if (Value.isFloat(a)) {
 			if (Value.isInteger(b)) {
-				return RawOperators.rawsub(Value.toFloat(a), Value.toInteger(b));
+				return Value.toFloat(a) - Value.toInteger(b);
 			}
 			else if (Value.isFloat(b)) {
-				return RawOperators.rawsub(Value.toFloat(a), Value.toFloat(b));
+				return Value.toFloat(a) - Value.toFloat(b);
 			}
 			else if (b instanceof String) {
 				Double db = Conversions.stringAsDouble((String) b);
 				if (db != null) {
-					return RawOperators.rawsub(Value.toFloat(a), db);
+					return Value.toFloat(a) - db;
 				}
 			}
 		}
@@ -142,15 +143,15 @@ public class Operators {
 			Double da = Conversions.stringAsDouble((String) a);
 			if (da != null) {
 				if (Value.isInteger(b)) {
-					return RawOperators.rawsub(da, Value.toInteger(b));
+					return da - Value.toInteger(b);
 				}
 				else if (Value.isFloat(b)) {
-					return RawOperators.rawsub(da, Value.toFloat(b));
+					return da - Value.toFloat(b);
 				}
 				else if (b instanceof String) {
 					Double db = Conversions.stringAsDouble((String) b);
 					if (db != null) {
-						return RawOperators.rawsub(da, db);
+						return da - db;
 					}
 				}
 			}
@@ -203,36 +204,36 @@ public class Operators {
 	public static Object band(LuaState state, Object a, Object b) {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
-		return la != null && lb != null ? RawOperators.rawband(la, lb) : tryMetamethodCall(state, Metatables.MT_BAND, a, b);
+		return la != null && lb != null ? la & lb : tryMetamethodCall(state, Metatables.MT_BAND, a, b);
 	}
 
 	public static Object bor(LuaState state, Object a, Object b) {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
-		return la != null && lb != null ? RawOperators.rawbor(la, lb) : tryMetamethodCall(state, Metatables.MT_BOR, a, b);
+		return la != null && lb != null ? la | lb : tryMetamethodCall(state, Metatables.MT_BOR, a, b);
 	}
 
 	public static Object bxor(LuaState state, Object a, Object b) {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
-		return la != null && lb != null ? RawOperators.rawbxor(la, lb) : tryMetamethodCall(state, Metatables.MT_BXOR, a, b);
+		return la != null && lb != null ? la ^ lb : tryMetamethodCall(state, Metatables.MT_BXOR, a, b);
 	}
 
 	public static Object bnot(LuaState state, Object o) {
 		Long lo = Conversions.objectAsLong(o);
-		return lo != null ? RawOperators.rawbnot(lo) : tryMetamethodCall(state, Metatables.MT_BNOT, o);
+		return lo != null ? ~lo : tryMetamethodCall(state, Metatables.MT_BNOT, o);
 	}
 
 	public static Object shl(LuaState state, Object a, Object b) {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
-		return la != null && lb != null ? RawOperators.rawshl(la, lb) : tryMetamethodCall(state, Metatables.MT_SHL, a, b);
+		return la != null && lb != null ? la << lb : tryMetamethodCall(state, Metatables.MT_SHL, a, b);
 	}
 
 	public static Object shr(LuaState state, Object a, Object b) {
 		Long la = Conversions.objectAsLong(a);
 		Long lb = Conversions.objectAsLong(b);
-		return la != null && lb != null ? RawOperators.rawshr(la, lb) : tryMetamethodCall(state, Metatables.MT_SHR, a, b);
+		return la != null && lb != null ? la >>> lb : tryMetamethodCall(state, Metatables.MT_SHR, a, b);
 	}
 
 	public static Object concat(LuaState state, Object a, Object b) {
