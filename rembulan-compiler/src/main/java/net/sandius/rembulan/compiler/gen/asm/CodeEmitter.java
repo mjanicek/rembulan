@@ -1058,7 +1058,7 @@ public class CodeEmitter {
 			_save_pc(id);
 			code.add(loadDispatchPreamble());
 			code.add(loadRegister(r_src, s));
-			code.add(DispatchMethods.dynamic("bnot", 1));
+			code.add(DispatchMethods.dynamic(DispatchMethods.OP_BNOT, 1));
 
 			_resumptionPoint(id);
 			code.add(retrieve_0());
@@ -1375,7 +1375,7 @@ public class CodeEmitter {
 				il.add(loadRegister(r_base, st));
 				il.add(objectToNumber("'for' initial value"));
 				il.add(new InsnNode(SWAP));
-				il.add(DispatchMethods.numeric("sub", 2));
+				il.add(DispatchMethods.numeric(DispatchMethods.OP_SUB, 2));
 				il.add(storeToRegister(r_base, st));
 				break;
 
@@ -1583,7 +1583,7 @@ public class CodeEmitter {
 				// increment index
 				il.add(loadRegister(r_base, st, Number.class));
 				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(DispatchMethods.numeric("add", 2));
+				il.add(DispatchMethods.numeric(DispatchMethods.OP_ADD, 2));
 				il.add(new InsnNode(DUP));
 				il.add(storeToRegister(r_base, st));  // save index into register
 

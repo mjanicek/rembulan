@@ -268,7 +268,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 			case Number:
 				add(e.loadRegister(r_arg, st, Number.class));
-				add(DispatchMethods.numeric("unm", 1));
+				add(DispatchMethods.numeric(DispatchMethods.OP_UNM, 1));
 				break;
 
 			case Any:
@@ -276,7 +276,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 				add(e.loadDispatchPreamble());
 				add(e.loadRegister(r_arg, st));
-				add(DispatchMethods.dynamic("unm", 1));
+				add(DispatchMethods.dynamic(DispatchMethods.OP_UNM, 1));
 
 				e._resumptionPoint(id);
 				add(e.retrieve_0());
@@ -314,17 +314,17 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitEq(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp(id, "eq", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		e._cmp(id, DispatchMethods.OP_EQ, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
 	}
 
 	@Override
 	public void visitLe(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp(id, "le", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		e._cmp(id, DispatchMethods.OP_LE, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
 	}
 
 	@Override
 	public void visitLt(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp(id, "lt", rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		e._cmp(id, DispatchMethods.OP_LT, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
 	}
 
 	@Override

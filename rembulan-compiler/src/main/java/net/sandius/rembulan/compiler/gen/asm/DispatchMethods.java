@@ -18,6 +18,35 @@ public class DispatchMethods {
 		// not to be instantiated
 	}
 
+	public static final String OP_ADD = "add";
+	public static final String OP_SUB = "sub";
+	public static final String OP_MUL = "mul";
+	public static final String OP_DIV = "div";
+	public static final String OP_MOD = "mod";
+	public static final String OP_POW = "pow";
+	public static final String OP_UNM = "unm";
+	public static final String OP_IDIV = "idiv";
+
+	public static final String OP_BAND = "band";
+	public static final String OP_BOR = "bor";
+	public static final String OP_BXOR = "bxor";
+	public static final String OP_BNOT = "bnot";
+	public static final String OP_SHL = "shl";
+	public static final String OP_SHR = "shr";
+
+	public static final String OP_CONCAT = "concat";
+	public static final String OP_LEN = "len";
+
+	public static final String OP_EQ = "eq";
+	public static final String OP_LT = "lt";
+	public static final String OP_LE = "le";
+
+	public static final String OP_INDEX = "index";
+	public static final String OP_NEWINDEX = "newindex";
+
+	public static final String OP_CALL = "call";
+
+
 	public static AbstractInsnNode dynamic(String methodName, int numArgs) {
 		ArrayList<Type> args = new ArrayList<>();
 		args.add(Type.getType(LuaState.class));
@@ -49,18 +78,18 @@ public class DispatchMethods {
 	}
 
 	public static AbstractInsnNode index() {
-		return dynamic("index", 2);
+		return dynamic(OP_INDEX, 2);
 	}
 
 	public static AbstractInsnNode newindex() {
-		return dynamic("newindex", 3);
+		return dynamic(OP_NEWINDEX, 3);
 	}
 
 	public static AbstractInsnNode call(int kind) {
 		return new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(Dispatch.class),
-				"call",
+				OP_CALL,
 				InvokeKind.staticMethodType(kind).getDescriptor(),
 				false);
 	}
