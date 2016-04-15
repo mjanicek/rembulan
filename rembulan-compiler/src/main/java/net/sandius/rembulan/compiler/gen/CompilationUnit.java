@@ -87,6 +87,8 @@ public class CompilationUnit {
 		int numFixedParams = generic.numOfFixedParameters();
 		boolean isVararg = generic.isVararg();
 
+		// TODO: factor this dependency on the asm package out of here
+
 		ClassEmitter classEmitter = new ClassEmitter(ctx, numFixedParams, isVararg);
 
 		classEmitter.begin();
