@@ -1,9 +1,12 @@
-package net.sandius.rembulan.compiler.gen.block;
+package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
+import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
+import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
+import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
@@ -16,7 +19,6 @@ import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;

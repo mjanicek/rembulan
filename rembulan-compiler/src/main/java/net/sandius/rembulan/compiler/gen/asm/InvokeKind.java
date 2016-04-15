@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.gen.block;
+package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
@@ -9,7 +9,6 @@ import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.Function3;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.Type;
 
 import java.util.ArrayList;

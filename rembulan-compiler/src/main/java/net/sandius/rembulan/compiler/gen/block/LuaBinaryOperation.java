@@ -57,7 +57,7 @@ public class LuaBinaryOperation extends Linear implements LuaInstruction {
 		return op.name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
 	}
 
-	protected static Type slotType(PrototypeContext context, SlotState slots, int rk) {
+	public static Type slotType(PrototypeContext context, SlotState slots, int rk) {
 		return rk < 0 ? context.constType(-rk - 1) : slots.typeAt(rk);
 	}
 

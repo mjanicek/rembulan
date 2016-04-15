@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.gen;
 
-import net.sandius.rembulan.compiler.gen.block.ClassEmitter;
-import net.sandius.rembulan.compiler.gen.block.CodeEmitter;
+import net.sandius.rembulan.compiler.gen.asm.ClassEmitter;
+import net.sandius.rembulan.compiler.gen.asm.CodeEmitter;
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Target;

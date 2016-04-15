@@ -1,15 +1,15 @@
-package net.sandius.rembulan.compiler.gen.block;
+package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.SlotState;
+import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntIterable;
 import net.sandius.rembulan.util.IntIterator;
 import net.sandius.rembulan.util.ReadOnlyArray;
-import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;

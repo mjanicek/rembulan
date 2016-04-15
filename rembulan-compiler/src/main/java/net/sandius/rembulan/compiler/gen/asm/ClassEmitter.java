@@ -1,11 +1,10 @@
-package net.sandius.rembulan.compiler.gen.block;
+package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
-import net.sandius.rembulan.util.asm.ASMUtils;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
