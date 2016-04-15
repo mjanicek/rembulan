@@ -79,14 +79,14 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitLoadBool(Object id, SlotState st, int r_dest, boolean value) {
-		add(ASMUtils.loadBoxedBoolean(value));
+		add(BoxedPrimitivesMethods.loadBoxedBoolean(value));
 		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
 	public void visitLoadNil(Object id, SlotState st, int r_dest, int count) {
 		for (int i = 0; i < count; i++) {
-			add(CodeEmitter.loadNull());
+			add(BoxedPrimitivesMethods.loadNull());
 			add(e.storeToRegister(r_dest + i, st));
 		}
 	}
@@ -262,7 +262,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		add(ASMUtils.loadInt(1));
 		add(new InsnNode(IXOR));
-		add(ASMUtils.box(Type.BOOLEAN_TYPE, Type.getType(Boolean.class)));
+		add(BoxedPrimitivesMethods.box(Type.BOOLEAN_TYPE, Type.getType(Boolean.class)));
 
 		add(e.storeToRegister(r_dest, st));
 	}
@@ -297,7 +297,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		if (st.typeAt(r_index).isSubtypeOf(LuaTypes.BOOLEAN)) {
 			add(e.loadRegister(r_index, st, Boolean.class));
-			add(CodeEmitter.booleanValue());
+			add(BoxedPrimitivesMethods.booleanValue());
 		}
 		else {
 			add(e.loadRegister(r_index, st));

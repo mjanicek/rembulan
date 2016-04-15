@@ -192,50 +192,8 @@ public class CodeEmitter {
 		return new VarInsnNode(ALOAD, 0);
 	}
 
-	public static AbstractInsnNode loadNull() {
-		return new InsnNode(ACONST_NULL);
-	}
-
-	public static InsnList loadBoxedConstant(Object k, Class<?> castTo) {
-		InsnList il = new InsnList();
-
-		if (k == null) {
-			il.add(loadNull());
-		}
-		else if (k instanceof Boolean) {
-			il.add(ASMUtils.loadBoxedBoolean((Boolean) k));
-		}
-		else if (k instanceof Double || k instanceof Float) {
-			il.add(ASMUtils.loadDouble(((Number) k).doubleValue()));
-			il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-		}
-		else if (k instanceof Number) {
-			il.add(ASMUtils.loadLong(((Number) k).longValue()));
-			il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
-		}
-		else if (k instanceof String) {
-			il.add(new LdcInsnNode((String) k));
-		}
-		else {
-			throw new UnsupportedOperationException("Illegal constant type: " + k.getClass());
-		}
-
-		if (castTo != null) {
-			Check.notNull(k);
-			if (!castTo.isAssignableFrom(k.getClass())) {
-				il.add(checkCast(castTo));
-			}
-		}
-
-		return il;
-	}
-
-	public static InsnList loadBoxedConstant(Object k) {
-		return loadBoxedConstant(k, null);
-	}
-
 	public InsnList loadConstant(int idx, Class castTo) {
-		return loadBoxedConstant(context.getConst(idx), castTo);
+		return BoxedPrimitivesMethods.loadBoxedConstant(context.getConst(idx), castTo);
 	}
 
 	public InsnList loadConstant(int idx) {
@@ -376,91 +334,26 @@ public class CodeEmitter {
 		return loadRegisterOrConstant(rk, slots, null);
 	}
 
-	private static AbstractInsnNode loadUnboxedConstant(Object o, Type requiredType) {
-		if (o instanceof Number) {
-
-			Number n = (Number) o;
-
-			if (n instanceof Double || n instanceof Float) {
-
-				double d = n.doubleValue();
-
-				if (requiredType.equals(Type.LONG_TYPE)) {
-					// FIXME: which one is better?
-					return ASMUtils.loadLong(n.longValue());
-//					return ASMUtils.loadLong((long) d);
-				}
-				else if (requiredType.equals(Type.INT_TYPE)) {
-					// FIXME: which one is better?
-					return ASMUtils.loadInt(n.intValue());
-//					return ASMUtils.loadLong((int) d);
-				}
-				else if (requiredType.equals(Type.DOUBLE_TYPE)) {
-					// FIXME: which one is better?
-					return ASMUtils.loadDouble(n.doubleValue());
-//					return ASMUtils.loadDouble(d);
-				}
-				else {
-					throw new UnsupportedOperationException("Unsupported required type: " + requiredType);
-				}
-			}
-			else {
-				long l = n.longValue();
-
-				if (requiredType.equals(Type.LONG_TYPE)) {
-					// FIXME: which one is better?
-					return ASMUtils.loadLong(n.longValue());
-//					return ASMUtils.loadLong(l);
-				}
-				else if (requiredType.equals(Type.INT_TYPE)) {
-					// FIXME: which one is better?
-					return ASMUtils.loadInt(n.intValue());
-//					return ASMUtils.loadLong((int) l);
-				}
-				else if (requiredType.equals(Type.DOUBLE_TYPE)) {
-					// FIXME: which one is better?
-					return ASMUtils.loadDouble(n.doubleValue());
-//					return ASMUtils.loadDouble((double) l);
-				}
-				else {
-					throw new UnsupportedOperationException("Unsupported required type: " + requiredType);
-				}
-			}
-		}
-		else {
-			throw new UnsupportedOperationException("Unsupported constant type: "
-					+ (o != null ? o.getClass().getName() : "null"));
-		}
-	}
-
-	public static AbstractInsnNode unbox(Class clazz, Type requiredType) {
-		if (requiredType.equals(Type.LONG_TYPE)) {
-			return longValue(clazz);
-		}
-		else if (requiredType.equals(Type.INT_TYPE)) {
-			return intValue(clazz);
-		}
-		else if (requiredType.equals(Type.DOUBLE_TYPE)) {
-			return doubleValue(clazz);
-		}
-		else {
-			throw new UnsupportedOperationException("Unsupported required type: " + requiredType);
-		}
-	}
-
-	public InsnList loadUnboxedRegisterOrConstant(int rk, SlotState slots, Type requiredType) {
+	public InsnList loadNumericRegisterOrConstantValue(int rk, SlotState slots, Type requiredType) {
 		InsnList il = new InsnList();
 
 		// FIXME: this duplicates the retrieval code!
 		if (rk < 0) {
 			// it's a constant
-			Object c = context.getConst(-rk - 1);
-			il.add(loadUnboxedConstant(c, requiredType));
+			int constIndex = -rk - 1;
+			Object c = context.getConst(constIndex);
+			if (c instanceof Number) {
+				il.add(BoxedPrimitivesMethods.loadNumericValue((Number) c, requiredType));
+			}
+			else {
+				throw new IllegalArgumentException("Constant #" + constIndex + " is not a Number: "
+						+ c + " (" + (c != null ? c.getClass().getName() : "null") + ")");
+			}
 		}
 		else {
 			// it's a register
 			il.add(loadRegister(rk, slots, Number.class));
-			il.add(unbox(Number.class, requiredType));
+			il.add(BoxedPrimitivesMethods.unbox(Number.class, requiredType));
 		}
 
 		return il;
@@ -1201,7 +1094,7 @@ public class CodeEmitter {
 		InsnList il = new InsnList();
 		if (slots.typeAt(registerIndex).isSubtypeOf(LuaTypes.BOOLEAN)) {
 			il.add(loadRegister(registerIndex, slots, Boolean.class));
-			il.add(booleanValue());
+			il.add(BoxedPrimitivesMethods.booleanValue());
 		}
 		else {
 			il.add(loadRegister(registerIndex, slots));
@@ -1214,10 +1107,10 @@ public class CodeEmitter {
 	public void _bnot(Object id, int r_src, int r_dest, SlotState s) {
 		if (s.typeAt(r_src).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 			code.add(loadRegister(r_src, s, Number.class));
-			code.add(longValue(Number.class));
+			code.add(BoxedPrimitivesMethods.longValue(Number.class));
 			code.add(new LdcInsnNode(-1L));
 			code.add(new InsnNode(LXOR));
-			code.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+			code.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
 			code.add(storeToRegister(r_dest, s));
 		}
 		else {
@@ -1237,10 +1130,10 @@ public class CodeEmitter {
 
 		il.add(new InsnNode(opcode));
 		if (resultIsLong) {
-			il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
 		}
 		else {
-			il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 		}
 
 		return il;
@@ -1259,10 +1152,10 @@ public class CodeEmitter {
 						argsAreLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE),
 				false));
 		if (resultIsLong) {
-			il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
 		}
 		else {
-			il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 		}
 		return il;
 	}
@@ -1273,19 +1166,19 @@ public class CodeEmitter {
 		switch (op) {
 			case DIV:
 			case POW:
-				il.add(loadUnboxedRegisterOrConstant(rk_left, s, Type.DOUBLE_TYPE));
-				il.add(loadUnboxedRegisterOrConstant(rk_right, s, Type.DOUBLE_TYPE));
+				il.add(loadNumericRegisterOrConstantValue(rk_left, s, Type.DOUBLE_TYPE));
+				il.add(loadNumericRegisterOrConstantValue(rk_right, s, Type.DOUBLE_TYPE));
 				break;
 
 			case SHL:
 			case SHR:
-				il.add(loadUnboxedRegisterOrConstant(rk_left, s, Type.LONG_TYPE));
-				il.add(loadUnboxedRegisterOrConstant(rk_right, s, Type.INT_TYPE));
+				il.add(loadNumericRegisterOrConstantValue(rk_left, s, Type.LONG_TYPE));
+				il.add(loadNumericRegisterOrConstantValue(rk_right, s, Type.INT_TYPE));
 				break;
 
 			default:
-				il.add(loadUnboxedRegisterOrConstant(rk_left, s, Type.LONG_TYPE));
-				il.add(loadUnboxedRegisterOrConstant(rk_right, s, Type.LONG_TYPE));
+				il.add(loadNumericRegisterOrConstantValue(rk_left, s, Type.LONG_TYPE));
+				il.add(loadNumericRegisterOrConstantValue(rk_right, s, Type.LONG_TYPE));
 				break;
 		}
 
@@ -1313,8 +1206,8 @@ public class CodeEmitter {
 	private InsnList binaryFloatOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 
-		il.add(loadUnboxedRegisterOrConstant(rk_left, s, Type.DOUBLE_TYPE));
-		il.add(loadUnboxedRegisterOrConstant(rk_right, s, Type.DOUBLE_TYPE));
+		il.add(loadNumericRegisterOrConstantValue(rk_left, s, Type.DOUBLE_TYPE));
+		il.add(loadNumericRegisterOrConstantValue(rk_right, s, Type.DOUBLE_TYPE));
 
 		switch (op) {
 			case ADD:  il.add(nativeBinaryOperationAndBox(DADD, false)); break;
@@ -1402,7 +1295,7 @@ public class CodeEmitter {
 		// assuming that _0 is of type Boolean.class
 
 		code.add(checkCast(Boolean.class));
-		code.add(booleanValue());
+		code.add(BoxedPrimitivesMethods.booleanValue());
 
 		// compare stack top with the expected value -- branch if not equal
 		code.add(new JumpInsnNode(pos ? IFEQ : IFNE, _l(falseBranch)));
@@ -1436,8 +1329,8 @@ public class CodeEmitter {
 		InsnList il = new InsnList();
 
 		il.add(loadRegister(registerIndex, st, Number.class));
-		il.add(doubleValue(Number.class));
-		il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
+		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 		il.add(storeToRegister(registerIndex, st));
 
 		return il;
@@ -1452,46 +1345,6 @@ public class CodeEmitter {
 		il.add(storeToRegister(r, st));
 
 		return il;
-	}
-
-	public static AbstractInsnNode booleanValue() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(Boolean.class),
-				"booleanValue",
-				Type.getMethodDescriptor(
-						Type.BOOLEAN_TYPE),
-				false);
-	}
-
-	private static AbstractInsnNode intValue(Class clazz) {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(clazz),
-				"intValue",
-				Type.getMethodDescriptor(
-						Type.INT_TYPE),
-				false);
-	}
-
-	private static AbstractInsnNode longValue(Class clazz) {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(clazz),
-				"longValue",
-				Type.getMethodDescriptor(
-						Type.LONG_TYPE),
-				false);
-	}
-
-	private static AbstractInsnNode doubleValue(Class clazz) {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(clazz),
-				"doubleValue",
-				Type.getMethodDescriptor(
-						Type.DOUBLE_TYPE),
-				false);
 	}
 
 	private InsnList objectToNumber(String what) {
@@ -1531,11 +1384,11 @@ public class CodeEmitter {
 				}
 
 				il.add(loadRegister(r_base, st, Number.class));
-				il.add(longValue(Number.class));
+				il.add(BoxedPrimitivesMethods.longValue(Number.class));
 				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(longValue(Number.class));
+				il.add(BoxedPrimitivesMethods.longValue(Number.class));
 				il.add(new InsnNode(LSUB));
-				il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+				il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
 				il.add(storeToRegister(r_base, st));
 				break;
 
@@ -1557,11 +1410,11 @@ public class CodeEmitter {
 
 				// the initial decrement
 				il.add(loadRegister(r_base, st, Number.class));
-				il.add(doubleValue(Number.class));
+				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
 				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(doubleValue(Number.class));
+				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
 				il.add(new InsnNode(DSUB));
-				il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+				il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 				il.add(storeToRegister(r_base, st));
 				break;
 
@@ -1629,9 +1482,9 @@ public class CodeEmitter {
 
 				// increment
 				il.add(loadRegister(r_base, st, Number.class));
-				il.add(longValue(Number.class));
+				il.add(BoxedPrimitivesMethods.longValue(Number.class));
 				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(longValue(Number.class));
+				il.add(BoxedPrimitivesMethods.longValue(Number.class));
 				il.add(new InsnNode(LADD));
 
 				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
@@ -1639,12 +1492,12 @@ public class CodeEmitter {
 				}
 
 				// box and store
-				il.add(ASMUtils.box(Type.LONG_TYPE, Type.getType(Long.class)));
+				il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
 				il.add(storeToRegister(r_base, st));  // save into register
 
 				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 					il.add(loadRegister(r_base + 1, st, Number.class));
-					il.add(longValue(Number.class));
+					il.add(BoxedPrimitivesMethods.longValue(Number.class));
 					il.add(new InsnNode(LCMP));
 
 					// Stack here: I(lcmp(index, limit))
@@ -1655,7 +1508,7 @@ public class CodeEmitter {
 
 					// compare step with zero
 					il.add(loadRegister(r_base + 2, st, Number.class));
-					il.add(longValue(Number.class));
+					il.add(BoxedPrimitivesMethods.longValue(Number.class));
 					il.add(new InsnNode(LCONST_0));
 					il.add(new InsnNode(LCMP));
 
@@ -1710,18 +1563,18 @@ public class CodeEmitter {
 
 				// increment index
 				il.add(loadRegister(r_base, st, Number.class));
-				il.add(doubleValue(Number.class));
+				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
 				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(doubleValue(Number.class));
+				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
 				il.add(new InsnNode(DADD));
 				il.add(new InsnNode(DUP2));  // will re-use this value for comparison
 
-				il.add(ASMUtils.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+				il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
 				il.add(storeToRegister(r_base, st));  // save index into register
 
 				// push limit to the stack
 				il.add(loadRegister(r_base + 1, st, Number.class));
-				il.add(doubleValue(Number.class));
+				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
 
 				// Stack here: D(index) D(limit)
 
@@ -1733,7 +1586,7 @@ public class CodeEmitter {
 
 				// fetch the step
 				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(doubleValue(Number.class));
+				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
 				il.add(new InsnNode(DUP2));  // save it for later use
 
 				// test step for NaN
