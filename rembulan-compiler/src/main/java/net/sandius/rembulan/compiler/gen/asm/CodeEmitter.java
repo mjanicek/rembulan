@@ -1505,33 +1505,18 @@ public class CodeEmitter {
 
 		_save_pc(id);
 
-		_loadState();
-		_loadObjectSink();
-
-		_load_reg_or_const(rk_left, s);
-		_load_reg_or_const(rk_right, s);
-
-		code.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Dispatch.class),
-				methodName,
-				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
-						Type.getType(LuaState.class),
-						Type.getType(ObjectSink.class),
-						Type.getType(Object.class),
-						Type.getType(Object.class)),
-				false
-		));
+		code.add(loadDispatchPreamble());
+		code.add(loadRegisterOrConstant(rk_left, s));
+		code.add(loadRegisterOrConstant(rk_right, s));
+		code.add(dispatchGeneric(methodName, 2));
 
 		_resumptionPoint(id);
-
-		_retrieve_0();
+		code.add(retrieve_0());
 
 		// assuming that _0 is of type Boolean.class
 
-		_checkCast(Boolean.class);
-		_unbox_boolean();
+		code.add(checkCast(Boolean.class));
+		code.add(booleanValue());
 
 		// compare stack top with the expected value -- branch if not equal
 		code.add(new JumpInsnNode(pos ? IFEQ : IFNE, _l(falseBranch)));
