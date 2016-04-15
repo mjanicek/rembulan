@@ -279,6 +279,12 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   SeqTableLength in EmptyContext succeedsWith (2)
 
+  val NilTableLength = fragment ("NilTableLength") {
+    """return #t
+    """
+  }
+  NilTableLength in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to get length of a nil value")
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
