@@ -378,65 +378,6 @@ public class CodeEmitter {
 		return il;
 	}
 
-	public AbstractInsnNode dispatchGeneric(String methodName, int numArgs) {
-		ArrayList<Type> args = new ArrayList<>();
-		args.add(Type.getType(LuaState.class));
-		args.add(Type.getType(ObjectSink.class));
-		for (int i = 0; i < numArgs; i++) {
-			args.add(Type.getType(Object.class));
-		}
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Dispatch.class),
-				methodName,
-				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
-						args.toArray(new Type[0])),
-				false);
-	}
-
-	public AbstractInsnNode dispatchNumeric(String methodName, int numArgs) {
-		Type[] args = new Type[numArgs];
-		Arrays.fill(args, Type.getType(Number.class));
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Dispatch.class),
-				methodName,
-				Type.getMethodDescriptor(
-						Type.getType(Number.class),
-						args),
-				false);
-	}
-
-	public AbstractInsnNode dispatchIndex() {
-		return dispatchGeneric("index", 2);
-	}
-
-	public AbstractInsnNode dispatchNewindex() {
-		return dispatchGeneric("newindex", 3);
-	}
-
-	public AbstractInsnNode dispatchCall(int kind) {
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Dispatch.class),
-				"call",
-				InvokeKind.staticMethodType(kind).getDescriptor(),
-				false);
-	}
-
-	public AbstractInsnNode dispatchContinueLoop() {
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Dispatch.class),
-				"continueLoop",
-				Type.getMethodDescriptor(
-						Type.BOOLEAN_TYPE,
-						Type.getType(Number.class),
-						Type.getType(Number.class),
-						Type.getType(Number.class)),
-				false);
-	}
 
 	public static AbstractInsnNode checkCast(Class clazz) {
 		return new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz));
@@ -1117,7 +1058,7 @@ public class CodeEmitter {
 			_save_pc(id);
 			code.add(loadDispatchPreamble());
 			code.add(loadRegister(r_src, s));
-			code.add(dispatchGeneric("bnot", 1));
+			code.add(DispatchMethods.dynamic("bnot", 1));
 
 			_resumptionPoint(id);
 			code.add(retrieve_0());
@@ -1231,7 +1172,7 @@ public class CodeEmitter {
 		String method = op.name().toLowerCase();  // FIXME: brittle
 		il.add(loadRegisterOrConstant(rk_left, s, Number.class));
 		il.add(loadRegisterOrConstant(rk_right, s, Number.class));
-		il.add(dispatchNumeric(method, 2));
+		il.add(DispatchMethods.numeric(method, 2));
 		il.add(storeToRegister(r_dest, s));
 
 		return il;
@@ -1247,7 +1188,7 @@ public class CodeEmitter {
 		code.add(loadDispatchPreamble());
 		code.add(loadRegisterOrConstant(rk_left, s));
 		code.add(loadRegisterOrConstant(rk_right, s));
-		code.add(dispatchGeneric(method, 2));
+		code.add(DispatchMethods.dynamic(method, 2));
 
 		_resumptionPoint(id);
 
@@ -1287,7 +1228,7 @@ public class CodeEmitter {
 		code.add(loadDispatchPreamble());
 		code.add(loadRegisterOrConstant(rk_left, s));
 		code.add(loadRegisterOrConstant(rk_right, s));
-		code.add(dispatchGeneric(methodName, 2));
+		code.add(DispatchMethods.dynamic(methodName, 2));
 
 		_resumptionPoint(id);
 		code.add(retrieve_0());
@@ -1434,7 +1375,7 @@ public class CodeEmitter {
 				il.add(loadRegister(r_base, st));
 				il.add(objectToNumber("'for' initial value"));
 				il.add(new InsnNode(SWAP));
-				il.add(dispatchNumeric("sub", 2));
+				il.add(DispatchMethods.numeric("sub", 2));
 				il.add(storeToRegister(r_base, st));
 				break;
 
@@ -1642,13 +1583,13 @@ public class CodeEmitter {
 				// increment index
 				il.add(loadRegister(r_base, st, Number.class));
 				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(dispatchNumeric("add", 2));
+				il.add(DispatchMethods.numeric("add", 2));
 				il.add(new InsnNode(DUP));
 				il.add(storeToRegister(r_base, st));  // save index into register
 
 				il.add(loadRegister(r_base + 1, st, Number.class));
 				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(dispatchContinueLoop());
+				il.add(DispatchMethods.continueLoop());
 
 				il.add(new JumpInsnNode(IFEQ, _l(breakBranch)));
 				il.add(new JumpInsnNode(GOTO, _l(continueBranch)));

@@ -106,7 +106,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.getUpvalueReference(upvalueIndex));
 		add(e.getUpvalueValue());
 		add(e.loadRegisterOrConstant(rk_key, st));
-		add(e.dispatchIndex());
+		add(DispatchMethods.index());
 
 		e._resumptionPoint(id);
 		add(e.retrieve_0());
@@ -120,7 +120,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadDispatchPreamble());
 		add(e.loadRegister(r_tab, st));
 		add(e.loadRegisterOrConstant(rk_key, st));
-		add(e.dispatchIndex());
+		add(DispatchMethods.index());
 
 		e._resumptionPoint(id);
 		add(e.retrieve_0());
@@ -136,7 +136,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.getUpvalueValue());
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(e.loadRegisterOrConstant(rk_value, st));
-		add(e.dispatchNewindex());
+		add(DispatchMethods.newindex());
 
 		e._resumptionPoint(id);
 	}
@@ -156,7 +156,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadRegister(r_tab, st));
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(e.loadRegisterOrConstant(rk_value, st));
-		add(e.dispatchNewindex());
+		add(DispatchMethods.newindex());
 
 		e._resumptionPoint(id);
 	}
@@ -179,7 +179,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.storeToRegister(r_dest + 1, st));
 
 		add(e.loadRegisterOrConstant(rk_key, st));
-		add(e.dispatchIndex());
+		add(DispatchMethods.index());
 
 		e._resumptionPoint(id);
 		add(e.retrieve_0());
@@ -325,7 +325,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadDispatchPreamble());
 		add(e.loadRegister(r_tgt, st));
 		add(e.mapInvokeArgumentsToKinds(r_tgt + 1, st, b, actualKind));
-		add(e.dispatchCall(actualKind));
+		add(DispatchMethods.call(actualKind));
 
 		e._resumptionPoint(id);
 
