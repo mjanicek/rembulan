@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
+import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
@@ -12,16 +13,14 @@ import net.sandius.rembulan.util.IntIterable;
 import net.sandius.rembulan.util.IntIterator;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
-import static org.objectweb.asm.Opcodes.DNEG;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.IXOR;
-import static org.objectweb.asm.Opcodes.LNEG;
-import static org.objectweb.asm.Opcodes.NEW;
-import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.*;
 
 public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
@@ -47,7 +46,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitJump(Object id, Object target) {
-		e._goto(target);
+		add(new JumpInsnNode(GOTO, e._l(target)));
 	}
 
 	@Override
@@ -196,62 +195,62 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitAdd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.ADD, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.ADD, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitSub(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.SUB, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.SUB, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitMul(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.MUL, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.MUL, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitMod(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.MOD, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.MOD, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitPow(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.POW, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.POW, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.DIV, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.DIV, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitIDiv(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.IDIV, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.IDIV, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitBAnd(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.BAND, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.BAND, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitBOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.BOR, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.BOR, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitBXOr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.BXOR, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.BXOR, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitShl(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.SHL, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.SHL, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
 	public void visitShr(Object id, SlotState st, int r_dest, int rk_left, int rk_right) {
-		e.binaryOperation(LuaBinaryOperation.Op.SHR, st, r_dest, rk_left, rk_right);
+		add(e.binaryOperation(LuaBinaryOperation.Op.SHR, st, r_dest, rk_left, rk_right));
 	}
 
 	@Override
@@ -295,7 +294,26 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitBNot(Object id, SlotState st, int r_dest, int r_arg) {
-		e._bnot(id, r_arg, r_dest, st);
+		if (st.typeAt(r_arg).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+			add(e.loadRegister(r_arg, st, Number.class));
+			add(BoxedPrimitivesMethods.longValue(Number.class));
+			add(ASMUtils.loadLong(-1L));
+			add(new InsnNode(LXOR));
+			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
+		}
+		else {
+			CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+			add(rp.save());
+
+			add(e.loadDispatchPreamble());
+			add(e.loadRegister(r_arg, st));
+			add(DispatchMethods.dynamic(DispatchMethods.OP_BNOT, 1));
+
+			add(rp.resume());
+			add(e.retrieve_0());
+		}
+
+		add(e.storeToRegister(r_dest, st));
 	}
 
 	@Override
@@ -321,22 +339,21 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitEq(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp(id, DispatchMethods.OP_EQ, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		add(e.cmp(DispatchMethods.OP_EQ, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
 	}
 
 	@Override
 	public void visitLe(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp(id, DispatchMethods.OP_LE, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		add(e.cmp(DispatchMethods.OP_LE, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
 	}
 
 	@Override
 	public void visitLt(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		e._cmp(id, DispatchMethods.OP_LT, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity);
+		add(e.cmp(DispatchMethods.OP_LT, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
 	}
 
 	@Override
 	public void visitTest(Object id, SlotState st, int r_index, boolean value, Object trueBranchIdentity, Object falseBranchIdentity) {
-
 		if (st.typeAt(r_index).isSubtypeOf(LuaTypes.BOOLEAN)) {
 			add(e.loadRegister(r_index, st, Boolean.class));
 			add(BoxedPrimitivesMethods.booleanValue());
@@ -346,16 +363,12 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			add(UtilMethods.objectToBoolean());
 		}
 
-		if (value)  {
-			// expected to be true, i.e. non-zero
-			e._ifzero(falseBranchIdentity);
-		}
-		else {
-			// expected to be false, i.e. zero
-			e._ifnonzero(falseBranchIdentity);
-		}
+		LabelNode trueBranch = e._l(trueBranchIdentity);
+		LabelNode falseBranch = e._l(falseBranchIdentity);
 
-		e._next_insn(trueBranchIdentity);
+		// branch if non-equal
+		add(new JumpInsnNode(value ? IFEQ : IFNE, falseBranch));
+		add(new JumpInsnNode(GOTO, trueBranch));
 	}
 
 	@Override
@@ -416,12 +429,275 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitForLoop(Object id, SlotState st, int r_base, Object trueBranch, Object falseBranch) {
-		e._forloop(st, r_base, trueBranch, falseBranch);
+
+		int r_index = r_base + 0;
+		int r_limit = r_base + 1;
+		int r_step = r_base + 2;
+
+		LabelNode continueBranch = e._l(trueBranch);
+		LabelNode breakBranch = e._l(falseBranch);
+		
+		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_index);  // index
+		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_limit);  // limit
+		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_step);  // step
+
+		LabelNode ascendingLoop = new LabelNode();
+		LabelNode descendingLoop = new LabelNode();
+
+		LuaInstruction.NumOpType loopType = LuaInstruction.NumOpType.loopType(a0, a1, a2);
+
+		switch (loopType) {
+
+			case Integer:
+
+				// increment
+				add(e.loadRegister(r_index, st, Number.class));
+				add(BoxedPrimitivesMethods.longValue(Number.class));
+				add(e.loadRegister(r_step, st, Number.class));
+				add(BoxedPrimitivesMethods.longValue(Number.class));
+				add(new InsnNode(LADD));
+
+				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+					add(new InsnNode(DUP2));  // will re-use this value for comparison
+				}
+
+				// box and store
+				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
+				add(e.storeToRegister(r_index, st));  // save into register
+
+				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+					add(e.loadRegister(r_limit, st, Number.class));
+					add(BoxedPrimitivesMethods.longValue(Number.class));
+					add(new InsnNode(LCMP));
+
+					// Stack here: I(lcmp(index, limit))
+
+					// We now have the integer representing the comparison of index and limit
+					// on the stack. To interpret this value, we now need to determine whether
+					// we're in an ascending or descending loop.
+
+					// compare step with zero
+					add(e.loadRegister(r_step, st, Number.class));
+					add(BoxedPrimitivesMethods.longValue(Number.class));
+					add(new InsnNode(LCONST_0));
+					add(new InsnNode(LCMP));
+
+					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
+
+					add(new InsnNode(DUP));
+					add(new JumpInsnNode(IFGT, ascendingLoop));
+					add(new JumpInsnNode(IFLT, descendingLoop));
+					add(new InsnNode(POP));  // we won't be needing the comparison value
+					add(new JumpInsnNode(GOTO, breakBranch));  // zero-step: break
+
+					add(descendingLoop);
+					// Stack here: I(lcmp(index, limit))
+					add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
+					add(new JumpInsnNode(IFLT, breakBranch));  // descending: break if lesser than limit
+					add(new JumpInsnNode(GOTO, continueBranch));
+
+					add(ascendingLoop);
+					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
+					// FIXME: do we really need to dump a full frame?
+					add(e.fullFrame(2, new Object[] { INTEGER, INTEGER }));
+					add(new InsnNode(POP));
+					add(new JumpInsnNode(IFGT, breakBranch));  // ascending: break if greater than limit
+					add(new JumpInsnNode(GOTO, continueBranch));
+				}
+				else {
+					// limit is not statically known to be an integer
+
+					// Stack here: empty
+
+					add(e.loadRegister(r_index, st, Number.class));
+					add(e.loadRegister(r_limit, st, Number.class));
+					add(e.loadRegister(r_step, st, Number.class));
+					add(DispatchMethods.continueLoop());
+					add(new JumpInsnNode(IFEQ, breakBranch));
+					add(new JumpInsnNode(GOTO, continueBranch));
+				}
+
+				break;
+
+			case Float:
+
+				// increment index
+				add(e.loadRegister(r_index, st, Number.class));
+				add(BoxedPrimitivesMethods.doubleValue(Number.class));
+				add(e.loadRegister(r_step, st, Number.class));
+				add(BoxedPrimitivesMethods.doubleValue(Number.class));
+				add(new InsnNode(DADD));
+				add(new InsnNode(DUP2));  // will re-use this value for comparison
+
+				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+				add(e.storeToRegister(r_index, st));  // save index into register
+
+				// push limit to the stack
+				add(e.loadRegister(r_limit, st, Number.class));
+				add(BoxedPrimitivesMethods.doubleValue(Number.class));
+
+				// Stack here: D(index) D(limit)
+
+				// At this point we have the index and the limit on the stack.
+				// Next, we need to determine what kind of loop we're in. Only then can we make
+				// the comparison -- at this point we wouldn't know how to treat a possible NaN result!
+
+				LabelNode stepIsNan = new LabelNode();
+
+				// fetch the step
+				add(e.loadRegister(r_step, st, Number.class));
+				add(BoxedPrimitivesMethods.doubleValue(Number.class));
+				add(new InsnNode(DUP2));  // save it for later use
+
+				// test step for NaN
+				add(new InsnNode(DUP2));
+				add(new InsnNode(DCMPG));  // compare with self: result will be non-zero iff step is not NaN
+				add(new JumpInsnNode(IFNE, stepIsNan));
+
+				// Stack here: D(index) D(limit) D(step)
+
+				// compare step with 0.0
+				add(new InsnNode(DCONST_0));
+				add(new InsnNode(DCMPG));
+
+				// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
+
+				add(new InsnNode(DUP));
+				add(new JumpInsnNode(IFGT, ascendingLoop));
+				add(new JumpInsnNode(IFLT, descendingLoop));
+
+				// Stack here: D(index) D(limit)
+
+				add(new InsnNode(POP2));
+				add(new InsnNode(POP2));
+				add(new JumpInsnNode(GOTO, breakBranch));  // step is zero => break
+
+				// step is NaN => break
+				add(stepIsNan);
+				// Stack here: D(index) D(limit) D(step)
+				add(e.fullFrame(3, new Object[] { DOUBLE, DOUBLE, DOUBLE }));
+				add(new InsnNode(POP2));
+				add(new InsnNode(POP2));
+				add(new InsnNode(POP2));
+				add(new JumpInsnNode(GOTO, breakBranch));
+
+				add(descendingLoop);
+				// Stack here: D(index) D(limit)
+				add(e.fullFrame(2, new Object[] { DOUBLE, DOUBLE }));
+				add(new InsnNode(DCMPL));  // if index or limit is NaN, result in -1
+				add(new JumpInsnNode(IFLT, breakBranch));  // descending: break if lesser than limit
+				add(new JumpInsnNode(GOTO, continueBranch));
+
+				add(ascendingLoop);
+				// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
+				add(e.fullFrame(3, new Object[] { DOUBLE, DOUBLE, INTEGER }));
+				add(new InsnNode(POP));
+				add(new InsnNode(DCMPG));  // if index or limit is NaN, result in +1
+				add(new JumpInsnNode(IFGT, breakBranch));  // ascending: break if greater than limit
+				add(new JumpInsnNode(GOTO, continueBranch));
+				break;
+
+			case Number:
+
+				// increment index
+				add(e.loadRegister(r_index, st, Number.class));
+				add(e.loadRegister(r_step, st, Number.class));
+				add(DispatchMethods.numeric(DispatchMethods.OP_ADD, 2));
+				add(new InsnNode(DUP));
+				add(e.storeToRegister(r_index, st));  // save index into register
+
+				add(e.loadRegister(r_limit, st, Number.class));
+				add(e.loadRegister(r_step, st, Number.class));
+				add(DispatchMethods.continueLoop());
+
+				add(new JumpInsnNode(IFEQ, breakBranch));
+				add(new JumpInsnNode(GOTO, continueBranch));
+				break;
+
+			default:
+				throw new IllegalStateException("Illegal loop type: " + loopType + " (base: " + r_index + "; slot state: " + st + ")");
+		}
+		
 	}
 
 	@Override
 	public void visitForPrep(Object id, SlotState st, int r_base) {
-		e._forprep(st, r_base);
+		
+		int r_index = r_base + 0;
+		int r_limit = r_base + 1;
+		int r_step = r_base + 2;
+		
+		LuaInstruction.NumOpType loopType = LuaInstruction.NumOpType.loopType(
+				st.typeAt(r_index),
+				st.typeAt(r_limit),
+				st.typeAt(r_step));
+
+		switch (loopType) {
+			case Integer:
+				// the initial decrement
+
+				// convert to number if necessary
+				if (!st.typeAt(r_limit).isSubtypeOf(LuaTypes.NUMBER)) {
+					add(e.convertRegisterToNumber(r_limit, st, "'for' limit"));
+				}
+
+				add(e.loadRegister(r_index, st, Number.class));
+				add(BoxedPrimitivesMethods.longValue(Number.class));
+				add(e.loadRegister(r_step, st, Number.class));
+				add(BoxedPrimitivesMethods.longValue(Number.class));
+				add(new InsnNode(LSUB));
+				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
+				break;
+
+			case Float:
+				// convert to number if necessary
+				if (!st.typeAt(r_limit).isSubtypeOf(LuaTypes.NUMBER)) {
+					add(e.convertRegisterToNumber(r_limit, st, "'for' limit"));
+				}
+
+				// convert to float when necessary (we are in a float loop, so both of these parameters
+				// are numbers, and at least one of them is a float)
+
+				if (!st.typeAt(r_index).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
+					add(e.convertNumericRegisterToFloat(r_index, st));
+				}
+				if (!st.typeAt(r_step).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
+					add(e.convertNumericRegisterToFloat(r_step, st));
+				}
+
+				// the initial decrement
+				add(e.loadRegister(r_index, st, Number.class));
+				add(BoxedPrimitivesMethods.doubleValue(Number.class));
+				add(e.loadRegister(r_step, st, Number.class));
+				add(BoxedPrimitivesMethods.doubleValue(Number.class));
+				add(new InsnNode(DSUB));
+				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+				break;
+
+			case Number:
+				// We were unable to statically determine loop kind: force conversion of loop
+				// parameters. Note that this does *not* imply that this is a float loop.
+
+				// Note: we process parameters in the same order as in PUC Lua to get
+				// the same error reporting.
+
+				add(e.convertRegisterToNumber(r_limit, st, "'for' limit"));
+
+				add(e.loadRegister(r_step, st));
+				add(UtilMethods.objectToNumber("'for' step"));
+				add(new InsnNode(DUP));
+				add(e.storeToRegister(r_step, st));
+				add(e.loadRegister(r_index, st));
+				add(UtilMethods.objectToNumber("'for' initial value"));
+				add(new InsnNode(SWAP));
+				add(DispatchMethods.numeric(DispatchMethods.OP_SUB, 2));
+				break;
+
+			default:
+				throw new IllegalStateException("Illegal loop type: " + loopType + " (base: " + r_index + "; slot state: " + st + ")");
+		}
+
+		add(e.storeToRegister(r_index, st));
 	}
 
 	@Override

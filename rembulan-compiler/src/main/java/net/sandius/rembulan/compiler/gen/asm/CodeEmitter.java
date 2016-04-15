@@ -23,7 +23,6 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -35,7 +34,6 @@ import org.objectweb.asm.tree.VarInsnNode;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -905,13 +903,6 @@ public class CodeEmitter {
 		return il;
 	}
 
-	@Deprecated
-	public Type[] closureConstructorTypes(int numUpvalues) {
-		Type[] argTypes = new Type[numUpvalues];
-		Arrays.fill(argTypes, Type.getType(Upvalue.class));
-		return argTypes;
-	}
-
 	public InsnList captureRegister(int registerIndex) {
 		InsnList il = new InsnList();
 
@@ -931,24 +922,6 @@ public class CodeEmitter {
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;
-	}
-
-	@Deprecated
-	public void _goto(Object l) {
-		code.add(new JumpInsnNode(GOTO, _l(l)));
-	}
-
-	@Deprecated
-	public void _next_insn(Object t) {
-		_goto(t);
-//
-//		if (t.inSize() < 2) {
-//			// can be inlined, TODO: check this again
-//			_note("goto ignored: " + t.toString());
-//		}
-//		else {
-//			_goto(t);
-//		}
 	}
 
 	public InsnList setReturnValuesFromRegisters(int fromRegisterIndex, SlotState st, int num) {
@@ -1020,30 +993,6 @@ public class CodeEmitter {
 			il.add(UtilMethods.objectToBoolean());
 		}
 		return il;
-	}
-
-	@Deprecated
-	public void _bnot(Object id, int r_src, int r_dest, SlotState s) {
-		if (s.typeAt(r_src).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-			code.add(loadRegister(r_src, s, Number.class));
-			code.add(BoxedPrimitivesMethods.longValue(Number.class));
-			code.add(new LdcInsnNode(-1L));
-			code.add(new InsnNode(LXOR));
-			code.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
-			code.add(storeToRegister(r_dest, s));
-		}
-		else {
-			ResumptionPoint rp = resumptionPoint();
-			code.add(rp.save());
-
-			code.add(loadDispatchPreamble());
-			code.add(loadRegister(r_src, s));
-			code.add(DispatchMethods.dynamic(DispatchMethods.OP_BNOT, 1));
-
-			code.add(rp.resume());
-			code.add(retrieve_0());
-			code.add(storeToRegister(r_dest, s));
-		}
 	}
 
 	private InsnList nativeBinaryOperationAndBox(int opcode, boolean resultIsLong) {
@@ -1158,27 +1107,28 @@ public class CodeEmitter {
 		return il;
 	}
 
-	@Deprecated
-	private void _binary_dynamic_op(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
-		Object id = new Object();
+	private InsnList binaryDynamicOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		InsnList il = new InsnList();
+
 		String method = op.name().toLowerCase();  // FIXME: brittle
 
 		ResumptionPoint rp = resumptionPoint();
-		code.add(rp.save());
+		il.add(rp.save());
 
-		code.add(loadDispatchPreamble());
-		code.add(loadRegisterOrConstant(rk_left, s));
-		code.add(loadRegisterOrConstant(rk_right, s));
-		code.add(DispatchMethods.dynamic(method, 2));
+		il.add(loadDispatchPreamble());
+		il.add(loadRegisterOrConstant(rk_left, s));
+		il.add(loadRegisterOrConstant(rk_right, s));
+		il.add(DispatchMethods.dynamic(method, 2));
 
-		code.add(rp.resume());
-		code.add(retrieve_0());
-		code.add(storeToRegister(r_dest, s));
+		il.add(rp.resume());
+		il.add(retrieve_0());
+		il.add(storeToRegister(r_dest, s));
+
+		return il;
 	}
 
-	@Deprecated
-	public void binaryOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
-		InsnList il = code;  // FIXME
+	public InsnList binaryOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+		InsnList il = new InsnList();
 
 		StaticMathImplementation staticMath = LuaBinaryOperation.mathForOp(op);
 		LuaInstruction.NumOpType ot = staticMath.opType(
@@ -1189,8 +1139,10 @@ public class CodeEmitter {
 			case Integer: il.add(binaryIntegerOperation(op, s, r_dest, rk_left, rk_right)); break;
 			case Float:   il.add(binaryFloatOperation(op, s, r_dest, rk_left, rk_right)); break;
 			case Number:  il.add(binaryNumericOperation(op, s, r_dest, rk_left, rk_right)); break;
-			case Any:     _binary_dynamic_op(op, s, r_dest, rk_left, rk_right); break;
+			case Any:     il.add(binaryDynamicOperation(op, s, r_dest, rk_left, rk_right)); break;
 		}
+
+		return il;
 	}
 
 	public AbstractInsnNode loadVarargs() {
@@ -1198,45 +1150,44 @@ public class CodeEmitter {
 		return new VarInsnNode(ALOAD, LV_VARARGS);
 	}
 
-	@Deprecated
-	public void _cmp(Object id, String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
-
-		// TODO: specialise
+	public InsnList dynamicComparison(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode trueBranch, LabelNode falseBranch) {
+		InsnList il = new InsnList();
 
 		ResumptionPoint rp = resumptionPoint();
-		code.add(rp.save());
+		il.add(rp.save());
 
-		code.add(loadDispatchPreamble());
-		code.add(loadRegisterOrConstant(rk_left, s));
-		code.add(loadRegisterOrConstant(rk_right, s));
-		code.add(DispatchMethods.dynamic(methodName, 2));
+		il.add(loadDispatchPreamble());
+		il.add(loadRegisterOrConstant(rk_left, s));
+		il.add(loadRegisterOrConstant(rk_right, s));
+		il.add(DispatchMethods.dynamic(methodName, 2));
 
-		code.add(rp.resume());
-		code.add(retrieve_0());
+		il.add(rp.resume());
+		il.add(retrieve_0());
 
 		// assuming that _0 is of type Boolean.class
 
-		code.add(checkCast(Boolean.class));
-		code.add(BoxedPrimitivesMethods.booleanValue());
+		il.add(checkCast(Boolean.class));
+		il.add(BoxedPrimitivesMethods.booleanValue());
 
 		// compare stack top with the expected value -- branch if not equal
-		code.add(new JumpInsnNode(pos ? IFEQ : IFNE, _l(falseBranch)));
+		il.add(new JumpInsnNode(pos ? IFEQ : IFNE, falseBranch));
 
 		// TODO: this could be a fall-through rather than a jump!
-		code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
+		il.add(new JumpInsnNode(GOTO, trueBranch));
+
+		return il;
 	}
 
-	@Deprecated
-	public void _ifzero(Object tgt) {
-		code.add(new JumpInsnNode(IFEQ, _l(tgt)));
+	public InsnList cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
+		InsnList il = new InsnList();
+		
+		// TODO: specialise
+		il.add(dynamicComparison(methodName, rk_left, rk_right, pos, s, _l(trueBranch), _l(falseBranch)));
+
+		return il;
 	}
 
-	@Deprecated
-	public void _ifnonzero(Object tgt) {
-		code.add(new JumpInsnNode(IFNE, _l(tgt)));
-	}
-
-	private InsnList convertNumericRegisterToFloat(int registerIndex, SlotState st) {
+	public InsnList convertNumericRegisterToFloat(int registerIndex, SlotState st) {
 		InsnList il = new InsnList();
 
 		il.add(loadRegister(registerIndex, st, Number.class));
@@ -1248,7 +1199,7 @@ public class CodeEmitter {
 	}
 
 	// TODO: name: shouldn't this be "coerce"?
-	private InsnList convertRegisterToNumber(int r, SlotState st, String what) {
+	public InsnList convertRegisterToNumber(int r, SlotState st, String what) {
 		InsnList il = new InsnList();
 
 		il.add(loadRegister(r, st));
@@ -1258,85 +1209,7 @@ public class CodeEmitter {
 		return il;
 	}
 
-	@Deprecated
-	public void _forprep(SlotState st, int r_base) {
-		final InsnList il = code;  // FIXME
-
-		LuaInstruction.NumOpType loopType = LuaInstruction.NumOpType.loopType(
-				st.typeAt(r_base + 0),
-				st.typeAt(r_base + 1),
-				st.typeAt(r_base + 2));
-
-		switch (loopType) {
-			case Integer:
-				// the initial decrement
-
-				// convert to number if necessary
-				if (!st.typeAt(r_base + 1).isSubtypeOf(LuaTypes.NUMBER)) {
-					il.add(convertRegisterToNumber(r_base + 1, st, "'for' limit"));
-				}
-
-				il.add(loadRegister(r_base, st, Number.class));
-				il.add(BoxedPrimitivesMethods.longValue(Number.class));
-				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(BoxedPrimitivesMethods.longValue(Number.class));
-				il.add(new InsnNode(LSUB));
-				il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
-				il.add(storeToRegister(r_base, st));
-				break;
-
-			case Float:
-				// convert to number if necessary
-				if (!st.typeAt(r_base + 1).isSubtypeOf(LuaTypes.NUMBER)) {
-					il.add(convertRegisterToNumber(r_base + 1, st, "'for' limit"));
-				}
-
-				// convert to float when necessary (we are in a float loop, so both of these parameters
-				// are numbers, and at least one of them is a float)
-
-				if (!st.typeAt(r_base + 0).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
-					il.add(convertNumericRegisterToFloat(r_base + 0, st));
-				}
-				if (!st.typeAt(r_base + 2).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
-					il.add(convertNumericRegisterToFloat(r_base + 2, st));
-				}
-
-				// the initial decrement
-				il.add(loadRegister(r_base, st, Number.class));
-				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				il.add(new InsnNode(DSUB));
-				il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-				il.add(storeToRegister(r_base, st));
-				break;
-
-			case Number:
-				// We were unable to statically determine loop kind: force conversion of loop
-				// parameters. Note that this does *not* imply that this is a float loop.
-
-				// Note: we process parameters in the same order as in PUC Lua to get
-				// the same error reporting.
-
-				il.add(convertRegisterToNumber(r_base + 1, st, "'for' limit"));
-
-				il.add(loadRegister(r_base + 2, st));
-				il.add(UtilMethods.objectToNumber("'for' step"));
-				il.add(new InsnNode(DUP));
-				il.add(storeToRegister(r_base + 2, st));
-				il.add(loadRegister(r_base, st));
-				il.add(UtilMethods.objectToNumber("'for' initial value"));
-				il.add(new InsnNode(SWAP));
-				il.add(DispatchMethods.numeric(DispatchMethods.OP_SUB, 2));
-				il.add(storeToRegister(r_base, st));
-				break;
-
-			default:
-				throw new IllegalStateException("Illegal loop type: " + loopType + " (base: " + r_base + "; slot state: " + st + ")");
-		}
-	}
-
-	private FrameNode fullFrame(int numStack, Object[] stack) {
+	public FrameNode fullFrame(int numStack, Object[] stack) {
 		ArrayList<Object> locals = new ArrayList<>();
 		locals.add(parent.thisClassType().getInternalName());
 		locals.add(Type.getInternalName(LuaState.class));
@@ -1354,192 +1227,6 @@ public class CodeEmitter {
 				locals.size(),
 				locals.toArray(),
 				numStack, stack);
-	}
-
-	@Deprecated
-	public void _forloop(SlotState st, int r_base, Object continueBranch, Object breakBranch) {
-		final InsnList il = code;  // FIXME
-
-		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_base + 0);  // index
-		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_base + 1);  // limit
-		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_base + 2);  // step
-
-		LabelNode ascendingLoop = new LabelNode();
-		LabelNode descendingLoop = new LabelNode();
-
-		LuaInstruction.NumOpType loopType = LuaInstruction.NumOpType.loopType(a0, a1, a2);
-
-		switch (loopType) {
-
-			case Integer:
-
-				// increment
-				il.add(loadRegister(r_base, st, Number.class));
-				il.add(BoxedPrimitivesMethods.longValue(Number.class));
-				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(BoxedPrimitivesMethods.longValue(Number.class));
-				il.add(new InsnNode(LADD));
-
-				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-					il.add(new InsnNode(DUP2));  // will re-use this value for comparison
-				}
-
-				// box and store
-				il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
-				il.add(storeToRegister(r_base, st));  // save into register
-
-				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-					il.add(loadRegister(r_base + 1, st, Number.class));
-					il.add(BoxedPrimitivesMethods.longValue(Number.class));
-					il.add(new InsnNode(LCMP));
-
-					// Stack here: I(lcmp(index, limit))
-
-					// We now have the integer representing the comparison of index and limit
-					// on the stack. To interpret this value, we now need to determine whether
-					// we're in an ascending or descending loop.
-
-					// compare step with zero
-					il.add(loadRegister(r_base + 2, st, Number.class));
-					il.add(BoxedPrimitivesMethods.longValue(Number.class));
-					il.add(new InsnNode(LCONST_0));
-					il.add(new InsnNode(LCMP));
-
-					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
-
-					il.add(new InsnNode(DUP));
-					il.add(new JumpInsnNode(IFGT, ascendingLoop));
-					il.add(new JumpInsnNode(IFLT, descendingLoop));
-					il.add(new InsnNode(POP));  // we won't be needing the comparison value
-					il.add(new JumpInsnNode(GOTO, _l(breakBranch)));  // zero-step: break
-
-					il.add(descendingLoop);
-					// Stack here: I(lcmp(index, limit))
-					il.add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
-					il.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
-					il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
-
-					il.add(ascendingLoop);
-					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
-					// FIXME: do we really need to dump a full frame?
-					il.add(fullFrame(2, new Object[] { INTEGER, INTEGER }));
-					il.add(new InsnNode(POP));
-					il.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
-					il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
-				}
-				else {
-					// limit is not statically known to be an integer
-
-					// Stack here: empty
-
-					il.add(loadRegister(r_base + 0, st, Number.class));
-					il.add(loadRegister(r_base + 1, st, Number.class));
-					il.add(loadRegister(r_base + 2, st, Number.class));
-					il.add(DispatchMethods.continueLoop());
-					il.add(new JumpInsnNode(IFEQ, _l(breakBranch)));
-					il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
-				}
-
-				break;
-
-			case Float:
-
-				// increment index
-				il.add(loadRegister(r_base, st, Number.class));
-				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				il.add(new InsnNode(DADD));
-				il.add(new InsnNode(DUP2));  // will re-use this value for comparison
-
-				il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-				il.add(storeToRegister(r_base, st));  // save index into register
-
-				// push limit to the stack
-				il.add(loadRegister(r_base + 1, st, Number.class));
-				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-
-				// Stack here: D(index) D(limit)
-
-				// At this point we have the index and the limit on the stack.
-				// Next, we need to determine what kind of loop we're in. Only then can we make
-				// the comparison -- at this point we wouldn't know how to treat a possible NaN result!
-
-				LabelNode stepIsNan = new LabelNode();
-
-				// fetch the step
-				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				il.add(new InsnNode(DUP2));  // save it for later use
-
-				// test step for NaN
-				il.add(new InsnNode(DUP2));
-				il.add(new InsnNode(DCMPG));  // compare with self: result will be non-zero iff step is not NaN
-				il.add(new JumpInsnNode(IFNE, stepIsNan));
-
-				// Stack here: D(index) D(limit) D(step)
-
-				// compare step with 0.0
-				il.add(new InsnNode(DCONST_0));
-				il.add(new InsnNode(DCMPG));
-
-				// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
-
-				il.add(new InsnNode(DUP));
-				il.add(new JumpInsnNode(IFGT, ascendingLoop));
-				il.add(new JumpInsnNode(IFLT, descendingLoop));
-
-				// Stack here: D(index) D(limit)
-
-				il.add(new InsnNode(POP2));
-				il.add(new InsnNode(POP2));
-				il.add(new JumpInsnNode(GOTO, _l(breakBranch)));  // step is zero => break
-
-				// step is NaN => break
-				il.add(stepIsNan);
-				// Stack here: D(index) D(limit) D(step)
-				il.add(fullFrame(3, new Object[] { DOUBLE, DOUBLE, DOUBLE }));
-				il.add(new InsnNode(POP2));
-				il.add(new InsnNode(POP2));
-				il.add(new InsnNode(POP2));
-				il.add(new JumpInsnNode(GOTO, _l(breakBranch)));
-
-				il.add(descendingLoop);
-				// Stack here: D(index) D(limit)
-				il.add(fullFrame(2, new Object[] { DOUBLE, DOUBLE }));
-				il.add(new InsnNode(DCMPL));  // if index or limit is NaN, result in -1
-				il.add(new JumpInsnNode(IFLT, _l(breakBranch)));  // descending: break if lesser than limit
-				il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
-
-				il.add(ascendingLoop);
-				// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
-				il.add(fullFrame(3, new Object[] { DOUBLE, DOUBLE, INTEGER }));
-				il.add(new InsnNode(POP));
-				il.add(new InsnNode(DCMPG));  // if index or limit is NaN, result in +1
-				il.add(new JumpInsnNode(IFGT, _l(breakBranch)));  // ascending: break if greater than limit
-				il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
-				break;
-
-			case Number:
-
-				// increment index
-				il.add(loadRegister(r_base, st, Number.class));
-				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(DispatchMethods.numeric(DispatchMethods.OP_ADD, 2));
-				il.add(new InsnNode(DUP));
-				il.add(storeToRegister(r_base, st));  // save index into register
-
-				il.add(loadRegister(r_base + 1, st, Number.class));
-				il.add(loadRegister(r_base + 2, st, Number.class));
-				il.add(DispatchMethods.continueLoop());
-
-				il.add(new JumpInsnNode(IFEQ, _l(breakBranch)));
-				il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
-				break;
-
-			default:
-				throw new IllegalStateException("Illegal loop type: " + loopType + " (base: " + r_base + "; slot state: " + st + ")");
-		}
 	}
 
 	public CodeVisitor codeVisitor() {
