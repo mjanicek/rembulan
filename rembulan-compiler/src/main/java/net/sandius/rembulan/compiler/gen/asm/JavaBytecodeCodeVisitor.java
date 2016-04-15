@@ -430,6 +430,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	@Override
 	public void visitForLoop(Object id, SlotState st, int r_base, Object trueBranch, Object falseBranch) {
 
+		// TODO: if we know the value of the step at compile time, we could avoid calling Dispatch.continueLoop().
+
 		int r_index = r_base + 0;
 		int r_limit = r_base + 1;
 		int r_step = r_base + 2;
@@ -441,188 +443,55 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_limit);  // limit
 		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_step);  // step
 
-		LabelNode ascendingLoop = new LabelNode();
-		LabelNode descendingLoop = new LabelNode();
-
 		LuaInstruction.NumOpType loopType = LuaInstruction.NumOpType.loopType(a0, a1, a2);
 
 		switch (loopType) {
 
 			case Integer:
-
 				// increment
 				add(e.loadRegister(r_index, st, Number.class));
 				add(BoxedPrimitivesMethods.longValue(Number.class));
 				add(e.loadRegister(r_step, st, Number.class));
 				add(BoxedPrimitivesMethods.longValue(Number.class));
 				add(new InsnNode(LADD));
-
-				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-					add(new InsnNode(DUP2));  // will re-use this value for comparison
-				}
-
-				// box and store
 				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
-				add(e.storeToRegister(r_index, st));  // save into register
-
-				if (a1.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-					add(e.loadRegister(r_limit, st, Number.class));
-					add(BoxedPrimitivesMethods.longValue(Number.class));
-					add(new InsnNode(LCMP));
-
-					// Stack here: I(lcmp(index, limit))
-
-					// We now have the integer representing the comparison of index and limit
-					// on the stack. To interpret this value, we now need to determine whether
-					// we're in an ascending or descending loop.
-
-					// compare step with zero
-					add(e.loadRegister(r_step, st, Number.class));
-					add(BoxedPrimitivesMethods.longValue(Number.class));
-					add(new InsnNode(LCONST_0));
-					add(new InsnNode(LCMP));
-
-					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
-
-					add(new InsnNode(DUP));
-					add(new JumpInsnNode(IFGT, ascendingLoop));
-					add(new JumpInsnNode(IFLT, descendingLoop));
-					add(new InsnNode(POP));  // we won't be needing the comparison value
-					add(new JumpInsnNode(GOTO, breakBranch));  // zero-step: break
-
-					add(descendingLoop);
-					// Stack here: I(lcmp(index, limit))
-					add(new FrameNode(F_SAME1, 0, null, 1, new Object[] { INTEGER }));
-					add(new JumpInsnNode(IFLT, breakBranch));  // descending: break if lesser than limit
-					add(new JumpInsnNode(GOTO, continueBranch));
-
-					add(ascendingLoop);
-					// Stack here: I(lcmp(index, limit)) I(lcmp(step, 0))
-					// FIXME: do we really need to dump a full frame?
-					add(e.fullFrame(2, new Object[] { INTEGER, INTEGER }));
-					add(new InsnNode(POP));
-					add(new JumpInsnNode(IFGT, breakBranch));  // ascending: break if greater than limit
-					add(new JumpInsnNode(GOTO, continueBranch));
-				}
-				else {
-					// limit is not statically known to be an integer
-
-					// Stack here: empty
-
-					add(e.loadRegister(r_index, st, Number.class));
-					add(e.loadRegister(r_limit, st, Number.class));
-					add(e.loadRegister(r_step, st, Number.class));
-					add(DispatchMethods.continueLoop());
-					add(new JumpInsnNode(IFEQ, breakBranch));
-					add(new JumpInsnNode(GOTO, continueBranch));
-				}
-
 				break;
 
 			case Float:
-
 				// increment index
 				add(e.loadRegister(r_index, st, Number.class));
 				add(BoxedPrimitivesMethods.doubleValue(Number.class));
 				add(e.loadRegister(r_step, st, Number.class));
 				add(BoxedPrimitivesMethods.doubleValue(Number.class));
 				add(new InsnNode(DADD));
-				add(new InsnNode(DUP2));  // will re-use this value for comparison
-
 				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-				add(e.storeToRegister(r_index, st));  // save index into register
-
-				// push limit to the stack
-				add(e.loadRegister(r_limit, st, Number.class));
-				add(BoxedPrimitivesMethods.doubleValue(Number.class));
-
-				// Stack here: D(index) D(limit)
-
-				// At this point we have the index and the limit on the stack.
-				// Next, we need to determine what kind of loop we're in. Only then can we make
-				// the comparison -- at this point we wouldn't know how to treat a possible NaN result!
-
-				LabelNode stepIsNan = new LabelNode();
-
-				// fetch the step
-				add(e.loadRegister(r_step, st, Number.class));
-				add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				add(new InsnNode(DUP2));  // save it for later use
-
-				// test step for NaN
-				add(new InsnNode(DUP2));
-				add(new InsnNode(DCMPG));  // compare with self: result will be non-zero iff step is not NaN
-				add(new JumpInsnNode(IFNE, stepIsNan));
-
-				// Stack here: D(index) D(limit) D(step)
-
-				// compare step with 0.0
-				add(new InsnNode(DCONST_0));
-				add(new InsnNode(DCMPG));
-
-				// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
-
-				add(new InsnNode(DUP));
-				add(new JumpInsnNode(IFGT, ascendingLoop));
-				add(new JumpInsnNode(IFLT, descendingLoop));
-
-				// Stack here: D(index) D(limit)
-
-				add(new InsnNode(POP2));
-				add(new InsnNode(POP2));
-				add(new JumpInsnNode(GOTO, breakBranch));  // step is zero => break
-
-				// step is NaN => break
-				add(stepIsNan);
-				// Stack here: D(index) D(limit) D(step)
-				add(e.fullFrame(3, new Object[] { DOUBLE, DOUBLE, DOUBLE }));
-				add(new InsnNode(POP2));
-				add(new InsnNode(POP2));
-				add(new InsnNode(POP2));
-				add(new JumpInsnNode(GOTO, breakBranch));
-
-				add(descendingLoop);
-				// Stack here: D(index) D(limit)
-				add(e.fullFrame(2, new Object[] { DOUBLE, DOUBLE }));
-				add(new InsnNode(DCMPL));  // if index or limit is NaN, result in -1
-				add(new JumpInsnNode(IFLT, breakBranch));  // descending: break if lesser than limit
-				add(new JumpInsnNode(GOTO, continueBranch));
-
-				add(ascendingLoop);
-				// Stack here: D(index) D(limit) I(dcmpg(step,0.0))
-				add(e.fullFrame(3, new Object[] { DOUBLE, DOUBLE, INTEGER }));
-				add(new InsnNode(POP));
-				add(new InsnNode(DCMPG));  // if index or limit is NaN, result in +1
-				add(new JumpInsnNode(IFGT, breakBranch));  // ascending: break if greater than limit
-				add(new JumpInsnNode(GOTO, continueBranch));
 				break;
 
 			case Number:
-
 				// increment index
 				add(e.loadRegister(r_index, st, Number.class));
 				add(e.loadRegister(r_step, st, Number.class));
 				add(DispatchMethods.numeric(DispatchMethods.OP_ADD, 2));
-				add(new InsnNode(DUP));
-				add(e.storeToRegister(r_index, st));  // save index into register
-
-				add(e.loadRegister(r_limit, st, Number.class));
-				add(e.loadRegister(r_step, st, Number.class));
-				add(DispatchMethods.continueLoop());
-
-				add(new JumpInsnNode(IFEQ, breakBranch));
-				add(new JumpInsnNode(GOTO, continueBranch));
 				break;
 
 			default:
 				throw new IllegalStateException("Illegal loop type: " + loopType + " (base: " + r_index + "; slot state: " + st + ")");
 		}
-		
+
+		// r_index is on stack
+		add(new InsnNode(DUP));
+		add(e.storeToRegister(r_index, st));  // save index into register
+
+		add(e.loadRegister(r_limit, st, Number.class));
+		add(e.loadRegister(r_step, st, Number.class));
+		add(DispatchMethods.continueLoop());
+		add(new JumpInsnNode(IFEQ, breakBranch));
+		add(new JumpInsnNode(GOTO, continueBranch));
 	}
 
 	@Override
 	public void visitForPrep(Object id, SlotState st, int r_base) {
-		
+
 		int r_index = r_base + 0;
 		int r_limit = r_base + 1;
 		int r_step = r_base + 2;
