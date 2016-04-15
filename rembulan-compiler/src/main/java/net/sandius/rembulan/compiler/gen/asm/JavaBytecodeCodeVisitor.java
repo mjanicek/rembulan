@@ -164,7 +164,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	@Override
 	public void visitNewTable(Object id, SlotState st, int r_dest, int arraySize, int hashSize) {
 		add(e.loadLuaState());
-		add(CodeEmitter.LuaState_prx.newTable(arraySize, hashSize));
+		add(LuaStateMethods.newTable(arraySize, hashSize));
 		add(e.storeToRegister(r_dest, st));
 	}
 
@@ -346,13 +346,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			add(e.loadObjectSink());
 			// FIXME: this needs to be remapped to an available invoke kind
 			add(e.loadRegisters(r_tgt, st, b));  // target is at r_tgt, plus (b - 1) arguments
-			add(CodeEmitter.ObjectSink_prx.tailCall(b - 1));
+			add(ObjectSinkMethods.tailCall(b - 1));
 			add(new InsnNode(RETURN));
 		}
 		else {
 			add(e.setReturnValuesUpToStackTop(r_tgt, st));
 			add(e.loadObjectSink());
-			add(CodeEmitter.ObjectSink_prx.markAsTailCall());
+			add(ObjectSinkMethods.markAsTailCall());
 			add(new InsnNode(RETURN));
 		}
 	}
@@ -427,7 +427,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 					if (i + 1 < n) {
 						add(new InsnNode(DUP));
 					}
-					add(CodeEmitter.Util_prx.getArrayElementOrNull(i));
+					add(UtilMethods.getArrayElementOrNull(i));
 					add(e.storeToRegister(r_base + i, st));
 				}
 			}
@@ -436,7 +436,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			// indeterminate case
 			add(e.loadObjectSink());
 			add(e.loadVarargs());
-			add(CodeEmitter.ObjectSink_prx.setToArray());
+			add(ObjectSinkMethods.setToArray());
 		}
 	}
 

@@ -14,10 +14,8 @@ import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Resumable;
-import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
-import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -315,22 +313,22 @@ public class CodeEmitter {
 		if (n == 0) {
 			// just take the varargs
 			il.add(loadObjectSink());
-			il.add(ObjectSink_prx.toArray());
+			il.add(ObjectSinkMethods.toArray());
 		}
 		else if (n < 0) {
 			// drop n elements from the object sink
 			il.add(loadObjectSink());
 			il.add(new InsnNode(DUP));
 			il.add(ASMUtils.loadInt(-n));
-			il.add(ObjectSink_prx.drop());
-			il.add(ObjectSink_prx.toArray());
+			il.add(ObjectSinkMethods.drop());
+			il.add(ObjectSinkMethods.toArray());
 		}
 		else {
 			// prepend n elements
 			il.add(packRegistersIntoArray(firstRegisterIndex, slots, n));
 			il.add(loadObjectSink());
-			il.add(ObjectSink_prx.toArray());
-			il.add(Util_prx.concatenateArrays());
+			il.add(ObjectSinkMethods.toArray());
+			il.add(UtilMethods.concatenateArrays());
 		}
 
 		return il;
@@ -570,7 +568,7 @@ public class CodeEmitter {
 		InsnList il = new InsnList();
 
 		il.add(loadObjectSink());
-		il.add(ObjectSink_prx.get(0));
+		il.add(ObjectSinkMethods.get(0));
 
 		return il;
 	}
@@ -583,7 +581,7 @@ public class CodeEmitter {
 				if (i + 1 < num) {
 					il.add(new InsnNode(DUP));
 				}
-				il.add(ObjectSink_prx.get(i));
+				il.add(ObjectSinkMethods.get(i));
 				il.add(storeToRegister(firstIdx + i, slots));
 			}
 		}
@@ -726,7 +724,7 @@ public class CodeEmitter {
 
 			if (isVararg) {
 				il.add(new VarInsnNode(ALOAD, 3));
-				il.add(Util_prx.arrayFrom(numOfParameters));
+				il.add(UtilMethods.arrayFrom(numOfParameters));
 			}
 
 			// load #numOfParameters, mapping them onto #numOfRegisters
@@ -734,7 +732,7 @@ public class CodeEmitter {
 			for (int i = 0; i < numOfRegisters(); i++) {
 				if (i < numOfParameters) {
 					il.add(new VarInsnNode(ALOAD, 3));  // TODO: use dup instead?
-					il.add(Util_prx.getArrayElementOrNull(i));
+					il.add(UtilMethods.getArrayElementOrNull(i));
 				}
 				else {
 					il.add(new InsnNode(ACONST_NULL));
@@ -1095,7 +1093,7 @@ public class CodeEmitter {
 
 		il.add(loadLuaState());
 		il.add(loadRegisterValue(registerIndex));
-		il.add(LuaState_prx.newUpvalue());
+		il.add(LuaStateMethods.newUpvalue());
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;
@@ -1144,14 +1142,14 @@ public class CodeEmitter {
 	public InsnList setReturnValuesFromRegisters(int fromRegisterIndex, SlotState st, int num) {
 		InsnList il = new InsnList();
 
-		if (ObjectSink_prx.canSaveNResults(num)) {
+		if (ObjectSinkMethods.canSaveNResults(num)) {
 			il.add(loadRegisters(fromRegisterIndex, st, num));
-			il.add(ObjectSink_prx.setTo(num));
+			il.add(ObjectSinkMethods.setTo(num));
 		}
 		else {
 			// need to pack into an array
 			il.add(packRegistersIntoArray(fromRegisterIndex, st, num));
-			il.add(ObjectSink_prx.setToArray());
+			il.add(ObjectSinkMethods.setToArray());
 		}
 
 		return il;
@@ -1173,7 +1171,7 @@ public class CodeEmitter {
 			// drop -n elements from the beginning
 			il.add(loadObjectSink());
 			il.add(ASMUtils.loadInt(-n));
-			il.add(ObjectSink_prx.drop());
+			il.add(ObjectSinkMethods.drop());
 		}
 		else {
 			// prepend n elements
@@ -1188,7 +1186,7 @@ public class CodeEmitter {
 				il.add(new InsnNode(AASTORE));
 			}
 
-			il.add(ObjectSink_prx.prepend());
+			il.add(ObjectSinkMethods.prepend());
 		}
 		return il;
 	}
@@ -1810,291 +1808,6 @@ public class CodeEmitter {
 
 	public CodeVisitor codeVisitor() {
 		return new JavaBytecodeCodeVisitor(this);
-	}
-
-	public static class LuaState_prx {
-
-		private LuaState_prx() {
-			// not to be instantiated
-		}
-
-		private static Type selfTpe() {
-			return Type.getType(LuaState.class);
-		}
-
-		public static InsnList newTable(int array, int hash) {
-			InsnList il = new InsnList();
-
-			il.add(ASMUtils.loadInt(array));
-			il.add(ASMUtils.loadInt(hash));
-
-			il.add(new MethodInsnNode(
-					INVOKEVIRTUAL,
-					selfTpe().getInternalName(),
-					"newTable",
-					Type.getMethodType(
-							Type.getType(Table.class),
-							Type.INT_TYPE,
-							Type.INT_TYPE).getDescriptor(),
-					false));
-
-			return il;
-		}
-
-		public static AbstractInsnNode newUpvalue() {
-			return new MethodInsnNode(
-					INVOKEVIRTUAL,
-					selfTpe().getInternalName(),
-					"newUpvalue",
-					Type.getMethodType(
-							Type.getType(Upvalue.class),
-							Type.getType(Object.class)).getDescriptor(),
-					false);
-		}
-
-	}
-
-	public static class ObjectSink_prx {
-
-		private ObjectSink_prx() {
-			// not to be instantiated
-		}
-
-		private static Type selfTpe() {
-			return Type.getType(ObjectSink.class);
-		}
-
-		public static InsnList get(int index) {
-			Check.nonNegative(index);
-
-			InsnList il = new InsnList();
-
-			if (index <= 4) {
-				String methodName = "_" + index;
-				il.add(new MethodInsnNode(
-						INVOKEINTERFACE,
-						selfTpe().getInternalName(),
-						methodName,
-						Type.getMethodType(
-								Type.getType(Object.class)).getDescriptor(),
-						true));
-			}
-			else {
-				il.add(ASMUtils.loadInt(index));
-				il.add(new MethodInsnNode(
-						INVOKEINTERFACE,
-						selfTpe().getInternalName(),
-						"get",
-						Type.getMethodType(
-								Type.getType(Object.class),
-								Type.INT_TYPE).getDescriptor(),
-						true));
-			}
-
-			return il;
-		}
-
-		public static AbstractInsnNode reset() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"reset",
-					Type.getMethodType(
-							Type.VOID_TYPE).getDescriptor(),
-					true);
-		}
-
-		public static AbstractInsnNode push() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"push",
-					Type.getMethodType(
-							Type.VOID_TYPE,
-							Type.getType(Object.class)).getDescriptor(),
-					true);
-		}
-
-		public static AbstractInsnNode addAll() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"addAll",
-					Type.getMethodType(
-							Type.VOID_TYPE,
-							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true);
-		}
-
-		@Deprecated
-		public static boolean canSaveNResults(int numValues) {
-			// TODO: determine this by reading the ObjectSink interface?
-			return numValues <= 5;
-		}
-
-		public static AbstractInsnNode setTo(int numValues) {
-			Check.nonNegative(numValues);
-			if (numValues == 0) {
-				return reset();
-			}
-			else {
-				Check.isTrue(canSaveNResults(numValues));
-
-				Type[] argTypes = new Type[numValues];
-				Arrays.fill(argTypes, Type.getType(Object.class));
-
-				return new MethodInsnNode(
-						INVOKEINTERFACE,
-						selfTpe().getInternalName(),
-						"setTo",
-						Type.getMethodType(
-								Type.VOID_TYPE,
-								argTypes).getDescriptor(),
-						true);
-			}
-		}
-
-		public static AbstractInsnNode setToArray() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"setToArray",
-					Type.getMethodType(
-							Type.VOID_TYPE,
-							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true);
-		}
-
-		public static AbstractInsnNode toArray() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"toArray",
-					Type.getMethodType(
-							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true);
-		}
-
-		public static AbstractInsnNode drop() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"drop",
-					Type.getMethodType(
-							Type.VOID_TYPE,
-							Type.INT_TYPE).getDescriptor(),
-					true);
-		}
-
-		public static AbstractInsnNode prepend() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"prepend",
-					Type.getMethodType(
-							Type.VOID_TYPE,
-							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true);
-		}
-
-		public static AbstractInsnNode pushAll() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"pushAll",
-					Type.getMethodType(
-							Type.VOID_TYPE,
-							ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-					true);
-		}
-
-		public static AbstractInsnNode tailCall(int numCallArgs) {
-			Check.nonNegative(numCallArgs);
-
-			// TODO: determine this by reading the ObjectSink interface?
-			if (numCallArgs <= 4) {
-				Type[] callArgTypes = new Type[numCallArgs + 1];  // don't forget the call target
-				Arrays.fill(callArgTypes, Type.getType(Object.class));
-
-				return new MethodInsnNode(
-						INVOKEINTERFACE,
-						selfTpe().getInternalName(),
-						"tailCall",
-						Type.getMethodType(
-								Type.VOID_TYPE,
-								callArgTypes).getDescriptor(),
-						true);
-			}
-			else {
-				// TODO: iterate and push
-				throw new UnsupportedOperationException("Tail call with " + numCallArgs + " arguments");
-			}
-		}
-
-		public static AbstractInsnNode markAsTailCall() {
-			return new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"markAsTailCall",
-					Type.getMethodType(
-							Type.VOID_TYPE).getDescriptor(),
-					true);
-		}
-
-	}
-
-	public static class Util_prx {
-
-		private Util_prx() {
-			// not to be instantiated
-		}
-
-		public static AbstractInsnNode concatenateArrays() {
-			return new MethodInsnNode(
-					INVOKESTATIC,
-					Type.getInternalName(Varargs.class),
-					"concat",
-					Type.getMethodDescriptor(
-							ASMUtils.arrayTypeFor(Object.class),
-							ASMUtils.arrayTypeFor(Object.class),
-							ASMUtils.arrayTypeFor(Object.class)),
-					false);
-		}
-
-		public static InsnList getArrayElementOrNull(int index) {
-			InsnList il = new InsnList();
-
-			il.add(ASMUtils.loadInt(index));
-			il.add(new MethodInsnNode(
-					INVOKESTATIC,
-					Type.getInternalName(Varargs.class),
-					"getElement",
-					Type.getMethodDescriptor(
-							Type.getType(Object.class),
-							ASMUtils.arrayTypeFor(Object.class),
-							Type.INT_TYPE),
-					false));
-
-			return il;
-		}
-
-		public static InsnList arrayFrom(int index) {
-			InsnList il = new InsnList();
-
-			il.add(ASMUtils.loadInt(index));
-			il.add(new MethodInsnNode(
-					INVOKESTATIC,
-					Type.getInternalName(Varargs.class),
-					"from",
-					Type.getMethodDescriptor(
-							ASMUtils.arrayTypeFor(Object.class),
-							ASMUtils.arrayTypeFor(Object.class),
-							Type.INT_TYPE),
-					false));
-
-			return il;
-		}
-
 	}
 
 }
