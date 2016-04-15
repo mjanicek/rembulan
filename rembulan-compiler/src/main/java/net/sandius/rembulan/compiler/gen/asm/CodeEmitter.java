@@ -190,16 +190,6 @@ public class CodeEmitter {
 		return code;
 	}
 
-	@Deprecated
-	public void _dup() {
-		code.add(new InsnNode(DUP));
-	}
-
-	@Deprecated
-	public void _swap() {
-		code.add(new InsnNode(SWAP));
-	}
-
 	public AbstractInsnNode loadThis() {
 		return new VarInsnNode(ALOAD, 0);
 	}
@@ -292,16 +282,6 @@ public class CodeEmitter {
 		return loadRegister(registerIndex, slots, null);
 	}
 
-	@Deprecated
-	public void _load_reg(int idx, SlotState slots, Class castTo) {
-		code.add(loadRegister(idx, slots, castTo));
-	}
-
-	@Deprecated
-	public void _load_reg(int idx, SlotState slots) {
-		code.add(loadRegister(idx, slots, null));
-	}
-
 	public InsnList loadRegisters(int firstRegisterIndex, SlotState slots, int num) {
 		InsnList il = new InsnList();
 		for (int i = 0; i < num; i++) {
@@ -375,26 +355,11 @@ public class CodeEmitter {
 	}
 
 
-	@Deprecated
-	public void _load_regs(int firstIdx, SlotState slots, int num) {
-		code.add(loadRegisters(firstIdx, slots, num));
-	}
-
-	@Deprecated
-	public void _pack_regs(int firstIdx, SlotState slots, int num) {
-		code.add(packRegistersIntoArray(firstIdx, slots, num));
-	}
-
 	public InsnList getDownvalue(int idx) {
 		InsnList il = new InsnList();
 		il.add(new VarInsnNode(ALOAD, registerOffset() + idx));
 		il.add(checkCast(Upvalue.class));
 		return il;
-	}
-
-	@Deprecated
-	public void _get_downvalue(int idx) {
-		code.add(getDownvalue(idx));
 	}
 
 	public InsnList loadRegisterOrConstant(int rk, SlotState slots, Class castTo) {
@@ -411,16 +376,6 @@ public class CodeEmitter {
 
 	public InsnList loadRegisterOrConstant(int rk, SlotState slots) {
 		return loadRegisterOrConstant(rk, slots, null);
-	}
-
-	@Deprecated
-	public void _load_reg_or_const(int rk, SlotState slots, Class castTo) {
-		code.add(loadRegisterOrConstant(rk, slots, castTo));
-	}
-
-	@Deprecated
-	public void _load_reg_or_const(int rk, SlotState slots) {
-		code.add(loadRegisterOrConstant(rk, slots));
 	}
 
 	private static AbstractInsnNode loadUnboxedConstant(Object o, Type requiredType) {
@@ -532,66 +487,6 @@ public class CodeEmitter {
 		return il;
 	}
 
-	@Deprecated
-	private void _store_reg_value(int r) {
-		code.add(storeRegisterValue(r));
-	}
-
-	@Deprecated
-	public void _store(int r, SlotState slots) {
-		code.add(storeToRegister(r, slots));
-	}
-
-	@Deprecated
-	public void _invokeStatic(Class clazz, String methodName, Type methodSignature) {
-		code.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(clazz),
-				methodName,
-				methodSignature.getDescriptor(),
-				false
-		));
-	}
-
-	@Deprecated
-	public void _invokeVirtual(Class clazz, String methodName, Type methodSignature) {
-		code.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(clazz),
-				methodName,
-				methodSignature.getDescriptor(),
-				false
-		));
-	}
-
-	@Deprecated
-	public void _invokeInterface(Class clazz, String methodName, Type methodSignature) {
-		code.add(new MethodInsnNode(
-				INVOKEINTERFACE,
-				Type.getInternalName(clazz),
-				methodName,
-				methodSignature.getDescriptor(),
-				true
-		));
-	}
-
-	@Deprecated
-	public void _invokeSpecial(String className, String methodName, Type methodSignature) {
-		code.add(new MethodInsnNode(
-				INVOKESPECIAL,
-				ASMUtils.typeForClassName(className).getInternalName(),
-				methodName,
-				methodSignature.getDescriptor(),
-				false
-		));
-	}
-
-	@Deprecated
-	public void _dispatch_binop(String name, Class clazz) {
-		Type t = Type.getType(clazz);
-		_invokeStatic(Dispatch.class, name, Type.getMethodType(t, t, t));
-	}
-
 	public AbstractInsnNode dispatchGeneric(String methodName, int numArgs) {
 		ArrayList<Type> args = new ArrayList<>();
 		args.add(Type.getType(LuaState.class));
@@ -656,18 +551,8 @@ public class CodeEmitter {
 		return new TypeInsnNode(CHECKCAST, Type.getInternalName(clazz));
 	}
 
-	@Deprecated
-	public void _checkCast(Class clazz) {
-		code.add(checkCast(clazz));
-	}
-
 	public AbstractInsnNode loadLuaState() {
 		return new VarInsnNode(ALOAD, LV_STATE);
-	}
-
-	@Deprecated
-	public void _loadState() {
-		code.add(loadLuaState());
 	}
 
 	public AbstractInsnNode loadObjectSink() {
@@ -681,11 +566,6 @@ public class CodeEmitter {
 		return il;
 	}
 
-	@Deprecated
-	public void _loadObjectSink() {
-		code.add(loadObjectSink());
-	}
-
 	public InsnList retrieve_0() {
 		InsnList il = new InsnList();
 
@@ -693,11 +573,6 @@ public class CodeEmitter {
 		il.add(ObjectSink_prx.get(0));
 
 		return il;
-	}
-
-	@Deprecated
-	public void _retrieve_0() {
-		code.add(retrieve_0());
 	}
 
 	public InsnList retrieveAndStore(int firstIdx, SlotState slots, int num) {
@@ -1538,11 +1413,6 @@ public class CodeEmitter {
 		code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
 	}
 
-	@Deprecated
-	public void _unbox_boolean() {
-		code.add(booleanValue());
-	}
-
 	public static AbstractInsnNode objectToBoolean() {
 		return new MethodInsnNode(
 				INVOKESTATIC,
@@ -1552,11 +1422,6 @@ public class CodeEmitter {
 						Type.BOOLEAN_TYPE,
 						Type.getType(Object.class)),
 				false);
-	}
-
-	@Deprecated
-	public void _to_boolean() {
-		code.add(objectToBoolean());
 	}
 
 	@Deprecated
@@ -1629,21 +1494,6 @@ public class CodeEmitter {
 				Type.getMethodDescriptor(
 						Type.DOUBLE_TYPE),
 				false);
-	}
-
-	@Deprecated
-	private void _get_intValue(Class clazz) {
-		code.add(intValue(clazz));
-	}
-
-	@Deprecated
-	private void _get_longValue(Class clazz) {
-		code.add(longValue(clazz));
-	}
-
-	@Deprecated
-	private void _get_doubleValue(Class clazz) {
-		code.add(doubleValue(clazz));
 	}
 
 	private InsnList objectToNumber(String what) {
