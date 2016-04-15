@@ -1039,7 +1039,7 @@ public class CodeEmitter {
 		}
 		else {
 			il.add(loadRegister(registerIndex, slots));
-			il.add(objectToBoolean());
+			il.add(UtilMethods.objectToBoolean());
 		}
 		return il;
 	}
@@ -1245,17 +1245,6 @@ public class CodeEmitter {
 		code.add(new JumpInsnNode(GOTO, _l(trueBranch)));
 	}
 
-	public static AbstractInsnNode objectToBoolean() {
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Conversions.class),
-				"objectToBoolean",
-				Type.getMethodDescriptor(
-						Type.BOOLEAN_TYPE,
-						Type.getType(Object.class)),
-				false);
-	}
-
 	@Deprecated
 	public void _ifzero(Object tgt) {
 		code.add(new JumpInsnNode(IFEQ, _l(tgt)));
@@ -1282,26 +1271,8 @@ public class CodeEmitter {
 		InsnList il = new InsnList();
 
 		il.add(loadRegister(r, st));
-		il.add(objectToNumber(what));
+		il.add(UtilMethods.objectToNumber(what));
 		il.add(storeToRegister(r, st));
-
-		return il;
-	}
-
-	private InsnList objectToNumber(String what) {
-		Check.notNull(what);
-		InsnList il = new InsnList();
-
-		il.add(new LdcInsnNode(what));
-		il.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Conversions.class),
-				"objectToNumber",
-				Type.getMethodDescriptor(
-						Type.getType(Number.class),
-						Type.getType(Object.class),
-						Type.getType(String.class)),
-				false));
 
 		return il;
 	}
@@ -1369,11 +1340,11 @@ public class CodeEmitter {
 				il.add(convertRegisterToNumber(r_base + 1, st, "'for' limit"));
 
 				il.add(loadRegister(r_base + 2, st));
-				il.add(objectToNumber("'for' step"));
+				il.add(UtilMethods.objectToNumber("'for' step"));
 				il.add(new InsnNode(DUP));
 				il.add(storeToRegister(r_base + 2, st));
 				il.add(loadRegister(r_base, st));
-				il.add(objectToNumber("'for' initial value"));
+				il.add(UtilMethods.objectToNumber("'for' initial value"));
 				il.add(new InsnNode(SWAP));
 				il.add(DispatchMethods.numeric(DispatchMethods.OP_SUB, 2));
 				il.add(storeToRegister(r_base, st));
@@ -1483,17 +1454,7 @@ public class CodeEmitter {
 					il.add(loadRegister(r_base + 0, st, Number.class));
 					il.add(loadRegister(r_base + 1, st, Number.class));
 					il.add(loadRegister(r_base + 2, st, Number.class));
-					il.add(new MethodInsnNode(
-							INVOKESTATIC,
-							Type.getInternalName(Dispatch.class),
-							"continueLoop",
-							Type.getMethodDescriptor(
-									Type.BOOLEAN_TYPE,
-									Type.getType(Number.class),
-									Type.getType(Number.class),
-									Type.getType(Number.class)),
-							false));
-
+					il.add(DispatchMethods.continueLoop());
 					il.add(new JumpInsnNode(IFEQ, _l(breakBranch)));
 					il.add(new JumpInsnNode(GOTO, _l(continueBranch)));
 				}

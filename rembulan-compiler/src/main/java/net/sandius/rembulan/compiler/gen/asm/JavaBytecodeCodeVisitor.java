@@ -336,7 +336,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		}
 		else {
 			add(e.loadRegister(r_index, st));
-			add(CodeEmitter.objectToBoolean());
+			add(UtilMethods.objectToBoolean());
 		}
 
 		if (value)  {
