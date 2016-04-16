@@ -299,6 +299,24 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   NilTableLength in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to get length of a nil value")
 
+  val ConcatStrings = fragment ("ConcatStrings") {
+    """return "hello".." ".."world"
+    """
+  }
+  ConcatStrings in EmptyContext succeedsWith ("hello world")
+
+  val ConcatStringsAndNumbers = fragment ("ConcatStringsAndNumbers") {
+    """return (4 .. 1 + "1") .. " = " .. 42
+    """
+  }
+  ConcatStringsAndNumbers in EmptyContext succeedsWith ("42.0 = 42")
+
+  val ConcatNil = fragment ("ConcatNil") {
+    """return "x = "..x
+    """
+  }
+  ConcatNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to concatenate a nil value")
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
