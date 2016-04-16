@@ -306,10 +306,21 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   ConcatStrings in EmptyContext succeedsWith ("hello world")
 
   val ConcatStringsAndNumbers = fragment ("ConcatStringsAndNumbers") {
-    """return (4 .. 1 + "1") .. " = " .. 42
+    """return (4 .. 1 + 1.0) .. " = " .. 42
     """
   }
   ConcatStringsAndNumbers in EmptyContext succeedsWith ("42.0 = 42")
+
+  val ConcatDynamic = fragment ("ConcatDynamic") {
+    """local function c(a, b, c)
+      |  return a..b..c
+      |end
+      |
+      |local s = c(1, "2", c(0, 0, 0))
+      |return s
+    """
+  }
+  ConcatDynamic in EmptyContext succeedsWith ("12.0000")
 
   val ConcatNil = fragment ("ConcatNil") {
     """return "x = "..x
