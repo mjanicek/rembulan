@@ -401,6 +401,7 @@ public interface LuaInstruction {
 			this.r_dest = a;
 			this.r_begin = b;
 			this.r_end = c;
+			Check.gt(r_end, r_begin);
 		}
 
 		@Override
