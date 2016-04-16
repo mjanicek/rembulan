@@ -320,7 +320,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
       |return s
     """
   }
-  ConcatDynamic in EmptyContext succeedsWith ("12.0000")
+  ConcatDynamic in EmptyContext succeedsWith ("12000")
 
   val ConcatNil = fragment ("ConcatNil") {
     """return "x = "..x
