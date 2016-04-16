@@ -533,7 +533,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 								false));
 					}
 					else if (t.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
-						add(e.loadNumericRegisterOrConstantValue(r, st, Type.LONG_TYPE));
+						add(e.loadNumericRegisterOrConstantValue(r, st, Type.DOUBLE_TYPE));
 						add(new MethodInsnNode(
 								INVOKESTATIC,
 								Type.getInternalName(LuaFormat.class),
