@@ -179,6 +179,20 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   DynamicIntegerForLoop in EmptyContext succeedsWith (55)
 
+  val ForLoopMtAttempt = fragment ("ForLoopMtAttempt") {
+    """local function nt(v)
+      |  local t = {}
+      |  local f = function(a, b) return v end
+      |  setmetatable(t, { __add = f, __sub = f })
+      |  return t
+      |end
+      |
+      |for i = nt(0), 10 do assert(false) end
+    """
+  }
+  ForLoopMtAttempt in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
+  ForLoopMtAttempt in BaseLibContext failsWith (classOf[IllegalOperationAttemptException], "'for' initial value must be a number")
+
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
       |local y = 10
