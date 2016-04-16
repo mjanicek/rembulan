@@ -222,7 +222,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		return il;
 	}
 
-	protected InsnList binaryIntegerOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+	protected InsnList binaryIntegerOperation(LuaBinaryOperation.Op op, SlotState s, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 		
 		switch (op) {
@@ -260,12 +260,10 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			default: throw new IllegalStateException("Illegal op: " + op);
 		}
 
-		il.add(e.storeToRegister(r_dest, s));
-
 		return il;
 	}
 
-	protected InsnList binaryFloatOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+	protected InsnList binaryFloatOperation(LuaBinaryOperation.Op op, SlotState s, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 
 		il.add(e.loadNumericRegisterOrConstantValue(rk_left, s, Type.DOUBLE_TYPE));
@@ -282,24 +280,21 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			default: throw new IllegalStateException("Illegal op: " + op);
 		}
 
-		il.add(e.storeToRegister(r_dest, s));
-
 		return il;
 	}
 
-	protected InsnList binaryNumericOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+	protected InsnList binaryNumericOperation(LuaBinaryOperation.Op op, SlotState s, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 
 		String method = op.name().toLowerCase();  // FIXME: brittle
 		il.add(e.loadRegisterOrConstant(rk_left, s, Number.class));
 		il.add(e.loadRegisterOrConstant(rk_right, s, Number.class));
 		il.add(DispatchMethods.numeric(method, 2));
-		il.add(e.storeToRegister(r_dest, s));
 
 		return il;
 	}
 
-	protected InsnList binaryDynamicOperation(LuaBinaryOperation.Op op, SlotState s, int r_dest, int rk_left, int rk_right) {
+	protected InsnList binaryDynamicOperation(LuaBinaryOperation.Op op, SlotState s, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 
 		String method = op.name().toLowerCase();  // FIXME: brittle
@@ -314,7 +309,6 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		il.add(rp.resume());
 		il.add(e.retrieve_0());
-		il.add(e.storeToRegister(r_dest, s));
 
 		return il;
 	}
@@ -328,11 +322,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				LuaBinaryOperation.slotType(e.context(), s, rk_right));
 
 		switch (ot) {
-			case Integer: il.add(binaryIntegerOperation(op, s, r_dest, rk_left, rk_right)); break;
-			case Float:   il.add(binaryFloatOperation(op, s, r_dest, rk_left, rk_right)); break;
-			case Number:  il.add(binaryNumericOperation(op, s, r_dest, rk_left, rk_right)); break;
-			case Any:     il.add(binaryDynamicOperation(op, s, r_dest, rk_left, rk_right)); break;
+			case Integer: il.add(binaryIntegerOperation(op, s, rk_left, rk_right)); break;
+			case Float:   il.add(binaryFloatOperation(op, s, rk_left, rk_right)); break;
+			case Number:  il.add(binaryNumericOperation(op, s, rk_left, rk_right)); break;
+			case Any:     il.add(binaryDynamicOperation(op, s, rk_left, rk_right)); break;
 		}
+
+		il.add(e.storeToRegister(r_dest, s));
 
 		return il;
 	}
@@ -644,37 +640,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		LuaInstruction.NumOpType loopType = LuaInstruction.NumOpType.loopType(a0, a1, a2);
 
+		// increment index
 		switch (loopType) {
+			case Integer: add(binaryIntegerOperation(LuaBinaryOperation.Op.ADD, st, r_index, r_step)); break;
+			case Float:   add(binaryFloatOperation(LuaBinaryOperation.Op.ADD, st, r_index, r_step)); break;
+			case Number:  add(binaryNumericOperation(LuaBinaryOperation.Op.ADD, st, r_index, r_step)); break;
 
-			case Integer:
-				// increment
-				add(e.loadRegister(r_index, st, Number.class));
-				add(BoxedPrimitivesMethods.longValue(Number.class));
-				add(e.loadRegister(r_step, st, Number.class));
-				add(BoxedPrimitivesMethods.longValue(Number.class));
-				add(new InsnNode(LADD));
-				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
-				break;
-
-			case Float:
-				// increment index
-				add(e.loadRegister(r_index, st, Number.class));
-				add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				add(e.loadRegister(r_step, st, Number.class));
-				add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				add(new InsnNode(DADD));
-				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-				break;
-
-			case Number:
-				// increment index
-				add(e.loadRegister(r_index, st, Number.class));
-				add(e.loadRegister(r_step, st, Number.class));
-				add(DispatchMethods.numeric(DispatchMethods.OP_ADD, 2));
-				break;
-
-			default:
-				throw new IllegalStateException("Illegal loop type: " + loopType + " (base: " + r_index + "; slot state: " + st + ")");
+			default: throw new IllegalStateException("Illegal loop type: " + loopType + " (base: " + r_index + "; slot state: " + st + ")");
 		}
 
 		// r_index is on stack
@@ -695,70 +667,41 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		int r_limit = r_base + 1;
 		int r_step = r_base + 2;
 		
-		LuaInstruction.NumOpType loopType = LuaInstruction.NumOpType.loopType(
+		LuaInstruction.NumOpType loopType = StaticMathImplementation.MAY_BE_INTEGER.opType(
 				st.typeAt(r_index),
-				st.typeAt(r_limit),
 				st.typeAt(r_step));
+
+		// Note: we coerce parameters to numbers in the same order as in PUC Lua to get
+		// the same error reporting.
+
+		// convert loop limit to number if necessary
+		if (!st.typeAt(r_limit).isSubtypeOf(LuaTypes.NUMBER)) {
+			add(e.convertRegisterToNumber(r_limit, st, "'for' limit"));
+		}
 
 		switch (loopType) {
 			case Integer:
-				// the initial decrement
-
-				// convert to number if necessary
-				if (!st.typeAt(r_limit).isSubtypeOf(LuaTypes.NUMBER)) {
-					add(e.convertRegisterToNumber(r_limit, st, "'for' limit"));
-				}
-
-				add(e.loadRegister(r_index, st, Number.class));
-				add(BoxedPrimitivesMethods.longValue(Number.class));
-				add(e.loadRegister(r_step, st, Number.class));
-				add(BoxedPrimitivesMethods.longValue(Number.class));
-				add(new InsnNode(LSUB));
-				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
+				add(binaryIntegerOperation(LuaBinaryOperation.Op.SUB, st, r_index, r_step));
 				break;
 
 			case Float:
-				// convert to number if necessary
-				if (!st.typeAt(r_limit).isSubtypeOf(LuaTypes.NUMBER)) {
-					add(e.convertRegisterToNumber(r_limit, st, "'for' limit"));
-				}
-
-				// convert to float when necessary (we are in a float loop, so both of these parameters
-				// are numbers, and at least one of them is a float)
-
-				if (!st.typeAt(r_index).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
-					add(e.convertNumericRegisterToFloat(r_index, st));
-				}
 				if (!st.typeAt(r_step).isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
 					add(e.convertNumericRegisterToFloat(r_step, st));
 				}
-
-				// the initial decrement
-				add(e.loadRegister(r_index, st, Number.class));
-				add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				add(e.loadRegister(r_step, st, Number.class));
-				add(BoxedPrimitivesMethods.doubleValue(Number.class));
-				add(new InsnNode(DSUB));
-				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+				add(binaryFloatOperation(LuaBinaryOperation.Op.SUB, st, r_index, r_step));
 				break;
 
+			case Any:
+				if (!st.typeAt(r_step).isSubtypeOf(LuaTypes.NUMBER)) {
+					add(e.convertRegisterToNumber(r_step, st, "'for' step"));
+				}
+				if (!st.typeAt(r_index).isSubtypeOf(LuaTypes.NUMBER)) {
+					add(e.convertRegisterToNumber(r_index, st, "'for' initial value"));
+				}
+				// fall through to the Number case
+
 			case Number:
-				// We were unable to statically determine loop kind: force conversion of loop
-				// parameters. Note that this does *not* imply that this is a float loop.
-
-				// Note: we process parameters in the same order as in PUC Lua to get
-				// the same error reporting.
-
-				add(e.convertRegisterToNumber(r_limit, st, "'for' limit"));
-
-				add(e.loadRegister(r_step, st));
-				add(UtilMethods.objectToNumber("'for' step"));
-				add(new InsnNode(DUP));
-				add(e.storeToRegister(r_step, st));
-				add(e.loadRegister(r_index, st));
-				add(UtilMethods.objectToNumber("'for' initial value"));
-				add(new InsnNode(SWAP));
-				add(DispatchMethods.numeric(DispatchMethods.OP_SUB, 2));
+				add(binaryNumericOperation(LuaBinaryOperation.Op.SUB, st, r_index, r_step));
 				break;
 
 			default:

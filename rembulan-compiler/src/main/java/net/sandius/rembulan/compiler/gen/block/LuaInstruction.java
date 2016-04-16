@@ -44,6 +44,7 @@ public interface LuaInstruction {
 			}
 		}
 
+		@Deprecated
 		public static NumOpType loopType(Type index, Type limit, Type step) {
 			NumOpType ot = StaticMathImplementation.MAY_BE_INTEGER.opType(index, step);
 
