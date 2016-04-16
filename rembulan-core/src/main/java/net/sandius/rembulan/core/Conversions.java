@@ -1,5 +1,6 @@
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.util.Check;
 
 import java.math.BigDecimal;
@@ -70,6 +71,16 @@ public abstract class Conversions {
 
 	public static boolean objectToBoolean(Object o) {
 		return !(o == null || (o instanceof Boolean && !((Boolean) o)));
+	}
+
+	// FIXME: isn't this a coercion?
+	public static String numberToString(Number n) {
+		if (n instanceof Double || n instanceof Float) {
+			return LuaFormat.toString(n.doubleValue());
+		}
+		else {
+			return LuaFormat.toString(n.longValue());
+		}
 	}
 
 }
