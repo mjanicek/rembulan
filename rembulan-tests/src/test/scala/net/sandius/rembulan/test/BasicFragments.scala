@@ -49,6 +49,51 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   IfThenElse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare number with nil")
 
+  val IntegerCmp = fragment ("IntegerCmp") {
+    """local min = 0x8000000000000000
+      |local max = 0x7fffffffffffffff
+      |return min < max, max + 1 == min, min < 0, max > 0
+    """
+  }
+  IntegerCmp in EmptyContext succeedsWith (true, true, true, true)
+
+  val NumericCmp = fragment ("NumericCmp") {
+    """return 1 < 1.0, 1 > 1.0, 1 <= 1.0, 1 >= 1.0, 1 == 1.0
+    """
+  }
+  NumericCmp in EmptyContext succeedsWith (false, false, true, true, true)
+
+  val NaNCmp = fragment ("NaNCmp") {
+    """local nan = 0/0
+      |return 0 < nan, 0 > nan, nan == nan, nan < nan, nan > nan
+    """
+  }
+  NaNCmp in EmptyContext succeedsWith (false, false, false, false, false)
+
+  val StringCmp = fragment ("StringCmp") {
+    """return "hello" < "there", "1" < "1.0", "1" > "1.0", "1" == "1.0"
+    """
+  }
+  StringCmp in EmptyContext succeedsWith (true, true, false, false)
+
+  val MixedEq = fragment ("MixedEq") {
+    """return 1 == "1", "1" == 1.0, 1 == 1.0
+    """
+  }
+  MixedEq in EmptyContext succeedsWith (false, false, true)
+
+  val MixedCmp = fragment ("MixedCmp") {
+    """return 1 < "1"
+    """
+  }
+  MixedCmp in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare number with string")
+
+  val MixedCmpReverse = fragment ("MixedCmpReverse") {
+    """return 1 > "1"
+    """
+  }
+  MixedCmpReverse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare string with number")
+
   val SimpleForLoop = fragment("SimpleForLoop") {
     """local sum = 0
       |for i = 1, 10 do
