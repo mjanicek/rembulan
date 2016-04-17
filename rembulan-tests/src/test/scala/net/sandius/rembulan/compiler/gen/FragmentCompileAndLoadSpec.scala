@@ -1,9 +1,11 @@
 package net.sandius.rembulan.compiler.gen
 
+import java.io.PrintWriter
+
 import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
 import net.sandius.rembulan.core.{Dispatch, Upvalue}
 import net.sandius.rembulan.core.impl.PairCachingObjectSink
-import net.sandius.rembulan.lbc.Prototype
+import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter}
 import net.sandius.rembulan.test.{BasicFragments, DummyLuaState, FragmentExpectations, LuaCFragmentCompiler}
 import net.sandius.rembulan.{core => lua}
 import org.junit.runner.RunWith
@@ -29,6 +31,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
 
         it ("can be compiled to a prototype") {
           proto = loader.compile(f)
+          PrototypePrinter.print(proto, new PrintWriter(System.out))
           proto must not be null
         }
 
