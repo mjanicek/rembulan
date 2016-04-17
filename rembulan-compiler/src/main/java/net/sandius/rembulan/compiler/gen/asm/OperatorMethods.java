@@ -1,6 +1,9 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
+import net.sandius.rembulan.LuaFormat;
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -36,4 +39,26 @@ public class OperatorMethods {
 				false);
 	}
 
+	public static AbstractInsnNode unboxedNumberToLuaFormatString(Type tpe) {
+		Check.isTrue(tpe.equals(Type.DOUBLE_TYPE) || tpe.equals(Type.LONG_TYPE));
+		return new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(LuaFormat.class),
+				"toString",
+				Type.getMethodDescriptor(
+						Type.getType(String.class),
+						tpe),
+				false);
+	}
+
+	public static AbstractInsnNode boxedNumberToLuaFormatString() {
+		return new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Conversions.class),
+				"numberToString",
+				Type.getMethodDescriptor(
+						Type.getType(String.class),
+						Type.getType(Number.class)),
+				false);
+	}
 }

@@ -1,13 +1,11 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
-import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -19,7 +17,6 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -535,59 +532,25 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 					if (t.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 						add(e.loadNumericRegisterOrConstantValue(i, st, Type.LONG_TYPE));
-						add(new MethodInsnNode(
-								INVOKESTATIC,
-								Type.getInternalName(LuaFormat.class),
-								"toString",
-								Type.getMethodDescriptor(
-										Type.getType(String.class),
-										Type.LONG_TYPE),
-								false));
+						add(OperatorMethods.unboxedNumberToLuaFormatString(Type.LONG_TYPE));
 					}
 					else if (t.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
 						add(e.loadNumericRegisterOrConstantValue(i, st, Type.DOUBLE_TYPE));
-						add(new MethodInsnNode(
-								INVOKESTATIC,
-								Type.getInternalName(LuaFormat.class),
-								"toString",
-								Type.getMethodDescriptor(
-										Type.getType(String.class),
-										Type.DOUBLE_TYPE),
-								false));
+						add(OperatorMethods.unboxedNumberToLuaFormatString(Type.DOUBLE_TYPE));
 					}
 					else {
 						add(e.loadRegister(i, st, Number.class));
-						add(new MethodInsnNode(
-								INVOKESTATIC,
-								Type.getInternalName(Conversions.class),
-								"numberToString",
-								Type.getMethodDescriptor(
-										Type.getType(String.class),
-										Type.getType(Number.class)),
-								false));
+						add(OperatorMethods.boxedNumberToLuaFormatString());
 					}
 				}
 				else {
 					throw new IllegalStateException("Unexpected type at register #" + i + ": " + t);
 				}
 
-				add(new MethodInsnNode(
-						INVOKEVIRTUAL,
-						Type.getInternalName(StringBuilder.class),
-						"append",
-						Type.getMethodDescriptor(
-								Type.getType(StringBuilder.class),
-								Type.getType(String.class)),
-						false));
+				add(UtilMethods.StringBuilder_append(Type.getType(String.class)));
 			}
 
-			add(new MethodInsnNode(
-					INVOKEVIRTUAL,
-					Type.getInternalName(StringBuilder.class),
-					"toString",
-					Type.getMethodDescriptor(
-							Type.getType(String.class)),
-					false));
+			add(UtilMethods.StringBuilder_toString());
 
 			// if (r < r_begin), we don't have any dynamic prefix: save directly to r_dest;
 			// save to the leftmost register of this suffix

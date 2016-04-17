@@ -10,6 +10,7 @@ import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class UtilMethods {
 
@@ -89,6 +90,27 @@ public class UtilMethods {
 				Type.getMethodDescriptor(
 						Type.BOOLEAN_TYPE,
 						Type.getType(Object.class)),
+				false);
+	}
+
+	public static AbstractInsnNode StringBuilder_append(Type t) {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(StringBuilder.class),
+				"append",
+				Type.getMethodDescriptor(
+						Type.getType(StringBuilder.class),
+						t),
+				false);
+	}
+
+	public static AbstractInsnNode StringBuilder_toString() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(StringBuilder.class),
+				"toString",
+				Type.getMethodDescriptor(
+						Type.getType(String.class)),
 				false);
 	}
 
