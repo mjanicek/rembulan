@@ -83,4 +83,13 @@ public abstract class Conversions {
 		}
 	}
 
+	// FIXME: isn't this a coercion?
+	public static String objectAsString(Object o) {
+		return o instanceof String
+				? (String) o
+				: o instanceof Number
+						? numberToString((Number) o)
+						: null;
+	}
+
 }

@@ -368,6 +368,24 @@ public abstract class Dispatch {
 		}
 	}
 
+	public static void concat(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
+		String sa = Conversions.objectAsString(a);
+		String sb = Conversions.objectAsString(b);
+
+		if (sa != null && sb != null) {
+			result.setTo(sa.concat(sb));
+		}
+		else {
+			Object handler = Metatables.binaryHandlerFor(state, Metatables.MT_CONCAT, a, b);
+			if (handler != null) {
+				call(state, result, handler, a, b);
+			}
+			else {
+				throw IllegalOperationAttemptException.concatenate(a, b);
+			}
+		}
+	}
+
 	private static class ComparisonResumable implements Resumable {
 
 		@Override

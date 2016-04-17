@@ -493,36 +493,48 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.storeToRegister(r_dest, st));
 	}
 
+	private static boolean isStringable(SlotState st, int r) {
+		return st.typeAt(r).isSubtypeOf(LuaTypes.STRING) || st.typeAt(r).isSubtypeOf(LuaTypes.NUMBER);
+	}
+
 	@Override
 	public void visitConcat(Object id, SlotState st, int r_dest, int r_begin, int r_end) {
 
-		add(new TypeInsnNode(NEW, Type.getInternalName(StringBuilder.class)));
-		add(new InsnNode(DUP));
-		add(ASMUtils.ctor(StringBuilder.class));
+		// sanity check: we will be potentially overwriting all registers from r_begin to r_end,
+		// assuming that they are not captured
+		for (int i = r_begin; i <= r_end; i++) {
+			Check.isFalse(st.isCaptured(i));
+		}
 
-		for (int r = r_begin; r <= r_end; r++) {
+		// CONCAT is right-associative, so we will be evaluating it right-to-left
 
-			net.sandius.rembulan.compiler.types.Type t = st.typeAt(r);
+		// find the rightmost non-stringable argument
+		int r = r_end;
+		while (r >= r_begin && isStringable(st, r)) {
+			r--;
+		}
 
-			if (t.isSubtypeOf(LuaTypes.STRING) || t.isSubtypeOf(LuaTypes.NUMBER)) {
+		if (r + 1 < r_end) {
+			// we have a (static) stringable suffix consisting of at least two elements
+
+			add(new TypeInsnNode(NEW, Type.getInternalName(StringBuilder.class)));
+			add(new InsnNode(DUP));
+			add(ASMUtils.ctor(StringBuilder.class));
+
+			for (int i = r + 1; i <= r_end; i++) {
+				net.sandius.rembulan.compiler.types.Type t = st.typeAt(i);
+
+				// register #i is stringable: a string or a number
 
 				add(new InsnNode(DUP));
 
 				if (t.isSubtypeOf(LuaTypes.STRING)) {
-					add(e.loadRegister(r, st, String.class));
-					add(new MethodInsnNode(
-							INVOKEVIRTUAL,
-							Type.getInternalName(StringBuilder.class),
-							"append",
-							Type.getMethodDescriptor(
-									Type.getType(StringBuilder.class),
-									Type.getType(String.class)),
-							false));
+					add(e.loadRegister(i, st, String.class));
 				}
 				else if (t.isSubtypeOf(LuaTypes.NUMBER)) {
 
 					if (t.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-						add(e.loadNumericRegisterOrConstantValue(r, st, Type.LONG_TYPE));
+						add(e.loadNumericRegisterOrConstantValue(i, st, Type.LONG_TYPE));
 						add(new MethodInsnNode(
 								INVOKESTATIC,
 								Type.getInternalName(LuaFormat.class),
@@ -533,7 +545,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 								false));
 					}
 					else if (t.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
-						add(e.loadNumericRegisterOrConstantValue(r, st, Type.DOUBLE_TYPE));
+						add(e.loadNumericRegisterOrConstantValue(i, st, Type.DOUBLE_TYPE));
 						add(new MethodInsnNode(
 								INVOKESTATIC,
 								Type.getInternalName(LuaFormat.class),
@@ -544,7 +556,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 								false));
 					}
 					else {
-						add(e.loadRegister(r, st, Number.class));
+						add(e.loadRegister(i, st, Number.class));
 						add(new MethodInsnNode(
 								INVOKESTATIC,
 								Type.getInternalName(Conversions.class),
@@ -554,33 +566,53 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 										Type.getType(Number.class)),
 								false));
 					}
-
-					add(new MethodInsnNode(
-							INVOKEVIRTUAL,
-							Type.getInternalName(StringBuilder.class),
-							"append",
-							Type.getMethodDescriptor(
-									Type.getType(StringBuilder.class),
-									Type.getType(String.class)),
-							false));
+				}
+				else {
+					throw new IllegalStateException("Unexpected type at register #" + i + ": " + t);
 				}
 
+				add(new MethodInsnNode(
+						INVOKEVIRTUAL,
+						Type.getInternalName(StringBuilder.class),
+						"append",
+						Type.getMethodDescriptor(
+								Type.getType(StringBuilder.class),
+								Type.getType(String.class)),
+						false));
 			}
-			else {
-				// an arbitrary object
-				throw new UnsupportedOperationException();  // TODO
+
+			add(new MethodInsnNode(
+					INVOKEVIRTUAL,
+					Type.getInternalName(StringBuilder.class),
+					"toString",
+					Type.getMethodDescriptor(
+							Type.getType(String.class)),
+					false));
+
+			// if (r < r_begin), we don't have any dynamic prefix: save directly to r_dest;
+			// save to the leftmost register of this suffix
+			add(e.storeToRegister(r < r_begin ? r_dest : r + 1, st));
+		}
+
+		// dynamic / non-stringable prefix
+		for ( ; r >= r_begin; r--) {
+
+			if (r < r_end) {
+				CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+				add(rp.save());
+				add(e.loadDispatchPreamble());
+				add(e.loadRegister(r, st));
+				add(e.loadRegister(r + 1, st));
+				add(DispatchMethods.dynamic(DispatchMethods.OP_CONCAT, 2));
+
+				add(rp.resume());
+				add(e.retrieve_0());
+
+				// save the last result to r_dest, otherwise keep rewriting the already used registers
+				add(e.storeToRegister(r == r_begin ? r_dest : r, st));
 			}
 		}
 
-		add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(StringBuilder.class),
-				"toString",
-				Type.getMethodDescriptor(
-						Type.getType(String.class)),
-				false));
-
-		add(e.storeToRegister(r_dest, st));
 	}
 
 	protected InsnList dynamicComparison(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode trueBranch, LabelNode falseBranch) {

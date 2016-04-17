@@ -63,4 +63,9 @@ public class IllegalOperationAttemptException extends RuntimeException {
 		return new IllegalOperationAttemptException("attempt to get length of a " + typeName + " value");
 	}
 
+	public static IllegalOperationAttemptException concatenate(Object a, Object b) {
+		String typeName = Value.typeOf(Conversions.objectAsString(a) == null ? a : b).name;
+		return new IllegalOperationAttemptException("concatenate", typeName);
+	}
+
 }

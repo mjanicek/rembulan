@@ -423,7 +423,14 @@ public interface LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			return s.update(r_dest, Slot.of(Origin.Computed.in(this), allStringable(s) ? LuaTypes.STRING : LuaTypes.ANY));
+			Type t = allStringable(s) ? LuaTypes.STRING : LuaTypes.ANY;
+			Origin origin = Origin.Computed.in(this);
+			for (int i = r_begin; i <= r_end; i++) {
+				// FIXME: these registers should actually be *blank*
+				s = s.update(r_dest, Slot.of(origin, t));
+			}
+			s = s.update(r_dest, Slot.of(origin, t));
+			return s;
 		}
 
 		@Override
