@@ -840,9 +840,60 @@ public interface LuaInstruction {
 
 	}
 
-	// TODO: TFORCALL
+	class TForCall extends Linear implements LuaInstruction {
 
-	// TODO: TFORLOOP
+		public final int r_base;
+		public final int c;
+
+		public TForCall(int a, int c) {
+			Check.gt(c, 0);
+			this.r_base = a;
+			this.c = c;
+		}
+
+		@Override
+		public String toString() {
+			return "TFORCALL(" + r_base + "," + c + ")";
+		}
+
+		@Override
+		protected SlotState effect(SlotState in) {
+			Origin origin = Origin.Computed.in(this);
+			for (int i = r_base + 3; i < r_base + 2 + c; i++) {
+				in = in.update(i, origin, LuaTypes.ANY);
+			}
+			return in;
+		}
+
+		@Override
+		public void emit(CodeVisitor visitor) {
+			visitor.visitTForCall(this, inSlots(), r_base, c);
+		}
+
+	}
+
+	class TForLoop extends Branch implements LuaInstruction {
+
+		public final int r_base;
+
+		public TForLoop(Target trueBranch, Target falseBranch, int a) {
+			super(trueBranch, falseBranch);
+			this.r_base = a;
+		}
+
+		@Override
+		public String toString() {
+			return "TFORLOOP(" + r_base + ")";
+		}
+
+		// TODO: slot state effect? update r[r_base + 1] to nil in the false branch
+
+		@Override
+		public void emit(CodeVisitor visitor) {
+			visitor.visitTForLoop(this, inSlots(), r_base, trueBranch(), falseBranch());
+		}
+
+	}
 
 	// TODO: SETLIST
 

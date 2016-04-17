@@ -99,9 +99,9 @@ public abstract class CodeVisitor {
 
 	public abstract void visitForPrep(Object id, SlotState st, int r_base);
 
-	// TODO: TFORCALL
+	public abstract void visitTForCall(Object id, SlotState st, int r_base, int c);
 
-	// TODO: TFORLOOP
+	public abstract void visitTForLoop(Object id, SlotState st, int r_base, Object trueBranchIdentity, Object falseBranchIdentity);
 
 	// TODO: SETLIST
 

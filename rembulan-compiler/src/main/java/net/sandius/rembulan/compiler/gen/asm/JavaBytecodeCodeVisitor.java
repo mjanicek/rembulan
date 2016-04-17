@@ -795,6 +795,32 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	}
 
 	@Override
+	public void visitTForCall(Object id, SlotState st, int r_base, int c) {
+		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		add(rp.save());
+
+		add(e.loadDispatchPreamble());
+		add(e.loadRegister(r_base, st));
+		add(e.loadRegister(r_base + 1, st));
+		add(e.loadRegister(r_base + 2, st));
+		add(DispatchMethods.call(3));
+
+		add(rp.resume());
+		for (int i = 0; i < c; i++) {
+			add(e.loadObjectSink());
+			add(ObjectSinkMethods.get(i));
+			add(e.storeToRegister(r_base + 3 + i, st));
+		}
+	}
+
+	@Override
+	public void visitTForLoop(Object id, SlotState st, int r_base, Object trueBranchIdentity, Object falseBranchIdentity) {
+		add(e.loadRegister(r_base + 1, st));
+		add(new JumpInsnNode(IFNONNULL, e._l(trueBranchIdentity)));
+		add(new JumpInsnNode(GOTO, e._l(falseBranchIdentity)));
+	}
+
+	@Override
 	public void visitClosure(Object id, SlotState st, int r_dest, int index) {
 		InsnList capture = new InsnList();
 		InsnList load = new InsnList();

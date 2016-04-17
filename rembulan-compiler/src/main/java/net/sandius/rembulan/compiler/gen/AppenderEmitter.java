@@ -252,12 +252,18 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 
 	@Override
 	public void l_TFORCALL(int a, int c) {
-		throw new UnsupportedOperationException();  // TODO
+		appender.append(new LuaInstruction.TForCall(a, c)).toNext();
 	}
 
+	/* A sBx   if R(A+1) ~= nil then { R(A)=R(A+1); pc += sBx } */
 	@Override
 	public void l_TFORLOOP(int a, int sbx) {
-		throw new UnsupportedOperationException();  // TODO
+		// splitting this into the loop step and local variable update in the true branch
+		Target trueBranch = new Target();
+		NodeAppender app = new NodeAppender(trueBranch);
+		app.append(new LuaInstruction.Move(a, a + 1));  // this is the R(A) := R(A+1)
+		app.jumpTo(appender.target(sbx + 1));
+		appender.branch(new LuaInstruction.TForLoop(trueBranch, appender.target(1), a));
 	}
 
 	@Override
