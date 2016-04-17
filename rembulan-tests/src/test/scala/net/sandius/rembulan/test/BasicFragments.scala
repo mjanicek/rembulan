@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.core.IllegalOperationAttemptException
+import net.sandius.rembulan.core._
 import net.sandius.rembulan.{core => lua}
 
 object BasicFragments extends FragmentBundle with FragmentExpectations {
@@ -635,6 +635,28 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   NumIterator in EmptyContext succeedsWith (11, 10)
+
+  val BasicSetList = fragment ("BasicSetList") {
+    """local a = { 1, 2, 3, 4, 5 }
+      |return #a, a
+    """
+  }
+  BasicSetList in EmptyContext succeedsWith (5, classOf[Table])
+
+  val VarLengthSetList = fragment ("VarLengthSetList") {
+    """local function f() return 1, 2, 3 end
+      |local a = { f(), f() }  -- should return 1, 1, 2, 3
+      |return #a, a
+    """
+  }
+  VarLengthSetList in EmptyContext succeedsWith (4, classOf[Table])
+
+  val VarargSetList = fragment ("VarargSetList") {
+    """local a = { ... }
+      |return #a, a
+    """
+  }
+  VarargSetList in EmptyContext succeedsWith (0, classOf[Table])
 
   // test should fail
   val GotoLocalSlot_withX = fragment ("GotoLocalSlot_withX") {
