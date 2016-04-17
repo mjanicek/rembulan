@@ -616,6 +616,26 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   IncompatibleFunctions in EmptyContext succeedsWith (null)
 
+  val NumIterator = fragment ("NumIterator") {
+    """local called = 0
+      |local looped = 0
+      |
+      |local function iter(limit, n)
+      |  called = called + 1
+      |  if n < limit then
+      |    return n + 1
+      |  end
+      |end
+      |
+      |for i in iter,10,0 do
+      |  looped = looped + 1
+      |end
+      |
+      |return called, looped
+    """
+  }
+  NumIterator in EmptyContext succeedsWith (11, 10)
+
   // test should fail
   val GotoLocalSlot_withX = fragment ("GotoLocalSlot_withX") {
     """do
