@@ -65,10 +65,10 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
 
   val NaNCmp = fragment ("NaNCmp") {
     """local nan = 0/0
-      |return 0 < nan, 0 > nan, nan == nan, nan < nan, nan > nan
+      |return 0 < nan, 0 > nan, nan == nan, nan < nan, nan > nan, nan >= nan, nan <= nan
     """
   }
-  NaNCmp in EmptyContext succeedsWith (false, false, false, false, false)
+  NaNCmp in EmptyContext succeedsWith (false, false, false, false, false, false, false)
 
   val StringCmp = fragment ("StringCmp") {
     """return "hello" < "there", "1" < "1.0", "1" > "1.0", "1" == "1.0"
