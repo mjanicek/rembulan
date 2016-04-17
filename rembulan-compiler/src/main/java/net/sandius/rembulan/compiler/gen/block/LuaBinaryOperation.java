@@ -5,7 +5,6 @@ import net.sandius.rembulan.compiler.gen.Origin;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.Slot;
 import net.sandius.rembulan.compiler.gen.SlotState;
-import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MAY_BE_INTEGER;
@@ -57,12 +56,8 @@ public class LuaBinaryOperation extends Linear implements LuaInstruction {
 		return op.name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
 	}
 
-	public static Type slotType(PrototypeContext context, SlotState slots, int rk) {
-		return rk < 0 ? context.constType(-rk - 1) : slots.typeAt(rk);
-	}
-
 	protected NumOpType opType(SlotState s) {
-		return mathForOp(op).opType(slotType(context, s, rk_left), slotType(context, s, rk_right));
+		return mathForOp(op).opType(LuaUtils.slotType(context, s, rk_left), LuaUtils.slotType(context, s, rk_right));
 	}
 
 	@Override

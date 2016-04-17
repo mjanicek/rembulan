@@ -5,6 +5,7 @@ import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
+import net.sandius.rembulan.compiler.gen.block.LuaUtils;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
@@ -323,8 +324,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		StaticMathImplementation staticMath = LuaBinaryOperation.mathForOp(op);
 		LuaInstruction.NumOpType ot = staticMath.opType(
-				LuaBinaryOperation.slotType(e.context(), s, rk_left),
-				LuaBinaryOperation.slotType(e.context(), s, rk_right));
+				LuaUtils.slotType(e.context(), s, rk_left),
+				LuaUtils.slotType(e.context(), s, rk_right));
 
 		switch (ot) {
 			case Integer: il.add(binaryIntegerOperation(op, s, rk_left, rk_right)); break;
@@ -583,7 +584,70 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	}
 
-	protected InsnList dynamicComparison(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode trueBranch, LabelNode falseBranch) {
+	private int cmpBranchOpcode(LuaInstruction.Comparison op, boolean pos) {
+		switch (op) {
+			case EQ:  return pos ? IFNE : IFEQ;
+			case LT:  return pos ? IFGE : IFLT;
+			case LE:  return pos ? IFGT : IFLE;
+			default:  throw new UnsupportedOperationException("Illegal comparison operation: " + op);
+		}
+	}
+
+	protected InsnList integerComparison(LuaInstruction.Comparison op, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode falseBranch) {
+		InsnList il = new InsnList();
+
+		il.add(e.loadNumericRegisterOrConstantValue(rk_left, s, Type.LONG_TYPE));
+		il.add(e.loadNumericRegisterOrConstantValue(rk_right, s, Type.LONG_TYPE));
+		il.add(new InsnNode(LCMP));
+
+		il.add(new JumpInsnNode(cmpBranchOpcode(op, pos), falseBranch));
+
+		return il;
+	}
+
+	protected InsnList floatComparison(LuaInstruction.Comparison op, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode falseBranch) {
+		InsnList il = new InsnList();
+
+		il.add(e.loadNumericRegisterOrConstantValue(rk_left, s, Type.DOUBLE_TYPE));
+		il.add(e.loadNumericRegisterOrConstantValue(rk_right, s, Type.DOUBLE_TYPE));
+
+		// Let OP be one of {EQ, LT, LE}. If we expect that
+		//   rk[rk_left] OP rk[rk_right] == true,
+		// then it is safe to treat comparisons involving NaNs as +1, since we're always
+		// interested in the lesser-than relation. Conversely, if the expectation == false,
+		// it is safe to treat NaNs as -1.
+		il.add(new InsnNode(pos ? DCMPG : DCMPL));
+
+		il.add(new JumpInsnNode(cmpBranchOpcode(op, pos), falseBranch));
+
+		return il;
+	}
+
+	protected InsnList numericComparison(LuaInstruction.Comparison op, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode falseBranch) {
+		InsnList il = new InsnList();
+
+		il.add(e.loadRegisterOrConstant(rk_left, s, Number.class));
+		il.add(e.loadRegisterOrConstant(rk_right, s, Number.class));
+		il.add(DispatchMethods.numeric(DispatchMethods.comparisonMethodName(op), 2));
+
+		il.add(new JumpInsnNode(pos ? IFEQ : IFNE, falseBranch));
+
+		return il;
+	}
+
+	protected InsnList stringComparison(LuaInstruction.Comparison op, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode falseBranch) {
+		InsnList il = new InsnList();
+
+		il.add(e.loadRegisterOrConstant(rk_left, s, String.class));
+		il.add(e.loadRegisterOrConstant(rk_right, s, String.class));
+		il.add(UtilMethods.String_compareTo());
+
+		il.add(new JumpInsnNode(cmpBranchOpcode(op, pos), falseBranch));
+
+		return il;
+	}
+
+	protected InsnList dynamicComparison(LuaInstruction.Comparison op, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode falseBranch) {
 		InsnList il = new InsnList();
 
 		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
@@ -592,7 +656,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		il.add(e.loadDispatchPreamble());
 		il.add(e.loadRegisterOrConstant(rk_left, s));
 		il.add(e.loadRegisterOrConstant(rk_right, s));
-		il.add(DispatchMethods.dynamic(methodName, 2));
+		il.add(DispatchMethods.dynamic(DispatchMethods.comparisonMethodName(op), 2));
 
 		il.add(rp.resume());
 		il.add(e.retrieve_0());
@@ -605,34 +669,46 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		// compare stack top with the expected value -- branch if not equal
 		il.add(new JumpInsnNode(pos ? IFEQ : IFNE, falseBranch));
 
-		// TODO: this could be a fall-through rather than a jump!
-		il.add(new JumpInsnNode(GOTO, trueBranch));
-
 		return il;
 	}
 
-	public InsnList cmp(String methodName, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranch, Object falseBranch) {
+	public InsnList cmp(LuaInstruction.Comparison op, int rk_left, int rk_right, boolean pos, SlotState s, Object trueBranchIdentity, Object falseBranchIdentity) {
 		InsnList il = new InsnList();
 
-		// TODO: specialise
-		il.add(dynamicComparison(methodName, rk_left, rk_right, pos, s, e._l(trueBranch), e._l(falseBranch)));
+		LuaInstruction.ComparisonOpType cmpOpType = LuaInstruction.ComparisonOpType.forTypes(
+				LuaUtils.slotType(e.context(), s, rk_left),
+				LuaUtils.slotType(e.context(), s, rk_right));
+
+		LabelNode falseBranch = e._l(falseBranchIdentity);
+
+		switch (cmpOpType) {
+			case Integer: il.add(integerComparison(op, rk_left, rk_right, pos, s, falseBranch)); break;
+			case Float:   il.add(floatComparison(op, rk_left, rk_right, pos, s, falseBranch)); break;
+			case Numeric: il.add(numericComparison(op, rk_left, rk_right, pos, s, falseBranch)); break;
+			case String:  il.add(stringComparison(op, rk_left, rk_right, pos, s, falseBranch)); break;
+			case Dynamic: il.add(dynamicComparison(op, rk_left, rk_right, pos, s, falseBranch)); break;
+			default: throw new IllegalArgumentException("Illegal comparison operation: " + op);
+		}
+
+		// TODO: this could be a fall-through rather than a jump!
+		il.add(new JumpInsnNode(GOTO, e._l(trueBranchIdentity)));
 
 		return il;
 	}
 
 	@Override
 	public void visitEq(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		add(cmp(DispatchMethods.OP_EQ, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
+		add(cmp(LuaInstruction.Comparison.EQ, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
 	}
 
 	@Override
 	public void visitLe(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		add(cmp(DispatchMethods.OP_LE, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
+		add(cmp(LuaInstruction.Comparison.LE, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
 	}
 
 	@Override
 	public void visitLt(Object id, SlotState st, boolean pos, int rk_left, int rk_right, Object trueBranchIdentity, Object falseBranchIdentity) {
-		add(cmp(DispatchMethods.OP_LT, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
+		add(cmp(LuaInstruction.Comparison.LT, rk_left, rk_right, pos, st, trueBranchIdentity, falseBranchIdentity));
 	}
 
 	@Override

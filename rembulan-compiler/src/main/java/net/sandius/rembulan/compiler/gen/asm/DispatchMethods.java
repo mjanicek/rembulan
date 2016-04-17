@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
+import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
@@ -62,6 +63,15 @@ public class DispatchMethods {
 			case SHL:  return OP_SHL;
 			case SHR:  return OP_SHR;
 			default: throw new IllegalArgumentException("Illegal binary operation: " + op);
+		}
+	}
+
+	public static String comparisonMethodName(LuaInstruction.Comparison op) {
+		switch (op) {
+			case EQ: return OP_EQ;
+			case LT: return OP_LT;
+			case LE: return OP_LE;
+			default: throw new IllegalArgumentException("Illegal comparison operation: " + op);
 		}
 	}
 	

@@ -132,22 +132,27 @@ public abstract class RawOperators {
 		}
 	}
 
+	@Deprecated
 	public static boolean rawlt(long a, long b) {
 		return a < b;
 	}
 
+	@Deprecated
 	public static boolean rawlt(double a, double b) {
 		return a < b;
 	}
 
+	@Deprecated
 	public static boolean rawlt(String a, String b) {
 		return a.compareTo(b) < 0;
 	}
 
+	@Deprecated
 	public static boolean rawle(long a, long b) {
 		return a <= b;
 	}
 
+	@Deprecated
 	public static boolean rawle(double a, double b) {
 		return a <= b;
 	}
@@ -157,6 +162,7 @@ public abstract class RawOperators {
 		throw new UnsupportedOperationException();  // TODO
 	}
 
+	@Deprecated
 	public static boolean rawle(String a, String b) {
 		return a.compareTo(b) <= 0;
 	}

@@ -430,6 +430,11 @@ public abstract class Dispatch {
 		result.setTo(rawEqual);
 	}
 
+	public static boolean eq(Number a, Number b) {
+		return ComparisonImplementation.of(a, b).do_eq(a, b);
+	}
+
+
 	public static void lt(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
 		ComparisonImplementation c = ComparisonImplementation.of(a, b);
 		if (c != null) {
@@ -445,6 +450,10 @@ public abstract class Dispatch {
 				throw IllegalOperationAttemptException.comparison(a, b);
 			}
 		}
+	}
+
+	public static boolean lt(Number a, Number b) {
+		return ComparisonImplementation.of(a, b).do_lt(a, b);
 	}
 
 	public static void le(LuaState state, ObjectSink result, Object a, Object b) throws ControlThrowable {
@@ -471,6 +480,10 @@ public abstract class Dispatch {
 				}
 			}
 		}
+	}
+
+	public static boolean le(Number a, Number b) {
+		return ComparisonImplementation.of(a, b).do_le(a, b);
 	}
 
 	public static void index(LuaState state, ObjectSink result, Object table, Object key) throws ControlThrowable {

@@ -58,6 +58,39 @@ public interface LuaInstruction {
 
 	}
 
+	enum Comparison {
+		EQ, LT, LE
+	}
+
+	enum ComparisonOpType {
+		Integer,
+		Float,
+		Numeric,
+		String,
+		Dynamic;
+
+		public static ComparisonOpType forTypes(Type left, Type right) {
+			if (left.isSubtypeOf(LuaTypes.STRING) && right.isSubtypeOf(LuaTypes.STRING)) {
+				return ComparisonOpType.String;
+			}
+			else if (left.isSubtypeOf(LuaTypes.NUMBER) && right.isSubtypeOf(LuaTypes.NUMBER)) {
+				if (left.isSubtypeOf(LuaTypes.NUMBER_INTEGER) && right.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
+					return ComparisonOpType.Integer;
+				}
+				else if (left.isSubtypeOf(LuaTypes.NUMBER_FLOAT) || right.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
+					return ComparisonOpType.Float;
+				}
+				else {
+					return ComparisonOpType.Numeric;
+				}
+			}
+			else {
+				return ComparisonOpType.Dynamic;
+			}
+		}
+
+	}
+
 	class Move extends Linear implements LuaInstruction {
 
 		public final int r_dest;

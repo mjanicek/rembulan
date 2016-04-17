@@ -114,4 +114,15 @@ public class UtilMethods {
 				false);
 	}
 
+	public static AbstractInsnNode String_compareTo() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(String.class),
+				"compareTo",
+				Type.getMethodDescriptor(
+						Type.INT_TYPE,
+						Type.getType(String.class)),
+				false);
+	}
+
 }

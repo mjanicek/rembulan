@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.block;
 
+import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.compiler.types.TypeSeq;
@@ -26,6 +27,10 @@ public abstract class LuaUtils {
 		}
 
 		return TypeSeq.of(ReadOnlyArray.wrap(args), count <= 0);
+	}
+
+	public static Type slotType(PrototypeContext context, SlotState slots, int rk) {
+		return rk < 0 ? context.constType(-rk - 1) : slots.typeAt(rk);
 	}
 
 }
