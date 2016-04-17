@@ -677,7 +677,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		}
 		else {
 			// keep results in the object sink
-			// TODO: should all registers from r_tgt onwards be cleared?
+
+			// clear registers from r_tgt onwards
+			add(e.clearRegisters(r_tgt));
 		}
 	}
 

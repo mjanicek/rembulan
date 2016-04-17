@@ -402,6 +402,15 @@ public class CodeEmitter {
 		return il;
 	}
 
+	public InsnList clearRegisters(int firstIdx) {
+		InsnList il = new InsnList();
+		for (int r = firstIdx; r < numOfRegisters(); r++) {
+			il.add(new InsnNode(ACONST_NULL));
+			il.add(storeRegisterValue(r));
+		}
+		return il;
+	}
+
 	public int newLocalVariable(int locIdx, String name, LabelNode begin, LabelNode end, Type t) {
 		// FIXME: this is quite brittle!
 		int idx = 4 + numOfRegisters() + (isVararg ? 1 : 0) + locIdx;
