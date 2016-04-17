@@ -103,7 +103,7 @@ public abstract class CodeVisitor {
 
 	public abstract void visitTForLoop(Object id, SlotState st, int r_base, Object trueBranchIdentity, Object falseBranchIdentity);
 
-	// TODO: SETLIST
+	public abstract void visitSetList(Object id, SlotState st, int r_base, int b, int c);
 
 	public abstract void visitClosure(Object id, SlotState st, int r_dest, int index);
 

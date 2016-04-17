@@ -3,12 +3,14 @@ package net.sandius.rembulan.compiler.gen.asm;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class OperatorMethods {
 
@@ -61,4 +63,17 @@ public class OperatorMethods {
 						Type.getType(Number.class)),
 				false);
 	}
+
+	public static AbstractInsnNode tableRawSetIntKey() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(Table.class),
+				"rawset",
+				Type.getMethodDescriptor(
+						Type.VOID_TYPE,
+						Type.INT_TYPE,
+						Type.getType(Object.class)),
+				false);
+	}
+
 }

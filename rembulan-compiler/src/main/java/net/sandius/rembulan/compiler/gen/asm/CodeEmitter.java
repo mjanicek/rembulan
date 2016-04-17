@@ -402,6 +402,13 @@ public class CodeEmitter {
 		return il;
 	}
 
+	public int newLocalVariable(int locIdx, String name, LabelNode begin, LabelNode end, Type t) {
+		// FIXME: this is quite brittle!
+		int idx = 4 + numOfRegisters() + (isVararg ? 1 : 0) + locIdx;
+		runMethodNode.localVariables.add(new LocalVariableNode(name, t.getDescriptor(), null, begin, end, idx));
+		return idx;
+	}
+
 	public class ResumptionPoint {
 
 		public final int index;

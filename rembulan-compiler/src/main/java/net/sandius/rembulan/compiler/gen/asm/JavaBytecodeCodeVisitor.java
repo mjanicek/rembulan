@@ -6,22 +6,30 @@ import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
+import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntIterable;
 import net.sandius.rembulan.util.IntIterator;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FrameNode;
+import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+import org.objectweb.asm.tree.VarInsnNode;
 
 import static org.objectweb.asm.Opcodes.*;
 
 public class JavaBytecodeCodeVisitor extends CodeVisitor {
+
+	// TODO: factor this outside make it a parameter
+	public static final int FIELDS_PER_FLUSH = 50;
 
 	private final CodeEmitter e;
 
@@ -818,6 +826,104 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadRegister(r_base + 1, st));
 		add(new JumpInsnNode(IFNONNULL, e._l(trueBranchIdentity)));
 		add(new JumpInsnNode(GOTO, e._l(falseBranchIdentity)));
+	}
+
+	@Override
+	public void visitSetList(Object id, SlotState st, int r_base, int b, int c) {
+
+		// We require that the destination object is a table: furthermore,
+		// we assume that the table has just been constructed by a NEWTABLE
+		// instruction, and therefore cannot have a metatable. All accesses
+		// may therefore be raw.
+
+		Check.isTrue(st.typeAt(r_base).isSubtypeOf(LuaTypes.TABLE));
+
+		int offset = (c - 1) * FIELDS_PER_FLUSH;
+
+		if (b > 0) {
+			add(e.loadRegister(r_base, st, Table.class));
+
+			for (int i = 1; i <= b; i++) {
+				if (i < b) {
+					add(new InsnNode(DUP));
+				}
+
+				add(ASMUtils.loadInt(offset + i));
+				add(e.loadRegister(r_base + i, st));
+				add(OperatorMethods.tableRawSetIntKey());
+			}
+		}
+		else {
+			Check.isTrue(st.hasVarargs());
+
+			int vp = st.varargPosition() - r_base;
+
+			Check.nonNegative(vp);
+
+			add(e.loadRegister(r_base, st, Table.class));
+
+			// we're copying from (r_base + 1) (inclusive) to vp (exclusive)
+			// -- these indices are in the locals
+
+			for (int i = 1; i < vp; i++) {
+				add(new InsnNode(DUP));
+				add(ASMUtils.loadInt(offset + i));
+				add(e.loadRegister(r_base + i, st));
+				add(OperatorMethods.tableRawSetIntKey());
+			}
+
+			// last used index is (offset + vp - 1), so the next one is (offset + vp)
+			int varOffset = offset + vp;
+
+			LabelNode tabBegin = new LabelNode();
+			LabelNode iterBegin = new LabelNode();
+			LabelNode iterEnd = new LabelNode();
+
+			int lv_tab = e.newLocalVariable(0, "t", tabBegin, iterEnd, Type.getType(Table.class));
+			int lv_idx = e.newLocalVariable(1, "i", iterBegin, iterEnd, Type.INT_TYPE);
+
+			// table is still on stack: store it into a local variable
+			add(new VarInsnNode(ASTORE, lv_tab));
+			add(tabBegin);
+
+			// now implement a for(int i = 0; i < sink.size(); i++) { ... }
+			// TODO: store the limit in a local variable? no need to query for it in each iteration
+
+			add(ASMUtils.loadInt(0));
+			add(new VarInsnNode(ISTORE, lv_idx));
+
+			add(iterBegin);
+			add(new FrameNode(F_APPEND, 2, new Object[] { Type.getInternalName(Table.class), Opcodes.INTEGER }, 0, null));
+			add(new VarInsnNode(ILOAD, lv_idx));
+			add(e.loadObjectSink());
+			add(ObjectSinkMethods.size());
+			add(new JumpInsnNode(IF_ICMPGE, iterEnd));
+
+			// load the table
+			add(new VarInsnNode(ALOAD, lv_tab));
+
+			// determine the table index for this element: it's (i + varOffset)
+			add(new VarInsnNode(ILOAD, lv_idx));
+			if (varOffset > 0) {
+				add(ASMUtils.loadInt(varOffset));
+				add(new InsnNode(IADD));
+			}
+
+			// load i-th value from sink
+			add(e.loadObjectSink());
+			add(new VarInsnNode(ILOAD, lv_idx));
+			add(ObjectSinkMethods.get());
+
+			// save to table
+			add(OperatorMethods.tableRawSetIntKey());
+
+			// increment index & iterate
+			add(new IincInsnNode(lv_idx, 1));
+			add(new JumpInsnNode(GOTO, iterBegin));
+
+			add(iterEnd);
+			add(new FrameNode(F_CHOP, 2, null, 0, null));
+		}
 	}
 
 	@Override

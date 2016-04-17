@@ -268,7 +268,9 @@ public class AppenderEmitter implements LuaInstructionVisitor {
 
 	@Override
 	public void l_SETLIST(int a, int b, int c) {
-		throw new UnsupportedOperationException();  // TODO
+		// FIXME: when c == 0, we need to fetch the next instruction, cast it as int & use it for c -- where to deal with it?
+		Check.gt(c, 0);
+		appender.append(new LuaInstruction.SetList(a, b, c)).toNext();
 	}
 
 	@Override

@@ -21,6 +21,27 @@ public class ObjectSinkMethods {
 		return Type.getType(ObjectSink.class);
 	}
 
+	public static AbstractInsnNode size() {
+		return new MethodInsnNode(
+				INVOKEINTERFACE,
+				selfTpe().getInternalName(),
+				"size",
+				Type.getMethodType(
+						Type.INT_TYPE).getDescriptor(),
+				true);
+	}
+
+	public static AbstractInsnNode get() {
+		return new MethodInsnNode(
+				INVOKEINTERFACE,
+				selfTpe().getInternalName(),
+				"get",
+				Type.getMethodType(
+						Type.getType(Object.class),
+						Type.INT_TYPE).getDescriptor(),
+				true);
+	}
+
 	public static InsnList get(int index) {
 		Check.nonNegative(index);
 
@@ -38,14 +59,7 @@ public class ObjectSinkMethods {
 		}
 		else {
 			il.add(ASMUtils.loadInt(index));
-			il.add(new MethodInsnNode(
-					INVOKEINTERFACE,
-					selfTpe().getInternalName(),
-					"get",
-					Type.getMethodType(
-							Type.getType(Object.class),
-							Type.INT_TYPE).getDescriptor(),
-					true));
+			il.add(get());
 		}
 
 		return il;

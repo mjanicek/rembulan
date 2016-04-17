@@ -895,7 +895,41 @@ public interface LuaInstruction {
 
 	}
 
-	// TODO: SETLIST
+	class SetList extends Linear implements LuaInstruction {
+
+		public final int r_dest;
+		public final int b;
+		public final int c;
+
+		public SetList(int a, int b, int c) {
+			Check.gt(c, 0);
+			this.r_dest = a;
+			this.b = b;
+			this.c = c;
+		}
+
+		@Override
+		public String toString() {
+			String suffix = inSlots().typeAt(r_dest).isSubtypeOf(LuaTypes.TABLE) ? "_T" : "_???";
+			return "SETLIST" + suffix + "(" + r_dest + "," + b + "," + c + ")";
+		}
+
+		@Override
+		protected SlotState effect(SlotState in) {
+			if (b == 0) {
+				Check.isTrue(in.hasVarargs());
+				in = in.consumeVarargs();
+			}
+			Type t = in.typeAt(r_dest);
+			return in.update(r_dest, Origin.Computed.in(this), t);
+		}
+
+		@Override
+		public void emit(CodeVisitor visitor) {
+			visitor.visitSetList(this, inSlots(), r_dest, b, c);
+		}
+
+	}
 
 	class Closure extends Linear implements LuaInstruction, LocalVariableEffect {
 

@@ -15,6 +15,10 @@ public abstract class Table extends LuaObject {
 
 	public abstract void rawset(Object key, Object value);
 
+	public void rawset(int idx, Object value) {
+		rawset((long) idx, value);
+	}
+
 	public abstract int rawlen();
 
 }
