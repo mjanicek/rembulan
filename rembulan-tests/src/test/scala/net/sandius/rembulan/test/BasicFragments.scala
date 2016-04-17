@@ -236,7 +236,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   ForLoopMtAttempt in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
-  ForLoopMtAttempt in BuiltinContext failsWith (classOf[IllegalOperationAttemptException], "'for' initial value must be a number")
+  ForLoopMtAttempt in BuiltinContext failsWith (classOf[IllegalArgumentException], "'for' initial value must be a number")
 
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
@@ -298,7 +298,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   UnmOnNumbers in EmptyContext succeedsWith (42, -42, 42.6, -42.6, 0.314, -0.314)
-  UnmOnNumbers in BuiltinContext succeedsWith (42, -42, 42.6, -42.6, 20, -20)
+  UnmOnNumbers in BuiltinContext succeedsWith (42, -42, 42.6, -42.6, 314, -314)
 
   val UnmOnNumericString = fragment ("UnmOnNumericString") {
     """local i = "42"
