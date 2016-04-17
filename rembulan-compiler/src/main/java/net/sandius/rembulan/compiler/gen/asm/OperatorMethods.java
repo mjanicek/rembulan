@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.LuaFormat;
+import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
@@ -13,6 +14,10 @@ import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class OperatorMethods {
+
+	public static final String RAW_OP_MOD = "rawmod";
+	public static final String RAW_OP_POW = "rawpow";
+	public static final String RAW_OP_IDIV = "rawidiv";
 
 	private OperatorMethods() {
 		// not to be instantiated

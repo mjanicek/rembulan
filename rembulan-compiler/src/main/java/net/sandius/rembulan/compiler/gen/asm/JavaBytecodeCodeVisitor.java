@@ -256,16 +256,16 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			case ADD:  il.add(nativeBinaryOperationAndBox(LADD, true)); break;
 			case SUB:  il.add(nativeBinaryOperationAndBox(LSUB, true)); break;
 			case MUL:  il.add(nativeBinaryOperationAndBox(LMUL, true)); break;
-			case MOD:  il.add(rawBinaryOperationAndBox("rawmod", true, true)); break;
-			case POW:  il.add(rawBinaryOperationAndBox("rawpow", false, false)); break;
+			case MOD:  il.add(rawBinaryOperationAndBox(OperatorMethods.RAW_OP_MOD, true, true)); break;
+			case POW:  il.add(rawBinaryOperationAndBox(OperatorMethods.RAW_OP_POW, false, false)); break;
 			case DIV:  il.add(nativeBinaryOperationAndBox(DDIV, false)); break;
-			case IDIV: il.add(rawBinaryOperationAndBox("rawidiv", true, true)); break;
+			case IDIV: il.add(rawBinaryOperationAndBox(OperatorMethods.RAW_OP_IDIV, true, true)); break;
 			case BAND: il.add(nativeBinaryOperationAndBox(LAND, true)); break;
 			case BOR:  il.add(nativeBinaryOperationAndBox(LOR, true)); break;
 			case BXOR: il.add(nativeBinaryOperationAndBox(LXOR, true)); break;
 			case SHL:  il.add(nativeBinaryOperationAndBox(LSHL, true)); break;
 			case SHR:  il.add(nativeBinaryOperationAndBox(LUSHR, true)); break;
-			default: throw new IllegalStateException("Illegal op: " + op);
+			default: throw new IllegalStateException("Illegal binary integer op: " + op);
 		}
 
 		return il;
@@ -281,11 +281,11 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			case ADD:  il.add(nativeBinaryOperationAndBox(DADD, false)); break;
 			case SUB:  il.add(nativeBinaryOperationAndBox(DSUB, false)); break;
 			case MUL:  il.add(nativeBinaryOperationAndBox(DMUL, false)); break;
-			case MOD:  il.add(rawBinaryOperationAndBox("rawmod", false, false)); break;
-			case POW:  il.add(rawBinaryOperationAndBox("rawpow", false, false)); break;
+			case MOD:  il.add(rawBinaryOperationAndBox(OperatorMethods.RAW_OP_MOD, false, false)); break;
+			case POW:  il.add(rawBinaryOperationAndBox(OperatorMethods.RAW_OP_POW, false, false)); break;
 			case DIV:  il.add(nativeBinaryOperationAndBox(DDIV, false)); break;
-			case IDIV: il.add(rawBinaryOperationAndBox("rawidiv", false, false)); break;
-			default: throw new IllegalStateException("Illegal op: " + op);
+			case IDIV: il.add(rawBinaryOperationAndBox(OperatorMethods.RAW_OP_IDIV, false, false)); break;
+			default: throw new IllegalStateException("Illegal binary float op: " + op);
 		}
 
 		return il;
@@ -294,10 +294,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	protected InsnList binaryNumericOperation(LuaBinaryOperation.Op op, SlotState s, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 
-		String method = op.name().toLowerCase();  // FIXME: brittle
 		il.add(e.loadRegisterOrConstant(rk_left, s, Number.class));
 		il.add(e.loadRegisterOrConstant(rk_right, s, Number.class));
-		il.add(DispatchMethods.numeric(method, 2));
+		il.add(DispatchMethods.numeric(DispatchMethods.binaryOperationMethodName(op), 2));
 
 		return il;
 	}
@@ -305,15 +304,13 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	protected InsnList binaryDynamicOperation(LuaBinaryOperation.Op op, SlotState s, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 
-		String method = op.name().toLowerCase();  // FIXME: brittle
-
 		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
 		il.add(rp.save());
 
 		il.add(e.loadDispatchPreamble());
 		il.add(e.loadRegisterOrConstant(rk_left, s));
 		il.add(e.loadRegisterOrConstant(rk_right, s));
-		il.add(DispatchMethods.dynamic(method, 2));
+		il.add(DispatchMethods.dynamic(DispatchMethods.binaryOperationMethodName(op), 2));
 
 		il.add(rp.resume());
 		il.add(e.retrieve_0());
