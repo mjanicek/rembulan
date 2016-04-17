@@ -177,28 +177,28 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   ZeroStepForLoop in EmptyContext succeedsWith ()
-  ZeroStepForLoop in BaseLibContext succeedsWith ()
+  ZeroStepForLoop in BuiltinContext succeedsWith ()
 
   val ZeroStepFloatForLoop = fragment ("ZeroStepFloatForLoop") {
     """for i = 1, 10, 0.0 do assert(false) end
     """
   }
   ZeroStepFloatForLoop in EmptyContext succeedsWith ()
-  ZeroStepFloatForLoop in BaseLibContext succeedsWith ()
+  ZeroStepFloatForLoop in BuiltinContext succeedsWith ()
 
   val NegativeStepForLoop = fragment ("NegativeStepForLoop") {
     """for i = 1, 10, -1 do assert(false) end
     """
   }
   NegativeStepForLoop in EmptyContext succeedsWith ()
-  NegativeStepForLoop in BaseLibContext succeedsWith ()
+  NegativeStepForLoop in BuiltinContext succeedsWith ()
 
   val NegativeStepFloatForLoop = fragment ("NegativeStepFloatForLoop") {
     """for i = 0, 1, -1.0 do assert(false) end
     """
   }
   NegativeStepFloatForLoop in EmptyContext succeedsWith ()
-  NegativeStepFloatForLoop in BaseLibContext succeedsWith ()
+  NegativeStepFloatForLoop in BuiltinContext succeedsWith ()
 
   val SimplifiableFloatForLoop = fragment ("SimplifiableFloatForLoop") {
     """local step = -1.0
@@ -208,7 +208,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   SimplifiableFloatForLoop in EmptyContext succeedsWith ()
-  SimplifiableFloatForLoop in BaseLibContext succeedsWith ()
+  SimplifiableFloatForLoop in BuiltinContext succeedsWith ()
 
   val DynamicIntegerForLoop = fragment ("DynamicIntegerForLoop") {
     """local function forloop(init, limit, step, f)
@@ -236,7 +236,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   ForLoopMtAttempt in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
-  ForLoopMtAttempt in BaseLibContext failsWith (classOf[IllegalOperationAttemptException], "'for' initial value must be a number")
+  ForLoopMtAttempt in BuiltinContext failsWith (classOf[IllegalOperationAttemptException], "'for' initial value must be a number")
 
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
@@ -284,7 +284,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   BitwiseError in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "number has no integer representation")
-  BitwiseError in BaseLibContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform bitwise operation on a function value")
+  BitwiseError in BuiltinContext failsWith (classOf[IllegalOperationAttemptException], "attempt to perform bitwise operation on a function value")
 
   val UnmOnNumbers = fragment ("UnmOnNumbers") {
     """local i = 42
@@ -298,7 +298,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   UnmOnNumbers in EmptyContext succeedsWith (42, -42, 42.6, -42.6, 0.314, -0.314)
-  UnmOnNumbers in BaseLibContext succeedsWith (42, -42, 42.6, -42.6, 20, -20)
+  UnmOnNumbers in BuiltinContext succeedsWith (42, -42, 42.6, -42.6, 20, -20)
 
   val UnmOnNumericString = fragment ("UnmOnNumericString") {
     """local i = "42"
