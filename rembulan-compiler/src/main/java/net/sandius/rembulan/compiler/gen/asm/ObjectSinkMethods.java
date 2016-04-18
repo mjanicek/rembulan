@@ -21,6 +21,17 @@ public class ObjectSinkMethods {
 		return Type.getType(ObjectSink.class);
 	}
 
+	@Deprecated
+	public static boolean canSaveNResults(int numValues) {
+		// TODO: determine this by reading the ObjectSink interface?
+		return numValues <= 5;
+	}
+
+	public static boolean canTailCallWithNArguments(int numValues) {
+		// TODO: determine this by reading the ObjectSink interface?
+		return numValues <= 5;
+	}
+
 	public static AbstractInsnNode size() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
@@ -95,12 +106,6 @@ public class ObjectSinkMethods {
 						Type.VOID_TYPE,
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
 				false);
-	}
-
-	@Deprecated
-	public static boolean canSaveNResults(int numValues) {
-		// TODO: determine this by reading the ObjectSink interface?
-		return numValues <= 5;
 	}
 
 	public static AbstractInsnNode setTo(int numValues) {
@@ -180,26 +185,19 @@ public class ObjectSinkMethods {
 	}
 
 	public static AbstractInsnNode tailCall(int numCallArgs) {
-		Check.nonNegative(numCallArgs);
+		Check.isTrue(canTailCallWithNArguments(numCallArgs));
 
-		// TODO: determine this by reading the ObjectSink interface?
-		if (numCallArgs <= 4) {
-			Type[] callArgTypes = new Type[numCallArgs + 1];  // don't forget the call target
-			Arrays.fill(callArgTypes, Type.getType(Object.class));
+		Type[] callArgTypes = new Type[numCallArgs + 1];  // don't forget the call target
+		Arrays.fill(callArgTypes, Type.getType(Object.class));
 
-			return new MethodInsnNode(
-					INVOKEVIRTUAL,
-					selfTpe().getInternalName(),
-					"tailCall",
-					Type.getMethodType(
-							Type.VOID_TYPE,
-							callArgTypes).getDescriptor(),
-					false);
-		}
-		else {
-			// TODO: iterate and push
-			throw new UnsupportedOperationException("Tail call with " + numCallArgs + " arguments");
-		}
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				selfTpe().getInternalName(),
+				"tailCall",
+				Type.getMethodType(
+						Type.VOID_TYPE,
+						callArgTypes).getDescriptor(),
+				false);
 	}
 
 	public static AbstractInsnNode setTailCallTarget() {

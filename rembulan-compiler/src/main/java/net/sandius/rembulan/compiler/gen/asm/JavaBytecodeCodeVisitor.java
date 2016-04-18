@@ -760,15 +760,27 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitTailCall(Object id, SlotState st, int r_tgt, int b) {
 		if (b > 0) {
 			// b - 1 is the actual number of arguments to the tailcall
-			add(e.loadObjectSink());
-			add(new InsnNode(DUP));
-			// target is at r_tgt, plus (b - 1) arguments
-			add(e.setReturnValuesFromRegisters(r_tgt + 1, st, b - 1));
-			add(e.loadRegister(r_tgt, st));
-			add(ObjectSinkMethods.setTailCallTarget());
+
+			if (ObjectSinkMethods.canTailCallWithNArguments(b - 1)) {
+				// we can use the tailCall method
+				add(e.loadObjectSink());
+				add(e.loadRegisters(r_tgt, st, b));  // target is at r_tgt, plus (b - 1) arguments
+				add(ObjectSinkMethods.tailCall(b - 1));
+			}
+			else {
+				// need to use setTo followed by setTailCallTarget
+				add(e.loadObjectSink());
+				add(new InsnNode(DUP));
+				add(e.setReturnValuesFromRegisters(r_tgt + 1, st, b - 1));  // (b - 1) call arguments
+				add(e.loadRegister(r_tgt, st));  // call target
+				add(ObjectSinkMethods.setTailCallTarget());
+			}
+
 			add(new InsnNode(RETURN));
 		}
 		else {
+			// need to use setTo followed by setTailCallTarget
+			// TODO: add an ObjectSink method to do this in one step
 			add(e.setReturnValuesUpToStackTop(r_tgt + 1, st));
 			add(e.loadObjectSink());
 			add(e.loadRegister(r_tgt, st));
