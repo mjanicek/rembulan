@@ -44,36 +44,4 @@ public abstract class InvokeKind {
 		}
 	}
 
-	private static Type methodTypeForKind(boolean isStatic, int kind) {
-		Check.nonNegative(kind);
-
-		ArrayList<Type> args = new ArrayList<>();
-		args.add(Type.getType(LuaState.class));
-		args.add(Type.getType(ObjectSink.class));
-		if (isStatic) {
-			args.add(Type.getType(Object.class));
-		}
-
-		if (kind > 0) {
-			// (kind - 1) arguments
-			Type o = Type.getType(Object.class);
-			for (int i = 0; i < kind - 1; i++) {
-				args.add(o);
-			}
-		}
-		else {
-			// variable number of arguments, packed in an array
-			args.add(ASMUtils.arrayTypeFor(Object.class));
-		}
-
-		return Type.getMethodType(
-				Type.VOID_TYPE,
-				args.toArray(new Type[0]));
-	}
-
-	@Deprecated
-	public static Type virtualMethodType(int kind) {
-		return methodTypeForKind(false, kind);
-	}
-
 }

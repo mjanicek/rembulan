@@ -55,7 +55,7 @@ public class ClassEmitter {
 	}
 
 	protected Type invokeMethodType() {
-		return InvokeKind.virtualMethodType(kind());
+		return InvokableMethods.invoke_method(kind()).getMethodType();
 	}
 
 	protected Type superClassType() {
