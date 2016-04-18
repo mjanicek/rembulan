@@ -48,7 +48,6 @@ public class RunMethodEmitter {
 	private final int numOfParameters;
 	private final boolean isVararg;
 
-	private final MethodNode invokeMethodNode;
 	private final MethodNode resumeMethodNode;
 	private final MethodNode runMethodNode;
 	private MethodNode saveStateNode;
@@ -69,13 +68,6 @@ public class RunMethodEmitter {
 
 		this.numOfParameters = numOfParameters;
 		this.isVararg = isVararg;
-
-		this.invokeMethodNode = new MethodNode(
-				ACC_PUBLIC,
-				"invoke",
-				invokeMethodType().getDescriptor(),
-				null,
-				exceptions());
 
 		this.resumeMethodNode = new MethodNode(
 				ACC_PUBLIC,
@@ -111,10 +103,6 @@ public class RunMethodEmitter {
 		return context;
 	}
 
-	public MethodNode invokeMethodNode() {
-		return invokeMethodNode;
-	}
-
 	public MethodNode resumeMethodNode() {
 		return resumeMethodNode;
 	}
@@ -127,11 +115,11 @@ public class RunMethodEmitter {
 		return saveStateNode;
 	}
 
-	private String runMethodName() {
+	public String runMethodName() {
 		return "run";
 	}
 
-	private Type runMethodType() {
+	public Type runMethodType() {
 		ArrayList<Type> args = new ArrayList<>();
 
 		args.add(Type.getType(LuaState.class));
@@ -146,11 +134,7 @@ public class RunMethodEmitter {
 		return Type.getMethodType(Type.VOID_TYPE, args.toArray(new Type[0]));
 	}
 
-	private Type invokeMethodType() {
-		return parent.invokeMethodType();
-	}
-
-	private String[] exceptions() {
+	public static String[] exceptions() {
 		return new String[] { Type.getInternalName(ControlThrowable.class) };
 	}
 
@@ -165,14 +149,6 @@ public class RunMethodEmitter {
 			labels.put(key, nl);
 			return nl;
 		}
-	}
-
-	public void _ignored(Object o) {
-		System.out.println("// Ignored: " + o.getClass() + ": " + o.toString());
-	}
-
-	public void _missing(Object o) {
-		throw new UnsupportedOperationException("Not implemented: " + o.getClass() + ": " + o.toString());
 	}
 
 	public InsnList code() {
@@ -534,91 +510,11 @@ public class RunMethodEmitter {
 
 		runMethodNode.instructions.add(l_insns_end);
 
-		emitInvokeNode();
 		emitResumeNode();
 
 		MethodNode save = saveStateNode();
 		if (save != null) {
-			parent.node().methods.add(save);
-		}
-	}
-
-	private void emitInvokeNode() {
-		InsnList il = invokeMethodNode.instructions;
-		List<LocalVariableNode> locals = invokeMethodNode.localVariables;
-
-		LabelNode begin = new LabelNode();
-		LabelNode end = new LabelNode();
-
-		int invokeKind = parent.kind();
-
-
-		il.add(begin);
-
-		il.add(new VarInsnNode(ALOAD, 0));  // this
-		il.add(new VarInsnNode(ALOAD, 1));  // state
-		il.add(new VarInsnNode(ALOAD, 2));  // sink
-		il.add(ASMUtils.loadInt(0));  // resumption point
-
-		if (invokeKind > 0) {
-			// we have (invokeKind - 1) standalone parameters, mapping them onto #numOfRegisters
-
-			for (int i = 0; i < numOfRegisters(); i++) {
-				if (i < invokeKind - 1) {
-					il.add(new VarInsnNode(ALOAD, 3 + i));
-				}
-				else {
-					il.add(new InsnNode(ACONST_NULL));
-				}
-			}
-		}
-		else {
-			// variable number of parameters, encoded in an array at position 3
-
-			if (isVararg) {
-				il.add(new VarInsnNode(ALOAD, 3));
-				il.add(UtilMethods.arrayFrom(numOfParameters));
-			}
-
-			// load #numOfParameters, mapping them onto #numOfRegisters
-
-			for (int i = 0; i < numOfRegisters(); i++) {
-				if (i < numOfParameters) {
-					il.add(new VarInsnNode(ALOAD, 3));  // TODO: use dup instead?
-					il.add(UtilMethods.getArrayElementOrNull(i));
-				}
-				else {
-					il.add(new InsnNode(ACONST_NULL));
-				}
-			}
-
-		}
-
-		il.add(new MethodInsnNode(
-				INVOKESPECIAL,
-				parent.thisClassType().getInternalName(),
-				runMethodName(),
-				runMethodType().getDescriptor(),
-				false));
-
-		il.add(new InsnNode(RETURN));
-		il.add(end);
-
-		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
-		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, begin, end, 1));
-		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, begin, end, 2));
-		if (invokeKind < 0) {
-			locals.add(new LocalVariableNode("args", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 3));
-
-			// TODO: maxLocals, maxStack
-		}
-		else {
-			for (int i = 0; i < invokeKind; i++) {
-				locals.add(new LocalVariableNode("arg_" + i, Type.getDescriptor(Object.class), null, begin, end, 3 + i));
-			}
-
-			invokeMethodNode.maxLocals = 3 + invokeKind;
-			invokeMethodNode.maxStack = 4 + numOfRegisters();
+			parent.classNode().methods.add(save);
 		}
 	}
 

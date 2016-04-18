@@ -33,12 +33,18 @@ public class ClassEmitter {
 
 	private final ArrayList<String> upvalueFieldNames;
 
+	private final RunMethodEmitter runMethodEmitter;
+	private final InvokeMethodEmitter invokeMethodEmitter;
+
 	public ClassEmitter(PrototypeContext context, int numOfParameters, boolean isVararg) {
 		this.context = Check.notNull(context);
 		this.classNode = new ClassNode();
 		this.upvalueFieldNames = new ArrayList<>();
 		this.numOfParameters = numOfParameters;
 		this.isVararg = isVararg;
+
+		this.runMethodEmitter = new RunMethodEmitter(this, context, numOfParameters, isVararg);
+		this.invokeMethodEmitter = new InvokeMethodEmitter(this, context, numOfParameters, isVararg);
 	}
 
 	protected Type thisClassType() {
@@ -77,6 +83,11 @@ public class ClassEmitter {
 	}
 
 	public void end() {
+		invokeMethod().end();
+
+		classNode.methods.add(invokeMethod().node());
+		classNode.methods.add(runMethod().resumeMethodNode());
+		classNode.methods.add(runMethod().runMethodNode());
 	}
 
 	public void accept(ClassVisitor visitor) {
@@ -230,16 +241,16 @@ public class ClassEmitter {
 		return ctorMethodNode;
 	}
 
-	protected ClassNode node() {
+	protected ClassNode classNode() {
 		return classNode;
 	}
 
-	public RunMethodEmitter code() {
-		RunMethodEmitter emitter = new RunMethodEmitter(this, context, numOfParameters, isVararg);
-		classNode.methods.add(emitter.invokeMethodNode());
-		classNode.methods.add(emitter.resumeMethodNode());
-		classNode.methods.add(emitter.runMethodNode());
-		return emitter;
+	public RunMethodEmitter runMethod() {
+		return runMethodEmitter;
+	}
+
+	public InvokeMethodEmitter invokeMethod() {
+		return invokeMethodEmitter;
 	}
 
 }
