@@ -9,7 +9,6 @@ import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.Upvalue;
-import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -49,7 +48,6 @@ public class RunMethodEmitter {
 	private final boolean isVararg;
 
 	private final MethodNode runMethodNode;
-	private MethodNode saveStateNode;
 
 	private final Map<Object, LabelNode> labels;
 	private final ArrayList<LabelNode> resumptionPoints;
@@ -75,8 +73,6 @@ public class RunMethodEmitter {
 				null,
 				exceptions());
 
-		this.saveStateNode = null;
-
 		resumeSwitch = new InsnList();
 		code = new InsnList();
 		errorState = new InsnList();
@@ -93,10 +89,6 @@ public class RunMethodEmitter {
 
 	public MethodNode runMethodNode() {
 		return runMethodNode;
-	}
-
-	public MethodNode saveNode() {
-		return saveStateNode;
 	}
 
 	public String runMethodName() {
@@ -443,12 +435,13 @@ public class RunMethodEmitter {
 	}
 
 	public void end() {
+
 		if (isResumable()) {
-			_error_state();
-		}
-		_dispatch_table();
-		if (isResumable()) {
-			_resumption_handler();
+			errorState.add(errorState(l_error_state));
+			resumeSwitch.add(dispatchTable());
+			resumeHandler.add(resumptionHandler(l_handler_begin));
+
+			runMethodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
 		}
 
 		// local variable declaration
@@ -493,160 +486,64 @@ public class RunMethodEmitter {
 		runMethodNode.instructions.add(resumeHandler);
 
 		runMethodNode.instructions.add(l_insns_end);
-
-		MethodNode save = saveStateNode();
-		if (save != null) {
-			parent.classNode().methods.add(save);
-		}
 	}
 
-	protected void _error_state() {
-		errorState.add(l_error_state);
-		errorState.add(ASMUtils.frameSame());
-		errorState.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
-		errorState.add(new InsnNode(DUP));
-		errorState.add(ASMUtils.ctor(IllegalStateException.class));
-		errorState.add(new InsnNode(ATHROW));
+	protected InsnList errorState(LabelNode label) {
+		InsnList il = new InsnList();
+		il.add(label);
+		il.add(ASMUtils.frameSame());
+		il.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
+		il.add(new InsnNode(DUP));
+		il.add(ASMUtils.ctor(IllegalStateException.class));
+		il.add(new InsnNode(ATHROW));
+		return il;
 	}
 
 	protected boolean isResumable() {
 		return resumptionPoints.size() > 1;
 	}
 
-	protected void _dispatch_table() {
-		if (isResumable()) {
-			LabelNode[] labels = resumptionPoints.toArray(new LabelNode[0]);
-
-			resumeSwitch.add(new VarInsnNode(ILOAD, LV_RESUME));
-			resumeSwitch.add(new TableSwitchInsnNode(0, resumptionPoints.size() - 1, l_error_state, labels));
-		}
+	protected InsnList dispatchTable() {
+		InsnList il = new InsnList();
+		LabelNode[] labels = resumptionPoints.toArray(new LabelNode[0]);
+		il.add(new VarInsnNode(ILOAD, LV_RESUME));
+		il.add(new TableSwitchInsnNode(0, resumptionPoints.size() - 1, l_error_state, labels));
+		return il;
 	}
 
 	protected int numOfRegisters() {
 		return context.prototype().getMaximumStackSize();
 	}
 
-	private Type saveStateType() {
-		ArrayList<Type> args = new ArrayList<>();
+	public InsnList createSnapshot() {
+		InsnList il = new InsnList();
 
-		args.add(Type.INT_TYPE);
+		il.add(new VarInsnNode(ALOAD, 0));  // this
+		il.add(new VarInsnNode(ALOAD, 0));
+		il.add(new VarInsnNode(ILOAD, LV_RESUME));
 		if (isVararg) {
-			args.add(ASMUtils.arrayTypeFor(Object.class));
+			il.add(new VarInsnNode(ALOAD, LV_VARARGS));
 		}
 		for (int i = 0; i < numOfRegisters(); i++) {
-			args.add(Type.getType(Object.class));
+			il.add(new VarInsnNode(ALOAD, registerOffset() + i));
 		}
-		return Type.getMethodType(Type.getType(Serializable.class), args.toArray(new Type[0]));
+		il.add(parent.snapshotMethod().methodInvokeInsn());
+
+		return il;
 	}
 
-	private String saveStateName() {
-		return "snapshot";
-	}
+	protected InsnList resumptionHandler(LabelNode label) {
+		InsnList il = new InsnList();
+		
+		il.add(label);
+		il.add(ASMUtils.frameSame1(ControlThrowable.class));
 
-	private MethodNode saveStateNode() {
-		if (isResumable()) {
-			MethodNode saveNode = new MethodNode(
-					ACC_PRIVATE,
-					saveStateName(),
-					saveStateType().getDescriptor(),
-					null,
-					null);
+		il.add(new InsnNode(DUP));
 
-			InsnList il = saveNode.instructions;
-			LabelNode begin = new LabelNode();
-			LabelNode end = new LabelNode();
-
-			il.add(begin);
-
-			il.add(new TypeInsnNode(NEW, Type.getInternalName(DefaultSavedState.class)));
-			il.add(new InsnNode(DUP));
-
-			int regOffset = isVararg ? 3 : 2;
-
-			// resumption point
-			il.add(new VarInsnNode(ILOAD, 1));
-
-			// registers
-			int numRegs = numOfRegisters();
-			il.add(ASMUtils.loadInt(numRegs));
-			il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
-			for (int i = 0; i < numRegs; i++) {
-				il.add(new InsnNode(DUP));
-				il.add(ASMUtils.loadInt(i));
-				il.add(new VarInsnNode(ALOAD, regOffset + i));
-				il.add(new InsnNode(AASTORE));
-			}
-
-			// varargs
-			if (isVararg) {
-				il.add(new VarInsnNode(ALOAD, 2));
-			}
-
-			if (isVararg) {
-				il.add(ASMUtils.ctor(
-						Type.getType(DefaultSavedState.class),
-						Type.INT_TYPE,
-						ASMUtils.arrayTypeFor(Object.class),
-						ASMUtils.arrayTypeFor(Object.class)));
-			}
-			else {
-				il.add(ASMUtils.ctor(
-						Type.getType(DefaultSavedState.class),
-						Type.INT_TYPE,
-						ASMUtils.arrayTypeFor(Object.class)));
-			}
-
-			il.add(new InsnNode(ARETURN));
-
-			il.add(end);
-
-			List<LocalVariableNode> locals = saveNode.localVariables;
-
-			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
-			locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, begin, end, 1));
-			if (isVararg) {
-				locals.add(new LocalVariableNode("varargs", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 2));
-			}
-			for (int i = 0; i < numOfRegisters(); i++) {
-				locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, begin, end, regOffset + i));
-			}
-
-			saveNode.maxLocals = 2 + numOfRegisters();
-			saveNode.maxStack = 4 + 3;  // 4 to get register array at top, +3 to add element to it
-
-			return saveNode;
-		}
-		else {
-			return null;
-		}
-	}
-
-	protected void _resumption_handler() {
-		resumeHandler.add(l_handler_begin);
-		resumeHandler.add(ASMUtils.frameSame1(ControlThrowable.class));
-
-		resumeHandler.add(new InsnNode(DUP));
-
-		resumeHandler.add(new VarInsnNode(ALOAD, 0));  // this
-
-		// create state snapshot
-		resumeHandler.add(new VarInsnNode(ALOAD, 0));
-		resumeHandler.add(new VarInsnNode(ILOAD, LV_RESUME));
-		if (isVararg) {
-			resumeHandler.add(new VarInsnNode(ALOAD, LV_VARARGS));
-		}
-		for (int i = 0; i < numOfRegisters(); i++) {
-			resumeHandler.add(new VarInsnNode(ALOAD, registerOffset() + i));
-		}
-		resumeHandler.add(new MethodInsnNode(
-				INVOKESPECIAL,
-				parent.thisClassType().getInternalName(),
-				saveStateName(),
-				saveStateType().getDescriptor(),
-				false));
+		il.add(createSnapshot());
 
 		// register snapshot with the control exception
-		resumeHandler.add(new MethodInsnNode(
+		il.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(ControlThrowable.class),
 				"push",
@@ -657,9 +554,9 @@ public class RunMethodEmitter {
 				false));
 
 		// rethrow
-		resumeHandler.add(new InsnNode(ATHROW));
+		il.add(new InsnNode(ATHROW));
 
-		runMethodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+		return il;
 	}
 
 	public InsnList getUpvalueReference(int idx) {

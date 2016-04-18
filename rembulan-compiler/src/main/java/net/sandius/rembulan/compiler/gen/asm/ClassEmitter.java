@@ -37,6 +37,7 @@ public class ClassEmitter {
 	private final ResumeMethodEmitter resumeMethodEmitter;
 
 	private final RunMethodEmitter runMethodEmitter;
+	private final SnapshotMethodEmitter snapshotMethodEmitter;
 
 	public ClassEmitter(PrototypeContext context, int numOfParameters, boolean isVararg) {
 		this.context = Check.notNull(context);
@@ -48,6 +49,7 @@ public class ClassEmitter {
 		this.invokeMethodEmitter = new InvokeMethodEmitter(this, context, numOfParameters, isVararg);
 		this.resumeMethodEmitter = new ResumeMethodEmitter(this, context, numOfParameters, isVararg);
 		this.runMethodEmitter = new RunMethodEmitter(this, context, numOfParameters, isVararg);
+		this.snapshotMethodEmitter = new SnapshotMethodEmitter(this, context, numOfParameters, isVararg);
 	}
 
 	protected Type thisClassType() {
@@ -92,6 +94,11 @@ public class ClassEmitter {
 		classNode.methods.add(invokeMethod().node());
 		classNode.methods.add(resumeMethod().node());
 		classNode.methods.add(runMethod().runMethodNode());
+
+		if (runMethod().isResumable()) {
+			snapshotMethod().end();
+			classNode.methods.add(snapshotMethod().node());
+		}
 	}
 
 	public void accept(ClassVisitor visitor) {
@@ -259,6 +266,10 @@ public class ClassEmitter {
 
 	public ResumeMethodEmitter resumeMethod() {
 		return resumeMethodEmitter;
+	}
+
+	public SnapshotMethodEmitter snapshotMethod() {
+		return snapshotMethodEmitter;
 	}
 
 }
