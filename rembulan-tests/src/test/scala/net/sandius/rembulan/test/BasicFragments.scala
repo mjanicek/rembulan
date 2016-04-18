@@ -661,6 +661,30 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   IncompatibleFunctions in EmptyContext succeedsWith (null)
 
+  val TailcallWith21Args = fragment ("TailcallWith21Args") {
+    """local function f(...) return true, ... end
+      |return f("hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
+      |   "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
+      |   "well")
+    """
+  }
+  TailcallWith21Args in EmptyContext succeedsWith (true,
+      "hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
+      "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
+      "well")
+
+  val TailcallWith21ArgsAndVarargs = fragment ("TailcallWith21ArgsAndVarargs") {
+    """local function f(...) return true, ... end
+      |return f("hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
+      |   "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
+      |   "well", ...)
+    """
+  }
+  TailcallWith21ArgsAndVarargs in EmptyContext succeedsWith (true,
+      "hello", "there", "this", "is", "a", "result", "of", "a", "tail", "call",
+      "with", "many", "arguments", "and", "it", "still", "appears", "to", "work", "quite",
+      "well")
+
   val NumIterator = fragment ("NumIterator") {
     """local called = 0
       |local looped = 0
