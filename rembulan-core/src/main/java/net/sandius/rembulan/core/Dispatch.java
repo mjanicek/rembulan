@@ -76,13 +76,13 @@ public abstract class Dispatch {
 	public static void evaluateTailCalls(LuaState state, ObjectSink r) throws ControlThrowable {
 		while (r.isTailCall()) {
 			switch (r.size()) {
-				case 0: throw new IllegalStateException();
-				case 1: mt_invoke(state, r, r._0()); break;
-				case 2: mt_invoke(state, r, r._0(), r._1()); break;
-				case 3: mt_invoke(state, r, r._0(), r._1(), r._2()); break;
-				case 4: mt_invoke(state, r, r._0(), r._1(), r._2(), r._3()); break;
-				case 5: mt_invoke(state, r, r._0(), r._1(), r._2(), r._3(), r._4()); break;
-				default: mt_invoke(state, r, r._0(), r.tailAsArray()); break;
+				case 0: mt_invoke(state, r, r.getTailCallTarget()); break;
+				case 1: mt_invoke(state, r, r.getTailCallTarget(), r._0()); break;
+				case 2: mt_invoke(state, r, r.getTailCallTarget(), r._0(), r._1()); break;
+				case 3: mt_invoke(state, r, r.getTailCallTarget(), r._0(), r._1(), r._2()); break;
+				case 4: mt_invoke(state, r, r.getTailCallTarget(), r._0(), r._1(), r._2(), r._3()); break;
+				case 5: mt_invoke(state, r, r.getTailCallTarget(), r._0(), r._1(), r._2(), r._3(), r._4()); break;
+				default: mt_invoke(state, r, r.getTailCallTarget(), r.toArray()); break;
 			}
 		}
 	}

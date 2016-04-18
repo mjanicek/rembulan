@@ -202,13 +202,14 @@ public class ObjectSinkMethods {
 		}
 	}
 
-	public static AbstractInsnNode markAsTailCall() {
+	public static AbstractInsnNode setTailCallTarget() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
-				"markAsTailCall",
+				"setTailCallTarget",
 				Type.getMethodType(
-						Type.VOID_TYPE).getDescriptor(),
+						Type.VOID_TYPE,
+						Type.getType(Object.class)).getDescriptor(),
 				false);
 	}
 

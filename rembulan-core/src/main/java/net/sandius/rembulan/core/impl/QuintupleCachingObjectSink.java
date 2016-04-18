@@ -123,27 +123,6 @@ public class QuintupleCachingObjectSink extends ObjectSink {
 	}
 
 	@Override
-	public Object[] tailAsArray() {
-		switch (size) {
-			case 0: throw new IllegalArgumentException();
-			case 1: return EMPTY_ARRAY;
-			case 2: return new Object[] { _1 };
-			case 3: return new Object[] { _1, _2 };
-			case 4: return new Object[] { _1, _2, _3 };
-			case 5: return new Object[] { _1, _2, _3, _4 };
-			default:
-				Object[] result = new Object[size - 1];
-				result[0] = _1;
-				result[1] = _2;
-				result[2] = _3;
-				result[3] = _4;
-				Object[] tmp = _var.toArray();
-				System.arraycopy(tmp, 0, result, 4, tmp.length);
-				return result;
-		}
-	}
-
-	@Override
 	public Object get(int idx) {
 		switch (idx) {
 			case 0: return _0;

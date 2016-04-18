@@ -762,14 +762,17 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			// b - 1 is the actual number of arguments to the tailcall
 			add(e.loadObjectSink());
 			add(new InsnNode(DUP));
-			add(e.setReturnValuesFromRegisters(r_tgt, st, b));  // target is at r_tgt, plus (b - 1) arguments
-			add(ObjectSinkMethods.markAsTailCall());
+			// target is at r_tgt, plus (b - 1) arguments
+			add(e.setReturnValuesFromRegisters(r_tgt + 1, st, b - 1));
+			add(e.loadRegister(r_tgt, st));
+			add(ObjectSinkMethods.setTailCallTarget());
 			add(new InsnNode(RETURN));
 		}
 		else {
-			add(e.setReturnValuesUpToStackTop(r_tgt, st));
+			add(e.setReturnValuesUpToStackTop(r_tgt + 1, st));
 			add(e.loadObjectSink());
-			add(ObjectSinkMethods.markAsTailCall());
+			add(e.loadRegister(r_tgt, st));
+			add(ObjectSinkMethods.setTailCallTarget());
 			add(new InsnNode(RETURN));
 		}
 	}

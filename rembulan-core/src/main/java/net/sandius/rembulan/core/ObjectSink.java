@@ -5,11 +5,14 @@ import net.sandius.rembulan.core.impl.Varargs;
 public abstract class ObjectSink {
 
 	protected boolean tailCall;
+	protected Object tailCallTarget;
 
 	protected ObjectSink() {
 		tailCall = false;
+		tailCallTarget = null;
 	}
 
+	// return the size of the arg-list part
 	public abstract int size();
 
 	public boolean isTailCall() {
@@ -19,12 +22,18 @@ public abstract class ObjectSink {
 	// resets tail call to false, size to 0
 	public abstract void reset();
 
-	public void markAsTailCall() {
-		tailCall = true;
-	}
-
 	protected void resetTailCall() {
 		tailCall = false;
+		tailCallTarget = null;
+	}
+
+	public void setTailCallTarget(Object target) {
+		tailCall = true;
+		tailCallTarget = target;
+	}
+
+	public Object getTailCallTarget() {
+		return tailCallTarget;
 	}
 
 	public abstract void push(Object o);
@@ -95,38 +104,36 @@ public abstract class ObjectSink {
 	}
 
 	public void tailCall(Object target) {
-		setTo(target);
-		markAsTailCall();
+		setTo();
+		setTailCallTarget(target);
 	}
 
 	public void tailCall(Object target, Object arg1) {
-		setTo(target, arg1);
-		markAsTailCall();
+		setTo(arg1);
+		setTailCallTarget(target);
 	}
 
 	public void tailCall(Object target, Object arg1, Object arg2) {
-		setTo(target, arg1, arg2);
-		markAsTailCall();
+		setTo(arg1, arg2);
+		setTailCallTarget(target);
 	}
 
 	public void tailCall(Object target, Object arg1, Object arg2, Object arg3) {
-		setTo(target, arg1, arg2, arg3);
-		markAsTailCall();
+		setTo(arg1, arg2, arg3);
+		setTailCallTarget(target);
 	}
 
 	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
-		setTo(target, arg1, arg2, arg3, arg4);
-		markAsTailCall();
+		setTo(arg1, arg2, arg3, arg4);
+		setTailCallTarget(target);
+	}
+
+	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+		setTo(arg1, arg2, arg3, arg4, arg5);
+		setTailCallTarget(target);
 	}
 
 	public abstract Object[] toArray();
-
-	public Object[] tailAsArray() {
-		Object[] tmp = toArray();
-		Object[] result = new Object[tmp.length - 1];
-		System.arraycopy(tmp, 1, result, 0, result.length);
-		return result;
-	}
 
 	public abstract Object get(int idx);
 
