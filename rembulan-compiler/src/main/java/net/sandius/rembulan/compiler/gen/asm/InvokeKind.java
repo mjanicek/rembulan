@@ -7,6 +7,8 @@ import net.sandius.rembulan.core.impl.Function0;
 import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.Function3;
+import net.sandius.rembulan.core.impl.Function4;
+import net.sandius.rembulan.core.impl.Function5;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
@@ -38,6 +40,8 @@ public abstract class InvokeKind {
 			case 2:  return Function1.class;
 			case 3:  return Function2.class;
 			case 4:  return Function3.class;
+			case 5:  return Function4.class;
+			case 6:  return Function5.class;
 			default: return null;
 		}
 	}
