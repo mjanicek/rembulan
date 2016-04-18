@@ -33,8 +33,10 @@ public class ClassEmitter {
 
 	private final ArrayList<String> upvalueFieldNames;
 
-	private final RunMethodEmitter runMethodEmitter;
 	private final InvokeMethodEmitter invokeMethodEmitter;
+	private final ResumeMethodEmitter resumeMethodEmitter;
+
+	private final RunMethodEmitter runMethodEmitter;
 
 	public ClassEmitter(PrototypeContext context, int numOfParameters, boolean isVararg) {
 		this.context = Check.notNull(context);
@@ -43,8 +45,9 @@ public class ClassEmitter {
 		this.numOfParameters = numOfParameters;
 		this.isVararg = isVararg;
 
-		this.runMethodEmitter = new RunMethodEmitter(this, context, numOfParameters, isVararg);
 		this.invokeMethodEmitter = new InvokeMethodEmitter(this, context, numOfParameters, isVararg);
+		this.resumeMethodEmitter = new ResumeMethodEmitter(this, context, numOfParameters, isVararg);
+		this.runMethodEmitter = new RunMethodEmitter(this, context, numOfParameters, isVararg);
 	}
 
 	protected Type thisClassType() {
@@ -84,9 +87,10 @@ public class ClassEmitter {
 
 	public void end() {
 		invokeMethod().end();
+		resumeMethod().end();
 
 		classNode.methods.add(invokeMethod().node());
-		classNode.methods.add(runMethod().resumeMethodNode());
+		classNode.methods.add(resumeMethod().node());
 		classNode.methods.add(runMethod().runMethodNode());
 	}
 
@@ -251,6 +255,10 @@ public class ClassEmitter {
 
 	public InvokeMethodEmitter invokeMethod() {
 		return invokeMethodEmitter;
+	}
+
+	public ResumeMethodEmitter resumeMethod() {
+		return resumeMethodEmitter;
 	}
 
 }
