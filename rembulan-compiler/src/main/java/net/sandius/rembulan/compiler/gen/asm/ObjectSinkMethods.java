@@ -21,17 +21,6 @@ public class ObjectSinkMethods {
 		return Type.getType(ObjectSink.class);
 	}
 
-	@Deprecated
-	public static boolean canSaveNResults(int numValues) {
-		// TODO: determine this by reading the ObjectSink interface?
-		return numValues <= 5;
-	}
-
-	public static boolean canTailCallWithNArguments(int numValues) {
-		// TODO: determine this by reading the ObjectSink interface?
-		return numValues <= 5;
-	}
-
 	public static AbstractInsnNode size() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
@@ -108,37 +97,30 @@ public class ObjectSinkMethods {
 				false);
 	}
 
-	public static AbstractInsnNode setTo(int numValues) {
-		Check.nonNegative(numValues);
-		if (numValues == 0) {
-			return reset();
-		}
-		else {
-			Check.isTrue(canSaveNResults(numValues));
-
-			Type[] argTypes = new Type[numValues];
-			Arrays.fill(argTypes, Type.getType(Object.class));
-
-			return new MethodInsnNode(
-					INVOKEVIRTUAL,
-					selfTpe().getInternalName(),
-					"setTo",
-					Type.getMethodType(
-							Type.VOID_TYPE,
-							argTypes).getDescriptor(),
-					false);
-		}
+	public static int adjustKind_setTo(int kind) {
+		return kind > 0 ? (setTo_method(kind).exists() ? kind : 0) : 0;
 	}
 
-	public static AbstractInsnNode setToArray() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"setToArray",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				false);
+	public static int adjustKind_tailCall(int kind) {
+		return kind > 0 ? (tailCall_method(kind).exists() ? kind : 0) : 0;
+	}
+
+	private static ReflectionUtils.Method setTo_method(int kind) {
+		String methodName = kind > 0 ? "setTo" : "setToArray";
+		return ReflectionUtils.virtualArgListMethodFromKind(ObjectSink.class, methodName, null, kind);
+	}
+
+	private static ReflectionUtils.Method tailCall_method(int kind) {
+		String methodName = "tailCall";
+		return ReflectionUtils.virtualArgListMethodFromKind(ObjectSink.class, methodName, new Class[] { Object.class }, kind);
+	}
+
+	public static AbstractInsnNode setTo(int kind) {
+		return setTo_method(kind).toMethodInsnNode();
+	}
+
+	public static AbstractInsnNode tailCall(int kind) {
+		return tailCall_method(kind).toMethodInsnNode();
 	}
 
 	public static AbstractInsnNode toArray() {
@@ -181,22 +163,6 @@ public class ObjectSinkMethods {
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				false);
-	}
-
-	public static AbstractInsnNode tailCall(int numCallArgs) {
-		Check.isTrue(canTailCallWithNArguments(numCallArgs));
-
-		Type[] callArgTypes = new Type[numCallArgs + 1];  // don't forget the call target
-		Arrays.fill(callArgTypes, Type.getType(Object.class));
-
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"tailCall",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						callArgTypes).getDescriptor(),
 				false);
 	}
 

@@ -288,14 +288,17 @@ public class CodeEmitter {
 	public InsnList mapInvokeArgumentsToKinds(int fromIndex, SlotState slots, int desired, int actual) {
 		if (desired > 0) {
 			if (actual == 0) {
-				return packRegistersIntoArray(fromIndex, slots, desired - 1);  // passing args through an array
+				// passing args through an array
+				return packRegistersIntoArray(fromIndex, slots, desired - 1);
 			}
 			else {
+				// passing args through the stack
 				Check.isEq(desired, actual);
-				return loadRegisters(fromIndex, slots, desired - 1);  // passing args through the stack
+				return loadRegisters(fromIndex, slots, desired - 1);
 			}
 		}
 		else {
+			// passing args through an array, but need to extract them from the object sink
 			Check.isEq(desired, actual);
 			return packRegistersUpToStackTopIntoArray(fromIndex, slots);
 		}
@@ -547,7 +550,7 @@ public class CodeEmitter {
 		LabelNode begin = new LabelNode();
 		LabelNode end = new LabelNode();
 
-		int invokeKind = InvokeKind.encode(numOfParameters, isVararg);
+		int invokeKind = parent.kind();
 
 
 		il.add(begin);
@@ -928,58 +931,6 @@ public class CodeEmitter {
 		il.add(UpvalueMethods.get());
 		il.add(storeRegisterValue(registerIndex));
 
-		return il;
-	}
-
-	public InsnList setReturnValuesFromRegisters(int fromRegisterIndex, SlotState st, int num) {
-		InsnList il = new InsnList();
-
-		if (ObjectSinkMethods.canSaveNResults(num)) {
-			il.add(loadRegisters(fromRegisterIndex, st, num));
-			il.add(ObjectSinkMethods.setTo(num));
-		}
-		else {
-			// need to pack into an array
-			il.add(packRegistersIntoArray(fromRegisterIndex, st, num));
-			il.add(ObjectSinkMethods.setToArray());
-		}
-
-		return il;
-	}
-
-	public InsnList setReturnValuesUpToStackTop(int fromRegisterIndex, SlotState st) {
-		Check.isTrue(st.hasVarargs());
-
-		InsnList il = new InsnList();
-
-		int varargPosition = st.varargPosition();
-
-		int n = varargPosition - fromRegisterIndex;
-
-		if (n == 0) {
-			// nothing to change, it's good as-is!
-		}
-		else if (n < 0) {
-			// drop -n elements from the beginning
-			il.add(loadObjectSink());
-			il.add(ASMUtils.loadInt(-n));
-			il.add(ObjectSinkMethods.drop());
-		}
-		else {
-			// prepend n elements
-			il.add(loadObjectSink());
-
-			il.add(ASMUtils.loadInt(n));
-			il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
-			for (int i = 0; i < n; i++) {
-				il.add(new InsnNode(DUP));
-				il.add(ASMUtils.loadInt(i));
-				il.add(loadRegister(fromRegisterIndex + i, st));
-				il.add(new InsnNode(AASTORE));
-			}
-
-			il.add(ObjectSinkMethods.prepend());
-		}
 		return il;
 	}
 

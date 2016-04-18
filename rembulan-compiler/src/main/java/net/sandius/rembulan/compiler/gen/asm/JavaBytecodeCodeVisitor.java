@@ -735,12 +735,12 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
-		int actualKind = InvokeKind.fromLua(b);
+		int kind = DispatchMethods.adjustKind_call(b);
 
 		add(e.loadDispatchPreamble());
 		add(e.loadRegister(r_tgt, st));
-		add(e.mapInvokeArgumentsToKinds(r_tgt + 1, st, b, actualKind));
-		add(DispatchMethods.call(actualKind));
+		add(e.mapInvokeArgumentsToKinds(r_tgt + 1, st, b, kind));
+		add(DispatchMethods.call(kind));
 
 		add(rp.resume());
 
@@ -749,58 +749,30 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			add(e.retrieveAndStore(r_tgt, st, c - 1));
 		}
 		else {
-			// keep results in the object sink
-
-			// clear registers from r_tgt onwards
+			// keep results in the object sink, but clear registers from r_tgt onwards
 			add(e.clearRegisters(r_tgt));
 		}
 	}
 
 	@Override
 	public void visitTailCall(Object id, SlotState st, int r_tgt, int b) {
-		if (b > 0) {
-			// b - 1 is the actual number of arguments to the tailcall
+		int kind = ObjectSinkMethods.adjustKind_tailCall(b);
 
-			if (ObjectSinkMethods.canTailCallWithNArguments(b - 1)) {
-				// we can use the tailCall method
-				add(e.loadObjectSink());
-				add(e.loadRegisters(r_tgt, st, b));  // target is at r_tgt, plus (b - 1) arguments
-				add(ObjectSinkMethods.tailCall(b - 1));
-			}
-			else {
-				// need to use setTo followed by setTailCallTarget
-				add(e.loadObjectSink());
-				add(new InsnNode(DUP));
-				add(e.setReturnValuesFromRegisters(r_tgt + 1, st, b - 1));  // (b - 1) call arguments
-				add(e.loadRegister(r_tgt, st));  // call target
-				add(ObjectSinkMethods.setTailCallTarget());
-			}
-
-			add(new InsnNode(RETURN));
-		}
-		else {
-			// need to use setTo followed by setTailCallTarget
-			// TODO: add an ObjectSink method to do this in one step
-			add(e.setReturnValuesUpToStackTop(r_tgt + 1, st));
-			add(e.loadObjectSink());
-			add(e.loadRegister(r_tgt, st));
-			add(ObjectSinkMethods.setTailCallTarget());
-			add(new InsnNode(RETURN));
-		}
+		add(e.loadObjectSink());
+		add(e.loadRegister(r_tgt, st));
+		add(e.mapInvokeArgumentsToKinds(r_tgt + 1, st, b, kind));
+		add(ObjectSinkMethods.tailCall(kind));
+		add(new InsnNode(RETURN));
 	}
 
 	@Override
 	public void visitReturn(Object id, SlotState st, int r_from, int b) {
-		if (b > 0) {
-			// b - 1 is the actual number of results
-			add(e.loadObjectSink());
-			add(e.setReturnValuesFromRegisters(r_from, st, b - 1));
-			add(new InsnNode(RETURN));
-		}
-		else {
-			add(e.setReturnValuesUpToStackTop(r_from, st));
-			add(new InsnNode(RETURN));
-		}
+		int kind = ObjectSinkMethods.adjustKind_setTo(b);
+
+		add(e.loadObjectSink());
+		add(e.mapInvokeArgumentsToKinds(r_from, st, b, kind));
+		add(ObjectSinkMethods.setTo(kind));
+		add(new InsnNode(RETURN));
 	}
 
 	@Override
@@ -897,11 +869,11 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
+		int kind = DispatchMethods.adjustKind_call(3);
 		add(e.loadDispatchPreamble());
 		add(e.loadRegister(r_base, st));
-		add(e.loadRegister(r_base + 1, st));
-		add(e.loadRegister(r_base + 2, st));
-		add(DispatchMethods.call(3));
+		add(e.mapInvokeArgumentsToKinds(r_base + 1, st, 3, kind));
+		add(DispatchMethods.call(kind));
 
 		add(rp.resume());
 		for (int i = 0; i < c; i++) {
@@ -1070,7 +1042,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			// indeterminate case
 			add(e.loadObjectSink());
 			add(e.loadVarargs());
-			add(ObjectSinkMethods.setToArray());
+			add(ObjectSinkMethods.setTo(0));
 		}
 	}
 

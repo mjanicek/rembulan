@@ -133,6 +133,11 @@ public abstract class ObjectSink {
 		setTailCallTarget(target);
 	}
 
+	public void tailCall(Object target, Object[] args) {
+		setToArray(args);
+		setTailCallTarget(target);
+	}
+
 	public abstract Object[] toArray();
 
 	public abstract Object get(int idx);

@@ -113,13 +113,17 @@ public class DispatchMethods {
 		return dynamic(OP_NEWINDEX, 3);
 	}
 
+	public static int adjustKind_call(int kind) {
+		return kind > 0 ? (call_method(kind).exists() ? kind : 0) : 0;
+	}
+
+	private static ReflectionUtils.Method call_method(int kind) {
+		return ReflectionUtils.staticArgListMethodFromKind(
+				Dispatch.class, OP_CALL, new Class[] { LuaState.class, ObjectSink.class, Object.class }, kind);
+	}
+
 	public static AbstractInsnNode call(int kind) {
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Dispatch.class),
-				OP_CALL,
-				InvokeKind.staticMethodType(kind).getDescriptor(),
-				false);
+		return call_method(kind).toMethodInsnNode();
 	}
 
 	public static AbstractInsnNode continueLoop() {

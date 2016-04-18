@@ -50,12 +50,16 @@ public class ClassEmitter {
 		return cn != null ? ASMUtils.typeForClassName(cn) : null;
 	}
 
+	protected int kind() {
+		return InvokeKind.adjust_nativeKind(InvokeKind.encode(numOfParameters, isVararg));
+	}
+
 	protected Type invokeMethodType() {
-		return InvokeKind.virtualMethodType(InvokeKind.encode(numOfParameters, isVararg));
+		return InvokeKind.virtualMethodType(kind());
 	}
 
 	protected Type superClassType() {
-		return Type.getType(InvokeKind.nativeClassForKind(InvokeKind.encode(numOfParameters, isVararg)));
+		return Type.getType(InvokeKind.nativeClassForKind(kind()));
 	}
 
 	public void begin() {
