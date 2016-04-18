@@ -234,8 +234,8 @@ public class ClassEmitter {
 		return classNode;
 	}
 
-	public CodeEmitter code() {
-		CodeEmitter emitter = new CodeEmitter(this, context, numOfParameters, isVararg);
+	public RunMethodEmitter code() {
+		RunMethodEmitter emitter = new RunMethodEmitter(this, context, numOfParameters, isVararg);
 		classNode.methods.add(emitter.invokeMethodNode());
 		classNode.methods.add(emitter.resumeMethodNode());
 		classNode.methods.add(emitter.runMethodNode());

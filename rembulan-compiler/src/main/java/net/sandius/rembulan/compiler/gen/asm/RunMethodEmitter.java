@@ -35,7 +35,7 @@ import java.util.Map;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class CodeEmitter {
+public class RunMethodEmitter {
 
 	public final int LV_STATE = 1;
 	public final int LV_OBJECTSINK = 2;
@@ -61,7 +61,7 @@ public class CodeEmitter {
 	private final InsnList errorState;
 	private final InsnList resumeHandler;
 
-	public CodeEmitter(ClassEmitter parent, PrototypeContext context, int numOfParameters, boolean isVararg) {
+	public RunMethodEmitter(ClassEmitter parent, PrototypeContext context, int numOfParameters, boolean isVararg) {
 		this.parent = Check.notNull(parent);
 		this.context = Check.notNull(context);
 		this.labels = new HashMap<>();

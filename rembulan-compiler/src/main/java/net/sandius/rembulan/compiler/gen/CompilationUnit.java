@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.compiler.gen.asm.ClassEmitter;
-import net.sandius.rembulan.compiler.gen.asm.CodeEmitter;
+import net.sandius.rembulan.compiler.gen.asm.RunMethodEmitter;
 import net.sandius.rembulan.compiler.gen.block.Entry;
 import net.sandius.rembulan.compiler.gen.block.Node;
 import net.sandius.rembulan.compiler.gen.block.Target;
@@ -93,13 +93,13 @@ public class CompilationUnit {
 
 		classEmitter.begin();
 
-		CodeEmitter codeEmitter = classEmitter.code();
+		RunMethodEmitter runMethodEmitter = classEmitter.code();
 
-		codeEmitter.begin();
+		runMethodEmitter.begin();
 		for (Node n : topoSorted) {
-			n.emit(codeEmitter.codeVisitor());
+			n.emit(runMethodEmitter.codeVisitor());
 		}
-		codeEmitter.end();
+		runMethodEmitter.end();
 
 		classEmitter.end();
 

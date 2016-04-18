@@ -32,9 +32,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	// TODO: factor this outside make it a parameter
 	public static final int FIELDS_PER_FLUSH = 50;
 
-	private final CodeEmitter e;
+	private final RunMethodEmitter e;
 
-	public JavaBytecodeCodeVisitor(CodeEmitter e) {
+	public JavaBytecodeCodeVisitor(RunMethodEmitter e) {
 		this.e = Check.notNull(e);
 	}
 
@@ -110,7 +110,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitGetTabUp(Object id, SlotState st, int r_dest, int upvalueIndex, int rk_key) {
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
 		add(e.loadDispatchPreamble());
@@ -126,7 +126,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitGetTable(Object id, SlotState st, int r_dest, int r_tab, int rk_key) {
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
 		add(e.loadDispatchPreamble());
@@ -141,7 +141,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSetTabUp(Object id, SlotState st, int upvalueIndex, int rk_key, int rk_value) {
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
 		add(e.loadDispatchPreamble());
@@ -163,7 +163,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSetTable(Object id, SlotState st, int r_tab, int rk_key, int rk_value) {
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
 		add(e.loadDispatchPreamble());
@@ -184,7 +184,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitSelf(Object id, SlotState st, int r_dest, int r_self, int rk_key) {
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
 		add(e.loadDispatchPreamble());
@@ -305,7 +305,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	protected InsnList binaryDynamicOperation(LuaBinaryOperation.Op op, SlotState s, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		il.add(rp.save());
 
 		il.add(e.loadDispatchPreamble());
@@ -423,7 +423,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				break;
 
 			case Any:
-				CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+				RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 				add(rp.save());
 
 				add(e.loadDispatchPreamble());
@@ -448,7 +448,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
 		}
 		else {
-			CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+			RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 			add(rp.save());
 
 			add(e.loadDispatchPreamble());
@@ -482,7 +482,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
 		}
 		else {
-			CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+			RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 			add(rp.save());
 
 			add(e.loadDispatchPreamble());
@@ -567,7 +567,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		for ( ; r >= r_begin; r--) {
 
 			if (r < r_end) {
-				CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+				RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 				add(rp.save());
 				add(e.loadDispatchPreamble());
 				add(e.loadRegister(r, st));
@@ -650,7 +650,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	protected InsnList dynamicComparison(LuaInstruction.Comparison op, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode falseBranch) {
 		InsnList il = new InsnList();
 
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		il.add(rp.save());
 
 		il.add(e.loadDispatchPreamble());
@@ -732,7 +732,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitCall(Object id, SlotState st, int r_tgt, int b, int c) {
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
 		int kind = DispatchMethods.adjustKind_call(b);
@@ -866,7 +866,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitTForCall(Object id, SlotState st, int r_base, int c) {
-		CodeEmitter.ResumptionPoint rp = e.resumptionPoint();
+		RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
 		add(rp.save());
 
 		int kind = DispatchMethods.adjustKind_call(3);
