@@ -25,8 +25,6 @@ public abstract class InvokeKind {
 	// n > 0 means exactly (n - 1) parameters
 	public static int encode(int numOfFixedArgs, boolean vararg) {
 		return vararg ? 0 : numOfFixedArgs + 1;
-//		Check.nonNegative(numOfFixedArgs);
-//		return (!vararg && numOfFixedArgs >= 0 && numOfFixedArgs <= 5) ? numOfFixedArgs + 1 : 0;
 	}
 
 	public static int adjust_nativeKind(int kind) {
