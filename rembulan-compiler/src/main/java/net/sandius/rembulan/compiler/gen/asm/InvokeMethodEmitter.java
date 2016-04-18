@@ -1,6 +1,5 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.util.Check;
@@ -9,7 +8,6 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
@@ -18,24 +16,16 @@ import java.util.List;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 
 public class InvokeMethodEmitter {
 
 	private final ClassEmitter parent;
-	private final PrototypeContext context;
-
-	private final int numOfParameters;
-	private final boolean isVararg;
 
 	private final MethodNode node;
 
-	public InvokeMethodEmitter(ClassEmitter parent, PrototypeContext context, int numOfParameters, boolean isVararg) {
+	public InvokeMethodEmitter(ClassEmitter parent) {
 		this.parent = Check.notNull(parent);
-		this.context = Check.notNull(context);
-		this.numOfParameters = numOfParameters;
-		this.isVararg = isVararg;
 
 		this.node = new MethodNode(
 				ACC_PUBLIC,
@@ -84,15 +74,15 @@ public class InvokeMethodEmitter {
 		else {
 			// variable number of parameters, encoded in an array at position 3
 
-			if (isVararg) {
+			if (parent.isVararg()) {
 				il.add(new VarInsnNode(ALOAD, 3));
-				il.add(UtilMethods.arrayFrom(numOfParameters));
+				il.add(UtilMethods.arrayFrom(parent.numOfParameters()));
 			}
 
 			// load #numOfParameters, mapping them onto #numOfRegisters
 
 			for (int i = 0; i < parent.runMethod().numOfRegisters(); i++) {
-				if (i < numOfParameters) {
+				if (i < parent.numOfParameters()) {
 					il.add(new VarInsnNode(ALOAD, 3));  // TODO: use dup instead?
 					il.add(UtilMethods.getArrayElementOrNull(i));
 				}
@@ -103,12 +93,7 @@ public class InvokeMethodEmitter {
 
 		}
 
-		il.add(new MethodInsnNode(
-				INVOKESPECIAL,
-				parent.thisClassType().getInternalName(),
-				parent.runMethod().runMethodName(),
-				parent.runMethod().runMethodType().getDescriptor(),
-				false));
+		il.add(parent.runMethod().methodInvokeInsn());
 
 		il.add(new InsnNode(RETURN));
 		il.add(end);

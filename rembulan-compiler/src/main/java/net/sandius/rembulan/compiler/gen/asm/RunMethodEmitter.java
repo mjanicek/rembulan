@@ -42,12 +42,8 @@ public class RunMethodEmitter {
 	public final int LV_VARARGS = 4;  // index of the varargs argument, if present
 
 	private final ClassEmitter parent;
-	private final PrototypeContext context;
 
-	private final int numOfParameters;
-	private final boolean isVararg;
-
-	private final MethodNode runMethodNode;
+	private final MethodNode node;
 
 	private final Map<Object, LabelNode> labels;
 	private final ArrayList<LabelNode> resumptionPoints;
@@ -57,19 +53,16 @@ public class RunMethodEmitter {
 	private final InsnList errorState;
 	private final InsnList resumeHandler;
 
-	public RunMethodEmitter(ClassEmitter parent, PrototypeContext context, int numOfParameters, boolean isVararg) {
+	public RunMethodEmitter(ClassEmitter parent) {
 		this.parent = Check.notNull(parent);
-		this.context = Check.notNull(context);
+
 		this.labels = new HashMap<>();
 		this.resumptionPoints = new ArrayList<>();
 
-		this.numOfParameters = numOfParameters;
-		this.isVararg = isVararg;
-
-		this.runMethodNode = new MethodNode(
+		this.node = new MethodNode(
 				ACC_PRIVATE,
-				runMethodName(),
-				runMethodType().getDescriptor(),
+				methodName(),
+				methodType().getDescriptor(),
 				null,
 				exceptions());
 
@@ -80,34 +73,43 @@ public class RunMethodEmitter {
 	}
 
 	private int registerOffset() {
-		return isVararg ? LV_VARARGS + 1 : LV_VARARGS;
+		return parent.isVararg() ? LV_VARARGS + 1 : LV_VARARGS;
 	}
 
 	public PrototypeContext context() {
-		return context;
+		return parent.context();
 	}
 
-	public MethodNode runMethodNode() {
-		return runMethodNode;
+	public MethodNode node() {
+		return node;
 	}
 
-	public String runMethodName() {
+	public String methodName() {
 		return "run";
 	}
 
-	public Type runMethodType() {
+	public Type methodType() {
 		ArrayList<Type> args = new ArrayList<>();
 
 		args.add(Type.getType(LuaState.class));
 		args.add(Type.getType(ObjectSink.class));
 		args.add(Type.INT_TYPE);
-		if (isVararg) {
+		if (parent.isVararg()) {
 			args.add(ASMUtils.arrayTypeFor(Object.class));
 		}
 		for (int i = 0; i < numOfRegisters(); i++) {
 			args.add(Type.getType(Object.class));
 		}
 		return Type.getMethodType(Type.VOID_TYPE, args.toArray(new Type[0]));
+	}
+
+	public MethodInsnNode methodInvokeInsn() {
+		return new MethodInsnNode(
+				INVOKESPECIAL,
+				parent.thisClassType().getInternalName(),
+				methodName(),
+				methodType().getDescriptor(),
+				false);
 	}
 
 	public static String[] exceptions() {
@@ -136,7 +138,7 @@ public class RunMethodEmitter {
 	}
 
 	public InsnList loadConstant(int idx, Class castTo) {
-		return BoxedPrimitivesMethods.loadBoxedConstant(context.getConst(idx), castTo);
+		return BoxedPrimitivesMethods.loadBoxedConstant(parent.context().getConst(idx), castTo);
 	}
 
 	public InsnList loadConstant(int idx) {
@@ -280,7 +282,7 @@ public class RunMethodEmitter {
 		if (rk < 0) {
 			// it's a constant
 			int constIndex = -rk - 1;
-			Object c = context.getConst(constIndex);
+			Object c = parent.context().getConst(constIndex);
 			if (c instanceof Number) {
 				il.add(BoxedPrimitivesMethods.loadNumericValue((Number) c, requiredType));
 			}
@@ -368,8 +370,8 @@ public class RunMethodEmitter {
 
 	public int newLocalVariable(int locIdx, String name, LabelNode begin, LabelNode end, Type t) {
 		// FIXME: this is quite brittle!
-		int idx = 4 + numOfRegisters() + (isVararg ? 1 : 0) + locIdx;
-		runMethodNode.localVariables.add(new LocalVariableNode(name, t.getDescriptor(), null, begin, end, idx));
+		int idx = 4 + numOfRegisters() + (parent.isVararg() ? 1 : 0) + locIdx;
+		node.localVariables.add(new LocalVariableNode(name, t.getDescriptor(), null, begin, end, idx));
 		return idx;
 	}
 
@@ -417,7 +419,7 @@ public class RunMethodEmitter {
 
 	public void begin() {
 		l_insns_begin = new LabelNode();
-		runMethodNode.instructions.add(l_insns_begin);
+		node.instructions.add(l_insns_begin);
 
 		l_body_begin = new LabelNode();
 		l_error_state = new LabelNode();
@@ -441,20 +443,20 @@ public class RunMethodEmitter {
 			resumeSwitch.add(dispatchTable());
 			resumeHandler.add(resumptionHandler(l_handler_begin));
 
-			runMethodNode.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+			node.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
 		}
 
 		// local variable declaration
 
 		LabelNode l_insns_end = new LabelNode();
 
-		List<LocalVariableNode> locals = runMethodNode.localVariables;
+		List<LocalVariableNode> locals = node.localVariables;
 		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, l_insns_begin, l_insns_end, 0));
 		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, l_insns_begin, l_insns_end, LV_STATE));
 		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, l_insns_begin, l_insns_end, LV_OBJECTSINK));
 		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
 
-		if (isVararg) {
+		if (parent.isVararg()) {
 			locals.add(new LocalVariableNode(
 					"varargs",
 					ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
@@ -474,18 +476,18 @@ public class RunMethodEmitter {
 //		}
 
 		// TODO: check these
-//		runMethodNode.maxLocals = numOfRegisters() + 4;
-//		runMethodNode.maxStack = numOfRegisters() + 5;
+//		node.maxLocals = numOfRegisters() + 4;
+//		node.maxStack = numOfRegisters() + 5;
 
-		runMethodNode.maxLocals = locals.size();
-		runMethodNode.maxStack = 4 + numOfRegisters() + 5;
+		node.maxLocals = locals.size();
+		node.maxStack = 4 + numOfRegisters() + 5;
 
-		runMethodNode.instructions.add(resumeSwitch);
-		runMethodNode.instructions.add(code);
-		runMethodNode.instructions.add(errorState);
-		runMethodNode.instructions.add(resumeHandler);
+		node.instructions.add(resumeSwitch);
+		node.instructions.add(code);
+		node.instructions.add(errorState);
+		node.instructions.add(resumeHandler);
 
-		runMethodNode.instructions.add(l_insns_end);
+		node.instructions.add(l_insns_end);
 	}
 
 	protected InsnList errorState(LabelNode label) {
@@ -512,7 +514,7 @@ public class RunMethodEmitter {
 	}
 
 	protected int numOfRegisters() {
-		return context.prototype().getMaximumStackSize();
+		return parent.context().prototype().getMaximumStackSize();
 	}
 
 	public InsnList createSnapshot() {
@@ -521,7 +523,7 @@ public class RunMethodEmitter {
 		il.add(new VarInsnNode(ALOAD, 0));  // this
 		il.add(new VarInsnNode(ALOAD, 0));
 		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-		if (isVararg) {
+		if (parent.isVararg()) {
 			il.add(new VarInsnNode(ALOAD, LV_VARARGS));
 		}
 		for (int i = 0; i < numOfRegisters(); i++) {
@@ -611,7 +613,7 @@ public class RunMethodEmitter {
 	}
 
 	public AbstractInsnNode loadVarargs() {
-		Check.isTrue(isVararg);
+		Check.isTrue(parent.isVararg());
 		return new VarInsnNode(ALOAD, LV_VARARGS);
 	}
 
@@ -637,13 +639,14 @@ public class RunMethodEmitter {
 		return il;
 	}
 
+	@Deprecated
 	public FrameNode fullFrame(int numStack, Object[] stack) {
 		ArrayList<Object> locals = new ArrayList<>();
 		locals.add(parent.thisClassType().getInternalName());
 		locals.add(Type.getInternalName(LuaState.class));
 		locals.add(Type.getInternalName(ObjectSink.class));
 		locals.add(INTEGER);
-		if (isVararg) {
+		if (parent.isVararg()) {
 			locals.add(ASMUtils.arrayTypeFor(Object.class).getInternalName());
 		}
 		for (int i = 0; i < numOfRegisters(); i++) {

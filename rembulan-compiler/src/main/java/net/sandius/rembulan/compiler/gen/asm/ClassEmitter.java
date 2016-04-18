@@ -46,10 +46,10 @@ public class ClassEmitter {
 		this.numOfParameters = numOfParameters;
 		this.isVararg = isVararg;
 
-		this.invokeMethodEmitter = new InvokeMethodEmitter(this, context, numOfParameters, isVararg);
-		this.resumeMethodEmitter = new ResumeMethodEmitter(this, context, numOfParameters, isVararg);
-		this.runMethodEmitter = new RunMethodEmitter(this, context, numOfParameters, isVararg);
-		this.snapshotMethodEmitter = new SnapshotMethodEmitter(this, context, numOfParameters, isVararg);
+		this.invokeMethodEmitter = new InvokeMethodEmitter(this);
+		this.resumeMethodEmitter = new ResumeMethodEmitter(this);
+		this.runMethodEmitter = new RunMethodEmitter(this);
+		this.snapshotMethodEmitter = new SnapshotMethodEmitter(this);
 	}
 
 	protected Type thisClassType() {
@@ -63,6 +63,18 @@ public class ClassEmitter {
 
 	protected int kind() {
 		return InvokeKind.adjust_nativeKind(InvokeKind.encode(numOfParameters, isVararg));
+	}
+
+	protected PrototypeContext context() {
+		return context;
+	}
+
+	protected int numOfParameters() {
+		return numOfParameters;
+	}
+
+	protected boolean isVararg() {
+		return isVararg;
 	}
 
 	protected Type invokeMethodType() {
@@ -93,7 +105,7 @@ public class ClassEmitter {
 
 		classNode.methods.add(invokeMethod().node());
 		classNode.methods.add(resumeMethod().node());
-		classNode.methods.add(runMethod().runMethodNode());
+		classNode.methods.add(runMethod().node());
 
 		if (runMethod().isResumable()) {
 			snapshotMethod().end();

@@ -1,6 +1,5 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
@@ -19,23 +18,15 @@ import java.io.Serializable;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
-import static org.objectweb.asm.Opcodes.ATHROW;
-import static org.objectweb.asm.Opcodes.DUP;
 
 public class ResumeMethodEmitter {
 
 	private final ClassEmitter parent;
-	private final PrototypeContext context;
-	private final int numOfParameters;
-	private final boolean isVararg;
 
 	private final MethodNode node;
 
-	public ResumeMethodEmitter(ClassEmitter parent, PrototypeContext context, int numOfParameters, boolean isVararg) {
+	public ResumeMethodEmitter(ClassEmitter parent) {
 		this.parent = Check.notNull(parent);
-		this.context = Check.notNull(context);
-		this.numOfParameters = numOfParameters;
-		this.isVararg = isVararg;
 
 		this.node = new MethodNode(
 				ACC_PUBLIC,
@@ -89,7 +80,7 @@ public class ResumeMethodEmitter {
 					false
 			));  // resumption point
 
-			if (isVararg) {
+			if (parent.isVararg()) {
 				il.add(new VarInsnNode(ALOAD, 4));
 				il.add(new MethodInsnNode(
 						INVOKEVIRTUAL,
@@ -130,13 +121,7 @@ public class ResumeMethodEmitter {
 			}
 
 			// call run(...)
-			il.add(new MethodInsnNode(
-					INVOKESPECIAL,
-					parent.thisClassType().getInternalName(),
-					parent.runMethod().runMethodName(),
-					parent.runMethod().runMethodType().getDescriptor(),
-					false
-			));
+			il.add(parent.runMethod().methodInvokeInsn());
 
 			il.add(new InsnNode(RETURN));
 			il.add(end);

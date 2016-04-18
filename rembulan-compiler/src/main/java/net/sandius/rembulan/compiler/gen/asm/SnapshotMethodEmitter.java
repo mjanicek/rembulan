@@ -1,6 +1,5 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
@@ -30,17 +29,11 @@ import static org.objectweb.asm.Opcodes.NEW;
 public class SnapshotMethodEmitter {
 
 	private final ClassEmitter parent;
-	private final PrototypeContext context;
-	private final int numOfParameters;
-	private final boolean isVararg;
 
 	private final MethodNode node;
 
-	public SnapshotMethodEmitter(ClassEmitter parent, PrototypeContext context, int numOfParameters, boolean isVararg) {
+	public SnapshotMethodEmitter(ClassEmitter parent) {
 		this.parent = Check.notNull(parent);
-		this.context = Check.notNull(context);
-		this.numOfParameters = numOfParameters;
-		this.isVararg = isVararg;
 
 		this.node = new MethodNode(
 				ACC_PRIVATE,
@@ -62,7 +55,7 @@ public class SnapshotMethodEmitter {
 		ArrayList<Type> args = new ArrayList<>();
 
 		args.add(Type.INT_TYPE);
-		if (isVararg) {
+		if (parent.isVararg()) {
 			args.add(ASMUtils.arrayTypeFor(Object.class));
 		}
 		for (int i = 0; i < parent.runMethod().numOfRegisters(); i++) {
@@ -94,7 +87,7 @@ public class SnapshotMethodEmitter {
 		il.add(new TypeInsnNode(NEW, Type.getInternalName(DefaultSavedState.class)));
 		il.add(new InsnNode(DUP));
 
-		int regOffset = isVararg ? 3 : 2;
+		int regOffset = parent.isVararg() ? 3 : 2;
 
 		// resumption point
 		il.add(new VarInsnNode(ILOAD, 1));
@@ -111,11 +104,11 @@ public class SnapshotMethodEmitter {
 		}
 
 		// varargs
-		if (isVararg) {
+		if (parent.isVararg()) {
 			il.add(new VarInsnNode(ALOAD, 2));
 		}
 
-		if (isVararg) {
+		if (parent.isVararg()) {
 			il.add(ASMUtils.ctor(
 					Type.getType(DefaultSavedState.class),
 					Type.INT_TYPE,
@@ -137,7 +130,7 @@ public class SnapshotMethodEmitter {
 
 		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
 		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, begin, end, 1));
-		if (isVararg) {
+		if (parent.isVararg()) {
 			locals.add(new LocalVariableNode("varargs", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 2));
 		}
 		for (int i = 0; i < parent.runMethod().numOfRegisters(); i++) {
