@@ -1,8 +1,10 @@
 package net.sandius.rembulan.core.impl;
 
+import net.sandius.rembulan.core.ObjectSink;
+
 import java.util.ArrayList;
 
-public class ArrayListObjectSink extends AbstractObjectSink {
+public class ArrayListObjectSink extends ObjectSink {
 
 	private final ArrayList<Object> buf;
 

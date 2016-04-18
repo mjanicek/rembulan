@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.util.Arrays;
 
-import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class ObjectSinkMethods {
 
@@ -23,23 +23,23 @@ public class ObjectSinkMethods {
 
 	public static AbstractInsnNode size() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"size",
 				Type.getMethodType(
 						Type.INT_TYPE).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static AbstractInsnNode get() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"get",
 				Type.getMethodType(
 						Type.getType(Object.class),
 						Type.INT_TYPE).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static InsnList get(int index) {
@@ -50,12 +50,12 @@ public class ObjectSinkMethods {
 		if (index <= 4) {
 			String methodName = "_" + index;
 			il.add(new MethodInsnNode(
-					INVOKEINTERFACE,
+					INVOKEVIRTUAL,
 					selfTpe().getInternalName(),
 					methodName,
 					Type.getMethodType(
 							Type.getType(Object.class)).getDescriptor(),
-					true));
+					false));
 		}
 		else {
 			il.add(ASMUtils.loadInt(index));
@@ -67,34 +67,34 @@ public class ObjectSinkMethods {
 
 	public static AbstractInsnNode reset() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"reset",
 				Type.getMethodType(
 						Type.VOID_TYPE).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static AbstractInsnNode push() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"push",
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						Type.getType(Object.class)).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static AbstractInsnNode addAll() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"addAll",
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				true);
+				false);
 	}
 
 	@Deprecated
@@ -115,68 +115,68 @@ public class ObjectSinkMethods {
 			Arrays.fill(argTypes, Type.getType(Object.class));
 
 			return new MethodInsnNode(
-					INVOKEINTERFACE,
+					INVOKEVIRTUAL,
 					selfTpe().getInternalName(),
 					"setTo",
 					Type.getMethodType(
 							Type.VOID_TYPE,
 							argTypes).getDescriptor(),
-					true);
+					false);
 		}
 	}
 
 	public static AbstractInsnNode setToArray() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"setToArray",
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static AbstractInsnNode toArray() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"toArray",
 				Type.getMethodType(
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static AbstractInsnNode drop() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"drop",
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						Type.INT_TYPE).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static AbstractInsnNode prepend() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"prepend",
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static AbstractInsnNode pushAll() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"pushAll",
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				true);
+				false);
 	}
 
 	public static AbstractInsnNode tailCall(int numCallArgs) {
@@ -188,13 +188,13 @@ public class ObjectSinkMethods {
 			Arrays.fill(callArgTypes, Type.getType(Object.class));
 
 			return new MethodInsnNode(
-					INVOKEINTERFACE,
+					INVOKEVIRTUAL,
 					selfTpe().getInternalName(),
 					"tailCall",
 					Type.getMethodType(
 							Type.VOID_TYPE,
 							callArgTypes).getDescriptor(),
-					true);
+					false);
 		}
 		else {
 			// TODO: iterate and push
@@ -204,12 +204,12 @@ public class ObjectSinkMethods {
 
 	public static AbstractInsnNode markAsTailCall() {
 		return new MethodInsnNode(
-				INVOKEINTERFACE,
+				INVOKEVIRTUAL,
 				selfTpe().getInternalName(),
 				"markAsTailCall",
 				Type.getMethodType(
 						Type.VOID_TYPE).getDescriptor(),
-				true);
+				false);
 	}
 
 }

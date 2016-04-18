@@ -1,60 +1,153 @@
 package net.sandius.rembulan.core;
 
-public interface ObjectSink {
+import net.sandius.rembulan.core.impl.Varargs;
 
-	int size();
+public abstract class ObjectSink {
 
-	boolean isTailCall();
+	protected boolean tailCall;
+
+	protected ObjectSink() {
+		tailCall = false;
+	}
+
+	public abstract int size();
+
+	public boolean isTailCall() {
+		return tailCall;
+	}
 
 	// resets tail call to false, size to 0
-	void reset();
+	public abstract void reset();
 
-	void markAsTailCall();
+	public void markAsTailCall() {
+		tailCall = true;
+	}
 
-	void push(Object o);
+	protected void resetTailCall() {
+		tailCall = false;
+	}
 
-	void pushAll(Object[] values);
+	public abstract void push(Object o);
 
-	void setTo(Object a);
+	public void pushAll(Object[] a) {
+		for (Object o : a) {
+			push(o);
+		}
+	}
 
-	void setTo(Object a, Object b);
+	public void setTo() {
+		reset();
+	}
 
-	void setTo(Object a, Object b, Object c);
+	public void setTo(Object a) {
+		reset();
+		push(a);
+	}
 
-	void setTo(Object a, Object b, Object c, Object d);
+	public void setTo(Object a, Object b) {
+		reset();
+		push(a);
+		push(b);
+	}
 
-	void setTo(Object a, Object b, Object c, Object d, Object e);
+	public void setTo(Object a, Object b, Object c) {
+		reset();
+		push(a);
+		push(b);
+		push(c);
+	}
 
-	void drop(int i);
+	public void setTo(Object a, Object b, Object c, Object d) {
+		reset();
+		push(a);
+		push(b);
+		push(c);
+		push(d);
+	}
 
-	void prepend(Object[] values);
+	public void setTo(Object a, Object b, Object c, Object d, Object e) {
+		reset();
+		push(a);
+		push(b);
+		push(c);
+		push(d);
+		push(e);
+	}
 
-	void setToArray(Object[] values);
+	public void setToArray(Object[] a) {
+		reset();
+		for (Object o : a) {
+			push(o);
+		}
+	}
 
-	void tailCall(Object target);
+	public void drop(int i) {
+		if (i > 0) {
+			setToArray(Varargs.from(toArray(), i));
+		}
+	}
 
-	void tailCall(Object target, Object arg1);
+	public void prepend(Object[] values) {
+		Object[] old = toArray();
+		reset();
+		pushAll(values);
+		pushAll(old);
+	}
 
-	void tailCall(Object target, Object arg1, Object arg2);
+	public void tailCall(Object target) {
+		setTo(target);
+		markAsTailCall();
+	}
 
-	void tailCall(Object target, Object arg1, Object arg2, Object arg3);
+	public void tailCall(Object target, Object arg1) {
+		setTo(target, arg1);
+		markAsTailCall();
+	}
 
-	void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4);
+	public void tailCall(Object target, Object arg1, Object arg2) {
+		setTo(target, arg1, arg2);
+		markAsTailCall();
+	}
 
-	Object[] toArray();
+	public void tailCall(Object target, Object arg1, Object arg2, Object arg3) {
+		setTo(target, arg1, arg2, arg3);
+		markAsTailCall();
+	}
 
-	Object[] tailAsArray();
+	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
+		setTo(target, arg1, arg2, arg3, arg4);
+		markAsTailCall();
+	}
 
-	Object get(int idx);
+	public abstract Object[] toArray();
 
-	Object _0();
-	
-	Object _1();
+	public Object[] tailAsArray() {
+		Object[] tmp = toArray();
+		Object[] result = new Object[tmp.length - 1];
+		System.arraycopy(tmp, 1, result, 0, result.length);
+		return result;
+	}
 
-	Object _2();
+	public abstract Object get(int idx);
 
-	Object _3();
+	public Object _0() {
+		return get(0);
+	}
 
-	Object _4();
+	public Object _1() {
+		return get(1);
+	}
+
+	public Object _2() {
+		return get(2);
+	}
+
+	public Object _3() {
+		return get(3);
+	}
+
+	public Object _4() {
+		return get(4);
+	}
 
 }

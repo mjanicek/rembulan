@@ -1,8 +1,10 @@
 package net.sandius.rembulan.core.impl;
 
+import net.sandius.rembulan.core.ObjectSink;
+
 import java.util.ArrayList;
 
-public class PairCachingObjectSink extends AbstractObjectSink {
+public class PairCachingObjectSink extends ObjectSink {
 
 	private Object _0;
 	private Object _1;
