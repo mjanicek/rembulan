@@ -761,9 +761,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		if (b > 0) {
 			// b - 1 is the actual number of arguments to the tailcall
 			add(e.loadObjectSink());
-			// FIXME: this needs to be remapped to an available invoke kind
-			add(e.loadRegisters(r_tgt, st, b));  // target is at r_tgt, plus (b - 1) arguments
-			add(ObjectSinkMethods.tailCall(b - 1));
+			add(new InsnNode(DUP));
+			add(e.setReturnValuesFromRegisters(r_tgt, st, b));  // target is at r_tgt, plus (b - 1) arguments
+			add(ObjectSinkMethods.markAsTailCall());
 			add(new InsnNode(RETURN));
 		}
 		else {
