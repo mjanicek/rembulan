@@ -758,24 +758,39 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   GotoLocalSlot_withoutX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
 
-  val ClosuresWithoutUpvaluesAreReused = fragment ("ClosuresWithoutUpvaluesAreReused") {
-    """function noclosure(x)
+  val PureFunctionsAreReused = fragment ("PureFunctionsAreReused") {
+    """function pure(x)
+      |  return function()
+      |    return 1234
+      |  end
+      |end
+      |return pure(1) == pure(2)
+    """
+  }
+  PureFunctionsAreReused in EmptyContext succeedsWith (true)
+
+  val ClosuresWithoutOpenUpvaluesAreReused = fragment ("ClosuresWithoutOpenUpvaluesAreReused") {
+    """function noopen(x)
       |  a = x
       |  return function()
       |    return a
       |  end
       |end
-      |
-      |function withclosure(x)
+      |return noopen(1) == noopen(2)
+    """
+  }
+  ClosuresWithoutOpenUpvaluesAreReused in EmptyContext succeedsWith (true)
+
+  val ClosuresWithOpenUpvaluesAreNotReused = fragment ("ClosuresWithOpenUpvaluesAreNotReused") {
+    """function withopen(x)
       |  local a = x
       |  return function()
       |    return a
       |  end
       |end
-      |
-      |return noclosure(1) == noclosure(2), withclosure(1) == withclosure(2)
+      |return withopen(1) == withopen(2)
     """
   }
-  ClosuresWithoutUpvaluesAreReused in EmptyContext succeedsWith (true, false)
+  ClosuresWithOpenUpvaluesAreNotReused in EmptyContext succeedsWith (false)
 
 }
