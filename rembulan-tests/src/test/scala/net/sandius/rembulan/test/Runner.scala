@@ -3,7 +3,7 @@ package net.sandius.rembulan.test
 import net.sandius.rembulan.compiler.ChunkClassLoader
 import net.sandius.rembulan.compiler.gen.ChunkCompiler
 import net.sandius.rembulan.core._
-import net.sandius.rembulan.core.impl.PairCachingObjectSink
+import net.sandius.rembulan.core.impl.{DefaultLuaState, PairCachingObjectSink}
 import net.sandius.rembulan.{core => lua}
 
 object Runner {
@@ -37,7 +37,7 @@ object Runner {
       val name = classLoader.install(chunk)
       val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
-      val state = new DummyLuaState(false)
+      val state = new DefaultLuaState(PreemptionContext.Never.INSTANCE)
       val os = new PairCachingObjectSink
 
       val env = state.newTable(0, 0)

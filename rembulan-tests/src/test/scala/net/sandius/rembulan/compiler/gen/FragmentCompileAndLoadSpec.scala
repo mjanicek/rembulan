@@ -4,12 +4,12 @@ import java.io.{PrintStream, PrintWriter}
 
 import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
 import net.sandius.rembulan.core._
-import net.sandius.rembulan.core.impl.PairCachingObjectSink
+import net.sandius.rembulan.core.impl.{DefaultLuaState, PairCachingObjectSink}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter}
 import net.sandius.rembulan.lib.impl.DefaultBuiltins
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.test.FragmentExpectations.Env.{Builtins, Empty}
-import net.sandius.rembulan.test.{BasicFragments, DummyLuaState, LuaCFragmentCompiler}
+import net.sandius.rembulan.test.{BasicFragments, LuaCFragmentCompiler}
 import net.sandius.rembulan.{core => lua}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -51,7 +51,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
           val name = classLoader.install(chunk)
           val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
-          val state = new DummyLuaState(false)
+          val state = new DefaultLuaState(PreemptionContext.Never.INSTANCE)
           val os = new PairCachingObjectSink
 
           val env = state.newTable(0, 0)
@@ -83,7 +83,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
             val name = classLoader.install(chunk)
             val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
-            val state = new DummyLuaState(true)
+            val state = new DefaultLuaState(PreemptionContext.Always.INSTANCE)
             val os = new PairCachingObjectSink
 
             val env = envForContext(state, ctx)
