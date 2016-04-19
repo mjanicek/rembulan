@@ -15,8 +15,6 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
 
-import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
 import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
@@ -101,26 +99,11 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
             val res: Either[Throwable, Seq[AnyRef]] = try {
               val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
 
-              val rs = ArrayBuffer.empty[ResumeInfo]
+              val exec = new Exec(state, os)
 
-              try {
-                Dispatch.call(state, os, f)
-              }
-              catch {
-                case ex: lua.ControlThrowable => rs.addAll(ex.resumeStack())
-              }
-
-              while (rs.nonEmpty) {
-                val last = rs.last
-                rs.reduceToSize(rs.size - 1)
-
-                try {
-                  last.resume(state, os)
-                  Dispatch.evaluateTailCalls(state, os)
-                }
-                catch {
-                  case ex: lua.ControlThrowable => rs.addAll(ex.resumeStack())
-                }
+              exec.init(f)
+              while (exec.isPaused) {
+                exec.resume()
               }
 
               val result = os.toArray.toSeq

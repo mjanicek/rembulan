@@ -1,21 +1,16 @@
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.Cons;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.ListIterator;
+import java.util.Iterator;
 
 public abstract class ControlThrowable extends Throwable {
 
-	protected final LinkedList<CallInfo> callStack;
-	protected final ArrayList<ResumeInfo> resumeStack;
+	private Cons<ResumeInfo> resumeStack;
 
 	protected ControlThrowable() {
-		this.callStack = new LinkedList<>();
-		this.resumeStack = new ArrayList<>();
+		this.resumeStack = null;
 	}
 
 	@Override
@@ -23,23 +18,13 @@ public abstract class ControlThrowable extends Throwable {
 		return this;
 	}
 
-	@Deprecated
-	public void push(CallInfo ci) {
-		Check.notNull(ci);
-		callStack.addFirst(ci);
-	}
-
 	public void push(Resumable resumable, Serializable suspendedState) {
-		resumeStack.add(0, new ResumeInfo(resumable, suspendedState));
+		resumeStack = new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack);
 	}
 
 	// LIFO iterator
-	public ListIterator<CallInfo> frameIterator() {
-		return Collections.unmodifiableList(callStack).listIterator();
-	}
-
-	public ArrayList<ResumeInfo> resumeStack() {
-		return resumeStack;
+	public Iterator<ResumeInfo> frames() {
+		return Cons.newIterator(resumeStack);
 	}
 
 }

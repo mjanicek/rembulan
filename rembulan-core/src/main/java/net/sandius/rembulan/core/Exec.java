@@ -2,75 +2,91 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
-import net.sandius.rembulan.util.Ptr;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 public class Exec {
 
-	private final PreemptionContext preemptionContext;
 	private final LuaState state;
+	private final ObjectSink sink;
 
-	private Cons<CallInfo> callStack;
+	private Cons<ResumeInfo> callStack;
 
-	public Exec(PreemptionContext preemptionContext, LuaState state) {
-		this.preemptionContext = Check.notNull(preemptionContext);
+	public Exec(LuaState state, ObjectSink sink) {
 		this.state = Check.notNull(state);
-
+		this.sink = Check.notNull(sink);
 		callStack = null;
-	}
-
-	public PreemptionContext getPreemptionContext() {
-		return preemptionContext;
 	}
 
 	public LuaState getState() {
 		return state;
 	}
 
+	public ObjectSink getSink() {
+		return sink;
+	}
+
 	public boolean isPaused() {
 		return callStack != null;
 	}
 
-	public Cons<CallInfo> getCallStack() {
+	public Cons<ResumeInfo> getCallStack() {
 		return callStack;
 	}
 
-	public void pushCall(CallInfo ci) {
-		Check.notNull(ci);
+	protected static class BootstrapResumable implements Resumable {
+
+		static final BootstrapResumable INSTANCE = new BootstrapResumable();
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			Call c = (Call) suspendedState;
+			Dispatch.call(state, result, c.target, c.args);
+		}
+
+		private static class Call implements Serializable {
+			public final Object target;
+			public final Object[] args;
+			public Call(Object target, Object[] args) {
+				this.target = Check.notNull(target);
+				this.args = Check.notNull(args);
+			}
+		}
+
+		public static ResumeInfo of(Object target, Object... args) {
+			return new ResumeInfo(INSTANCE, new Call(target, args));
+		}
+
+	}
+
+	public void init(Object target, Object... args) {
+		Check.notNull(args);
 
 		if (callStack != null) {
-			throw new IllegalStateException("Pushing a call in paused state");
+			throw new IllegalStateException("Initialising call in paused state");
 		}
 		else {
-			callStack = new Cons<>(ci);
+			callStack = new Cons<>(BootstrapResumable.of(target, args));
 		}
 	}
 
 	// return true if execution was paused, false if execution is finished
 	// in other words: returns true iff isPaused() == true afterwards
 	public boolean resume() {
-		Ptr<Object> tail = new Ptr<>();
-
 		while (callStack != null) {
-			CallInfo top = callStack.car;
+			ResumeInfo top = callStack.car;
 			callStack = callStack.cdr;
 
-//			System.out.println("Will resume " + top.toString());
-//			System.out.println("Call stack now: " + Cons.toString(callStack, " "));
-
 			try {
-				tail.clear();
-				top.resume();
+				top.resume(state, sink);
+				Dispatch.evaluateTailCalls(state, sink);
 			}
 			catch (ControlThrowable ct) {
-//				System.out.println("Control event: " + ct.toString());
-				Iterator<CallInfo> it = ct.frameIterator();
-//				System.out.println("Call stack before: " + Cons.toString(callStack, " "));
+				Iterator<ResumeInfo> it = ct.frames();
 				while (it.hasNext()) {
 					callStack = new Cons<>(it.next(), callStack);
 				}
-//				System.out.println("Call stack after: " + Cons.toString(callStack, " "));
 
 				assert (callStack != null);
 				return true;  // we're paused
