@@ -33,23 +33,32 @@ public class ClassEmitter {
 
 	private final ArrayList<String> upvalueFieldNames;
 
+	private final ConstructorEmitter constructorEmitter;
 	private final InvokeMethodEmitter invokeMethodEmitter;
 	private final ResumeMethodEmitter resumeMethodEmitter;
-
 	private final RunMethodEmitter runMethodEmitter;
 	private final SnapshotMethodEmitter snapshotMethodEmitter;
 
 	public ClassEmitter(PrototypeContext context, int numOfParameters, boolean isVararg) {
 		this.context = Check.notNull(context);
-		this.classNode = new ClassNode();
 		this.upvalueFieldNames = new ArrayList<>();
 		this.numOfParameters = numOfParameters;
 		this.isVararg = isVararg;
 
+		this.constructorEmitter = new ConstructorEmitter(this);
 		this.invokeMethodEmitter = new InvokeMethodEmitter(this);
 		this.resumeMethodEmitter = new ResumeMethodEmitter(this);
 		this.runMethodEmitter = new RunMethodEmitter(this);
 		this.snapshotMethodEmitter = new SnapshotMethodEmitter(this);
+
+		this.classNode = new ClassNode();
+		classNode.version = V1_7;
+		classNode.access = ACC_PUBLIC + ACC_SUPER;
+		classNode.name = thisClassType().getInternalName();
+		classNode.superName = superClassType().getInternalName();
+		classNode.sourceFile = context.prototype().getShortSource();
+
+		addUpvalueFields();
 	}
 
 	protected Type thisClassType() {
@@ -85,24 +94,16 @@ public class ClassEmitter {
 		return Type.getType(InvokeKind.nativeClassForKind(kind()));
 	}
 
-	public void begin() {
-		classNode.version = V1_7;
-		classNode.access = ACC_PUBLIC + ACC_SUPER;
-		classNode.name = thisClassType().getInternalName();
-		classNode.superName = superClassType().getInternalName();
-		classNode.sourceFile = context.prototype().getShortSource();
+	public void end() {
+		runMethod().end();
 
 		addInnerClassLinks();
 
-		addUpvalueFields();
-
-		classNode.methods.add(constructorNode());
-	}
-
-	public void end() {
+		constructor().end();
 		invokeMethod().end();
 		resumeMethod().end();
 
+		classNode.methods.add(constructor().node());
 		classNode.methods.add(invokeMethod().node());
 		classNode.methods.add(resumeMethod().node());
 		classNode.methods.add(runMethod().node());
@@ -212,60 +213,12 @@ public class ClassEmitter {
 		}
 	}
 
-	private MethodNode constructorNode() {
-		ReadOnlyArray<Prototype.UpvalueDesc> uvd = context.prototype().getUpValueDescriptions();
-
-		Type[] args = new Type[uvd.size()];
-		Arrays.fill(args, upvalueType());
-		Type ctorMethodType = Type.getMethodType(Type.VOID_TYPE, args);
-
-		MethodNode ctorMethodNode = new MethodNode(
-				ACC_PUBLIC,
-				"<init>",
-				ctorMethodType.getDescriptor(),
-				null,
-				null);
-
-		InsnList il = ctorMethodNode.instructions;
-
-		LabelNode begin = new LabelNode();
-		LabelNode end = new LabelNode();
-
-		ctorMethodNode.localVariables.add(new LocalVariableNode("this", thisClassType().getDescriptor(), null, begin, end, 0));
-
-		il.add(begin);
-
-		// superclass constructor
-		il.add(new VarInsnNode(ALOAD, 0));
-		il.add(new MethodInsnNode(
-				INVOKESPECIAL,
-				superClassType().getInternalName(),
-				"<init>",
-				Type.getMethodType(Type.VOID_TYPE).getDescriptor(),
-				false));
-
-		for (int i = 0; i < uvd.size(); i++) {
-			String name = getUpvalueFieldName(i);
-
-			il.add(new VarInsnNode(ALOAD, 0));  // this
-			il.add(new VarInsnNode(ALOAD, 1 + i));  // upvalue #i
-			il.add(new FieldInsnNode(PUTFIELD, thisClassType().getInternalName(), name, upvalueType().getDescriptor()));
-
-			ctorMethodNode.localVariables.add(new LocalVariableNode(name, upvalueType().getDescriptor(), null, begin, end, i));
-		}
-
-		il.add(new InsnNode(RETURN));
-
-		il.add(end);
-
-		ctorMethodNode.maxStack = 2;
-		ctorMethodNode.maxLocals = args.length + 1;
-
-		return ctorMethodNode;
-	}
-
 	protected ClassNode classNode() {
 		return classNode;
+	}
+
+	public ConstructorEmitter constructor() {
+		return constructorEmitter;
 	}
 
 	public RunMethodEmitter runMethod() {

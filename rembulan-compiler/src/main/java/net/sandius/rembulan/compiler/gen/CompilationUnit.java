@@ -91,13 +91,10 @@ public class CompilationUnit {
 
 		ClassEmitter classEmitter = new ClassEmitter(ctx, numFixedParams, isVararg);
 
-		classEmitter.begin();
-
 		RunMethodEmitter runMethodEmitter = classEmitter.runMethod();
 		for (Node n : topoSorted) {
 			n.emit(runMethodEmitter.codeVisitor());
 		}
-		runMethodEmitter.end();
 
 		classEmitter.end();
 
