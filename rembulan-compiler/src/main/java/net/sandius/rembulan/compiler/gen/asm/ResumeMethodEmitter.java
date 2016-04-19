@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
@@ -145,9 +146,9 @@ public class ResumeMethodEmitter {
 			LabelNode end = new LabelNode();
 
 			il.add(begin);
-			il.add(new TypeInsnNode(NEW, Type.getInternalName(UnsupportedOperationException.class)));
+			il.add(new TypeInsnNode(NEW, Type.getInternalName(NonsuspendableFunctionException.class)));
 			il.add(new InsnNode(DUP));
-			il.add(ASMUtils.ctor(UnsupportedOperationException.class));
+			il.add(ASMUtils.ctor(NonsuspendableFunctionException.class));
 			il.add(new InsnNode(ATHROW));
 			il.add(end);
 
