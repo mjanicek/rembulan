@@ -1,6 +1,5 @@
 package net.sandius.rembulan.bm;
 
-import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
@@ -61,11 +60,6 @@ public class DummyLuaState extends LuaState {
 	@Override
 	public PreemptionContext preemptionContext() {
 		return preemptionContext;
-	}
-
-	@Override
-	public Coroutine getCurrentCoroutine() {
-		return null;
 	}
 
 }
