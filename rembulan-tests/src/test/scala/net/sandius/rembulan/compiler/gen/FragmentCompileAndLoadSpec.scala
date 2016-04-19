@@ -107,6 +107,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
 
                 try {
                   last.resume(state, os)
+                  Dispatch.evaluateTailCalls(state, os)
                 }
                 catch {
                   case ex: lua.ControlThrowable => rs.addAll(ex.resumeStack())
