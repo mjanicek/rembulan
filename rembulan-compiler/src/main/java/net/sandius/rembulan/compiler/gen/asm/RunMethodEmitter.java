@@ -13,11 +13,9 @@ import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
-import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
@@ -53,6 +51,11 @@ public class RunMethodEmitter {
 	private final InsnList errorState;
 	private final InsnList resumeHandler;
 
+	private final LabelNode l_insns_begin;
+	private final LabelNode l_body_begin;
+	private final LabelNode l_error_state;
+	private final LabelNode l_handler_begin;
+
 	public RunMethodEmitter(ClassEmitter parent) {
 		this.parent = Check.notNull(parent);
 
@@ -70,10 +73,27 @@ public class RunMethodEmitter {
 		code = new InsnList();
 		errorState = new InsnList();
 		resumeHandler = new InsnList();
+
+		l_insns_begin = new LabelNode();
+		l_body_begin = new LabelNode();
+		l_error_state = new LabelNode();
+		l_handler_begin = new LabelNode();
+
+		node.instructions.add(l_insns_begin);
+
+		resumptionPoints.add(l_body_begin);
+
+		code.add(l_body_begin);
+		code.add(ASMUtils.frameSame());
+
+		// FIXME: the initial Target emits a label + stack frame immediately after this;
+		// that is illegal if there is no instruction in between
+		code.add(new InsnNode(NOP));
 	}
 
-	private int registerOffset() {
-		return parent.isVararg() ? LV_VARARGS + 1 : LV_VARARGS;
+	protected int registerLocalValueIndex(int index) {
+		int offset = parent.isVararg() ? LV_VARARGS + 1 : LV_VARARGS;
+		return offset + index;
 	}
 
 	public PrototypeContext context() {
@@ -116,6 +136,134 @@ public class RunMethodEmitter {
 		return new String[] { Type.getInternalName(ControlThrowable.class) };
 	}
 
+	protected int numOfRegisters() {
+		return parent.context().prototype().getMaximumStackSize();
+	}
+
+	protected boolean isResumable() {
+		return resumptionPoints.size() > 1;
+	}
+
+	public CodeVisitor codeVisitor() {
+		return new JavaBytecodeCodeVisitor(this);
+	}
+
+	public void end() {
+		if (isResumable()) {
+			errorState.add(errorState(l_error_state));
+			resumeSwitch.add(dispatchTable());
+			resumeHandler.add(resumptionHandler(l_handler_begin));
+
+			node.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+		}
+
+		// local variable declaration
+
+		LabelNode l_insns_end = new LabelNode();
+
+		List<LocalVariableNode> locals = node.localVariables;
+		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, l_insns_begin, l_insns_end, 0));
+		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, l_insns_begin, l_insns_end, LV_STATE));
+		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, l_insns_begin, l_insns_end, LV_OBJECTSINK));
+		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
+
+		if (parent.isVararg()) {
+			locals.add(new LocalVariableNode(
+					"varargs",
+					ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
+					null,
+					l_insns_begin,
+					l_insns_end,
+					LV_VARARGS
+					));
+		}
+
+		for (int i = 0; i < numOfRegisters(); i++) {
+			locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, registerLocalValueIndex(i)));
+		}
+
+//		if (isResumable()) {
+//			locals.add(new LocalVariableNode("ct", Type.getDescriptor(ControlThrowable.class), null, l_handler_begin, l_handler_end, registerOffset() + numOfRegisters()));
+//		}
+
+		// TODO: check these
+//		node.maxLocals = numOfRegisters() + 4;
+//		node.maxStack = numOfRegisters() + 5;
+
+		node.maxLocals = locals.size();
+		node.maxStack = 4 + numOfRegisters() + 5;
+
+		node.instructions.add(resumeSwitch);
+		node.instructions.add(code);
+		node.instructions.add(errorState);
+		node.instructions.add(resumeHandler);
+
+		node.instructions.add(l_insns_end);
+	}
+
+	protected InsnList errorState(LabelNode label) {
+		InsnList il = new InsnList();
+		il.add(label);
+		il.add(ASMUtils.frameSame());
+		il.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
+		il.add(new InsnNode(DUP));
+		il.add(ASMUtils.ctor(IllegalStateException.class));
+		il.add(new InsnNode(ATHROW));
+		return il;
+	}
+
+	protected InsnList dispatchTable() {
+		InsnList il = new InsnList();
+		LabelNode[] labels = resumptionPoints.toArray(new LabelNode[0]);
+		il.add(new VarInsnNode(ILOAD, LV_RESUME));
+		il.add(new TableSwitchInsnNode(0, resumptionPoints.size() - 1, l_error_state, labels));
+		return il;
+	}
+
+	public InsnList createSnapshot() {
+		InsnList il = new InsnList();
+
+		il.add(new VarInsnNode(ALOAD, 0));  // this
+		il.add(new VarInsnNode(ALOAD, 0));
+		il.add(new VarInsnNode(ILOAD, LV_RESUME));
+		if (parent.isVararg()) {
+			il.add(new VarInsnNode(ALOAD, LV_VARARGS));
+		}
+		for (int i = 0; i < numOfRegisters(); i++) {
+			il.add(new VarInsnNode(ALOAD, registerLocalValueIndex(i)));
+		}
+		il.add(parent.snapshotMethod().methodInvokeInsn());
+
+		return il;
+	}
+
+	protected InsnList resumptionHandler(LabelNode label) {
+		InsnList il = new InsnList();
+
+		il.add(label);
+		il.add(ASMUtils.frameSame1(ControlThrowable.class));
+
+		il.add(new InsnNode(DUP));
+
+		il.add(createSnapshot());
+
+		// register snapshot with the control exception
+		il.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(ControlThrowable.class),
+				"push",
+				Type.getMethodType(
+						Type.VOID_TYPE,
+						Type.getType(Resumable.class),
+						Type.getType(Serializable.class)).getDescriptor(),
+				false));
+
+		// rethrow
+		il.add(new InsnNode(ATHROW));
+
+		return il;
+	}
+
 	protected LabelNode _l(Object key) {
 		LabelNode l = labels.get(key);
 
@@ -133,6 +281,49 @@ public class RunMethodEmitter {
 		return code;
 	}
 
+	public int newLocalVariable(int locIdx, String name, LabelNode begin, LabelNode end, Type t) {
+		// FIXME: this is quite brittle!
+		int idx = 4 + numOfRegisters() + (parent.isVararg() ? 1 : 0) + locIdx;
+		node.localVariables.add(new LocalVariableNode(name, t.getDescriptor(), null, begin, end, idx));
+		return idx;
+	}
+
+	public class ResumptionPoint {
+
+		public final int index;
+
+		private ResumptionPoint(int index) {
+			this.index = index;
+		}
+
+		public LabelNode label() {
+			return _l(this);
+		}
+
+		public InsnList save() {
+			InsnList il = new InsnList();
+			il.add(ASMUtils.loadInt(index));
+			il.add(new VarInsnNode(ISTORE, LV_RESUME));
+			return il;
+		}
+
+		public InsnList resume() {
+			InsnList il = new InsnList();
+
+			il.add(label());
+			il.add(ASMUtils.frameSame());
+
+			return il;
+		}
+	}
+
+	public ResumptionPoint resumptionPoint() {
+		int idx = resumptionPoints.size();
+		ResumptionPoint rp = new ResumptionPoint(idx);
+		resumptionPoints.add(rp.label());
+		return rp;
+	}
+
 	public AbstractInsnNode loadThis() {
 		return new VarInsnNode(ALOAD, 0);
 	}
@@ -146,7 +337,7 @@ public class RunMethodEmitter {
 	}
 
 	public AbstractInsnNode loadRegisterValue(int registerIndex) {
-		return new VarInsnNode(ALOAD, registerOffset() + registerIndex);
+		return new VarInsnNode(ALOAD, registerLocalValueIndex(registerIndex));
 	}
 
 	public InsnList loadRegisterValue(int registerIndex, Class castTo) {
@@ -181,6 +372,60 @@ public class RunMethodEmitter {
 
 	public InsnList loadRegister(int registerIndex, SlotState slots) {
 		return loadRegister(registerIndex, slots, null);
+	}
+
+	public InsnList loadRegisterOrConstant(int rk, SlotState slots, Class castTo) {
+		Check.notNull(slots);
+
+		if (rk < 0) {
+			// it's a constant
+			return loadConstant(-rk - 1, castTo);
+		}
+		else {
+			return loadRegister(rk, slots, castTo);
+		}
+	}
+
+	public InsnList loadRegisterOrConstant(int rk, SlotState slots) {
+		return loadRegisterOrConstant(rk, slots, null);
+	}
+
+	public InsnList loadNumericRegisterOrConstantValue(int rk, SlotState slots, Type requiredType) {
+		InsnList il = new InsnList();
+
+		// FIXME: this duplicates the retrieval code!
+		if (rk < 0) {
+			// it's a constant
+			int constIndex = -rk - 1;
+			Object c = parent.context().getConst(constIndex);
+			if (c instanceof Number) {
+				il.add(BoxedPrimitivesMethods.loadNumericValue((Number) c, requiredType));
+			}
+			else {
+				throw new IllegalArgumentException("Constant #" + constIndex + " is not a Number: "
+						+ c + " (" + (c != null ? c.getClass().getName() : "null") + ")");
+			}
+		}
+		else {
+			// it's a register
+			il.add(loadRegister(rk, slots, Number.class));
+			il.add(BoxedPrimitivesMethods.unbox(Number.class, requiredType));
+		}
+
+		return il;
+	}
+
+	public InsnList loadRegisterAsBoolean(int registerIndex, SlotState slots) {
+		InsnList il = new InsnList();
+		if (slots.typeAt(registerIndex).isSubtypeOf(LuaTypes.BOOLEAN)) {
+			il.add(loadRegister(registerIndex, slots, Boolean.class));
+			il.add(BoxedPrimitivesMethods.booleanValue());
+		}
+		else {
+			il.add(loadRegister(registerIndex, slots));
+			il.add(UtilMethods.objectToBoolean());
+		}
+		return il;
 	}
 
 	public InsnList loadRegisters(int firstRegisterIndex, SlotState slots, int num) {
@@ -237,7 +482,6 @@ public class RunMethodEmitter {
 		return il;
 	}
 
-
 	// FIXME: come up with a better name
 	public InsnList mapInvokeArgumentsToKinds(int fromIndex, SlotState slots, int desired, int actual) {
 		if (desired > 0) {
@@ -258,50 +502,8 @@ public class RunMethodEmitter {
 		}
 	}
 
-
-	public InsnList loadRegisterOrConstant(int rk, SlotState slots, Class castTo) {
-		Check.notNull(slots);
-
-		if (rk < 0) {
-			// it's a constant
-			return loadConstant(-rk - 1, castTo);
-		}
-		else {
-			return loadRegister(rk, slots, castTo);
-		}
-	}
-
-	public InsnList loadRegisterOrConstant(int rk, SlotState slots) {
-		return loadRegisterOrConstant(rk, slots, null);
-	}
-
-	public InsnList loadNumericRegisterOrConstantValue(int rk, SlotState slots, Type requiredType) {
-		InsnList il = new InsnList();
-
-		// FIXME: this duplicates the retrieval code!
-		if (rk < 0) {
-			// it's a constant
-			int constIndex = -rk - 1;
-			Object c = parent.context().getConst(constIndex);
-			if (c instanceof Number) {
-				il.add(BoxedPrimitivesMethods.loadNumericValue((Number) c, requiredType));
-			}
-			else {
-				throw new IllegalArgumentException("Constant #" + constIndex + " is not a Number: "
-						+ c + " (" + (c != null ? c.getClass().getName() : "null") + ")");
-			}
-		}
-		else {
-			// it's a register
-			il.add(loadRegister(rk, slots, Number.class));
-			il.add(BoxedPrimitivesMethods.unbox(Number.class, requiredType));
-		}
-
-		return il;
-	}
-
 	private AbstractInsnNode storeRegisterValue(int registerIndex) {
-		return new VarInsnNode(ASTORE, registerOffset() + registerIndex);
+		return new VarInsnNode(ASTORE, registerLocalValueIndex(registerIndex));
 	}
 
 	public InsnList storeToRegister(int registerIndex, SlotState slots) {
@@ -319,6 +521,27 @@ public class RunMethodEmitter {
 		return il;
 	}
 
+	// TODO: name: shouldn't this be "coerce"?
+	public InsnList convertRegisterToNumber(int r, SlotState st, String what) {
+		InsnList il = new InsnList();
+
+		il.add(loadRegister(r, st));
+		il.add(UtilMethods.objectToNumber(what));
+		il.add(storeToRegister(r, st));
+
+		return il;
+	}
+
+	public InsnList convertNumericRegisterToFloat(int registerIndex, SlotState st) {
+		InsnList il = new InsnList();
+
+		il.add(loadRegister(registerIndex, st, Number.class));
+		il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
+		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		il.add(storeToRegister(registerIndex, st));
+
+		return il;
+	}
 
 	public AbstractInsnNode loadLuaState() {
 		return new VarInsnNode(ALOAD, LV_STATE);
@@ -326,6 +549,11 @@ public class RunMethodEmitter {
 
 	public AbstractInsnNode loadObjectSink() {
 		return new VarInsnNode(ALOAD, LV_OBJECTSINK);
+	}
+
+	public AbstractInsnNode loadVarargs() {
+		Check.isTrue(parent.isVararg());
+		return new VarInsnNode(ALOAD, LV_VARARGS);
 	}
 
 	public InsnList loadDispatchPreamble() {
@@ -368,199 +596,6 @@ public class RunMethodEmitter {
 		return il;
 	}
 
-	public int newLocalVariable(int locIdx, String name, LabelNode begin, LabelNode end, Type t) {
-		// FIXME: this is quite brittle!
-		int idx = 4 + numOfRegisters() + (parent.isVararg() ? 1 : 0) + locIdx;
-		node.localVariables.add(new LocalVariableNode(name, t.getDescriptor(), null, begin, end, idx));
-		return idx;
-	}
-
-	public class ResumptionPoint {
-
-		public final int index;
-
-		private ResumptionPoint(int index) {
-			this.index = index;
-		}
-
-		public LabelNode label() {
-			return _l(this);
-		}
-
-		public InsnList save() {
-			InsnList il = new InsnList();
-			il.add(ASMUtils.loadInt(index));
-			il.add(new VarInsnNode(ISTORE, LV_RESUME));
-			return il;
-		}
-
-		public InsnList resume() {
-			InsnList il = new InsnList();
-
-			il.add(label());
-			il.add(ASMUtils.frameSame());
-
-			return il;
-		}
-	}
-
-	public ResumptionPoint resumptionPoint() {
-		int idx = resumptionPoints.size();
-		ResumptionPoint rp = new ResumptionPoint(idx);
-		resumptionPoints.add(rp.label());
-		return rp;
-	}
-
-	private LabelNode l_insns_begin;
-	private LabelNode l_body_begin;
-	private LabelNode l_error_state;
-
-	private LabelNode l_handler_begin;
-
-	public void begin() {
-		l_insns_begin = new LabelNode();
-		node.instructions.add(l_insns_begin);
-
-		l_body_begin = new LabelNode();
-		l_error_state = new LabelNode();
-
-		l_handler_begin = new LabelNode();
-
-		resumptionPoints.add(l_body_begin);
-
-		code.add(l_body_begin);
-		code.add(ASMUtils.frameSame());
-
-		// FIXME: the initial Target emits a label + stack frame immediately after this;
-		// that is illegal if there is no instruction in between
-		code.add(new InsnNode(NOP));
-	}
-
-	public void end() {
-
-		if (isResumable()) {
-			errorState.add(errorState(l_error_state));
-			resumeSwitch.add(dispatchTable());
-			resumeHandler.add(resumptionHandler(l_handler_begin));
-
-			node.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
-		}
-
-		// local variable declaration
-
-		LabelNode l_insns_end = new LabelNode();
-
-		List<LocalVariableNode> locals = node.localVariables;
-		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, l_insns_begin, l_insns_end, 0));
-		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, l_insns_begin, l_insns_end, LV_STATE));
-		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, l_insns_begin, l_insns_end, LV_OBJECTSINK));
-		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
-
-		if (parent.isVararg()) {
-			locals.add(new LocalVariableNode(
-					"varargs",
-					ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
-					null,
-					l_insns_begin,
-					l_insns_end,
-					LV_VARARGS
-					));
-		}
-
-		for (int i = 0; i < numOfRegisters(); i++) {
-			locals.add(new LocalVariableNode("r_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, registerOffset() + i));
-		}
-
-//		if (isResumable()) {
-//			locals.add(new LocalVariableNode("ct", Type.getDescriptor(ControlThrowable.class), null, l_handler_begin, l_handler_end, registerOffset() + numOfRegisters()));
-//		}
-
-		// TODO: check these
-//		node.maxLocals = numOfRegisters() + 4;
-//		node.maxStack = numOfRegisters() + 5;
-
-		node.maxLocals = locals.size();
-		node.maxStack = 4 + numOfRegisters() + 5;
-
-		node.instructions.add(resumeSwitch);
-		node.instructions.add(code);
-		node.instructions.add(errorState);
-		node.instructions.add(resumeHandler);
-
-		node.instructions.add(l_insns_end);
-	}
-
-	protected InsnList errorState(LabelNode label) {
-		InsnList il = new InsnList();
-		il.add(label);
-		il.add(ASMUtils.frameSame());
-		il.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
-		il.add(new InsnNode(DUP));
-		il.add(ASMUtils.ctor(IllegalStateException.class));
-		il.add(new InsnNode(ATHROW));
-		return il;
-	}
-
-	protected boolean isResumable() {
-		return resumptionPoints.size() > 1;
-	}
-
-	protected InsnList dispatchTable() {
-		InsnList il = new InsnList();
-		LabelNode[] labels = resumptionPoints.toArray(new LabelNode[0]);
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-		il.add(new TableSwitchInsnNode(0, resumptionPoints.size() - 1, l_error_state, labels));
-		return il;
-	}
-
-	protected int numOfRegisters() {
-		return parent.context().prototype().getMaximumStackSize();
-	}
-
-	public InsnList createSnapshot() {
-		InsnList il = new InsnList();
-
-		il.add(new VarInsnNode(ALOAD, 0));  // this
-		il.add(new VarInsnNode(ALOAD, 0));
-		il.add(new VarInsnNode(ILOAD, LV_RESUME));
-		if (parent.isVararg()) {
-			il.add(new VarInsnNode(ALOAD, LV_VARARGS));
-		}
-		for (int i = 0; i < numOfRegisters(); i++) {
-			il.add(new VarInsnNode(ALOAD, registerOffset() + i));
-		}
-		il.add(parent.snapshotMethod().methodInvokeInsn());
-
-		return il;
-	}
-
-	protected InsnList resumptionHandler(LabelNode label) {
-		InsnList il = new InsnList();
-		
-		il.add(label);
-		il.add(ASMUtils.frameSame1(ControlThrowable.class));
-
-		il.add(new InsnNode(DUP));
-
-		il.add(createSnapshot());
-
-		// register snapshot with the control exception
-		il.add(new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(ControlThrowable.class),
-				"push",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						Type.getType(Resumable.class),
-						Type.getType(Serializable.class)).getDescriptor(),
-				false));
-
-		// rethrow
-		il.add(new InsnNode(ATHROW));
-
-		return il;
-	}
-
 	public InsnList getUpvalueReference(int idx) {
 		InsnList il = new InsnList();
 		il.add(new VarInsnNode(ALOAD, 0));
@@ -591,77 +626,6 @@ public class RunMethodEmitter {
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;
-	}
-
-	public void _line_here(int line) {
-		LabelNode l = _l(new Object());
-		code.add(l);
-		code.add(new LineNumberNode(line, l));
-	}
-
-	public InsnList loadRegisterAsBoolean(int registerIndex, SlotState slots) {
-		InsnList il = new InsnList();
-		if (slots.typeAt(registerIndex).isSubtypeOf(LuaTypes.BOOLEAN)) {
-			il.add(loadRegister(registerIndex, slots, Boolean.class));
-			il.add(BoxedPrimitivesMethods.booleanValue());
-		}
-		else {
-			il.add(loadRegister(registerIndex, slots));
-			il.add(UtilMethods.objectToBoolean());
-		}
-		return il;
-	}
-
-	public AbstractInsnNode loadVarargs() {
-		Check.isTrue(parent.isVararg());
-		return new VarInsnNode(ALOAD, LV_VARARGS);
-	}
-
-	public InsnList convertNumericRegisterToFloat(int registerIndex, SlotState st) {
-		InsnList il = new InsnList();
-
-		il.add(loadRegister(registerIndex, st, Number.class));
-		il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
-		il.add(storeToRegister(registerIndex, st));
-
-		return il;
-	}
-
-	// TODO: name: shouldn't this be "coerce"?
-	public InsnList convertRegisterToNumber(int r, SlotState st, String what) {
-		InsnList il = new InsnList();
-
-		il.add(loadRegister(r, st));
-		il.add(UtilMethods.objectToNumber(what));
-		il.add(storeToRegister(r, st));
-
-		return il;
-	}
-
-	@Deprecated
-	public FrameNode fullFrame(int numStack, Object[] stack) {
-		ArrayList<Object> locals = new ArrayList<>();
-		locals.add(parent.thisClassType().getInternalName());
-		locals.add(Type.getInternalName(LuaState.class));
-		locals.add(Type.getInternalName(ObjectSink.class));
-		locals.add(INTEGER);
-		if (parent.isVararg()) {
-			locals.add(ASMUtils.arrayTypeFor(Object.class).getInternalName());
-		}
-		for (int i = 0; i < numOfRegisters(); i++) {
-			locals.add(Type.getInternalName(Object.class));
-		}
-
-		return new FrameNode(
-				F_FULL,
-				locals.size(),
-				locals.toArray(),
-				numStack, stack);
-	}
-
-	public CodeVisitor codeVisitor() {
-		return new JavaBytecodeCodeVisitor(this);
 	}
 
 }

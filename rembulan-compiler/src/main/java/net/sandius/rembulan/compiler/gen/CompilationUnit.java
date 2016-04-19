@@ -94,8 +94,6 @@ public class CompilationUnit {
 		classEmitter.begin();
 
 		RunMethodEmitter runMethodEmitter = classEmitter.runMethod();
-
-		runMethodEmitter.begin();
 		for (Node n : topoSorted) {
 			n.emit(runMethodEmitter.codeVisitor());
 		}
