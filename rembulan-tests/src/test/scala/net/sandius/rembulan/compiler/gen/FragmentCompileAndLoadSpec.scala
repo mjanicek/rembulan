@@ -83,7 +83,16 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
             val name = classLoader.install(chunk)
             val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
-            val state = new DefaultLuaState(PreemptionContext.Always.INSTANCE)
+            var totalCost = 0
+
+            val preemptionContext = new PreemptionContext.Always {
+              override def withdraw(cost: Int) {
+                totalCost += cost
+                super.withdraw(cost)
+              }
+            }
+
+            val state = new DefaultLuaState(preemptionContext)
             val os = new PairCachingObjectSink
 
             val env = envForContext(state, ctx)
@@ -125,6 +134,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
 
             res match {
               case Right(result) =>
+                println("Total cost: " + totalCost)
                 println("Execution result (" + result.size + " values):")
                 for ((v, i) <- result.zipWithIndex) {
                   println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
