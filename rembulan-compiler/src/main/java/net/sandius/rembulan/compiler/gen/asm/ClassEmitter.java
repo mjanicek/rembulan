@@ -34,6 +34,7 @@ public class ClassEmitter {
 	private final ArrayList<String> upvalueFieldNames;
 
 	private final ConstructorEmitter constructorEmitter;
+	private final StaticConstructorEmitter staticConstructorEmitter;
 	private final InvokeMethodEmitter invokeMethodEmitter;
 	private final ResumeMethodEmitter resumeMethodEmitter;
 	private final RunMethodEmitter runMethodEmitter;
@@ -46,6 +47,7 @@ public class ClassEmitter {
 		this.isVararg = isVararg;
 
 		this.constructorEmitter = new ConstructorEmitter(this);
+		this.staticConstructorEmitter = new StaticConstructorEmitter(this);
 		this.invokeMethodEmitter = new InvokeMethodEmitter(this);
 		this.resumeMethodEmitter = new ResumeMethodEmitter(this);
 		this.runMethodEmitter = new RunMethodEmitter(this);
@@ -57,6 +59,10 @@ public class ClassEmitter {
 		classNode.name = thisClassType().getInternalName();
 		classNode.superName = superClassType().getInternalName();
 		classNode.sourceFile = context.prototype().getShortSource();
+
+		if (!hasUpvalues()) {
+			classNode.fields.add(instanceField());
+		}
 
 		addUpvalueFields();
 	}
@@ -86,8 +92,25 @@ public class ClassEmitter {
 		return isVararg;
 	}
 
+	protected boolean hasUpvalues() {
+		return context.prototype().hasUpValues();
+	}
+
 	protected Type invokeMethodType() {
 		return InvokableMethods.invoke_method(kind()).getMethodType();
+	}
+
+	protected static String instanceFieldName() {
+		return "INSTANCE";
+	}
+
+	protected FieldNode instanceField() {
+		return new FieldNode(
+				ACC_PUBLIC + ACC_FINAL + ACC_STATIC,
+				instanceFieldName(),
+				thisClassType().getDescriptor(),
+				null,
+				null);
 	}
 
 	protected Type superClassType() {
@@ -111,6 +134,11 @@ public class ClassEmitter {
 		if (runMethod().isResumable()) {
 			snapshotMethod().end();
 			classNode.methods.add(snapshotMethod().node());
+		}
+
+		if (!hasUpvalues()) {
+			staticConstructor().end();
+			classNode.methods.add(staticConstructor().node());
 		}
 	}
 
@@ -219,6 +247,10 @@ public class ClassEmitter {
 
 	public ConstructorEmitter constructor() {
 		return constructorEmitter;
+	}
+
+	public StaticConstructorEmitter staticConstructor() {
+		return staticConstructorEmitter;
 	}
 
 	public RunMethodEmitter runMethod() {

@@ -13,9 +13,11 @@ import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntIterable;
 import net.sandius.rembulan.util.IntIterator;
+import net.sandius.rembulan.util.ReadOnlyArray;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.IincInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -990,33 +992,46 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitClosure(Object id, SlotState st, int r_dest, int index) {
-		InsnList capture = new InsnList();
-		InsnList load = new InsnList();
-		int argCount = 0;
-
-		for (Prototype.UpvalueDesc uvd : e.context().nestedPrototype(index).getUpValueDescriptions()) {
-			if (uvd.inStack) {
-				if (!st.isCaptured(uvd.index)) {
-					capture.add(e.captureRegister(uvd.index));
-					st = st.capture(uvd.index);  // just marking it so that we can store properly
-				}
-				load.add(e.loadRegisterValue(uvd.index, Upvalue.class));
-			}
-			else {
-				load.add(e.getUpvalueReference(uvd.index));
-			}
-
-			argCount += 1;
-		}
-
+		ReadOnlyArray<Prototype.UpvalueDesc> upvalues = e.context().nestedPrototype(index).getUpValueDescriptions();
 		String closureClassName = e.context().nestedPrototypeName(index);
 		Type closureType = ASMUtils.typeForClassName(closureClassName);
 
-		add(capture);
-		add(new TypeInsnNode(NEW, closureType.getInternalName()));
-		add(new InsnNode(DUP));
-		add(load);
-		add(ASMUtils.ctor(closureType, ASMUtils.fillTypes(Type.getType(Upvalue.class), argCount)));
+		if (!upvalues.isEmpty()) {
+			InsnList capture = new InsnList();
+			InsnList load = new InsnList();
+			int argCount = 0;
+
+			for (Prototype.UpvalueDesc uvd : upvalues) {
+				if (uvd.inStack) {
+					if (!st.isCaptured(uvd.index)) {
+						capture.add(e.captureRegister(uvd.index));
+						st = st.capture(uvd.index);  // just marking it so that we can store properly
+					}
+					load.add(e.loadRegisterValue(uvd.index, Upvalue.class));
+				}
+				else {
+					load.add(e.getUpvalueReference(uvd.index));
+				}
+
+				argCount += 1;
+			}
+
+			add(capture);
+
+			add(new TypeInsnNode(NEW, closureType.getInternalName()));
+			add(new InsnNode(DUP));
+			add(load);
+			add(ASMUtils.ctor(closureType, ASMUtils.fillTypes(Type.getType(Upvalue.class), argCount)));
+		}
+		else {
+			// load the static instance
+			add(new FieldInsnNode(
+					GETSTATIC,
+					closureType.getInternalName(),
+					ClassEmitter.instanceFieldName(),
+					closureType.getDescriptor()));
+		}
+
 		add(e.storeToRegister(r_dest, st));
 	}
 
