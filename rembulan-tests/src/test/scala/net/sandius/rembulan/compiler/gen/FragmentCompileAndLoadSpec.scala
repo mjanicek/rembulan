@@ -3,18 +3,20 @@ package net.sandius.rembulan.compiler.gen
 import java.io.{PrintStream, PrintWriter}
 
 import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
-import net.sandius.rembulan.core.{Dispatch, LuaState, Table, Upvalue}
+import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.PairCachingObjectSink
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter}
 import net.sandius.rembulan.lib.impl.DefaultBuiltins
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.test.FragmentExpectations.Env.{Builtins, Empty}
-import net.sandius.rembulan.test.{BasicFragments, DummyLuaState, FragmentExpectations, LuaCFragmentCompiler}
+import net.sandius.rembulan.test.{BasicFragments, DummyLuaState, LuaCFragmentCompiler}
 import net.sandius.rembulan.{core => lua}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
 
+import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 import scala.util.control.NonFatal
 
 @RunWith(classOf[JUnitRunner])
@@ -81,7 +83,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
             val name = classLoader.install(chunk)
             val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
-            val state = new DummyLuaState(false)
+            val state = new DummyLuaState(true)
             val os = new PairCachingObjectSink
 
             val env = envForContext(state, ctx)
@@ -90,19 +92,43 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
             val res: Either[Throwable, Seq[AnyRef]] = try {
               val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
 
-              Dispatch.call(state, os, f)
+              val rs = ArrayBuffer.empty[ResumeInfo]
+
+              try {
+                Dispatch.call(state, os, f)
+              }
+              catch {
+                case ex: lua.ControlThrowable => rs.addAll(ex.resumeStack())
+              }
+
+              while (rs.nonEmpty) {
+                val last = rs.last
+                rs.reduceToSize(rs.size - 1)
+
+                try {
+                  last.resume(state, os)
+                }
+                catch {
+                  case ex: lua.ControlThrowable => rs.addAll(ex.resumeStack())
+                }
+              }
 
               val result = os.toArray.toSeq
-              println("Execution result (" + result.size + " values):")
-              for ((v, i) <- result.zipWithIndex) {
-                println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
-              }
               Right(result)
             }
             catch {
               case ex: VerifyError => throw new IllegalStateException(ex)
               case ex: NoSuchMethodError => throw new IllegalStateException(ex)
               case NonFatal(ex) => Left(ex)
+            }
+
+            res match {
+              case Right(result) =>
+                println("Execution result (" + result.size + " values):")
+                for ((v, i) <- result.zipWithIndex) {
+                  println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
+                }
+              case _ =>
             }
 
             for (ctxExp <- bundle.expectationFor(f);
