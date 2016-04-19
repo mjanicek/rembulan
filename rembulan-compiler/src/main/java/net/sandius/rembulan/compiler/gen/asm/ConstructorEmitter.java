@@ -76,6 +76,7 @@ public class ConstructorEmitter {
 				Type.getMethodType(Type.VOID_TYPE).getDescriptor(),
 				false));
 
+		// initialise upvalue fields
 		for (int i = 0; i < upvalues().size(); i++) {
 			String name = parent.getUpvalueFieldName(i);
 
@@ -88,6 +89,9 @@ public class ConstructorEmitter {
 
 			node.localVariables.add(new LocalVariableNode(name, Type.getDescriptor(Upvalue.class), null, begin, end, i));
 		}
+
+		// instantiate closures that have no open upvalues
+		il.add(parent.instantiateNestedInstanceFields());
 
 		il.add(new InsnNode(RETURN));
 

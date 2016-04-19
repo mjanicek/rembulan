@@ -628,4 +628,12 @@ public class RunMethodEmitter {
 		return il;
 	}
 
+	public ClassEmitter.NestedInstanceKind nestedClosureKind(int index) {
+		return parent.nestedInstanceKind(index);
+	}
+
+	protected FieldInsnNode getNestedInstanceField(int idx) {
+		return parent.getNestedInstance(idx);
+	}
+
 }

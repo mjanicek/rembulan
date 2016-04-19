@@ -13,14 +13,11 @@ import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InnerClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -100,19 +97,6 @@ public class ClassEmitter {
 		return InvokableMethods.invoke_method(kind()).getMethodType();
 	}
 
-	protected static String instanceFieldName() {
-		return "INSTANCE";
-	}
-
-	protected FieldNode instanceField() {
-		return new FieldNode(
-				ACC_PUBLIC + ACC_FINAL + ACC_STATIC,
-				instanceFieldName(),
-				thisClassType().getDescriptor(),
-				null,
-				null);
-	}
-
 	protected Type superClassType() {
 		return Type.getType(InvokeKind.nativeClassForKind(kind()));
 	}
@@ -121,6 +105,7 @@ public class ClassEmitter {
 		runMethod().end();
 
 		addInnerClassLinks();
+		addNestedInstanceFields();
 
 		constructor().end();
 		invokeMethod().end();
@@ -144,10 +129,6 @@ public class ClassEmitter {
 
 	public void accept(ClassVisitor visitor) {
 		classNode.accept(visitor);
-	}
-
-	public Type upvalueType() {
-		return Type.getType(Upvalue.class);
 	}
 
 	private String toJavaName(String n) {
@@ -233,12 +214,128 @@ public class ClassEmitter {
 			FieldNode fieldNode = new FieldNode(
 					ACC_PROTECTED + ACC_FINAL,
 					name,
-					upvalueType().getDescriptor(),
+					Type.getDescriptor(Upvalue.class),
 					null,
 					null);
 
 			classNode.fields.add(fieldNode);
 		}
+	}
+
+	protected String nestedInstanceFieldName(int idx) {
+		// TODO: check for conflicts with upvalue names
+		return "f" + (idx + 1) + "_INSTANCE";
+	}
+
+	protected Type nestedInstanceFieldType(int idx) {
+		String closureClassName = context().nestedPrototypeName(idx);
+		return ASMUtils.typeForClassName(closureClassName);
+	}
+
+	protected FieldNode nestedInstanceField(int idx) {
+		return new FieldNode(
+				ACC_PROTECTED + ACC_FINAL,
+				nestedInstanceFieldName(idx),
+				nestedInstanceFieldType(idx).getDescriptor(),
+				null,
+				null);
+	}
+
+	enum NestedInstanceKind {
+		Pure,
+		Closed,
+		Open
+	}
+
+	protected NestedInstanceKind nestedInstanceKind(int idx) {
+		Prototype np = context().nestedPrototype(idx);
+		ReadOnlyArray<Prototype.UpvalueDesc> uvds = np.getUpValueDescriptions();
+
+		if (uvds.isEmpty()) {
+			return NestedInstanceKind.Pure;
+		}
+		else {
+			for (Prototype.UpvalueDesc uvd : uvds) {
+				if (uvd.inStack) {
+					return NestedInstanceKind.Open;
+				}
+			}
+			return NestedInstanceKind.Closed;
+		}
+	}
+
+	protected FieldInsnNode getNestedInstance(int idx) {
+		return new FieldInsnNode(
+				GETFIELD,
+				thisClassType().getInternalName(),
+				nestedInstanceFieldName(idx),
+				nestedInstanceFieldType(idx).getDescriptor());
+	}
+
+	protected FieldInsnNode setNestedInstance(int idx) {
+		return new FieldInsnNode(
+				PUTFIELD,
+				thisClassType().getInternalName(),
+				nestedInstanceFieldName(idx),
+				nestedInstanceFieldType(idx).getDescriptor());
+	}
+
+	protected void addNestedInstanceFields() {
+		ReadOnlyArray<Prototype> nps = context().prototype().getNestedPrototypes();
+		for (int i = 0; i < nps.size(); i++) {
+			if (nestedInstanceKind(i) == NestedInstanceKind.Closed) {
+				classNode.fields.add(nestedInstanceField(i));
+			}
+		}
+	}
+
+	protected InsnList instantiateNestedInstanceFields() {
+		InsnList il = new InsnList();
+
+		ReadOnlyArray<Prototype> nps = context().prototype().getNestedPrototypes();
+		for (int i = 0; i < nps.size(); i++) {
+			if (nestedInstanceKind(i) == NestedInstanceKind.Closed) {
+				ReadOnlyArray<Prototype.UpvalueDesc> uvds = nps.get(i).getUpValueDescriptions();
+
+				il.add(new VarInsnNode(ALOAD, 0));
+				il.add(new TypeInsnNode(NEW, nestedInstanceFieldType(i).getInternalName()));
+				il.add(new InsnNode(DUP));
+				for (Prototype.UpvalueDesc uvd : uvds) {
+					Check.isFalse(uvd.inStack);
+
+					il.add(new VarInsnNode(ALOAD, 0));  // this
+					il.add(new FieldInsnNode(
+							GETFIELD,
+							thisClassType().getInternalName(),
+							getUpvalueFieldName(uvd.index),
+							Type.getDescriptor(Upvalue.class)));
+				}
+				il.add(new MethodInsnNode(
+						INVOKESPECIAL,
+						nestedInstanceFieldType(i).getInternalName(),
+						"<init>",
+						Type.getMethodDescriptor(
+								Type.VOID_TYPE,
+								ASMUtils.fillTypes(Type.getType(Upvalue.class), uvds.size())),
+						false));
+				il.add(setNestedInstance(i));
+			}
+		}
+
+		return il;
+	}
+
+	protected static String instanceFieldName() {
+		return "INSTANCE";
+	}
+
+	protected FieldNode instanceField() {
+		return new FieldNode(
+				ACC_PUBLIC + ACC_FINAL + ACC_STATIC,
+				instanceFieldName(),
+				thisClassType().getDescriptor(),
+				null,
+				null);
 	}
 
 	protected ClassNode classNode() {

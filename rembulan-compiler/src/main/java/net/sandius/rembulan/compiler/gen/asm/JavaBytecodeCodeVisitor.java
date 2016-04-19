@@ -996,40 +996,54 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		String closureClassName = e.context().nestedPrototypeName(index);
 		Type closureType = ASMUtils.typeForClassName(closureClassName);
 
-		if (!upvalues.isEmpty()) {
-			InsnList capture = new InsnList();
-			InsnList load = new InsnList();
-			int argCount = 0;
+		ClassEmitter.NestedInstanceKind kind = e.nestedClosureKind(index);
 
-			for (Prototype.UpvalueDesc uvd : upvalues) {
-				if (uvd.inStack) {
-					if (!st.isCaptured(uvd.index)) {
-						capture.add(e.captureRegister(uvd.index));
-						st = st.capture(uvd.index);  // just marking it so that we can store properly
+		switch (kind) {
+			case Pure:
+				// load the static instance
+				add(new FieldInsnNode(
+						GETSTATIC,
+						closureType.getInternalName(),
+						ClassEmitter.instanceFieldName(),
+						closureType.getDescriptor()));
+				break;
+
+			case Closed:
+				// load the field
+				add(new VarInsnNode(ALOAD, 0));
+				add(e.getNestedInstanceField(index));
+				break;
+
+			case Open:
+				InsnList capture = new InsnList();
+				InsnList load = new InsnList();
+				int argCount = 0;
+
+				for (Prototype.UpvalueDesc uvd : upvalues) {
+					if (uvd.inStack) {
+						if (!st.isCaptured(uvd.index)) {
+							capture.add(e.captureRegister(uvd.index));
+							st = st.capture(uvd.index);  // just marking it so that we can store properly
+						}
+						load.add(e.loadRegisterValue(uvd.index, Upvalue.class));
 					}
-					load.add(e.loadRegisterValue(uvd.index, Upvalue.class));
+					else {
+						load.add(e.getUpvalueReference(uvd.index));
+					}
+
+					argCount += 1;
 				}
-				else {
-					load.add(e.getUpvalueReference(uvd.index));
-				}
 
-				argCount += 1;
-			}
+				add(capture);
 
-			add(capture);
+				add(new TypeInsnNode(NEW, closureType.getInternalName()));
+				add(new InsnNode(DUP));
+				add(load);
+				add(ASMUtils.ctor(closureType, ASMUtils.fillTypes(Type.getType(Upvalue.class), argCount)));
+				break;
 
-			add(new TypeInsnNode(NEW, closureType.getInternalName()));
-			add(new InsnNode(DUP));
-			add(load);
-			add(ASMUtils.ctor(closureType, ASMUtils.fillTypes(Type.getType(Upvalue.class), argCount)));
-		}
-		else {
-			// load the static instance
-			add(new FieldInsnNode(
-					GETSTATIC,
-					closureType.getInternalName(),
-					ClassEmitter.instanceFieldName(),
-					closureType.getDescriptor()));
+			default:
+				throw new UnsupportedOperationException("Illegal nested instance kind: " + kind);
 		}
 
 		add(e.storeToRegister(r_dest, st));
