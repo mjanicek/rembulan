@@ -38,7 +38,11 @@ public abstract class LuaState {
 
 	public abstract TableFactory tableFactory();
 
-	public abstract boolean shouldPreemptNow();
+	public void checkCpu(int cost) throws ControlThrowable {
+		preemptionContext().withdraw(cost);
+	}
+
+	public abstract PreemptionContext preemptionContext();
 
 	@Deprecated
 	public abstract Coroutine getCurrentCoroutine();

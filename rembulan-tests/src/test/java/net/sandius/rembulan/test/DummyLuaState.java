@@ -2,17 +2,21 @@ package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.impl.DefaultTable;
 
 public class DummyLuaState extends LuaState {
 
-	private final boolean preempting;
+	private final PreemptionContext preemptionContext;
 	private final Coroutine mainCoroutine;
 
 	public DummyLuaState(boolean preempting) {
-		this.preempting = preempting;
+		this.preemptionContext = preempting
+				? PreemptionContext.Always.INSTANCE
+				: PreemptionContext.Never.INSTANCE;
+
 		mainCoroutine = new Coroutine(this);
 	}
 
@@ -61,8 +65,8 @@ public class DummyLuaState extends LuaState {
 	}
 
 	@Override
-	public boolean shouldPreemptNow() {
-		return preempting;
+	public PreemptionContext preemptionContext() {
+		return preemptionContext;
 	}
 
 	@Override
