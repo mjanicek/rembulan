@@ -1075,4 +1075,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		}
 	}
 
+	@Override
+	public void visitCpuCheck(int cost) {
+		add(e.cpuCheck(cost));
+	}
+
 }

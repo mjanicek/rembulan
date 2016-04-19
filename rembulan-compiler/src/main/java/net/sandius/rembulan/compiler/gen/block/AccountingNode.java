@@ -22,6 +22,11 @@ public abstract class AccountingNode extends Linear {
 			return "CPU.Add(" + cost + ")";
 		}
 
+		@Override
+		public void emit(CodeVisitor visitor) {
+			visitor.visitCpuCheck(cost);
+		}
+
 	}
 
 	public static class TickBefore extends AccountingNode {

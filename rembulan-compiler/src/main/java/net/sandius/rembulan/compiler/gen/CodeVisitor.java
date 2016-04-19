@@ -109,4 +109,7 @@ public abstract class CodeVisitor {
 
 	public abstract void visitVararg(Object id, SlotState st, int r_base, int b);
 
+
+	public abstract void visitCpuCheck(int cost);
+
 }

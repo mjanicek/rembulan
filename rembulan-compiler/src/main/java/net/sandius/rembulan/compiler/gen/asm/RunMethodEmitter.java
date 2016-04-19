@@ -636,4 +636,17 @@ public class RunMethodEmitter {
 		return parent.getNestedInstance(idx);
 	}
 
+	public InsnList cpuCheck(int cost) {
+		InsnList il = new InsnList();
+
+		ResumptionPoint rp = resumptionPoint();
+		il.add(rp.save());
+		il.add(loadLuaState());
+		il.add(ASMUtils.loadInt(cost));
+		il.add(LuaStateMethods.checkCpu());
+		il.add(rp.resume());
+
+		return il;
+	}
+
 }

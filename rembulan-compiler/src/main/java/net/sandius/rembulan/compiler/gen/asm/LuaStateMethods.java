@@ -50,4 +50,15 @@ public class LuaStateMethods {
 				false);
 	}
 
+	public static AbstractInsnNode checkCpu() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				selfTpe().getInternalName(),
+				"checkCpu",
+				Type.getMethodDescriptor(
+						Type.VOID_TYPE,
+						Type.INT_TYPE),
+				false);
+	}
+
 }
