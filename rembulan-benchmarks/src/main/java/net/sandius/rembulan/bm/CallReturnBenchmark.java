@@ -6,7 +6,7 @@ import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.Operators;
+import net.sandius.rembulan.core.legacy.Operators;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.Function3;
 import net.sandius.rembulan.core.impl.QuintupleCachingObjectSink;

@@ -26,7 +26,7 @@ public class Coroutine {
 	protected final LuaState state;
 
 	// paused call stack: up-to-date only iff coroutine is not running
-	protected Cons<CallInfo> callStack;
+	protected Cons<ResumeInfo> callStack;
 
 	protected Coroutine yieldingTo;
 	protected Coroutine resuming;

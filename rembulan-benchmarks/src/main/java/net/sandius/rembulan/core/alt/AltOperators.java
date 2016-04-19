@@ -3,7 +3,7 @@ package net.sandius.rembulan.core.alt;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Metatables;
-import net.sandius.rembulan.core.Operators;
+import net.sandius.rembulan.core.legacy.Operators;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Value;
 

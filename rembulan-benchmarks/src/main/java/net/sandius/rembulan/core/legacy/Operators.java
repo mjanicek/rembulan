@@ -1,8 +1,17 @@
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.legacy;
 
+import net.sandius.rembulan.core.Coercions;
+import net.sandius.rembulan.core.Conversions;
+import net.sandius.rembulan.core.IllegalOperationAttemptException;
+import net.sandius.rembulan.core.Invokable;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.Metatables;
+import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.Userdata;
+import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.util.Check;
 
-@Deprecated
 public class Operators {
 
 	public static Object tryMetamethodCall(LuaState state, String event, Object a, Object b) {
