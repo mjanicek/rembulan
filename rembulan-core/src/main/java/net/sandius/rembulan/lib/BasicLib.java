@@ -5,7 +5,7 @@ import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.util.Check;
 
-public abstract class Builtins {
+public abstract class BasicLib {
 
 	protected void install(Table table, String key, Object value) {
 		Check.notNull(table);

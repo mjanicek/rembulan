@@ -6,9 +6,9 @@ import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.{DefaultLuaState, PairCachingObjectSink}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter}
-import net.sandius.rembulan.lib.impl.DefaultBuiltins
+import net.sandius.rembulan.lib.impl.DefaultBasicLib
 import net.sandius.rembulan.test.FragmentExpectations.Env
-import net.sandius.rembulan.test.FragmentExpectations.Env.{Builtins, Empty}
+import net.sandius.rembulan.test.FragmentExpectations.Env.{Basic, Empty}
 import net.sandius.rembulan.test.{BasicFragments, LuaCFragmentCompiler}
 import net.sandius.rembulan.{core => lua}
 import org.junit.runner.RunWith
@@ -68,11 +68,11 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
         def envForContext(state: LuaState, ctx: Env): Table = {
           ctx match {
             case Empty => state.newTable(0, 0)
-            case Builtins => new DefaultBuiltins(new PrintStream(System.out)).init(state.tableFactory())
+            case Basic => new DefaultBasicLib(new PrintStream(System.out)).init(state.tableFactory())
           }
         }
 
-        val contexts = Seq(Env.Empty, Env.Builtins)
+        val contexts = Seq(Env.Empty, Env.Basic)
 
         for (ctx <- contexts) {
 

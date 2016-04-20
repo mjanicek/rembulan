@@ -14,17 +14,17 @@ import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
-import net.sandius.rembulan.lib.Builtins;
+import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;
 import java.io.Serializable;
 
-public class DefaultBuiltins extends Builtins {
+public class DefaultBasicLib extends BasicLib {
 
 	private final Print print;
 
-	public DefaultBuiltins(PrintStream out) {
+	public DefaultBasicLib(PrintStream out) {
 		this.print = new Print(out);
 	}
 
