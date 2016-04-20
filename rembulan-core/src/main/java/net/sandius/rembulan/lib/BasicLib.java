@@ -1,11 +1,11 @@
 package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.util.Check;
 
-public abstract class BasicLib {
+public abstract class BasicLib implements Lib {
 
 	protected void install(Table table, String key, Object value) {
 		Check.notNull(table);
@@ -13,49 +13,44 @@ public abstract class BasicLib {
 			table.rawset(key, value);
 		}
 	}
-	
-	public void installInto(Table table) {
-		Check.notNull(table);
 
-		install(table, "_G", table);
-		install(table, "_VERSION", __VERSION());
+	@Override
+	public void installInto(LuaState state, Table env) {
+		Check.notNull(env);
+
+		install(env, "_G", env);
+		install(env, "_VERSION", __VERSION());
 		
-		install(table, "print", _print());
-		install(table, "type", _type());
+		install(env, "print", _print());
+		install(env, "type", _type());
 
-		install(table, "next", _next());
-		install(table, "pairs", _pairs());
-		install(table, "ipairs", _ipairs());
+		install(env, "next", _next());
+		install(env, "pairs", _pairs());
+		install(env, "ipairs", _ipairs());
 
-		install(table, "tostring", _tostring());
-		install(table, "tonumber", _tonumber());
+		install(env, "tostring", _tostring());
+		install(env, "tonumber", _tonumber());
 
-		install(table, "error", _error());
-		install(table, "assert", _assert());
+		install(env, "error", _error());
+		install(env, "assert", _assert());
 
-		install(table, "getmetatable", _getmetatable());
-		install(table, "setmetatable", _setmetatable());
+		install(env, "getmetatable", _getmetatable());
+		install(env, "setmetatable", _setmetatable());
 
-		install(table, "pcall", _pcall());
-		install(table, "xpcall", _xpcall());
+		install(env, "pcall", _pcall());
+		install(env, "xpcall", _xpcall());
 
-		install(table, "rawequal", _rawequal());
-		install(table, "rawget", _rawget());
-		install(table, "rawset", _rawset());
-		install(table, "rawlen", _rawlen());
+		install(env, "rawequal", _rawequal());
+		install(env, "rawget", _rawget());
+		install(env, "rawset", _rawset());
+		install(env, "rawlen", _rawlen());
 
-		install(table, "select", _select());
+		install(env, "select", _select());
 
-		install(table, "collectgarbage", _collectgarbage());
-		install(table, "dofile", _dofile());
-		install(table, "load", _load());
-		install(table, "loadfile", _loadfile());
-	}
-
-	public Table init(TableFactory tableFactory) {
-		Table table = tableFactory.newTable(0, 0);
-		installInto(table);
-		return table;
+		install(env, "collectgarbage", _collectgarbage());
+		install(env, "dofile", _dofile());
+		install(env, "load", _load());
+		install(env, "loadfile", _loadfile());
 	}
 
 	/**

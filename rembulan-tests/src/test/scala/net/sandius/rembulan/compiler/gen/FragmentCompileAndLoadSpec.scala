@@ -6,6 +6,7 @@ import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.{DefaultLuaState, PairCachingObjectSink}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter}
+import net.sandius.rembulan.lib.LibUtils
 import net.sandius.rembulan.lib.impl.DefaultBasicLib
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.test.FragmentExpectations.Env.{Basic, Empty}
@@ -68,7 +69,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
         def envForContext(state: LuaState, ctx: Env): Table = {
           ctx match {
             case Empty => state.newTable(0, 0)
-            case Basic => new DefaultBasicLib(new PrintStream(System.out)).init(state.tableFactory())
+            case Basic => LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
           }
         }
 
