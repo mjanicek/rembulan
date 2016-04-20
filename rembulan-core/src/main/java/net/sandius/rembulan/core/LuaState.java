@@ -10,6 +10,8 @@ public abstract class LuaState {
 	public abstract Table threadMetatable();
 	public abstract Table lightuserdataMetatable();
 
+	public abstract TableFactory tableFactory();
+
 	public Table newTable(int array, int hash) {
 		return tableFactory().newTable(array, hash);
 	}
@@ -18,7 +20,11 @@ public abstract class LuaState {
 		return new Upvalue(initialValue);
 	}
 
-	public abstract TableFactory tableFactory();
+	public abstract CoroutineFactory coroutineFactory();
+
+	public Coroutine newCoroutine() {
+		return coroutineFactory().newCoroutine(this);
+	}
 
 	public void checkCpu(int cost) throws ControlThrowable {
 		preemptionContext().withdraw(cost);

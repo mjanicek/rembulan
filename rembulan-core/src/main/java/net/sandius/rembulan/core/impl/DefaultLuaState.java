@@ -1,5 +1,6 @@
 package net.sandius.rembulan.core.impl;
 
+import net.sandius.rembulan.core.CoroutineFactory;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
@@ -9,6 +10,8 @@ import net.sandius.rembulan.util.Check;
 public class DefaultLuaState extends LuaState {
 
 	private final TableFactory tableFactory;
+	private final CoroutineFactory coroutineFactory;
+
 	private final PreemptionContext preemptionContext;
 
 	protected Table nilMetatable;
@@ -19,13 +22,14 @@ public class DefaultLuaState extends LuaState {
 	protected Table threadMetatable;
 	protected Table lightuserdataMetatable;
 
-	public DefaultLuaState(TableFactory tableFactory, PreemptionContext preemptionContext) {
+	public DefaultLuaState(TableFactory tableFactory, CoroutineFactory coroutineFactory, PreemptionContext preemptionContext) {
 		this.tableFactory = Check.notNull(tableFactory);
+		this.coroutineFactory = Check.notNull(coroutineFactory);
 		this.preemptionContext = Check.notNull(preemptionContext);
 	}
 
 	public DefaultLuaState(PreemptionContext preemptionContext) {
-		this(DefaultTable.FACTORY_INSTANCE, preemptionContext);
+		this(DefaultTable.FACTORY_INSTANCE, DefaultCoroutine.FACTORY_INSTANCE, preemptionContext);
 	}
 
 	@Override
@@ -66,6 +70,11 @@ public class DefaultLuaState extends LuaState {
 	@Override
 	public TableFactory tableFactory() {
 		return tableFactory;
+	}
+
+	@Override
+	public CoroutineFactory coroutineFactory() {
+		return coroutineFactory;
 	}
 
 	@Override
