@@ -21,7 +21,7 @@ import net.sandius.rembulan.util.Cons;
    c.resuming = d
    d.yieldingTo = c
  */
-public class Coroutine {
+public abstract class Coroutine {
 
 	protected final LuaState state;
 
