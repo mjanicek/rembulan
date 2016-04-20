@@ -10,6 +10,12 @@ public abstract class LuaState {
 	public abstract Table threadMetatable();
 	public abstract Table lightuserdataMetatable();
 
+	public abstract ObjectSinkFactory objectSinkFactory();
+
+	public ObjectSink newObjectSink() {
+		return objectSinkFactory().newObjectSink();
+	}
+
 	public abstract UpvalueFactory upvalueFactory();
 
 	public Upvalue newUpvalue(Object initialValue) {

@@ -2,6 +2,7 @@ package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.CoroutineFactory;
 import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.ObjectSinkFactory;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
@@ -10,6 +11,7 @@ import net.sandius.rembulan.util.Check;
 
 public class DefaultLuaState extends LuaState {
 
+	private final ObjectSinkFactory objectSinkFactory;
 	private final UpvalueFactory upvalueFactory;
 	private final TableFactory tableFactory;
 	private final CoroutineFactory coroutineFactory;
@@ -24,7 +26,13 @@ public class DefaultLuaState extends LuaState {
 	protected Table threadMetatable;
 	protected Table lightuserdataMetatable;
 
-	public DefaultLuaState(UpvalueFactory upvalueFactory, TableFactory tableFactory, CoroutineFactory coroutineFactory, PreemptionContext preemptionContext) {
+	public DefaultLuaState(ObjectSinkFactory objectSinkFactory,
+						   UpvalueFactory upvalueFactory,
+						   TableFactory tableFactory,
+						   CoroutineFactory coroutineFactory,
+						   PreemptionContext preemptionContext) {
+
+		this.objectSinkFactory = Check.notNull(objectSinkFactory);
 		this.upvalueFactory = Check.notNull(upvalueFactory);
 		this.tableFactory = Check.notNull(tableFactory);
 		this.coroutineFactory = Check.notNull(coroutineFactory);
@@ -32,7 +40,8 @@ public class DefaultLuaState extends LuaState {
 	}
 
 	public DefaultLuaState(PreemptionContext preemptionContext) {
-		this(DefaultUpvalue.FACTORY_INSTANCE,
+		this(CachingObjectSinkFactory.DEFAULT_INSTANCE,
+				DefaultUpvalue.FACTORY_INSTANCE,
 				DefaultTable.FACTORY_INSTANCE,
 				DefaultCoroutine.FACTORY_INSTANCE,
 				preemptionContext);
@@ -71,6 +80,11 @@ public class DefaultLuaState extends LuaState {
 	@Override
 	public Table lightuserdataMetatable() {
 		return lightuserdataMetatable;
+	}
+
+	@Override
+	public ObjectSinkFactory objectSinkFactory() {
+		return objectSinkFactory;
 	}
 
 	@Override

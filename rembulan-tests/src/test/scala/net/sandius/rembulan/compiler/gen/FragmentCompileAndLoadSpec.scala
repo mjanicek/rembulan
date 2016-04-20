@@ -91,7 +91,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
             }
 
             val state = new DefaultLuaState(preemptionContext)
-            val os = new PairCachingObjectSink
+            val os = state.newObjectSink()
 
             val env = envForContext(state, ctx)
             val upEnv = state.newUpvalue(env)

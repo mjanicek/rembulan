@@ -1,10 +1,18 @@
 package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.ObjectSinkFactory;
 
 import java.util.ArrayList;
 
 public class ArrayListObjectSink extends ObjectSink {
+
+	public static final ObjectSinkFactory FACTORY_INSTANCE = new ObjectSinkFactory() {
+		@Override
+		public ObjectSink newObjectSink() {
+			return new ArrayListObjectSink();
+		}
+	};
 
 	private final ArrayList<Object> buf;
 
