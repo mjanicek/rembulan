@@ -90,8 +90,11 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
               }
             }
 
-            val state = new DefaultLuaState.Builder().withPreemptionContext(preemptionContext).build()
-            val os = state.newObjectSink()
+            val state = new DefaultLuaState.Builder()
+                .withPreemptionContext(preemptionContext)
+                .build()
+
+            val exec = new Exec(state)
 
             val env = envForContext(state, ctx)
             val upEnv = state.newUpvalue(env)
@@ -99,14 +102,12 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
             val res: Either[Throwable, Seq[AnyRef]] = try {
               val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
 
-              val exec = new Exec(state, os)
-
               exec.init(f)
               while (exec.isPaused) {
                 exec.resume()
               }
 
-              val result = os.toArray.toSeq
+              val result = exec.getSink().toArray.toSeq
               Right(result)
             }
             catch {

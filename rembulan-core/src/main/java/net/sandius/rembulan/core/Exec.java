@@ -13,9 +13,9 @@ public class Exec {
 
 	private Cons<ResumeInfo> callStack;
 
-	public Exec(LuaState state, ObjectSink sink) {
+	public Exec(LuaState state) {
 		this.state = Check.notNull(state);
-		this.sink = Check.notNull(sink);
+		this.sink = Check.notNull(state.newObjectSink());
 		callStack = null;
 	}
 
