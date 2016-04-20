@@ -8,6 +8,7 @@ import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.UpvalueFactory;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.GenericBuilder;
 
 public class DefaultLuaState extends LuaState {
 
@@ -39,6 +40,7 @@ public class DefaultLuaState extends LuaState {
 		this.preemptionContext = Check.notNull(preemptionContext);
 	}
 
+	@Deprecated
 	public DefaultLuaState(PreemptionContext preemptionContext) {
 		this(CachingObjectSinkFactory.DEFAULT_INSTANCE,
 				DefaultUpvalue.FACTORY_INSTANCE,
@@ -105,6 +107,73 @@ public class DefaultLuaState extends LuaState {
 	@Override
 	public PreemptionContext preemptionContext() {
 		return preemptionContext;
+	}
+
+	public static class Builder implements GenericBuilder<DefaultLuaState> {
+
+		private ObjectSinkFactory objectSinkFactory;
+		private UpvalueFactory upvalueFactory;
+		private TableFactory tableFactory;
+		private CoroutineFactory coroutineFactory;
+		private PreemptionContext preemptionContext;
+
+		protected Builder(ObjectSinkFactory objectSinkFactory,
+							   UpvalueFactory upvalueFactory,
+							   TableFactory tableFactory,
+							   CoroutineFactory coroutineFactory,
+							   PreemptionContext preemptionContext) {
+
+			this.objectSinkFactory = Check.notNull(objectSinkFactory);
+			this.upvalueFactory = Check.notNull(upvalueFactory);
+			this.tableFactory = Check.notNull(tableFactory);
+			this.coroutineFactory = Check.notNull(coroutineFactory);
+			this.preemptionContext = Check.notNull(preemptionContext);
+		}
+
+		public Builder() {
+			// defaults
+			this(CachingObjectSinkFactory.DEFAULT_INSTANCE,
+					DefaultUpvalue.FACTORY_INSTANCE,
+					DefaultTable.FACTORY_INSTANCE,
+					DefaultCoroutine.FACTORY_INSTANCE,
+					PreemptionContext.Never.INSTANCE);
+		}
+
+		public Builder withObjectSinkFactory(ObjectSinkFactory factory) {
+			this.objectSinkFactory = Check.notNull(factory);
+			return this;
+		}
+
+		public Builder withUpvalueFactory(UpvalueFactory factory) {
+			this.upvalueFactory = Check.notNull(factory);
+			return this;
+		}
+
+		public Builder withTableFactory(TableFactory factory) {
+			this.tableFactory = Check.notNull(factory);
+			return this;
+		}
+
+		public Builder withCoroutineFactory(CoroutineFactory factory) {
+			this.coroutineFactory = Check.notNull(factory);
+			return this;
+		}
+
+		public Builder withPreemptionContext(PreemptionContext context) {
+			this.preemptionContext = Check.notNull(context);
+			return this;
+		}
+
+		@Override
+		public DefaultLuaState build() {
+			return new DefaultLuaState(
+					objectSinkFactory,
+					upvalueFactory,
+					tableFactory,
+					coroutineFactory,
+					preemptionContext);
+		}
+		
 	}
 
 }

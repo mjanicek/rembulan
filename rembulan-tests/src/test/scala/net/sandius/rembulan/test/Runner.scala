@@ -37,9 +37,8 @@ object Runner {
       val name = classLoader.install(chunk)
       val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
-      val state = new DefaultLuaState(PreemptionContext.Never.INSTANCE)
-      val os = new PairCachingObjectSink
-
+      val state = new DefaultLuaState.Builder().build()
+      val os = state.newObjectSink()
       val env = state.newTable(0, 0)
       val upEnv = state.newUpvalue(env)
 
