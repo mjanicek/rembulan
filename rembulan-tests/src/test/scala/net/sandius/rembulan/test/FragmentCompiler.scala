@@ -1,7 +1,7 @@
 package net.sandius.rembulan.test
 
 import net.sandius.rembulan.lbc.Prototype
-import net.sandius.rembulan.parser.LuaCPrototypeLoader
+import net.sandius.rembulan.parser.LuaCPrototypeReader
 
 trait FragmentCompiler {
 
@@ -15,7 +15,7 @@ class LuaCFragmentCompiler(pathToLuaC: String) extends FragmentCompiler {
 
   require (pathToLuaC != null)
 
-  val ploader = new LuaCPrototypeLoader(pathToLuaC)
+  val ploader = new LuaCPrototypeReader(pathToLuaC)
 
   override def version = ploader.getVersion
 

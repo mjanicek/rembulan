@@ -3,7 +3,7 @@ package net.sandius.rembulan.lbc
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.nio.ByteOrder
 
-import net.sandius.rembulan.parser.LuaCPrototypeLoader
+import net.sandius.rembulan.parser.LuaCPrototypeReader
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
@@ -12,7 +12,7 @@ import org.scalatest.{FunSpec, MustMatchers}
 class LoaderWriterSpec extends FunSpec with MustMatchers {
 
   val luacPath = "luac53"
-  val luacLoader = new LuaCPrototypeLoader(luacPath)
+  val luacLoader = new LuaCPrototypeReader(luacPath)
 
   def escape(raw: String) = PrototypePrinter.escape(raw)
 

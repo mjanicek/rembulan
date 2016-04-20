@@ -8,7 +8,7 @@ import net.sandius.rembulan.compiler.Chunk
 import net.sandius.rembulan.compiler.gen._
 import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
-import net.sandius.rembulan.parser.LuaCPrototypeLoader
+import net.sandius.rembulan.parser.LuaCPrototypeReader
 
 import scala.collection.JavaConversions._
 

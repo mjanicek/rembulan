@@ -2,12 +2,13 @@ package net.sandius.rembulan.compiler.gen
 
 import java.io.{PrintStream, PrintWriter}
 
-import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
+import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader, PrototypeCompilerChunkLoader}
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.{DefaultLuaState, PairCachingObjectSink}
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter}
 import net.sandius.rembulan.lib.LibUtils
 import net.sandius.rembulan.lib.impl.DefaultBasicLib
+import net.sandius.rembulan.parser.LuaCPrototypeReader
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.test.FragmentExpectations.Env.{Basic, Empty}
 import net.sandius.rembulan.test.{BasicFragments, LuaCFragmentCompiler}
@@ -23,7 +24,9 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
 
   describe ("fragment") {
 
-    val loader = new LuaCFragmentCompiler("luac53")
+    val luacName = "luac53"
+
+    val loader = new LuaCFragmentCompiler(luacName)
     val bundle = BasicFragments
 
     for (f <- bundle.all) {
@@ -78,9 +81,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
         for (ctx <- contexts) {
 
           it ("can be executed in " + ctx) {
-            val classLoader = new ChunkClassLoader()
-            val name = classLoader.install(chunk)
-            val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
+            val ldr = new PrototypeCompilerChunkLoader(new LuaCPrototypeReader(luacName), getClass.getClassLoader)
 
             var totalCost = 0
 
@@ -95,25 +96,18 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
                 .withPreemptionContext(preemptionContext)
                 .build()
 
-            val exec = new Exec(state)
-
             val env = envForContext(state, ctx)
-            val upEnv = state.newUpvalue(env)
+            val func = ldr.loadTextChunk(state.newUpvalue(env), "test", f.code)
 
             val res: Either[Throwable, Seq[AnyRef]] = try {
-              val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
-
-              exec.init(f)
+              val exec = new Exec(state)
+              exec.init(func)
               while (exec.isPaused) {
                 exec.resume()
               }
-
-              val result = exec.getSink().toArray.toSeq
-              Right(result)
+              Right(exec.getSink.toArray.toSeq)
             }
             catch {
-              case ex: VerifyError => throw new IllegalStateException(ex)
-              case ex: NoSuchMethodError => throw new IllegalStateException(ex)
               case NonFatal(ex) => Left(ex)
             }
 

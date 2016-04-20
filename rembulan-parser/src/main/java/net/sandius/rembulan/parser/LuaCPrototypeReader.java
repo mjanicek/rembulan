@@ -3,6 +3,8 @@ package net.sandius.rembulan.parser;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.PrototypeBuilderVisitor;
 import net.sandius.rembulan.lbc.PrototypeLoader;
+import net.sandius.rembulan.lbc.PrototypeReader;
+import net.sandius.rembulan.lbc.PrototypeReaderException;
 import net.sandius.rembulan.lbc.PrototypeVisitor;
 import net.sandius.rembulan.util.ProcessCall;
 import net.sandius.rembulan.util.Check;
@@ -12,11 +14,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LuaCPrototypeLoader {
+public class LuaCPrototypeReader implements PrototypeReader {
 
 	public final String luacName;
 
-	public LuaCPrototypeLoader(String luacName) {
+	public LuaCPrototypeReader(String luacName) {
 		this.luacName = luacName;
 	}
 
@@ -69,11 +71,16 @@ public class LuaCPrototypeLoader {
 		PrototypeLoader.fromInputStream(new BufferedInputStream(call.out)).accept(pv);
 	}
 
-	@Deprecated
-	public Prototype load(String program) throws IOException {
+	@Override
+	public Prototype load(String program) throws PrototypeReaderException {
 		PrototypeBuilderVisitor visitor = new PrototypeBuilderVisitor();
-		accept(program, visitor);
-		return visitor.get();
+		try {
+			accept(program, visitor);
+			return visitor.get();
+		}
+		catch (IOException ex) {
+			throw new PrototypeReaderException(ex);
+		}
 	}
 
 }
