@@ -1,23 +1,9 @@
 package net.sandius.rembulan.core;
 
-public class Upvalue {
+public abstract class Upvalue {
 
-	private Object value;
+	public abstract Object get();
 
-	public Upvalue(Object value) {
-		this.value = value;
-	}
-
-	public Upvalue() {
-		this(null);
-	}
-
-	public Object get() {
-		return value;
-	}
-
-	public void set(Object value) {
-		this.value = value;
-	}
+	public abstract void set(Object value);
 
 }
