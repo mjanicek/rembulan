@@ -793,4 +793,16 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   ClosuresWithOpenUpvaluesAreNotReused in EmptyContext succeedsWith (false)
 
+  val BigForLoop = fragment ("BigForLoop") {
+    """local sum = 0
+      |
+      |for i = 1, 1000000 do
+      |  sum = sum + i
+      |end
+      |
+      |return sum
+    """
+  }
+  BigForLoop in EmptyContext succeedsWith (500000500000L)
+
 }
