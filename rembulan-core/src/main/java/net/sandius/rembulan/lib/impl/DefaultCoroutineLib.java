@@ -1,43 +1,174 @@
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.IllegalOperationAttemptException;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.impl.Function0;
+import net.sandius.rembulan.core.impl.Function1;
+import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.lib.CoroutineLib;
+
+import java.io.Serializable;
 
 public class DefaultCoroutineLib extends CoroutineLib {
 
 	@Override
 	protected Function _create() {
-		return null;  // TODO
+		return Create.INSTANCE;
 	}
 
 	@Override
 	protected Function _resume() {
-		return null;  // TODO
+		return Resume.INSTANCE;
 	}
 
 	@Override
 	protected Function _yield() {
-		return null;  // TODO
+		return Yield.INSTANCE;
 	}
 
 	@Override
 	protected Function _isyieldable() {
-		return null;  // TODO
+		return IsYieldable.INSTANCE;
 	}
 
 	@Override
 	protected Function _status() {
-		return null;  // TODO
+		return Status.INSTANCE;
 	}
 
 	@Override
 	protected Function _running() {
-		return null;  // TODO
+		return Running.INSTANCE;
 	}
 
 	@Override
 	protected Function _wrap() {
-		return null;  // TODO
+		return Wrap.INSTANCE;
+	}
+
+	public static class Create extends Function1 {
+
+		public static final Create INSTANCE = new Create();
+		
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
+			// TODO
+			Coroutine c = state.newCoroutine();
+			result.setTo(c);
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Resume extends FunctionAnyarg {
+
+		public static final Resume INSTANCE = new Resume();
+		
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object[] args) throws ControlThrowable {
+			// TODO
+			throw new IllegalOperationAttemptException("cannot resume dead coroutine");
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Yield extends FunctionAnyarg {
+
+		public static final Yield INSTANCE = new Yield();
+		
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object[] args) throws ControlThrowable {
+			// TODO
+			throw new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class IsYieldable extends Function0 {
+
+		public static final IsYieldable INSTANCE = new IsYieldable();
+		
+		@Override
+		public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
+			// TODO
+			result.setTo(false);
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Status extends Function1 {
+
+		public static final Status INSTANCE = new Status();
+		
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
+			// TODO
+			result.setTo("running");
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Running extends Function0 {
+
+		public static final Running INSTANCE = new Running();
+		
+		@Override
+		public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
+			// TODO
+			result.setTo();
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Wrap extends Function1 {
+
+		public static final Wrap INSTANCE = new Wrap();
+		
+		@Override
+		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
+			// TODO
+			result.setTo(arg1);
+		}
+
+		@Override
+		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
 	}
 
 }
