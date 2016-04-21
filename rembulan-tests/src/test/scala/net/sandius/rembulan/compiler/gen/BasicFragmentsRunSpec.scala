@@ -11,4 +11,6 @@ class BasicFragmentsRunSpec extends FragmentExecTestSuite {
   override def expectations = Seq(BasicFragments)
   override def contexts = Seq(Empty, Basic)
 
+  override val step = 1
+
 }

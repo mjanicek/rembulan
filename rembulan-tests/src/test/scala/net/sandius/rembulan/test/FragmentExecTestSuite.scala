@@ -3,6 +3,7 @@ package net.sandius.rembulan.test
 import java.io.PrintStream
 
 import net.sandius.rembulan.compiler.PrototypeCompilerChunkLoader
+import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.lib.LibUtils
@@ -19,6 +20,8 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   def expectations: Seq[FragmentExpectations]
   def contexts: Seq[FragmentExpectations.Env]
 
+  def step: Int
+
   protected val Empty = FragmentExpectations.Env.Empty
   protected val Basic = FragmentExpectations.Env.Basic
 
@@ -29,11 +32,17 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
     }
   }
 
-  class CountingAlwaysPreemptingPreemptionContext extends PreemptionContext.Always {
+  class CountingPreemptionContext extends AbstractPreemptionContext {
     var totalCost = 0
-    override def withdraw(cost: Int) {
+    private var allowance = step
+
+    override def withdraw(cost: Int): Unit = {
       totalCost += cost
-      super.withdraw(cost)
+      allowance -= cost
+      if (allowance <= 0) {
+        allowance += step
+        preempt()
+      }
     }
   }
 
@@ -49,7 +58,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
           describe ("in " + ctx) {
             it ("can be executed") {
-              val preemptionContext = new CountingAlwaysPreemptingPreemptionContext
+              val preemptionContext = new CountingPreemptionContext
 
               val exec = Util.timed("Compilation and setup") {
                 val ldr = new PrototypeCompilerChunkLoader(
@@ -69,19 +78,33 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
                 exec
               }
 
-              val res = Util.timed("Execution") {
-                try {
-                  while (exec.isPaused) {
-                    exec.resume()
-                  }
-                  Right(exec.getSink.toArray.toSeq)
-                }
-                catch {
-                  case NonFatal(ex) => Left(ex)
-                }
-              }
+              var steps = 0
 
-              println("Total CPU cost: " + preemptionContext.totalCost)
+              val before = System.nanoTime()
+              val res = try {
+                while (exec.isPaused) {
+                  exec.resume()
+                  steps += 1
+                }
+                Right(exec.getSink.toArray.toSeq)
+              }
+              catch {
+                case NonFatal(ex) => Left(ex)
+              }
+              val after = System.nanoTime()
+
+              val totalTimeMillis = (after - before) / 1000000.0
+              val totalCPUUnitsSpent = preemptionContext.totalCost
+              val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
+              val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+
+              println("Execution took %.1f ms".format(totalTimeMillis))
+              println("Total CPU cost: " + preemptionContext.totalCost + " LI")
+              println("Computation steps: " + steps)
+              println()
+              println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+              println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+              println()
 
               res match {
                 case Right(result) =>
