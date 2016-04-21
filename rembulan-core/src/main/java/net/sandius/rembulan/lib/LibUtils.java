@@ -13,4 +13,11 @@ public class LibUtils {
 		return env;
 	}
 
+	public static void setIfNonNull(Table table, String key, Object value) {
+		Check.notNull(table);
+		if (value != null) {
+			table.rawset(key, value);
+		}
+	}
+
 }

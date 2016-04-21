@@ -7,24 +7,17 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class CoroutineLib implements Lib {
 
-	protected void install(Table table, String key, Object value) {
-		Check.notNull(table);
-		if (value != null) {
-			table.rawset(key, value);
-		}
-	}
-
 	@Override
 	public void installInto(LuaState state, Table env) {
 		Check.notNull(env);
 
-		install(env, "create", _create());
-		install(env, "resume", _resume());
-		install(env, "yield", _yield());
-		install(env, "isyieldable", _isyieldable());
-		install(env, "status", _status());
-		install(env, "running", _running());
-		install(env, "wrap", _wrap());
+		LibUtils.setIfNonNull(env, "create", _create());
+		LibUtils.setIfNonNull(env, "resume", _resume());
+		LibUtils.setIfNonNull(env, "yield", _yield());
+		LibUtils.setIfNonNull(env, "isyieldable", _isyieldable());
+		LibUtils.setIfNonNull(env, "status", _status());
+		LibUtils.setIfNonNull(env, "running", _running());
+		LibUtils.setIfNonNull(env, "wrap", _wrap());
 	}
 
 	/**

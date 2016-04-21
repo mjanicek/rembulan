@@ -7,50 +7,43 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class BasicLib implements Lib {
 
-	protected void install(Table table, String key, Object value) {
-		Check.notNull(table);
-		if (value != null) {
-			table.rawset(key, value);
-		}
-	}
-
 	@Override
 	public void installInto(LuaState state, Table env) {
 		Check.notNull(env);
 
-		install(env, "_G", env);
-		install(env, "_VERSION", __VERSION());
+		LibUtils.setIfNonNull(env, "_G", env);
+		LibUtils.setIfNonNull(env, "_VERSION", __VERSION());
 		
-		install(env, "print", _print());
-		install(env, "type", _type());
+		LibUtils.setIfNonNull(env, "print", _print());
+		LibUtils.setIfNonNull(env, "type", _type());
 
-		install(env, "next", _next());
-		install(env, "pairs", _pairs());
-		install(env, "ipairs", _ipairs());
+		LibUtils.setIfNonNull(env, "next", _next());
+		LibUtils.setIfNonNull(env, "pairs", _pairs());
+		LibUtils.setIfNonNull(env, "ipairs", _ipairs());
 
-		install(env, "tostring", _tostring());
-		install(env, "tonumber", _tonumber());
+		LibUtils.setIfNonNull(env, "tostring", _tostring());
+		LibUtils.setIfNonNull(env, "tonumber", _tonumber());
 
-		install(env, "error", _error());
-		install(env, "assert", _assert());
+		LibUtils.setIfNonNull(env, "error", _error());
+		LibUtils.setIfNonNull(env, "assert", _assert());
 
-		install(env, "getmetatable", _getmetatable());
-		install(env, "setmetatable", _setmetatable());
+		LibUtils.setIfNonNull(env, "getmetatable", _getmetatable());
+		LibUtils.setIfNonNull(env, "setmetatable", _setmetatable());
 
-		install(env, "pcall", _pcall());
-		install(env, "xpcall", _xpcall());
+		LibUtils.setIfNonNull(env, "pcall", _pcall());
+		LibUtils.setIfNonNull(env, "xpcall", _xpcall());
 
-		install(env, "rawequal", _rawequal());
-		install(env, "rawget", _rawget());
-		install(env, "rawset", _rawset());
-		install(env, "rawlen", _rawlen());
+		LibUtils.setIfNonNull(env, "rawequal", _rawequal());
+		LibUtils.setIfNonNull(env, "rawget", _rawget());
+		LibUtils.setIfNonNull(env, "rawset", _rawset());
+		LibUtils.setIfNonNull(env, "rawlen", _rawlen());
 
-		install(env, "select", _select());
+		LibUtils.setIfNonNull(env, "select", _select());
 
-		install(env, "collectgarbage", _collectgarbage());
-		install(env, "dofile", _dofile());
-		install(env, "load", _load());
-		install(env, "loadfile", _loadfile());
+		LibUtils.setIfNonNull(env, "collectgarbage", _collectgarbage());
+		LibUtils.setIfNonNull(env, "dofile", _dofile());
+		LibUtils.setIfNonNull(env, "load", _load());
+		LibUtils.setIfNonNull(env, "loadfile", _loadfile());
 	}
 
 	/**
