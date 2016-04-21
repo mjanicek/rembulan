@@ -32,7 +32,9 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
       case Basic => LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
       case Coro =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        new DefaultCoroutineLib().installInto(state, env)
+        val coro = state.newTable(0, 0)
+        new DefaultCoroutineLib().installInto(state, coro)
+        env.rawset("coroutine", coro)
         env
     }
   }
