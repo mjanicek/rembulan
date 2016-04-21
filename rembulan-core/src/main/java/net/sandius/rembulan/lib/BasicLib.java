@@ -252,7 +252,7 @@ public abstract class BasicLib implements Lib {
 	 * invoking any metamethod. {@code table} must be a table, {@code index} any value
 	 * different from <b>nil</b> and NaN, and {@code value} any Lua value.</p>
 	 *
-	 * <p>This function returns table.</p>
+	 * <p>This function returns {@code table}.</p>
 	 */
 	public abstract Function _rawset();
 
