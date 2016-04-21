@@ -62,6 +62,7 @@ trait FragmentExpectations {
 
   protected val EmptyContext = Env.Empty
   protected val BasicContext = Env.Basic
+  protected val CoroContext = Env.Coro
 
   private val expectations = mutable.Map.empty[Fragment, mutable.Map[Env, Expect]]
 
@@ -109,6 +110,7 @@ object FragmentExpectations {
   object Env {
     case object Empty extends Env
     case object Basic extends Env
+    case object Coro extends Env
   }
 
   sealed trait Expect {
