@@ -4,18 +4,23 @@ public interface PreemptionContext {
 
 	void withdraw(int cost) throws ControlThrowable;
 
-	class Always implements PreemptionContext {
+	abstract class AbstractPreemptionContext implements PreemptionContext {
+		protected final void preempt() throws ControlThrowable {
+			throw new Preempted();
+		}
+	}
+
+	class Always extends AbstractPreemptionContext {
 
 		public static final Always INSTANCE = new Always();
 
 		@Override
 		public void withdraw(int cost) throws ControlThrowable {
-			throw new Preempted();
-
+			preempt();
 		}
 	}
 
-	class Never implements PreemptionContext {
+	class Never extends AbstractPreemptionContext {
 
 		public static final Never INSTANCE = new Never();
 
