@@ -9,12 +9,11 @@ import java.util.Iterator;
 public class Exec {
 
 	private final LuaState state;
-
-	private Coroutine currentCoroutine;
+	private final Coroutine mainCoroutine;
 
 	public Exec(LuaState state) {
 		this.state = Check.notNull(state);
-		currentCoroutine = null;
+		mainCoroutine = Check.notNull(state.newCoroutine());
 	}
 
 	public LuaState getState() {
@@ -22,15 +21,15 @@ public class Exec {
 	}
 
 	public ObjectSink getSink() {
-		return currentCoroutine.objectSink();
+		return mainCoroutine.objectSink();
 	}
 
 	public boolean isPaused() {
-		return currentCoroutine != null && currentCoroutine.callStack != null;
+		return mainCoroutine.callStack != null;
 	}
 
-	public Coroutine getCurrentCoroutine() {
-		return currentCoroutine;
+	public Coroutine getMainCoroutine() {
+		return mainCoroutine;
 	}
 
 	protected static class BootstrapResumable implements Resumable {
@@ -61,20 +60,18 @@ public class Exec {
 	public void init(Object target, Object... args) {
 		Check.notNull(args);
 
-		if (currentCoroutine != null) {
+		if (mainCoroutine.callStack != null) {
 			throw new IllegalStateException("Initialising call in paused state");
 		}
 		else {
-			Coroutine mainCoroutine = state.newCoroutine();
 			mainCoroutine.callStack = new Cons<>(BootstrapResumable.of(target, args));
-			currentCoroutine = mainCoroutine;
 		}
 	}
 
 	// return true if execution was paused, false if execution is finished
 	// in other words: returns true iff isPaused() == true afterwards
 	public boolean resume() {
-		Coroutine coro = currentCoroutine;
+		Coroutine coro = mainCoroutine;
 
 		while (coro.callStack != null) {
 			ResumeInfo top = coro.callStack.car;
