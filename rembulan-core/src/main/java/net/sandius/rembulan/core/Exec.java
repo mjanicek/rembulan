@@ -9,14 +9,12 @@ import java.util.Iterator;
 public class Exec {
 
 	private final LuaState state;
-	private final ObjectSink sink;
 
-	private Cons<ResumeInfo> callStack;
+	private Coroutine currentCoroutine;
 
 	public Exec(LuaState state) {
 		this.state = Check.notNull(state);
-		this.sink = Check.notNull(state.newObjectSink());
-		callStack = null;
+		currentCoroutine = null;
 	}
 
 	public LuaState getState() {
@@ -24,15 +22,15 @@ public class Exec {
 	}
 
 	public ObjectSink getSink() {
-		return sink;
+		return currentCoroutine.objectSink();
 	}
 
 	public boolean isPaused() {
-		return callStack != null;
+		return currentCoroutine != null && currentCoroutine.callStack != null;
 	}
 
-	public Cons<ResumeInfo> getCallStack() {
-		return callStack;
+	public Coroutine getCurrentCoroutine() {
+		return currentCoroutine;
 	}
 
 	protected static class BootstrapResumable implements Resumable {
@@ -63,32 +61,36 @@ public class Exec {
 	public void init(Object target, Object... args) {
 		Check.notNull(args);
 
-		if (callStack != null) {
+		if (currentCoroutine != null) {
 			throw new IllegalStateException("Initialising call in paused state");
 		}
 		else {
-			callStack = new Cons<>(BootstrapResumable.of(target, args));
+			Coroutine mainCoroutine = state.newCoroutine();
+			mainCoroutine.callStack = new Cons<>(BootstrapResumable.of(target, args));
+			currentCoroutine = mainCoroutine;
 		}
 	}
 
 	// return true if execution was paused, false if execution is finished
 	// in other words: returns true iff isPaused() == true afterwards
 	public boolean resume() {
-		while (callStack != null) {
-			ResumeInfo top = callStack.car;
-			callStack = callStack.cdr;
+		Coroutine coro = currentCoroutine;
+
+		while (coro.callStack != null) {
+			ResumeInfo top = coro.callStack.car;
+			coro.callStack = coro.callStack.cdr;
 
 			try {
-				top.resume(state, sink);
-				Dispatch.evaluateTailCalls(state, sink);
+				top.resume(state, coro.sink);
+				Dispatch.evaluateTailCalls(state, coro.sink);
 			}
 			catch (ControlThrowable ct) {
 				Iterator<ResumeInfo> it = ct.frames();
 				while (it.hasNext()) {
-					callStack = new Cons<>(it.next(), callStack);
+					coro.callStack = new Cons<>(it.next(), coro.callStack);
 				}
 
-				assert (callStack != null);
+				assert (coro.callStack != null);
 				return true;  // we're paused
 			}
 		}

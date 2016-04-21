@@ -24,6 +24,7 @@ import net.sandius.rembulan.util.Cons;
 public abstract class Coroutine {
 
 	protected final LuaState state;
+	protected final ObjectSink sink;
 
 	// paused call stack: up-to-date only iff coroutine is not running
 	protected Cons<ResumeInfo> callStack;
@@ -32,13 +33,16 @@ public abstract class Coroutine {
 	protected Coroutine resuming;
 
 	public Coroutine(LuaState state) {
-		Check.notNull(state);
-
-		this.state = state;
+		this.state = Check.notNull(state);
+		this.sink = state.newObjectSink();
 	}
 
 	public LuaState getOwnerState() {
 		return state;
+	}
+
+	public ObjectSink objectSink() {
+		return sink;
 	}
 
 	@Override
