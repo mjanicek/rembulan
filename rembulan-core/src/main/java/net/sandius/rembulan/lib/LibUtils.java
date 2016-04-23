@@ -22,6 +22,18 @@ public class LibUtils {
 		}
 	}
 
+	public static <T> T checkArgumentOrNil(Object arg, int index, Class<T> clazz) {
+		if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
+			return (T) arg ;
+		}
+		else if (arg == null) {
+			return null;
+		}
+		else {
+			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '?' (? or nil expected, got " + Value.typeOf(arg).name + ")");
+		}
+	}
+
 	public static <T> T checkArgument(Object arg, int index, Class<T> clazz) {
 		if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
 			return (T) arg ;

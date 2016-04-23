@@ -15,6 +15,7 @@ import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.lib.BasicLib;
+import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;
@@ -231,15 +232,8 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
-			if (!(arg1 instanceof Table)) {
-				throw new IllegalArgumentException("bad argument #1 to 'setmetatable' (table expected, got " + Value.typeOf(arg1).name + ")");
-			}
-			if (!(arg2 == null || arg2 instanceof Table)) {
-				throw new IllegalArgumentException("bad argument #2 to 'setmetatable' (nil or table expected)");
-			}
-
-			Table t = (Table) arg1;
-			Table mt = arg2 != null ? (Table) arg2 : null;
+			Table t = LibUtils.checkArgument(arg1, 0, Table.class);
+			Table mt = LibUtils.checkArgumentOrNil(arg2, 1, Table.class);
 
 			t.setMetatable(mt);
 			result.setTo(t);
