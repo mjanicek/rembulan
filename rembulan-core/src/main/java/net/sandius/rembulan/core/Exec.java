@@ -11,9 +11,12 @@ public class Exec {
 	private final LuaState state;
 	private final Coroutine mainCoroutine;
 
+	private final Context context;
+
 	public Exec(LuaState state) {
 		this.state = Check.notNull(state);
 		mainCoroutine = Check.notNull(state.newCoroutine());
+		this.context = new Context();
 	}
 
 	public LuaState getState() {
@@ -30,6 +33,34 @@ public class Exec {
 
 	public Coroutine getMainCoroutine() {
 		return mainCoroutine;
+	}
+
+	protected Coroutine getCurrentCoroutine() {
+		// FIXME
+		return getMainCoroutine();
+	}
+
+	public ExecutionContext getContext() {
+		return context;
+	}
+
+	protected class Context implements ExecutionContext {
+
+		@Override
+		public LuaState getState() {
+			return state;
+		}
+
+		@Override
+		public ObjectSink getObjectSink() {
+			return Exec.this.getCurrentCoroutine().objectSink();
+		}
+
+		@Override
+		public Coroutine getCurrentCoroutine() {
+			return Exec.this.getCurrentCoroutine();
+		}
+
 	}
 
 	protected static class BootstrapResumable implements Resumable {
