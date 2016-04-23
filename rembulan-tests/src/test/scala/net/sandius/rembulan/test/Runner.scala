@@ -3,7 +3,7 @@ package net.sandius.rembulan.test
 import net.sandius.rembulan.compiler.ChunkClassLoader
 import net.sandius.rembulan.compiler.gen.ChunkCompiler
 import net.sandius.rembulan.core._
-import net.sandius.rembulan.core.impl.{DefaultLuaState, PairCachingObjectSink}
+import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.{core => lua}
 
 object Runner {
@@ -44,9 +44,15 @@ object Runner {
 
       val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
 
+      val context = new ExecutionContext {
+        override def getState = state
+        override def getObjectSink = os
+        override def getCurrentCoroutine = ???
+      }
+
       section("Call") {
         timed("Call") {
-          Dispatch.call(state, os, f)
+          Dispatch.call(context, f)
         }
       }
 

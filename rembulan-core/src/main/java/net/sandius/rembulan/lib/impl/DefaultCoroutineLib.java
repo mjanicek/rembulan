@@ -3,10 +3,9 @@ package net.sandius.rembulan.lib.impl;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.CoroutineSwitch;
+import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
-import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.impl.Function0;
 import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
@@ -58,14 +57,14 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public static final Create INSTANCE = new Create();
 		
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
+		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
 			// TODO
-			Coroutine c = state.newCoroutine();
-			result.setTo(c);
+			Coroutine c = context.getState().newCoroutine();
+			context.getObjectSink().setTo(c);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -76,7 +75,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public static final Resume INSTANCE = new Resume();
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object[] args) throws ControlThrowable {
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 			Coroutine coroutine = LibUtils.getArgument(args, 0, Coroutine.class);
 			Object[] resumeArgs = Varargs.from(args, 1);
 
@@ -87,8 +86,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
-			result.prepend(new Object[] {true});
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+			context.getObjectSink().prepend(new Object[] {true});
 		}
 
 	}
@@ -98,14 +97,14 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public static final Yield INSTANCE = new Yield();
 		
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object[] args) throws ControlThrowable {
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 			CoroutineSwitch.Yield ct = new CoroutineSwitch.Yield(args);
 			ct.push(this, null);
 			throw ct;
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 		}
 
 	}
@@ -115,13 +114,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public static final IsYieldable INSTANCE = new IsYieldable();
 		
 		@Override
-		public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
+		public void invoke(ExecutionContext context) throws ControlThrowable {
 			// TODO
-			result.setTo(false);
+			context.getObjectSink().setTo(false);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -132,13 +131,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public static final Status INSTANCE = new Status();
 		
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
+		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
 			Coroutine coroutine = LibUtils.checkArgument(arg1, 0, Coroutine.class);
-			result.setTo(coroutine.getStatus().toString());
+			context.getObjectSink().setTo(coroutine.getStatus().toString());
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -149,13 +148,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public static final Running INSTANCE = new Running();
 		
 		@Override
-		public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
+		public void invoke(ExecutionContext context) throws ControlThrowable {
 			// TODO
-			result.setTo();
+			context.getObjectSink().setTo();
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -166,13 +165,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public static final Wrap INSTANCE = new Wrap();
 		
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
+		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
 			// TODO
-			result.setTo(arg1);
+			context.getObjectSink().setTo(arg1);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 

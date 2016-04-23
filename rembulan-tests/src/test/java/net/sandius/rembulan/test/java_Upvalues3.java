@@ -2,8 +2,7 @@ package net.sandius.rembulan.test;
 
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.core.impl.Function0;
@@ -19,27 +18,27 @@ public class java_Upvalues3 extends Function0 {
 		this._ENV = _ENV;
 	}
 
-	private void run(LuaState state, ObjectSink sink, int rp, Object r_0, Object r_1, Object r_2) throws ControlThrowable {
+	private void run(ExecutionContext context, int rp, Object r_0, Object r_1, Object r_2) throws ControlThrowable {
 		try {
 			switch (rp) {
 				case 0:
 					r_0 = null;
 					r_1 = null;
 					rp = 1;
-					Dispatch.index(state, sink, _ENV.get(), "g");
+					Dispatch.index(context, _ENV.get(), "g");
 				case 1:
-					r_2 = sink._0();
+					r_2 = context.getObjectSink()._0();
 					if (r_2 == null) {
-						r_0 = state.newUpvalue(r_0);
+						r_0 = context.getState().newUpvalue(r_0);
 						r_2 = new f1((Upvalue) r_0);
 						r_1 = r_2;
-						r_1 = state.newUpvalue(r_1);
+						r_1 = context.getState().newUpvalue(r_1);
 					}
 					else {
-						r_1 = state.newUpvalue(r_1);
+						r_1 = context.getState().newUpvalue(r_1);
 						r_2 = new f2((Upvalue) r_1);
 						r_0 = r_2;
-						r_0 = state.newUpvalue(r_0);
+						r_0 = context.getState().newUpvalue(r_0);
 					}
 					if (((Upvalue) r_0).get() != null) {
 						r_2 = ((Upvalue) r_1).get();
@@ -47,7 +46,7 @@ public class java_Upvalues3 extends Function0 {
 					else {
 						r_2 = ((Upvalue) r_0).get();
 					}
-					sink.setTo(r_2);
+					context.getObjectSink().setTo(r_2);
 					return;
 
 				default:
@@ -65,15 +64,15 @@ public class java_Upvalues3 extends Function0 {
 	}
 
 	@Override
-	public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+	public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 		DefaultSavedState ss = (DefaultSavedState) suspendedState;
 		Object[] regs = ss.registers();
-		run(state, result, ss.resumptionPoint(), regs[0], regs[1], regs[2]);
+		run(context, ss.resumptionPoint(), regs[0], regs[1], regs[2]);
 	}
 
 	@Override
-	public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
-		run(state, result, 0, null, null, null);
+	public void invoke(ExecutionContext context) throws ControlThrowable {
+		run(context, 0, null, null, null);
 	}
 
 	public static class f1 extends Function0 {
@@ -85,19 +84,19 @@ public class java_Upvalues3 extends Function0 {
 			this.x = x;
 		}
 
-		private void run(LuaState state, ObjectSink sink, int rp, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int rp, Object r_0, Object r_1) throws ControlThrowable {
 			r_0 = x.get();
-			sink.setTo(r_0);
+			context.getObjectSink().setTo(r_0);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
-			run(state, result, 0, null, null);
+		public void invoke(ExecutionContext context) throws ControlThrowable {
+			run(context, 0, null, null);
 		}
 
 	}
@@ -111,19 +110,19 @@ public class java_Upvalues3 extends Function0 {
 			this.y = y;
 		}
 
-		private void run(LuaState state, ObjectSink sink, int rp, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int rp, Object r_0, Object r_1) throws ControlThrowable {
 			r_0 = y.get();
-			sink.setTo(r_0);
+			context.getObjectSink().setTo(r_0);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
-			run(state, result, 0, null, null);
+		public void invoke(ExecutionContext context) throws ControlThrowable {
+			run(context, 0, null, null);
 		}
 
 	}

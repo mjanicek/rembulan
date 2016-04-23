@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public interface Resumable {
 
-	void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable;
+	void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable;
 
 }

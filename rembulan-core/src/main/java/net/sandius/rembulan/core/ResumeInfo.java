@@ -14,8 +14,8 @@ public class ResumeInfo {
 		this.savedState = savedState;
 	}
 
-	public void resume(LuaState state, ObjectSink result) throws ControlThrowable {
-		resumable.resume(state, result, savedState);
+	public void resume(ExecutionContext context) throws ControlThrowable {
+		resumable.resume(context, savedState);
 	}
 
 }

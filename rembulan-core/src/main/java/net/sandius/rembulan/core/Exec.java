@@ -68,9 +68,9 @@ public class Exec {
 		static final BootstrapResumable INSTANCE = new BootstrapResumable();
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			Call c = (Call) suspendedState;
-			Dispatch.call(state, result, c.target, c.args);
+			Dispatch.call(context, c.target, c.args);
 		}
 
 		private static class Call implements Serializable {
@@ -109,8 +109,8 @@ public class Exec {
 			coro.callStack = coro.callStack.cdr;
 
 			try {
-				top.resume(state, coro.sink);
-				Dispatch.evaluateTailCalls(state, coro.sink);
+				top.resume(context);
+				Dispatch.evaluateTailCalls(context);
 			}
 			catch (ControlThrowable ct) {
 				Iterator<ResumeInfo> it = ct.frames();

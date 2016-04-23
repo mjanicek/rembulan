@@ -1,42 +1,41 @@
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.core.Function;
 
 public abstract class Function2 extends Function {
 
 	@Override
-	public void invoke(LuaState state, ObjectSink result) throws ControlThrowable {
-		invoke(state, result, null, null);
+	public void invoke(ExecutionContext context) throws ControlThrowable {
+		invoke(context, null, null);
 	}
 
 	@Override
-	public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
-		invoke(state, result, arg1, null);
+	public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
+		invoke(context, arg1, null);
 	}
 
 	@Override
-	public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-		invoke(state, result, arg1, arg2);
+	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+		invoke(context, arg1, arg2);
 	}
 
 	@Override
-	public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
-		invoke(state, result, arg1, arg2);
+	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
+		invoke(context, arg1, arg2);
 	}
 
 	@Override
-	public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
-		invoke(state, result, arg1, arg2);
+	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
+		invoke(context, arg1, arg2);
 	}
 
 	@Override
-	public void invoke(LuaState state, ObjectSink result, Object[] args) throws ControlThrowable {
+	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 		Object a = args.length >= 1 ? args[0] : null;
 		Object b = args.length >= 2 ? args[1] : null;
-		invoke(state, result, a, b);
+		invoke(context, a, b);
 	}
 
 }

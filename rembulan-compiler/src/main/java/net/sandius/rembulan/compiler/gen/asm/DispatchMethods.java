@@ -3,8 +3,7 @@ package net.sandius.rembulan.compiler.gen.asm;
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.core.Dispatch;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.ExecutionContext;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -77,8 +76,7 @@ public class DispatchMethods {
 	
 	public static AbstractInsnNode dynamic(String methodName, int numArgs) {
 		ArrayList<Type> args = new ArrayList<>();
-		args.add(Type.getType(LuaState.class));
-		args.add(Type.getType(ObjectSink.class));
+		args.add(Type.getType(ExecutionContext.class));
 		for (int i = 0; i < numArgs; i++) {
 			args.add(Type.getType(Object.class));
 		}
@@ -119,7 +117,7 @@ public class DispatchMethods {
 
 	private static ReflectionUtils.Method call_method(int kind) {
 		return ReflectionUtils.staticArgListMethodFromKind(
-				Dispatch.class, OP_CALL, new Class[] { LuaState.class, ObjectSink.class, Object.class }, kind);
+				Dispatch.class, OP_CALL, new Class[] { ExecutionContext.class, Object.class }, kind);
 	}
 
 	public static AbstractInsnNode call(int kind) {

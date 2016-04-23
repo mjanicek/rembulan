@@ -1,8 +1,7 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
-import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
@@ -34,8 +33,7 @@ public class ResumeMethodEmitter {
 				"resume",
 				Type.getMethodType(
 						Type.VOID_TYPE,
-						Type.getType(LuaState.class),
-						Type.getType(ObjectSink.class),
+						Type.getType(ExecutionContext.class),
 						Type.getType(Serializable.class)).getDescriptor(),
 						null,
 				RunMethodEmitter.exceptions());
@@ -60,18 +58,17 @@ public class ResumeMethodEmitter {
 
 			il.add(begin);
 
-			il.add(new VarInsnNode(ALOAD, 3));
+			il.add(new VarInsnNode(ALOAD, 2));
 			il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(DefaultSavedState.class)));
 
 			il.add(vars);
 
-			il.add(new VarInsnNode(ASTORE, 4));
+			il.add(new VarInsnNode(ASTORE, 3));
 
 			il.add(new VarInsnNode(ALOAD, 0));  // this
-			il.add(new VarInsnNode(ALOAD, 1));  // state
-			il.add(new VarInsnNode(ALOAD, 2));  // sink
+			il.add(new VarInsnNode(ALOAD, 1));  // context
 
-			il.add(new VarInsnNode(ALOAD, 4));  // saved state
+			il.add(new VarInsnNode(ALOAD, 3));  // saved state
 			il.add(new MethodInsnNode(
 					INVOKEVIRTUAL,
 					Type.getInternalName(DefaultSavedState.class),
@@ -82,7 +79,7 @@ public class ResumeMethodEmitter {
 			));  // resumption point
 
 			if (parent.isVararg()) {
-				il.add(new VarInsnNode(ALOAD, 4));
+				il.add(new VarInsnNode(ALOAD, 3));
 				il.add(new MethodInsnNode(
 						INVOKEVIRTUAL,
 						Type.getInternalName(DefaultSavedState.class),
@@ -95,7 +92,7 @@ public class ResumeMethodEmitter {
 
 			// registers
 			if (parent.runMethod().numOfRegisters() > 0) {
-				il.add(new VarInsnNode(ALOAD, 4));
+				il.add(new VarInsnNode(ALOAD, 3));
 				il.add(new MethodInsnNode(
 						INVOKEVIRTUAL,
 						Type.getInternalName(DefaultSavedState.class),
@@ -128,13 +125,12 @@ public class ResumeMethodEmitter {
 			il.add(end);
 
 			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
-			locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, begin, end, 1));
-			locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, begin, end, 2));
-			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 3));
-			locals.add(new LocalVariableNode("ss", Type.getDescriptor(DefaultSavedState.class), null, vars, end, 4));
+			locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, begin, end, 1));
+			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 2));
+			locals.add(new LocalVariableNode("ss", Type.getDescriptor(DefaultSavedState.class), null, vars, end, 3));
 
 			// TODO: maxStack, maxLocals
-			node.maxStack = 4 + (parent.runMethod().numOfRegisters() > 0 ? 3: 0);
+			node.maxStack = 3 + (parent.runMethod().numOfRegisters() > 0 ? 3: 0);
 			node.maxLocals = 5;
 		}
 		else
@@ -153,12 +149,11 @@ public class ResumeMethodEmitter {
 			il.add(end);
 
 			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
-			locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, begin, end, 1));
-			locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, begin, end, 2));
-			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 3));
+			locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, begin, end, 1));
+			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 2));
 
 			node.maxStack = 2;
-			node.maxLocals = 4;
+			node.maxLocals = 3;
 		}
 	}
 

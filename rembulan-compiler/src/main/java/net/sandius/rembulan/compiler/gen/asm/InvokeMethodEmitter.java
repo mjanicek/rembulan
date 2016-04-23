@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
@@ -55,8 +54,7 @@ public class InvokeMethodEmitter {
 		il.add(begin);
 
 		il.add(new VarInsnNode(ALOAD, 0));  // this
-		il.add(new VarInsnNode(ALOAD, 1));  // state
-		il.add(new VarInsnNode(ALOAD, 2));  // sink
+		il.add(new VarInsnNode(ALOAD, 1));  // context
 		il.add(ASMUtils.loadInt(0));  // resumption point
 
 		if (invokeKind > 0) {
@@ -64,7 +62,7 @@ public class InvokeMethodEmitter {
 
 			for (int i = 0; i < parent.runMethod().numOfRegisters(); i++) {
 				if (i < invokeKind - 1) {
-					il.add(new VarInsnNode(ALOAD, 3 + i));
+					il.add(new VarInsnNode(ALOAD, 2 + i));
 				}
 				else {
 					il.add(new InsnNode(ACONST_NULL));
@@ -72,10 +70,10 @@ public class InvokeMethodEmitter {
 			}
 		}
 		else {
-			// variable number of parameters, encoded in an array at position 3
+			// variable number of parameters, encoded in an array at position 2
 
 			if (parent.isVararg()) {
-				il.add(new VarInsnNode(ALOAD, 3));
+				il.add(new VarInsnNode(ALOAD, 2));
 				il.add(UtilMethods.arrayFrom(parent.numOfParameters()));
 			}
 
@@ -83,7 +81,7 @@ public class InvokeMethodEmitter {
 
 			for (int i = 0; i < parent.runMethod().numOfRegisters(); i++) {
 				if (i < parent.numOfParameters()) {
-					il.add(new VarInsnNode(ALOAD, 3));  // TODO: use dup instead?
+					il.add(new VarInsnNode(ALOAD, 2));  // TODO: use dup instead?
 					il.add(UtilMethods.getArrayElementOrNull(i));
 				}
 				else {
@@ -99,20 +97,19 @@ public class InvokeMethodEmitter {
 		il.add(end);
 
 		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
-		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, begin, end, 1));
-		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, begin, end, 2));
+		locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, begin, end, 1));
 		if (invokeKind < 0) {
-			locals.add(new LocalVariableNode("args", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 3));
+			locals.add(new LocalVariableNode("args", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 2));
 
 			// TODO: maxLocals, maxStack
 		}
 		else {
 			for (int i = 0; i < invokeKind; i++) {
-				locals.add(new LocalVariableNode("arg_" + i, Type.getDescriptor(Object.class), null, begin, end, 3 + i));
+				locals.add(new LocalVariableNode("arg_" + i, Type.getDescriptor(Object.class), null, begin, end, 2 + i));
 			}
 
 			// TODO: maxLocals, maxStack
-			node.maxLocals = 3 + invokeKind;
+			node.maxLocals = 2 + invokeKind;
 			node.maxStack = 4 + parent.runMethod().numOfRegisters();
 		}
 	}

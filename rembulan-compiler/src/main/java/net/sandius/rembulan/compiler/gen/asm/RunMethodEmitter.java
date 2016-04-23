@@ -5,6 +5,7 @@ import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Resumable;
@@ -34,10 +35,11 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class RunMethodEmitter {
 
-	public final int LV_STATE = 1;
-	public final int LV_OBJECTSINK = 2;
-	public final int LV_RESUME = 3;
-	public final int LV_VARARGS = 4;  // index of the varargs argument, if present
+	public final int LV_CONTEXT = 1;
+//	public final int LV_STATE = 1;
+//	public final int LV_OBJECTSINK = 2;
+	public final int LV_RESUME = 2;
+	public final int LV_VARARGS = 3;  // index of the varargs argument, if present
 
 	private final ClassEmitter parent;
 
@@ -111,8 +113,7 @@ public class RunMethodEmitter {
 	public Type methodType() {
 		ArrayList<Type> args = new ArrayList<>();
 
-		args.add(Type.getType(LuaState.class));
-		args.add(Type.getType(ObjectSink.class));
+		args.add(Type.getType(ExecutionContext.class));
 		args.add(Type.INT_TYPE);
 		if (parent.isVararg()) {
 			args.add(ASMUtils.arrayTypeFor(Object.class));
@@ -163,8 +164,7 @@ public class RunMethodEmitter {
 
 		List<LocalVariableNode> locals = node.localVariables;
 		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, l_insns_begin, l_insns_end, 0));
-		locals.add(new LocalVariableNode("state", Type.getDescriptor(LuaState.class), null, l_insns_begin, l_insns_end, LV_STATE));
-		locals.add(new LocalVariableNode("sink", Type.getDescriptor(ObjectSink.class), null, l_insns_begin, l_insns_end, LV_OBJECTSINK));
+		locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, l_insns_begin, l_insns_end, LV_CONTEXT));
 		locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
 
 		if (parent.isVararg()) {
@@ -283,7 +283,7 @@ public class RunMethodEmitter {
 
 	public int newLocalVariable(int locIdx, String name, LabelNode begin, LabelNode end, Type t) {
 		// FIXME: this is quite brittle!
-		int idx = 4 + numOfRegisters() + (parent.isVararg() ? 1 : 0) + locIdx;
+		int idx = 3 + numOfRegisters() + (parent.isVararg() ? 1 : 0) + locIdx;
 		node.localVariables.add(new LocalVariableNode(name, t.getDescriptor(), null, begin, end, idx));
 		return idx;
 	}
@@ -543,12 +543,44 @@ public class RunMethodEmitter {
 		return il;
 	}
 
-	public AbstractInsnNode loadLuaState() {
-		return new VarInsnNode(ALOAD, LV_STATE);
+	public AbstractInsnNode loadExecutionContext() {
+		return new VarInsnNode(ALOAD, LV_CONTEXT);
 	}
 
-	public AbstractInsnNode loadObjectSink() {
-		return new VarInsnNode(ALOAD, LV_OBJECTSINK);
+	private AbstractInsnNode loadState() {
+		return new MethodInsnNode(
+				INVOKEINTERFACE,
+				Type.getInternalName(ExecutionContext.class),
+				"getState",
+				Type.getMethodDescriptor(
+						Type.getType(LuaState.class)),
+				true);
+	}
+
+	private AbstractInsnNode loadSink() {
+		return new MethodInsnNode(
+				INVOKEINTERFACE,
+				Type.getInternalName(ExecutionContext.class),
+				"getObjectSink",
+				Type.getMethodDescriptor(
+						Type.getType(ObjectSink.class)),
+				true);
+	}
+
+	@Deprecated
+	public InsnList loadLuaState() {
+		InsnList il = new InsnList();
+		il.add(loadExecutionContext());
+		il.add(loadState());
+		return il;
+	}
+
+	@Deprecated
+	public InsnList loadObjectSink() {
+		InsnList il = new InsnList();
+		il.add(loadExecutionContext());
+		il.add(loadSink());
+		return il;
 	}
 
 	public AbstractInsnNode loadVarargs() {
@@ -558,8 +590,7 @@ public class RunMethodEmitter {
 
 	public InsnList loadDispatchPreamble() {
 		InsnList il = new InsnList();
-		il.add(loadLuaState());
-		il.add(loadObjectSink());
+		il.add(loadExecutionContext());
 		return il;
 	}
 

@@ -1,15 +1,15 @@
 package net.sandius.rembulan.bm;
 
-import net.sandius.rembulan.core.alt.AltOperators;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
+import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Invokable;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.legacy.Operators;
+import net.sandius.rembulan.core.alt.AltOperators;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.Function3;
 import net.sandius.rembulan.core.impl.QuintupleCachingObjectSink;
+import net.sandius.rembulan.core.legacy.Operators;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
@@ -206,21 +206,21 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
+		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
 			Invokable f = (Invokable) arg1;
 			long l = ((Number) arg2).longValue();
 			if (l > 0) {
-				f.invoke(state, result, f, l - 1);
-				Number m = (Number) result._0();
-				result.setTo(m.longValue() + 1);
+				f.invoke(context, f, l - 1);
+				Number m = (Number) context.getObjectSink()._0();
+				context.getObjectSink().setTo(m.longValue() + 1);
 			}
 			else {
-				result.setTo(n);
+				context.getObjectSink().setTo(n);
 			}
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -234,29 +234,29 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) throws ControlThrowable {
 			switch (pc) {
 				case 0:
 				case 1:
 					long l = ((Number) r_1).longValue();
 					if (l > 0) {
-						Dispatch.call(state, result, r_0, r_0, l - 1);
-						Number m = (Number) result._0();
-						result.setTo(m.longValue() + 1);
+						Dispatch.call(context, r_0, r_0, l - 1);
+						Number m = (Number) context.getObjectSink()._0();
+						context.getObjectSink().setTo(m.longValue() + 1);
 					}
 					else {
-						result.setTo(n);
+						context.getObjectSink().setTo(n);
 					}
 			}
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
-			run(state, result, 0, arg1, arg2);
+		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
+			run(context, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -270,28 +270,28 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1, Object r_2) {
 			switch (pc) {
 				case 0:
 				case 1:
 					long l = ((Number) r_1).longValue();
 					long acc = ((Number) r_2).longValue();
 					if (l > 0) {
-						result.tailCall(r_0, r_0, l - 1, acc + 1);
+						context.getObjectSink().tailCall(r_0, r_0, l - 1, acc + 1);
 					}
 					else {
-						result.setTo(acc + n);
+						context.getObjectSink().setTo(acc + n);
 					}
 			}
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-			run(state, result, 0, arg1, arg2, arg3);
+		public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+			run(context, 0, arg1, arg2, arg3);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -305,28 +305,28 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) throws ControlThrowable {
 			switch (pc) {
 				case 0:
 				case 1:
 					long l = ((Number) r_0).longValue();
 					long acc = ((Number) r_1).longValue();
 					if (l > 0) {
-						result.tailCall(this, l - 1, acc + 1);
+						context.getObjectSink().tailCall(this, l - 1, acc + 1);
 					}
 					else {
-						result.setTo(acc + n);
+						context.getObjectSink().setTo(acc + n);
 					}
 			}
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
-			run(state, result, 0, arg1, arg2);
+		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
+			run(context, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -336,7 +336,8 @@ public class CallReturnBenchmark {
 	public void _1_1_recursiveInvoke(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new RecursiveInvokeFunc(100);
 		ObjectSink result = newSink();
-		f.invoke(luaState, result, f, 20);
+		ExecutionContext context = new DummyExecutionContext(luaState, result);
+		f.invoke(context, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -344,7 +345,8 @@ public class CallReturnBenchmark {
 	public void _1_2_recursiveCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new RecursiveCallFunc(100);
 		ObjectSink result = newSink();
-		Dispatch.call(luaState, result, f, f, 20);
+		ExecutionContext context = new DummyExecutionContext(luaState, result);
+		Dispatch.call(context, f, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -352,7 +354,8 @@ public class CallReturnBenchmark {
 	public void _1_3_tailCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new TailCallFunc(100);
 		ObjectSink result = newSink();
-		Dispatch.call(luaState, result, f, f, 20, 0);
+		ExecutionContext context = new DummyExecutionContext(luaState, result);
+		Dispatch.call(context, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -360,7 +363,8 @@ public class CallReturnBenchmark {
 	public void _1_4_selfRecursiveTailCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new SelfRecursiveTailCallFunc(100);
 		ObjectSink result = newSink();
-		Dispatch.call(luaState, result, f, 20, 0);
+		ExecutionContext context = new DummyExecutionContext(luaState, result);
+		Dispatch.call(context, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -375,30 +379,30 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) throws ControlThrowable {
 			switch (pc) {
 				case 0:
 				case 1:
-					if (Operators.lt(state, k_0, r_1)) {
-						r_1 = Operators.sub(state, r_1, k_1);
-						Dispatch.call(state, result, r_0, r_0, r_1);
-						r_0 = result._0();
-						r_0 = Operators.add(state, r_0, k_1);
-						result.setTo(r_0);
+					if (Operators.lt(context.getState(), k_0, r_1)) {
+						r_1 = Operators.sub(context.getState(), r_1, k_1);
+						Dispatch.call(context, r_0, r_0, r_1);
+						r_0 = context.getObjectSink()._0();
+						r_0 = Operators.add(context.getState(), r_0, k_1);
+						context.getObjectSink().setTo(r_0);
 					}
 					else {
-						result.setTo(n);
+						context.getObjectSink().setTo(n);
 					}
 			}
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
-			run(state, result, 0, arg1, arg2);
+		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
+			run(context, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -415,30 +419,30 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) throws ControlThrowable {
 			switch (pc) {
 				case 0:
 				case 1:
-					if (AltOperators.lt(state, k_0, r_1)) {
-						r_1 = AltOperators.sub(state, r_1, k_1);
-						Dispatch.call(state, result, r_0, r_0, r_1);
-						r_0 = result._0();
-						r_0 = AltOperators.add(state, r_0, k_1);
-						result.setTo(r_0);
+					if (AltOperators.lt(context.getState(), k_0, r_1)) {
+						r_1 = AltOperators.sub(context.getState(), r_1, k_1);
+						Dispatch.call(context, r_0, r_0, r_1);
+						r_0 = context.getObjectSink()._0();
+						r_0 = AltOperators.add(context.getState(), r_0, k_1);
+						context.getObjectSink().setTo(r_0);
 					}
 					else {
-						result.setTo(n);
+						context.getObjectSink().setTo(n);
 					}
 			}
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2) throws ControlThrowable {
-			run(state, result, 0, arg1, arg2);
+		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
+			run(context, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -455,29 +459,29 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1, Object r_2) {
 			switch (pc) {
 				case 0:
 				case 1:
-					if (Operators.gt(state, r_1, k_0)) {
-						r_1 = Operators.sub(state, r_1, k_1);
-						r_2 = Operators.add(state, r_2, k_1);
-						result.tailCall(r_0, r_0, r_1, r_2);
+					if (Operators.gt(context.getState(), r_1, k_0)) {
+						r_1 = Operators.sub(context.getState(), r_1, k_1);
+						r_2 = Operators.add(context.getState(), r_2, k_1);
+						context.getObjectSink().tailCall(r_0, r_0, r_1, r_2);
 					}
 					else {
-						r_0 = Operators.add(state, r_2, n);
-						result.setTo(r_0);
+						r_0 = Operators.add(context.getState(), r_2, n);
+						context.getObjectSink().setTo(r_0);
 					}
 			}
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-			run(state, result, 0, arg1, arg2, arg3);
+		public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+			run(context, 0, arg1, arg2, arg3);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -494,29 +498,29 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(LuaState state, ObjectSink result, int pc, Object r_0, Object r_1, Object r_2) {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1, Object r_2) {
 			switch (pc) {
 				case 0:
 				case 1:
-					if (AltOperators.gt(state, r_1, k_0)) {
-						r_1 = AltOperators.sub(state, r_1, k_1);
-						r_2 = AltOperators.add(state, r_2, k_1);
-						result.tailCall(r_0, r_0, r_1, r_2);
+					if (AltOperators.gt(context.getState(), r_1, k_0)) {
+						r_1 = AltOperators.sub(context.getState(), r_1, k_1);
+						r_2 = AltOperators.add(context.getState(), r_2, k_1);
+						context.getObjectSink().tailCall(r_0, r_0, r_1, r_2);
 					}
 					else {
-						r_0 = AltOperators.add(state, r_2, n);
-						result.setTo(r_0);
+						r_0 = AltOperators.add(context.getState(), r_2, n);
+						context.getObjectSink().setTo(r_0);
 					}
 			}
 		}
 
 		@Override
-		public void invoke(LuaState state, ObjectSink result, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-			run(state, result, 0, arg1, arg2, arg3);
+		public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+			run(context, 0, arg1, arg2, arg3);
 		}
 
 		@Override
-		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -526,7 +530,8 @@ public class CallReturnBenchmark {
 	public void _2_2_0_recursiveOpCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new RecursiveOpCallFunc(100);
 		ObjectSink result = newSink();
-		Dispatch.call(luaState, result, f, f, 20);
+		ExecutionContext context = new DummyExecutionContext(luaState, result);
+		Dispatch.call(context, f, f, 20);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -534,7 +539,8 @@ public class CallReturnBenchmark {
 	public void _2_2_1_recursiveAltOpCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new RecursiveAltOpCallFunc(100);
 		ObjectSink result = newSink();
-		Dispatch.call(luaState, result, f, f, 20L);
+		ExecutionContext context = new DummyExecutionContext(luaState, result);
+		Dispatch.call(context, f, f, 20L);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -542,7 +548,8 @@ public class CallReturnBenchmark {
 	public void _2_3_0_tailOpCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new TailCallOpFunc(100);
 		ObjectSink result = newSink();
-		Dispatch.call(luaState, result, f, f, 20, 0);
+		ExecutionContext context = new DummyExecutionContext(luaState, result);
+		Dispatch.call(context, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
@@ -550,7 +557,8 @@ public class CallReturnBenchmark {
 	public void _2_3_1_tailAltOpCall(DummyLuaState luaState) throws ControlThrowable {
 		Invokable f = new TailCallAltOpFunc(100);
 		ObjectSink result = newSink();
-		Dispatch.call(luaState, result, f, f, 20, 0);
+		ExecutionContext context = new DummyExecutionContext(luaState, result);
+		Dispatch.call(context, f, f, 20, 0);
 		assertEquals(result._0(), 120L);
 	}
 
