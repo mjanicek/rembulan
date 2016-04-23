@@ -2,15 +2,17 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
+import net.sandius.rembulan.core.CoroutineSwitch;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.impl.Function0;
 import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
+import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.CoroutineLib;
+import net.sandius.rembulan.lib.LibUtils;
 
 import java.io.Serializable;
 
@@ -72,16 +74,21 @@ public class DefaultCoroutineLib extends CoroutineLib {
 	public static class Resume extends FunctionAnyarg {
 
 		public static final Resume INSTANCE = new Resume();
-		
+
 		@Override
 		public void invoke(LuaState state, ObjectSink result, Object[] args) throws ControlThrowable {
-			// TODO
-			throw new IllegalOperationAttemptException("cannot resume dead coroutine");
+			Coroutine coroutine = LibUtils.getArgument(args, 0, Coroutine.class);
+			Object[] resumeArgs = Varargs.from(args, 1);
+
+			CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, resumeArgs);
+			ct.push(this, null);
+
+			throw ct;
 		}
 
 		@Override
 		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+			result.prepend(new Object[] {true});
 		}
 
 	}
@@ -92,13 +99,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		
 		@Override
 		public void invoke(LuaState state, ObjectSink result, Object[] args) throws ControlThrowable {
-			// TODO
-			throw new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
+			CoroutineSwitch.Yield ct = new CoroutineSwitch.Yield(args);
+			ct.push(this, null);
+			throw ct;
 		}
 
 		@Override
 		public void resume(LuaState state, ObjectSink result, Serializable suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
 	}

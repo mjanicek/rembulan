@@ -2,6 +2,8 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.Value;
+import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.util.Check;
 
 public class LibUtils {
@@ -18,6 +20,19 @@ public class LibUtils {
 		if (value != null) {
 			table.rawset(key, value);
 		}
+	}
+
+	public static <T> T checkArgument(Object arg, int index, Class<T> clazz) {
+		if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
+			return (T) arg ;
+		}
+		else {
+			throw new IllegalArgumentException("bad argument #" + index + " to '?' (? expected, got " + Value.typeOf(arg).name + ")");
+		}
+	}
+
+	public static <T> T getArgument(Object[] args, int index, Class<T> clazz) {
+		return checkArgument(Varargs.getElement(args, index), index, clazz);
 	}
 
 }
