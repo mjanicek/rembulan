@@ -27,7 +27,7 @@ public class LibUtils {
 			return (T) arg ;
 		}
 		else {
-			throw new IllegalArgumentException("bad argument #" + index + " to '?' (? expected, got " + Value.typeOf(arg).name + ")");
+			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '?' (? expected, got " + Value.typeOf(arg).name + ")");
 		}
 	}
 
