@@ -37,6 +37,21 @@ public abstract class Coroutine {
 		this.sink = state.newObjectSink();
 	}
 
+	public enum Status {
+		Running,
+		Suspended,
+		Normal,
+		Dead;
+
+		@Override
+		public String toString() {
+			return name().toLowerCase();
+		}
+
+	}
+
+	public abstract Status getStatus();
+
 	public LuaState getOwnerState() {
 		return state;
 	}

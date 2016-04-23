@@ -133,8 +133,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		
 		@Override
 		public void invoke(LuaState state, ObjectSink result, Object arg1) throws ControlThrowable {
-			// TODO
-			result.setTo("running");
+			Coroutine coroutine = LibUtils.checkArgument(arg1, 0, Coroutine.class);
+			result.setTo(coroutine.getStatus().toString());
 		}
 
 		@Override

@@ -17,4 +17,9 @@ public class DefaultCoroutine extends Coroutine {
 		super(state);
 	}
 
+	@Override
+	public Status getStatus() {
+		return Status.Running;  // FIXME
+	}
+
 }
