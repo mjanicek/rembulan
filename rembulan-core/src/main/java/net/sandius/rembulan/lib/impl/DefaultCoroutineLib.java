@@ -149,8 +149,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		
 		@Override
 		public void invoke(ExecutionContext context) throws ControlThrowable {
-			// TODO
-			context.getObjectSink().setTo();
+			context.getObjectSink().setTo(context.getCurrentCoroutine());
 		}
 
 		@Override
