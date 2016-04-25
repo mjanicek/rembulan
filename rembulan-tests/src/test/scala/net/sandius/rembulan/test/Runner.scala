@@ -48,6 +48,7 @@ object Runner {
         override def getState = state
         override def getObjectSink = os
         override def getCurrentCoroutine = ???
+        override def newCoroutine(function: Function) = ???
       }
 
       section("Call") {

@@ -58,8 +58,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		
 		@Override
 		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
-			// TODO
-			Coroutine c = context.getState().newCoroutine();
+			Function func = LibUtils.checkArgument(arg1, 0, Function.class);
+			Coroutine c = context.newCoroutine(func);
 			context.getObjectSink().setTo(c);
 		}
 
@@ -78,6 +78,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 			Coroutine coroutine = LibUtils.getArgument(args, 0, Coroutine.class);
 			Object[] resumeArgs = Varargs.from(args, 1);
+
+			context.getObjectSink().reset();
 
 			CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, resumeArgs);
 			ct.push(this, null);

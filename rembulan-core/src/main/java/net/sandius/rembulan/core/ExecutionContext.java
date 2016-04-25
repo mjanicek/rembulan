@@ -8,4 +8,6 @@ public interface ExecutionContext {
 
 	Coroutine getCurrentCoroutine();
 
+	Coroutine newCoroutine(Function function);
+
 }

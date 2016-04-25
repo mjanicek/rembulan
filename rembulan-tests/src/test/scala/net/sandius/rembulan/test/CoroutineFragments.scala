@@ -15,12 +15,19 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
   }
   CreateReturnsAThread in CoroContext succeedsWith (classOf[Coroutine])
 
-  val ResumeReturnsControlToCallerOnExit = fragment ("ResumeReturnsControlToCallerOnExit") {
+  val ResumeReturnsControlToCallerOnExit1 = fragment ("ResumeReturnsControlToCallerOnExit1") {
     """t = coroutine.create(function() end)
-      |return coroutine.resume(t)
+      |coroutine.resume(t)
+      |assert(false)
     """
   }
-  ResumeReturnsControlToCallerOnExit in CoroContext succeedsWith (true)
+  ResumeReturnsControlToCallerOnExit1 in CoroContext failsWith (classOf[IllegalStateException], "assertion failed!")
+
+  val ResumeReturnsControlToCallerOnExit2 = fragment ("ResumeReturnsControlToCallerOnExit2") {
+    """return coroutine.resume(coroutine.create(function() end))
+    """
+  }
+  ResumeReturnsControlToCallerOnExit2 in CoroContext succeedsWith (true)
 
   val ResumeReturnsValuesOnExit = fragment ("ResumeReturnsValuesOnExit") {
     """f = function(...)
