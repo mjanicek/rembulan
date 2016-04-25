@@ -37,4 +37,9 @@ public class DummyExecutionContext implements ExecutionContext {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public boolean canYield() {
+		throw new UnsupportedOperationException();
+	}
+
 }

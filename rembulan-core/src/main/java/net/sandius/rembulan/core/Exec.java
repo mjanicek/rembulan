@@ -68,6 +68,11 @@ public class Exec {
 			return coroutine;
 		}
 
+		@Override
+		public boolean canYield() {
+			return currentCoroutine != mainCoroutine;
+		}
+
 	}
 
 	protected class CoroutineImpl extends Coroutine {

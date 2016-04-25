@@ -64,6 +64,12 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
   }
   MainCoroutineIsNotYieldable in CoroContext succeedsWith (false)
 
+  val NewCoroutineIsYieldable = fragment ("NewCoroutineIsYieldable") {
+    """return coroutine.resume(coroutine.create(coroutine.isyieldable))
+    """
+  }
+  NewCoroutineIsYieldable in CoroContext succeedsWith (true, true)
+
   val WrapReturnsAFunction = fragment ("WrapReturnsAFunction") {
     """local function f(...) return ... end
       |local w = coroutine.wrap(f)

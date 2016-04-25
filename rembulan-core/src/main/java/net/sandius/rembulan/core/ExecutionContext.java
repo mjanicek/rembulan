@@ -10,4 +10,6 @@ public interface ExecutionContext {
 
 	Coroutine newCoroutine(Function function);
 
+	boolean canYield();
+
 }
