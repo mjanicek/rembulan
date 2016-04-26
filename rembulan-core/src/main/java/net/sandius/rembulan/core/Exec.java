@@ -139,13 +139,11 @@ public class Exec {
 		Check.notNull(target);
 		Check.notNull(args);
 
-		Function func = (Function) target;
-
 		if (mainCoroutine != null) {
 			throw new IllegalStateException("Initialising call in paused state");
 		}
 		else {
-			mainCoroutine = context.newCoroutine(func);
+			mainCoroutine = context.newCoroutine(target);
 			currentCoroutine = mainCoroutine;
 
 			mainCoroutine.callStack = new Cons<>(BootstrapResumable.of(target, args));
@@ -159,33 +157,33 @@ public class Exec {
 		return tail;
 	}
 
-	// return true if execution was paused, false if execution is finished
-	// in other words: returns true iff isPaused() == true afterwards
-	public boolean resume() {
-		while (currentCoroutine.callStack != null) {
-			ResumeInfo top = currentCoroutine.callStack.car;
-			currentCoroutine.callStack = currentCoroutine.callStack.cdr;
+	// return null if main coroutine returned, otherwise return next coroutine C to be resumed;
+	// if C == coro, then this is a pause
+	private Coroutine resumeCoroutine(final Coroutine coro) {
+		Check.isNull(coro.resuming);
+
+		Cons<ResumeInfo> callStack = coro.callStack;
+
+		while (callStack != null) {
+			ResumeInfo top = callStack.car;
+			callStack = callStack.cdr;
 
 			try {
 				top.resume(context);
 				Dispatch.evaluateTailCalls(context);
 			}
 			catch (CoroutineSwitch.Yield yield) {
-				currentCoroutine.callStack = prependCalls(yield.frames(), currentCoroutine.callStack);
+				callStack = prependCalls(yield.frames(), callStack);
 
-				Object[] args = yield.args;
+				Coroutine target = coro.yieldingTo;
 
-				if (currentCoroutine.yieldingTo != null) {
+				if (target != null) {
+					target.objectSink().setToArray(yield.args);
 
-					Coroutine target = currentCoroutine.yieldingTo;
-					target.objectSink().setToArray(args);
-
-					currentCoroutine.yieldingTo = null;
+					coro.yieldingTo = null;
 					target.resuming = null;
 
-					currentCoroutine = target;
-
-					continue;
+					return target;
 				}
 				else {
 					// XXX cannot yield outside a coroutine
@@ -193,20 +191,17 @@ public class Exec {
 				}
 			}
 			catch (CoroutineSwitch.Resume resume) {
-				currentCoroutine.callStack = prependCalls(resume.frames(), currentCoroutine.callStack);
+				callStack = prependCalls(resume.frames(), callStack);
 
 				Coroutine target = resume.coroutine;
 
 				if (target.resuming == null && target.callStack != null) {
-					Object[] args = resume.args;
-					target.objectSink().setToArray(args);
+					target.objectSink().setToArray(resume.args);
 
-					target.yieldingTo = currentCoroutine;
-					currentCoroutine.resuming = target;
+					target.yieldingTo = coro;
+					coro.resuming = target;
 
-					currentCoroutine = target;
-
-					continue;
+					return target;
 				}
 				else {
 					// XXX cannot resume
@@ -214,29 +209,49 @@ public class Exec {
 				}
 			}
 			catch (Preempted preempted) {
-				currentCoroutine.callStack = prependCalls(preempted.frames(), currentCoroutine.callStack);
-				assert (currentCoroutine.callStack != null);
-				return true;  // we're paused
+				callStack = prependCalls(preempted.frames(), callStack);
+				assert (callStack != null);
+				return coro;
 			}
 			catch (ControlThrowable ct) {
 				throw new UnsupportedOperationException(ct);
 			}
-
-			if (currentCoroutine.callStack == null) {
-				Coroutine yieldTarget = currentCoroutine.yieldingTo;
-				// coroutine terminated normally, this is an implicit yield
-				if (yieldTarget != null) {
-					Object[] args = currentCoroutine.objectSink().toArray();
-					yieldTarget.objectSink().setToArray(args);
-					currentCoroutine.yieldingTo = null;
-					yieldTarget.resuming = null;
-					currentCoroutine = yieldTarget;
-				}
+			finally {
+				coro.callStack = callStack;
 			}
-
 		}
 
-		// call stack is null, we're not paused
+		Coroutine yieldTarget = coro.yieldingTo;
+		if (yieldTarget != null) {
+			// implicit yield on return
+			Object[] args = coro.objectSink().toArray();
+			yieldTarget.objectSink().setToArray(args);
+			coro.yieldingTo = null;
+			yieldTarget.resuming = null;
+			return yieldTarget;
+		}
+		else {
+			// main coroutine return
+			return null;
+		}
+	}
+
+	// return true if execution was paused, false if execution is finished
+	// in other words: returns true iff isPaused() == true afterwards
+	public boolean resume() {
+		while (currentCoroutine != null) {
+			Coroutine next = resumeCoroutine(currentCoroutine);
+			if (next == currentCoroutine) {
+				// pause
+				return true;
+			}
+			else {
+				// coroutine switch
+				currentCoroutine = next;
+			}
+		}
+
+		// main coroutine returned
 		return false;
 	}
 
