@@ -4,15 +4,18 @@ import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
+import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
+import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.util.Check;
@@ -90,7 +93,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _pcall() {
-		return null;  // TODO
+		return PCall.INSTANCE;
 	}
 
 	@Override
@@ -260,6 +263,42 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class PCall extends FunctionAnyarg implements ProtectedResumable {
+
+		public static final PCall INSTANCE = new PCall();
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Object callTarget = Varargs.getElement(args, 0);
+			Object[] callArgs = Varargs.from(args, 1);
+
+			try {
+				Dispatch.call(context, callTarget, callArgs);
+			}
+			catch (ControlThrowable ct) {
+				ct.push(this, null);
+				throw ct;
+			}
+			catch (Exception ex) {
+				context.getObjectSink().setTo(false, Conversions.throwableToObject(ex));  // failure
+			}
+
+			context.getObjectSink().prepend(new Object[] {true});  // success
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+			// success
+			context.getObjectSink().prepend(new Object[] {true});
+		}
+
+		@Override
+		public void resumeError(ExecutionContext context, Serializable suspendedState, Object error) {
+			context.getObjectSink().setTo(false, error);
 		}
 
 	}
