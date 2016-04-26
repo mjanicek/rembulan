@@ -805,4 +805,67 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   BigForLoop in EmptyContext succeedsWith (500000500000L)
 
+  val BasicPCall = fragment ("BasicPCall") {
+    """return pcall(something, "with argument", 123)
+    """
+  }
+  BasicPCall in BasicContext succeedsWith (false, "attempt to call a nil value")
+
+  val AssertReturnsItsArguments = fragment ("AssertReturnsItsArguments") {
+    """return assert(true, "hello", "there", 5)
+    """
+  }
+  AssertReturnsItsArguments in BasicContext succeedsWith (true, "hello", "there", 5)
+
+  val AssertWithDefaultErrorObject = fragment ("AssertWithDefaultErrorObject") {
+    """local a, b = pcall(assert, false)
+      |return b
+    """
+  }
+  AssertWithDefaultErrorObject in BasicContext succeedsWith ("assertion failed!")
+
+  val AssertWithNilErrorObject = fragment ("AssertWithNilErrorObject") {
+    """local a, b = pcall(assert, false, nil)
+      |return type(b)
+    """
+  }
+  AssertWithNilErrorObject in BasicContext succeedsWith ("nil")
+
+  val AssertWithBooleanErrorObject = fragment ("AssertWithBooleanErrorObject") {
+    """local a, b = pcall(assert, false, true)
+      |local c, d = pcall(assert, false, false)
+      |return type(b), type(d)
+    """
+  }
+  AssertWithBooleanErrorObject in BasicContext succeedsWith ("boolean", "boolean")
+
+  val AssertWithNumberErrorObjectIsCastToString = fragment ("AssertWithNumberErrorObjectIsCastToString") {
+    """local a, b = pcall(assert, false, 1)
+      |local c, d = pcall(assert, false, 1.2)
+      |return type(b), type(d)
+    """
+  }
+  AssertWithNumberErrorObjectIsCastToString in BasicContext succeedsWith ("string", "string")
+
+  val AssertWithTableErrorObject = fragment ("AssertWithTableErrorObject") {
+    """local a, b = pcall(assert, false, {})
+      |return type(b)
+    """
+  }
+  AssertWithTableErrorObject in BasicContext succeedsWith ("table")
+
+  val AssertWithFunctionErrorObject = fragment ("AssertWithFunctionErrorObject") {
+    """local a, b = pcall(assert, false, assert)
+      |return type(b)
+    """
+  }
+  AssertWithFunctionErrorObject in BasicContext succeedsWith ("function")
+
+  val AssertWithCoroutineErrorObject = fragment ("AssertWithCoroutineErrorObject") {
+    """local a, b = pcall(assert, false, coroutine.create(function() end))
+      |return type(b)
+    """
+  }
+  AssertWithCoroutineErrorObject in CoroContext succeedsWith ("thread")
+
 }
