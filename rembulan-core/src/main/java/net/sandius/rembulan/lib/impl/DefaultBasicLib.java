@@ -158,13 +158,13 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 			for (int i = 0; i < args.length; i++) {
+				out.print(ToString.toString(args[i]));
 				if (i + 1 < args.length) {
 					out.print('\t');
 				}
-				out.print(ToString.toString(args[i]));
 			}
 			out.println();
-			context.getObjectSink().reset();
+			context.getObjectSink().setTo();
 		}
 
 		@Override
