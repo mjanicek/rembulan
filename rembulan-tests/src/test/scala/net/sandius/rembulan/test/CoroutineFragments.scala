@@ -70,6 +70,12 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
   }
   NewCoroutineIsYieldable in CoroContext succeedsWith (true, true)
 
+  val ResumeCurrentFails = fragment ("ResumeCurrentFails") {
+    """return coroutine.resume(coroutine.running())
+    """
+  }
+  ResumeCurrentFails in CoroContext succeedsWith (false, "cannot resume non-suspended coroutine")
+
   val WrapReturnsAFunction = fragment ("WrapReturnsAFunction") {
     """local function f(...) return ... end
       |local w = coroutine.wrap(f)
