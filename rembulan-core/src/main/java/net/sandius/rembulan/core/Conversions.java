@@ -92,8 +92,18 @@ public abstract class Conversions {
 						: null;
 	}
 
+	public static String objectToString(Object o) {
+		String s = objectAsString(o);
+		return s != null ? s : (o != null ? o.toString() : LuaFormat.NIL);
+	}
+
 	public static Object throwableToObject(Throwable ex) {
-		return ex.getMessage();
+		if (ex instanceof LuaRuntimeException) {
+			return ((LuaRuntimeException) ex).getErrorObject();
+		}
+		else {
+			return ex.getMessage();
+		}
 	}
 
 }

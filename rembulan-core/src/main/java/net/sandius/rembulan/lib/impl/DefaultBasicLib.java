@@ -1,7 +1,7 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaType;
+import net.sandius.rembulan.core.AssertionFailedException;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
@@ -196,8 +196,7 @@ public class DefaultBasicLib extends BasicLib {
 		public static final ToString INSTANCE = new ToString();
 
 		public static String toString(Object o) {
-			String s = Conversions.objectAsString(o);
-			return s != null ? s : LuaFormat.NIL;
+			return Conversions.objectToString(o);
 		}
 
 		@Override
@@ -248,16 +247,36 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Assert extends Function1 {
+	public static class Assert extends FunctionAnyarg {
 
 		public static final Assert INSTANCE = new Assert();
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
-			if (!Conversions.objectToBoolean(arg1)) {
-				throw new IllegalStateException("assertion failed!");
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			if (Conversions.objectToBoolean(Varargs.getElement(args, 0))) {
+				context.getObjectSink().setToArray(args);
 			}
-			context.getObjectSink().reset();
+			else {
+				final AssertionFailedException ex;
+				if (args.length > 1) {
+					// message is defined
+					Object message = args[1];
+					String stringMessage = Conversions.objectAsString(message);
+					if (stringMessage != null) {
+						ex = new AssertionFailedException(stringMessage);
+					}
+					else {
+						ex = new AssertionFailedException(message);
+					}
+				}
+				else {
+					// message not defined, use the default
+					ex = new AssertionFailedException("assertion failed!");
+				}
+
+				throw ex;
+			}
+
 		}
 
 		@Override
@@ -284,21 +303,22 @@ public class DefaultBasicLib extends BasicLib {
 				throw ct;
 			}
 			catch (Exception ex) {
-				context.getObjectSink().setTo(false, Conversions.throwableToObject(ex));  // failure
+				context.getObjectSink().setTo(Boolean.FALSE, Conversions.throwableToObject(ex));  // failure
+				return;
 			}
 
-			context.getObjectSink().prepend(new Object[] {true});  // success
+			context.getObjectSink().prepend(new Object[] {Boolean.TRUE});  // success
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			// success
-			context.getObjectSink().prepend(new Object[] {true});
+			context.getObjectSink().prepend(new Object[] {Boolean.TRUE});
 		}
 
 		@Override
 		public void resumeError(ExecutionContext context, Serializable suspendedState, Object error) throws ControlThrowable {
-			context.getObjectSink().setTo(false, error);
+			context.getObjectSink().setTo(Boolean.FALSE, error);
 		}
 
 	}

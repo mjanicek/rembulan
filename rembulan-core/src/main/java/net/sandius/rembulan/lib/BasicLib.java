@@ -127,7 +127,7 @@ public abstract class BasicLib implements Lib {
 	 *
 	 * <p>Calls {@link #_error() {@code error}} if the value of its argument {@code v}
 	 * is false (i.e., <b>nil</b> or <b>false</b>); otherwise, returns all its arguments.
-	 * In case of error, message is the error object; when absent, it defaults
+	 * In case of error, {@code message} is the error object; when absent, it defaults
 	 * to {@code "assertion failed!"}</p>
 	 */
 	public abstract Function _assert();
@@ -223,7 +223,7 @@ public abstract class BasicLib implements Lib {
 	/**
 	 * {@code xpcall (f, msgh [, arg1, ···])}
 	 *
-	 * <p>This function is similar to {@link #_pcall() {@code pcall}}, except that it sets
+	 * <p>This function is similar to {@link #_pcall() <code>pcall</code>}, except that it sets
 	 * a new message handler {@code msgh}.</p>
 	 */
 	public abstract Function _xpcall();

@@ -1,6 +1,6 @@
 package net.sandius.rembulan.core;
 
-public class IllegalOperationAttemptException extends RuntimeException {
+public class IllegalOperationAttemptException extends LuaRuntimeException {
 
 	public IllegalOperationAttemptException(String message) {
 		super(message);

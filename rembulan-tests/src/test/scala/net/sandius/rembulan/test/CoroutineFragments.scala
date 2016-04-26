@@ -21,7 +21,7 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
       |assert(false)
     """
   }
-  ResumeReturnsControlToCallerOnExit1 in CoroContext failsWith (classOf[IllegalStateException], "assertion failed!")
+  ResumeReturnsControlToCallerOnExit1 in CoroContext failsWith (classOf[AssertionFailedException], "assertion failed!")
 
   val ResumeReturnsControlToCallerOnExit2 = fragment ("ResumeReturnsControlToCallerOnExit2") {
     """return coroutine.resume(coroutine.create(function() end))
