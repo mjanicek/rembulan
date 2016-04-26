@@ -10,9 +10,8 @@ import net.sandius.rembulan.lib.LibUtils
 import net.sandius.rembulan.lib.impl.{DefaultBasicLib, DefaultCoroutineLib}
 import net.sandius.rembulan.parser.LuaCPrototypeReader
 import net.sandius.rembulan.test.FragmentExpectations.Env
+import net.sandius.rembulan.{core => lua}
 import org.scalatest.{FunSpec, MustMatchers}
-
-import scala.util.control.NonFatal
 
 trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
@@ -96,7 +95,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
                 Right(exec.getSink.toArray.toSeq)
               }
               catch {
-                case NonFatal(ex) => Left(ex)
+                case ex: lua.ExecutionException => Left(ex.getCause)
               }
               val after = System.nanoTime()
 

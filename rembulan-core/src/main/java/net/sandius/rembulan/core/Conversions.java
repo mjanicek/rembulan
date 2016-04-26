@@ -92,4 +92,8 @@ public abstract class Conversions {
 						: null;
 	}
 
+	public static Object throwableToObject(Throwable ex) {
+		return ex.getMessage();
+	}
+
 }

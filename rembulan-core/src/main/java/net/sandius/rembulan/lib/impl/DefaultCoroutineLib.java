@@ -6,6 +6,7 @@ import net.sandius.rembulan.core.CoroutineSwitch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.impl.Function0;
 import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
@@ -70,7 +71,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 	}
 
-	public static class Resume extends FunctionAnyarg {
+	public static class Resume extends FunctionAnyarg implements ProtectedResumable {
 
 		public static final Resume INSTANCE = new Resume();
 
@@ -90,6 +91,11 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		@Override
 		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
 			context.getObjectSink().prepend(new Object[] {true});
+		}
+
+		@Override
+		public void resumeError(ExecutionContext context, Serializable suspendedState, Object error) {
+			context.getObjectSink().setTo(false, error);
 		}
 
 	}

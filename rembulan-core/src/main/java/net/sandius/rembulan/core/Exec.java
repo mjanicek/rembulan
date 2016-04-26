@@ -159,100 +159,163 @@ public class Exec {
 		return tail;
 	}
 
+	private static class CoroutineResumeResult {
+		public static final CoroutineResumeResult PAUSED = new CoroutineResumeResult(null, null);
+
+		public final Coroutine coroutine;
+		public final Throwable error;
+
+		private CoroutineResumeResult(Coroutine coroutine, Throwable error) {
+			this.coroutine = coroutine;
+			this.error = error;
+		}
+
+		public static CoroutineResumeResult standard(Coroutine c) {
+			return new CoroutineResumeResult(c, null);
+		}
+	}
+
 	// return null if main coroutine returned, otherwise return next coroutine C to be resumed;
 	// if C == coro, then this is a pause
-	private Coroutine resumeCoroutine(final Coroutine coro) {
+	private CoroutineResumeResult resumeCoroutine(final Coroutine coro, Throwable error) {
 		Check.isNull(coro.resuming);
 
 		Cons<ResumeInfo> callStack = coro.callStack;
 
-		while (callStack != null) {
-			ResumeInfo top = callStack.car;
-			callStack = callStack.cdr;
+		try {
+			while (error != null && callStack != null) {
+				ResumeInfo r = callStack.car;
+				callStack = callStack.cdr;
+				if (r.resumable instanceof ProtectedResumable) {
+					ProtectedResumable pr = (ProtectedResumable) r.resumable;
+					pr.resumeError(context, r.savedState, Conversions.throwableToObject(error));
 
-			try {
-				top.resume(context);
-				Dispatch.evaluateTailCalls(context);
-			}
-			catch (CoroutineSwitch.Yield yield) {
-				callStack = prependCalls(yield.frames(), callStack);
-
-				Coroutine target = coro.yieldingTo;
-
-				if (target != null) {
-					objectSink.setToArray(yield.args);
-
-					coro.yieldingTo = null;
-					target.resuming = null;
-
-					return target;
-				}
-				else {
-					// XXX cannot yield outside a coroutine
-					throw new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
+					// exception handled, continue normally
+					error = null;
 				}
 			}
-			catch (CoroutineSwitch.Resume resume) {
-				callStack = prependCalls(resume.frames(), callStack);
 
-				Coroutine target = resume.coroutine;
+			outer:
+			while (callStack != null) {
+				ResumeInfo top = callStack.car;
+				callStack = callStack.cdr;
 
-				if (target.resuming == null && target.callStack != null) {
-					objectSink.setToArray(resume.args);
-
-					target.yieldingTo = coro;
-					coro.resuming = target;
-
-					return target;
+				try {
+					top.resume(context);
+					Dispatch.evaluateTailCalls(context);
 				}
-				else {
-					// XXX cannot resume
-					throw new IllegalStateException("cannot resume a non-suspended coroutine " + target + ", status=" + target.getStatus());
+				catch (CoroutineSwitch.Yield yield) {
+					callStack = prependCalls(yield.frames(), callStack);
+
+					Coroutine target = coro.yieldingTo;
+
+					if (target != null) {
+						objectSink.setToArray(yield.args);
+
+						coro.resuming = null;  // XXX
+						coro.yieldingTo = null;
+						target.resuming = null;
+
+						return CoroutineResumeResult.standard(target);
+					}
+					else {
+						return new CoroutineResumeResult(coro, new IllegalOperationAttemptException("attempt to yield from outside a coroutine"));
+					}
 				}
-			}
-			catch (Preempted preempted) {
-				callStack = prependCalls(preempted.frames(), callStack);
-				assert (callStack != null);
-				return coro;
-			}
-			catch (ControlThrowable ct) {
-				throw new UnsupportedOperationException(ct);
-			}
-			finally {
-				coro.callStack = callStack;
+				catch (CoroutineSwitch.Resume resume) {
+					callStack = prependCalls(resume.frames(), callStack);
+
+					Coroutine target = resume.coroutine;
+
+					if (target.callStack == null) {
+						// dead coroutine
+						return new CoroutineResumeResult(coro, new IllegalStateException("cannot resume dead coroutine"));
+					}
+					else if (target == coro || target.resuming != null) {
+						// running or normal coroutine
+						return new CoroutineResumeResult(coro, new IllegalStateException("cannot resume non-suspended coroutine"));
+					}
+					else {
+						objectSink.setToArray(resume.args);
+
+						target.yieldingTo = coro;
+						coro.resuming = target;
+
+						return CoroutineResumeResult.standard(target);
+					}
+				}
+				catch (Preempted preempted) {
+					callStack = prependCalls(preempted.frames(), callStack);
+					assert (callStack != null);
+					return CoroutineResumeResult.PAUSED;
+				}
+				catch (ControlThrowable ct) {
+					throw new UnsupportedOperationException(ct);
+				}
+				catch (Exception ex) {
+					while (callStack != null) {
+						ResumeInfo r = callStack.car;
+						callStack = callStack.cdr;
+						if (r.resumable instanceof ProtectedResumable) {
+							ProtectedResumable pr = (ProtectedResumable) r.resumable;
+							pr.resumeError(context, r.savedState, Conversions.throwableToObject(ex));
+
+							// exception handled, continue normally
+							continue outer;
+						}
+					}
+
+					// exception not handled in this coroutine
+					error = ex;
+				}
 			}
 		}
+		finally {
+			coro.callStack = callStack;
+		}
+
+		assert (coro.callStack == null);
 
 		Coroutine yieldTarget = coro.yieldingTo;
 		if (yieldTarget != null) {
 			// implicit yield on return
 			coro.yieldingTo = null;
 			yieldTarget.resuming = null;
-			return yieldTarget;
+			return new CoroutineResumeResult(yieldTarget, error);
 		}
 		else {
 			// main coroutine return
-			return null;
+			return new CoroutineResumeResult(null, error);
 		}
 	}
 
 	// return true if execution was paused, false if execution is finished
 	// in other words: returns true iff isPaused() == true afterwards
 	public boolean resume() {
+		Throwable error = null;
+
 		while (currentCoroutine != null) {
-			Coroutine next = resumeCoroutine(currentCoroutine);
-			if (next == currentCoroutine) {
+			CoroutineResumeResult result = resumeCoroutine(currentCoroutine, error);
+
+			if (result == CoroutineResumeResult.PAUSED) {
 				// pause
 				return true;
 			}
 			else {
 				// coroutine switch
-				currentCoroutine = next;
+				currentCoroutine = result.coroutine;
+				error = result.error;
 			}
 		}
 
-		// main coroutine returned
-		return false;
+		if (error == null) {
+			// main coroutine returned
+			return false;
+		}
+		else {
+			// exception in the main coroutine: rethrow
+			throw new ExecutionException(error);
+		}
 	}
 
 }
