@@ -9,6 +9,7 @@ import java.util.Iterator;
 public class Exec {
 
 	private final LuaState state;
+	private final ObjectSink objectSink;
 
 	private final Context context;
 
@@ -17,6 +18,7 @@ public class Exec {
 
 	public Exec(LuaState state) {
 		this.state = Check.notNull(state);
+		this.objectSink = state.newObjectSink();
 		this.context = new Context();
 	}
 
@@ -25,7 +27,7 @@ public class Exec {
 	}
 
 	public ObjectSink getSink() {
-		return mainCoroutine.objectSink();
+		return objectSink;
 	}
 
 	public boolean isPaused() {
@@ -53,12 +55,12 @@ public class Exec {
 
 		@Override
 		public ObjectSink getObjectSink() {
-			return Exec.this.getCurrentCoroutine().objectSink();
+			return objectSink;
 		}
 
 		@Override
 		public Coroutine getCurrentCoroutine() {
-			return Exec.this.getCurrentCoroutine();
+			return currentCoroutine;
 		}
 
 		@Override
@@ -178,7 +180,7 @@ public class Exec {
 				Coroutine target = coro.yieldingTo;
 
 				if (target != null) {
-					target.objectSink().setToArray(yield.args);
+					objectSink.setToArray(yield.args);
 
 					coro.yieldingTo = null;
 					target.resuming = null;
@@ -196,7 +198,7 @@ public class Exec {
 				Coroutine target = resume.coroutine;
 
 				if (target.resuming == null && target.callStack != null) {
-					target.objectSink().setToArray(resume.args);
+					objectSink.setToArray(resume.args);
 
 					target.yieldingTo = coro;
 					coro.resuming = target;
@@ -224,8 +226,6 @@ public class Exec {
 		Coroutine yieldTarget = coro.yieldingTo;
 		if (yieldTarget != null) {
 			// implicit yield on return
-			Object[] args = coro.objectSink().toArray();
-			yieldTarget.objectSink().setToArray(args);
 			coro.yieldingTo = null;
 			yieldTarget.resuming = null;
 			return yieldTarget;
