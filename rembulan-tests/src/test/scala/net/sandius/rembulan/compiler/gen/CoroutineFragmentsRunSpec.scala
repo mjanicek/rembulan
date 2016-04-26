@@ -11,6 +11,6 @@ class CoroutineFragmentsRunSpec extends FragmentExecTestSuite {
   override def expectations = Seq(CoroutineFragments)
   override def contexts = Seq(Coro)
 
-  override val step = 1
+  override def steps = Seq(1, Int.MaxValue)
 
 }

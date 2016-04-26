@@ -19,7 +19,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   def expectations: Seq[FragmentExpectations]
   def contexts: Seq[FragmentExpectations.Env]
 
-  def step: Int
+  def steps: Seq[Int]
 
   protected val Empty = FragmentExpectations.Env.Empty
   protected val Basic = FragmentExpectations.Env.Basic
@@ -38,7 +38,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
     }
   }
 
-  class CountingPreemptionContext extends AbstractPreemptionContext {
+  class CountingPreemptionContext(step: Int) extends AbstractPreemptionContext {
     var totalCost = 0
     private var allowance = step
 
@@ -62,72 +62,75 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
         for (ctx <- contexts) {
 
-          describe ("in " + ctx) {
-            it ("can be executed") {
-              val preemptionContext = new CountingPreemptionContext
+          for (s <- steps) {
 
-              val exec = Util.timed("Compilation and setup") {
-                val ldr = new PrototypeCompilerChunkLoader(
-                  new LuaCPrototypeReader(luacName),
-                  getClass.getClassLoader)
+            describe ("in " + ctx) {
+              it ("can be executed with " + s + " steps") {
+                val preemptionContext = new CountingPreemptionContext(s)
+
+                val exec = Util.timed("Compilation and setup") {
+                  val ldr = new PrototypeCompilerChunkLoader(
+                    new LuaCPrototypeReader(luacName),
+                    getClass.getClassLoader)
 
 
-                val state = new DefaultLuaState.Builder()
-                    .withPreemptionContext(preemptionContext)
-                    .build()
+                  val state = new DefaultLuaState.Builder()
+                      .withPreemptionContext(preemptionContext)
+                      .build()
 
-                val env = envForContext(state, ctx)
-                val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
+                  val env = envForContext(state, ctx)
+                  val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
 
-                val exec = new Exec(state)
-                exec.init(func)
-                exec
-              }
-
-              var steps = 0
-
-              val before = System.nanoTime()
-              val res = try {
-                while (exec.isPaused) {
-                  exec.resume()
-                  steps += 1
+                  val exec = new Exec(state)
+                  exec.init(func)
+                  exec
                 }
-                Right(exec.getSink.toArray.toSeq)
-              }
-              catch {
-                case ex: lua.ExecutionException => Left(ex.getCause)
-              }
-              val after = System.nanoTime()
 
-              val totalTimeMillis = (after - before) / 1000000.0
-              val totalCPUUnitsSpent = preemptionContext.totalCost
-              val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
-              val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+                var steps = 0
 
-              println("Execution took %.1f ms".format(totalTimeMillis))
-              println("Total CPU cost: " + preemptionContext.totalCost + " LI")
-              println("Computation steps: " + steps)
-              println()
-              println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
-              println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
-              println()
-
-              res match {
-                case Right(result) =>
-                  println("Result: success (" + result.size + " values):")
-                  for ((v, i) <- result.zipWithIndex) {
-                    println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
+                val before = System.nanoTime()
+                val res = try {
+                  while (exec.isPaused) {
+                    exec.resume()
+                    steps += 1
                   }
-                case Left(ex) =>
-                  println("Result: error: " + ex.getMessage)
-              }
+                  Right(exec.getSink.toArray.toSeq)
+                }
+                catch {
+                  case ex: lua.ExecutionException => Left(ex.getCause)
+                }
+                val after = System.nanoTime()
 
-              for (expects <- expectations;
-                    ctxExp <- expects.expectationFor(fragment);
-                    exp <- ctxExp.get(ctx)) {
+                val totalTimeMillis = (after - before) / 1000000.0
+                val totalCPUUnitsSpent = preemptionContext.totalCost
+                val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
+                val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
 
-                exp.tryMatch(res)(this)
+                println("Execution took %.1f ms".format(totalTimeMillis))
+                println("Total CPU cost: " + preemptionContext.totalCost + " LI")
+                println("Computation steps: " + steps)
+                println()
+                println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+                println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+                println()
 
+                res match {
+                  case Right(result) =>
+                    println("Result: success (" + result.size + " values):")
+                    for ((v, i) <- result.zipWithIndex) {
+                      println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
+                    }
+                  case Left(ex) =>
+                    println("Result: error: " + ex.getMessage)
+                }
+
+                for (expects <- expectations;
+                      ctxExp <- expects.expectationFor(fragment);
+                      exp <- ctxExp.get(ctx)) {
+
+                  exp.tryMatch(res)(this)
+
+                }
               }
             }
           }
