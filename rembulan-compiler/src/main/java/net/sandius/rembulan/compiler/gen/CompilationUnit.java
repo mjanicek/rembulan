@@ -103,10 +103,10 @@ public class CompilationUnit {
 		byte[] bytes = writer.toByteArray();
 
 		// verify bytecode
-		ClassReader reader = new ClassReader(bytes);
-		ClassVisitor tracer = new TraceClassVisitor(new PrintWriter(System.out));
-		ClassVisitor checker = new CheckClassAdapter(tracer, true);
-		reader.accept(checker, 0);
+//		ClassReader reader = new ClassReader(bytes);
+//		ClassVisitor tracer = new TraceClassVisitor(new PrintWriter(System.out));
+//		ClassVisitor checker = new CheckClassAdapter(tracer, true);
+//		reader.accept(checker, 0);
 
 		return new CompiledClass(ctx.className(), ByteVector.wrap(bytes));
 	}
