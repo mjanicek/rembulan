@@ -94,7 +94,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Serializable suspendedState, Object error) {
+		public void resumeError(ExecutionContext context, Serializable suspendedState, Object error) throws ControlThrowable {
 			context.getObjectSink().setTo(false, error);
 		}
 

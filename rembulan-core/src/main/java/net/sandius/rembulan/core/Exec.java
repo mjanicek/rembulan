@@ -183,17 +183,6 @@ public class Exec {
 		Cons<ResumeInfo> callStack = coro.callStack;
 
 		try {
-			while (error != null && callStack != null) {
-				ResumeInfo r = callStack.car;
-				callStack = callStack.cdr;
-				if (r.resumable instanceof ProtectedResumable) {
-					ProtectedResumable pr = (ProtectedResumable) r.resumable;
-					pr.resumeError(context, r.savedState, Conversions.throwableToObject(error));
-
-					// exception handled, continue normally
-					error = null;
-				}
-			}
 
 			outer:
 			while (callStack != null) {
@@ -201,8 +190,26 @@ public class Exec {
 				callStack = callStack.cdr;
 
 				try {
-					top.resume(context);
-					Dispatch.evaluateTailCalls(context);
+					if (error == null) {
+						// no errors
+						top.resume(context);
+						Dispatch.evaluateTailCalls(context);
+					}
+					else {
+						// there is an error to be handled
+						if (top.resumable instanceof ProtectedResumable) {
+							// top is protected, can handle the error
+							Throwable e = error;
+							error = null;  // this exception will be handled
+
+							ProtectedResumable pr = (ProtectedResumable) top.resumable;
+							pr.resumeError(context, top.savedState, Conversions.throwableToObject(e));
+							Dispatch.evaluateTailCalls(context);
+						}
+						else {
+							// top is not protected, continue unwinding the stack
+						}
+					}
 				}
 				catch (CoroutineSwitch.Yield yield) {
 					callStack = prependCalls(yield.frames(), callStack);
@@ -253,19 +260,7 @@ public class Exec {
 					throw new UnsupportedOperationException(ct);
 				}
 				catch (Exception ex) {
-					while (callStack != null) {
-						ResumeInfo r = callStack.car;
-						callStack = callStack.cdr;
-						if (r.resumable instanceof ProtectedResumable) {
-							ProtectedResumable pr = (ProtectedResumable) r.resumable;
-							pr.resumeError(context, r.savedState, Conversions.throwableToObject(ex));
-
-							// exception handled, continue normally
-							continue outer;
-						}
-					}
-
-					// exception not handled in this coroutine
+					// unhandled exception: will try finding a handler in the next iteration
 					error = ex;
 				}
 			}

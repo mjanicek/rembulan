@@ -4,6 +4,6 @@ import java.io.Serializable;
 
 public interface ProtectedResumable extends Resumable {
 
-	void resumeError(ExecutionContext context, Serializable suspendedState, Object error);
+	void resumeError(ExecutionContext context, Serializable suspendedState, Object error) throws ControlThrowable;
 
 }
