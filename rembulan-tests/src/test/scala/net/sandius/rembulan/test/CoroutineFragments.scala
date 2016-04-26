@@ -76,6 +76,21 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
   }
   ResumeCurrentFails in CoroContext succeedsWith (false, "cannot resume non-suspended coroutine")
 
+  val ResumeDead = fragment ("ResumeDead") {
+    """local c = coroutine.create(function() end)
+      |return coroutine.resume(c), coroutine.resume(c)
+    """
+  }
+  ResumeDead in CoroContext succeedsWith (true, false, "cannot resume dead coroutine")
+
+  val ResumeMainFromUpvalue = fragment ("ResumeMainFromUpvalue") {
+    """local main = coroutine.running()
+      |local c = coroutine.create(function() return coroutine.resume(main) end)
+      |return coroutine.resume(c)
+    """
+  }
+  ResumeMainFromUpvalue in CoroContext succeedsWith (true, false, "cannot resume non-suspended coroutine")
+
   val WrapReturnsAFunction = fragment ("WrapReturnsAFunction") {
     """local function f(...) return ... end
       |local w = coroutine.wrap(f)
@@ -91,6 +106,12 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
     """
   }
   RunningCoroutineStatus in CoroContext succeedsWith ("running")
+
+  val NormalCoroutineStatus = fragment ("NormalCoroutineStatus") {
+    """return coroutine.resume(coroutine.create(function(c) return coroutine.status(c) end), coroutine.running())
+    """
+  }
+  NormalCoroutineStatus in CoroContext succeedsWith (true, "normal")
 
   val YieldFromOutsideCoroutine = fragment ("YieldFromOutsideCoroutine") {
     """coroutine.yield()
