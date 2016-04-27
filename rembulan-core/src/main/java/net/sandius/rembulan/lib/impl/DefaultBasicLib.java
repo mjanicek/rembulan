@@ -364,13 +364,13 @@ public class DefaultBasicLib extends BasicLib {
 				return;
 			}
 
-			context.getObjectSink().prepend(new Object[] {Boolean.TRUE});  // success
+			context.getObjectSink().prepend(Boolean.TRUE);  // success
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			// success
-			context.getObjectSink().prepend(new Object[] {Boolean.TRUE});
+			context.getObjectSink().prepend(Boolean.TRUE);
 		}
 
 		@Override
@@ -397,7 +397,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		private void prependTrue(ExecutionContext context) {
-			context.getObjectSink().prepend(new Object[] {Boolean.TRUE});
+			context.getObjectSink().prepend(Boolean.TRUE);
 		}
 
 		private void prependFalseAndPad(ExecutionContext context) {
@@ -408,7 +408,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				// just prepend false
-				os.prepend(new Object[] {Boolean.FALSE});
+				os.prepend(Boolean.FALSE);
 			}
 		}
 
@@ -438,7 +438,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				// depth must be >= MAX_DEPTH
-				context.getObjectSink().setTo(false, "error in error handling");
+				context.getObjectSink().setTo(Boolean.FALSE, "error in error handling");
 			}
 		}
 

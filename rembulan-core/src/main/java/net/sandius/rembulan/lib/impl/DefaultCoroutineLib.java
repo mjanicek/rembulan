@@ -88,12 +88,12 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			context.getObjectSink().prepend(new Object[] {true});
+			context.getObjectSink().prepend(Boolean.TRUE);
 		}
 
 		@Override
 		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
-			context.getObjectSink().setTo(false, error);
+			context.getObjectSink().setTo(Boolean.FALSE, error);
 		}
 
 	}

@@ -96,6 +96,10 @@ public abstract class ObjectSink {
 		}
 	}
 
+	public void prepend(Object o) {
+		prepend(new Object[] {o});
+	}
+
 	public void prepend(Object[] values) {
 		Object[] old = toArray();
 		reset();
