@@ -66,7 +66,7 @@ public class Exec {
 		@Override
 		public Coroutine newCoroutine(Function function) {
 			CoroutineImpl coroutine = new CoroutineImpl(state);
-			coroutine.callStack = new Cons<>(new ResumeInfo(CoroutineBootstrapResumable.INSTANCE, new SerializableFunction(function)));
+			coroutine.callStack = new Cons<>(new ResumeInfo(CoroutineBootstrapResumable.INSTANCE, function));
 			return coroutine;
 		}
 
@@ -93,21 +93,13 @@ public class Exec {
 
 	}
 
-	@Deprecated
-	protected static class SerializableFunction implements Serializable {
-		public final Function f;
-		public SerializableFunction(Function f) {
-			this.f = Check.notNull(f);
-		}
-	}
-
 	protected static class CoroutineBootstrapResumable implements Resumable {
 
 		static final CoroutineBootstrapResumable INSTANCE = new CoroutineBootstrapResumable();
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			Function target = ((SerializableFunction) suspendedState).f;
+			Function target = (Function) suspendedState;
 			Dispatch.call(context, target, context.getObjectSink().toArray());
 		}
 	}
