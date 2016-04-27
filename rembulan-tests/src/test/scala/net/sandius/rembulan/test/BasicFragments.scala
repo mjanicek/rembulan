@@ -906,6 +906,20 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   XPCallWithErroneousHandler in BasicContext succeedsWith (false, "error in error handling")
 
+  val XPCallMaxDepth = fragment ("XPCallMaxDepth") {
+    """local count = 0
+      |
+      |local function handler(e)
+      |  count = count + 1
+      |  error(e)
+      |end
+      |
+      |local a, b = xpcall(error, handler)
+      |return a, b, count
+    """
+  }
+  XPCallMaxDepth in BasicContext succeedsWith (false, "error in error handling", 220)  // 220 in PUC-Lua 5.3
+
   val RawEqualWithNoArgs = fragment ("RawEqualWithNoArgs") {
     """return rawequal()
     """
