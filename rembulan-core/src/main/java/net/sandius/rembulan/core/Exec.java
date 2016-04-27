@@ -234,7 +234,8 @@ public class Exec {
 					if (target != null) {
 						objectSink.setToArray(yield.args);
 
-						coro.resuming = null;  // XXX
+						assert (coro.resuming == null);
+
 						coro.yieldingTo = null;
 						target.resuming = null;
 
