@@ -1,5 +1,6 @@
 package net.sandius.rembulan.lib;
 
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
@@ -54,6 +55,33 @@ public class LibUtils {
 		else {
 			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (value expected)");
 		}
+	}
+
+	// FIXME: clean this up: redundant code!
+	public static int checkInteger(String name, Object[] args, int index) {
+		final String what;
+		if (index < args.length) {
+			Object arg = args[index];
+
+			if (arg instanceof Number) {
+				Long l = Conversions.numberAsLong((Number) arg);
+				if (l != null) {
+					long ll = l;
+					if (ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE) {
+						return (int) ll;
+					}
+				}
+
+				throw new IllegalArgumentException("number has no integer representation");
+			}
+			else {
+				what = Value.typeOf(arg).name;
+			}
+		}
+		else {
+			what = "no value";
+		}
+		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (integer expected, got " + what + ")");
 	}
 
 	// FIXME: clean this up: redundant code!

@@ -60,7 +60,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _ipairs() {
-		return null;  // TODO
+		return IPairs.INSTANCE;
 	}
 
 	@Override
@@ -229,6 +229,33 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
+	public static class INext extends FunctionAnyarg {
+
+		public static final INext INSTANCE = new INext();
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Table table = LibUtils.checkTable("inext", args, 0);
+			int index = LibUtils.checkInteger("inext", args, 1);
+
+			index += 1;
+
+			Object o = table.rawget(index);
+			if (o != null) {
+				context.getObjectSink().setTo(index, o);
+			}
+			else {
+				context.getObjectSink().setTo(null);
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
 	public static class Pairs extends FunctionAnyarg {
 
 		public static final Pairs INSTANCE = new Pairs();
@@ -260,6 +287,23 @@ public class DefaultBasicLib extends BasicLib {
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			ObjectSink os = context.getObjectSink();
 			os.setTo(os._0(), os._1(), os._2());
+		}
+
+	}
+
+	public static class IPairs extends FunctionAnyarg {
+
+		public static final IPairs INSTANCE = new IPairs();
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Table t = LibUtils.checkTable("ipairs", args, 0);
+			context.getObjectSink().setTo(INext.INSTANCE, t, 0L);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
 	}

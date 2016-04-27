@@ -1108,4 +1108,42 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   PairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'pairs' (table expected, got no value)")
 
+  val IPairsOnList = fragment ("IPairsOnList") {
+    """local l = {5, 4, 3, 2}
+      |local count = 0
+      |local a = 1
+      |local s = ""
+      |
+      |for i, v in ipairs(l) do
+      |  count = count + 1
+      |  a = a * v + i
+      |  s = s..i..v
+      |end
+      |
+      |return count, a, s
+    """
+  }
+  IPairsOnList in BasicContext succeedsWith (4, 166, "15243342")
+
+  val IPairsWithMetatable = fragment ("IPairsWithMetatable") {
+    """local t = {}
+      |local mt = { __pairs = function(x) error() end }
+      |setmetatable(t, mt)
+      |return ipairs(t)
+    """
+  }
+  IPairsWithMetatable in BasicContext succeedsWith (classOf[Function], classOf[Table], 0)
+
+  val IPairsNoTable = fragment ("IPairsNoTable") {
+    """ipairs(42)
+    """
+  }
+  IPairsNoTable in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'ipairs' (table expected, got number)")
+
+  val IPairsNoArg = fragment ("IPairsNoArg") {
+    """ipairs()
+    """
+  }
+  IPairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'ipairs' (table expected, got no value)")
+
 }
