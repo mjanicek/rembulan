@@ -1087,6 +1087,15 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   PairsOnTable in BasicContext succeedsWith (3)
 
+  val PairsWithMetatable = fragment ("PairsWithMetatable") {
+    """local t = {}
+      |local mt = { __pairs = function(x) return 1, 2, 3 end }
+      |setmetatable(t, mt)
+      |return pairs(t)
+    """
+  }
+  PairsWithMetatable in BasicContext succeedsWith (1, 2, 3)
+
   val PairsNoTable = fragment ("PairsNoTable") {
     """pairs(42)
     """
