@@ -1053,4 +1053,20 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   NextNaNKey in BasicContext failsWith (classOf[IllegalArgumentException], "invalid key to 'next'")
 
+  val PairsOnTable = fragment ("PairsOnTable") {
+    """local t = {u = "hu"}
+      |t[42] = {}
+      |t.hello = 22/7
+      |
+      |local count = 0
+      |
+      |for k, v in pairs(t) do
+      |  count = count + 1
+      |end
+      |
+      |return count
+    """
+  }
+  PairsOnTable in BasicContext succeedsWith (3)
+
 }

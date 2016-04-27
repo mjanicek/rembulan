@@ -55,7 +55,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _pairs() {
-		return null;  // TODO
+		return Pairs.INSTANCE;
 	}
 
 	@Override
@@ -224,6 +224,41 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Pairs extends FunctionAnyarg {
+
+		public static final Pairs INSTANCE = new Pairs();
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Object t = Varargs.getElement(args, 0);
+			Object metamethod = Metatables.getMetamethod(context.getState(), "__pairs", t);
+
+			if (metamethod != null) {
+				try {
+					Dispatch.call(context, metamethod, t);
+				}
+				catch (ControlThrowable ct) {
+					ct.push(this, null);
+					throw ct;
+				}
+
+				ObjectSink os = context.getObjectSink();
+				os.setTo(os._0(), os._1(), os._2());
+			}
+			else {
+				ObjectSink os = context.getObjectSink();
+				os.setTo(Next.INSTANCE, t, null);
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			ObjectSink os = context.getObjectSink();
+			os.setTo(os._0(), os._1(), os._2());
 		}
 
 	}
