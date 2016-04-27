@@ -480,8 +480,8 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Object callTarget = Varargs.getElement(args, 0);
-			Function handler = LibUtils.getArgument(args, 1, Function.class);
+			Function handler = LibUtils.checkFunction("xpcall", args, 1);
+			Object callTarget = LibUtils.checkValue("xpcall", args, 0);
 			Object[] callArgs = Varargs.from(args, 2);
 
 			Object errorObject = null;
@@ -531,10 +531,8 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			LibUtils.checkArgCount("rawequal", args, 2);
-
-			Object a = args[0];
-			Object b = args[1];
+			Object a = LibUtils.checkValue("rawequal", args, 0);
+			Object b = LibUtils.checkValue("rawequal", args, 1);
 
 			context.getObjectSink().setTo(RawOperators.raweq(a, b));
 		}
@@ -553,10 +551,9 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 			Table table = LibUtils.checkTable("rawget", args, 0);
-			Object arg2 = Varargs.getElement(args, 1);
-			LibUtils.checkArgCount("rawget", args, 2);
+			Object key = LibUtils.checkValue("rawget", args, 1);
 
-			context.getObjectSink().setTo(table.rawget(arg2));
+			context.getObjectSink().setTo(table.rawget(key));
 		}
 
 		@Override
@@ -573,10 +570,8 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 			Table table = LibUtils.checkTable("rawset", args, 0);
-			Object key = Varargs.getElement(args, 1);
-			Object value = Varargs.getElement(args, 2);
-
-			LibUtils.checkArgCount("rawset", args, 3);
+			Object key = LibUtils.checkValue("rawset", args, 1);
+			Object value = LibUtils.checkValue("rawset", args, 2);
 
 			table.rawset(key, value);
 			context.getObjectSink().setTo(table);

@@ -51,13 +51,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		return Wrap.INSTANCE;
 	}
 
-	public static class Create extends Function1 {
+	public static class Create extends FunctionAnyarg {
 
 		public static final Create INSTANCE = new Create();
 		
 		@Override
-		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
-			Function func = LibUtils.checkArgument(arg1, 0, Function.class);
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Function func = LibUtils.checkFunction("create", args, 0);
 			Coroutine c = context.newCoroutine(func);
 			context.getObjectSink().setTo(c);
 		}
@@ -75,7 +75,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Coroutine coroutine = LibUtils.getArgument(args, 0, Coroutine.class);
+			Coroutine coroutine = LibUtils.checkCoroutine("resume", args, 0);
 			Object[] resumeArgs = Varargs.from(args, 1);
 
 			context.getObjectSink().reset();

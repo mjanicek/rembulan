@@ -1,5 +1,7 @@
 package net.sandius.rembulan.lib;
 
+import net.sandius.rembulan.core.Coroutine;
+import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
@@ -35,6 +37,7 @@ public class LibUtils {
 		}
 	}
 
+	@Deprecated
 	public static <T> T checkArgument(Object arg, int index, Class<T> clazz) {
 		if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
 			return (T) arg ;
@@ -44,6 +47,16 @@ public class LibUtils {
 		}
 	}
 
+	public static Object checkValue(String name, Object[] args, int index) {
+		if (index < args.length) {
+			return args[index];
+		}
+		else {
+			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (value expected)");
+		}
+	}
+
+	// FIXME: clean this up: redundant code!
 	public static Table checkTable(String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
@@ -61,23 +74,40 @@ public class LibUtils {
 		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (table expected, got " + what + ")");
 	}
 
-	public static Table checkTable(String name, Object arg, int index) {
-		if (arg instanceof Table) {
-			return (Table) arg;
+	// FIXME: clean this up: redundant code!
+	public static Function checkFunction(String name, Object[] args, int index) {
+		final String what;
+		if (index < args.length) {
+			Object arg = args[index];
+			if (arg instanceof Function) {
+				return (Function) arg;
+			}
+			else {
+				what = Value.typeOf(arg).name;
+			}
 		}
 		else {
-			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (table expected, got " + Value.typeOf(arg).name + ")");
+			what = "no value";
 		}
+		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (function expected, got " + what + ")");
 	}
 
-	public static <T> T getArgument(Object[] args, int index, Class<T> clazz) {
-		return checkArgument(Varargs.getElement(args, index), index, clazz);
-	}
-
-	public static void checkArgCount(String name, Object[] args, int minCount) {
-		if (args.length < minCount) {
-			throw new IllegalArgumentException("bad argument #" + (args.length + 1) + " to '" + name + "' (value expected)");
+	// FIXME: clean this up: redundant code!
+	public static Coroutine checkCoroutine(String name, Object[] args, int index) {
+		final String what;
+		if (index < args.length) {
+			Object arg = args[index];
+			if (arg instanceof Coroutine) {
+				return (Coroutine) arg;
+			}
+			else {
+				what = Value.typeOf(arg).name;
+			}
 		}
+		else {
+			what = "no value";
+		}
+		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (coroutine expected, got " + what + ")");
 	}
 
 }
