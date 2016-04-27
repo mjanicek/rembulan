@@ -88,7 +88,7 @@ public class DefaultTable extends Table {
 			}
 		}
 
-		throw new IllegalArgumentException("illegal key to 'next'");
+		throw new IllegalArgumentException("invalid key to 'next'");
 	}
 
 }

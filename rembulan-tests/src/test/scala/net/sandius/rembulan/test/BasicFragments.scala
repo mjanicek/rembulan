@@ -1021,4 +1021,22 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   NextTraversesEverything in BasicContext succeedsWith (3)
 
+  val NextArgMustBeTable = fragment ("NextArgMustBeTable") {
+    """next(uu)
+    """
+  }
+  NextArgMustBeTable in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'next' (table expected, got nil)")
+
+  val NextNonexistentKey = fragment ("NextNonexistentKey") {
+    """next({}, "boom")
+    """
+  }
+  NextNonexistentKey in BasicContext failsWith (classOf[IllegalArgumentException], "invalid key to 'next'")
+
+  val NextNaNKey = fragment ("NextNaNKey") {
+    """next({}, "0/0")
+    """
+  }
+  NextNaNKey in BasicContext failsWith (classOf[IllegalArgumentException], "invalid key to 'next'")
+
 }
