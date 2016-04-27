@@ -382,7 +382,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	public static class XPCall extends FunctionAnyarg implements ProtectedResumable {
 
-		public static final int MAX_DEPTH = 50;
+		public static final int MAX_DEPTH = 220;  // 220 in PUC-Lua 5.3
 
 		public static final XPCall INSTANCE = new XPCall();
 
