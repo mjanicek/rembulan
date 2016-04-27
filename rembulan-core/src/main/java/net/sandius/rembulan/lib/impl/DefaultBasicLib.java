@@ -10,6 +10,7 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
@@ -98,7 +99,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _xpcall() {
-		return null;  // TODO
+		return XPCall.INSTANCE;
 	}
 
 	@Override
@@ -336,6 +337,115 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
 			context.getObjectSink().setTo(Boolean.FALSE, error);
+		}
+
+	}
+
+	public static class XPCall extends FunctionAnyarg implements ProtectedResumable {
+
+		public static final int MAX_DEPTH = 50;
+
+		public static final XPCall INSTANCE = new XPCall();
+
+		private static class SavedState {
+			public final Function handler;
+			public final int depth;
+
+			private SavedState(Function handler, int depth) {
+				this.handler = handler;
+				this.depth = depth;
+			}
+		}
+
+		private void prependTrue(ExecutionContext context) {
+			context.getObjectSink().prepend(new Object[] {Boolean.TRUE});
+		}
+
+		private void prependFalseAndPad(ExecutionContext context) {
+			ObjectSink os = context.getObjectSink();
+			if (os.size() == 0) {
+				// if empty, pad with a dummy nil value
+				os.setTo(Boolean.FALSE, null);
+			}
+			else {
+				// just prepend false
+				os.prepend(new Object[] {Boolean.FALSE});
+			}
+		}
+
+		private void handleError(ExecutionContext context, Function handler, int depth, Object errorObject) throws ControlThrowable {
+			// we want to be able to handle nil error objects, so we need a separate flag
+			boolean isError = true;
+
+			while (isError && depth < MAX_DEPTH) {
+				depth += 1;
+
+				try {
+					Dispatch.call(context, handler, errorObject);
+					isError = false;
+				}
+				catch (ControlThrowable ct) {
+					ct.push(this, new SavedState(handler, depth));
+					throw ct;
+				}
+				catch (Exception e) {
+					errorObject = Conversions.throwableToObject(e);
+					isError = true;
+				}
+			}
+
+			if (!isError) {
+				prependFalseAndPad(context);
+			}
+			else {
+				// depth must be >= MAX_DEPTH
+				context.getObjectSink().setTo(false, "error in error handling");
+			}
+		}
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Object callTarget = Varargs.getElement(args, 0);
+			Function handler = LibUtils.getArgument(args, 1, Function.class);
+			Object[] callArgs = Varargs.from(args, 2);
+
+			Object errorObject = null;
+			boolean isError = false;  // need to distinguish nil error objects from no-error
+
+			try {
+				Dispatch.call(context, callTarget, callArgs);
+			}
+			catch (ControlThrowable ct) {
+				ct.push(this, new SavedState(handler, 0));
+			}
+			catch (Exception e) {
+				errorObject = Conversions.throwableToObject(e);
+				isError = true;
+			}
+
+			if (!isError) {
+				prependTrue(context);
+			}
+			else {
+				handleError(context, handler, 0, errorObject);
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			SavedState ss = (SavedState) suspendedState;
+			if (ss.depth == 0) {
+				prependTrue(context);
+			}
+			else {
+				prependFalseAndPad(context);
+			}
+		}
+
+		@Override
+		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
+			SavedState ss = (SavedState) suspendedState;
+			handleError(context, ss.handler, ss.depth, error);
 		}
 
 	}

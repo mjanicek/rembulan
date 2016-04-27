@@ -805,6 +805,12 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   BigForLoop in EmptyContext succeedsWith (500000500000L)
 
+  val TypesOfValues = fragment ("TypesOfValues") {
+    """return type(x), type(true), type(false), type(42), type(42.0), type("hello"), type({})
+    """
+  }
+  TypesOfValues in BasicContext succeedsWith ("nil", "boolean", "boolean", "number", "number", "string", "table")
+
   val BasicPCall = fragment ("BasicPCall") {
     """return pcall(something, "with argument", 123)
     """
@@ -873,5 +879,31 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   ErrorThrowsAnError in BasicContext failsWith (classOf[LuaRuntimeException], "boom!")
+
+  val ErrorWithoutArguments = fragment ("ErrorWithoutArguments") {
+    """local a, b = pcall(error)
+      |return a, b, type(b)
+    """
+  }
+  ErrorWithoutArguments in BasicContext succeedsWith (false, null, "nil")
+
+  val XPCallAndError = fragment ("XPCallAndError") {
+    """local a, b, c = xpcall(error, function(e) return type(e), e end)
+      |return a, b, type(b), c, type(c)
+    """
+  }
+  XPCallAndError in BasicContext succeedsWith (false, "nil", "string", null, "nil")
+
+  val XPCallWithEmptyHandler = fragment ("XPCallWithEmptyHandler") {
+    """return xpcall(error, function() end)
+    """
+  }
+  XPCallWithEmptyHandler in BasicContext succeedsWith (false, null)
+
+  val XPCallWithErroneousHandler = fragment ("XPCallWithErroneousHandler") {
+    """return xpcall(error, function() error() end)
+    """
+  }
+  XPCallWithErroneousHandler in BasicContext succeedsWith (false, "error in error handling")
 
 }
