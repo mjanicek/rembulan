@@ -15,8 +15,6 @@ import org.openjdk.jmh.annotations.Fork;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.Warmup;
 
-import java.io.Serializable;
-
 import static net.sandius.rembulan.util.testing.Assertions.assertEquals;
 
 @Fork(1)
@@ -220,7 +218,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -256,7 +254,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -291,7 +289,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -326,7 +324,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -402,7 +400,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -442,7 +440,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -481,7 +479,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 
@@ -520,7 +518,7 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new UnsupportedOperationException();
 		}
 

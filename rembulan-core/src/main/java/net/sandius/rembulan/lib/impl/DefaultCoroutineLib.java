@@ -14,8 +14,6 @@ import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.lib.LibUtils;
 
-import java.io.Serializable;
-
 public class DefaultCoroutineLib extends CoroutineLib {
 
 	@Override
@@ -65,7 +63,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -89,12 +87,12 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			context.getObjectSink().prepend(new Object[] {true});
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Serializable suspendedState, Object error) throws ControlThrowable {
+		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
 			context.getObjectSink().setTo(false, error);
 		}
 
@@ -112,7 +110,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 		}
 
 	}
@@ -127,7 +125,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -144,7 +142,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -160,7 +158,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -177,7 +175,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 

@@ -2,14 +2,12 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
-import java.io.Serializable;
-
 public class ResumeInfo {
 
 	public final Resumable resumable;
-	public final Serializable savedState;
+	public final Object savedState;
 
-	public ResumeInfo(Resumable resumable, Serializable savedState) {
+	public ResumeInfo(Resumable resumable, Object savedState) {
 		this.resumable = Check.notNull(resumable);
 		this.savedState = savedState;
 	}

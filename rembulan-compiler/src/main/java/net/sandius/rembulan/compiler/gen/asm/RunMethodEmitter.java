@@ -25,7 +25,6 @@ import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -255,7 +254,7 @@ public class RunMethodEmitter {
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						Type.getType(Resumable.class),
-						Type.getType(Serializable.class)).getDescriptor(),
+						ClassEmitter.savedStateType()).getDescriptor(),
 				false));
 
 		// rethrow

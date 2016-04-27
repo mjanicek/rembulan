@@ -6,8 +6,6 @@ import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.core.impl.Varargs;
 
-import java.io.Serializable;
-
 public class java_Varargs extends FunctionAnyarg {
 
 	@Override
@@ -16,7 +14,7 @@ public class java_Varargs extends FunctionAnyarg {
 	}
 
 	@Override
-	public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+	public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 		DefaultSavedState ss = (DefaultSavedState) suspendedState;
 		Object[] regs = ss.registers();
 		run(context, ss.varargs(), regs[0], regs[1]);

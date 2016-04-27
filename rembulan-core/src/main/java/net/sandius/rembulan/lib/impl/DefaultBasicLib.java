@@ -21,7 +21,6 @@ import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;
-import java.io.Serializable;
 
 public class DefaultBasicLib extends BasicLib {
 
@@ -168,7 +167,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -185,7 +184,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -205,7 +204,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -221,7 +220,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -241,7 +240,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -280,7 +279,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
@@ -311,13 +310,13 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			// success
 			context.getObjectSink().prepend(new Object[] {Boolean.TRUE});
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Serializable suspendedState, Object error) throws ControlThrowable {
+		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
 			context.getObjectSink().setTo(Boolean.FALSE, error);
 		}
 

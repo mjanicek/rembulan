@@ -14,7 +14,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import java.io.Serializable;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -34,7 +33,7 @@ public class ResumeMethodEmitter {
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						Type.getType(ExecutionContext.class),
-						Type.getType(Serializable.class)).getDescriptor(),
+						ClassEmitter.savedStateType()).getDescriptor(),
 						null,
 				RunMethodEmitter.exceptions());
 	}
@@ -126,7 +125,7 @@ public class ResumeMethodEmitter {
 
 			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
 			locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, begin, end, 1));
-			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 2));
+			locals.add(new LocalVariableNode("suspendedState", ClassEmitter.savedStateType().getDescriptor(), null, begin, end, 2));
 			locals.add(new LocalVariableNode("ss", Type.getDescriptor(DefaultSavedState.class), null, vars, end, 3));
 
 			// TODO: maxStack, maxLocals
@@ -150,7 +149,7 @@ public class ResumeMethodEmitter {
 
 			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));
 			locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, begin, end, 1));
-			locals.add(new LocalVariableNode("suspendedState", Type.getDescriptor(Object.class), null, begin, end, 2));
+			locals.add(new LocalVariableNode("suspendedState", ClassEmitter.savedStateType().getDescriptor(), null, begin, end, 2));
 
 			node.maxStack = 2;
 			node.maxLocals = 3;

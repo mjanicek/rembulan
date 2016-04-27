@@ -2,7 +2,6 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Cons;
 
-import java.io.Serializable;
 import java.util.Iterator;
 
 public abstract class ControlThrowable extends Throwable {
@@ -18,7 +17,7 @@ public abstract class ControlThrowable extends Throwable {
 		return this;
 	}
 
-	public void push(Resumable resumable, Serializable suspendedState) {
+	public void push(Resumable resumable, Object suspendedState) {
 		resumeStack = new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack);
 	}
 

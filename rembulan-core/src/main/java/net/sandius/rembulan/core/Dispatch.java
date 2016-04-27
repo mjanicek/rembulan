@@ -1,7 +1,5 @@
 package net.sandius.rembulan.core;
 
-import java.io.Serializable;
-
 public abstract class Dispatch {
 
 	private Dispatch() {
@@ -391,7 +389,7 @@ public abstract class Dispatch {
 	private static class ComparisonResumable implements Resumable {
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			Boolean b = (Boolean) suspendedState;
 			ObjectSink result = context.getObjectSink();
 			boolean resultValue = Conversions.objectToBoolean(result._0());

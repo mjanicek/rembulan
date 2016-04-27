@@ -101,6 +101,10 @@ public class ClassEmitter {
 		return Type.getType(InvokeKind.nativeClassForKind(kind()));
 	}
 
+	public static Type savedStateType() {
+		return Type.getType(Object.class);
+	}
+
 	public void end() {
 		runMethod().end();
 

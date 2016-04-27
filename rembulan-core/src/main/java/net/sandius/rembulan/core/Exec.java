@@ -106,7 +106,7 @@ public class Exec {
 		static final CoroutineBootstrapResumable INSTANCE = new CoroutineBootstrapResumable();
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			Function target = ((SerializableFunction) suspendedState).f;
 			Dispatch.call(context, target, context.getObjectSink().toArray());
 		}
@@ -117,12 +117,12 @@ public class Exec {
 		static final BootstrapResumable INSTANCE = new BootstrapResumable();
 
 		@Override
-		public void resume(ExecutionContext context, Serializable suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			Call c = (Call) suspendedState;
 			Dispatch.call(context, c.target, c.args);
 		}
 
-		private static class Call implements Serializable {
+		private static class Call {
 			public final Object target;
 			public final Object[] args;
 			public Call(Object target, Object[] args) {

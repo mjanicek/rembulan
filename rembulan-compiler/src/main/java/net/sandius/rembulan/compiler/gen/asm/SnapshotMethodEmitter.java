@@ -12,7 +12,6 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,7 +60,7 @@ public class SnapshotMethodEmitter {
 		for (int i = 0; i < parent.runMethod().numOfRegisters(); i++) {
 			args.add(Type.getType(Object.class));
 		}
-		return Type.getMethodType(Type.getType(Serializable.class), args.toArray(new Type[0]));
+		return Type.getMethodType(ClassEmitter.savedStateType(), args.toArray(new Type[0]));
 	}
 
 	public MethodInsnNode methodInvokeInsn() {
