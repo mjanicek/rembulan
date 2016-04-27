@@ -184,7 +184,6 @@ public class Exec {
 
 		try {
 
-			outer:
 			while (callStack != null) {
 				ResumeInfo top = callStack.car;
 				callStack = callStack.cdr;
