@@ -868,4 +868,10 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   AssertWithCoroutineErrorObject in CoroContext succeedsWith ("thread")
 
+  val ErrorThrowsAnError = fragment ("ErrorThrowsAnError") {
+    """error("boom!")
+    """
+  }
+  ErrorThrowsAnError in BasicContext failsWith (classOf[LuaRuntimeException], "boom!")
+
 }

@@ -7,6 +7,7 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ProtectedResumable;
@@ -72,7 +73,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _error() {
-		return null;  // TODO
+		return Error.INSTANCE;
 	}
 
 	@Override
@@ -237,6 +238,23 @@ public class DefaultBasicLib extends BasicLib {
 
 			t.setMetatable(mt);
 			context.getObjectSink().setTo(t);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Error extends Function2 {
+
+		public static final Error INSTANCE = new Error();
+
+		@Override
+		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
+			// TODO: handle levels
+			throw new LuaRuntimeException(arg1);
 		}
 
 		@Override
