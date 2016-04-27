@@ -214,6 +214,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
+	// TODO: handle the __metatable field
 	public static class GetMetatable extends Function1 {
 
 		public static final GetMetatable INSTANCE = new GetMetatable();
@@ -230,6 +231,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
+	// TODO: throw error if the original metatable has the __metatable field
 	public static class SetMetatable extends Function2 {
 
 		public static final SetMetatable INSTANCE = new SetMetatable();
