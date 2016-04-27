@@ -148,6 +148,7 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 
+	// TODO: use tostring to convert arguments to string -- may involve calling metamethods, i.e. needs to be resumable
 	public static class Print extends FunctionAnyarg {
 
 		private final PrintStream out;
@@ -192,6 +193,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
+	// TODO: handle the __tostring metamethod
 	public static class ToString extends Function1 {
 
 		public static final ToString INSTANCE = new ToString();
