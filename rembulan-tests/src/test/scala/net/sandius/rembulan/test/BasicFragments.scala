@@ -906,4 +906,16 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   XPCallWithErroneousHandler in BasicContext succeedsWith (false, "error in error handling")
 
+  val RawEqualWithNoArgs = fragment ("RawEqualWithNoArgs") {
+    """return rawequal()
+    """
+  }
+  RawEqualWithNoArgs in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawequal' (value expected)")
+
+  val RawEqualWithOneArg = fragment ("RawEqualWithOneArg") {
+    """return rawequal(42)
+    """
+  }
+  RawEqualWithOneArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #2 to 'rawequal' (value expected)")
+
 }

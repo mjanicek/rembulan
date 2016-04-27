@@ -12,6 +12,7 @@ import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.ProtectedResumable;
+import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Function1;
@@ -104,7 +105,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _rawequal() {
-		return null;  // TODO
+		return RawEqual.INSTANCE;
 	}
 
 	@Override
@@ -450,6 +451,29 @@ public class DefaultBasicLib extends BasicLib {
 		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
 			SavedState ss = (SavedState) suspendedState;
 			handleError(context, ss.handler, ss.depth, error);
+		}
+
+	}
+
+	public static class RawEqual extends FunctionAnyarg {
+
+		public static final RawEqual INSTANCE = new RawEqual();
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			if (args.length < 2) {
+				throw new IllegalArgumentException("bad argument #" + (args.length + 1) + " to 'rawequal' (value expected)");
+			}
+
+			Object a = args[0];
+			Object b = args[1];
+
+			context.getObjectSink().setTo(RawOperators.raweq(a, b));
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
 	}
