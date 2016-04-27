@@ -194,13 +194,14 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Next extends Function2 {
+	public static class Next extends FunctionAnyarg {
 
 		public static final Next INSTANCE = new Next();
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object index) throws ControlThrowable {
-			Table table = LibUtils.checkTable("next", arg1, 0);
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Table table = LibUtils.checkTable("next", args, 0);
+			Object index = Varargs.getElement(args, 1);
 
 			final Object nxt;
 
@@ -234,7 +235,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Object t = Varargs.getElement(args, 0);
+			Table t = LibUtils.checkTable("pairs", args, 0);
 			Object metamethod = Metatables.getMetamethod(context.getState(), "__pairs", t);
 
 			if (metamethod != null) {
@@ -551,10 +552,8 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Object arg1 = Varargs.getElement(args, 0);
+			Table table = LibUtils.checkTable("rawget", args, 0);
 			Object arg2 = Varargs.getElement(args, 1);
-
-			Table table = LibUtils.checkTable("rawget", arg1, 0);
 			LibUtils.checkArgCount("rawget", args, 2);
 
 			context.getObjectSink().setTo(table.rawget(arg2));
@@ -573,13 +572,12 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			LibUtils.checkArgCount("rawset", args, 3);
-
-			Object arg1 = Varargs.getElement(args, 0);
+			Table table = LibUtils.checkTable("rawset", args, 0);
 			Object key = Varargs.getElement(args, 1);
 			Object value = Varargs.getElement(args, 2);
 
-			Table table = LibUtils.checkTable("rawset", arg1, 0);
+			LibUtils.checkArgCount("rawset", args, 3);
+
 			table.rawset(key, value);
 			context.getObjectSink().setTo(table);
 		}

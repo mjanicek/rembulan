@@ -44,6 +44,23 @@ public class LibUtils {
 		}
 	}
 
+	public static Table checkTable(String name, Object[] args, int index) {
+		final String what;
+		if (index < args.length) {
+			Object arg = args[index];
+			if (arg instanceof Table) {
+				return (Table) arg;
+			}
+			else {
+				what = Value.typeOf(arg).name;
+			}
+		}
+		else {
+			what = "no value";
+		}
+		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (table expected, got " + what + ")");
+	}
+
 	public static Table checkTable(String name, Object arg, int index) {
 		if (arg instanceof Table) {
 			return (Table) arg;
