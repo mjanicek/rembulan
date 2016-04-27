@@ -59,11 +59,11 @@ public abstract class BasicLib implements Lib {
 	 * print (···)
 	 *
 	 * <p>Receives any number of arguments and prints their values to {@code stdout},
-	 * using the {@link #_tostring() {@code tostring}} function to convert each argument
+	 * using the {@link #_tostring() <code>tostring</code>} function to convert each argument
 	 * to a string. {@code print} is not intended for formatted output, but only as
 	 * a quick way to show a value, for instance for debugging. For complete control over
-	 * the output, use {@link StringLib#_format() {@code string.format}}
-	 * and {@link IOLib#_write() {@code io.write}}.</p>
+	 * the output, use {@link StringLib#_format() <code>string.format</code>}
+	 * and {@link IOLib#_write() <code>io.write</code>}.</p>
 	 */
 	public abstract Function _print();
 
@@ -83,7 +83,7 @@ public abstract class BasicLib implements Lib {
 	 *
 	 * <p>Receives a value of any type and converts it to a string in a human-readable format.
 	 * (For complete control of how numbers are converted,
-	 * use {@link StringLib#_format() {@code string.format}}.) If the metatable
+	 * use {@link StringLib#_format() <code>string.format</code>}.) If the metatable
 	 * of {@code v} has a {@code "__tostring"} field, then {@code tostring} calls
 	 * the corresponding value with {@code v} as argument, and uses the result
 	 * of the call as its result.</p>
@@ -125,7 +125,7 @@ public abstract class BasicLib implements Lib {
 	/**
 	 * {@code assert (v [, message])}
 	 *
-	 * <p>Calls {@link #_error() {@code error}} if the value of its argument {@code v}
+	 * <p>Calls {@link #_error() <code>error</code>} if the value of its argument {@code v}
 	 * is false (i.e., <b>nil</b> or <b>false</b>); otherwise, returns all its arguments.
 	 * In case of error, {@code message} is the error object; when absent, it defaults
 	 * to {@code "assertion failed!"}</p>
@@ -182,14 +182,14 @@ public abstract class BasicLib implements Lib {
 	 * <p>If {@code t} has a metamethod {@code __pairs}, calls it with {@code t}
 	 * as argument and returns the first three results from the call.</p>
 	 *
-	 * <p>Otherwise, returns three values: the {@link #_next() {@code next}} function,
+	 * <p>Otherwise, returns three values: the {@link #_next() <code>next</code>} function,
 	 * the table {@code t}, and <b>nil</b>, so that the construction
 	 *
 	 *   <blockquote>{@code for k,v in pairs(t) do body end}</blockquote>
 	 *
 	 * will iterate over all key–value pairs of table {@code t}.</p>
 	 *
-	 * <p>See function {@link #_next() {@code next}} for the caveats of modifying the table
+	 * <p>See function {@link #_next() <code>next</code>} for the caveats of modifying the table
 	 * during its traversal.</p>
 	 */
 	public abstract Function _pairs();
@@ -341,7 +341,7 @@ public abstract class BasicLib implements Lib {
 	 * Other upvalues are initialized with <b>nil</b>. (When you load a main chunk, the resulting
 	 * function will always have exactly one upvalue, the {@code _ENV} variable
 	 * (see §2.2 of the Lua Reference Manual). However, when you load a binary chunk created
-	 * from a function (see {@link StringLib#_dump() {@code string.dump}}), the resulting
+	 * from a function (see {@link StringLib#_dump() <code>string.dump</code>}), the resulting
 	 * function can have an arbitrary number of upvalues.) All upvalues are fresh, that is,
 	 * they are not shared with any other function.</p>
 	 *
@@ -362,7 +362,7 @@ public abstract class BasicLib implements Lib {
 	/**
 	 * {@code loadfile ([filename [, mode [, env]]])}
 	 *
-	 * <p>Similar to {@link #_load() {@code load}}, but gets the chunk from file
+	 * <p>Similar to {@link #_load() <code>load</code>}, but gets the chunk from file
 	 * {@code filename} or from the standard input, if no file name is given.</p>
 	 */
 	public abstract Function _loadfile();
