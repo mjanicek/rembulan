@@ -13,6 +13,7 @@ public abstract class Table extends LuaObject {
 		return rawget((long) idx);
 	}
 
+	// must throw an exception when key is nil or NaN
 	public abstract void rawset(Object key, Object value);
 
 	public void rawset(int idx, Object value) {

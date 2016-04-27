@@ -918,4 +918,83 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   RawEqualWithOneArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #2 to 'rawequal' (value expected)")
 
+  val BasicRawGet = fragment ("BasicRawGet") {
+    """local t = {}
+      |t.hello = "world"
+      |return rawget(t, hi), rawget(t, "hello")
+    """
+  }
+  BasicRawGet in BasicContext succeedsWith (null, "world")
+
+  val BasicRawGetFail = fragment ("BasicRawGetFail") {
+    """return rawget(42, "something")
+    """
+  }
+  BasicRawGetFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawget' (table expected, got number)")
+
+  val BasicRawGetFail2 = fragment ("BasicRawGetFail2") {
+    """return rawget(42)
+    """
+  }
+  BasicRawGetFail2 in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawget' (table expected, got number)")
+
+  val BasicRawGetArgCountFail = fragment ("BasicRawGetArgCountFail") {
+    """return rawget({})
+    """
+  }
+  BasicRawGetArgCountFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #2 to 'rawget' (value expected)")
+
+  val BasicRawSet = fragment ("BasicRawSet") {
+    """local t = {}
+      |rawset(t, "hello", "world")
+      |local a = t.hello
+      |rawset(t, "hello", uu)
+      |local b = t.hello
+      |return a, b
+    """
+  }
+  BasicRawSet in BasicContext succeedsWith ("world", null)
+
+  val RawSetNilFail = fragment ("RawSetNilFail") {
+    """rawset({}, uu, uu)
+    """
+  }
+  RawSetNilFail in BasicContext failsWith (classOf[IllegalArgumentException], "table index is nil")
+
+  val RawSetNaNFail = fragment ("RawSetNaNFail") {
+    """rawset({}, 0/0, uu)
+    """
+  }
+  RawSetNaNFail in BasicContext failsWith (classOf[IllegalArgumentException], "table index is NaN")
+
+  val RawSetArgCountFail1 = fragment ("RawSetArgCountFail1") {
+    """rawset({})
+    """
+  }
+  RawSetArgCountFail1 in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #2 to 'rawset' (value expected)")
+
+  val RawSetArgCountFail2 = fragment ("RawSetArgCountFail2") {
+    """rawset({}, 0/0)
+    """
+  }
+  RawSetArgCountFail2 in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #3 to 'rawset' (value expected)")
+
+  val BasicRawLen = fragment ("BasicRawLen") {
+    """return rawlen({3, 2, 1}), rawlen("hello")
+    """
+  }
+  BasicRawLen in BasicContext succeedsWith (3, 5)
+
+  val RawLenArgCountFail = fragment ("RawLenArgCountFail") {
+    """rawlen()
+    """
+  }
+  RawLenArgCountFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawlen' (table or string expected)")
+
+  val RawLenBadArgFail = fragment ("RawLenBadArgFail") {
+    """rawlen(42)
+    """
+  }
+  RawLenBadArgFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawlen' (table or string expected)")
+
 }

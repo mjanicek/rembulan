@@ -110,17 +110,17 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _rawget() {
-		return null;  // TODO
+		return RawGet.INSTANCE;
 	}
 
 	@Override
 	public Function _rawset() {
-		return null;  // TODO
+		return RawSet.INSTANCE;
 	}
 
 	@Override
 	public Function _rawlen() {
-		return null;  // TODO
+		return RawLen.INSTANCE;
 	}
 
 	@Override
@@ -461,14 +461,88 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			if (args.length < 2) {
-				throw new IllegalArgumentException("bad argument #" + (args.length + 1) + " to 'rawequal' (value expected)");
-			}
+			LibUtils.checkArgCount("rawequal", args, 2);
 
 			Object a = args[0];
 			Object b = args[1];
 
 			context.getObjectSink().setTo(RawOperators.raweq(a, b));
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class RawGet extends FunctionAnyarg {
+
+		public static final RawGet INSTANCE = new RawGet();
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Object arg1 = Varargs.getElement(args, 0);
+			Object arg2 = Varargs.getElement(args, 1);
+
+			Table table = LibUtils.checkTable("rawget", arg1, 0);
+			LibUtils.checkArgCount("rawget", args, 2);
+
+			context.getObjectSink().setTo(table.rawget(arg2));
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class RawSet extends FunctionAnyarg {
+
+		public static final RawSet INSTANCE = new RawSet();
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			LibUtils.checkArgCount("rawset", args, 3);
+
+			Object arg1 = Varargs.getElement(args, 0);
+			Object key = Varargs.getElement(args, 1);
+			Object value = Varargs.getElement(args, 2);
+
+			Table table = LibUtils.checkTable("rawset", arg1, 0);
+			table.rawset(key, value);
+			context.getObjectSink().setTo(table);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class RawLen extends Function1 {
+
+		public static final RawLen INSTANCE = new RawLen();
+
+		@Override
+		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
+			final long result;
+
+			if (arg1 instanceof Table) {
+				Table table = (Table) arg1;
+				result = table.rawlen();
+			}
+			else if (arg1 instanceof String) {
+				String s = (String) arg1;
+				result = RawOperators.stringLen(s);
+			}
+			else {
+				throw new IllegalArgumentException("bad argument #1 to 'rawlen' (table or string expected)");
+			}
+
+			context.getObjectSink().setTo(result);
 		}
 
 		@Override

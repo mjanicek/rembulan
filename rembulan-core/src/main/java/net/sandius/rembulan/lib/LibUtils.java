@@ -22,6 +22,7 @@ public class LibUtils {
 		}
 	}
 
+	@Deprecated
 	public static <T> T checkArgumentOrNil(Object arg, int index, Class<T> clazz) {
 		if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
 			return (T) arg ;
@@ -43,8 +44,23 @@ public class LibUtils {
 		}
 	}
 
+	public static Table checkTable(String name, Object arg, int index) {
+		if (arg instanceof Table) {
+			return (Table) arg;
+		}
+		else {
+			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (table expected, got " + Value.typeOf(arg).name + ")");
+		}
+	}
+
 	public static <T> T getArgument(Object[] args, int index, Class<T> clazz) {
 		return checkArgument(Varargs.getElement(args, index), index, clazz);
+	}
+
+	public static void checkArgCount(String name, Object[] args, int minCount) {
+		if (args.length < minCount) {
+			throw new IllegalArgumentException("bad argument #" + (args.length + 1) + " to '" + name + "' (value expected)");
+		}
 	}
 
 }
