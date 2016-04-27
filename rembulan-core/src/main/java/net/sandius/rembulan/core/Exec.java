@@ -170,9 +170,25 @@ public class Exec {
 			this.error = error;
 		}
 
-		public static CoroutineResumeResult standard(Coroutine c) {
-			return new CoroutineResumeResult(c, null);
+		public static CoroutineResumeResult switchTo(Coroutine c) {
+			return switchTo(c, null);
 		}
+
+		public static CoroutineResumeResult switchTo(Coroutine c, Throwable e) {
+			Check.notNull(c);
+			return new CoroutineResumeResult(c, e);
+		}
+
+		public static CoroutineResumeResult errorInCoroutine(Coroutine c, Throwable e) {
+			Check.notNull(c);
+			Check.notNull(e);
+			return new CoroutineResumeResult(c, e);
+		}
+
+		public static CoroutineResumeResult mainReturn(Throwable e) {
+			return new CoroutineResumeResult(null, e);
+		}
+
 	}
 
 	// return null if main coroutine returned, otherwise return next coroutine C to be resumed;
@@ -222,10 +238,11 @@ public class Exec {
 						coro.yieldingTo = null;
 						target.resuming = null;
 
-						return CoroutineResumeResult.standard(target);
+						return CoroutineResumeResult.switchTo(target);
 					}
 					else {
-						return new CoroutineResumeResult(coro, new IllegalOperationAttemptException("attempt to yield from outside a coroutine"));
+						return CoroutineResumeResult.errorInCoroutine(coro,
+								new IllegalOperationAttemptException("attempt to yield from outside a coroutine"));
 					}
 				}
 				catch (CoroutineSwitch.Resume resume) {
@@ -235,11 +252,13 @@ public class Exec {
 
 					if (target.callStack == null) {
 						// dead coroutine
-						return new CoroutineResumeResult(coro, new IllegalStateException("cannot resume dead coroutine"));
+						return CoroutineResumeResult.errorInCoroutine(coro,
+								new IllegalStateException("cannot resume dead coroutine"));
 					}
 					else if (target == coro || target.resuming != null) {
 						// running or normal coroutine
-						return new CoroutineResumeResult(coro, new IllegalStateException("cannot resume non-suspended coroutine"));
+						return CoroutineResumeResult.errorInCoroutine(coro,
+								new IllegalStateException("cannot resume non-suspended coroutine"));
 					}
 					else {
 						objectSink.setToArray(resume.args);
@@ -247,7 +266,7 @@ public class Exec {
 						target.yieldingTo = coro;
 						coro.resuming = target;
 
-						return CoroutineResumeResult.standard(target);
+						return CoroutineResumeResult.switchTo(target);
 					}
 				}
 				catch (Preempted preempted) {
@@ -279,7 +298,7 @@ public class Exec {
 		}
 		else {
 			// main coroutine return
-			return new CoroutineResumeResult(null, error);
+			return CoroutineResumeResult.mainReturn(error);
 		}
 	}
 
