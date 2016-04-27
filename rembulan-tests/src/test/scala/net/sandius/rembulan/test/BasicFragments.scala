@@ -1041,6 +1041,12 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   NextArgMustBeTable in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'next' (table expected, got nil)")
 
+  val NextNoArg = fragment ("NextNoArg") {
+    """next()
+    """
+  }
+  NextNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'next' (table expected, got no value)")
+
   val NextNonexistentKey = fragment ("NextNonexistentKey") {
     """next({}, "boom")
     """
@@ -1068,5 +1074,17 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   PairsOnTable in BasicContext succeedsWith (3)
+
+  val PairsNoTable = fragment ("PairsNoTable") {
+    """pairs(42)
+    """
+  }
+  PairsNoTable in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'pairs' (table expected, got number)")
+
+  val PairsNoArg = fragment ("PairsNoArg") {
+    """pairs()
+    """
+  }
+  PairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'pairs' (table expected, got no value)")
 
 }
