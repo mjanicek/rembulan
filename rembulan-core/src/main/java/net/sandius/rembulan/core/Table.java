@@ -22,4 +22,8 @@ public abstract class Table extends LuaObject {
 
 	public abstract int rawlen();
 
+	public abstract Object initialIndex();
+
+	public abstract Object nextIndex(Object key);
+
 }

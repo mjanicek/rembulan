@@ -997,4 +997,28 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   RawLenBadArgFail in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'rawlen' (table or string expected)")
 
+  val NextOnEmptyTable = fragment ("NextOnEmptyTable") {
+    """return next({})
+    """
+  }
+  NextOnEmptyTable in BasicContext succeedsWith (null)
+
+  val NextTraversesEverything = fragment ("NextTraversesEverything") {
+    """local t = {}
+      |t.hello = "world"
+      |t[42] = true
+      |t[1/0] = 0/0
+      |
+      |local u = next(t)
+      |local count = 0
+      |while u do
+      |  count = count + 1
+      |  u = next(t, u)
+      |end
+      |
+      |return count
+    """
+  }
+  NextTraversesEverything in BasicContext succeedsWith (3)
+
 }

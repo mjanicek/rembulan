@@ -50,7 +50,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _next() {
-		return null;  // TODO
+		return Next.INSTANCE;
 	}
 
 	@Override
@@ -185,6 +185,40 @@ public class DefaultBasicLib extends BasicLib {
 		public void invoke(ExecutionContext context, Object arg) throws ControlThrowable {
 			LuaType tpe = Value.typeOf(arg);
 			context.getObjectSink().setTo(tpe.name);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Next extends Function2 {
+
+		public static final Next INSTANCE = new Next();
+
+		@Override
+		public void invoke(ExecutionContext context, Object arg1, Object index) throws ControlThrowable {
+			Table table = LibUtils.checkTable("next", arg1, 0);
+
+			final Object nxt;
+
+			if (index != null) {
+				nxt = table.nextIndex(index);
+			}
+			else {
+				nxt = table.initialIndex();
+			}
+
+			if (nxt == null) {
+				// we've reached the end
+				context.getObjectSink().setTo(null);
+			}
+			else {
+				Object value = table.rawget(nxt);
+				context.getObjectSink().setTo(nxt, value);
+			}
 		}
 
 		@Override

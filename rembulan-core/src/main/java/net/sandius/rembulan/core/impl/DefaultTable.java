@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Value;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class DefaultTable extends Table {
@@ -63,6 +64,31 @@ public class DefaultTable extends Table {
 		}
 
 		return idx - 1;
+	}
+
+	private Object next(Iterator<Object> it) {
+		return it.hasNext() ? it.next() : null;
+	}
+
+	@Override
+	public Object initialIndex() {
+		Iterator<Object> it = values.keySet().iterator();
+		return next(it);
+	}
+
+	@Override
+	public Object nextIndex(Object key) {
+		// FIXME: extremely inefficient!
+		Iterator<Object> it = values.keySet().iterator();
+
+		while (it.hasNext()) {
+			Object k = it.next();
+			if (k.equals(key)) {
+				return next(it);
+			}
+		}
+
+		throw new IllegalArgumentException("illegal key to 'next'");
 	}
 
 }
