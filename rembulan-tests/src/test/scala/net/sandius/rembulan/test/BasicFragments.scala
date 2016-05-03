@@ -805,6 +805,32 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   BigForLoop in EmptyContext succeedsWith (500000500000L)
 
+  val ToStringMetamethod = fragment ("ToStringMetamethod") {
+    """local t = setmetatable({}, { __tostring = function () return end})
+      |local ts = tostring(t)
+      |return ts, type(ts)
+    """
+  }
+  ToStringMetamethod in BasicContext succeedsWith (null, "nil")
+
+  val GetSetMetatableWithMetatable = fragment ("GetSetMetatableWithMetatable") {
+    """local mt = {}
+      |local t = setmetatable({}, mt)
+      |local a = getmetatable(t)  -- a == mt
+      |mt.__metatable = 42
+      |local b = getmetatable(t)  -- b == 42
+      |return a, a == mt, b, b == mt
+    """
+  }
+  GetSetMetatableWithMetatable in BasicContext succeedsWith (classOf[Table], true, 42, false)
+
+  val SetMetatableRefusesMetatableField = fragment ("SetMetatableRefusesMetatableField") {
+    """local t = setmetatable({}, { __metatable = 123 })
+      |setmetatable(t, {})
+    """
+  }
+  SetMetatableRefusesMetatableField in BasicContext failsWith (classOf[IllegalOperationAttemptException], "cannot change a protected metatable")
+
   val TypesOfValues = fragment ("TypesOfValues") {
     """return type(x), type(true), type(false), type(42), type(42.0), type("hello"), type({})
     """

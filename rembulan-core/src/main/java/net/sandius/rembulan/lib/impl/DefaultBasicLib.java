@@ -7,6 +7,7 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
@@ -149,7 +150,6 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 
-	// TODO: use tostring to convert arguments to string -- may involve calling metamethods, i.e. needs to be resumable
 	public static class Print extends FunctionAnyarg {
 
 		private final PrintStream out;
@@ -158,21 +158,44 @@ public class DefaultBasicLib extends BasicLib {
 			this.out = Check.notNull(out);
 		}
 
-		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+		private void run(ExecutionContext context, Object[] args) throws ControlThrowable {
 			for (int i = 0; i < args.length; i++) {
+				Object a = args[i];
+				try {
+					Dispatch.call(context, ToString.INSTANCE, a);
+				}
+				catch (ControlThrowable ct) {
+					ct.push(this, Varargs.from(args, i + 1));
+					throw ct;
+				}
+
+				Object s = context.getObjectSink()._0();
+				if (s instanceof String) {
+					out.print(s);
+				}
+				else {
+					throw new LuaRuntimeException("error calling 'print' ('tostring' must return a string to 'print')");
+				}
+
 				out.print(ToString.toString(args[i]));
 				if (i + 1 < args.length) {
 					out.print('\t');
 				}
 			}
 			out.println();
+
+			// returning nothing
 			context.getObjectSink().setTo();
 		}
 
 		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			run(context, args);
+		}
+
+		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+			run(context, (Object[]) suspendedState);
 		}
 
 	}
@@ -308,7 +331,6 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	// TODO: handle the __tostring metamethod
 	public static class ToString extends Function1 {
 
 		public static final ToString INSTANCE = new ToString();
@@ -319,24 +341,48 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		public void invoke(ExecutionContext context, Object arg) throws ControlThrowable {
-			context.getObjectSink().setTo(toString(arg));
+			Object meta = Metatables.getMetamethod(context.getState(), "__tostring", arg);
+			if (meta != null) {
+				try {
+					Dispatch.call(context, meta, arg);
+				}
+				catch (ControlThrowable ct) {
+					ct.push(this, null);
+					throw ct;
+				}
+
+				// resume
+				resume(context, null);
+			}
+			else {
+				// no metamethod, just call the default toString
+				String s = toString(arg);
+				context.getObjectSink().setTo(s);
+			}
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+			// trim to single value
+			Object result = context.getObjectSink()._1();
+			context.getObjectSink().setTo(result);
 		}
 
 	}
 
-	// TODO: handle the __metatable field
 	public static class GetMetatable extends Function1 {
 
 		public static final GetMetatable INSTANCE = new GetMetatable();
 
 		@Override
 		public void invoke(ExecutionContext context, Object arg) throws ControlThrowable {
-			context.getObjectSink().setTo(Metatables.getMetatable(context.getState(), arg));
+			Object meta = Metatables.getMetamethod(context.getState(), "__metatable", arg);
+
+			Object result = meta != null
+					? meta  // __metatable field present, return its value
+					: Metatables.getMetatable(context.getState(), arg);  // return the entire metatable
+
+			context.getObjectSink().setTo(result);
 		}
 
 		@Override
@@ -346,7 +392,6 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	// TODO: throw error if the original metatable has the __metatable field
 	public static class SetMetatable extends Function2 {
 
 		public static final SetMetatable INSTANCE = new SetMetatable();
@@ -356,8 +401,13 @@ public class DefaultBasicLib extends BasicLib {
 			Table t = LibUtils.checkArgument(arg1, 0, Table.class);
 			Table mt = LibUtils.checkArgumentOrNil(arg2, 1, Table.class);
 
-			t.setMetatable(mt);
-			context.getObjectSink().setTo(t);
+			if (Metatables.getMetamethod(context.getState(), "__metatable", t) != null) {
+				throw new IllegalOperationAttemptException("cannot change a protected metatable");
+			}
+			else {
+				t.setMetatable(mt);
+				context.getObjectSink().setTo(t);
+			}
 		}
 
 		@Override
