@@ -21,6 +21,19 @@ public abstract class Conversions {
 		return (double) l == n.doubleValue() && l != Long.MAX_VALUE ? l : null;
 	}
 
+	public static Integer numberAsInt(Number n) {
+		Long l = numberAsLong(n);
+		if (l != null) {
+			long ll = l;
+			int i = (int) ll;
+			return (long) i == ll ? i : null;
+		}
+		else {
+			// no integer representation
+			return null;
+		}
+	}
+
 	public static double stringToDouble(String s) throws NumberFormatException {
 		Check.notNull(s);
 

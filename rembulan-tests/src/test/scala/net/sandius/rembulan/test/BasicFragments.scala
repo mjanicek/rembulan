@@ -1172,4 +1172,22 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   IPairsNoArg in BasicContext failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'ipairs' (table expected, got no value)")
 
+  val SelectCount = fragment ("SelectCount") {
+    """return select('#', 3, 2, x)
+    """
+  }
+  SelectCount in BasicContext succeedsWith (3)
+
+  val SelectPositiveIndex = fragment ("SelectPositiveIndex") {
+    """return select(2, 1, 2, 3, 4)
+    """
+  }
+  SelectPositiveIndex in BasicContext succeedsWith (2, 3, 4)
+
+  val SelectNegativeIndex = fragment ("SelectNegativeIndex") {
+    """return select(-2, 1, 2, 3, 4)
+    """
+  }
+  SelectNegativeIndex in BasicContext succeedsWith (3, 4)
+
 }

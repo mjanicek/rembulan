@@ -2,6 +2,7 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.core.AssertionFailedException;
+import net.sandius.rembulan.core.Coercions;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
@@ -126,7 +127,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _select() {
-		return null;  // TODO
+		return Select.INSTANCE;
 	}
 
 	@Override
@@ -699,6 +700,52 @@ public class DefaultBasicLib extends BasicLib {
 			}
 
 			context.getObjectSink().setTo(result);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
+	public static class Select extends FunctionAnyarg {
+
+		public static final Select INSTANCE = new Select();
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			Object index = LibUtils.checkValue("select", args, 0);
+
+			if (index instanceof String && ((String) index).startsWith("#")) {
+				// return the number of remaining args
+				context.getObjectSink().setTo((long) args.length - 1);
+			}
+			else {
+				Number n = Conversions.objectAsNumber(index);
+
+				if (n != null) {
+					Integer idx = Conversions.numberAsInt(n);
+
+					if (idx != null) {
+						int from = idx >= 0
+								? idx  // from the beginning
+								: args.length + idx;  // idx < 0: from the end (-1 is the last index)
+
+						if (from < 1) {
+							throw new IllegalArgumentException("bad argument #1 to 'select' (index out of range)");
+						}
+
+						context.getObjectSink().setToArray(Varargs.from(args, from));
+					}
+					else {
+						throw new IllegalArgumentException("bad argument #1 to 'select' (number has no integer representation)");
+					}
+				}
+				else {
+					throw new IllegalArgumentException("bad argument #1 to 'select' (number expected, got " + Value.typeOf(index).name + ")");
+				}
+			}
 		}
 
 		@Override
