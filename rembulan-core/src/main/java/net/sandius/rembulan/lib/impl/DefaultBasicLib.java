@@ -72,7 +72,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _tonumber() {
-		return null;  // TODO
+		return ToNumber.INSTANCE;
 	}
 
 	@Override
@@ -370,6 +370,106 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 	}
+
+	public static class ToNumber extends FunctionAnyarg {
+
+		public static final ToNumber INSTANCE = new ToNumber();
+
+		private static final int MIN_BASE = 2;
+		private static final int MAX_BASE = 36;
+
+		public static Long toNumber(String s, int base) {
+			Check.notNull(s);
+			Check.inRange(base, MIN_BASE, MAX_BASE);
+
+			s = s.trim();
+
+			int idx = 0;
+
+			// empty!
+			if (s.isEmpty()) {
+				return null;
+			}
+
+			// sign?
+			final boolean pos;
+
+			{
+				final char c = s.charAt(idx);
+
+				if (c == '-') {
+					pos = false;
+					idx++;
+				}
+				else if (c == '+') {
+					pos = true;
+					idx++;
+				}
+				else {
+					pos = true;
+				}
+			}
+
+			// no digits!
+			if (idx >= s.length()) {
+				return null;
+			}
+
+			long n = 0;
+
+			// digits
+			while (idx < s.length()) {
+				final char c = s.charAt(idx);
+				final int digit;
+
+				if (c >= '0' && c <= '9') {
+					digit = c - '0';
+				}
+				else if (c >= 'a' && c <= 'z') {
+					digit = 10 + c - 'a';
+				}
+				else if (c >= 'A' && c <= 'Z') {
+					digit = 10 + c - 'A';
+				}
+				else {
+					// non-alphanumeric character
+					return null;
+				}
+
+				if (digit >= base) {
+					// doesn't fit in the base
+					return null;
+				}
+
+				n = n * base + digit;
+				idx++;
+			}
+
+			return pos ? n : -n;
+		}
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			if (Varargs.getElement(args, 1) == null) {
+				// no base
+				Object o = LibUtils.checkValue("tonumber", args, 0);
+				Number n = Conversions.objectAsNumber(o);
+				context.getObjectSink().setTo(n);
+			}
+			else {
+				String s = LibUtils.checkString("tonumber", args, 0);
+				int base = LibUtils.checkRange("tonumber", args, 1, "base", MIN_BASE, MAX_BASE);
+				context.getObjectSink().setTo(toNumber(s, base));
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
+
 
 	public static class GetMetatable extends Function1 {
 
@@ -722,29 +822,17 @@ public class DefaultBasicLib extends BasicLib {
 				context.getObjectSink().setTo((long) args.length - 1);
 			}
 			else {
-				Number n = Conversions.objectAsNumber(index);
+				int idx = LibUtils.checkRange("select", args, 0, "index", -args.length + 1, Integer.MAX_VALUE);
 
-				if (n != null) {
-					Integer idx = Conversions.numberAsInt(n);
+				int from = idx >= 0
+						? idx  // from the beginning
+						: args.length + idx;  // idx < 0: from the end (-1 is the last index)
 
-					if (idx != null) {
-						int from = idx >= 0
-								? idx  // from the beginning
-								: args.length + idx;  // idx < 0: from the end (-1 is the last index)
-
-						if (from < 1) {
-							throw new IllegalArgumentException("bad argument #1 to 'select' (index out of range)");
-						}
-
-						context.getObjectSink().setToArray(Varargs.from(args, from));
-					}
-					else {
-						throw new IllegalArgumentException("bad argument #1 to 'select' (number has no integer representation)");
-					}
+				if (from < 1) {
+					throw new IllegalArgumentException("bad argument #1 to 'select' (index out of range)");
 				}
-				else {
-					throw new IllegalArgumentException("bad argument #1 to 'select' (number expected, got " + Value.typeOf(index).name + ")");
-				}
+
+				context.getObjectSink().setToArray(Varargs.from(args, from));
 			}
 		}
 

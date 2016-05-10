@@ -813,6 +813,23 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   ToStringMetamethod in BasicContext succeedsWith (null, "nil")
 
+  val SimpleToNumber = fragment ("SimpleToNumber") {
+    """local a = tonumber("123.5")
+      |local b = tonumber(123.5)
+      |return a, type(a), b, type(b)
+    """
+  }
+  SimpleToNumber in BasicContext succeedsWith (123.5, "number", 123.5, "number")
+
+  val ToNumberWithBase = fragment ("ToNumberWithBase") {
+    """local a = tonumber("123.5", 10)
+      |local b = tonumber("123", 9)
+      |local c = tonumber("helloThere", 36)
+      |return a, type(a), b, type(b), c, type(c)
+    """
+  }
+  ToNumberWithBase in BasicContext succeedsWith (null, "nil", 102, "number", 1767707662651898L, "number")
+
   val GetSetMetatableWithMetatable = fragment ("GetSetMetatableWithMetatable") {
     """local mt = {}
       |local t = setmetatable({}, mt)
