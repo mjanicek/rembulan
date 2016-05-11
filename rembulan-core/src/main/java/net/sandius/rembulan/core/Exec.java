@@ -183,6 +183,46 @@ public class Exec {
 
 	}
 
+	private CoroutineResumeResult doYield(Coroutine current, Object[] args) {
+		Coroutine target = current.yieldingTo;
+
+		if (target != null) {
+			objectSink.setToArray(args);
+
+			assert (current.resuming == null);
+
+			current.yieldingTo = null;
+			target.resuming = null;
+
+			return CoroutineResumeResult.switchTo(target);
+		}
+		else {
+			return CoroutineResumeResult.errorInCoroutine(current,
+					new IllegalOperationAttemptException("attempt to yield from outside a coroutine"));
+		}
+	}
+
+	private CoroutineResumeResult doResume(Coroutine current, Coroutine target, Object[] args) {
+		if (target.callStack == null) {
+			// dead coroutine
+			return CoroutineResumeResult.errorInCoroutine(current,
+					new IllegalStateException("cannot resume dead coroutine"));
+		}
+		else if (target == current || target.resuming != null) {
+			// running or normal coroutine
+			return CoroutineResumeResult.errorInCoroutine(current,
+					new IllegalStateException("cannot resume non-suspended coroutine"));
+		}
+		else {
+			objectSink.setToArray(args);
+
+			target.yieldingTo = current;
+			current.resuming = target;
+
+			return CoroutineResumeResult.switchTo(target);
+		}
+	}
+
 	// return null if main coroutine returned, otherwise return next coroutine C to be resumed;
 	// if C == coro, then this is a pause
 	private CoroutineResumeResult resumeCoroutine(final Coroutine coro, Throwable error) {
@@ -220,47 +260,11 @@ public class Exec {
 				}
 				catch (CoroutineSwitch.Yield yield) {
 					callStack = prependCalls(yield.frames(), callStack);
-
-					Coroutine target = coro.yieldingTo;
-
-					if (target != null) {
-						objectSink.setToArray(yield.args);
-
-						assert (coro.resuming == null);
-
-						coro.yieldingTo = null;
-						target.resuming = null;
-
-						return CoroutineResumeResult.switchTo(target);
-					}
-					else {
-						return CoroutineResumeResult.errorInCoroutine(coro,
-								new IllegalOperationAttemptException("attempt to yield from outside a coroutine"));
-					}
+					return doYield(coro, yield.args);
 				}
 				catch (CoroutineSwitch.Resume resume) {
 					callStack = prependCalls(resume.frames(), callStack);
-
-					Coroutine target = resume.coroutine;
-
-					if (target.callStack == null) {
-						// dead coroutine
-						return CoroutineResumeResult.errorInCoroutine(coro,
-								new IllegalStateException("cannot resume dead coroutine"));
-					}
-					else if (target == coro || target.resuming != null) {
-						// running or normal coroutine
-						return CoroutineResumeResult.errorInCoroutine(coro,
-								new IllegalStateException("cannot resume non-suspended coroutine"));
-					}
-					else {
-						objectSink.setToArray(resume.args);
-
-						target.yieldingTo = coro;
-						coro.resuming = target;
-
-						return CoroutineResumeResult.switchTo(target);
-					}
+					return doResume(coro, resume.coroutine, resume.args);
 				}
 				catch (Preempted preempted) {
 					callStack = prependCalls(preempted.frames(), callStack);
