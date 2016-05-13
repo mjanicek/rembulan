@@ -47,11 +47,6 @@ public final class Coroutine {
 		Normal,
 		Dead;
 
-		@Override
-		public String toString() {
-			return name().toLowerCase();
-		}
-
 	}
 
 	public Status getStatus() {

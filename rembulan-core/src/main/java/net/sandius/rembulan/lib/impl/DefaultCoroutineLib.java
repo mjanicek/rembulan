@@ -134,11 +134,21 @@ public class DefaultCoroutineLib extends CoroutineLib {
 	public static class Status extends Function1 {
 
 		public static final Status INSTANCE = new Status();
-		
+
+		public static String statusToString(Coroutine.Status status) {
+			switch (status) {
+				case Running:   return "running";
+				case Suspended: return "suspended";
+				case Normal:    return "normal";
+				case Dead:      return "dead";
+				default:  throw new IllegalArgumentException("Illegal status: " + status);
+			}
+		}
+
 		@Override
 		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
 			Coroutine coroutine = LibUtils.checkArgument(arg1, 0, Coroutine.class);
-			context.getObjectSink().setTo(coroutine.getStatus().toString());
+			context.getObjectSink().setTo(statusToString(coroutine.getStatus()));
 		}
 
 		@Override
