@@ -155,17 +155,10 @@ public class Exec {
 	}
 
 	private CoroutineResumeResult doYield(Coroutine current, Object[] args) {
-		Coroutine target = current.yieldingTo;
-
-		if (target != null) {
+		Coroutine c = current.yield();
+		if (c != null) {
 			objectSink.setToArray(args);
-
-			assert (current.resuming == null);
-
-			current.yieldingTo = null;
-			target.resuming = null;
-
-			return CoroutineResumeResult.switchTo(target);
+			return CoroutineResumeResult.switchTo(c);
 		}
 		else {
 			return CoroutineResumeResult.errorInCoroutine(current,
@@ -174,30 +167,22 @@ public class Exec {
 	}
 
 	private CoroutineResumeResult doResume(Coroutine current, Coroutine target, Object[] args) {
-		if (target.callStack == null) {
-			// dead coroutine
-			return CoroutineResumeResult.errorInCoroutine(current,
-					new IllegalStateException("cannot resume dead coroutine"));
+		final Coroutine c;
+		try {
+			c = current.resume(target);
 		}
-		else if (target == current || target.resuming != null) {
-			// running or normal coroutine
-			return CoroutineResumeResult.errorInCoroutine(current,
-					new IllegalStateException("cannot resume non-suspended coroutine"));
+		catch (Exception ex) {
+			return CoroutineResumeResult.errorInCoroutine(current, ex);
 		}
-		else {
-			objectSink.setToArray(args);
 
-			target.yieldingTo = current;
-			current.resuming = target;
-
-			return CoroutineResumeResult.switchTo(target);
-		}
+		objectSink.setToArray(args);
+		return CoroutineResumeResult.switchTo(c);
 	}
 
 	// return null if main coroutine returned, otherwise return next coroutine C to be resumed;
 	// if C == coro, then this is a pause
 	private CoroutineResumeResult resumeCoroutine(final Coroutine coro, Throwable error) {
-		Check.isNull(coro.resuming);
+		Check.isFalse(coro.isResuming());
 
 		Cons<ResumeInfo> callStack = coro.callStack;
 
@@ -257,11 +242,8 @@ public class Exec {
 
 		assert (coro.callStack == null);
 
-		Coroutine yieldTarget = coro.yieldingTo;
+		Coroutine yieldTarget = coro.yield();
 		if (yieldTarget != null) {
-			// implicit yield on return
-			coro.yieldingTo = null;
-			yieldTarget.resuming = null;
 			return new CoroutineResumeResult(yieldTarget, error);
 		}
 		else {

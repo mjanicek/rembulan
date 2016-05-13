@@ -26,11 +26,13 @@ public final class Coroutine {
 	// paused call stack: up-to-date only iff coroutine is not running
 	protected Cons<ResumeInfo> callStack;
 
-	protected Coroutine yieldingTo;
-	protected Coroutine resuming;
+	private Coroutine yieldingTo;
+	private Coroutine resuming;
 
 	public Coroutine(Function function) {
 		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, Check.notNull(function)));
+		this.yieldingTo = null;
+		this.resuming = null;
 	}
 
 	public boolean isResuming() {
@@ -56,6 +58,52 @@ public final class Coroutine {
 			Dispatch.call(context, target, context.getObjectSink().toArray());
 		}
 
+	}
+
+	public Coroutine resume(Coroutine target) {
+		Check.notNull(target);
+
+		synchronized (this) {
+			synchronized (target) {
+
+				if (target.callStack == null) {
+					// dead coroutine
+					throw new IllegalStateException("cannot resume dead coroutine");
+				}
+				else if (target == this || target.resuming != null) {
+					// running or normal coroutine
+					throw new IllegalStateException("cannot resume non-suspended coroutine");
+				}
+				else {
+					target.yieldingTo = this;
+					this.resuming = target;
+
+					return target;
+				}
+			}
+		}
+	}
+
+	public Coroutine yield() {
+		synchronized (this) {
+			Coroutine target = this.yieldingTo;
+
+			if (target != null) {
+				synchronized (target) {  // FIXME: unsafe: target may have been changed already!
+
+					assert (this.resuming == null);
+					assert (target.resuming == this);
+
+					this.yieldingTo = null;
+					target.resuming = null;
+
+					return target;
+				}
+			}
+			else {
+				return null;
+			}
+		}
 	}
 
 }
