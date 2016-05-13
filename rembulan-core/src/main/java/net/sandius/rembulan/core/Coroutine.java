@@ -21,9 +21,9 @@ import net.sandius.rembulan.util.Cons;
    c.resuming = d
    d.yieldingTo = c
  */
-public abstract class Coroutine {
+public final class Coroutine {
 
-	protected final LuaState state;
+	protected final Exec exec;
 
 	// paused call stack: up-to-date only iff coroutine is not running
 	protected Cons<ResumeInfo> callStack;
@@ -31,11 +31,17 @@ public abstract class Coroutine {
 	protected Coroutine yieldingTo;
 	protected Coroutine resuming;
 
-	public Coroutine(LuaState state) {
-		this.state = Check.notNull(state);
+	private Coroutine(Exec exec) {
+		this.exec = Check.notNull(exec);
+	}
+
+	public Coroutine(Exec exec, Function function) {
+		this(exec);
+		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, Check.notNull(function)));
 	}
 
 	public enum Status {
+
 		Running,
 		Suspended,
 		Normal,
@@ -48,15 +54,28 @@ public abstract class Coroutine {
 
 	}
 
-	public abstract Status getStatus();
-
-	public LuaState getOwnerState() {
-		return state;
+	public Status getStatus() {
+		if (this == exec.getCurrentCoroutine()) return Status.Running;
+		else if (callStack == null) return Status.Dead;
+		else if (resuming != null) return Status.Normal;
+		else return Status.Suspended;
 	}
 
 	@Override
 	public String toString() {
 		return "thread: 0x" + Integer.toHexString(hashCode());
+	}
+
+	protected static class BootstrapResumable implements Resumable {
+
+		static final BootstrapResumable INSTANCE = new BootstrapResumable();
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			Function target = (Function) suspendedState;
+			Dispatch.call(context, target, context.getObjectSink().toArray());
+		}
+
 	}
 
 }

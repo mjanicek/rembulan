@@ -65,9 +65,7 @@ public class Exec {
 
 		@Override
 		public Coroutine newCoroutine(Function function) {
-			CoroutineImpl coroutine = new CoroutineImpl(state);
-			coroutine.callStack = new Cons<>(new ResumeInfo(CoroutineBootstrapResumable.INSTANCE, function));
-			return coroutine;
+			return new Coroutine(Exec.this, function);
 		}
 
 		@Override
@@ -75,33 +73,6 @@ public class Exec {
 			return currentCoroutine != mainCoroutine;
 		}
 
-	}
-
-	protected class CoroutineImpl extends Coroutine {
-
-		public CoroutineImpl(LuaState state) {
-			super(state);
-		}
-
-		@Override
-		public Status getStatus() {
-			if (this == currentCoroutine) return Status.Running;
-			else if (callStack == null) return Status.Dead;
-			else if (resuming != null) return Status.Normal;
-			else return Status.Suspended;
-		}
-
-	}
-
-	protected static class CoroutineBootstrapResumable implements Resumable {
-
-		static final CoroutineBootstrapResumable INSTANCE = new CoroutineBootstrapResumable();
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			Function target = (Function) suspendedState;
-			Dispatch.call(context, target, context.getObjectSink().toArray());
-		}
 	}
 
 	protected static class BootstrapResumable implements Resumable {

@@ -28,14 +28,6 @@ public abstract class LuaState {
 		return tableFactory().newTable(array, hash);
 	}
 
-	@Deprecated
-	public abstract CoroutineFactory coroutineFactory();
-
-	@Deprecated
-	public Coroutine newCoroutine() {
-		return coroutineFactory().newCoroutine(this);
-	}
-
 	public void checkCpu(int cost) throws ControlThrowable {
 		preemptionContext().withdraw(cost);
 	}

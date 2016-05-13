@@ -1,6 +1,5 @@
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.CoroutineFactory;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSinkFactory;
 import net.sandius.rembulan.core.PreemptionContext;
@@ -15,7 +14,6 @@ public class DefaultLuaState extends LuaState {
 	private final ObjectSinkFactory objectSinkFactory;
 	private final UpvalueFactory upvalueFactory;
 	private final TableFactory tableFactory;
-	private final CoroutineFactory coroutineFactory;
 
 	private final PreemptionContext preemptionContext;
 
@@ -30,13 +28,11 @@ public class DefaultLuaState extends LuaState {
 	public DefaultLuaState(ObjectSinkFactory objectSinkFactory,
 						   UpvalueFactory upvalueFactory,
 						   TableFactory tableFactory,
-						   CoroutineFactory coroutineFactory,
 						   PreemptionContext preemptionContext) {
 
 		this.objectSinkFactory = Check.notNull(objectSinkFactory);
 		this.upvalueFactory = Check.notNull(upvalueFactory);
 		this.tableFactory = Check.notNull(tableFactory);
-		this.coroutineFactory = Check.notNull(coroutineFactory);
 		this.preemptionContext = Check.notNull(preemptionContext);
 	}
 
@@ -45,7 +41,6 @@ public class DefaultLuaState extends LuaState {
 		this(CachingObjectSinkFactory.DEFAULT_INSTANCE,
 				DefaultUpvalue.FACTORY_INSTANCE,
 				DefaultTable.FACTORY_INSTANCE,
-				DefaultCoroutine.FACTORY_INSTANCE,
 				preemptionContext);
 	}
 
@@ -100,11 +95,6 @@ public class DefaultLuaState extends LuaState {
 	}
 
 	@Override
-	public CoroutineFactory coroutineFactory() {
-		return coroutineFactory;
-	}
-
-	@Override
 	public PreemptionContext preemptionContext() {
 		return preemptionContext;
 	}
@@ -114,19 +104,16 @@ public class DefaultLuaState extends LuaState {
 		private ObjectSinkFactory objectSinkFactory;
 		private UpvalueFactory upvalueFactory;
 		private TableFactory tableFactory;
-		private CoroutineFactory coroutineFactory;
 		private PreemptionContext preemptionContext;
 
 		protected Builder(ObjectSinkFactory objectSinkFactory,
 							   UpvalueFactory upvalueFactory,
 							   TableFactory tableFactory,
-							   CoroutineFactory coroutineFactory,
 							   PreemptionContext preemptionContext) {
 
 			this.objectSinkFactory = Check.notNull(objectSinkFactory);
 			this.upvalueFactory = Check.notNull(upvalueFactory);
 			this.tableFactory = Check.notNull(tableFactory);
-			this.coroutineFactory = Check.notNull(coroutineFactory);
 			this.preemptionContext = Check.notNull(preemptionContext);
 		}
 
@@ -135,7 +122,6 @@ public class DefaultLuaState extends LuaState {
 			this(CachingObjectSinkFactory.DEFAULT_INSTANCE,
 					DefaultUpvalue.FACTORY_INSTANCE,
 					DefaultTable.FACTORY_INSTANCE,
-					DefaultCoroutine.FACTORY_INSTANCE,
 					PreemptionContext.Never.INSTANCE);
 		}
 
@@ -154,11 +140,6 @@ public class DefaultLuaState extends LuaState {
 			return this;
 		}
 
-		public Builder withCoroutineFactory(CoroutineFactory factory) {
-			this.coroutineFactory = Check.notNull(factory);
-			return this;
-		}
-
 		public Builder withPreemptionContext(PreemptionContext context) {
 			this.preemptionContext = Check.notNull(context);
 			return this;
@@ -170,7 +151,6 @@ public class DefaultLuaState extends LuaState {
 					objectSinkFactory,
 					upvalueFactory,
 					tableFactory,
-					coroutineFactory,
 					preemptionContext);
 		}
 		
