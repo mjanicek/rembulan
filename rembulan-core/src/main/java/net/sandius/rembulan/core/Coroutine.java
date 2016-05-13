@@ -23,37 +23,22 @@ import net.sandius.rembulan.util.Cons;
  */
 public final class Coroutine {
 
-	protected final Exec exec;
-
 	// paused call stack: up-to-date only iff coroutine is not running
 	protected Cons<ResumeInfo> callStack;
 
 	protected Coroutine yieldingTo;
 	protected Coroutine resuming;
 
-	private Coroutine(Exec exec) {
-		this.exec = Check.notNull(exec);
-	}
-
-	public Coroutine(Exec exec, Function function) {
-		this(exec);
+	public Coroutine(Function function) {
 		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, Check.notNull(function)));
 	}
 
-	public enum Status {
-
-		Running,
-		Suspended,
-		Normal,
-		Dead;
-
+	public boolean isResuming() {
+		return resuming != null;
 	}
 
-	public Status getStatus() {
-		if (this == exec.getCurrentCoroutine()) return Status.Running;
-		else if (callStack == null) return Status.Dead;
-		else if (resuming != null) return Status.Normal;
-		else return Status.Suspended;
+	public boolean isDead() {
+		return callStack == null;
 	}
 
 	@Override

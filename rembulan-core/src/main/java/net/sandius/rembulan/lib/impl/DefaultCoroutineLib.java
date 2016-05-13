@@ -13,6 +13,7 @@ import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.lib.LibUtils;
+import net.sandius.rembulan.util.Check;
 
 public class DefaultCoroutineLib extends CoroutineLib {
 
@@ -135,20 +136,27 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		public static final Status INSTANCE = new Status();
 
-		public static String statusToString(Coroutine.Status status) {
-			switch (status) {
-				case Running:   return "running";
-				case Suspended: return "suspended";
-				case Normal:    return "normal";
-				case Dead:      return "dead";
-				default:  throw new IllegalArgumentException("Illegal status: " + status);
-			}
+		public static final String STATUS_RUNNING = "running";
+		public static final String STATUS_SUSPENDED = "suspended";
+		public static final String STATUS_NORMAL = "normal";
+		public static final String STATUS_DEAD = "dead";
+
+		public static String status(ExecutionContext context, Coroutine coroutine) {
+			Check.notNull(context);
+			Check.notNull(coroutine);
+
+			Coroutine currentCoroutine = context.getCurrentCoroutine();
+
+			if (coroutine == currentCoroutine) return STATUS_RUNNING;
+			else if (coroutine.isDead()) return STATUS_DEAD;
+			else if (coroutine.isResuming()) return STATUS_NORMAL;
+			else return STATUS_SUSPENDED;
 		}
 
 		@Override
 		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
 			Coroutine coroutine = LibUtils.checkArgument(arg1, 0, Coroutine.class);
-			context.getObjectSink().setTo(statusToString(coroutine.getStatus()));
+			context.getObjectSink().setTo(status(context, coroutine));
 		}
 
 		@Override

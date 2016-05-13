@@ -65,7 +65,7 @@ public class Exec {
 
 		@Override
 		public Coroutine newCoroutine(Function function) {
-			return new Coroutine(Exec.this, function);
+			return new Coroutine(function);
 		}
 
 		@Override
