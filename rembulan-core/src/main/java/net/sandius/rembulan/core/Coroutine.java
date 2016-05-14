@@ -49,6 +49,10 @@ public final class Coroutine {
 		return callStack == null;
 	}
 
+	public boolean canYield() {
+		return yieldingTo != null;
+	}
+
 	@Override
 	public String toString() {
 		return "thread: 0x" + Integer.toHexString(hashCode());

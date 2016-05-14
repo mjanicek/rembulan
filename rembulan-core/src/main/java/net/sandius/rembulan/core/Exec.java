@@ -9,7 +9,6 @@ public class Exec {
 
 	private final Context context;
 
-	private Coroutine mainCoroutine;
 	private Coroutine currentCoroutine;
 
 	public Exec(LuaState state) {
@@ -27,11 +26,7 @@ public class Exec {
 	}
 
 	public boolean isPaused() {
-		return mainCoroutine.isPaused();
-	}
-
-	public Coroutine getMainCoroutine() {
-		return mainCoroutine;
+		return currentCoroutine != null && currentCoroutine.isPaused();
 	}
 
 	protected Coroutine getCurrentCoroutine() {
@@ -66,7 +61,7 @@ public class Exec {
 
 		@Override
 		public boolean canYield() {
-			return currentCoroutine != mainCoroutine;
+			return currentCoroutine.canYield();
 		}
 
 	}
@@ -75,14 +70,13 @@ public class Exec {
 		Check.notNull(target);
 		Check.notNull(args);
 
-		if (mainCoroutine != null) {
+		if (currentCoroutine != null) {
 			throw new IllegalStateException("Initialising call in paused state");
 		}
 		else {
 			Coroutine c = context.newCoroutine(target);
 			objectSink.setToArray(args);
-			mainCoroutine = c;
-			currentCoroutine = mainCoroutine;
+			currentCoroutine = c;
 		}
 	}
 
