@@ -117,11 +117,11 @@ public final class Coroutine {
 		}
 	}
 
-	private Cons<ResumeInfo> prependCalls(Iterator<ResumeInfo> it, Cons<ResumeInfo> tail) {
+	private void saveFrames(ControlThrowable ct) {
+		Iterator<ResumeInfo> it = ct.frames();
 		while (it.hasNext()) {
-			tail = new Cons<>(it.next(), tail);
+			callStack = new Cons<>(it.next(), callStack);
 		}
-		return tail;
 	}
 
 	static class ResumeResult {
@@ -211,15 +211,15 @@ public final class Coroutine {
 				}
 			}
 			catch (CoroutineSwitch.Yield yield) {
-				callStack = prependCalls(yield.frames(), callStack);
+				saveFrames(yield);
 				return doYield(context.getObjectSink(), yield.args);
 			}
 			catch (CoroutineSwitch.Resume resume) {
-				callStack = prependCalls(resume.frames(), callStack);
+				saveFrames(resume);
 				return doResume(context.getObjectSink(), resume.coroutine, resume.args);
 			}
 			catch (Preempted preempted) {
-				callStack = prependCalls(preempted.frames(), callStack);
+				saveFrames(preempted);
 				assert (callStack != null);
 				return ResumeResult.PAUSED;
 			}
