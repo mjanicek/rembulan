@@ -136,12 +136,8 @@ public final class Coroutine {
 		}
 
 		public static ResumeResult switchTo(Coroutine c) {
-			return switchTo(c, null);
-		}
-
-		public static ResumeResult switchTo(Coroutine c, Throwable e) {
 			Check.notNull(c);
-			return new ResumeResult(c, e);
+			return new ResumeResult(c, null);
 		}
 
 		public static ResumeResult errorInCoroutine(Coroutine c, Throwable e) {
