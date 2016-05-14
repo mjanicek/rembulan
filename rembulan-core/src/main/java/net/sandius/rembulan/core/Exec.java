@@ -1,10 +1,6 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.Cons;
-
-import java.io.Serializable;
-import java.util.Iterator;
 
 public class Exec {
 
@@ -31,7 +27,7 @@ public class Exec {
 	}
 
 	public boolean isPaused() {
-		return mainCoroutine.callStack != null;
+		return mainCoroutine.isPaused();
 	}
 
 	public Coroutine getMainCoroutine() {
@@ -75,31 +71,6 @@ public class Exec {
 
 	}
 
-	protected static class BootstrapResumable implements Resumable {
-
-		static final BootstrapResumable INSTANCE = new BootstrapResumable();
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			Call c = (Call) suspendedState;
-			Dispatch.call(context, c.target, c.args);
-		}
-
-		private static class Call {
-			public final Object target;
-			public final Object[] args;
-			public Call(Object target, Object[] args) {
-				this.target = Check.notNull(target);
-				this.args = Check.notNull(args);
-			}
-		}
-
-		public static ResumeInfo of(Object target, Object... args) {
-			return new ResumeInfo(INSTANCE, new Call(target, args));
-		}
-
-	}
-
 	public void init(Function target, Object... args) {
 		Check.notNull(target);
 		Check.notNull(args);
@@ -108,149 +79,15 @@ public class Exec {
 			throw new IllegalStateException("Initialising call in paused state");
 		}
 		else {
-			mainCoroutine = context.newCoroutine(target);
-			currentCoroutine = mainCoroutine;
-
-			mainCoroutine.callStack = new Cons<>(BootstrapResumable.of(target, args));
-		}
-	}
-
-	private Cons<ResumeInfo> prependCalls(Iterator<ResumeInfo> it, Cons<ResumeInfo> tail) {
-		while (it.hasNext()) {
-			tail = new Cons<>(it.next(), tail);
-		}
-		return tail;
-	}
-
-	private static class CoroutineResumeResult {
-		public static final CoroutineResumeResult PAUSED = new CoroutineResumeResult(null, null);
-
-		public final Coroutine coroutine;
-		public final Throwable error;
-
-		private CoroutineResumeResult(Coroutine coroutine, Throwable error) {
-			this.coroutine = coroutine;
-			this.error = error;
-		}
-
-		public static CoroutineResumeResult switchTo(Coroutine c) {
-			return switchTo(c, null);
-		}
-
-		public static CoroutineResumeResult switchTo(Coroutine c, Throwable e) {
-			Check.notNull(c);
-			return new CoroutineResumeResult(c, e);
-		}
-
-		public static CoroutineResumeResult errorInCoroutine(Coroutine c, Throwable e) {
-			Check.notNull(c);
-			Check.notNull(e);
-			return new CoroutineResumeResult(c, e);
-		}
-
-		public static CoroutineResumeResult mainReturn(Throwable e) {
-			return new CoroutineResumeResult(null, e);
-		}
-
-	}
-
-	private CoroutineResumeResult doYield(Coroutine current, Object[] args) {
-		Coroutine c = current.yield();
-		if (c != null) {
+			Coroutine c = context.newCoroutine(target);
 			objectSink.setToArray(args);
-			return CoroutineResumeResult.switchTo(c);
+			mainCoroutine = c;
+			currentCoroutine = mainCoroutine;
 		}
-		else {
-			return CoroutineResumeResult.errorInCoroutine(current,
-					new IllegalOperationAttemptException("attempt to yield from outside a coroutine"));
-		}
-	}
-
-	private CoroutineResumeResult doResume(Coroutine current, Coroutine target, Object[] args) {
-		final Coroutine c;
-		try {
-			c = current.resume(target);
-		}
-		catch (Exception ex) {
-			return CoroutineResumeResult.errorInCoroutine(current, ex);
-		}
-
-		objectSink.setToArray(args);
-		return CoroutineResumeResult.switchTo(c);
 	}
 
 	// return null if main coroutine returned, otherwise return next coroutine C to be resumed;
 	// if C == coro, then this is a pause
-	private CoroutineResumeResult resumeCoroutine(final Coroutine coro, Throwable error) {
-		Check.isFalse(coro.isResuming());
-
-		Cons<ResumeInfo> callStack = coro.callStack;
-
-		try {
-
-			while (callStack != null) {
-				ResumeInfo top = callStack.car;
-				callStack = callStack.cdr;
-
-				try {
-					if (error == null) {
-						// no errors
-						top.resume(context);
-						Dispatch.evaluateTailCalls(context);
-					}
-					else {
-						// there is an error to be handled
-						if (top.resumable instanceof ProtectedResumable) {
-							// top is protected, can handle the error
-							Throwable e = error;
-							error = null;  // this exception will be handled
-
-							ProtectedResumable pr = (ProtectedResumable) top.resumable;
-							pr.resumeError(context, top.savedState, Conversions.throwableToObject(e));
-							Dispatch.evaluateTailCalls(context);
-						}
-						else {
-							// top is not protected, continue unwinding the stack
-						}
-					}
-				}
-				catch (CoroutineSwitch.Yield yield) {
-					callStack = prependCalls(yield.frames(), callStack);
-					return doYield(coro, yield.args);
-				}
-				catch (CoroutineSwitch.Resume resume) {
-					callStack = prependCalls(resume.frames(), callStack);
-					return doResume(coro, resume.coroutine, resume.args);
-				}
-				catch (Preempted preempted) {
-					callStack = prependCalls(preempted.frames(), callStack);
-					assert (callStack != null);
-					return CoroutineResumeResult.PAUSED;
-				}
-				catch (ControlThrowable ct) {
-					throw new UnsupportedOperationException(ct);
-				}
-				catch (Exception ex) {
-					// unhandled exception: will try finding a handler in the next iteration
-					error = ex;
-				}
-			}
-		}
-		finally {
-			coro.callStack = callStack;
-		}
-
-		assert (coro.callStack == null);
-
-		Coroutine yieldTarget = coro.yield();
-		if (yieldTarget != null) {
-			return new CoroutineResumeResult(yieldTarget, error);
-		}
-		else {
-			// main coroutine return
-			return CoroutineResumeResult.mainReturn(error);
-		}
-	}
 
 	// return true if execution was paused, false if execution is finished
 	// in other words: returns true iff isPaused() == true afterwards
@@ -258,9 +95,9 @@ public class Exec {
 		Throwable error = null;
 
 		while (currentCoroutine != null) {
-			CoroutineResumeResult result = resumeCoroutine(currentCoroutine, error);
+			Coroutine.ResumeResult result = currentCoroutine.resume(context, error);
 
-			if (result == CoroutineResumeResult.PAUSED) {
+			if (result == Coroutine.ResumeResult.PAUSED) {
 				// pause
 				return true;
 			}
