@@ -89,16 +89,30 @@ public class Exec {
 		Throwable error = null;
 
 		while (currentCoroutine != null) {
-			Coroutine.ResumeResult result = currentCoroutine.resume(context, error);
+			ResumeResult result = currentCoroutine.resume(context, error);
 
-			if (result == Coroutine.ResumeResult.PAUSED) {
-				// pause
+			if (result instanceof ResumeResult.Pause) {
 				return true;
 			}
+			else if (result instanceof ResumeResult.Switch) {
+				currentCoroutine = ((ResumeResult.Switch) result).target;
+				error = null;
+			}
+			else if (result instanceof ResumeResult.ImplicitYield) {
+				ResumeResult.ImplicitYield r = (ResumeResult.ImplicitYield) result;
+				currentCoroutine = r.target;
+				error = r.error;
+			}
+			else if (result instanceof ResumeResult.Error) {
+				currentCoroutine = null;
+				error = ((ResumeResult.Error) result).error;
+			}
+			else if (result instanceof ResumeResult.Finished) {
+				currentCoroutine = null;
+				error = null;
+			}
 			else {
-				// coroutine switch
-				currentCoroutine = result.coroutine;
-				error = result.error;
+				throw new IllegalStateException("Illegal result: " + result);
 			}
 		}
 

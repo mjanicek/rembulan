@@ -124,59 +124,6 @@ public final class Coroutine {
 		}
 	}
 
-	static class ResumeResult {
-		public static final ResumeResult PAUSED = new ResumeResult(null, null);
-
-		public final Coroutine coroutine;
-		public final Throwable error;
-
-		private ResumeResult(Coroutine coroutine, Throwable error) {
-			this.coroutine = coroutine;
-			this.error = error;
-		}
-
-		public static ResumeResult switchTo(Coroutine c) {
-			Check.notNull(c);
-			return new ResumeResult(c, null);
-		}
-
-		public static ResumeResult errorInCoroutine(Coroutine c, Throwable e) {
-			Check.notNull(c);
-			Check.notNull(e);
-			return new ResumeResult(c, e);
-		}
-
-		public static ResumeResult mainReturn(Throwable e) {
-			return new ResumeResult(null, e);
-		}
-
-	}
-
-	private ResumeResult doYield(ObjectSink objectSink, Object[] args) {
-		Coroutine c = this.yield();
-		if (c != null) {
-			objectSink.setToArray(args);
-			return ResumeResult.switchTo(c);
-		}
-		else {
-			return ResumeResult.errorInCoroutine(this,
-					new IllegalOperationAttemptException("attempt to yield from outside a coroutine"));
-		}
-	}
-
-	private ResumeResult doResume(ObjectSink objectSink, Coroutine target, Object[] args) {
-		final Coroutine c;
-		try {
-			c = this.resume(target);
-		}
-		catch (Exception ex) {
-			return ResumeResult.errorInCoroutine(this, ex);
-		}
-
-		objectSink.setToArray(args);
-		return ResumeResult.switchTo(c);
-	}
-
 	public ResumeResult resume(ExecutionContext context, Throwable error) {
 		Check.isNull(resuming);
 
@@ -208,16 +155,33 @@ public final class Coroutine {
 			}
 			catch (CoroutineSwitch.Yield yield) {
 				saveFrames(yield);
-				return doYield(context.getObjectSink(), yield.args);
+
+				Coroutine c = this.yield();
+				if (c != null) {
+					context.getObjectSink().setToArray(yield.args);
+					return new ResumeResult.Switch(c);
+				}
+				else {
+					error = new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
+				}
 			}
 			catch (CoroutineSwitch.Resume resume) {
 				saveFrames(resume);
-				return doResume(context.getObjectSink(), resume.coroutine, resume.args);
+
+				final Coroutine c;
+				try {
+					c = this.resume(resume.coroutine);
+					context.getObjectSink().setToArray(resume.args);
+					return new ResumeResult.Switch(c);
+				}
+				catch (Exception ex) {
+					error = ex;
+				}
 			}
 			catch (Preempted preempted) {
 				saveFrames(preempted);
 				assert (callStack != null);
-				return ResumeResult.PAUSED;
+				return ResumeResult.Pause.INSTANCE;
 			}
 			catch (ControlThrowable ct) {
 				throw new UnsupportedOperationException(ct);
@@ -232,11 +196,11 @@ public final class Coroutine {
 
 		Coroutine yieldTarget = yield();
 		if (yieldTarget != null) {
-			return new ResumeResult(yieldTarget, error);
+			return new ResumeResult.ImplicitYield(yieldTarget, error);
 		}
 		else {
 			// main coroutine return
-			return ResumeResult.mainReturn(error);
+			return error == null ? ResumeResult.Finished.INSTANCE : new ResumeResult.Error(error);
 		}
 	}
 
