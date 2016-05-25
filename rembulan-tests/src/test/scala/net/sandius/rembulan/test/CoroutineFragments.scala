@@ -107,6 +107,12 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
   }
   RunningCoroutineStatus in CoroContext succeedsWith ("running")
 
+  val CoroutineRunningInMain = fragment ("CoroutineRunningInMain") {
+    """return coroutine.running()
+    """
+  }
+  CoroutineRunningInMain in CoroContext succeedsWith (classOf[Coroutine], true)
+
   val NormalCoroutineStatus = fragment ("NormalCoroutineStatus") {
     """return coroutine.resume(coroutine.create(function(c) return coroutine.status(c) end), coroutine.running())
     """
@@ -127,5 +133,11 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
     """
   }
   WrapNormalFunctionCannotBeCalledTwice in CoroContext failsWith (classOf[IllegalStateException], "cannot resume dead coroutine")
+
+  val WrappedCoroutineRunning = fragment ("WrappedCoroutineRunning") {
+    """return coroutine.wrap(coroutine.running)()
+    """
+  }
+  WrappedCoroutineRunning in CoroContext succeedsWith (classOf[Coroutine], false)
 
 }
