@@ -185,11 +185,38 @@ public class DefaultCoroutineLib extends CoroutineLib {
 	public static class Wrap extends Function1 {
 
 		public static final Wrap INSTANCE = new Wrap();
-		
+
+		static class WrappedCoroutine extends FunctionAnyarg {
+
+			private final Coroutine coroutine;
+
+			public WrappedCoroutine(Function function, ExecutionContext context) {
+				Check.notNull(function);
+				Check.notNull(context);
+				this.coroutine = context.newCoroutine(function);
+			}
+
+			@Override
+			public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+				context.getObjectSink().reset();
+
+				CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, args);
+				ct.push(this, null);
+				throw ct;
+			}
+
+			@Override
+			public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+				// no-op
+			}
+
+		}
+
 		@Override
 		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
-			// TODO
-			context.getObjectSink().setTo(arg1);
+			Function f = LibUtils.checkFunction("coroutine.wrap", new Object[] {arg1}, 0);
+			Function result = new WrappedCoroutine(f, context);
+			context.getObjectSink().setTo(result);
 		}
 
 		@Override

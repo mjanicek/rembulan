@@ -120,4 +120,12 @@ object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
   }
   YieldFromOutsideCoroutine in CoroContext failsWith (classOf[IllegalOperationAttemptException], "attempt to yield from outside a coroutine")
 
+  val WrapNormalFunctionCannotBeCalledTwice = fragment ("WrapNormalFunctionCannotBeCalledTwice") {
+    """local f = coroutine.wrap(function() end)
+      |f()
+      |f()
+    """
+  }
+  WrapNormalFunctionCannotBeCalledTwice in CoroContext failsWith (classOf[IllegalStateException], "cannot resume dead coroutine")
+
 }
