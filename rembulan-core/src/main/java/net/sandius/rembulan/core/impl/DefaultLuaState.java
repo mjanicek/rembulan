@@ -80,6 +80,48 @@ public class DefaultLuaState extends LuaState {
 	}
 
 	@Override
+	public Table setNilMetatable(Table table) {
+		Table old = nilMetatable;
+		nilMetatable = table;
+		return old;
+	}
+
+	@Override
+	public Table setBooleanMetatable(Table table) {
+		Table old = booleanMetatable;
+		booleanMetatable = table;
+		return old;
+	}
+
+	@Override
+	public Table setNumberMetatable(Table table) {
+		Table old = numberMetatable;
+		numberMetatable = table;
+		return old;
+	}
+
+	@Override
+	public Table setStringMetatable(Table table) {
+		Table old = stringMetatable;
+		stringMetatable = table;
+		return old;
+	}
+
+	@Override
+	public Table setThreadMetatable(Table table) {
+		Table old = threadMetatable;
+		threadMetatable = table;
+		return old;
+	}
+
+	@Override
+	public Table setLightUserdataMetatable(Table table) {
+		Table old = lightuserdataMetatable;
+		lightuserdataMetatable = table;
+		return old;
+	}
+
+	@Override
 	public ObjectSinkFactory objectSinkFactory() {
 		return objectSinkFactory;
 	}

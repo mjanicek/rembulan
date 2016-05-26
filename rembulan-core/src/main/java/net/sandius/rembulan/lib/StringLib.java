@@ -40,7 +40,7 @@ public abstract class StringLib implements Lib {
 		LibUtils.setIfNonNull(env, "unpack", _unpack());
 		LibUtils.setIfNonNull(env, "upper", _upper());
 
-		// TODO: install string metatable
+		state.setStringMetatable(env);
 	}
 
 	/**

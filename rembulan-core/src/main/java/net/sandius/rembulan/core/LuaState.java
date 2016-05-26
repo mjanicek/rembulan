@@ -10,6 +10,13 @@ public abstract class LuaState {
 	public abstract Table threadMetatable();
 	public abstract Table lightuserdataMetatable();
 
+	public abstract Table setNilMetatable(Table table);
+	public abstract Table setBooleanMetatable(Table table);
+	public abstract Table setNumberMetatable(Table table);
+	public abstract Table setStringMetatable(Table table);
+	public abstract Table setThreadMetatable(Table table);
+	public abstract Table setLightUserdataMetatable(Table table);
+
 	public abstract ObjectSinkFactory objectSinkFactory();
 
 	public ObjectSink newObjectSink() {
