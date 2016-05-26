@@ -75,12 +75,12 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _reverse() {
-		return null;  // TODO
+		return Reverse.INSTANCE;
 	}
 
 	@Override
 	public Function _sub() {
-		return null;  // TODO
+		return Sub.INSTANCE;
 	}
 
 	@Override
@@ -194,6 +194,59 @@ public class DefaultStringLib extends StringLib {
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			String s = args.nextString();
 			context.getObjectSink().setTo(s.toLowerCase());
+		}
+
+	}
+
+	public static class Reverse extends LibFunction {
+
+		public static final Reverse INSTANCE = new Reverse();
+
+		@Override
+		protected String name() {
+			return "reverse";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+
+			int len = s.length();
+			char[] chars = new char[len];
+
+			for (int i = 0; i < chars.length; i++) {
+				chars[i] = s.charAt(len - 1 - i);
+			}
+
+			String result = String.valueOf(chars);
+
+			context.getObjectSink().setTo(result);
+		}
+
+	}
+
+	public static class Sub extends LibFunction {
+
+		public static final Sub INSTANCE = new Sub();
+
+		@Override
+		protected String name() {
+			return "sub";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			int i = args.nextInt();
+			int j = args.optNextInt(-1);
+
+			int len = s.length();
+			i = correctIndex(i, len) - 1;
+			j = correctIndex(j, len);
+
+			String result = s.substring(i, j);
+
+			context.getObjectSink().setTo(result);
 		}
 
 	}
