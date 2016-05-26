@@ -43,6 +43,12 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   AddNumbers in EmptyContext succeedsWith (42.0)
 
+  val AddHexString = fragment ("AddHexString") {
+    """return "0x10" + 1
+    """
+  }
+  AddHexString in EmptyContext succeedsWith (17.0)
+
   val IfThenElse = fragment ("IfThenElse") {
     """if x >= 0 and x <= 10 then print(x) end
     """
