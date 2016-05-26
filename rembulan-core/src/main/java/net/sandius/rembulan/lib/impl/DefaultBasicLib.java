@@ -374,77 +374,13 @@ public class DefaultBasicLib extends BasicLib {
 
 		public static final ToNumber INSTANCE = new ToNumber();
 
-		private static final int MIN_BASE = 2;
-		private static final int MAX_BASE = 36;
-
 		public static Long toNumber(String s, int base) {
-			Check.notNull(s);
-			Check.inRange(base, MIN_BASE, MAX_BASE);
-
-			s = s.trim();
-
-			int idx = 0;
-
-			// empty!
-			if (s.isEmpty()) {
+			try {
+				return Long.parseLong(s, base);
+			}
+			catch (NumberFormatException ex) {
 				return null;
 			}
-
-			// sign?
-			final boolean pos;
-
-			{
-				final char c = s.charAt(idx);
-
-				if (c == '-') {
-					pos = false;
-					idx++;
-				}
-				else if (c == '+') {
-					pos = true;
-					idx++;
-				}
-				else {
-					pos = true;
-				}
-			}
-
-			// no digits!
-			if (idx >= s.length()) {
-				return null;
-			}
-
-			long n = 0;
-
-			// digits
-			while (idx < s.length()) {
-				final char c = s.charAt(idx);
-				final int digit;
-
-				if (c >= '0' && c <= '9') {
-					digit = c - '0';
-				}
-				else if (c >= 'a' && c <= 'z') {
-					digit = 10 + c - 'a';
-				}
-				else if (c >= 'A' && c <= 'Z') {
-					digit = 10 + c - 'A';
-				}
-				else {
-					// non-alphanumeric character
-					return null;
-				}
-
-				if (digit >= base) {
-					// doesn't fit in the base
-					return null;
-				}
-
-				n = n * base + digit;
-				idx++;
-			}
-
-			return pos ? n : -n;
 		}
 
 		@Override
@@ -457,7 +393,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				String s = LibUtils.checkString("tonumber", args, 0);
-				int base = LibUtils.checkRange("tonumber", args, 1, "base", MIN_BASE, MAX_BASE);
+				int base = LibUtils.checkRange("tonumber", args, 1, "base", Character.MIN_RADIX, Character.MAX_RADIX);
 				context.getObjectSink().setTo(toNumber(s, base));
 			}
 		}
