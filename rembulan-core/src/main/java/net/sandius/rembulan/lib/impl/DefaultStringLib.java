@@ -3,10 +3,7 @@ package net.sandius.rembulan.lib.impl;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.RawOperators;
-import net.sandius.rembulan.core.impl.FunctionAnyarg;
-import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.lib.StringLib;
 
 public class DefaultStringLib extends StringLib {
@@ -112,15 +109,20 @@ public class DefaultStringLib extends StringLib {
 		return i;
 	}
 
-	public static class Byte extends FunctionAnyarg {
+	public static class Byte extends LibFunction {
 
 		public static final Byte INSTANCE = new Byte();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			String s = LibUtils.checkString("byte", args, 0);
-			int i = args.length >= 1 ? LibUtils.checkInt("byte", args, 1) : 1;
-			int j = args.length >= 2 ? LibUtils.checkInt("byte", args, 2) : i;
+		protected String name() {
+			return "byte";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			int i = args.optNextInt(1);
+			int j = args.optNextInt(i);
 
 			int len = RawOperators.stringLen(s);
 
@@ -137,49 +139,44 @@ public class DefaultStringLib extends StringLib {
 			}
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Char extends FunctionAnyarg {
+	public static class Char extends LibFunction {
 
 		public static final Char INSTANCE = new Char();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			char[] chars = new char[args.length];
+		protected String name() {
+			return "char";
+		}
 
-			for (int i = 0; i < args.length; i++) {
-				chars[i] = (char) LibUtils.checkInt("char", args, i);
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			char[] chars = new char[args.size()];
+
+			for (int i = 0; i < chars.length; i++) {
+				chars[i] = (char) args.nextInt();
 			}
 
 			String s = String.valueOf(chars);
 			context.getObjectSink().setTo(s);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Len extends FunctionAnyarg {
+	public static class Len extends LibFunction {
 
 		public static final Len INSTANCE = new Len();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			String s = LibUtils.checkString("len", args, 0);
-			context.getObjectSink().setTo((long) s.length());
+		protected String name() {
+			return "len";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			context.getObjectSink().setTo((long) s.length());
 		}
 
 	}

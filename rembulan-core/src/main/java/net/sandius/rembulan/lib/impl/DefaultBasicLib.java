@@ -10,18 +10,13 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
-import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
-import net.sandius.rembulan.core.impl.Function1;
-import net.sandius.rembulan.core.impl.Function2;
-import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
-import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;
@@ -150,12 +145,17 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 
-	public static class Print extends FunctionAnyarg {
+	public static class Print extends LibFunction {
 
 		private final PrintStream out;
 
 		public Print(PrintStream out) {
 			this.out = Check.notNull(out);
+		}
+
+		@Override
+		protected String name() {
+			return "print";
 		}
 
 		private void run(ExecutionContext context, Object[] args) throws ControlThrowable {
@@ -189,8 +189,8 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			run(context, args);
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			run(context, args.args);
 		}
 
 		@Override
@@ -200,31 +200,36 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Type extends Function1 {
+	public static class Type extends LibFunction {
 
 		public static final Type INSTANCE = new Type();
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg) throws ControlThrowable {
-			LuaType tpe = Value.typeOf(arg);
-			context.getObjectSink().setTo(tpe.name);
+		protected String name() {
+			return "type";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			LuaType tpe = Value.typeOf(args.nextAny());
+			context.getObjectSink().setTo(tpe.name);
 		}
 
 	}
 
-	public static class Next extends FunctionAnyarg {
+	public static class Next extends LibFunction {
 
 		public static final Next INSTANCE = new Next();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Table table = LibUtils.checkTable("next", args, 0);
-			Object index = Varargs.getElement(args, 1);
+		protected String name() {
+			return "next";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Table table = args.nextTable();
+			Object index = args.optNextAny();
 
 			final Object nxt;
 
@@ -245,21 +250,21 @@ public class DefaultBasicLib extends BasicLib {
 			}
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class INext extends FunctionAnyarg {
+	public static class INext extends LibFunction {
 
 		public static final INext INSTANCE = new INext();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Table table = LibUtils.checkTable("inext", args, 0);
-			int index = LibUtils.checkInt("inext", args, 1);
+		protected String name() {
+			return "inext";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Table table = args.nextTable();
+			int index = args.nextInt();
 
 			index += 1;
 
@@ -272,20 +277,20 @@ public class DefaultBasicLib extends BasicLib {
 			}
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Pairs extends FunctionAnyarg {
+	public static class Pairs extends LibFunction {
 
 		public static final Pairs INSTANCE = new Pairs();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Table t = LibUtils.checkTable("pairs", args, 0);
+		protected String name() {
+			return "pairs";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Table t = args.nextTable();
 			Object metamethod = Metatables.getMetamethod(context.getState(), "__pairs", t);
 
 			if (metamethod != null) {
@@ -314,24 +319,24 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class IPairs extends FunctionAnyarg {
+	public static class IPairs extends LibFunction {
 
 		public static final IPairs INSTANCE = new IPairs();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Table t = LibUtils.checkTable("ipairs", args, 0);
-			context.getObjectSink().setTo(INext.INSTANCE, t, 0L);
+		protected String name() {
+			return "ipairs";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Table t = args.nextTable();
+			context.getObjectSink().setTo(INext.INSTANCE, t, 0L);
 		}
 
 	}
 
-	public static class ToString extends Function1 {
+	public static class ToString extends LibFunction {
 
 		public static final ToString INSTANCE = new ToString();
 
@@ -340,7 +345,14 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg) throws ControlThrowable {
+		protected String name() {
+			return "tostring";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object arg = args.nextAny();
+
 			Object meta = Metatables.getMetamethod(context.getState(), "__tostring", arg);
 			if (meta != null) {
 				try {
@@ -370,7 +382,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class ToNumber extends FunctionAnyarg {
+	public static class ToNumber extends LibFunction {
 
 		public static final ToNumber INSTANCE = new ToNumber();
 
@@ -384,34 +396,40 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			if (Varargs.getElement(args, 1) == null) {
+		protected String name() {
+			return "tonumber";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			if (args.size() < 2) {
 				// no base
-				Object o = LibUtils.checkValue("tonumber", args, 0);
+				Object o = args.nextAny();
 				Number n = Conversions.objectAsNumber(o);
 				context.getObjectSink().setTo(n);
 			}
 			else {
-				String s = LibUtils.checkString("tonumber", args, 0);
-				int base = LibUtils.checkRange("tonumber", args, 1, "base", Character.MIN_RADIX, Character.MAX_RADIX);
+				String s = args.nextString();
+				int base = args.nextIntRange("base", Character.MIN_RADIX, Character.MAX_RADIX);
 				context.getObjectSink().setTo(toNumber(s, base));
 			}
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
 	}
 
 
-	public static class GetMetatable extends Function1 {
+	public static class GetMetatable extends LibFunction {
 
 		public static final GetMetatable INSTANCE = new GetMetatable();
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg) throws ControlThrowable {
+		protected String name() {
+			return "getmetatable";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object arg = args.nextAny();
 			Object meta = Metatables.getMetamethod(context.getState(), "__metatable", arg);
 
 			Object result = meta != null
@@ -421,21 +439,21 @@ public class DefaultBasicLib extends BasicLib {
 			context.getObjectSink().setTo(result);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class SetMetatable extends Function2 {
+	public static class SetMetatable extends LibFunction {
 
 		public static final SetMetatable INSTANCE = new SetMetatable();
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
-			Table t = LibUtils.checkArgument(arg1, 0, Table.class);
-			Table mt = LibUtils.checkArgumentOrNil(arg2, 1, Table.class);
+		protected String name() {
+			return "setmetatable";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Table t = args.nextTable();
+			Table mt = args.optNextTable();
 
 			if (Metatables.getMetamethod(context.getState(), "__metatable", t) != null) {
 				throw new IllegalOperationAttemptException("cannot change a protected metatable");
@@ -446,44 +464,45 @@ public class DefaultBasicLib extends BasicLib {
 			}
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Error extends Function2 {
+	public static class Error extends LibFunction {
 
 		public static final Error INSTANCE = new Error();
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
-			// TODO: handle levels
-			throw new LuaRuntimeException(arg1);
+		protected String name() {
+			return "error";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			// TODO: handle levels
+			Object arg1 = args.optNextAny();
+			throw new LuaRuntimeException(arg1);
 		}
 
 	}
 
-	public static class Assert extends FunctionAnyarg {
+	public static class Assert extends LibFunction {
 
 		public static final Assert INSTANCE = new Assert();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			if (Conversions.objectToBoolean(Varargs.getElement(args, 0))) {
-				context.getObjectSink().setToArray(args);
+		protected String name() {
+			return "assert";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			if (Conversions.objectToBoolean(args.nextAny())) {
+				context.getObjectSink().setToArray(args.getAll());
 			}
 			else {
 				final AssertionFailedException ex;
-				if (args.length > 1) {
+				if (args.hasNext()) {
 					// message is defined
-					Object message = args[1];
+					Object message = args.nextAny();
 					String stringMessage = Conversions.objectAsString(message);
 					if (stringMessage != null) {
 						ex = new AssertionFailedException(stringMessage);
@@ -502,21 +521,21 @@ public class DefaultBasicLib extends BasicLib {
 
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class PCall extends FunctionAnyarg implements ProtectedResumable {
+	public static class PCall extends LibFunction implements ProtectedResumable {
 
 		public static final PCall INSTANCE = new PCall();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Object callTarget = Varargs.getElement(args, 0);
-			Object[] callArgs = Varargs.from(args, 1);
+		protected String name() {
+			return "pcall";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object callTarget = args.nextAny();
+			Object[] callArgs = args.getTail();
 
 			try {
 				Dispatch.call(context, callTarget, callArgs);
@@ -546,11 +565,16 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class XPCall extends FunctionAnyarg implements ProtectedResumable {
+	public static class XPCall extends LibFunction implements ProtectedResumable {
 
 		public static final int MAX_DEPTH = 220;  // 220 in PUC-Lua 5.3
 
 		public static final XPCall INSTANCE = new XPCall();
+
+		@Override
+		protected String name() {
+			return "xpcall";
+		}
 
 		private static class SavedState {
 			public final Function handler;
@@ -609,10 +633,10 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Function handler = LibUtils.checkFunction("xpcall", args, 1);
-			Object callTarget = LibUtils.checkValue("xpcall", args, 0);
-			Object[] callArgs = Varargs.from(args, 2);
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object callTarget = args.nextAny();
+			Function handler = args.nextFunction();
+			Object[] callArgs = args.getTail();
 
 			Object errorObject = null;
 			boolean isError = false;  // need to distinguish nil error objects from no-error
@@ -655,72 +679,78 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawEqual extends FunctionAnyarg {
+	public static class RawEqual extends LibFunction {
 
 		public static final RawEqual INSTANCE = new RawEqual();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Object a = LibUtils.checkValue("rawequal", args, 0);
-			Object b = LibUtils.checkValue("rawequal", args, 1);
-
-			context.getObjectSink().setTo(RawOperators.raweq(a, b));
+		protected String name() {
+			return "rawequal";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object a = args.nextAny();
+			Object b = args.nextAny();
+			context.getObjectSink().setTo(RawOperators.raweq(a, b));
 		}
 
 	}
 
-	public static class RawGet extends FunctionAnyarg {
+	public static class RawGet extends LibFunction {
 
 		public static final RawGet INSTANCE = new RawGet();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Table table = LibUtils.checkTable("rawget", args, 0);
-			Object key = LibUtils.checkValue("rawget", args, 1);
-
-			context.getObjectSink().setTo(table.rawget(key));
+		protected String name() {
+			return "rawget";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Table table = args.nextTable();
+			Object key = args.nextAny();
+			context.getObjectSink().setTo(table.rawget(key));
 		}
 
 	}
 
-	public static class RawSet extends FunctionAnyarg {
+	public static class RawSet extends LibFunction {
 
 		public static final RawSet INSTANCE = new RawSet();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Table table = LibUtils.checkTable("rawset", args, 0);
-			Object key = LibUtils.checkValue("rawset", args, 1);
-			Object value = LibUtils.checkValue("rawset", args, 2);
+		protected String name() {
+			return "rawset";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Table table = args.nextTable();
+			Object key = args.nextAny();
+			Object value = args.nextAny();
 
 			table.rawset(key, value);
 			context.getObjectSink().setTo(table);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class RawLen extends Function1 {
+	public static class RawLen extends LibFunction {
 
 		public static final RawLen INSTANCE = new RawLen();
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
+		protected String name() {
+			return "rawlen";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			final long result;
+
+			// no need to distinguish missing value vs nil
+			Object arg1 = args.optNextAny();
 
 			if (arg1 instanceof Table) {
 				Table table = (Table) arg1;
@@ -737,43 +767,39 @@ public class DefaultBasicLib extends BasicLib {
 			context.getObjectSink().setTo(result);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Select extends FunctionAnyarg {
+	public static class Select extends LibFunction {
 
 		public static final Select INSTANCE = new Select();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Object index = LibUtils.checkValue("select", args, 0);
+		protected String name() {
+			return "select";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object index = args.nextAny();
 
 			if (index instanceof String && ((String) index).startsWith("#")) {
 				// return the number of remaining args
-				context.getObjectSink().setTo((long) args.length - 1);
+				context.getObjectSink().setTo((long) args.tailSize());
 			}
 			else {
-				int idx = LibUtils.checkRange("select", args, 0, "index", -args.length + 1, Integer.MAX_VALUE);
+				args.reset();
+				int idx = args.nextIntRange("index", -args.size() + 1, Integer.MAX_VALUE);
 
 				int from = idx >= 0
 						? idx  // from the beginning
-						: args.length + idx;  // idx < 0: from the end (-1 is the last index)
+						: args.size() + idx;  // idx < 0: from the end (-1 is the last index)
 
 				if (from < 1) {
 					throw new IllegalArgumentException("bad argument #1 to 'select' (index out of range)");
 				}
 
-				context.getObjectSink().setToArray(Varargs.from(args, from));
+				context.getObjectSink().setToArray(Varargs.from(args.getAll(), from));
 			}
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
 	}

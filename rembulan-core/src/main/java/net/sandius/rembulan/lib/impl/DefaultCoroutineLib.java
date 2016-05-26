@@ -5,14 +5,9 @@ import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.CoroutineSwitch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ProtectedResumable;
-import net.sandius.rembulan.core.impl.Function0;
-import net.sandius.rembulan.core.impl.Function1;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
-import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.CoroutineLib;
-import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.util.Check;
 
 public class DefaultCoroutineLib extends CoroutineLib {
@@ -52,32 +47,37 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		return Wrap.INSTANCE;
 	}
 
-	public static class Create extends FunctionAnyarg {
+	public static class Create extends LibFunction {
 
 		public static final Create INSTANCE = new Create();
-		
+
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Function func = LibUtils.checkFunction("create", args, 0);
+		protected String name() {
+			return "create";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Function func = args.nextFunction();
 			Coroutine c = context.newCoroutine(func);
 			context.getObjectSink().setTo(c);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Resume extends FunctionAnyarg implements ProtectedResumable {
+	public static class Resume extends LibFunction implements ProtectedResumable {
 
 		public static final Resume INSTANCE = new Resume();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Coroutine coroutine = LibUtils.checkCoroutine("resume", args, 0);
-			Object[] resumeArgs = Varargs.from(args, 1);
+		protected String name() {
+			return "resume";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Coroutine coroutine = args.nextCoroutine();
+			Object[] resumeArgs = args.getTail();
 
 			context.getObjectSink().reset();
 
@@ -99,40 +99,46 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 	}
 
-	public static class Yield extends FunctionAnyarg {
+	public static class Yield extends LibFunction {
 
 		public static final Yield INSTANCE = new Yield();
-		
+
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			CoroutineSwitch.Yield ct = new CoroutineSwitch.Yield(args);
+		protected String name() {
+			return "yield";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			CoroutineSwitch.Yield ct = new CoroutineSwitch.Yield(args.getAll());
 			ct.push(this, null);
 			throw ct;
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			// no-op, the resume arguments are on the stack already
 		}
 
 	}
 
-	public static class IsYieldable extends Function0 {
+	public static class IsYieldable extends LibFunction {
 
 		public static final IsYieldable INSTANCE = new IsYieldable();
-		
+
 		@Override
-		public void invoke(ExecutionContext context) throws ControlThrowable {
+		protected String name() {
+			return "isyieldable";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			context.getObjectSink().setTo(context.canYield());
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Status extends Function1 {
+	public static class Status extends LibFunction {
 
 		public static final Status INSTANCE = new Status();
 
@@ -154,36 +160,36 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
-			Coroutine coroutine = LibUtils.checkArgument(arg1, 0, Coroutine.class);
-			context.getObjectSink().setTo(status(context, coroutine));
+		protected String name() {
+			return "status";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Coroutine coroutine = args.nextCoroutine();
+			context.getObjectSink().setTo(status(context, coroutine));
 		}
 
 	}
 
-	public static class Running extends Function0 {
+	public static class Running extends LibFunction {
 
 		public static final Running INSTANCE = new Running();
-		
+
 		@Override
-		public void invoke(ExecutionContext context) throws ControlThrowable {
+		protected String name() {
+			return "running";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Coroutine c = context.getCurrentCoroutine();
 			context.getObjectSink().setTo(c, !c.canYield());
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Wrap extends Function1 {
+	public static class Wrap extends LibFunction {
 
 		public static final Wrap INSTANCE = new Wrap();
 
@@ -214,15 +220,15 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
-			Function f = LibUtils.checkFunction("coroutine.wrap", new Object[] {arg1}, 0);
-			Function result = new WrappedCoroutine(f, context);
-			context.getObjectSink().setTo(result);
+		protected String name() {
+			return "wrap";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Function f = args.nextFunction();
+			Function result = new WrappedCoroutine(f, context);
+			context.getObjectSink().setTo(result);
 		}
 
 	}

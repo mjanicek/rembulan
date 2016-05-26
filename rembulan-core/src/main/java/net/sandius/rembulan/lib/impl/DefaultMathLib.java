@@ -5,9 +5,6 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.NonsuspendableFunctionException;
-import net.sandius.rembulan.core.impl.FunctionAnyarg;
-import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.lib.MathLib;
 import net.sandius.rembulan.util.Check;
 
@@ -160,9 +157,7 @@ public class DefaultMathLib extends MathLib {
 		return ULt.INSTANCE;
 	}
 
-	public static abstract class MathFunction1 extends FunctionAnyarg {
-
-		protected abstract String name();
+	public static abstract class MathFunction1 extends LibFunction {
 
 		protected abstract Number op(double x);
 
@@ -171,15 +166,10 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Number x = LibUtils.checkNumber(name(), args, 0);
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Number x = args.nextNumber();
 			Number result = x instanceof Float || x instanceof Double ? op(x.doubleValue()) : op(x.longValue());
 			context.getObjectSink().setTo(result);
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
 	}
@@ -347,14 +337,19 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class FMod extends FunctionAnyarg {
+	public static class FMod extends LibFunction {
 
 		public static final FMod INSTANCE = new FMod();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Number x = LibUtils.checkNumber("fmod", args, 0);
-			Number y = LibUtils.checkNumber("fmod", args, 1);
+		protected String name() {
+			return "fmod";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Number x = args.nextNumber();
+			Number y = args.nextNumber();
 
 			final Number result;
 
@@ -378,26 +373,26 @@ public class DefaultMathLib extends MathLib {
 			context.getObjectSink().setTo(result);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class Log extends FunctionAnyarg {
+	public static class Log extends LibFunction {
 
 		public static final Log INSTANCE = new Log();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Number x = LibUtils.checkNumber("log", args, 0);
+		protected String name() {
+			return "log";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Number x = args.nextNumber();
 			double ln = Math.log(x.doubleValue());
 			final double result;
 
-			if (args.length > 1) {
+			if (args.hasNext()) {
 				// explicit base
-				double base = LibUtils.checkNumber("log", args, 1).doubleValue();
+				double base = args.nextNumber().doubleValue();
 				result = ln / Math.log(base);
 			}
 			else {
@@ -408,14 +403,9 @@ public class DefaultMathLib extends MathLib {
 			context.getObjectSink().setTo(result);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class MaxMin extends FunctionAnyarg {
+	public static class MaxMin extends LibFunction {
 
 		private final boolean isMax;
 
@@ -438,6 +428,11 @@ public class DefaultMathLib extends MathLib {
 				this.best = best;
 			}
 
+		}
+
+		@Override
+		protected String name() {
+			return isMax ? "max" : "min";
 		}
 
 		private void run(ExecutionContext context, Object[] args, int idx, Object best) throws ControlThrowable {
@@ -467,13 +462,9 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			if (args.length == 0) {
-				String name = isMax ? "max" : "min";
-				throw new IllegalArgumentException("bad argument #1 to '" + name + "' (value expected)");
-			}
-
-			run(context, args, 1, args[0]);
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object initial = args.nextAny();
+			run(context, args.getAll(), 1, initial);
 		}
 
 		@Override
@@ -494,23 +485,23 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ModF extends FunctionAnyarg {
+	public static class ModF extends LibFunction {
 
 		public static final ModF INSTANCE = new ModF();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Number x = LibUtils.checkNumber("modf", args, 0);
+		protected String name() {
+			return "modf";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Number x = args.nextNumber();
 
 			long intPart = x.longValue();
 			double fltPart = x.doubleValue() - intPart;
 
 			context.getObjectSink().setTo(intPart, fltPart);
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
 	}
@@ -531,12 +522,17 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Rand extends FunctionAnyarg {
+	public static class Rand extends LibFunction {
 
 		protected final Random random;
 
 		public Rand(Random random) {
 			this.random = Check.notNull(random);
+		}
+
+		@Override
+		protected String name() {
+			return "random";
 		}
 
 		// return a long in the range [0, n)
@@ -557,31 +553,26 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			final Number result;
 
-			switch (args.length) {
-
+			if (!args.hasNext()) {
 				// float in the range [0.0, 1.0)
-				case 0:
-					result = random.nextDouble();
-					break;
+				result = random.nextDouble();
+			}
+			else {
+				long m = args.nextInteger();
 
-				// integer in the range [1, m]
-				case 1: {
-					long m = LibUtils.checkInteger("random", args, 0);
+				if (!args.hasNext()) {
+					// integer in the range [1, m]
 					if (m < 1) {
 						throw new IllegalArgumentException("bad argument #1 to 'random' (interval is empty)");
 					}
 					result = 1L + nextLong(m);
-					break;
 				}
-
-				// integer in the range [m, n]
-				case 2:
-				default: {
-					long m = LibUtils.checkInteger("random", args, 0);
-					long n = LibUtils.checkInteger("random", args, 1);
+				else {
+					// integer in the range [m, n]
+					long n = args.nextInteger();
 
 					if (n < m) {
 						throw new IllegalArgumentException("bad argument #1 to 'random' (interval is empty)");
@@ -594,21 +585,15 @@ public class DefaultMathLib extends MathLib {
 					}
 
 					result = m + nextLong(limit);
-					break;
 				}
 			}
 
 			context.getObjectSink().setTo(result);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class RandSeed extends FunctionAnyarg {
+	public static class RandSeed extends LibFunction {
 
 		protected final Random random;
 
@@ -617,8 +602,13 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Number arg = LibUtils.checkInteger("randomseed", args, 0);
+		protected String name() {
+			return "randomseed";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Number arg = args.nextNumber();
 
 			long seed = arg instanceof Double || arg instanceof Float
 					? Double.doubleToLongBits(arg.doubleValue())
@@ -627,11 +617,6 @@ public class DefaultMathLib extends MathLib {
 			random.setSeed(seed);
 
 			context.getObjectSink().reset();
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
 		}
 
 	}
@@ -684,30 +669,35 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ToInteger extends FunctionAnyarg {
+	public static class ToInteger extends LibFunction {
 
 		public static final ToInteger INSTANCE = new ToInteger();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Object x = LibUtils.checkValue("tointeger", args, 0);
-			context.getObjectSink().setTo(Conversions.objectAsLong(x));
+		protected String name() {
+			return "tointeger";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object x = args.nextAny();
+			context.getObjectSink().setTo(Conversions.objectAsLong(x));
 		}
 
 	}
 
-	public static class Type extends FunctionAnyarg {
+	public static class Type extends LibFunction {
 
 		public static final Type INSTANCE = new Type();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			Object x = LibUtils.checkValue("type", args, 0);
+		protected String name() {
+			return "type";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Object x = args.nextAny();
 
 			String result = x instanceof Number
 					? (x instanceof Float || x instanceof Double
@@ -718,27 +708,22 @@ public class DefaultMathLib extends MathLib {
 			context.getObjectSink().setTo(result);
 		}
 
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
 	}
 
-	public static class ULt extends FunctionAnyarg {
+	public static class ULt extends LibFunction {
 
 		public static final ULt INSTANCE = new ULt();
 
 		@Override
-		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-			long x = LibUtils.checkInteger("ult", args, 0);
-			long y = LibUtils.checkInteger("ult", args, 1);
-			context.getObjectSink().setTo((x - y) < 0);
+		protected String name() {
+			return "ult";
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			long x = args.nextInteger();
+			long y = args.nextInteger();
+			context.getObjectSink().setTo((x - y) < 0);
 		}
 
 	}
