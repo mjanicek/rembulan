@@ -1,8 +1,10 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.lib.StringLib;
 
@@ -20,7 +22,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _dump() {
-		return null;  // TODO
+		return Dump.INSTANCE;
 	}
 
 	@Override
@@ -160,6 +162,25 @@ public class DefaultStringLib extends StringLib {
 
 			String s = String.valueOf(chars);
 			context.getObjectSink().setTo(s);
+		}
+
+	}
+
+	public static class Dump extends LibFunction {
+
+		public static final Dump INSTANCE = new Dump();
+
+		@Override
+		protected String name() {
+			return "dump";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			Function f = args.nextFunction();
+			boolean strip = Conversions.objectToBoolean(args.optNextAny());
+
+			throw new IllegalOperationAttemptException("unable to dump given function");
 		}
 
 	}
