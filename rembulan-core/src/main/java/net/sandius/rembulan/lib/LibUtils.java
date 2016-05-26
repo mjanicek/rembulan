@@ -58,7 +58,26 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static int checkInteger(String name, Object[] args, int index) {
+	public static Number checkNumber(String name, Object[] args, int index) {
+		final String what;
+		if (index < args.length) {
+			Object arg = args[index];
+			Number n = Conversions.objectAsNumber(arg);
+			if (n != null) {
+				return n;
+			}
+			else {
+				what = Value.typeOf(arg).name;
+			}
+		}
+		else {
+			what = "no value";
+		}
+		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number expected, got " + what + ")");
+	}
+
+	// FIXME: clean this up: redundant code!
+	public static int checkInt(String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -82,6 +101,31 @@ public class LibUtils {
 			what = "no value";
 		}
 		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (integer expected, got " + what + ")");
+	}
+
+	// FIXME: clean this up: redundant code!
+	public static long checkInteger(String name, Object[] args, int index) {
+		final String what;
+		if (index < args.length) {
+			Object arg = args[index];
+
+			if (arg instanceof Number) {
+				Long l = Conversions.numberAsLong((Number) arg);
+				if (l != null) {
+					return l;
+				}
+				else {
+					throw new IllegalArgumentException("number has no integer representation");
+				}
+			}
+			else {
+				what = Value.typeOf(arg).name;
+			}
+		}
+		else {
+			what = "no value";
+		}
+		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number expected, got " + what + ")");
 	}
 
 	// FIXME: clean this up: redundant code!

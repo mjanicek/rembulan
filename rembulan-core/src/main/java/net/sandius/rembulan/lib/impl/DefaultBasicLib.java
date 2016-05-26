@@ -2,7 +2,6 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.core.AssertionFailedException;
-import net.sandius.rembulan.core.Coercions;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
@@ -260,7 +259,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 			Table table = LibUtils.checkTable("inext", args, 0);
-			int index = LibUtils.checkInteger("inext", args, 1);
+			int index = LibUtils.checkInt("inext", args, 1);
 
 			index += 1;
 

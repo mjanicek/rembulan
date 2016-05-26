@@ -55,9 +55,23 @@ public abstract class Check {
 		return n;
 	}
 
+	public static long lt(long n, long limit) {
+		if (!(n < limit)) {
+			throw new IllegalArgumentException("long " + n + " is not lesser than " + limit);
+		}
+		return n;
+	}
+
 	public static int gt(int n, int limit) {
 		if (!(n > limit)) {
 			throw new IllegalArgumentException("integer " + n + " is not greater than " + limit);
+		}
+		return n;
+	}
+
+	public static long gt(long n, long limit) {
+		if (!(n > limit)) {
+			throw new IllegalArgumentException("long " + n + " is not greater than " + limit);
 		}
 		return n;
 	}
@@ -75,6 +89,10 @@ public abstract class Check {
 	}
 
 	public static int nonNegative(int n) {
+		return gt(n, -1);
+	}
+
+	public static long nonNegative(long n) {
 		return gt(n, -1);
 	}
 
