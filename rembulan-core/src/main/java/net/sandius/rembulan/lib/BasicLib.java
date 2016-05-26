@@ -63,7 +63,7 @@ public abstract class BasicLib implements Lib {
 	 * to a string. {@code print} is not intended for formatted output, but only as
 	 * a quick way to show a value, for instance for debugging. For complete control over
 	 * the output, use {@link StringLib#_format() <code>string.format</code>}
-	 * and {@link IOLib#_write() <code>io.write</code>}.</p>
+	 * and {@link IoLib#_write() <code>io.write</code>}.</p>
 	 */
 	public abstract Function _print();
 
