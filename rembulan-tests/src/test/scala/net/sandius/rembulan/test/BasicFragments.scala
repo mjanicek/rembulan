@@ -1207,4 +1207,22 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
   }
   SelectNegativeIndex in BasicContext succeedsWith (3, 4)
 
+  val VersionSniff = fragment ("VersionSniff") {
+    """local f, t = function()return function()end end, {nil,
+      |  [false]  = 'Lua 5.1',
+      |  [true]   = 'Lua 5.2',
+      |  [1/'-0'] = 'Lua 5.3',
+      |  [1]      = 'LuaJIT' }
+      |local version = t[1] or t[1/0] or t[f()==f()]
+      |return version
+    """
+  }
+  VersionSniff in EmptyContext succeedsWith ("Lua 5.3")
+
+  val SniffIntegerTrick = fragment ("SniffIntegerTrick") {
+    """return 1/'-0'
+    """
+  }
+  SniffIntegerTrick in EmptyContext succeedsWith (Double.PositiveInfinity)
+
 }
