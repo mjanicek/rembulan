@@ -51,6 +51,15 @@ public abstract class Conversions {
 		}
 	}
 
+	public static Long stringAsLong(String s) {
+		try {
+			return Long.parseLong(s);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
 	public static Double stringAsDouble(String s) {
 		try {
 			return stringToDouble(s);
@@ -60,12 +69,17 @@ public abstract class Conversions {
 		}
 	}
 
+	public static Number stringAsNumber(String s) {
+		Long l = stringAsLong(s);
+		return l != null ? Double.valueOf(l.doubleValue()) : stringAsDouble(s);
+	}
+
 	// argument can be null
 	public static Number objectAsNumber(Object o) {
 		return o instanceof Number
 				? (Number) o
 				: o instanceof String
-						? stringAsDouble((String) o)
+						? stringAsNumber((String) o)
 						: null;
 	}
 
