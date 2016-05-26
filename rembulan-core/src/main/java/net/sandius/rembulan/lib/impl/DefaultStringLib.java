@@ -50,7 +50,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _lower() {
-		return null;  // TODO
+		return Lower.INSTANCE;
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _upper() {
-		return null;  // TODO
+		return Upper.INSTANCE;
 	}
 
 	private static int correctIndex(int i, int len) {
@@ -177,6 +177,40 @@ public class DefaultStringLib extends StringLib {
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			String s = args.nextString();
 			context.getObjectSink().setTo((long) s.length());
+		}
+
+	}
+
+	public static class Lower extends LibFunction {
+
+		public static final Lower INSTANCE = new Lower();
+
+		@Override
+		protected String name() {
+			return "lower";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			context.getObjectSink().setTo(s.toLowerCase());
+		}
+
+	}
+
+	public static class Upper extends LibFunction {
+
+		public static final Upper INSTANCE = new Upper();
+
+		@Override
+		protected String name() {
+			return "upper";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			context.getObjectSink().setTo(s.toUpperCase());
 		}
 
 	}
