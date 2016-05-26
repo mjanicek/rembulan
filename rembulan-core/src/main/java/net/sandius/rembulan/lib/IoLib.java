@@ -157,7 +157,7 @@ public abstract class IoLib implements Lib {
 	/**
 	 * {@code io.write (···)}
 	 *
-	 * <p>Equivalent to {@code io.output():write(···)}.</p>
+	 * <p>Equivalent to {@link #_file_write() <code>io.output():write(···)</code>}.</p>
 	 */
 	public abstract Function _write();
 
