@@ -27,7 +27,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _find() {
-		return null;  // TODO
+		return Find.INSTANCE;
 	}
 
 	@Override
@@ -184,6 +184,43 @@ public class DefaultStringLib extends StringLib {
 		}
 
 	}
+
+	public static class Find extends LibFunction {
+
+		public static final Find INSTANCE = new Find();
+
+		@Override
+		protected String name() {
+			return "find";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			String pattern = args.nextString();
+			int init = args.optNextInt(1);
+			boolean plain = args.optNextBoolean(false);
+
+			init = correctIndex(init, s.length());
+
+			if (plain) {
+				// find a substring
+				int at = s.indexOf(pattern, init - 1);
+				if (at >= 0) {
+					context.getObjectSink().setTo(at + 1, at + pattern.length());
+				}
+				else {
+					context.getObjectSink().setTo(null);
+				}
+			}
+			else {
+				// find a pattern
+				throw new UnsupportedOperationException("not implemented");  // TODO
+			}
+		}
+
+	}
+
 
 	public static class Len extends LibFunction {
 

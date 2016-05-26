@@ -1,6 +1,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
@@ -80,6 +81,15 @@ public abstract class LibFunction extends FunctionAnyarg {
 
 		public long nextInteger() {
 			return LibUtils.checkInteger(name, args, index++);
+		}
+
+		public boolean optNextBoolean(boolean defaultValue) {
+			if (hasNext()) {
+				return Conversions.objectToBoolean(nextAny());
+			}
+			else {
+				return defaultValue;
+			}
 		}
 
 		public String nextString() {
