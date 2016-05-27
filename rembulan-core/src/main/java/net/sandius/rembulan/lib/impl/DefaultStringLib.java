@@ -13,6 +13,7 @@ import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultStringLib extends StringLib {
 
@@ -295,12 +296,12 @@ public class DefaultStringLib extends StringLib {
 
 			public final String string;
 			public final Pattern pattern;
-			private int index;
+			private final AtomicInteger index;
 
 			public IteratorFunction(String string, Pattern pattern) {
 				this.string = Check.notNull(string);
 				this.pattern = Check.notNull(pattern);
-				this.index = 1;
+				this.index = new AtomicInteger(1);
 			}
 
 			@Override
@@ -308,20 +309,28 @@ public class DefaultStringLib extends StringLib {
 				final String[] fullMatch = new String[] { null };
 				final ArrayList<Object> captures = new ArrayList<>();
 
-				int nextIndex = pattern.match(string, index, new Pattern.MatchAction() {
-					@Override
-					public void onMatch(String s, int firstIndex, int lastIndex) {
-						fullMatch[0] = s.substring(firstIndex - 1, lastIndex);
-					}
+				int oldIndex;
+				int nextIndex;
 
-					@Override
-					public void onCapture(String s, int index, String value) {
-						captures.add(value != null ? value : (long) index);
-					}
-				});
+				do {
+					oldIndex = index.get();
 
-				// store the next index
-				index = nextIndex;
+					fullMatch[0] = null;
+					captures.clear();
+
+					nextIndex = pattern.match(string, oldIndex, new Pattern.MatchAction() {
+						@Override
+						public void onMatch(String s, int firstIndex, int lastIndex) {
+							fullMatch[0] = s.substring(firstIndex - 1, lastIndex);
+						}
+
+						@Override
+						public void onCapture(String s, int index, String value) {
+							captures.add(value != null ? value : (long) index);
+						}
+					});
+
+				} while (!index.compareAndSet(oldIndex, nextIndex));
 
 				if (nextIndex < 1) {
 					// no match
