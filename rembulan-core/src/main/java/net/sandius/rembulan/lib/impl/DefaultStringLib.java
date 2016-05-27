@@ -79,7 +79,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _rep() {
-		return null;  // TODO
+		return Rep.INSTANCE;
 	}
 
 	@Override
@@ -460,6 +460,43 @@ public class DefaultStringLib extends StringLib {
 					}
 				}
 			}
+		}
+
+	}
+
+	public static class Rep extends LibFunction {
+
+		public static final Rep INSTANCE = new Rep();
+
+		@Override
+		protected String name() {
+			return "rep";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			int n = args.nextInt();
+			String sep = args.optNextString("");
+
+			final String result;
+			if (n > 0) {
+				StringBuilder bld = new StringBuilder();
+
+				for (int i = 0; i < n; i++) {
+					bld.append(s);
+					if (i + 1 < n) {
+						bld.append(sep);
+					}
+				}
+
+				result = bld.toString();
+			}
+			else {
+				result = "";
+			}
+
+			context.getObjectSink().setTo(result);
 		}
 
 	}
