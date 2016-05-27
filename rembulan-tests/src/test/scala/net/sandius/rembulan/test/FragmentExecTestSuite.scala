@@ -7,7 +7,7 @@ import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.lib.LibUtils
-import net.sandius.rembulan.lib.impl.{DefaultBasicLib, DefaultCoroutineLib}
+import net.sandius.rembulan.lib.impl.{DefaultBasicLib, DefaultCoroutineLib, DefaultStringLib}
 import net.sandius.rembulan.parser.LuaCPrototypeReader
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{core => lua}
@@ -24,6 +24,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   protected val Empty = FragmentExpectations.Env.Empty
   protected val Basic = FragmentExpectations.Env.Basic
   protected val Coro = FragmentExpectations.Env.Coro
+  protected val Str = FragmentExpectations.Env.Str
 
   protected def envForContext(state: LuaState, ctx: Env): Table = {
     ctx match {
@@ -34,6 +35,12 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
         val coro = state.newTable(0, 0)
         new DefaultCoroutineLib().installInto(state, coro)
         env.rawset("coroutine", coro)
+        env
+      case Str =>
+        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
+        val str = state.newTable(0, 0)
+        new DefaultStringLib().installInto(state, str)
+        env.rawset("string", str)
         env
     }
   }
