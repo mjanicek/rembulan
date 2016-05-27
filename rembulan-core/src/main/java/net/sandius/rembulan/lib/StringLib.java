@@ -2,6 +2,7 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
 
 /**
@@ -40,7 +41,10 @@ public abstract class StringLib implements Lib {
 		LibUtils.setIfNonNull(env, "unpack", _unpack());
 		LibUtils.setIfNonNull(env, "upper", _upper());
 
-		state.setStringMetatable(env);
+		// set metatable for the string type
+		Table mt = state.newTable(0, 0);
+		mt.rawset(Metatables.MT_INDEX, env);
+		state.setStringMetatable(mt);
 	}
 
 	/**
