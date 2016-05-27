@@ -39,7 +39,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _format() {
-		return null;  // TODO
+		return Format.INSTANCE;
 	}
 
 	@Override
@@ -284,6 +284,155 @@ public class DefaultStringLib extends StringLib {
 					}
 				}
 			}
+		}
+
+	}
+
+	public static class Format extends LibFunction {
+
+		public static final Format INSTANCE = new Format();
+
+		@Override
+		protected String name() {
+			return "format";
+		}
+
+		private static String optionToString(char c) {
+			if (Character.isLetterOrDigit(c)) {
+				return "%" + c;
+			}
+			else {
+				return "%\\<" + ((int) c) + ">";
+			}
+		}
+
+		private static String padLeft(String s, char c, int width) {
+			int diff = width - s.length();
+
+			if (diff > 0) {
+				StringBuilder bld = new StringBuilder();
+				for (int i = 0; i < diff; i++) {
+					bld.append(c);
+				}
+				bld.append(s);
+				return bld.toString();
+			}
+			else {
+				return s;
+			}
+		}
+
+		private static final long L_1E18  = 1000000000000000000L;
+		private static final long L_9E18  =  9 * L_1E18;
+		private static final long L_10E18 = 10 * L_1E18;  // overflows, and that's the point
+
+		public static String longToUnsignedString(long x) {
+
+			// Maximum value representable by signed long is    (2^63 - 1)
+			//                             by unsigned long is  (2^64 - 1)
+			//
+			// Now,
+			//        9e18 < (2^63 - 1) < 10e18 < (2^64 - 1) < 20e18
+			//
+			// If signed(x) >= 0, then signed(x) == unsigned(x).
+			// If signed(x) < 0, then unsigned(x) >= 2^63, and therefore unsigned(x) > unsigned(9e18).
+			// Now we only need to check whether unsigned(x) >= unsigned(10e18) -- if so,
+			// the leftmost digit is necessarily '1' (since 20e18 > 2^64), followed by 19 digits;
+			// otherwise, the leftmost digit is '9', followed by 18 digits.
+			// In 2's complement, for a, b such that both unsigned(a) >= 2^63 and unsigned(b) >= 2^63,
+			// (signed(a) < signed(b)) iff (unsigned(a) < unsigned(b)),
+			// so the test is equivalent to signed(x) >= signed(10e18).
+
+			return x >= 0
+					? Long.toString(x)
+					: (x >= L_10E18
+							? '1' + padLeft(Long.toString(x - L_10E18), '0', 19)
+							: '9' + padLeft(Long.toString(x - L_9E18), '0', 18));
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String fmt = args.nextString();
+
+			StringBuilder bld = new StringBuilder();
+
+			int index = 0;
+			while (index < fmt.length()) {
+				final char c = fmt.charAt(index);
+
+				switch (c) {
+					case '%': {
+						index++;
+
+						final char d = index < fmt.length() ? fmt.charAt(index) : '\0';
+						switch (d) {
+
+							case 'd':
+							case 'i':
+								bld.append(args.nextInteger());
+								break;
+
+							case 'u':
+								bld.append(longToUnsignedString(args.nextInteger()));
+								break;
+
+							case 'o':
+								bld.append(Long.toOctalString(args.nextInteger()));
+								break;
+
+							case 'x':
+							case 'X': {
+								String hex = Long.toHexString(args.nextInteger());
+								bld.append(d == 'X' ? hex.toUpperCase() : hex);
+								break;
+							}
+
+							case 'c':
+								bld.append((char) args.nextInteger());
+								break;
+
+							case 's': {
+								Object v = args.nextAny();
+								String s = Conversions.objectAsString(v);
+								if (s != null) {
+									bld.append(s);
+								}
+								else {
+									// TODO: use __tostring for non-string arguments
+									throw new UnsupportedOperationException("not implemented: tostring");
+								}
+								break;
+							}
+
+							case 'q': {
+								String s = args.nextString();
+								throw new UnsupportedOperationException("not implemented: %q");  // TODO
+							}
+
+							default:
+								throw new IllegalArgumentException("invalid option '%" + optionToString(d) + "' to 'format'");
+						}
+
+						break;
+					}
+
+					default:
+						bld.append(c);
+						break;
+				}
+
+				index++;
+			}
+
+			String result = bld.toString();
+
+			context.getObjectSink().setTo(result);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			// TODO: needed for tostring
+			super.resume(context, suspendedState);
 		}
 
 	}
