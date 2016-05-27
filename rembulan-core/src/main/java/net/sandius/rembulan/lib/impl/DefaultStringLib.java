@@ -60,7 +60,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _match() {
-		return null;  // TODO
+		return Match.INSTANCE;
 	}
 
 	@Override
@@ -312,6 +312,61 @@ public class DefaultStringLib extends StringLib {
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			String s = args.nextString();
 			context.getObjectSink().setTo(s.toLowerCase());
+		}
+
+	}
+
+	public static class Match extends LibFunction {
+
+		public static final Match INSTANCE = new Match();
+
+		@Override
+		protected String name() {
+			return "match";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			String pattern = args.nextString();
+			int init = args.optNextInt(1);
+
+			init = correctIndex(init, s.length());
+
+			Pattern pat = Pattern.fromString(pattern);
+
+			final String[] fullMatch = new String[] { null };
+			final ArrayList<Object> captures = new ArrayList<>();
+
+			int nextIndex = pat.match(s, init, new Pattern.MatchAction() {
+				@Override
+				public void onMatch(String s, int firstIndex, int lastIndex) {
+					fullMatch[0] = s.substring(firstIndex - 1, lastIndex);
+				}
+
+				@Override
+				public void onCapture(String s, int index, String value) {
+					captures.add(value != null ? value : (long) index);
+				}
+			});
+
+			if (nextIndex < 1) {
+				// no match found
+				context.getObjectSink().setTo(null);
+			}
+			else {
+				// match was found
+				if (captures.isEmpty()) {
+					// no captures
+					context.getObjectSink().setTo(fullMatch[0]);
+				}
+				else {
+					context.getObjectSink().reset();
+					for (Object c : captures) {
+						context.getObjectSink().push(c);
+					}
+				}
+			}
 		}
 
 	}
