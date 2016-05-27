@@ -50,4 +50,28 @@ object StringFragments extends FragmentBundle with FragmentExpectations {
   }
   ByteMethodForOutsideNegativeIndex in StringContext succeedsWith ()
 
+  val ByteInterval = fragment ("ByteInterval") {
+    """return ("hello"):byte(1, -1)
+    """
+  }
+  ByteInterval in StringContext succeedsWith (104, 101, 108, 108, 111)
+
+  val ByteOutsideInterval = fragment ("ByteOutsideInterval") {
+    """return ("hello"):byte(0, 100)
+    """
+  }
+  ByteOutsideInterval in StringContext succeedsWith (104, 101, 108, 108, 111)
+
+  val ByteWithoutArgs = fragment ("ByteWithoutArgs") {
+    """return ("hello"):byte()
+    """
+  }
+  ByteWithoutArgs in StringContext succeedsWith (104)
+
+  val EmptyStringByteWithoutArgs = fragment ("EmptyStringByteWithoutArgs") {
+    """return (""):byte()
+    """
+  }
+  EmptyStringByteWithoutArgs in StringContext succeedsWith ()
+
 }
