@@ -7,7 +7,6 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.impl.Function0;
 import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
@@ -129,20 +128,14 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	private static int correctIndex(int i, int len) {
-		if (i < 0) {
-			i = len - i;
-		}
+	private static int lowerBound(int i, int len) {
+		int j = i < 0 ? len + i + 1 : i;
+		return j < 1 ? 1 : j;
+	}
 
-		if (i < 1) {
-			i = 1;
-		}
-
-		if (i > len) {
-			i = len;
-		}
-
-		return i;
+	private static int upperBound(int i, int len) {
+		int j = i < 0 ? len + i + 1 : i;
+		return j > len ? len : j;
 	}
 
 	public static class Byte extends LibFunction {
@@ -160,11 +153,10 @@ public class DefaultStringLib extends StringLib {
 			int i = args.optNextInt(1);
 			int j = args.optNextInt(i);
 
-			int len = RawOperators.stringLen(s);
+			int len = s.length();
 
-			// correct indices
-			i = correctIndex(i, len);
-			j = correctIndex(j, len);
+			i = lowerBound(i, len);
+			j = upperBound(j, len);
 
 			context.getObjectSink().reset();
 
@@ -235,7 +227,7 @@ public class DefaultStringLib extends StringLib {
 			int init = args.optNextInt(1);
 			boolean plain = args.optNextBoolean(false);
 
-			init = correctIndex(init, s.length());
+			init = lowerBound(init, s.length());
 
 			if (plain) {
 				// find a substring
@@ -573,7 +565,7 @@ public class DefaultStringLib extends StringLib {
 			String pattern = args.nextString();
 			int init = args.optNextInt(1);
 
-			init = correctIndex(init, s.length());
+			init = lowerBound(init, s.length());
 
 			Pattern pat = Pattern.fromString(pattern);
 
@@ -693,8 +685,8 @@ public class DefaultStringLib extends StringLib {
 			int j = args.optNextInt(-1);
 
 			int len = s.length();
-			i = correctIndex(i, len) - 1;
-			j = correctIndex(j, len);
+			i = lowerBound(i, len) - 1;
+			j = upperBound(j, len);
 
 			String result = s.substring(i, j);
 
