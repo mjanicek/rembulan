@@ -48,4 +48,18 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
     }
   }
 
+  about ("char") {
+    in (StringContext) {
+
+      program ("""return string.char()""") succeedsWith ("")
+      program ("""return string.char(104, 101, 108, 108, 111)""") succeedsWith ("hello")
+
+      program ("""return string.char("104", "105.0", 33.0)""") succeedsWith ("hi!")
+
+      program ("""string.char(-1)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
+      program ("""string.char(256)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
+
+    }
+  }
+
 }
