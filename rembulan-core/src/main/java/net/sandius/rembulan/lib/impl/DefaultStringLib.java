@@ -5,9 +5,12 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
+import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.core.impl.Function0;
 import net.sandius.rembulan.lib.StringLib;
+import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 
@@ -40,7 +43,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _gmatch() {
-		return null;  // TODO
+		return GMatch.INSTANCE;
 	}
 
 	@Override
@@ -101,11 +104,14 @@ public class DefaultStringLib extends StringLib {
 	public static class Pattern {
 
 		private Pattern() {
+		}
 
+		public static Pattern fromString(String pattern, boolean ignoreCaret) {
+			throw new UnsupportedOperationException();  // TODO
 		}
 
 		public static Pattern fromString(String pattern) {
-			throw new UnsupportedOperationException();  // TODO
+			return fromString(pattern, false);
 		}
 
 		public interface MatchAction {
@@ -117,7 +123,7 @@ public class DefaultStringLib extends StringLib {
 		// returns the index immediately following the match,
 		// or 0 if not match was found
 		public int match(String s, int fromIndex, MatchAction action) {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException();  // TODO
 		}
 
 	}
@@ -281,6 +287,84 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
+	public static class GMatch extends LibFunction {
+
+		public static final GMatch INSTANCE = new GMatch();
+
+		public static class IteratorFunction extends Function0 {
+
+			public final String string;
+			public final Pattern pattern;
+			private int index;
+
+			public IteratorFunction(String string, Pattern pattern) {
+				this.string = Check.notNull(string);
+				this.pattern = Check.notNull(pattern);
+				this.index = 1;
+			}
+
+			@Override
+			public void invoke(ExecutionContext context) throws ControlThrowable {
+				final String[] fullMatch = new String[] { null };
+				final ArrayList<Object> captures = new ArrayList<>();
+
+				int nextIndex = pattern.match(string, index, new Pattern.MatchAction() {
+					@Override
+					public void onMatch(String s, int firstIndex, int lastIndex) {
+						fullMatch[0] = s.substring(firstIndex - 1, lastIndex);
+					}
+
+					@Override
+					public void onCapture(String s, int index, String value) {
+						captures.add(value != null ? value : (long) index);
+					}
+				});
+
+				// store the next index
+				index = nextIndex;
+
+				if (nextIndex < 1) {
+					// no match
+					context.getObjectSink().reset();
+				}
+				else {
+					// match
+					if (captures.isEmpty()) {
+						context.getObjectSink().setTo(fullMatch);
+					}
+					else {
+						context.getObjectSink().reset();
+						for (Object c : captures) {
+							context.getObjectSink().push(c);
+						}
+					}
+				}
+			}
+
+			@Override
+			public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+				throw new NonsuspendableFunctionException(this.getClass());
+			}
+		}
+
+		@Override
+		protected String name() {
+			return "gmatch";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			String s = args.nextString();
+			String pattern = args.nextString();
+
+			Pattern pat = Pattern.fromString(pattern, true);
+
+			Function f = new IteratorFunction(s, pat);
+
+			context.getObjectSink().setTo(f);
+		}
+
+	}
 
 	public static class Len extends LibFunction {
 
