@@ -5,8 +5,11 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
+import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.lib.StringLib;
+
+import java.util.ArrayList;
 
 public class DefaultStringLib extends StringLib {
 
@@ -93,6 +96,30 @@ public class DefaultStringLib extends StringLib {
 	@Override
 	public Function _upper() {
 		return Upper.INSTANCE;
+	}
+
+	public static class Pattern {
+
+		private Pattern() {
+
+		}
+
+		public static Pattern fromString(String pattern) {
+			throw new UnsupportedOperationException();  // TODO
+		}
+
+		public interface MatchAction {
+			void onMatch(String s, int firstIndex, int lastIndex);
+			// if value == null, it's just the index
+			void onCapture(String s, int index, String value);
+		}
+
+		// returns the index immediately following the match,
+		// or 0 if not match was found
+		public int match(String s, int fromIndex, MatchAction action) {
+			throw new UnsupportedOperationException();
+		}
+
 	}
 
 	private static int correctIndex(int i, int len) {
@@ -215,7 +242,40 @@ public class DefaultStringLib extends StringLib {
 			}
 			else {
 				// find a pattern
-				throw new UnsupportedOperationException("not implemented");  // TODO
+				Pattern pat = Pattern.fromString(pattern);
+
+				final ArrayList<Object> results = new ArrayList<>();
+				final ArrayList<Object> captures = new ArrayList<>();
+
+				int nextIndex = pat.match(s, init, new Pattern.MatchAction() {
+
+					@Override
+					public void onMatch(String s, int firstIndex, int lastIndex) {
+						results.add((long) firstIndex);
+						results.add((long) lastIndex);
+					}
+
+					@Override
+					public void onCapture(String s, int index, String value) {
+						captures.add(value != null ? value : (long) index);
+					}
+				});
+
+				if (nextIndex < 1) {
+					// pattern not found
+					context.getObjectSink().setTo(null);
+				}
+				else {
+					// pattern found
+					ObjectSink objectSink = context.getObjectSink();
+					objectSink.reset();
+					for (Object r : results) {
+						objectSink.push(r);
+					}
+					for (Object c : captures) {
+						objectSink.push(c);
+					}
+				}
 			}
 		}
 
