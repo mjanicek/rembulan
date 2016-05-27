@@ -45,6 +45,15 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
       program ("""return ("hello"):byte()""") succeedsWith (104)
       program ("""return (""):byte()""") succeedsWith ()
 
+      program ("""return string.byte(42, 1, -1)""") succeedsWith (52, 50)
+      program ("""return string.byte(42.0, 1, -1)""") succeedsWith (52, 50, 46, 48)
+      program ("""return ("hello"):byte("1")""") succeedsWith (104)
+      program ("""return ("hello"):byte("1.0")""") succeedsWith (104)
+      program ("""return ("hello"):byte(1.0)""") succeedsWith (104)
+
+      program ("""local x; return ("Boom"):byte(x)""") succeedsWith (66)
+      program ("""return ("Boom"):byte(true)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'byte' (number expected, got boolean)")
+
     }
   }
 
