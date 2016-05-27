@@ -3,7 +3,7 @@ package net.sandius.rembulan.test
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.{core => lua}
 
-object StringFragments extends FragmentBundle with FragmentExpectations {
+object StringFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
   val StringSetsMetatable = fragment ("StringSetsMetatable") {
     """return getmetatable("hello")
@@ -25,53 +25,27 @@ object StringFragments extends FragmentBundle with FragmentExpectations {
   }
   LenMethodIsEqualToLenOperator in StringContext succeedsWith (true)
 
-  val ByteMethod = fragment ("ByteMethod") {
-    """local s = "hello"
-      |return s:byte(1), s:byte(-1), s:byte(2), s:byte(10), s:byte(-#s), s:byte(#s)
-    """
-  }
-  ByteMethod in StringContext succeedsWith (104, 111, 101, null, 104, 111)
+  about ("byte") {
+    in (StringContext) {
 
-  val ByteMethodForZeroIndex = fragment ("ByteMethodForZeroIndex") {
-    """return ("hello"):byte(0)
-    """
-  }
-  ByteMethodForZeroIndex in StringContext succeedsWith ()
+      program ("""return ("hello"):byte(1)""") succeedsWith (104)
+      program ("""return ("hello"):byte(-1)""") succeedsWith (111)
+      program ("""return ("hello"):byte(5)""") succeedsWith (111)
+      program ("""return ("hello"):byte(-5)""") succeedsWith (104)
 
-  val ByteMethodForOutsidePositiveIndex = fragment ("ByteMethodForOutsidePositiveIndex") {
-    """return ("hello"):byte(100)
-    """
-  }
-  ByteMethodForOutsidePositiveIndex in StringContext succeedsWith ()
+      program ("""return ("hello"):byte(0)""") succeedsWith ()
+      program ("""return ("hello"):byte(100)""") succeedsWith ()
+      program ("""return ("hello"):byte(-100)""") succeedsWith ()
 
-  val ByteMethodForOutsideNegativeIndex = fragment ("ByteMethodForOutsideNegativeIndex") {
-    """return ("hello"):byte(-100)
-    """
-  }
-  ByteMethodForOutsideNegativeIndex in StringContext succeedsWith ()
+      program ("""return ("hello"):byte(1, -1)""") succeedsWith (104, 101, 108, 108, 111)
+      program ("""return ("hello"):byte(-1, 1)""") succeedsWith ()
+      program ("""return ("hello"):byte(2, 4)""") succeedsWith (101, 108, 108)
+      program ("""return ("hello"):byte(2, -2)""") succeedsWith (101, 108, 108)
+      program ("""return ("hello"):byte(0, 100)""") succeedsWith (104, 101, 108, 108, 111)
+      program ("""return ("hello"):byte()""") succeedsWith (104)
+      program ("""return (""):byte()""") succeedsWith ()
 
-  val ByteInterval = fragment ("ByteInterval") {
-    """return ("hello"):byte(1, -1)
-    """
+    }
   }
-  ByteInterval in StringContext succeedsWith (104, 101, 108, 108, 111)
-
-  val ByteOutsideInterval = fragment ("ByteOutsideInterval") {
-    """return ("hello"):byte(0, 100)
-    """
-  }
-  ByteOutsideInterval in StringContext succeedsWith (104, 101, 108, 108, 111)
-
-  val ByteWithoutArgs = fragment ("ByteWithoutArgs") {
-    """return ("hello"):byte()
-    """
-  }
-  ByteWithoutArgs in StringContext succeedsWith (104)
-
-  val EmptyStringByteWithoutArgs = fragment ("EmptyStringByteWithoutArgs") {
-    """return (""):byte()
-    """
-  }
-  EmptyStringByteWithoutArgs in StringContext succeedsWith ()
 
 }

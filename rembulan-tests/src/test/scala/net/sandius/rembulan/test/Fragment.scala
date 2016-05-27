@@ -195,3 +195,38 @@ object FragmentExpectations {
   }
 
 }
+
+trait OneLiners { this: FragmentBundle with FragmentExpectations =>
+
+  private var prefixes: List[String] = Nil
+
+  def about(desc: String)(body: => Unit): Unit = {
+    val oldPrefixes = prefixes
+    try {
+      prefixes = desc :: oldPrefixes
+      body
+    }
+    finally {
+      prefixes = oldPrefixes
+    }
+  }
+
+  private var context: FragmentExpectations.Env = null
+
+  def in(env: FragmentExpectations.Env)(body: => Unit): Unit = {
+    val oldContext = context
+    try {
+      context = env
+      body
+    }
+    finally {
+      context = oldContext
+    }
+  }
+
+  def program(body: String): RichFragment.InContext = {
+    val name = (body :: prefixes).reverse.mkString(": ")
+    fragment(name)(body) in context
+  }
+
+}
