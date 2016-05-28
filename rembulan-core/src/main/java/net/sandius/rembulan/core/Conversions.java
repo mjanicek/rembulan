@@ -76,7 +76,20 @@ public abstract class Conversions {
 
 	public static Number stringAsNumber(String s) {
 		Long l = stringAsLong(s);
-		return l != null ? Double.valueOf(l.doubleValue()) : stringAsDouble(s);
+		return l != null ? l : (Number) stringAsDouble(s);
+	}
+
+	public static Number stringAsFloat(String s) {
+		Number n = stringAsNumber(s);
+		return n != null ? n.doubleValue() : null;
+	}
+
+	public static Number objectAsFloatIfString(Object o) {
+		return o instanceof Number
+				? (Number) o
+				: o instanceof String
+						? stringAsFloat((String) o)
+						: null;
 	}
 
 	// argument can be null

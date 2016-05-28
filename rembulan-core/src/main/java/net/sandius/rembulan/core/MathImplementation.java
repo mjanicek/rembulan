@@ -139,16 +139,9 @@ public abstract class MathImplementation {
 
 	}
 
+	@Deprecated
 	public static MathImplementation arithmetic(Object a, Object b) {
-		if (a instanceof Number && b instanceof Number) {
-			return arithmetic((Number) a, (Number) b);
-		}
-		else if (a instanceof String || b instanceof String) {
-			return arithmetic(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b));
-		}
-		else {
-			return null;
-		}
+		return arithmetic(Conversions.objectAsFloatIfString(a), Conversions.objectAsFloatIfString(b));
 	}
 
 	public static MathImplementation arithmetic(Number a, Number b) {
@@ -164,16 +157,9 @@ public abstract class MathImplementation {
 		}
 	}
 
+	@Deprecated
 	public static MathImplementation arithmetic(Object o) {
-		if (o instanceof Number) {
-			return arithmetic((Number) o);
-		}
-		else if (o instanceof String) {
-			return arithmetic(Conversions.objectAsNumber(o));
-		}
-		else {
-			return null;
-		}
+		return arithmetic(Conversions.objectAsFloatIfString(o));
 	}
 
 	public static MathImplementation arithmetic(Number n) {

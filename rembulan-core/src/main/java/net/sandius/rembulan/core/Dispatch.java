@@ -145,9 +145,12 @@ public abstract class Dispatch {
 	}
 
 	public static void add(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		MathImplementation math = MathImplementation.arithmetic(a, b);
+		Number na = Conversions.objectAsFloatIfString(a);
+		Number nb = Conversions.objectAsFloatIfString(b);
+		MathImplementation math = MathImplementation.arithmetic(na, nb);
+
 		if (math != null) {
-			context.getObjectSink().setTo(math.do_add(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+			context.getObjectSink().setTo(math.do_add(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_ADD, a, b);
@@ -159,9 +162,11 @@ public abstract class Dispatch {
 	}
 
 	public static void sub(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		MathImplementation m = MathImplementation.arithmetic(a, b);
+		Number na = Conversions.objectAsFloatIfString(a);
+		Number nb = Conversions.objectAsFloatIfString(b);
+		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_sub(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+			context.getObjectSink().setTo(m.do_sub(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_SUB, a, b);
@@ -173,9 +178,11 @@ public abstract class Dispatch {
 	}
 
 	public static void mul(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		MathImplementation m = MathImplementation.arithmetic(a, b);
+		Number na = Conversions.objectAsFloatIfString(a);
+		Number nb = Conversions.objectAsFloatIfString(b);
+		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_mul(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+			context.getObjectSink().setTo(m.do_mul(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_MUL, a, b);
@@ -187,9 +194,11 @@ public abstract class Dispatch {
 	}
 
 	public static void div(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		MathImplementation m = MathImplementation.arithmetic(a, b);
+		Number na = Conversions.objectAsFloatIfString(a);
+		Number nb = Conversions.objectAsFloatIfString(b);
+		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_div(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+			context.getObjectSink().setTo(m.do_div(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_DIV, a, b);
@@ -201,9 +210,11 @@ public abstract class Dispatch {
 	}
 
 	public static void mod(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		MathImplementation m = MathImplementation.arithmetic(a, b);
+		Number na = Conversions.objectAsFloatIfString(a);
+		Number nb = Conversions.objectAsFloatIfString(b);
+		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_mod(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+			context.getObjectSink().setTo(m.do_mod(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_MOD, a, b);
@@ -215,9 +226,11 @@ public abstract class Dispatch {
 	}
 
 	public static void idiv(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		MathImplementation m = MathImplementation.arithmetic(a, b);
+		Number na = Conversions.objectAsFloatIfString(a);
+		Number nb = Conversions.objectAsFloatIfString(b);
+		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_idiv(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+			context.getObjectSink().setTo(m.do_idiv(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_IDIV, a, b);
@@ -229,9 +242,11 @@ public abstract class Dispatch {
 	}
 
 	public static void pow(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		MathImplementation m = MathImplementation.arithmetic(a, b);
+		Number na = Conversions.objectAsFloatIfString(a);
+		Number nb = Conversions.objectAsFloatIfString(b);
+		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_pow(Conversions.objectAsNumber(a), Conversions.objectAsNumber(b)));
+			context.getObjectSink().setTo(m.do_pow(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_POW, a, b);
@@ -325,10 +340,10 @@ public abstract class Dispatch {
 	}
 
 	public static void unm(ExecutionContext context, Object o) throws ControlThrowable {
-		MathImplementation m = MathImplementation.arithmetic(o);
-
+		Number no = Conversions.objectAsFloatIfString(o);
+		MathImplementation m = MathImplementation.arithmetic(no);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_unm(Conversions.objectAsNumber(o)));
+			context.getObjectSink().setTo(m.do_unm(no));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_UNM, o);
