@@ -81,9 +81,9 @@ public class LibUtils {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-
-			if (arg instanceof Number) {
-				Long l = Conversions.numberAsLong((Number) arg);
+			Number n = Conversions.objectAsNumber(arg);
+			if (n != null) {
+				Long l = Conversions.numberAsLong(n);
 				if (l != null) {
 					long ll = l;
 					if (ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE) {
@@ -100,7 +100,7 @@ public class LibUtils {
 		else {
 			what = "no value";
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (integer expected, got " + what + ")");
+		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number expected, got " + what + ")");
 	}
 
 	// FIXME: clean this up: redundant code!
@@ -108,9 +108,9 @@ public class LibUtils {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-
-			if (arg instanceof Number) {
-				Long l = Conversions.numberAsLong((Number) arg);
+			Number n = Conversions.objectAsNumber(arg);
+			if (n != null) {
+				Long l = Conversions.numberAsLong(n);
 				if (l != null) {
 					return l;
 				}
@@ -161,8 +161,9 @@ public class LibUtils {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-			if (arg instanceof String) {
-				return (String) arg;
+			String s = Conversions.objectAsString(arg);
+			if (s != null) {
+				return s;
 			}
 			else {
 				what = Value.typeOf(arg).name;
