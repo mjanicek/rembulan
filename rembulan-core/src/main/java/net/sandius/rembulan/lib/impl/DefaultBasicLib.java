@@ -388,7 +388,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		public static Long toNumber(String s, int base) {
 			try {
-				return Long.parseLong(s, base);
+				return Long.parseLong(s.trim(), base);
 			}
 			catch (NumberFormatException ex) {
 				return null;
