@@ -3,7 +3,7 @@ package net.sandius.rembulan.test
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.{core => lua}
 
-object BasicFragments extends FragmentBundle with FragmentExpectations {
+object BasicFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
   val JustX = fragment ("JustX") {
     """return x
@@ -1230,5 +1230,19 @@ object BasicFragments extends FragmentBundle with FragmentExpectations {
     """
   }
   SniffIntegerTrick in EmptyContext succeedsWith (Double.PositiveInfinity)
+
+  about ("coercions") {
+    in (EmptyContext) {
+
+      program ("""return -("0")""") succeedsWith (-0.0)
+      program ("""return -("-0")""") succeedsWith (-0.0)
+      program ("""return -("-0.0")""") succeedsWith (0.0)
+
+      program ("""return 1 + 2""") succeedsWith (3)
+      program ("""return "1" + 2""") succeedsWith (3.0)
+      program ("""return "1" + "2"""") succeedsWith (3.0)
+
+    }
+  }
 
 }
