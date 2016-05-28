@@ -580,7 +580,7 @@ public class DefaultMathLib extends MathLib {
 
 					long limit = n - m + 1;  // including the upper bound
 
-					if (limit < 0) {
+					if (limit <= 0) {
 						throw new IllegalArgumentException("bad argument #1 to 'random' (interval too large)");
 					}
 
