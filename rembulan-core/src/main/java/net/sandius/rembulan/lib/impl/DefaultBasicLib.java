@@ -599,16 +599,10 @@ public class DefaultBasicLib extends BasicLib {
 			context.getObjectSink().prepend(Boolean.TRUE);
 		}
 
-		private void prependFalseAndPad(ExecutionContext context) {
+		private void prependFalseAndTrim(ExecutionContext context) {
 			ObjectSink os = context.getObjectSink();
-			if (os.size() == 0) {
-				// if empty, pad with a dummy nil value
-				os.setTo(Boolean.FALSE, null);
-			}
-			else {
-				// just prepend false
-				os.prepend(Boolean.FALSE);
-			}
+			Object errorObject = os._0();
+			os.setTo(Boolean.FALSE, errorObject);
 		}
 
 		private void handleError(ExecutionContext context, Function handler, int depth, Object errorObject) throws ControlThrowable {
@@ -633,7 +627,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 
 			if (!isError) {
-				prependFalseAndPad(context);
+				prependFalseAndTrim(context);
 			}
 			else {
 				// depth must be >= MAX_DEPTH
@@ -676,7 +670,7 @@ public class DefaultBasicLib extends BasicLib {
 				prependTrue(context);
 			}
 			else {
-				prependFalseAndPad(context);
+				prependFalseAndTrim(context);
 			}
 		}
 
