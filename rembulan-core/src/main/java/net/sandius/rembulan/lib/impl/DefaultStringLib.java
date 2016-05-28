@@ -183,7 +183,7 @@ public class DefaultStringLib extends StringLib {
 			char[] chars = new char[args.size()];
 
 			for (int i = 0; i < chars.length; i++) {
-				chars[i] = (char) args.nextInt();
+				chars[i] = (char) args.nextIntRange("value", 0, 255);
 			}
 
 			String s = String.valueOf(chars);
