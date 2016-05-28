@@ -1,5 +1,6 @@
 package net.sandius.rembulan.test
 
+import net.sandius.rembulan.core.LuaRuntimeException
 import org.scalatest.FunSpec
 
 import scala.collection.mutable
@@ -88,13 +89,16 @@ trait FragmentExpectations {
         addExpectation(fragment, ctx, Expect.Success(values map toRembulanValue))
       }
       def failsWith(clazz: Class[_ <: Throwable]) = {
-        addExpectation(fragment, ctx, Expect.Failure(Some(clazz), None))
+        addExpectation(fragment, ctx, Expect.Failure.ExceptionFailure(Some(clazz), None))
       }
       def failsWith(clazz: Class[_ <: Throwable], message: String) = {
-        addExpectation(fragment, ctx, Expect.Failure(Some(clazz), Some(message)))
+        addExpectation(fragment, ctx, Expect.Failure.ExceptionFailure(Some(clazz), Some(message)))
       }
       def failsWith(message: String) = {
-        addExpectation(fragment, ctx, Expect.Failure(None, Some(message)))
+        addExpectation(fragment, ctx, Expect.Failure.ExceptionFailure(None, Some(message)))
+      }
+      def failsWithLuaError(errorObject: AnyRef) = {
+        addExpectation(fragment, ctx, Expect.Failure.LuaErrorFailure(errorObject))
       }
     }
 
@@ -106,6 +110,8 @@ trait FragmentExpectations {
   protected def expect(body: => Unit): Unit = {
     body
   }
+
+  protected def stringStartingWith(prefix: String) = ValueMatch.StringStartingWith(prefix)
 
 }
 
@@ -145,28 +151,54 @@ object FragmentExpectations {
         }
       }
     }
-    case class Failure(optExpectClass: Option[Class[_ <: Throwable]], optExpectMessage: Option[String]) extends Expect {
+
+    sealed trait Failure extends Expect {
+
+      protected def matchError(ex: Throwable)(spec: FunSpec): Unit
+
       override def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec) = {
         actual match {
-          case Right(vs) =>
-            spec.fail("Expected failure, got success")
-          case Left(ex) =>
-            for (expectClass <- optExpectClass) {
-              val actualClass = ex.getClass
-              if (!expectClass.isAssignableFrom(actualClass)) {
-                spec.fail("Expected exception of type " + expectClass.getName + ", got " + actualClass.getName)
-              }
-            }
-
-            for (expectMessage <- optExpectMessage) {
-              val actualMessage = ex.getMessage
-              if (actualMessage != expectMessage) {
-                spec.fail("Error message mismatch: expected \"" + expectMessage + "\", got \"" + actualMessage + "\"")
-              }
-            }
+          case Right(vs) => spec.fail("Expected failure, got success")
+          case Left(ex) => matchError(ex)(spec)
         }
       }
+
     }
+
+    object Failure {
+
+      case class ExceptionFailure(optExpectClass: Option[Class[_ <: Throwable]], optExpectMessage: Option[String]) extends Failure {
+        override protected def matchError(ex: Throwable)(spec: FunSpec) = {
+          for (expectClass <- optExpectClass) {
+            val actualClass = ex.getClass
+            if (!expectClass.isAssignableFrom(actualClass)) {
+              spec.fail("Expected exception of type " + expectClass.getName + ", got " + actualClass.getName)
+            }
+          }
+
+          for (expectMessage <- optExpectMessage) {
+            val actualMessage = ex.getMessage
+            if (actualMessage != expectMessage) {
+              spec.fail("Error message mismatch: expected \"" + expectMessage + "\", got \"" + actualMessage + "\"")
+            }
+          }
+        }
+      }
+
+      case class LuaErrorFailure(expectErrorObject: AnyRef) extends Failure {
+        override protected def matchError(ex: Throwable)(spec: FunSpec) = {
+          ex match {
+            case le: LuaRuntimeException =>
+              val actualErrorObject = le.getErrorObject
+              if (expectErrorObject != actualErrorObject) {
+                spec.fail("Error object mismatch: expected [" + expectErrorObject + "], got [" + actualErrorObject + "]")
+              }
+          }
+        }
+      }
+
+    }
+
   }
 
   sealed trait ValueMatch {
@@ -186,11 +218,21 @@ object FragmentExpectations {
     case class SubtypeOf(c: Class[_]) extends ValueMatch {
       override def matches(o: AnyRef) = if (o == null) false else c.isAssignableFrom(o.getClass)
     }
+    case class StringStartingWith(prefix: String) extends ValueMatch {
+      override def matches(o: AnyRef) = {
+        o match {
+          case s: String if s.startsWith(prefix) => true
+          case _ => false
+        }
+      }
+    }
+
   }
 
   private def toRembulanValue(v: Any): ValueMatch = {
     import ValueMatch._
     v match {
+      case vm: ValueMatch => vm
       case null => Eq(null)
       case b: Boolean => Eq(java.lang.Boolean.valueOf(b))
       case i: Int => Eq(java.lang.Long.valueOf(i))
@@ -232,6 +274,8 @@ trait OneLiners { this: FragmentBundle with FragmentExpectations =>
       context = oldContext
     }
   }
+
+  protected def thisContext: FragmentExpectations.Env = context
 
   def program(body: String): RichFragment.InContext = {
     val name = (body :: prefixes).reverse.mkString(": ")
