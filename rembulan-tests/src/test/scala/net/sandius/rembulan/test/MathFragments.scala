@@ -2,9 +2,9 @@ package net.sandius.rembulan.test
 
 object MathFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
-  about ("random") {
-    in (MathContext) {
+  in (MathContext) {
 
+    about ("random") {
       program ("math.random(0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")
       program ("math.random(1, 0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")
 
@@ -13,13 +13,9 @@ object MathFragments extends FragmentBundle with FragmentExpectations with OneLi
       program ("return math.random(-10000000000000000000, 10000000000000000000)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")
 
       program ("math.random(1 << 63, (1 << 63) - 1)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval too large)")
-
     }
-  }
 
-  about ("randomseed") {
-    in (MathContext) {
-
+    about ("randomseed") {
       program ("math.randomseed(1)") succeedsWith ()
       program ("math.randomseed(1.0)") succeedsWith ()
       program ("""math.randomseed("1")""") succeedsWith ()
@@ -33,8 +29,8 @@ object MathFragments extends FragmentBundle with FragmentExpectations with OneLi
           |local y = math.random()
           |return x == y
         """) succeedsWith (true)
-
     }
+
   }
 
 }

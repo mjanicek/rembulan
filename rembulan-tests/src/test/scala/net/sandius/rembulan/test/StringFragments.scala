@@ -25,9 +25,9 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
   }
   LenMethodIsEqualToLenOperator in StringContext succeedsWith (true)
 
-  about ("byte") {
-    in (StringContext) {
+  in (StringContext) {
 
+    about ("byte") {
       program ("""return ("hello"):byte(1)""") succeedsWith (104)
       program ("""return ("hello"):byte(-1)""") succeedsWith (111)
       program ("""return ("hello"):byte(5)""") succeedsWith (111)
@@ -53,13 +53,9 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
 
       program ("""local x; return ("Boom"):byte(x)""") succeedsWith (66)
       program ("""return ("Boom"):byte(true)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'byte' (number expected, got boolean)")
-
     }
-  }
 
-  about ("char") {
-    in (StringContext) {
-
+    about ("char") {
       program ("""return string.char()""") succeedsWith ("")
       program ("""return string.char(104, 101, 108, 108, 111)""") succeedsWith ("hello")
 
@@ -67,13 +63,9 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
 
       program ("""string.char(-1)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
       program ("""string.char(256)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
-
     }
-  }
 
-  about ("format") {
-    in (StringContext) {
-
+    about ("format") {
       program ("""return ("%s%d"):format("0", 10.0)""") succeedsWith ("010")
 
       program ("""return ("%d"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'format' (no value)")
@@ -108,8 +100,8 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
       program ("""return ("%x:%X"):format("-234.00","-234.00")""") succeedsWith ("ffffffffffffff16:FFFFFFFFFFFFFF16")
 
       program ("""return ("%c%c%c%c%c"):format(104,101,108,108,111)""") succeedsWith ("hello")
-
     }
+
   }
 
 }
