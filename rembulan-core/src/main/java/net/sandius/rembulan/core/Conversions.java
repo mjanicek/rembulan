@@ -84,6 +84,35 @@ public abstract class Conversions {
 		return n != null ? n.doubleValue() : null;
 	}
 
+	/**
+	 * Converts the argument {@code o} to a number, coercing it into a Lua float
+	 * if {@code o} is a string that can be converted to a number.
+	 *
+	 * <p>If {@code o} is already a number, returns {@code o} cast to number. If {@code o} is
+	 * a string convertible to a number, it first converts the string to a number
+	 * following the syntactic and lexical rules lexer, and then converts the result to
+	 * a Lua float. Returns {@code null} if the argument is not a number or a string convertible
+	 * to number.
+	 *
+	 * <p>Note that this method differs from {@link #objectAsNumber(Object)} in that it
+	 * coerces strings convertible to numbers into into floats rather than preserving
+	 * their canonical representation, and also note that this conversion happens <i>after</i>
+	 * the number has been parsed. Most significantly,
+	 *
+	 * <pre>
+	 *     Conversions.objectAsFloatIfString("-0")
+	 * </pre>
+	 *
+	 * yields {@code 0.0} rather than {@code 0} (as would be the case for {@code objectAsNumber}),
+	 * or {@code -0.0} (as it would in the case if the string was parsed directly as a float).
+	 *
+	 * @param o  object to convert to number, may be {@code null}
+	 *
+	 * @return number representing the object,
+	 *         or {@code null} if {@code o} cannot be coerced into a number.
+	 *
+	 * @see #objectAsNumber(Object)
+	 */
 	public static Number objectAsFloatIfString(Object o) {
 		return o instanceof Number
 				? (Number) o
@@ -92,7 +121,27 @@ public abstract class Conversions {
 						: null;
 	}
 
-	// argument can be null
+	/**
+	 * Returns the argument {@code o} as a number, coercing it into a number if it is
+	 * a string convertible to number.
+	 *
+	 * <p>If {@code o} is already a number, returns {@code o} cast to number. If {@code o}
+	 * is a string convertible to a number, it returns the number it represents (i.e.
+	 * an integer if the string is a valid integral literal, or a float if it is
+	 * a floating-point literal according to the syntactic and lexical rules of Lua).
+	 *
+	 * <p>This method differs from {@link #objectAsFloatIfString(Object)} in that it
+	 * preserves the representation of coerced strings. In order to conform to Lua's
+	 * conversion rules for arithmetic operations, use {@link #objectAsFloatIfString(Object)}
+	 * rather than this method.
+	 *
+	 * @param o  object to convert to number, may be {@code null}
+	 *
+	 * @return number representing the object,
+	 *         of {@code null} if {@code o} cannot be coerced into a number.
+	 *
+	 * @see #objectAsFloatIfString(Object)
+	 */
 	public static Number objectAsNumber(Object o) {
 		return o instanceof Number
 				? (Number) o
