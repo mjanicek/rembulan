@@ -64,7 +64,13 @@ public abstract class LibFunction extends FunctionAnyarg {
 
 		public int optNextInt(int defaultValue) {
 			if (hasNext()) {
-				return nextInt();
+				if (args[index] == null) {
+					index += 1;
+					return defaultValue;
+				}
+				else {
+					return nextInt();
+				}
 			}
 			else {
 				return defaultValue;
