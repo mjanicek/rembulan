@@ -235,6 +235,7 @@ object FragmentExpectations {
           case Strict(s) :: tail if actual.indexOf(s, idx) == idx => strict(tail, idx + s.length)
           case NonStrict(_) :: tail => nonStrict(tail, idx)
           case Nil => true
+          case _ => false
         }
       }
 
