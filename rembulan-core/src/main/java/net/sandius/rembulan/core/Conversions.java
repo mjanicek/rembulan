@@ -17,8 +17,13 @@ public abstract class Conversions {
 	}
 
 	public static Long numberAsLong(Number n) {
-		long l = n.longValue();
-		return (double) l == n.doubleValue() && l != Long.MAX_VALUE ? l : null;
+		if (n instanceof Double || n instanceof Float) {
+			long l = n.longValue();
+			return (double) l == n.doubleValue() && l != Long.MAX_VALUE ? l : null;
+		}
+		else {
+			return n.longValue();
+		}
 	}
 
 	public static Integer numberAsInt(Number n) {
