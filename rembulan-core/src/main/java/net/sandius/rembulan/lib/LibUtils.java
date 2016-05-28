@@ -146,7 +146,7 @@ public class LibUtils {
 				}
 			}
 			else {
-				throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number has no integer representation");
+				throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number has no integer representation)");
 			}
 		}
 		else {
