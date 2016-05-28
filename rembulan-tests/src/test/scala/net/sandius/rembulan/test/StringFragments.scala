@@ -68,6 +68,8 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
     about ("format") {
       program ("""return ("%s%d"):format("0", 10.0)""") succeedsWith ("010")
 
+      program ("""return ("%%u%%"):format()""") succeedsWith ("%u%")
+
       program ("""return ("%d"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (no value)")
       program ("""return ("%d"):format("hi")""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (number expected, got string)")
       program ("""return ("%d"):format("1")""") succeedsWith ("1")

@@ -359,6 +359,10 @@ public class DefaultStringLib extends StringLib {
 						final char d = index < fmt.length() ? fmt.charAt(index) : '\0';
 						switch (d) {
 
+							case '%':
+								bld.append('%');
+								break;
+
 							case 'd':
 							case 'i':
 								bld.append(args.nextInteger());
