@@ -131,26 +131,32 @@ public class LibUtils {
 	// FIXME: clean this up: redundant code!
 	public static int checkRange(String name, Object[] args, int index, String rangeName, int min, int max) {
 		final String what;
-		Object o = Varargs.getElement(args, index);
-		Number n = Conversions.objectAsNumber(o);
 
-		if (n != null) {
-			Integer i = Conversions.numberAsInt(n);
-			if (i != null) {
-				int ii = i;
-				if (ii >= min && ii <= max) {
-					return ii;
+		if (index < args.length) {
+			Object o = args[index];
+			Number n = Conversions.objectAsNumber(o);
+
+			if (n != null) {
+				Integer i = Conversions.numberAsInt(n);
+				if (i != null) {
+					int ii = i;
+					if (ii >= min && ii <= max) {
+						return ii;
+					}
+					else {
+						throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (" + rangeName + " out of range)");
+					}
 				}
 				else {
-					throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (" + rangeName + " out of range)");
+					throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number has no integer representation)");
 				}
 			}
 			else {
-				throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number has no integer representation)");
+				what = Value.typeOf(o).name;
 			}
 		}
 		else {
-			what = Value.typeOf(o).name;
+			what = "no value";
 		}
 
 		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number expected, got " + what + ")");

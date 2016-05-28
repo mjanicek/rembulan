@@ -780,7 +780,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Object index = args.nextAny();
+			Object index = args.optNextAny();
 
 			if (index instanceof String && ((String) index).startsWith("#")) {
 				// return the number of remaining args
