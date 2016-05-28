@@ -409,9 +409,18 @@ public class DefaultBasicLib extends BasicLib {
 				context.getObjectSink().setTo(n);
 			}
 			else {
+				// first get the base, then retrieve the string, then check the base value
+				args.skip();
+				int base = args.nextInt();
+				args.reset();
 				String s = args.nextStrictString();
-				int base = args.nextIntRange("base", Character.MIN_RADIX, Character.MAX_RADIX);
+
+				if (base < Character.MIN_RADIX || base > Character.MAX_RADIX) {
+					throw new IllegalArgumentException("bad argument #2 to 'tonumber' (base out of range)");
+				}
+
 				context.getObjectSink().setTo(toNumber(s, base));
+
 			}
 		}
 

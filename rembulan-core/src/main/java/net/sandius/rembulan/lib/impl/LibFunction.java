@@ -30,6 +30,10 @@ public abstract class LibFunction extends FunctionAnyarg {
 			index = 0;
 		}
 
+		public void skip() {
+			index += 1;
+		}
+
 		public boolean hasNext() {
 			return index < args.length;
 		}
