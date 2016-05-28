@@ -634,7 +634,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Object callTarget = args.nextAny();
+			Object callTarget = args.optNextAny();
 			Function handler = args.nextFunction();
 			Object[] callArgs = args.getTail();
 
