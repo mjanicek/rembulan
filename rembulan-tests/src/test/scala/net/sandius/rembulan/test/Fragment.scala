@@ -88,10 +88,13 @@ trait FragmentExpectations {
         addExpectation(fragment, ctx, Expect.Success(values map toRembulanValue))
       }
       def failsWith(clazz: Class[_ <: Throwable]) = {
-        addExpectation(fragment, ctx, Expect.Failure(clazz))
+        addExpectation(fragment, ctx, Expect.Failure(Some(clazz), None))
       }
       def failsWith(clazz: Class[_ <: Throwable], message: String) = {
-        addExpectation(fragment, ctx, Expect.Failure(clazz, Some(message)))
+        addExpectation(fragment, ctx, Expect.Failure(Some(clazz), Some(message)))
+      }
+      def failsWith(message: String) = {
+        addExpectation(fragment, ctx, Expect.Failure(None, Some(message)))
       }
     }
 
@@ -142,19 +145,23 @@ object FragmentExpectations {
         }
       }
     }
-    case class Failure(clazz: Class[_ <: Throwable], message: Option[String] = None) extends Expect {
+    case class Failure(optExpectClass: Option[Class[_ <: Throwable]], optExpectMessage: Option[String]) extends Expect {
       override def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec) = {
         actual match {
           case Right(vs) =>
             spec.fail("Expected failure, got success")
           case Left(ex) =>
-            if (!clazz.isAssignableFrom(ex.getClass)) {
-              spec.fail("Expected exception of type " + clazz.getName + ", got " + ex.getClass.getName)
+            for (expectClass <- optExpectClass) {
+              val actualClass = ex.getClass
+              if (!expectClass.isAssignableFrom(actualClass)) {
+                spec.fail("Expected exception of type " + expectClass.getName + ", got " + actualClass.getName)
+              }
             }
-            val msg = ex.getMessage
-            for (expMsg <- message) {
-              if (msg != expMsg) {
-                spec.fail("Error message mismatch: expected \"" + expMsg + "\", got \"" + msg + "\"")
+
+            for (expectMessage <- optExpectMessage) {
+              val actualMessage = ex.getMessage
+              if (actualMessage != expectMessage) {
+                spec.fail("Error message mismatch: expected \"" + expectMessage + "\", got \"" + actualMessage + "\"")
               }
             }
         }
