@@ -186,6 +186,19 @@ public class LibUtils {
 		return checkString(name, args, index, false);
 	}
 
+	public static Table checkTableOrNil(String name, Object[] args, int index) {
+		if (index < args.length) {
+			Object arg = args[index];
+			if (arg instanceof Table) {
+				return (Table) arg;
+			}
+			else if (arg == null) {
+				return null;
+			}
+		}
+		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (nil or table expected)");
+	}
+
 	// FIXME: clean this up: redundant code!
 	public static Table checkTable(String name, Object[] args, int index) {
 		final String what;

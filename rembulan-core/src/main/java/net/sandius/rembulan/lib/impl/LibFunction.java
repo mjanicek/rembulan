@@ -123,6 +123,10 @@ public abstract class LibFunction extends FunctionAnyarg {
 			return LibUtils.checkTable(name, args, index++);
 		}
 
+		public Table nextTableOrNil() {
+			return LibUtils.checkTableOrNil(name, args, index++);
+		}
+
 		public Table optNextTable() {
 			if (hasNext()) {
 				if (args[index] == null) {

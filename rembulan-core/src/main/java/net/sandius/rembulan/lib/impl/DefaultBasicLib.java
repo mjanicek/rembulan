@@ -453,7 +453,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Table t = args.nextTable();
-			Table mt = args.optNextTable();
+			Table mt = args.nextTableOrNil();
 
 			if (Metatables.getMetamethod(context.getState(), "__metatable", t) != null) {
 				throw new IllegalOperationAttemptException("cannot change a protected metatable");
