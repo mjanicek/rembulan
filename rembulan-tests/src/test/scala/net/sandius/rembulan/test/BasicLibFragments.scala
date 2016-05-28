@@ -86,6 +86,8 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return tonumber(0 / 0, 36)") failsWith "bad argument #1 to 'tonumber' (string expected, got number)"
       program ("return tonumber(0.2, 10)") failsWith "bad argument #1 to 'tonumber' (string expected, got number)"
 
+      program ("return tonumber()") failsWith "bad argument #1 to 'tonumber' (value expected)"
+
     }
 
     about ("getmetatable") {
