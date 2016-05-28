@@ -406,7 +406,7 @@ public class DefaultStringLib extends StringLib {
 							}
 
 							default:
-								throw new IllegalArgumentException("invalid option '%" + optionToString(d) + "' to 'format'");
+								throw new IllegalArgumentException("invalid option '" + optionToString(d) + "' to 'format'");
 						}
 
 						break;

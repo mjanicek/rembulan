@@ -70,6 +70,9 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
 
       program ("""return ("%%u%%"):format()""") succeedsWith ("%u%")
 
+      program ("""local x; return ("%"):format(x)""") failsWith (classOf[IllegalArgumentException], "invalid option '%<\\0>' to 'format'")
+      program ("""return ("%"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (no value)")
+
       program ("""return ("%d"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (no value)")
       program ("""return ("%d"):format("hi")""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (number expected, got string)")
       program ("""return ("%d"):format("1")""") succeedsWith ("1")
