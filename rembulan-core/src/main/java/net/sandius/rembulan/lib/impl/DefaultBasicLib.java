@@ -409,7 +409,7 @@ public class DefaultBasicLib extends BasicLib {
 				context.getObjectSink().setTo(n);
 			}
 			else {
-				String s = args.nextString();
+				String s = args.nextStrictString();
 				int base = args.nextIntRange("base", Character.MIN_RADIX, Character.MAX_RADIX);
 				context.getObjectSink().setTo(toNumber(s, base));
 			}

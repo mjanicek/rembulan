@@ -157,17 +157,24 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static String checkString(String name, Object[] args, int index) {
+	public static String checkString(String name, Object[] args, int index, boolean strict) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-			String s = Conversions.objectAsString(arg);
-			if (s != null) {
-				return s;
+			if (strict) {
+				if (arg instanceof String) {
+					return (String) arg;
+				}
 			}
 			else {
-				what = Value.typeOf(arg).name;
+				String s = Conversions.objectAsString(arg);
+				if (s != null) {
+					return s;
+				}
 			}
+
+			// not a string!
+			what = Value.typeOf(arg).name;
 		}
 		else {
 			what = "no value";
@@ -175,6 +182,9 @@ public class LibUtils {
 		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (string expected, got " + what + ")");
 	}
 
+	public static String checkString(String name, Object[] args, int index) {
+		return checkString(name, args, index, false);
+	}
 
 	// FIXME: clean this up: redundant code!
 	public static Table checkTable(String name, Object[] args, int index) {
