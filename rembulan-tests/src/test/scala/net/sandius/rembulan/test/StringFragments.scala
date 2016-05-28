@@ -71,4 +71,45 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
     }
   }
 
+  about ("format") {
+    in (StringContext) {
+
+      program ("""return ("%s%d"):format("0", 10.0)""") succeedsWith ("010")
+
+      program ("""return ("%d"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'format' (no value)")
+      program ("""return ("%d"):format("hi")""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'format' (number expected, got string)")
+      program ("""return ("%d"):format("1")""") succeedsWith ("1")
+
+      program ("""return ("%i"):format(42)""") succeedsWith ("42")
+      program ("""return ("%i"):format(-15)""") succeedsWith ("-15")
+      program ("""return ("%i"):format(50.0)""") succeedsWith ("50")
+      program ("""return ("%i"):format(-2.0)""") succeedsWith ("-2")
+      program ("""return ("%i"):format("102")""") succeedsWith ("102")
+      program ("""return ("%i"):format("234.00")""") succeedsWith ("234")
+
+      program ("""return ("%o"):format(1234)""") succeedsWith ("2322")
+      program ("""return ("%o"):format(-1)""") succeedsWith ("1777777777777777777777")
+      program ("""return ("%o"):format(45.0)""") succeedsWith ("55")
+      program ("""return ("%o"):format("321")""") succeedsWith ("501")
+      program ("""return ("%o"):format("234.00")""") succeedsWith ("352")
+
+      program ("""return ("%u"):format(1234)""") succeedsWith ("1234")
+      program ("""return ("%u"):format((2<<63) - 1)""") succeedsWith ("18446744073709551615")
+      program ("""return ("%u"):format(-1)""") succeedsWith ("18446744073709551615")
+      program ("""return ("%u"):format(45.0)""") succeedsWith ("45")
+      program ("""return ("%u"):format("321")""") succeedsWith ("321")
+      program ("""return ("%u"):format("-234.00")""") succeedsWith ("18446744073709551382")
+
+      program ("""return ("%x:%X"):format(1234,1234)""") succeedsWith ("4d2:4D2")
+      program ("""return ("%x:%X"):format((2<<63)-1,(2<<63)-1)""") succeedsWith ("ffffffffffffffff:FFFFFFFFFFFFFFFF")
+      program ("""return ("%x:%X"):format(-1,-1)""") succeedsWith ("ffffffffffffffff:FFFFFFFFFFFFFFFF")
+      program ("""return ("%x:%X"):format(45.0,45.0)""") succeedsWith ("2d:2D")
+      program ("""return ("%x:%X"):format("381","381")""") succeedsWith ("17d:17D")
+      program ("""return ("%x:%X"):format("-234.00","-234.00")""") succeedsWith ("ffffffffffffff16:FFFFFFFFFFFFFF16")
+
+      program ("""return ("%c%c%c%c%c"):format(104,101,108,108,111)""") succeedsWith ("hello")
+
+    }
+  }
+
 }
