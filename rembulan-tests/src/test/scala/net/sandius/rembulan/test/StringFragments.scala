@@ -52,7 +52,7 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
       program ("""return ("hello"):byte(1.0)""") succeedsWith (104)
 
       program ("""local x; return ("Boom"):byte(x)""") succeedsWith (66)
-      program ("""return ("Boom"):byte(true)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'byte' (number expected, got boolean)")
+      program ("""return ("Boom"):byte(true)""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'byte' (number expected, got boolean)")
     }
 
     about ("char") {
@@ -68,8 +68,8 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
     about ("format") {
       program ("""return ("%s%d"):format("0", 10.0)""") succeedsWith ("010")
 
-      program ("""return ("%d"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'format' (no value)")
-      program ("""return ("%d"):format("hi")""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'format' (number expected, got string)")
+      program ("""return ("%d"):format()""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (no value)")
+      program ("""return ("%d"):format("hi")""") failsWith (classOf[IllegalArgumentException], "bad argument #"<<"1">>" to 'format' (number expected, got string)")
       program ("""return ("%d"):format("1")""") succeedsWith ("1")
 
       program ("""return ("%i"):format(42)""") succeedsWith ("42")

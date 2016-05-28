@@ -91,10 +91,10 @@ trait FragmentExpectations {
       def failsWith(clazz: Class[_ <: Throwable]) = {
         addExpectation(fragment, ctx, Expect.Failure.ExceptionFailure(Some(clazz), None))
       }
-      def failsWith(clazz: Class[_ <: Throwable], message: String) = {
+      def failsWith(clazz: Class[_ <: Throwable], message: StringMatcher) = {
         addExpectation(fragment, ctx, Expect.Failure.ExceptionFailure(Some(clazz), Some(message)))
       }
-      def failsWith(message: String) = {
+      def failsWith(message: StringMatcher) = {
         addExpectation(fragment, ctx, Expect.Failure.ExceptionFailure(None, Some(message)))
       }
       def failsWithLuaError(errorObject: AnyRef) = {
@@ -112,6 +112,8 @@ trait FragmentExpectations {
   }
 
   protected def stringStartingWith(prefix: String) = ValueMatch.StringStartingWith(prefix)
+
+  implicit def stringToMatcher(s: String): StringMatcher = StringMatcher(StringMatcher.Strict(s) :: Nil)
 
 }
 
@@ -167,7 +169,7 @@ object FragmentExpectations {
 
     object Failure {
 
-      case class ExceptionFailure(optExpectClass: Option[Class[_ <: Throwable]], optExpectMessage: Option[String]) extends Failure {
+      case class ExceptionFailure(optExpectClass: Option[Class[_ <: Throwable]], optExpectMessage: Option[StringMatcher]) extends Failure {
         override protected def matchError(ex: Throwable)(spec: FunSpec) = {
           for (expectClass <- optExpectClass) {
             val actualClass = ex.getClass
@@ -176,10 +178,10 @@ object FragmentExpectations {
             }
           }
 
-          for (expectMessage <- optExpectMessage) {
+          for (messageMatcher <- optExpectMessage) {
             val actualMessage = ex.getMessage
-            if (actualMessage != expectMessage) {
-              spec.fail("Error message mismatch: expected \"" + expectMessage + "\", got \"" + actualMessage + "\"")
+            if (!messageMatcher.matches(actualMessage)) {
+              spec.fail("Error message mismatch: expected \"" + messageMatcher + "\", got \"" + actualMessage + "\"")
             }
           }
         }
@@ -197,6 +199,56 @@ object FragmentExpectations {
         }
       }
 
+    }
+
+  }
+
+  case class StringMatcher(parts: List[StringMatcher.Part]) {
+    def <<(arg: String) = StringMatcher(parts :+ StringMatcher.NonStrict(arg))
+    def >>(arg: String) = StringMatcher(parts :+ StringMatcher.Strict(arg))
+    def matches(actual: String): Boolean = StringMatcher.matches(parts, actual)
+
+    override def toString = parts.mkString("")
+  }
+
+  object StringMatcher {
+    sealed trait Part
+    case class Strict(s: String) extends Part {
+      override def toString = s
+    }
+    case class NonStrict(s: String) extends Part {
+      override def toString = "<<" + s + ">>"
+    }
+
+    def matches(parts: List[StringMatcher.Part], actual: String): Boolean = {
+
+      def either(parts: List[StringMatcher.Part], idx: Int): Boolean = {
+        parts.headOption match {
+          case Some(h: Strict) => strict(parts, 0)
+          case Some(h: NonStrict) => nonStrict(parts, 0)
+          case None => true
+        }
+      }
+
+      def strict(parts: List[StringMatcher.Part], idx: Int): Boolean = {
+        parts match {
+          case Strict(s) :: tail if actual.indexOf(s, idx) == idx => strict(tail, idx + s.length)
+          case NonStrict(_) :: tail => nonStrict(tail, idx)
+          case Nil => true
+        }
+      }
+
+      def nonStrict(parts: List[StringMatcher.Part], idx: Int): Boolean = {
+        parts match {
+          case Strict(s) :: tail =>
+            val nextIdx = actual.indexOf(s, idx)
+            (nextIdx >= 0) && (either(tail, nextIdx + s.length()) || nonStrict(parts, idx + 1))
+          case NonStrict(_) :: tail => nonStrict(tail, idx)
+          case Nil => true
+        }
+      }
+
+      either(parts, 0)
     }
 
   }
