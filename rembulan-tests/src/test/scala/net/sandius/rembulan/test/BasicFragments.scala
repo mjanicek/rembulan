@@ -1231,6 +1231,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   SniffIntegerTrick in EmptyContext succeedsWith (Double.PositiveInfinity)
 
+  val NameMetaFieldIsUsedInLibErrorMessages = fragment ("NameMetaFieldIsUsedInLibErrorMessages") {
+    """local t = setmetatable({}, { __name = "elbaT" })
+      |select(t)
+    """
+  }
+  NameMetaFieldIsUsedInLibErrorMessages in BasicContext failsWith "bad argument #1 to 'select' (number expected, got elbaT)"
+
   about ("coercions") {
     in (EmptyContext) {
 

@@ -4,12 +4,15 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.util.Check;
 
 public class LibUtils {
+
+	public static final String MT_NAME = "__name";
 
 	public static Table init(LuaState state, Lib lib) {
 		Check.notNull(state);
@@ -34,8 +37,19 @@ public class LibUtils {
 		}
 	}
 
+	public static String valueName(LuaState state, Object o) {
+		Table mt = Metatables.getMetatable(state, o);
+		if (mt != null) {
+			Object nameField = mt.rawget(MT_NAME);
+			if (nameField instanceof String) {
+				return (String) nameField;
+			}
+		}
+		return Value.typeOf(o).name;
+	}
+
 	// FIXME: clean this up: redundant code!
-	public static Number checkNumber(String name, Object[] args, int index) {
+	public static Number checkNumber(LuaState state, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -44,7 +58,7 @@ public class LibUtils {
 				return n;
 			}
 			else {
-				what = Value.typeOf(arg).name;
+				what = valueName(state, arg);
 			}
 		}
 		else {
@@ -54,7 +68,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static int checkInt(String name, Object[] args, int index) {
+	public static int checkInt(LuaState state, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -71,7 +85,7 @@ public class LibUtils {
 				throw new IllegalArgumentException("number has no integer representation");
 			}
 			else {
-				what = Value.typeOf(arg).name;
+				what = valueName(state, arg);
 			}
 		}
 		else {
@@ -81,7 +95,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static long checkInteger(String name, Object[] args, int index) {
+	public static long checkInteger(LuaState state, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -96,7 +110,7 @@ public class LibUtils {
 				}
 			}
 			else {
-				what = Value.typeOf(arg).name;
+				what = valueName(state, arg);
 			}
 		}
 		else {
@@ -106,7 +120,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static int checkRange(String name, Object[] args, int index, String rangeName, int min, int max) {
+	public static int checkRange(LuaState state, String name, Object[] args, int index, String rangeName, int min, int max) {
 		final String what;
 
 		if (index < args.length) {
@@ -129,7 +143,7 @@ public class LibUtils {
 				}
 			}
 			else {
-				what = Value.typeOf(o).name;
+				what = valueName(state, o);
 			}
 		}
 		else {
@@ -140,7 +154,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static String checkString(String name, Object[] args, int index, boolean strict) {
+	public static String checkString(LuaState state, String name, Object[] args, int index, boolean strict) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -157,7 +171,7 @@ public class LibUtils {
 			}
 
 			// not a string!
-			what = Value.typeOf(arg).name;
+			what = valueName(state, arg);
 		}
 		else {
 			what = "no value";
@@ -165,8 +179,8 @@ public class LibUtils {
 		throw new BadArgumentException((index + 1), name, "string expected, got " + what);
 	}
 
-	public static String checkString(String name, Object[] args, int index) {
-		return checkString(name, args, index, false);
+	public static String checkString(LuaState state, String name, Object[] args, int index) {
+		return checkString(state, name, args, index, false);
 	}
 
 	public static Table checkTableOrNil(String name, Object[] args, int index) {
@@ -183,7 +197,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static Table checkTable(String name, Object[] args, int index) {
+	public static Table checkTable(LuaState state, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -191,7 +205,7 @@ public class LibUtils {
 				return (Table) arg;
 			}
 			else {
-				what = Value.typeOf(arg).name;
+				what = valueName(state, arg);
 			}
 		}
 		else {
@@ -201,7 +215,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static Function checkFunction(String name, Object[] args, int index) {
+	public static Function checkFunction(LuaState state, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -209,7 +223,7 @@ public class LibUtils {
 				return (Function) arg;
 			}
 			else {
-				what = Value.typeOf(arg).name;
+				what = valueName(state, arg);
 			}
 		}
 		else {
@@ -219,7 +233,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static Coroutine checkCoroutine(String name, Object[] args, int index) {
+	public static Coroutine checkCoroutine(LuaState state, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -227,7 +241,7 @@ public class LibUtils {
 				return (Coroutine) arg;
 			}
 			else {
-				what = Value.typeOf(arg).name;
+				what = valueName(state, arg);
 			}
 		}
 		else {
