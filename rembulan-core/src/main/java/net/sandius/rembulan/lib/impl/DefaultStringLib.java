@@ -294,7 +294,7 @@ public class DefaultStringLib extends StringLib {
 				return "%" + c;
 			}
 			else {
-				return "%\\<" + ((int) c) + ">";
+				return "%<\\" + ((int) c) + ">";
 			}
 		}
 
