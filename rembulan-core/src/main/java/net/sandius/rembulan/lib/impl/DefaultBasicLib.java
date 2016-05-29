@@ -11,6 +11,7 @@ import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.PlainValueTypeNamer;
 import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
@@ -212,8 +213,8 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			LuaType tpe = Value.typeOf(args.nextAny());
-			context.getObjectSink().setTo(tpe.name);
+			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
+			context.getObjectSink().setTo(typeName);
 		}
 
 	}

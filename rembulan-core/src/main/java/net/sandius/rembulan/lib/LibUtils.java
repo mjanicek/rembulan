@@ -5,8 +5,10 @@ import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Metatables;
+import net.sandius.rembulan.core.PlainValueTypeNamer;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
+import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.util.Check;
 
 public class LibUtils {
@@ -36,23 +38,6 @@ public class LibUtils {
 		}
 	}
 
-	public interface ValueTypeNamer {
-
-		String typeNameOf(Object instance);
-
-	}
-
-	public static class PlainValueTypeNamer implements ValueTypeNamer {
-
-		public static final PlainValueTypeNamer INSTANCE = new PlainValueTypeNamer();
-
-		@Override
-		public String typeNameOf(Object instance) {
-			return Value.typeOf(instance).name;
-		}
-
-	}
-
 	public static class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 
 		private final LuaState state;
@@ -70,7 +55,7 @@ public class LibUtils {
 					return (String) nameField;
 				}
 			}
-			return Value.typeOf(instance).name;
+			return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
 		}
 
 	}

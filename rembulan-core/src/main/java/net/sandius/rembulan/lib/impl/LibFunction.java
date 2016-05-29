@@ -7,6 +7,7 @@ import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.LibUtils;
@@ -16,13 +17,13 @@ public abstract class LibFunction extends FunctionAnyarg {
 
 	public static class CallArguments {
 
-		private final LibUtils.ValueTypeNamer namer;
+		private final ValueTypeNamer namer;
 
 		public final String name;
 		public final Object[] args;
 		public int index;
 
-		public CallArguments(LibUtils.ValueTypeNamer namer, String name, Object[] args) {
+		public CallArguments(ValueTypeNamer namer, String name, Object[] args) {
 			this.namer = Check.notNull(namer);
 			this.name = Check.notNull(name);
 			this.args = Check.notNull(args);
