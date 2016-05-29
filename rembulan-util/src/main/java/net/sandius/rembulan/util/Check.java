@@ -33,14 +33,6 @@ public abstract class Check {
 		return a;
 	}
 
-	public static void numOfArgs(Object[] args, int num) {
-		Check.notNull(args);
-
-		if (args.length < num) {
-			throw new IllegalArgumentException("bad argument #" + (args.length + 1) + ": value expected");
-		}
-	}
-
 	public static int inRange(int n, int min, int max) {
 		if (n < min && n > max) {
 			throw new IllegalArgumentException("integer " + n + " out of range: [" + min + ", " + max + "]");

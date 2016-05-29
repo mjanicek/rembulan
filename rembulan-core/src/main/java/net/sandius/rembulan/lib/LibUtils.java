@@ -25,29 +25,6 @@ public class LibUtils {
 		}
 	}
 
-	@Deprecated
-	public static <T> T checkArgumentOrNil(Object arg, int index, Class<T> clazz) {
-		if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
-			return (T) arg ;
-		}
-		else if (arg == null) {
-			return null;
-		}
-		else {
-			throw new BadArgumentException((index + 1), "?", "? or nil expected, got " + Value.typeOf(arg).name);
-		}
-	}
-
-	@Deprecated
-	public static <T> T checkArgument(Object arg, int index, Class<T> clazz) {
-		if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
-			return (T) arg ;
-		}
-		else {
-			throw new BadArgumentException((index + 1), "?", "? expected, got " + Value.typeOf(arg).name);
-		}
-	}
-
 	public static Object checkValue(String name, Object[] args, int index) {
 		if (index < args.length) {
 			return args[index];
