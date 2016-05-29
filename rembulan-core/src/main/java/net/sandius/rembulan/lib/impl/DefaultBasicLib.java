@@ -179,7 +179,6 @@ public class DefaultBasicLib extends BasicLib {
 					throw new LuaRuntimeException("error calling 'print' ('tostring' must return a string to 'print')");
 				}
 
-				out.print(ToString.toString(args[i]));
 				if (i + 1 < args.length) {
 					out.print('\t');
 				}
