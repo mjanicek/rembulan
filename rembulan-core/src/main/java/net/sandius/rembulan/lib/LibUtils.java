@@ -121,7 +121,7 @@ public class LibUtils {
 						return ii;
 					}
 					else {
-						throw new BadArgumentException((index + 1), name, "" + rangeName + " out of range");
+						throw new BadArgumentException((index + 1), name, rangeName + " out of range");
 					}
 				}
 				else {
