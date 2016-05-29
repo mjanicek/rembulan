@@ -7,7 +7,6 @@ import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
-import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.util.Check;
 
 public class LibUtils {
@@ -37,19 +36,47 @@ public class LibUtils {
 		}
 	}
 
-	public static String valueName(LuaState state, Object o) {
-		Table mt = Metatables.getMetatable(state, o);
-		if (mt != null) {
-			Object nameField = mt.rawget(MT_NAME);
-			if (nameField instanceof String) {
-				return (String) nameField;
-			}
+	public interface ValueTypeNamer {
+
+		String typeNameOf(Object instance);
+
+	}
+
+	public static class PlainValueTypeNamer implements ValueTypeNamer {
+
+		public static final PlainValueTypeNamer INSTANCE = new PlainValueTypeNamer();
+
+		@Override
+		public String typeNameOf(Object instance) {
+			return Value.typeOf(instance).name;
 		}
-		return Value.typeOf(o).name;
+
+	}
+
+	public static class NameMetamethodValueTypeNamer implements ValueTypeNamer {
+
+		private final LuaState state;
+
+		public NameMetamethodValueTypeNamer(LuaState state) {
+			this.state = Check.notNull(state);
+		}
+
+		@Override
+		public String typeNameOf(Object instance) {
+			Table mt = Metatables.getMetatable(state, instance);
+			if (mt != null) {
+				Object nameField = mt.rawget(MT_NAME);
+				if (nameField instanceof String) {
+					return (String) nameField;
+				}
+			}
+			return Value.typeOf(instance).name;
+		}
+
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static Number checkNumber(LuaState state, String name, Object[] args, int index) {
+	public static Number checkNumber(ValueTypeNamer namer, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -58,7 +85,7 @@ public class LibUtils {
 				return n;
 			}
 			else {
-				what = valueName(state, arg);
+				what = namer.typeNameOf(arg);
 			}
 		}
 		else {
@@ -68,7 +95,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static int checkInt(LuaState state, String name, Object[] args, int index) {
+	public static int checkInt(ValueTypeNamer namer, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -85,7 +112,7 @@ public class LibUtils {
 				throw new IllegalArgumentException("number has no integer representation");
 			}
 			else {
-				what = valueName(state, arg);
+				what = namer.typeNameOf(arg);
 			}
 		}
 		else {
@@ -95,7 +122,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static long checkInteger(LuaState state, String name, Object[] args, int index) {
+	public static long checkInteger(ValueTypeNamer namer, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -110,7 +137,7 @@ public class LibUtils {
 				}
 			}
 			else {
-				what = valueName(state, arg);
+				what = namer.typeNameOf(arg);
 			}
 		}
 		else {
@@ -120,7 +147,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static int checkRange(LuaState state, String name, Object[] args, int index, String rangeName, int min, int max) {
+	public static int checkRange(ValueTypeNamer namer, String name, Object[] args, int index, String rangeName, int min, int max) {
 		final String what;
 
 		if (index < args.length) {
@@ -143,7 +170,7 @@ public class LibUtils {
 				}
 			}
 			else {
-				what = valueName(state, o);
+				what = namer.typeNameOf(o);
 			}
 		}
 		else {
@@ -154,7 +181,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static String checkString(LuaState state, String name, Object[] args, int index, boolean strict) {
+	public static String checkString(ValueTypeNamer namer, String name, Object[] args, int index, boolean strict) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -171,7 +198,7 @@ public class LibUtils {
 			}
 
 			// not a string!
-			what = valueName(state, arg);
+			what = namer.typeNameOf(arg);
 		}
 		else {
 			what = "no value";
@@ -179,8 +206,8 @@ public class LibUtils {
 		throw new BadArgumentException((index + 1), name, "string expected, got " + what);
 	}
 
-	public static String checkString(LuaState state, String name, Object[] args, int index) {
-		return checkString(state, name, args, index, false);
+	public static String checkString(ValueTypeNamer namer, String name, Object[] args, int index) {
+		return checkString(namer, name, args, index, false);
 	}
 
 	public static Table checkTableOrNil(String name, Object[] args, int index) {
@@ -197,7 +224,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static Table checkTable(LuaState state, String name, Object[] args, int index) {
+	public static Table checkTable(ValueTypeNamer namer, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -205,7 +232,7 @@ public class LibUtils {
 				return (Table) arg;
 			}
 			else {
-				what = valueName(state, arg);
+				what = namer.typeNameOf(arg);
 			}
 		}
 		else {
@@ -215,7 +242,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static Function checkFunction(LuaState state, String name, Object[] args, int index) {
+	public static Function checkFunction(ValueTypeNamer namer, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -223,7 +250,7 @@ public class LibUtils {
 				return (Function) arg;
 			}
 			else {
-				what = valueName(state, arg);
+				what = namer.typeNameOf(arg);
 			}
 		}
 		else {
@@ -233,7 +260,7 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static Coroutine checkCoroutine(LuaState state, String name, Object[] args, int index) {
+	public static Coroutine checkCoroutine(ValueTypeNamer namer, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
@@ -241,7 +268,7 @@ public class LibUtils {
 				return (Coroutine) arg;
 			}
 			else {
-				what = valueName(state, arg);
+				what = namer.typeNameOf(arg);
 			}
 		}
 		else {

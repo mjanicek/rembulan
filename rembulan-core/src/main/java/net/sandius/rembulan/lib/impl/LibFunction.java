@@ -5,7 +5,6 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
@@ -17,14 +16,14 @@ public abstract class LibFunction extends FunctionAnyarg {
 
 	public static class CallArguments {
 
-		private final LuaState state;
+		private final LibUtils.ValueTypeNamer namer;
 
 		public final String name;
 		public final Object[] args;
 		public int index;
 
-		public CallArguments(LuaState state, String name, Object[] args) {
-			this.state = Check.notNull(state);
+		public CallArguments(LibUtils.ValueTypeNamer namer, String name, Object[] args) {
+			this.namer = Check.notNull(namer);
 			this.name = Check.notNull(name);
 			this.args = Check.notNull(args);
 			this.index = 0;
@@ -67,7 +66,7 @@ public abstract class LibFunction extends FunctionAnyarg {
 		}
 
 		public int nextInt() {
-			return LibUtils.checkInt(state, name, args, index++);
+			return LibUtils.checkInt(namer, name, args, index++);
 		}
 
 		public int optNextInt(int defaultValue) {
@@ -86,15 +85,15 @@ public abstract class LibFunction extends FunctionAnyarg {
 		}
 
 		public int nextIntRange(String rangeName, int min, int max) {
-			return LibUtils.checkRange(state, name, args, index++, rangeName, min, max);
+			return LibUtils.checkRange(namer, name, args, index++, rangeName, min, max);
 		}
 
 		public Number nextNumber() {
-			return LibUtils.checkNumber(state, name, args, index++);
+			return LibUtils.checkNumber(namer, name, args, index++);
 		}
 
 		public long nextInteger() {
-			return LibUtils.checkInteger(state, name, args, index++);
+			return LibUtils.checkInteger(namer, name, args, index++);
 		}
 
 		public boolean optNextBoolean(boolean defaultValue) {
@@ -107,11 +106,11 @@ public abstract class LibFunction extends FunctionAnyarg {
 		}
 
 		public String nextString() {
-			return LibUtils.checkString(state, name, args, index++);
+			return LibUtils.checkString(namer, name, args, index++);
 		}
 
 		public String nextStrictString() {
-			return LibUtils.checkString(state, name, args, index++, true);
+			return LibUtils.checkString(namer, name, args, index++, true);
 		}
 
 		public String optNextString(String defaultValue) {
@@ -124,11 +123,11 @@ public abstract class LibFunction extends FunctionAnyarg {
 		}
 
 		public Function nextFunction() {
-			return LibUtils.checkFunction(state, name, args, index++);
+			return LibUtils.checkFunction(namer, name, args, index++);
 		}
 
 		public Table nextTable() {
-			return LibUtils.checkTable(state, name, args, index++);
+			return LibUtils.checkTable(namer, name, args, index++);
 		}
 
 		public Table nextTableOrNil() {
@@ -142,7 +141,7 @@ public abstract class LibFunction extends FunctionAnyarg {
 					return null;
 				}
 				else {
-					return LibUtils.checkTable(state, name, args, index++);
+					return LibUtils.checkTable(namer, name, args, index++);
 				}
 			}
 			else {
@@ -151,7 +150,7 @@ public abstract class LibFunction extends FunctionAnyarg {
 		}
 
 		public Coroutine nextCoroutine() {
-			return LibUtils.checkCoroutine(state, name, args, index++);
+			return LibUtils.checkCoroutine(namer, name, args, index++);
 		}
 
 	}
@@ -160,7 +159,7 @@ public abstract class LibFunction extends FunctionAnyarg {
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-		CallArguments callArgs = new CallArguments(context.getState(), name(), args);
+		CallArguments callArgs = new CallArguments(new LibUtils.NameMetamethodValueTypeNamer(context.getState()), name(), args);
 		invoke(context, callArgs);
 	}
 
