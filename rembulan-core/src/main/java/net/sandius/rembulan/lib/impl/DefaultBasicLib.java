@@ -445,7 +445,7 @@ public class DefaultBasicLib extends BasicLib {
 
 			Object result = meta != null
 					? meta  // __metatable field present, return its value
-					: Metatables.getMetatable(context.getState(), arg);  // return the entire metatable
+					: context.getState().getMetatable(arg);  // return the entire metatable
 
 			context.getObjectSink().setTo(result);
 		}

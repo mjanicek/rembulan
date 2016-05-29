@@ -1,6 +1,5 @@
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.util.Check;
 
 public class Metatables {
@@ -33,33 +32,12 @@ public class Metatables {
 
 	public static final String MT_CALL = "__call";
 
-	public static Table getMetatable(LuaState state, Object o) {
-		Check.notNull(state);
-		// o can be null
-
-		if (o instanceof LuaObject) {
-			return ((LuaObject) o).getMetatable();
-		}
-		else {
-			LuaType tpe = Value.typeOf(o);
-			switch (tpe) {
-				case NIL: return state.nilMetatable();
-				case BOOLEAN: return state.booleanMetatable();
-				case LIGHTUSERDATA: return state.lightuserdataMetatable();
-				case NUMBER: return state.numberMetatable();
-				case STRING: return state.stringMetatable();
-				case FUNCTION: return state.functionMetatable();
-				case THREAD: return state.threadMetatable();
-				default: throw new IllegalStateException("Illegal type: " + tpe);
-			}
-		}
-	}
-
-	public static Object getMetamethod(LuaState state, String event, Object o) {
-		// o can be null
+	public static Object getMetamethod(MetatableProvider metatableProvider, String event, Object o) {
+		Check.notNull(metatableProvider);
 		Check.notNull(event);
+		// o can be null
 
-		Table mt = getMetatable(state, o);
+		Table mt = metatableProvider.getMetatable(o);
 		if (mt != null) {
 			return mt.rawget(event);
 		}
@@ -68,9 +46,11 @@ public class Metatables {
 		}
 	}
 
-	public static Object binaryHandlerFor(LuaState state, String event, Object a, Object b) {
-		Object ma = Metatables.getMetamethod(state, event, a);
-		return ma != null ? ma : Metatables.getMetamethod(state, event, b);
+	public static Object binaryHandlerFor(MetatableProvider metatableProvider, String event, Object a, Object b) {
+		Check.notNull(metatableProvider);
+		Check.notNull(event);
+		Object ma = Metatables.getMetamethod(metatableProvider, event, a);
+		return ma != null ? ma : Metatables.getMetamethod(metatableProvider, event, b);
 	}
 
 }

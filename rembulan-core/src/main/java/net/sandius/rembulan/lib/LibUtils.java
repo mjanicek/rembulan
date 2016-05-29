@@ -4,10 +4,10 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.MetatableProvider;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.PlainValueTypeNamer;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.util.Check;
 
@@ -40,22 +40,21 @@ public class LibUtils {
 
 	public static class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 
-		private final LuaState state;
+		private final MetatableProvider metatableProvider;
 
-		public NameMetamethodValueTypeNamer(LuaState state) {
-			this.state = Check.notNull(state);
+		public NameMetamethodValueTypeNamer(MetatableProvider metatableProvider) {
+			this.metatableProvider = Check.notNull(metatableProvider);
 		}
 
 		@Override
 		public String typeNameOf(Object instance) {
-			Table mt = Metatables.getMetatable(state, instance);
-			if (mt != null) {
-				Object nameField = mt.rawget(MT_NAME);
-				if (nameField instanceof String) {
-					return (String) nameField;
-				}
+			Object nameField = Metatables.getMetamethod(metatableProvider, MT_NAME, instance);
+			if (nameField instanceof String) {
+				return (String) nameField;
 			}
-			return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
+			else {
+				return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
+			}
 		}
 
 	}
