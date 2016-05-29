@@ -357,56 +357,63 @@ public class DefaultStringLib extends StringLib {
 						index++;
 
 						final char d = index < fmt.length() ? fmt.charAt(index) : '\0';
-						switch (d) {
 
-							case '%':
-								bld.append('%');
-								break;
-
-							case 'd':
-							case 'i':
-								bld.append(args.nextInteger());
-								break;
-
-							case 'u':
-								bld.append(longToUnsignedString(args.nextInteger()));
-								break;
-
-							case 'o':
-								bld.append(Long.toOctalString(args.nextInteger()));
-								break;
-
-							case 'x':
-							case 'X': {
-								String hex = Long.toHexString(args.nextInteger());
-								bld.append(d == 'X' ? hex.toUpperCase() : hex);
-								break;
+						if (d == '%') {
+							bld.append('%');
+						}
+						else {
+							if (!args.hasNext()) {
+								throw new IllegalArgumentException("bad argument #" + (args.size() + 1) + " to '" + name() + "' (no value)");
 							}
 
-							case 'c':
-								bld.append((char) args.nextInteger());
-								break;
+							switch (d) {
 
-							case 's': {
-								Object v = args.nextAny();
-								String s = Conversions.objectAsString(v);
-								if (s != null) {
-									bld.append(s);
+								case 'd':
+								case 'i':
+									bld.append(args.nextInteger());
+									break;
+
+								case 'u':
+									bld.append(longToUnsignedString(args.nextInteger()));
+									break;
+
+								case 'o':
+									bld.append(Long.toOctalString(args.nextInteger()));
+									break;
+
+								case 'x':
+								case 'X': {
+									String hex = Long.toHexString(args.nextInteger());
+									bld.append(d == 'X' ? hex.toUpperCase() : hex);
+									break;
 								}
-								else {
-									// TODO: use __tostring for non-string arguments
-									throw new UnsupportedOperationException("not implemented: tostring");
+
+								case 'c':
+									bld.append((char) args.nextInteger());
+									break;
+
+								case 's': {
+									Object v = args.nextAny();
+									String s = Conversions.objectAsString(v);
+									if (s != null) {
+										bld.append(s);
+									}
+									else {
+										// TODO: use __tostring for non-string arguments
+										throw new UnsupportedOperationException("not implemented: tostring");
+									}
+									break;
 								}
-								break;
-							}
 
-							case 'q': {
-								String s = args.nextString();
-								throw new UnsupportedOperationException("not implemented: %q");  // TODO
-							}
+								case 'q': {
+									String s = args.nextString();
+									throw new UnsupportedOperationException("not implemented: %q");  // TODO
+								}
 
-							default:
-								throw new IllegalArgumentException("invalid option '" + optionToString(d) + "' to 'format'");
+								default:
+									throw new IllegalArgumentException("invalid option '" + optionToString(d) + "' to 'format'");
+
+							}
 						}
 
 						break;
