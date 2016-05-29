@@ -7,6 +7,10 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class BasicLib implements Lib {
 
+	public static final String MT_TOSTRING = "__tostring";
+	public static final String MT_METATABLE = "__metatable";
+	public static final String MT_PAIRS = "__pairs";
+
 	@Override
 	public void installInto(LuaState state, Table env) {
 		Check.notNull(env);
@@ -84,9 +88,9 @@ public abstract class BasicLib implements Lib {
 	 * <p>Receives a value of any type and converts it to a string in a human-readable format.
 	 * (For complete control of how numbers are converted,
 	 * use {@link StringLib#_format() <code>string.format</code>}.) If the metatable
-	 * of {@code v} has a {@code "__tostring"} field, then {@code tostring} calls
-	 * the corresponding value with {@code v} as argument, and uses the result
-	 * of the call as its result.</p>
+	 * of {@code v} has a {@link #MT_TOSTRING <code>"__tostring"</code>} field,
+	 * then {@code tostring} calls the corresponding value with {@code v} as argument, and uses
+	 * the result of the call as its result.</p>
 	 */
 	public abstract Function _tostring();
 
@@ -137,8 +141,8 @@ public abstract class BasicLib implements Lib {
 	 * {@code getmetatable (object)}
 	 *
 	 * <p>If {@code object} does not have a metatable, returns <b>nil</b>. Otherwise,
-	 * if the object's metatable has a {@code "__metatable"} field, returns the associated
-	 * value. Otherwise, returns the metatable of the given object.</p>
+	 * if the object's metatable has a {@link #MT_METATABLE <code>"__metatable"</code>} field,
+	 * returns the associated value. Otherwise, returns the metatable of the given object.</p>
 	 */
 	public abstract Function _getmetatable();
 
@@ -148,8 +152,8 @@ public abstract class BasicLib implements Lib {
 	 * <p>Sets the metatable for the given {@code table}. (To change the metatable of other
 	 * types from Lua code, you must use the debug library (see §6.10 of the Lua Reference
 	 * Manual).) If {@code metatable} is <b>nil</b>, removes the metatable of the given
-	 * table. If the original metatable has a {@code "__metatable"} field, raises
-	 * an error.</p>
+	 * table. If the original metatable has a {@link #MT_METATABLE <code>"__metatable"</code>}
+	 * field, raises an error.</p>
 	 *
 	 * <p>This function returns {@code table}.</p>
 	 */
@@ -179,8 +183,8 @@ public abstract class BasicLib implements Lib {
 	/**
 	 * {@code pairs (t)}
 	 *
-	 * <p>If {@code t} has a metamethod {@code __pairs}, calls it with {@code t}
-	 * as argument and returns the first three results from the call.</p>
+	 * <p>If {@code t} has a metamethod {@link #MT_PAIRS <code>"__pairs"</code>}, calls it with
+	 * {@code t} as argument and returns the first three results from the call.</p>
 	 *
 	 * <p>Otherwise, returns three values: the {@link #_next() <code>next</code>} function,
 	 * the table {@code t}, and <b>nil</b>, so that the construction

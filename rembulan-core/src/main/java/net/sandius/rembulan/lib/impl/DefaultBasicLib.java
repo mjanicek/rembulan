@@ -292,7 +292,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Table t = args.nextTable();
-			Object metamethod = Metatables.getMetamethod(context.getState(), "__pairs", t);
+			Object metamethod = Metatables.getMetamethod(context.getState(), MT_PAIRS, t);
 
 			if (metamethod != null) {
 				try {
@@ -354,7 +354,7 @@ public class DefaultBasicLib extends BasicLib {
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Object arg = args.nextAny();
 
-			Object meta = Metatables.getMetamethod(context.getState(), "__tostring", arg);
+			Object meta = Metatables.getMetamethod(context.getState(), MT_TOSTRING, arg);
 			if (meta != null) {
 				try {
 					Dispatch.call(context, meta, arg);
@@ -440,7 +440,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Object arg = args.nextAny();
-			Object meta = Metatables.getMetamethod(context.getState(), "__metatable", arg);
+			Object meta = Metatables.getMetamethod(context.getState(), MT_METATABLE, arg);
 
 			Object result = meta != null
 					? meta  // __metatable field present, return its value
@@ -465,7 +465,7 @@ public class DefaultBasicLib extends BasicLib {
 			Table t = args.nextTable();
 			Table mt = args.nextTableOrNil();
 
-			if (Metatables.getMetamethod(context.getState(), "__metatable", t) != null) {
+			if (Metatables.getMetamethod(context.getState(), MT_METATABLE, t) != null) {
 				throw new IllegalOperationAttemptException("cannot change a protected metatable");
 			}
 			else {
