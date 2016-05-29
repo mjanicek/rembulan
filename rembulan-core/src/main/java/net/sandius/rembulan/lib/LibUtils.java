@@ -34,7 +34,7 @@ public class LibUtils {
 			return null;
 		}
 		else {
-			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '?' (? or nil expected, got " + Value.typeOf(arg).name + ")");
+			throw new BadArgumentException((index + 1), "?", "? or nil expected, got " + Value.typeOf(arg).name);
 		}
 	}
 
@@ -44,7 +44,7 @@ public class LibUtils {
 			return (T) arg ;
 		}
 		else {
-			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '?' (? expected, got " + Value.typeOf(arg).name + ")");
+			throw new BadArgumentException((index + 1), "?", "? expected, got " + Value.typeOf(arg).name);
 		}
 	}
 
@@ -53,7 +53,7 @@ public class LibUtils {
 			return args[index];
 		}
 		else {
-			throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (value expected)");
+			throw new BadArgumentException((index + 1), name, "value expected");
 		}
 	}
 
@@ -73,7 +73,7 @@ public class LibUtils {
 		else {
 			what = "no value";
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number expected, got " + what + ")");
+		throw new BadArgumentException((index + 1), name, "number expected, got " + what);
 	}
 
 	// FIXME: clean this up: redundant code!
@@ -100,7 +100,7 @@ public class LibUtils {
 		else {
 			what = "no value";
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number expected, got " + what + ")");
+		throw new BadArgumentException((index + 1), name, "number expected, got " + what);
 	}
 
 	// FIXME: clean this up: redundant code!
@@ -125,7 +125,7 @@ public class LibUtils {
 		else {
 			what = "no value";
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number expected, got " + what + ")");
+		throw new BadArgumentException((index + 1), name, "number expected, got " + what);
 	}
 
 	// FIXME: clean this up: redundant code!
@@ -144,11 +144,11 @@ public class LibUtils {
 						return ii;
 					}
 					else {
-						throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (" + rangeName + " out of range)");
+						throw new BadArgumentException((index + 1), name, "" + rangeName + " out of range");
 					}
 				}
 				else {
-					throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number has no integer representation)");
+					throw new BadArgumentException((index + 1), name, "number has no integer representation");
 				}
 			}
 			else {
@@ -159,7 +159,7 @@ public class LibUtils {
 			what = "no value";
 		}
 
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (number expected, got " + what + ")");
+		throw new BadArgumentException((index + 1), name, "number expected, got " + what);
 	}
 
 	// FIXME: clean this up: redundant code!
@@ -185,7 +185,7 @@ public class LibUtils {
 		else {
 			what = "no value";
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (string expected, got " + what + ")");
+		throw new BadArgumentException((index + 1), name, "string expected, got " + what);
 	}
 
 	public static String checkString(String name, Object[] args, int index) {
@@ -202,7 +202,7 @@ public class LibUtils {
 				return null;
 			}
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (nil or table expected)");
+		throw new BadArgumentException((index + 1), name, "nil or table expected");
 	}
 
 	// FIXME: clean this up: redundant code!
@@ -220,7 +220,7 @@ public class LibUtils {
 		else {
 			what = "no value";
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (table expected, got " + what + ")");
+		throw new BadArgumentException((index + 1), name, "table expected, got " + what);
 	}
 
 	// FIXME: clean this up: redundant code!
@@ -238,7 +238,7 @@ public class LibUtils {
 		else {
 			what = "no value";
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (function expected, got " + what + ")");
+		throw new BadArgumentException((index + 1), name, "function expected, got " + what);
 	}
 
 	// FIXME: clean this up: redundant code!
@@ -256,7 +256,7 @@ public class LibUtils {
 		else {
 			what = "no value";
 		}
-		throw new IllegalArgumentException("bad argument #" + (index + 1) + " to '" + name + "' (coroutine expected, got " + what + ")");
+		throw new BadArgumentException((index + 1), name, "coroutine expected, got " + what);
 	}
 
 }

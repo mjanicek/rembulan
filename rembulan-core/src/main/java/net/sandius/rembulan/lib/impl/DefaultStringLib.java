@@ -8,6 +8,7 @@ import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.impl.Function0;
+import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
 
@@ -363,7 +364,7 @@ public class DefaultStringLib extends StringLib {
 						}
 						else {
 							if (!args.hasNext()) {
-								throw new IllegalArgumentException("bad argument #" + (args.size() + 1) + " to '" + name() + "' (no value)");
+								throw new BadArgumentException(args.size() + 1, name(), "no value");
 							}
 
 							switch (d) {

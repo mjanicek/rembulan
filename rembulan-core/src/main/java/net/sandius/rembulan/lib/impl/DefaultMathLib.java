@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.MathLib;
 import net.sandius.rembulan.util.Check;
 
@@ -366,7 +367,7 @@ public class DefaultMathLib extends MathLib {
 					result = xi % yi;
 				}
 				else {
-					throw new IllegalArgumentException("bad argument #2 to 'fmod' (zero)");
+					throw new BadArgumentException(2, name(), "zero");
 				}
 			}
 
@@ -566,7 +567,7 @@ public class DefaultMathLib extends MathLib {
 				if (!args.hasNext()) {
 					// integer in the range [1, m]
 					if (m < 1) {
-						throw new IllegalArgumentException("bad argument #1 to 'random' (interval is empty)");
+						throw new BadArgumentException(1, name(), "interval is empty");
 					}
 					result = 1L + nextLong(m);
 				}
@@ -575,13 +576,13 @@ public class DefaultMathLib extends MathLib {
 					long n = args.nextInteger();
 
 					if (n < m) {
-						throw new IllegalArgumentException("bad argument #1 to 'random' (interval is empty)");
+						throw new BadArgumentException(1, name(), "interval is empty");
 					}
 
 					long limit = n - m + 1;  // including the upper bound
 
 					if (limit <= 0) {
-						throw new IllegalArgumentException("bad argument #1 to 'random' (interval too large)");
+						throw new BadArgumentException(1, name(), "interval too large");
 					}
 
 					result = m + nextLong(limit);

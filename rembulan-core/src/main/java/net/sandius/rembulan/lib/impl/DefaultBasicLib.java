@@ -16,6 +16,7 @@ import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Varargs;
+import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.util.Check;
 
@@ -416,7 +417,7 @@ public class DefaultBasicLib extends BasicLib {
 				String s = args.nextStrictString();
 
 				if (base < Character.MIN_RADIX || base > Character.MAX_RADIX) {
-					throw new IllegalArgumentException("bad argument #2 to 'tonumber' (base out of range)");
+					throw new BadArgumentException(2, name(), "base out of range");
 				}
 
 				context.getObjectSink().setTo(toNumber(s, base));
@@ -764,7 +765,7 @@ public class DefaultBasicLib extends BasicLib {
 				result = RawOperators.stringLen(s);
 			}
 			else {
-				throw new IllegalArgumentException("bad argument #1 to 'rawlen' (table or string expected)");
+				throw new BadArgumentException(1, name(), "table or string expected");
 			}
 
 			context.getObjectSink().setTo(result);
@@ -798,7 +799,7 @@ public class DefaultBasicLib extends BasicLib {
 						: args.size() + idx;  // idx < 0: from the end (-1 is the last index)
 
 				if (from < 1) {
-					throw new IllegalArgumentException("bad argument #1 to 'select' (index out of range)");
+					throw new BadArgumentException(1, name(), "index out of range");
 				}
 
 				context.getObjectSink().setToArray(Varargs.from(args.getAll(), from));
