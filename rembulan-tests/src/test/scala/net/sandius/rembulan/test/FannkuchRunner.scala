@@ -5,14 +5,30 @@ import java.util.Scanner
 
 import net.sandius.rembulan.compiler.PrototypeCompilerChunkLoader
 import net.sandius.rembulan.core.impl.DefaultLuaState
-import net.sandius.rembulan.core.{Exec, PreemptionContext}
+import net.sandius.rembulan.core.{Exec, LuaState, PreemptionContext, Table}
 import net.sandius.rembulan.lib.LibUtils
-import net.sandius.rembulan.lib.impl.DefaultBasicLib
+import net.sandius.rembulan.lib.impl.{DefaultBasicLib, DefaultCoroutineLib, DefaultMathLib, DefaultStringLib}
 import net.sandius.rembulan.parser.LuaCPrototypeReader
 
 import scala.util.Try
 
 object FannkuchRunner {
+
+  def initEnv(state: LuaState, args: Seq[String]): Table = {
+    val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
+    env.rawset("coroutine", new DefaultCoroutineLib().installInto(state, state.newTable(0, 0)))
+    env.rawset("math", new DefaultMathLib().installInto(state, state.newTable(0, 0)))
+    env.rawset("string", new DefaultStringLib().installInto(state, state.newTable(0, 0)))
+
+    // command-line arguments
+    val argTable = state.newTable(0, 0)
+    for ((a, i) <- args.zipWithIndex) {
+      argTable.rawset(i + 1, a)
+    }
+    env.rawset("arg", argTable)
+
+    env
+  }
 
   def init(filename: String, args: String*): Exec = {
     val resourceStream = getClass.getResourceAsStream(filename)
@@ -28,14 +44,7 @@ object FannkuchRunner {
         .withPreemptionContext(preemptionContext)
         .build()
 
-    val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-
-    // command-line arguments
-    val argTable = state.newTable(0, 0)
-    for ((a, i) <- args.zipWithIndex) {
-      argTable.rawset(i + 1, a)
-    }
-    env.rawset("arg", argTable)
+    val env = initEnv(state, args)
 
     val func = ldr.loadTextChunk(state.newUpvalue(env), "fannkuch", sourceContents)
 
