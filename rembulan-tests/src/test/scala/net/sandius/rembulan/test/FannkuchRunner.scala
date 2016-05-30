@@ -9,6 +9,7 @@ import net.sandius.rembulan.core.{Exec, LuaState, PreemptionContext, Table}
 import net.sandius.rembulan.lib.LibUtils
 import net.sandius.rembulan.lib.impl.{DefaultBasicLib, DefaultCoroutineLib, DefaultMathLib, DefaultStringLib}
 import net.sandius.rembulan.parser.LuaCPrototypeReader
+import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
 
 import scala.util.Try
 
@@ -30,14 +31,14 @@ object FannkuchRunner {
     env
   }
 
-  def init(filename: String, args: String*): Exec = {
+  def init(pc: PreemptionContext, filename: String, args: String*): Exec = {
     val resourceStream = getClass.getResourceAsStream(filename)
     require (resourceStream != null, "resource must exist, is null")
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
     require (sourceContents != null, "source contents must not be null")
 
     val luacName = "luac53"
-    val preemptionContext = PreemptionContext.Never.INSTANCE
+    val preemptionContext = pc
     val ldr = new PrototypeCompilerChunkLoader(new LuaCPrototypeReader(luacName), getClass.getClassLoader)
 
     val state = new DefaultLuaState.Builder()
@@ -64,14 +65,37 @@ object FannkuchRunner {
   }
 
   def doFile(prefix: String, filename: String, args: String*): Unit = {
+    val stepSize = 1000000
+    val pc = new CountingPreemptionContext(stepSize)
+
     val exec = timed (prefix + "init") {
-      init(filename, args:_*)
+      init(pc, filename, args:_*)
     }
-    timed (prefix + "execution") {
-      while (exec.isPaused) {
-        exec.resume()
-      }
+
+    var steps = 0
+
+    val before = System.nanoTime()
+    while (exec.isPaused) {
+      exec.resume()
+      steps += 1
     }
+    val after = System.nanoTime()
+
+    val totalTimeMillis = (after - before) / 1000000.0
+    val totalCPUUnitsSpent = pc.totalCost
+    val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
+    val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+
+    println(prefix + "Execution took %.1f ms".format(totalTimeMillis))
+    println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
+    println(prefix)
+    println(prefix + "Step size: " + stepSize + " LI")
+    println(prefix + "Num of steps: " + steps)
+    println(prefix + "Avg time per step: %.3f ms".format(totalTimeMillis / steps))
+    println(prefix)
+    println(prefix + "Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+    println(prefix + "Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+    println()
   }
 
   private def intProperty(key: String, default: Int): Int = {
@@ -86,7 +110,7 @@ object FannkuchRunner {
     println("numRuns = " + numRuns)
 
     for (i <- 1 to numRuns) {
-      doFile(s"RUN #$i: ", "/fannkuchredux.lua", n.toString)
+      doFile(s"#$i\t", "/fannkuchredux.lua", n.toString)
     }
 
   }
