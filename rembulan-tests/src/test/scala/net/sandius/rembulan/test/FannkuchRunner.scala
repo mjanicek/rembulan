@@ -7,7 +7,7 @@ import net.sandius.rembulan.compiler.PrototypeCompilerChunkLoader
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.{Exec, LuaState, PreemptionContext, Table}
 import net.sandius.rembulan.lib.LibUtils
-import net.sandius.rembulan.lib.impl.{DefaultBasicLib, DefaultCoroutineLib, DefaultMathLib, DefaultStringLib}
+import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.parser.LuaCPrototypeReader
 import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
 
@@ -17,9 +17,18 @@ object FannkuchRunner {
 
   def initEnv(state: LuaState, args: Seq[String]): Table = {
     val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-    env.rawset("coroutine", new DefaultCoroutineLib().installInto(state, state.newTable(0, 0)))
-    env.rawset("math", new DefaultMathLib().installInto(state, state.newTable(0, 0)))
-    env.rawset("string", new DefaultStringLib().installInto(state, state.newTable(0, 0)))
+    val coroutineLib = state.newTable(0, 0)
+    new DefaultCoroutineLib().installInto(state, coroutineLib)
+    env.rawset("coroutine", coroutineLib)
+    val mathLib = state.newTable(0, 0)
+    new DefaultMathLib().installInto(state, mathLib)
+    env.rawset("math", mathLib)
+    val stringLib = state.newTable(0, 0)
+    new DefaultStringLib().installInto(state, stringLib)
+    env.rawset("string", stringLib)
+    val ioLib = state.newTable(0, 0)
+    new DefaultIOLib(state, null, System.out).installInto(state, ioLib)
+    env.rawset("io", ioLib)
 
     // command-line arguments
     val argTable = state.newTable(0, 0)
