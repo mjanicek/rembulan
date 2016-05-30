@@ -45,4 +45,6 @@ end
 
 local n = tonumber(arg and arg[1]) or 1
 local sum, flips = fannkuch(n)
-io.write(sum, "\nPfannkuchen(", n, ") = ", flips, "\n")
+--io.write(sum, "\nPfannkuchen(", n, ") = ", flips, "\n")
+print(sum)
+print("Pfannkuchen("..n..") = "..flips)
