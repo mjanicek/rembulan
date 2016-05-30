@@ -25,7 +25,7 @@ import net.sandius.rembulan.core.Userdata;
  * of the error message and error code in case of errors may be not thread safe, because they
  * rely on the global C variable {@code errno}.
  */
-public abstract class IoLib implements Lib {
+public abstract class IOLib implements Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
