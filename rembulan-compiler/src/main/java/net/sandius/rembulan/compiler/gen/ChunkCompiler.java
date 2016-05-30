@@ -32,7 +32,7 @@ public class ChunkCompiler {
 		addUnits(units, ctx, prototype, null, us, nameGenerator);
 
 		for (CompilationUnit u : us) {
-			System.out.println("Processing " + u.name() + "...");
+//			System.out.println("Processing " + u.name() + "...");
 			processGeneric(u);
 
 			CompiledClass ccl = u.toCompiledClass();
@@ -40,7 +40,7 @@ public class ChunkCompiler {
 				classes.add(ccl);
 			}
 			else {
-				System.out.println("No compiled bytecode for class " + u.name());
+				throw new RuntimeException("No compiled bytecode for class " + u.name());
 			}
 		}
 

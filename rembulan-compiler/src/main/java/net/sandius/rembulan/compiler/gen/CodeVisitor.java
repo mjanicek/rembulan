@@ -6,7 +6,7 @@ public abstract class CodeVisitor {
 
 	@Deprecated
 	public void _ignored(Object id) {
-		System.out.println("// ignored: " + id.getClass().getName() + " : " + id);
+//		System.out.println("// ignored: " + id.getClass().getName() + " : " + id);
 	}
 
 	@Deprecated
