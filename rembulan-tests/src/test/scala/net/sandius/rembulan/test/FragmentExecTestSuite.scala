@@ -15,6 +15,8 @@ import org.scalatest.{FunSpec, MustMatchers}
 
 trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
+  import FragmentExecTestSuite._
+
   def bundles: Seq[FragmentBundle]
   def expectations: Seq[FragmentExpectations]
   def contexts: Seq[FragmentExpectations.Env]
@@ -53,20 +55,6 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
         new DefaultStringLib().installInto(state, str)
         env.rawset("string", str)
         env
-    }
-  }
-
-  class CountingPreemptionContext(step: Int) extends AbstractPreemptionContext {
-    var totalCost = 0
-    private var allowance = step
-
-    override def withdraw(cost: Int): Unit = {
-      totalCost += cost
-      allowance -= cost
-      if (allowance <= 0) {
-        allowance += step
-        preempt()
-      }
     }
   }
 
@@ -157,6 +145,24 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
       }
     }
 
+  }
+
+}
+
+object FragmentExecTestSuite {
+
+  class CountingPreemptionContext(step: Int) extends AbstractPreemptionContext {
+    var totalCost = 0
+    private var allowance = step
+
+    override def withdraw(cost: Int): Unit = {
+      totalCost += cost
+      allowance -= cost
+      if (allowance <= 0) {
+        allowance += step
+        preempt()
+      }
+    }
   }
 
 }
