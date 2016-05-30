@@ -2,15 +2,13 @@ package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Userdata;
-import net.sandius.rembulan.util.Check;
 
-public class DefaultUserdata extends Userdata {
+public abstract class DefaultUserdata<T> extends Userdata {
 
 	private Table mt;
-	private final Object data;
 
-	public DefaultUserdata(Object data) {
-		this.data = Check.notNull(data);
+	public DefaultUserdata(Table metatable) {
+		this.mt = metatable;
 	}
 
 	@Override
@@ -21,11 +19,6 @@ public class DefaultUserdata extends Userdata {
 	@Override
 	public void setMetatable(Table mt) {
 		this.mt = mt;
-	}
-
-	@Override
-	public Object getData() {
-		return data;
 	}
 
 }

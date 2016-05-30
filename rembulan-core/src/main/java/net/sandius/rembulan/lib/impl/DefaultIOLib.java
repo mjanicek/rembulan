@@ -1,10 +1,55 @@
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Dispatch;
+import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.Metatables;
+import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Userdata;
+import net.sandius.rembulan.core.impl.DefaultUserdata;
+import net.sandius.rembulan.core.impl.Varargs;
+import net.sandius.rembulan.lib.BadArgumentException;
+import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IOLib;
+import net.sandius.rembulan.lib.LibUtils;
+import net.sandius.rembulan.util.Check;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class DefaultIOLib extends IOLib {
+
+	private final Table fileMetatable;
+
+	private IOFile defaultInput;
+	private IOFile defaultOutput;
+
+	public DefaultIOLib(LuaState state, InputStream in, OutputStream out) {
+		Check.notNull(state);
+
+		Table mt = state.newTable(0, 0);
+		mt.rawset(Metatables.MT_INDEX, mt);
+		mt.rawset(LibUtils.MT_NAME, IOFile.typeName());
+		LibUtils.setIfNonNull(mt, BasicLib.MT_TOSTRING, _file_tostring());
+
+		// TODO: set the __gc metamethod
+
+		LibUtils.setIfNonNull(mt, "close", _file_close());
+		LibUtils.setIfNonNull(mt, "flush", _file_flush());
+		LibUtils.setIfNonNull(mt, "lines", _file_lines());
+		LibUtils.setIfNonNull(mt, "read", _file_read());
+		LibUtils.setIfNonNull(mt, "seek", _file_seek());
+		LibUtils.setIfNonNull(mt, "setvbuf", _file_setvbuf());
+		LibUtils.setIfNonNull(mt, "write", _file_write());
+
+		this.fileMetatable = mt;
+
+		defaultInput = in != null ? newFile(in, null) : null;
+		defaultOutput = out != null ? newFile(null, out) : null;
+	}
 
 	@Override
 	public Function _close() {
@@ -33,7 +78,7 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Function _output() {
-		return null;  // TODO
+		return new Output(this);
 	}
 
 	@Override
@@ -58,7 +103,7 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Function _write() {
-		return null;  // TODO
+		return new Write(this);
 	}
 
 	@Override
@@ -109,6 +154,178 @@ public class DefaultIOLib extends IOLib {
 	@Override
 	public Function _file_write() {
 		return null;  // TODO
+	}
+
+	public Function _file_tostring() {
+		return IOFile.ToString.INSTANCE;
+	}
+
+	protected IOFile newFile(InputStream in, OutputStream out) {
+		return new IOFile(in, out, fileMetatable);
+	}
+
+	public static class IOFile extends DefaultUserdata {
+
+		private final InputStream in;
+		private final OutputStream out;
+
+		public IOFile(InputStream in, OutputStream out, Table metatable) {
+			super(metatable);
+			this.in = in;
+			this.out = out;
+		}
+
+		public static String typeName() {
+			return "FILE*";
+		}
+
+		@Override
+		public String toString() {
+			return "file (0x" + Integer.toHexString(hashCode()) + ")";
+		}
+
+		public void write(String s) throws IOException {
+			out.write(s.getBytes());
+		}
+
+		protected static IOFile nextFile(LibFunction.CallArguments args) {
+			Check.notNull(args);
+
+			if (args.hasNext()) {
+				Object o = args.optNextAny();
+				if (o instanceof IOFile) {
+					return (IOFile) o;
+				}
+				else {
+					throw new BadArgumentException(1, args.name, typeName() + " expected, got " + args.namer().typeNameOf(o));
+				}
+			}
+			else {
+				throw new BadArgumentException(1, args.name, typeName() + " expected, got no value");
+			}
+		}
+
+		public static class ToString extends LibFunction {
+
+			public static final ToString INSTANCE = new ToString();
+
+			@Override
+			protected String name() {
+				return "tostring";
+			}
+
+			@Override
+			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+				IOFile f = nextFile(args);
+				System.out.println("YO!\t" + f.toString());
+				context.getObjectSink().setTo(f.toString());
+			}
+
+		}
+
+		public static class Write extends LibFunction {
+
+			public static final Write INSTANCE = new Write();
+
+			@Override
+			protected String name() {
+				return "write";
+			}
+
+			@Override
+			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+				IOFile f = nextFile(args);
+
+				while (args.hasNext()) {
+					String s = args.nextString();
+					try {
+						f.write(s);
+						context.getObjectSink().setTo(f);
+					}
+					catch (IOException ex) {
+						context.getObjectSink().setTo(null, ex.getMessage());
+						throw new RuntimeException(ex);
+					}
+				}
+
+			}
+
+		}
+
+	}
+
+	public IOFile setDefaultOutputFile(IOFile f) {
+		defaultOutput = Check.notNull(f);
+		return f;
+	}
+
+	public IOFile getDefaultOutputFile() {
+		return defaultOutput;
+	}
+
+	public static class Output extends LibFunction {
+
+		private final DefaultIOLib lib;
+
+		public Output(DefaultIOLib lib) {
+			this.lib = Check.notNull(lib);
+		}
+
+		@Override
+		protected String name() {
+			return "output";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			if (args.hasNext()) {
+				// open the argument for writing and set it as the default output file
+				throw new UnsupportedOperationException();  // TODO
+			}
+			else {
+				// return the default output file
+				IOFile outFile = lib.getDefaultOutputFile();
+				context.getObjectSink().setTo(outFile);
+			}
+		}
+
+	}
+
+	public static class Write extends LibFunction {
+
+		private final DefaultIOLib lib;
+
+		public Write(DefaultIOLib lib) {
+			this.lib = Check.notNull(lib);
+		}
+
+		@Override
+		protected String name() {
+			return "write";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			IOFile outFile = lib.getDefaultOutputFile();
+
+			Object[] writeCallArgs = Varargs.concat(new Object[] { outFile }, args.getAll());
+
+			try {
+				Dispatch.call(context, IOFile.Write.INSTANCE, writeCallArgs);
+			}
+			catch (ControlThrowable ct) {
+				ct.push(this, outFile);
+				throw ct;
+			}
+
+			resume(context, outFile);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			// results are already on the stack, this is a no-op
+		}
+
 	}
 
 }

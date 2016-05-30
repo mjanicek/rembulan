@@ -8,6 +8,4 @@ public abstract class Userdata extends LuaObject {
 		return "userdata: 0x" + Integer.toHexString(hashCode());
 	}
 
-	public abstract Object getData();
-
 }

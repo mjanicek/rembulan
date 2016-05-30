@@ -30,6 +30,10 @@ public abstract class LibFunction extends FunctionAnyarg {
 			this.index = 0;
 		}
 
+		public ValueTypeNamer namer() {
+			return namer;
+		}
+
 		public void reset() {
 			index = 0;
 		}
