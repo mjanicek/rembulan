@@ -377,7 +377,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			// trim to single value
-			Object result = context.getObjectSink()._1();
+			Object result = context.getObjectSink()._0();
 			context.getObjectSink().setTo(result);
 		}
 
