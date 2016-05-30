@@ -66,7 +66,7 @@ object FannkuchRunner {
 
   def doFile(prefix: String, filename: String, args: String*): Unit = {
     val stepSize = 1000000
-    val pc = new CountingPreemptionContext(stepSize)
+    val pc = new CountingPreemptionContext()
 
     val exec = timed (prefix + "init") {
       init(pc, filename, args:_*)
@@ -76,7 +76,10 @@ object FannkuchRunner {
 
     val before = System.nanoTime()
     while (exec.isPaused) {
-      exec.resume()
+      pc.deposit(stepSize)
+      if (pc.allowed) {
+        exec.resume()
+      }
       steps += 1
     }
     val after = System.nanoTime()

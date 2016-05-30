@@ -72,7 +72,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
             describe ("in " + ctx) {
               it ("can be executed with " + s + " steps") {
-                val preemptionContext = new CountingPreemptionContext(s)
+                val preemptionContext = new CountingPreemptionContext()
 
                 val exec = Util.timed("Compilation and setup") {
                   val ldr = new PrototypeCompilerChunkLoader(
@@ -97,7 +97,10 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
                 val before = System.nanoTime()
                 val res = try {
                   while (exec.isPaused) {
-                    exec.resume()
+                    preemptionContext.deposit(s)
+                    if (preemptionContext.allowed) {
+                      exec.resume()
+                    }
                     steps += 1
                   }
                   Right(exec.getSink.toArray.toSeq)
@@ -151,18 +154,24 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
 object FragmentExecTestSuite {
 
-  class CountingPreemptionContext(step: Int) extends AbstractPreemptionContext {
-    var totalCost = 0
-    private var allowance = step
+  class CountingPreemptionContext extends AbstractPreemptionContext {
+    var totalCost = 0L
+    private var allowance = 0L
 
     override def withdraw(cost: Int): Unit = {
       totalCost += cost
       allowance -= cost
-      if (allowance <= 0) {
-        allowance += step
+      if (!allowed) {
         preempt()
       }
     }
+
+    def deposit(n: Int): Unit = {
+      allowance += n
+    }
+
+    def allowed = allowance > 0
+
   }
 
 }
