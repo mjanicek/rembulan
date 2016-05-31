@@ -17,7 +17,7 @@ public class DefaultTable extends Table {
 		this.values = new HashMap<Object, Object>();
 	}
 
-	public static final TableFactory FACTORY_INSTANCE = new TableFactory() {
+	static class Factory implements TableFactory {
 		@Override
 		public Table newTable() {
 			return newTable(0, 0);
@@ -27,7 +27,9 @@ public class DefaultTable extends Table {
 		public Table newTable(int array, int hash) {
 			return new DefaultTable();
 		}
-	};
+	}
+
+	public static final TableFactory FACTORY_INSTANCE = new Factory();
 
 	@Override
 	public Table getMetatable() {
