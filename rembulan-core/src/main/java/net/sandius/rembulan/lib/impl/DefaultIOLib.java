@@ -30,7 +30,7 @@ public class DefaultIOLib extends IOLib {
 	public DefaultIOLib(LuaState state, InputStream in, OutputStream out) {
 		Check.notNull(state);
 
-		Table mt = state.newTable(0, 0);
+		Table mt = state.newTable();
 		mt.rawset(Metatables.MT_INDEX, mt);
 		mt.rawset(LibUtils.MT_NAME, IOFile.typeName());
 		LibUtils.setIfNonNull(mt, BasicLib.MT_TOSTRING, _file_tostring());

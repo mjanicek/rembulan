@@ -32,34 +32,34 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
   protected def envForContext(state: LuaState, ctx: Env): Table = {
     ctx match {
-      case Empty => state.newTable(0, 0)
+      case Empty => state.newTable()
 
       case Basic => LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
 
       case Coro =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        val coro = state.newTable(0, 0)
+        val coro = state.newTable()
         new DefaultCoroutineLib().installInto(state, coro)
         env.rawset("coroutine", coro)
         env
 
       case Math =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        val mathlib = state.newTable(0, 0)
+        val mathlib = state.newTable()
         new DefaultMathLib().installInto(state, mathlib)
         env.rawset("math", mathlib)
         env
 
       case Str =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        val str = state.newTable(0, 0)
+        val str = state.newTable()
         new DefaultStringLib().installInto(state, str)
         env.rawset("string", str)
         env
 
       case IO =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        val io = state.newTable(0, 0)
+        val io = state.newTable()
         new DefaultIOLib(state, null, System.out).installInto(state, io)
         env.rawset("io", io)
         env

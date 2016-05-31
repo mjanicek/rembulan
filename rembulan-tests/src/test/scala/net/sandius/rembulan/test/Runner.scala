@@ -39,7 +39,7 @@ object Runner {
 
       val state = new DefaultLuaState.Builder().build()
       val os = state.newObjectSink()
-      val env = state.newTable(0, 0)
+      val env = state.newTable()
       val upEnv = state.newUpvalue(env)
 
       val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)

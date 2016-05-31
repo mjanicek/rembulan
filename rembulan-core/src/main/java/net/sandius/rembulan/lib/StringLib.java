@@ -42,7 +42,7 @@ public abstract class StringLib implements Lib {
 		LibUtils.setIfNonNull(env, "upper", _upper());
 
 		// set metatable for the string type
-		Table mt = state.newTable(0, 0);
+		Table mt = state.newTable();
 		mt.rawset(Metatables.MT_INDEX, env);
 		state.setStringMetatable(mt);
 	}

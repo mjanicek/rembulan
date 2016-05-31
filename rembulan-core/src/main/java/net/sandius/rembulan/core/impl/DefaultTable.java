@@ -19,6 +19,11 @@ public class DefaultTable extends Table {
 
 	public static final TableFactory FACTORY_INSTANCE = new TableFactory() {
 		@Override
+		public Table newTable() {
+			return newTable(0, 0);
+		}
+
+		@Override
 		public Table newTable(int array, int hash) {
 			return new DefaultTable();
 		}

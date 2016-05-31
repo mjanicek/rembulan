@@ -17,21 +17,21 @@ object FannkuchRunner {
 
   def initEnv(state: LuaState, args: Seq[String]): Table = {
     val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-    val coroutineLib = state.newTable(0, 0)
+    val coroutineLib = state.newTable()
     new DefaultCoroutineLib().installInto(state, coroutineLib)
     env.rawset("coroutine", coroutineLib)
-    val mathLib = state.newTable(0, 0)
+    val mathLib = state.newTable()
     new DefaultMathLib().installInto(state, mathLib)
     env.rawset("math", mathLib)
-    val stringLib = state.newTable(0, 0)
+    val stringLib = state.newTable()
     new DefaultStringLib().installInto(state, stringLib)
     env.rawset("string", stringLib)
-    val ioLib = state.newTable(0, 0)
+    val ioLib = state.newTable()
     new DefaultIOLib(state, null, System.out).installInto(state, ioLib)
     env.rawset("io", ioLib)
 
     // command-line arguments
-    val argTable = state.newTable(0, 0)
+    val argTable = state.newTable()
     for ((a, i) <- args.zipWithIndex) {
       argTable.rawset(i + 1, a)
     }

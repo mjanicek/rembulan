@@ -2,7 +2,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.LuaType;
 
-public abstract class LuaState implements MetatableProvider {
+public abstract class LuaState implements MetatableProvider, TableFactory {
 
 	public abstract Table nilMetatable();
 	public abstract Table booleanMetatable();
@@ -53,6 +53,12 @@ public abstract class LuaState implements MetatableProvider {
 
 	public abstract TableFactory tableFactory();
 
+	@Override
+	public Table newTable() {
+		return tableFactory().newTable();
+	}
+
+	@Override
 	public Table newTable(int array, int hash) {
 		return tableFactory().newTable(array, hash);
 	}
