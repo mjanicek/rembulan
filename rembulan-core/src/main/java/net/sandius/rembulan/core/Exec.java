@@ -2,7 +2,11 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class Exec {
+
+	private final AtomicReference<ExecutionState> executionState;
 
 	private final LuaState state;
 	private final ObjectSink objectSink;
@@ -16,12 +20,18 @@ public class Exec {
 		this.objectSink = state.newObjectSink();
 		this.context = new Context();
 
+		this.executionState = new AtomicReference<>(ExecutionState.PAUSED);
+
 		Check.notNull(target);
 		Check.notNull(args);
 
 		Coroutine c = context.newCoroutine(target);
 		objectSink.setToArray(args);
 		currentCoroutine = c;
+	}
+
+	public ExecutionState getExecutionState() {
+		return executionState.get();
 	}
 
 	public LuaState getState() {
@@ -73,19 +83,18 @@ public class Exec {
 
 	}
 
-	// return null if main coroutine returned, otherwise return next coroutine C to be resumed;
-	// if C == coro, then this is a pause
-
 	// return true if execution was paused, false if execution is finished
 	// in other words: returns true iff isPaused() == true afterwards
-	public boolean resume() {
+	public ExecutionState resume() {
 		Throwable error = null;
 
 		while (currentCoroutine != null) {
 			ResumeResult result = currentCoroutine.resume(context, error);
 
 			if (result instanceof ResumeResult.Pause) {
-				return true;
+				ExecutionState es = ExecutionState.PAUSED;
+				executionState.set(es);
+				return es;
 			}
 			else if (result instanceof ResumeResult.Switch) {
 				currentCoroutine = ((ResumeResult.Switch) result).target;
@@ -111,11 +120,15 @@ public class Exec {
 
 		if (error == null) {
 			// main coroutine returned
-			return false;
+			ExecutionState es = ExecutionState.TERMINATED_NORMALLY;
+			executionState.set(es);
+			return es;
 		}
 		else {
-			// exception in the main coroutine: rethrow
-			throw new ExecutionException(error);
+			// exception in the main coroutine
+			ExecutionState es = new ExecutionState.TerminatedAbnormally(error);
+			executionState.set(es);
+			return es;
 		}
 	}
 

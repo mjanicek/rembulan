@@ -82,10 +82,12 @@ object FannkuchRunner {
     var steps = 0
 
     val before = System.nanoTime()
+    var execState = exec.getExecutionState
+
     while (exec.isPaused) {
       pc.deposit(stepSize)
       if (pc.allowed) {
-        exec.resume()
+        execState = exec.resume()
       }
       steps += 1
     }

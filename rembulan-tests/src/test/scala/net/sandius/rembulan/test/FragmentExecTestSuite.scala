@@ -102,19 +102,21 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
                 var steps = 0
 
                 val before = System.nanoTime()
-                val res = try {
-                  while (exec.isPaused) {
-                    preemptionContext.deposit(s)
-                    if (preemptionContext.allowed) {
-                      exec.resume()
-                    }
-                    steps += 1
+
+                var execState = exec.getExecutionState
+                while (exec.isPaused) {
+                  preemptionContext.deposit(s)
+                  if (preemptionContext.allowed) {
+                    execState = exec.resume()
                   }
-                  Right(exec.getSink.toArray.toSeq)
+                  steps += 1
                 }
-                catch {
-                  case ex: lua.ExecutionException => Left(ex.getCause)
+
+                val res = execState match {
+                  case es: ExecutionState.TerminatedAbnormally => Left(es.getError)
+                  case _ => Right(exec.getSink.toArray.toSeq)
                 }
+
                 val after = System.nanoTime()
 
                 val totalTimeMillis = (after - before) / 1000000.0
@@ -130,6 +132,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
                 println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
                 println()
 
+                println("Result state: " + execState)
                 res match {
                   case Right(result) =>
                     println("Result: success (" + result.size + " values):")
