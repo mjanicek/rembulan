@@ -58,9 +58,7 @@ object FannkuchRunner {
 
     val func = ldr.loadTextChunk(state.newUpvalue(env), "fannkuch", sourceContents)
 
-    val exec = new Exec(state)
-    exec.init(func)
-    exec
+    new Exec(state, func)
   }
 
   def timed[A](name: String)(body: => A): A = {

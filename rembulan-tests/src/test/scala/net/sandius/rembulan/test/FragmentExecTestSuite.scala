@@ -96,9 +96,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
                   val env = envForContext(state, ctx)
                   val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
 
-                  val exec = new Exec(state)
-                  exec.init(func)
-                  exec
+                  new Exec(state, func)
                 }
 
                 var steps = 0

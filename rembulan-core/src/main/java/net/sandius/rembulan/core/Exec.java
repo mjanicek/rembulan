@@ -11,10 +11,17 @@ public class Exec {
 
 	private Coroutine currentCoroutine;
 
-	public Exec(LuaState state) {
+	public Exec(LuaState state, Function target, Object... args) {
 		this.state = Check.notNull(state);
 		this.objectSink = state.newObjectSink();
 		this.context = new Context();
+
+		Check.notNull(target);
+		Check.notNull(args);
+
+		Coroutine c = context.newCoroutine(target);
+		objectSink.setToArray(args);
+		currentCoroutine = c;
 	}
 
 	public LuaState getState() {
@@ -64,20 +71,6 @@ public class Exec {
 			return currentCoroutine.canYield();
 		}
 
-	}
-
-	public void init(Function target, Object... args) {
-		Check.notNull(target);
-		Check.notNull(args);
-
-		if (currentCoroutine != null) {
-			throw new IllegalStateException("Initialising call in paused state");
-		}
-		else {
-			Coroutine c = context.newCoroutine(target);
-			objectSink.setToArray(args);
-			currentCoroutine = c;
-		}
 	}
 
 	// return null if main coroutine returned, otherwise return next coroutine C to be resumed;
