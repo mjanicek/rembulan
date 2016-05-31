@@ -6,12 +6,12 @@ public abstract class Dispatch {
 		// not to be instantiated or extended
 	}
 
-	public static Invokable callTarget(LuaState state, Object target) {
+	public static Invokable callTarget(MetatableProvider metatableProvider, Object target) {
 		if (target instanceof Invokable) {
 			return (Invokable) target;
 		}
 		else {
-			Object handler = Metatables.getMetamethod(state, Metatables.MT_CALL, target);
+			Object handler = Metatables.getMetamethod(metatableProvider, Metatables.MT_CALL, target);
 
 			if (handler instanceof Invokable) {
 				return (Invokable) handler;
