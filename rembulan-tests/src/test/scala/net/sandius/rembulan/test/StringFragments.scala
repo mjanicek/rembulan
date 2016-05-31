@@ -9,23 +9,23 @@ object StringFragments extends FragmentBundle with FragmentExpectations with One
     """return getmetatable("hello")
     """
   }
-  StringSetsMetatable in StringContext succeedsWith (classOf[Table])
+  StringSetsMetatable in StringLibContext succeedsWith (classOf[Table])
 
   val StringTableIsReferencedInStringMetatable = fragment ("StringTableIsReferencedInStringMetatable") {
     """local mt = getmetatable("hello")
       |return mt == string, mt.__index == string
     """
   }
-  StringTableIsReferencedInStringMetatable in StringContext succeedsWith (false, true)
+  StringTableIsReferencedInStringMetatable in StringLibContext succeedsWith (false, true)
 
   val LenMethodIsEqualToLenOperator = fragment ("LenMethodIsEqualToLenOperator") {
     """local hello = "hello"
       |return hello:len() == #hello
     """
   }
-  LenMethodIsEqualToLenOperator in StringContext succeedsWith (true)
+  LenMethodIsEqualToLenOperator in StringLibContext succeedsWith (true)
 
-  in (StringContext) {
+  in (StringLibContext) {
 
     about ("byte") {
       program ("""return ("hello"):byte(1)""") succeedsWith (104)

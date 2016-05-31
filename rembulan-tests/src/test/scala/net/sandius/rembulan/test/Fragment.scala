@@ -65,7 +65,7 @@ trait FragmentExpectations {
   protected val BasicContext = Env.Basic
   protected val CoroContext = Env.Coro
   protected val MathContext = Env.Math
-  protected val StringContext = Env.Str
+  protected val StringLibContext = Env.Str  // must not be called StringContext -- messes up with string interpolation
   protected val IOContext = Env.IO
 
   private val expectations = mutable.Map.empty[Fragment, mutable.Map[Env, Expect]]
