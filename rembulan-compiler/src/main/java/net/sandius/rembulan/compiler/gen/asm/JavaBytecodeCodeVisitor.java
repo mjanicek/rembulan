@@ -531,8 +531,6 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 				// register #i is stringable: a string or a number
 
-				add(new InsnNode(DUP));
-
 				if (t.isSubtypeOf(LuaTypes.STRING)) {
 					add(e.loadRegister(i, st, String.class));
 				}
@@ -556,6 +554,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				}
 
 				add(UtilMethods.StringBuilder_append(Type.getType(String.class)));
+
+				// StringBuilder is now on stack top
 			}
 
 			add(UtilMethods.StringBuilder_toString());
