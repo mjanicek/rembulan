@@ -27,7 +27,7 @@ object FannkuchRunner {
     new DefaultStringLib().installInto(state, stringLib)
     env.rawset("string", stringLib)
     val ioLib = state.newTable()
-    new DefaultIOLib(state, null, System.out).installInto(state, ioLib)
+    new DefaultIOLib(state).installInto(state, ioLib)
     env.rawset("io", ioLib)
 
     // command-line arguments

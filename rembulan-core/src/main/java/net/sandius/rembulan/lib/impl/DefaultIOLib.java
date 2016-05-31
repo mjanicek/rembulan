@@ -4,9 +4,9 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.impl.DefaultUserdata;
 import net.sandius.rembulan.core.impl.Varargs;
@@ -19,21 +19,28 @@ import net.sandius.rembulan.util.Check;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 
 public class DefaultIOLib extends IOLib {
 
 	private final Table fileMetatable;
 
+	private final FileSystem fileSystem;
+
 	private IOFile defaultInput;
 	private IOFile defaultOutput;
 
-	public DefaultIOLib(LuaState state, InputStream in, OutputStream out) {
-		Check.notNull(state);
+	public DefaultIOLib(TableFactory tableFactory, FileSystem fileSystem, InputStream in, OutputStream out) {
+		Check.notNull(tableFactory);
+		Check.notNull(fileSystem);
 
-		Table mt = state.newTable();
+		// set up metatable for files
+		Table mt = tableFactory.newTable();
 		mt.rawset(Metatables.MT_INDEX, mt);
 		mt.rawset(LibUtils.MT_NAME, IOFile.typeName());
 		LibUtils.setIfNonNull(mt, BasicLib.MT_TOSTRING, _file_tostring());
+		this.fileMetatable = mt;
 
 		// TODO: set the __gc metamethod
 
@@ -45,10 +52,14 @@ public class DefaultIOLib extends IOLib {
 		LibUtils.setIfNonNull(mt, "setvbuf", _file_setvbuf());
 		LibUtils.setIfNonNull(mt, "write", _file_write());
 
-		this.fileMetatable = mt;
+		this.fileSystem = fileSystem;
 
 		defaultInput = in != null ? newFile(in, null) : null;
 		defaultOutput = out != null ? newFile(null, out) : null;
+	}
+
+	public DefaultIOLib(TableFactory tableFactory) {
+		this(tableFactory, FileSystems.getDefault(), System.in, System.out);
 	}
 
 	@Override

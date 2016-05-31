@@ -60,7 +60,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
       case IO =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
         val io = state.newTable()
-        new DefaultIOLib(state, null, System.out).installInto(state, io)
+        new DefaultIOLib(state).installInto(state, io)
         env.rawset("io", io)
         env
 
