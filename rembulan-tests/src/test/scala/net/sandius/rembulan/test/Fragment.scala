@@ -113,6 +113,7 @@ trait FragmentExpectations {
   }
 
   protected def stringStartingWith(prefix: String) = ValueMatch.StringStartingWith(prefix)
+  protected val NaN = ValueMatch.NaN
 
   implicit def stringToMatcher(s: String): StringMatcher = StringMatcher(StringMatcher.Strict(s) :: Nil)
 
@@ -277,6 +278,14 @@ object FragmentExpectations {
       override def matches(o: AnyRef) = {
         o match {
           case s: String if s.startsWith(prefix) => true
+          case _ => false
+        }
+      }
+    }
+    case object NaN extends ValueMatch {
+      override def matches(o: AnyRef) = {
+        o match {
+          case d: java.lang.Double if d.isNaN => true
           case _ => false
         }
       }
