@@ -4,8 +4,6 @@ public abstract class LNumber {
 
 	public abstract boolean isFloat();
 
-	public abstract boolean isNaN();
-
 	// may lose precision if not a long
 	public abstract long longValue();
 
@@ -15,7 +13,14 @@ public abstract class LNumber {
 	// may lose precision if not a float
 	public abstract double doubleValue();
 
+	@Deprecated
+	public int intValue() {
+		return (int) longValue();
+	}
+
 	public abstract LInteger toInteger();
+
+	public abstract LInteger asExactInteger();
 
 	public abstract LFloat toFloat();
 

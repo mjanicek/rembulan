@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
+import net.sandius.rembulan.core.LInteger;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.impl.Function0;
@@ -164,7 +165,7 @@ public class DefaultStringLib extends StringLib {
 			for (int idx = i; idx <= j; idx++) {
 				// FIXME: these are not bytes!
 				char c = s.charAt(idx - 1);
-				context.getObjectSink().push((long) c);
+				context.getObjectSink().push(LInteger.valueOf(c));
 			}
 		}
 
@@ -540,7 +541,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			String s = args.nextString();
-			context.getObjectSink().setTo((long) s.length());
+			context.getObjectSink().setTo(LInteger.valueOf(s.length()));
 		}
 
 	}

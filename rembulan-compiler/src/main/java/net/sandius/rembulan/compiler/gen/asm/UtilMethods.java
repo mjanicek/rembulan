@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.core.Conversions;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
@@ -72,9 +73,9 @@ public class UtilMethods {
 		il.add(new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(Conversions.class),
-				"objectToNumber",
+				"objectToLNumber",
 				Type.getMethodDescriptor(
-						Type.getType(Number.class),
+						Type.getType(LNumber.class),
 						Type.getType(Object.class),
 						Type.getType(String.class)),
 				false));

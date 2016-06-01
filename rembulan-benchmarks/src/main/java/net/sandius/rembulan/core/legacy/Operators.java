@@ -211,38 +211,42 @@ public class Operators {
 //		return na != null && nb != null ? RawOperators.rawidiv(na, nb) : tryMetamethodCall(state, Metatables.MT_IDIV, a, b);
 	}
 
+	private static Long objectAsLong(Object o) {
+		throw new UnsupportedOperationException();
+	}
+	
 	public static Object band(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = objectAsLong(a);
+		Long lb = objectAsLong(b);
 		return la != null && lb != null ? la & lb : tryMetamethodCall(state, Metatables.MT_BAND, a, b);
 	}
 
 	public static Object bor(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = objectAsLong(a);
+		Long lb = objectAsLong(b);
 		return la != null && lb != null ? la | lb : tryMetamethodCall(state, Metatables.MT_BOR, a, b);
 	}
 
 	public static Object bxor(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = objectAsLong(a);
+		Long lb = objectAsLong(b);
 		return la != null && lb != null ? la ^ lb : tryMetamethodCall(state, Metatables.MT_BXOR, a, b);
 	}
 
 	public static Object bnot(LuaState state, Object o) {
-		Long lo = Conversions.objectAsLong(o);
+		Long lo = objectAsLong(o);
 		return lo != null ? ~lo : tryMetamethodCall(state, Metatables.MT_BNOT, o);
 	}
 
 	public static Object shl(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = objectAsLong(a);
+		Long lb = objectAsLong(b);
 		return la != null && lb != null ? la << lb : tryMetamethodCall(state, Metatables.MT_SHL, a, b);
 	}
 
 	public static Object shr(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = objectAsLong(a);
+		Long lb = objectAsLong(b);
 		return la != null && lb != null ? la >>> lb : tryMetamethodCall(state, Metatables.MT_SHR, a, b);
 	}
 

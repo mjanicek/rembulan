@@ -145,116 +145,115 @@ public abstract class Dispatch {
 	}
 
 	public static void add(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
-		MathImplementation math = MathImplementation.arithmetic(na, nb);
+		LNumber na = Conversions.objectAsFloatIfString(a);
+		LNumber nb = Conversions.objectAsFloatIfString(b);
 
-		if (math != null) {
-			context.getObjectSink().setTo(math.do_add(na, nb));
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.add(nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_ADD, a, b);
 		}
 	}
 
-	public static Number add(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_add(a, b);
+	public static LNumber add(LNumber a, LNumber b) {
+		return a.add(b);
 	}
 
 	public static void sub(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
-		if (m != null) {
-			context.getObjectSink().setTo(m.do_sub(na, nb));
+		LNumber na = Conversions.objectAsFloatIfString(a);
+		LNumber nb = Conversions.objectAsFloatIfString(b);
+
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.sub(nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_SUB, a, b);
 		}
 	}
 
-	public static Number sub(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_sub(a, b);
+	public static LNumber sub(LNumber a, LNumber b) {
+		return a.sub(b);
 	}
 
 	public static void mul(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
-		if (m != null) {
-			context.getObjectSink().setTo(m.do_mul(na, nb));
+		LNumber na = Conversions.objectAsFloatIfString(a);
+		LNumber nb = Conversions.objectAsFloatIfString(b);
+
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.mul(nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_MUL, a, b);
 		}
 	}
 
-	public static Number mul(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_mul(a, b);
+	public static LNumber mul(LNumber a, LNumber b) {
+		return a.mul(b);
 	}
 
 	public static void div(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
-		if (m != null) {
-			context.getObjectSink().setTo(m.do_div(na, nb));
+		LNumber na = Conversions.objectAsFloatIfString(a);
+		LNumber nb = Conversions.objectAsFloatIfString(b);
+
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.div(nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_DIV, a, b);
 		}
 	}
 
-	public static Number div(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_div(a, b);
+	public static LNumber div(LNumber a, LNumber b) {
+		return a.div(b);
 	}
 
 	public static void mod(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
-		if (m != null) {
-			context.getObjectSink().setTo(m.do_mod(na, nb));
+		LNumber na = Conversions.objectAsFloatIfString(a);
+		LNumber nb = Conversions.objectAsFloatIfString(b);
+
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.mod(nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_MOD, a, b);
 		}
 	}
 
-	public static Number mod(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_mod(a, b);
+	public static LNumber mod(LNumber a, LNumber b) {
+		return a.mod(b);
 	}
 
 	public static void idiv(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
-		if (m != null) {
-			context.getObjectSink().setTo(m.do_idiv(na, nb));
+		LNumber na = Conversions.objectAsFloatIfString(a);
+		LNumber nb = Conversions.objectAsFloatIfString(b);
+
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.idiv(nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_IDIV, a, b);
 		}
 	}
 
-	public static Number idiv(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_idiv(a, b);
+	public static LNumber idiv(LNumber a, LNumber b) {
+		return a.idiv(b);
 	}
 
 	public static void pow(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
-		if (m != null) {
-			context.getObjectSink().setTo(m.do_pow(na, nb));
+		LNumber na = Conversions.objectAsFloatIfString(a);
+		LNumber nb = Conversions.objectAsFloatIfString(b);
+
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.pow(nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_POW, a, b);
 		}
 	}
 
-	public static Number pow(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_pow(a, b);
+	public static LNumber pow(LNumber a, LNumber b) {
+		return a.pow(b);
 	}
 
 	private static void try_mt_bitwise(ExecutionContext context, String event, Object a, Object b) throws ControlThrowable {
@@ -280,11 +279,11 @@ public abstract class Dispatch {
 	}
 
 	public static void band(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		LNumber na = Conversions.objectAsLNumber(a);
+		LNumber nb = Conversions.objectAsLNumber(b);
 
-		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la & lb);
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.band(nb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BAND, a, b);
@@ -292,11 +291,11 @@ public abstract class Dispatch {
 	}
 
 	public static void bor(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		LNumber na = Conversions.objectAsLNumber(a);
+		LNumber nb = Conversions.objectAsLNumber(b);
 
-		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la | lb);
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.bor(nb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BOR, a, b);
@@ -304,11 +303,11 @@ public abstract class Dispatch {
 	}
 
 	public static void bxor(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		LNumber na = Conversions.objectAsLNumber(a);
+		LNumber nb = Conversions.objectAsLNumber(b);
 
-		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la ^ lb);
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.bxor(nb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BXOR, a, b);
@@ -316,11 +315,11 @@ public abstract class Dispatch {
 	}
 
 	public static void shl(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		LNumber na = Conversions.objectAsLNumber(a);
+		LNumber nb = Conversions.objectAsLNumber(b);
 
-		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la << lb);
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.shl(nb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHL, a, b);
@@ -328,11 +327,11 @@ public abstract class Dispatch {
 	}
 
 	public static void shr(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		LNumber na = Conversions.objectAsLNumber(a);
+		LNumber nb = Conversions.objectAsLNumber(b);
 
-		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la >>> lb);
+		if (na != null && nb != null) {
+			context.getObjectSink().setTo(na.shr(nb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHR, a, b);
@@ -340,25 +339,24 @@ public abstract class Dispatch {
 	}
 
 	public static void unm(ExecutionContext context, Object o) throws ControlThrowable {
-		Number no = Conversions.objectAsFloatIfString(o);
-		MathImplementation m = MathImplementation.arithmetic(no);
-		if (m != null) {
-			context.getObjectSink().setTo(m.do_unm(no));
+		LNumber no = Conversions.objectAsFloatIfString(o);
+		if (no != null) {
+			context.getObjectSink().setTo(no.unm());
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_UNM, o);
 		}
 	}
 
-	public static Number unm(Number n) {
-		return MathImplementation.arithmetic(n).do_unm(n);
+	public static LNumber unm(LNumber n) {
+		return n.unm();
 	}
 
 	public static void bnot(ExecutionContext context, Object o) throws ControlThrowable {
-		Long lo = Conversions.objectAsLong(o);
+		LNumber no = Conversions.objectAsLNumber(o);
 
-		if (lo != null) {
-			context.getObjectSink().setTo(~lo);
+		if (no != null) {
+			context.getObjectSink().setTo(no.bnot());
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BNOT, o);
@@ -367,7 +365,7 @@ public abstract class Dispatch {
 
 	public static void len(ExecutionContext context, Object o) throws ControlThrowable {
 		if (o instanceof String) {
-			context.getObjectSink().setTo((long) RawOperators.stringLen((String) o));
+			context.getObjectSink().setTo(LInteger.valueOf(RawOperators.stringLen((String) o)));
 		}
 		else {
 			Object handler = Metatables.getMetamethod(context.getState(), Metatables.MT_LEN, o);
@@ -375,7 +373,7 @@ public abstract class Dispatch {
 				call(context, handler, o);
 			}
 			else if (o instanceof Table) {
-				context.getObjectSink().setTo((long) ((Table) o).rawlen());
+				context.getObjectSink().setTo(LInteger.valueOf(((Table) o).rawlen()));
 			}
 			else {
 				throw IllegalOperationAttemptException.length(o);
@@ -447,7 +445,7 @@ public abstract class Dispatch {
 		context.getObjectSink().setTo(rawEqual);
 	}
 
-	public static boolean eq(Number a, Number b) {
+	public static boolean eq(LNumber a, LNumber b) {
 		return ComparisonImplementation.of(a, b).do_eq(a, b);
 	}
 
@@ -469,7 +467,7 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static boolean lt(Number a, Number b) {
+	public static boolean lt(LNumber a, LNumber b) {
 		return ComparisonImplementation.of(a, b).do_lt(a, b);
 	}
 
@@ -500,7 +498,7 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static boolean le(Number a, Number b) {
+	public static boolean le(LNumber a, LNumber b) {
 		return ComparisonImplementation.of(a, b).do_le(a, b);
 	}
 
@@ -573,22 +571,20 @@ public abstract class Dispatch {
 		}
 	}
 
-	private static boolean isNonZero(MathImplementation m, Number n) {
-		return !m.do_eq(0L, n);
+	private static boolean isNonZero(LNumber n) {
+		return !n.eq(LInteger.ZERO);
 	}
 
-	public static boolean continueLoop(Number index, Number limit, Number step) {
-		MathImplementation m_step = MathImplementation.arithmetic(step, 0L);
-		if (!isNonZero(m_step, step)) {
+	public static boolean continueLoop(LNumber index, LNumber limit, LNumber step) {
+		if (!isNonZero(step)) {
 			return false;  // step is zero or NaN
 		}
 
-		boolean ascending = m_step.do_lt(0L, step);
+		boolean ascending = LInteger.ZERO.lt(step);
 
-		MathImplementation m_cmp = MathImplementation.arithmetic(index, limit);
 		return ascending
-				? m_cmp.do_le(index, limit)
-				: m_cmp.do_le(limit, index);
+				? index.le(limit)
+				: limit.le(index);
 	}
 
 }

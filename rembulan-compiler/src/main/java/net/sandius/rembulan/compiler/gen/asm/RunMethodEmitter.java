@@ -6,6 +6,8 @@ import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.core.LFloat;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Resumable;
@@ -407,8 +409,8 @@ public class RunMethodEmitter {
 		}
 		else {
 			// it's a register
-			il.add(loadRegister(rk, slots, Number.class));
-			il.add(BoxedPrimitivesMethods.unbox(Number.class, requiredType));
+			il.add(loadRegister(rk, slots, LNumber.class));
+			il.add(BoxedPrimitivesMethods.unbox(LNumber.class, requiredType));
 		}
 
 		return il;
@@ -534,9 +536,10 @@ public class RunMethodEmitter {
 	public InsnList convertNumericRegisterToFloat(int registerIndex, SlotState st) {
 		InsnList il = new InsnList();
 
-		il.add(loadRegister(registerIndex, st, Number.class));
-		il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		// TODO: don't unbox and re-box
+		il.add(loadRegister(registerIndex, st, LNumber.class));
+		il.add(BoxedPrimitivesMethods.doubleValue(LNumber.class));
+		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LFloat.class)));
 		il.add(storeToRegister(registerIndex, st));
 
 		return il;

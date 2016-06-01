@@ -109,11 +109,9 @@ public abstract class RawOperators {
 			// b is definitely not nil; also ensures that neither a nor b is null in the tests below
 			return false;
 		}
-		else if (a instanceof Number && b instanceof Number) {
-			Number na = (Number) a;
-			Number nb = (Number) b;
+		else if (a instanceof LNumber && b instanceof LNumber) {
 			// must denote the same mathematical value
-			return na.doubleValue() == nb.doubleValue() && na.longValue() == nb.longValue();
+			return ((LNumber) a).eq((LNumber) b);
 		}
 		else if (a instanceof Boolean || a instanceof String || a instanceof Invokable) {
 			// value-based equality

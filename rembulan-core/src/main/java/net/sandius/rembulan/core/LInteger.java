@@ -4,6 +4,8 @@ import net.sandius.rembulan.LuaFormat;
 
 public final class LInteger extends LNumber {
 
+	public static final LInteger ZERO = valueOf(0L);
+
 	private final long value;
 
 	public LInteger(long value) {
@@ -39,11 +41,6 @@ public final class LInteger extends LNumber {
 	}
 
 	@Override
-	public boolean isNaN() {
-		return false;
-	}
-
-	@Override
 	public long longValue() {
 		return value;
 	}
@@ -60,6 +57,11 @@ public final class LInteger extends LNumber {
 
 	@Override
 	public LInteger toInteger() {
+		return this;
+	}
+
+	@Override
+	public LInteger asExactInteger() {
 		return this;
 	}
 

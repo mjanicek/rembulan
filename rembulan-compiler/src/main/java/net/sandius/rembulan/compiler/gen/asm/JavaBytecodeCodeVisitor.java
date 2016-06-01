@@ -7,6 +7,9 @@ import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.LuaUtils;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
+import net.sandius.rembulan.core.LFloat;
+import net.sandius.rembulan.core.LInteger;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
@@ -208,10 +211,10 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		il.add(new InsnNode(opcode));
 		if (resultIsLong) {
-			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(LInteger.class)));
 		}
 		else {
-			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LFloat.class)));
 		}
 
 		return il;
@@ -225,10 +228,10 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				resultIsLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE,
 				argsAreLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE));
 		if (resultIsLong) {
-			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(LInteger.class)));
 		}
 		else {
-			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LFloat.class)));
 		}
 		return il;
 	}
@@ -297,8 +300,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	protected InsnList binaryNumericOperation(LuaBinaryOperation.Op op, SlotState s, int rk_left, int rk_right) {
 		InsnList il = new InsnList();
 
-		il.add(e.loadRegisterOrConstant(rk_left, s, Number.class));
-		il.add(e.loadRegisterOrConstant(rk_right, s, Number.class));
+		il.add(e.loadRegisterOrConstant(rk_left, s, LNumber.class));
+		il.add(e.loadRegisterOrConstant(rk_right, s, LNumber.class));
 		il.add(DispatchMethods.numeric(DispatchMethods.binaryOperationMethodName(op), 2));
 
 		return il;
@@ -405,22 +408,24 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitUnm(Object id, SlotState st, int r_dest, int r_arg) {
 		switch (StaticMathImplementation.MAY_BE_INTEGER.opType(st.typeAt(r_arg))) {
 
+			// TODO: use LNumber methods instead of bytecode instructions
+
 			case Integer:
-				add(e.loadRegister(r_arg, st, Number.class));
-				add(BoxedPrimitivesMethods.unbox(Number.class, Type.LONG_TYPE));
+				add(e.loadRegister(r_arg, st, LNumber.class));
+				add(BoxedPrimitivesMethods.unbox(LNumber.class, Type.LONG_TYPE));
 				add(new InsnNode(LNEG));
-				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
+				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, LInteger.class));
 				break;
 
 			case Float:
-				add(e.loadRegister(r_arg, st, Number.class));
-				add(BoxedPrimitivesMethods.unbox(Number.class, Type.DOUBLE_TYPE));
+				add(e.loadRegister(r_arg, st, LNumber.class));
+				add(BoxedPrimitivesMethods.unbox(LNumber.class, Type.DOUBLE_TYPE));
 				add(new InsnNode(DNEG));
-				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Double.class));
+				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, LFloat.class));
 				break;
 
 			case Number:
-				add(e.loadRegister(r_arg, st, Number.class));
+				add(e.loadRegister(r_arg, st, LNumber.class));
 				add(DispatchMethods.numeric(DispatchMethods.OP_UNM, 1));
 				break;
 
@@ -443,11 +448,12 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	@Override
 	public void visitBNot(Object id, SlotState st, int r_dest, int r_arg) {
 		if (st.typeAt(r_arg).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-			add(e.loadRegister(r_arg, st, Number.class));
-			add(BoxedPrimitivesMethods.longValue(Number.class));
+			// TODO: call LNumber method
+			add(e.loadRegister(r_arg, st, LNumber.class));
+			add(BoxedPrimitivesMethods.longValue(LNumber.class));
 			add(ASMUtils.loadLong(-1L));
 			add(new InsnNode(LXOR));
-			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
+			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, LInteger.class));
 		}
 		else {
 			RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
@@ -481,7 +487,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			add(e.loadRegister(r_arg, st, String.class));
 			add(OperatorMethods.stringLen());
 			add(new InsnNode(I2L));
-			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Long.class));
+			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, LInteger.class));
 		}
 		else {
 			RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
@@ -545,7 +551,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 						add(OperatorMethods.unboxedNumberToLuaFormatString(Type.DOUBLE_TYPE));
 					}
 					else {
-						add(e.loadRegister(i, st, Number.class));
+						add(e.loadRegister(i, st, LNumber.class));
 						add(OperatorMethods.boxedNumberToLuaFormatString());
 					}
 				}
@@ -628,8 +634,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	protected InsnList numericComparison(LuaInstruction.Comparison op, int rk_left, int rk_right, boolean pos, SlotState s, LabelNode falseBranch) {
 		InsnList il = new InsnList();
 
-		il.add(e.loadRegisterOrConstant(rk_left, s, Number.class));
-		il.add(e.loadRegisterOrConstant(rk_right, s, Number.class));
+		il.add(e.loadRegisterOrConstant(rk_left, s, LNumber.class));
+		il.add(e.loadRegisterOrConstant(rk_right, s, LNumber.class));
 		il.add(DispatchMethods.numeric(DispatchMethods.comparisonMethodName(op), 2));
 
 		il.add(new JumpInsnNode(pos ? IFEQ : IFNE, falseBranch));
@@ -808,8 +814,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(new InsnNode(DUP));
 		add(e.storeToRegister(r_index, st));  // save index into register
 
-		add(e.loadRegister(r_limit, st, Number.class));
-		add(e.loadRegister(r_step, st, Number.class));
+		add(e.loadRegister(r_limit, st, LNumber.class));
+		add(e.loadRegister(r_step, st, LNumber.class));
 		add(DispatchMethods.continueLoop());
 		add(new JumpInsnNode(IFEQ, breakBranch));
 		add(new JumpInsnNode(GOTO, continueBranch));

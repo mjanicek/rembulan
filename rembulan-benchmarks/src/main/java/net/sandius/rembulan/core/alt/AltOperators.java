@@ -67,6 +67,10 @@ public abstract class AltOperators {
 	protected static final IntegerMathImpl INTEGER_MATH = new IntegerMathImpl();
 	protected static final FloatMathImpl FLOAT_MATH = new FloatMathImpl();
 
+	private static Number objectAsNumber(Object o) {
+		throw new UnsupportedOperationException();
+	}
+
 	private static MathImpl __bin_arith_op(Number a, Number b) {
 		return (Value.isFloat(a) || Value.isFloat(b)) ? FLOAT_MATH : INTEGER_MATH;
 	}
@@ -82,8 +86,8 @@ public abstract class AltOperators {
 			return __bin_arith_op(na, nb).add(na, nb);
 		}
 		else if ((a instanceof String || a instanceof Number) || (b instanceof String || b instanceof Number)) {
-			Number na = Conversions.objectAsNumber(a);
-			Number nb = Conversions.objectAsNumber(b);
+			Number na = objectAsNumber(a);
+			Number nb = objectAsNumber(b);
 			if (na != null && nb != null) {
 				return __bin_arith_op(na, nb).add(na, nb);
 			}
@@ -99,8 +103,8 @@ public abstract class AltOperators {
 			return __bin_arith_op(na, nb).sub(na, nb);
 		}
 		else if ((a instanceof String || a instanceof Number) || (b instanceof String || b instanceof Number)) {
-			Number na = Conversions.objectAsNumber(a);
-			Number nb = Conversions.objectAsNumber(b);
+			Number na = objectAsNumber(a);
+			Number nb = objectAsNumber(b);
 			if (na != null && nb != null) {
 				return __bin_arith_op(na, nb).sub(na, nb);
 			}

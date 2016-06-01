@@ -17,7 +17,9 @@ public abstract class Value {
 	 * nil            null pointer
 	 * boolean        java.lang.Boolean
 	 * lightuserdata  any class other than these mentioned
-	 * number         java.lang.Number; java.lang.Long for integers, java.lang.Double for floats
+	 * number         net.sandius.rembulan.core.LNumber:
+	 *                  net.sandius.rembulan.core.LInteger for integers
+	 *                  net.sandius.rembulan.core.LFloat for floats
 	 * string         java.lang.String
 	 * table          net.sandius.rembulan.core.Table
 	 * function       net.sandius.rembulan.core.Function
@@ -27,7 +29,7 @@ public abstract class Value {
 	public static LuaType typeOf(Object v) {
 		if (v == null) return LuaType.NIL;
 		else if (v instanceof Boolean) return LuaType.BOOLEAN;
-		else if (v instanceof Number) return LuaType.NUMBER;
+		else if (v instanceof LNumber) return LuaType.NUMBER;
 		else if (v instanceof String) return LuaType.STRING;
 		else if (v instanceof Table) return LuaType.TABLE;
 		else if (v instanceof Invokable) return LuaType.FUNCTION;
@@ -60,7 +62,7 @@ public abstract class Value {
 	}
 
 	public static boolean isNaN(Object o) {
-		return isFloat(o) && Double.isNaN(toFloat(o));
+		return o instanceof LFloat && ((LFloat) o).isNaN();
 	}
 
 	public static double toFloat(Object o) {

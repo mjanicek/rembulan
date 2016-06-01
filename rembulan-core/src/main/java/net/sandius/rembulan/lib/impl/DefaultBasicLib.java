@@ -1,6 +1,5 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.core.AssertionFailedException;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
@@ -8,6 +7,8 @@ import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
+import net.sandius.rembulan.core.LInteger;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.ObjectSink;
@@ -15,7 +16,6 @@ import net.sandius.rembulan.core.PlainValueTypeNamer;
 import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
@@ -271,7 +271,7 @@ public class DefaultBasicLib extends BasicLib {
 
 			Object o = table.rawget(index);
 			if (o != null) {
-				context.getObjectSink().setTo(index, o);
+				context.getObjectSink().setTo(LInteger.valueOf(index), o);
 			}
 			else {
 				context.getObjectSink().setTo(null);
@@ -332,7 +332,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Table t = args.nextTable();
-			context.getObjectSink().setTo(INext.INSTANCE, t, 0L);
+			context.getObjectSink().setTo(INext.INSTANCE, t, LInteger.ZERO);
 		}
 
 	}
@@ -387,9 +387,9 @@ public class DefaultBasicLib extends BasicLib {
 
 		public static final ToNumber INSTANCE = new ToNumber();
 
-		public static Long toNumber(String s, int base) {
+		public static LInteger toNumber(String s, int base) {
 			try {
-				return Long.parseLong(s.trim(), base);
+				return LInteger.valueOf(Long.parseLong(s.trim(), base));
 			}
 			catch (NumberFormatException ex) {
 				return null;
@@ -406,7 +406,7 @@ public class DefaultBasicLib extends BasicLib {
 			if (args.size() < 2) {
 				// no base
 				Object o = args.nextAny();
-				Number n = Conversions.objectAsNumber(o);
+				LNumber n = Conversions.objectAsLNumber(o);
 				context.getObjectSink().setTo(n);
 			}
 			else {
@@ -768,7 +768,7 @@ public class DefaultBasicLib extends BasicLib {
 				throw new BadArgumentException(1, name(), "table or string expected");
 			}
 
-			context.getObjectSink().setTo(result);
+			context.getObjectSink().setTo(LInteger.valueOf(result));
 		}
 
 	}
@@ -788,7 +788,7 @@ public class DefaultBasicLib extends BasicLib {
 
 			if (index instanceof String && ((String) index).startsWith("#")) {
 				// return the number of remaining args
-				context.getObjectSink().setTo((long) args.tailSize());
+				context.getObjectSink().setTo(LInteger.valueOf(args.tailSize()));
 			}
 			else {
 				args.reset();

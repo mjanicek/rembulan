@@ -39,7 +39,6 @@ public final class LFloat extends LNumber {
 		return true;
 	}
 
-	@Override
 	public boolean isNaN() {
 		return Double.isNaN(value);
 	}
@@ -68,6 +67,17 @@ public final class LFloat extends LNumber {
 	@Override
 	public LInteger toInteger() {
 		return LInteger.valueOf(longValue());
+	}
+
+	@Override
+	public LInteger asExactInteger() {
+		long l = (long) value;
+		if ((double) l == value) {
+			return LInteger.valueOf(l);
+		}
+		else {
+			return null;
+		}
 	}
 
 	@Override

@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.ValueTypeNamer;
@@ -93,7 +94,7 @@ public abstract class LibFunction extends FunctionAnyarg {
 			return LibUtils.checkRange(namer, name, args, index++, rangeName, min, max);
 		}
 
-		public Number nextNumber() {
+		public LNumber nextNumber() {
 			return LibUtils.checkNumber(namer, name, args, index++);
 		}
 

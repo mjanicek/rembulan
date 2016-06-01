@@ -11,7 +11,7 @@ public class IllegalOperationAttemptException extends LuaRuntimeException {
 	}
 
 	public static IllegalOperationAttemptException arithmetic(Object a, Object b) {
-		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.objectAsNumber(a) == null ? a : b);
+		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.objectAsLNumber(a) == null ? a : b);
 		return new IllegalOperationAttemptException("perform arithmetic on", typeName);
 	}
 
@@ -35,9 +35,9 @@ public class IllegalOperationAttemptException extends LuaRuntimeException {
 	}
 
 	public static IllegalOperationAttemptException bitwise(Object a, Object b) {
-		Object nonNumeric = Conversions.objectAsNumber(a) == null ? a : b;
+		Object nonNumeric = Conversions.objectAsLNumber(a) == null ? a : b;
 
-		if (Conversions.objectAsNumber(nonNumeric) == null) {
+		if (Conversions.objectAsLNumber(nonNumeric) == null) {
 			// indeed it's not a number
 			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(nonNumeric);
 			return new IllegalOperationAttemptException("perform bitwise operation on", typeName);
@@ -48,7 +48,7 @@ public class IllegalOperationAttemptException extends LuaRuntimeException {
 	}
 
 	public static IllegalOperationAttemptException bitwise(Object o) {
-		if (Conversions.objectAsNumber(o) == null) {
+		if (Conversions.objectAsLNumber(o) == null) {
 			// indeed it's not a number
 			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
 			return new IllegalOperationAttemptException("perform bitwise operation on", typeName);

@@ -3,6 +3,8 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LInteger;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.MetatableProvider;
 import net.sandius.rembulan.core.Metatables;
@@ -60,11 +62,11 @@ public class LibUtils {
 	}
 
 	// FIXME: clean this up: redundant code!
-	public static Number checkNumber(ValueTypeNamer namer, String name, Object[] args, int index) {
+	public static LNumber checkNumber(ValueTypeNamer namer, String name, Object[] args, int index) {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-			Number n = Conversions.objectAsNumber(arg);
+			LNumber n = Conversions.objectAsLNumber(arg);
 			if (n != null) {
 				return n;
 			}
@@ -83,11 +85,11 @@ public class LibUtils {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-			Number n = Conversions.objectAsNumber(arg);
+			LNumber n = Conversions.objectAsLNumber(arg);
 			if (n != null) {
-				Long l = Conversions.numberAsLong(n);
+				LInteger l = n.asExactInteger();
 				if (l != null) {
-					long ll = l;
+					long ll = l.longValue();
 					if (ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE) {
 						return (int) ll;
 					}
@@ -110,11 +112,11 @@ public class LibUtils {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-			Number n = Conversions.objectAsNumber(arg);
+			LNumber n = Conversions.objectAsLNumber(arg);
 			if (n != null) {
-				Long l = Conversions.numberAsLong(n);
+				LInteger l = n.asExactInteger();
 				if (l != null) {
-					return l;
+					return l.longValue();
 				}
 				else {
 					throw new IllegalArgumentException("number has no integer representation");
@@ -136,7 +138,7 @@ public class LibUtils {
 
 		if (index < args.length) {
 			Object o = args[index];
-			Number n = Conversions.objectAsNumber(o);
+			LNumber n = Conversions.objectAsLNumber(o);
 
 			if (n != null) {
 				Integer i = Conversions.numberAsInt(n);

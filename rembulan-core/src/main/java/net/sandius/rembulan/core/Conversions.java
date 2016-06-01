@@ -3,8 +3,6 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.util.Check;
 
-import java.math.BigDecimal;
-
 /*
  * "to" conversions always succeed (they never return null),
  * "as" conversions are successful if they return a non-null result, and signal failure
@@ -16,22 +14,16 @@ public abstract class Conversions {
 		// not to be instantiated
 	}
 
-	public static Long numberAsLong(Number n) {
-		if (n instanceof Double || n instanceof Float) {
-			long l = n.longValue();
-			return (double) l == n.doubleValue() && l != Long.MAX_VALUE ? l : null;
-		}
-		else {
-			return n.longValue();
-		}
+	@Deprecated
+	public static LInteger numberAsLong(LNumber n) {
+		return n.asExactInteger();
 	}
 
-	public static Integer numberAsInt(Number n) {
-		Long l = numberAsLong(n);
+	public static Integer numberAsInt(LNumber n) {
+		LInteger l = numberAsLong(n);
 		if (l != null) {
-			long ll = l;
-			int i = (int) ll;
-			return (long) i == ll ? i : null;
+			long ll = l.longValue();
+			return ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE ? (int) ll : null;
 		}
 		else {
 			// no integer representation
@@ -74,14 +66,20 @@ public abstract class Conversions {
 		}
 	}
 
-	public static Number stringAsNumber(String s) {
+	public static LNumber stringAsLNumber(String s) {
 		Long l = stringAsLong(s);
-		return l != null ? l : (Number) stringAsDouble(s);
+		if (l != null) {
+			return LInteger.valueOf(l);
+		}
+		else {
+			Double d = stringAsDouble(s);
+			return d != null ? LFloat.valueOf(d) : null;
+		}
 	}
 
-	public static Number stringAsFloat(String s) {
-		Number n = stringAsNumber(s);
-		return n != null ? n.doubleValue() : null;
+	public static LNumber stringAsFloat(String s) {
+		LNumber n = stringAsLNumber(s);
+		return n != null ? n.toFloat() : null;
 	}
 
 	/**
@@ -94,7 +92,7 @@ public abstract class Conversions {
 	 * a Lua float. Returns {@code null} if the argument is not a number or a string convertible
 	 * to number.
 	 *
-	 * <p>Note that this method differs from {@link #objectAsNumber(Object)} in that it
+	 * <p>Note that this method differs from {@link #objectAsLNumber(Object)} in that it
 	 * coerces strings convertible to numbers into into floats rather than preserving
 	 * their canonical representation, and also note that this conversion happens <i>after</i>
 	 * the number has been parsed. Most significantly,
@@ -103,7 +101,7 @@ public abstract class Conversions {
 	 *     Conversions.objectAsFloatIfString("-0")
 	 * </pre>
 	 *
-	 * yields {@code 0.0} rather than {@code 0} (as would be the case for {@code objectAsNumber}),
+	 * yields {@code 0.0} rather than {@code 0} (as would be the case for {@code objectAsLNumber}),
 	 * or {@code -0.0} (as it would in the case if the string was parsed directly as a float).
 	 *
 	 * @param o  object to convert to number, may be {@code null}
@@ -111,11 +109,11 @@ public abstract class Conversions {
 	 * @return number representing the object,
 	 *         or {@code null} if {@code o} cannot be coerced into a number.
 	 *
-	 * @see #objectAsNumber(Object)
+	 * @see #objectAsLNumber(Object)
 	 */
-	public static Number objectAsFloatIfString(Object o) {
-		return o instanceof Number
-				? (Number) o
+	public static LNumber objectAsFloatIfString(Object o) {
+		return o instanceof LNumber
+				? (LNumber) o
 				: o instanceof String
 						? stringAsFloat((String) o)
 						: null;
@@ -142,24 +140,24 @@ public abstract class Conversions {
 	 *
 	 * @see #objectAsFloatIfString(Object)
 	 */
-	public static Number objectAsNumber(Object o) {
-		return o instanceof Number
-				? (Number) o
+	public static LNumber objectAsLNumber(Object o) {
+		return o instanceof LNumber
+				? (LNumber) o
 				: o instanceof String
-						? stringAsNumber((String) o)
+						? stringAsLNumber((String) o)
 						: null;
 	}
 
-	public static Number objectToNumber(Object o, String name) {
-		Number n = objectAsNumber(o);
+	public static LNumber objectToLNumber(Object o, String name) {
+		LNumber n = objectAsLNumber(o);
 		if (n == null) {
 			throw new IllegalArgumentException(name + " must be a number");
 		}
 		return n;
 	}
 
-	public static Long objectAsLong(Object o) {
-		Number n = objectAsNumber(o);
+	public static LInteger objectAsLong(Object o) {
+		LNumber n = objectAsLNumber(o);
 		return n != null ? numberAsLong(n) : null;
 	}
 
@@ -168,22 +166,14 @@ public abstract class Conversions {
 	}
 
 	// FIXME: isn't this a coercion?
-	public static String numberToString(Number n) {
-		if (n instanceof Double || n instanceof Float) {
-			return LuaFormat.toString(n.doubleValue());
-		}
-		else {
-			return LuaFormat.toString(n.longValue());
-		}
+	@Deprecated
+	public static String numberToString(LNumber n) {
+		return n.toString();
 	}
 
 	// FIXME: isn't this a coercion?
 	public static String objectAsString(Object o) {
-		return o instanceof String
-				? (String) o
-				: o instanceof Number
-						? numberToString((Number) o)
-						: null;
+		return o instanceof String || o instanceof LNumber ? o.toString() : null;
 	}
 
 	public static String objectToString(Object o) {

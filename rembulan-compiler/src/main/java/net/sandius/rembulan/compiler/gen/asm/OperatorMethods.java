@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler.gen.asm;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.core.Conversions;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.util.Check;
@@ -65,7 +66,7 @@ public class OperatorMethods {
 				"numberToString",
 				Type.getMethodDescriptor(
 						Type.getType(String.class),
-						Type.getType(Number.class)),
+						Type.getType(LNumber.class)),
 				false);
 	}
 

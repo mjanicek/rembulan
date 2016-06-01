@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.core.LNumber;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -92,13 +93,13 @@ public class DispatchMethods {
 
 	public static AbstractInsnNode numeric(String methodName, int numArgs) {
 		Type[] args = new Type[numArgs];
-		Arrays.fill(args, Type.getType(Number.class));
+		Arrays.fill(args, Type.getType(LNumber.class));
 		return new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(Dispatch.class),
 				methodName,
 				Type.getMethodDescriptor(
-						Type.getType(Number.class),
+						Type.getType(LNumber.class),
 						args),
 				false);
 	}
@@ -131,9 +132,9 @@ public class DispatchMethods {
 				"continueLoop",
 				Type.getMethodDescriptor(
 						Type.BOOLEAN_TYPE,
-						Type.getType(Number.class),
-						Type.getType(Number.class),
-						Type.getType(Number.class)),
+						Type.getType(LNumber.class),
+						Type.getType(LNumber.class),
+						Type.getType(LNumber.class)),
 				false);
 	}
 

@@ -5,6 +5,9 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LFloat;
+import net.sandius.rembulan.core.LInteger;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.MathLib;
 import net.sandius.rembulan.util.Check;
@@ -160,16 +163,16 @@ public class DefaultMathLib extends MathLib {
 
 	public static abstract class MathFunction1 extends LibFunction {
 
-		protected abstract Number op(double x);
+		protected abstract LNumber op(double x);
 
-		protected Number op(long x) {
+		protected LNumber op(long x) {
 			return op((double) x);
 		}
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Number x = args.nextNumber();
-			Number result = x instanceof Float || x instanceof Double ? op(x.doubleValue()) : op(x.longValue());
+			LNumber x = args.nextNumber();
+			LNumber result = x.isFloat() ? op(x.doubleValue()) : op(x.longValue());
 			context.getObjectSink().setTo(result);
 		}
 
@@ -185,13 +188,13 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.abs(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.abs(x));
 		}
 
 		@Override
-		protected Number op(long x) {
-			return Math.abs(x);
+		protected LNumber op(long x) {
+			return LInteger.valueOf(Math.abs(x));
 		}
 
 	}
@@ -206,8 +209,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.acos(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.acos(x));
 		}
 
 	}
@@ -222,8 +225,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.asin(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.asin(x));
 		}
 
 	}
@@ -238,8 +241,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.atan(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.atan(x));
 		}
 
 	}
@@ -254,15 +257,16 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
+		protected LNumber op(double x) {
 			double d = Math.ceil(x);
 			long l = (long) d;
-			return d == (double) l ? l : d;
+			return d == (double) l ? LInteger.valueOf(l) : LFloat.valueOf(d);
 		}
 
 		@Override
-		protected Number op(long x) {
-			return x;
+		protected LNumber op(long x) {
+			// TODO: no need to unbox and box again
+			return LInteger.valueOf(x);
 		}
 
 	}
@@ -277,8 +281,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.cos(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.cos(x));
 		}
 
 	}
@@ -293,8 +297,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.toDegrees(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.toDegrees(x));
 		}
 
 	}
@@ -309,8 +313,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.exp(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.exp(x));
 		}
 
 	}
@@ -325,15 +329,15 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
+		protected LNumber op(double x) {
 			double d = Math.floor(x);
 			long l = (long) d;
-			return d == (double) l ? l : d;
+			return d == (double) l ? LInteger.valueOf(l) : LFloat.valueOf(d);
 		}
 
 		@Override
-		protected Number op(long x) {
-			return x;
+		protected LNumber op(long x) {
+			return LInteger.valueOf(x);
 		}
 
 	}
@@ -349,22 +353,20 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Number x = args.nextNumber();
-			Number y = args.nextNumber();
+			LNumber x = args.nextNumber();
+			LNumber y = args.nextNumber();
 
-			final Number result;
+			final LNumber result;
 
-			if (x instanceof Float || x instanceof Double
-					|| y instanceof Float || y instanceof Double) {
-
-				result = Math.IEEEremainder(x.doubleValue(), y.doubleValue());
+			if (x.isFloat() || y.isFloat()) {
+				result = LFloat.valueOf(Math.IEEEremainder(x.doubleValue(), y.doubleValue()));
 			}
 			else {
 				long xi = x.longValue();
 				long yi = y.longValue();
 
 				if (yi != 0) {
-					result = xi % yi;
+					result = LInteger.valueOf(xi % yi);
 				}
 				else {
 					throw new BadArgumentException(2, name(), "zero");
@@ -387,7 +389,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Number x = args.nextNumber();
+			LNumber x = args.nextNumber();
 			double ln = Math.log(x.doubleValue());
 			final double result;
 
@@ -401,7 +403,7 @@ public class DefaultMathLib extends MathLib {
 				result = ln;
 			}
 
-			context.getObjectSink().setTo(result);
+			context.getObjectSink().setTo(LFloat.valueOf(result));
 		}
 
 	}
@@ -497,12 +499,12 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Number x = args.nextNumber();
+			LNumber x = args.nextNumber();
 
 			long intPart = x.longValue();
 			double fltPart = x.doubleValue() - intPart;
 
-			context.getObjectSink().setTo(intPart, fltPart);
+			context.getObjectSink().setTo(LInteger.valueOf(intPart), LFloat.valueOf(fltPart));
 		}
 
 	}
@@ -517,8 +519,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.toRadians(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.toRadians(x));
 		}
 
 	}
@@ -555,11 +557,11 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			final Number result;
+			final LNumber result;
 
 			if (!args.hasNext()) {
 				// float in the range [0.0, 1.0)
-				result = random.nextDouble();
+				result = LFloat.valueOf(random.nextDouble());
 			}
 			else {
 				long m = args.nextInteger();
@@ -569,7 +571,7 @@ public class DefaultMathLib extends MathLib {
 					if (m < 1) {
 						throw new BadArgumentException(1, name(), "interval is empty");
 					}
-					result = 1L + nextLong(m);
+					result = LInteger.valueOf(1L + nextLong(m));
 				}
 				else {
 					// integer in the range [m, n]
@@ -585,7 +587,7 @@ public class DefaultMathLib extends MathLib {
 						throw new BadArgumentException(1, name(), "interval too large");
 					}
 
-					result = m + nextLong(limit);
+					result = LInteger.valueOf(m + nextLong(limit));
 				}
 			}
 
@@ -609,9 +611,9 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Number arg = args.nextNumber();
+			LNumber arg = args.nextNumber();
 
-			long seed = arg instanceof Double || arg instanceof Float
+			long seed = arg.isFloat()
 					? Double.doubleToLongBits(arg.doubleValue())
 					: arg.longValue();
 
@@ -632,8 +634,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.sin(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.sin(x));
 		}
 
 	}
@@ -648,8 +650,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.sqrt(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.sqrt(x));
 		}
 
 	}
@@ -664,8 +666,8 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected Number op(double x) {
-			return Math.tan(x);
+		protected LNumber op(double x) {
+			return LFloat.valueOf(Math.tan(x));
 		}
 
 	}
@@ -700,8 +702,8 @@ public class DefaultMathLib extends MathLib {
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Object x = args.nextAny();
 
-			String result = x instanceof Number
-					? (x instanceof Float || x instanceof Double
+			String result = x instanceof LNumber
+					? (((LNumber) x).isFloat()
 							? "float"
 							: "integer")
 					: null;
