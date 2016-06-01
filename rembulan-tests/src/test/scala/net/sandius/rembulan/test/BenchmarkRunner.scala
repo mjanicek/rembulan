@@ -17,8 +17,8 @@ trait BenchmarkRunner {
 
   import BenchmarkRunner._
 
-  protected val Fannkuch = Benchmark("/fannkuchredux.lua")
-  protected val BinaryTrees = Benchmark("/binarytrees.lua-2.lua")
+  protected val Fannkuch = Benchmark("/benchmarksgame/fannkuchredux.lua")
+  protected val BinaryTrees = Benchmark("/benchmarksgame/binarytrees.lua-2.lua")
 
   protected def intProperty(key: String, default: Int): Int = {
     Option(System.getProperty(key)) flatMap { s => Try(s.toInt).toOption } getOrElse default
