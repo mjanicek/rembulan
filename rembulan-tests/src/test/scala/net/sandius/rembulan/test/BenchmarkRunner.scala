@@ -13,7 +13,26 @@ import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
 
 import scala.util.Try
 
-object FannkuchRunner {
+trait BenchmarkRunner {
+
+  import BenchmarkRunner._
+
+  protected val Fannkuch = Benchmark("/fannkuchredux.lua")
+  protected val BinaryTrees = Benchmark("/binarytrees.lua-2.lua")
+
+  protected def intProperty(key: String, default: Int): Int = {
+    Option(System.getProperty(key)) flatMap { s => Try(s.toInt).toOption } getOrElse default
+  }
+
+}
+
+object BenchmarkRunner {
+
+  case class Benchmark(fileName: String) {
+    def go(prefix: String, args: String*): Unit = {
+      doFile(prefix, fileName, args:_*)
+    }
+  }
 
   def initEnv(state: LuaState, args: Seq[String]): Table = {
     val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
@@ -56,7 +75,7 @@ object FannkuchRunner {
 
     val env = initEnv(state, args)
 
-    val func = ldr.loadTextChunk(state.newUpvalue(env), "fannkuch", sourceContents)
+    val func = ldr.loadTextChunk(state.newUpvalue(env), "benchmarkMain", sourceContents)
 
     new Exec(state, func)
   }
@@ -110,21 +129,5 @@ object FannkuchRunner {
     println()
   }
 
-  private def intProperty(key: String, default: Int): Int = {
-    Option(System.getProperty(key)) flatMap { s => Try(s.toInt).toOption } getOrElse default
-  }
-
-  def main(args: Array[String]): Unit = {
-    val n = intProperty("n", 10)
-    val numRuns = intProperty("numRuns", 3)
-
-    println("n = " + n)
-    println("numRuns = " + numRuns)
-
-    for (i <- 1 to numRuns) {
-      doFile(s"#$i\t", "/fannkuchredux.lua", n.toString)
-    }
-
-  }
 
 }
