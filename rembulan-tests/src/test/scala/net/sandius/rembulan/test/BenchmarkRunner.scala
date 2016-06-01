@@ -13,25 +13,20 @@ import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
 
 import scala.util.Try
 
-trait BenchmarkRunner {
-
-  import BenchmarkRunner._
-
-  protected val Fannkuch = Benchmark("/benchmarksgame/fannkuchredux.lua")
-  protected val BinaryTrees = Benchmark("/benchmarksgame/binarytrees.lua-2.lua")
-
-  protected def intProperty(key: String, default: Int): Int = {
-    Option(System.getProperty(key)) flatMap { s => Try(s.toInt).toOption } getOrElse default
-  }
-
-}
-
 object BenchmarkRunner {
 
   case class Benchmark(fileName: String) {
     def go(prefix: String, args: String*): Unit = {
       doFile(prefix, fileName, args:_*)
     }
+  }
+
+  protected def stringProperty(key: String, default: String): String = {
+    Option(System.getProperty(key)) getOrElse default
+  }
+
+  protected def intProperty(key: String, default: Int): Int = {
+    Option(System.getProperty(key)) flatMap { s => Try(s.toInt).toOption } getOrElse default
   }
 
   def initEnv(state: LuaState, args: Seq[String]): Table = {
@@ -127,6 +122,55 @@ object BenchmarkRunner {
     println(prefix + "Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
     println(prefix + "Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
     println()
+  }
+
+  val dirPrefix = "/benchmarksgame/"
+
+  private case class Setup(benchmarkFile: String, args: Seq[String]) {
+
+  }
+
+  private def getSetup(args: Array[String]): Option[Setup] = {
+    args.toList match {
+      case fileName :: tail => Some(Setup(fileName, tail))
+      case _ => None
+    }
+  }
+
+  val NumOfRunsPropertyName = "numRuns"
+  val DefaultNumOfRuns = 3
+
+  def main(args: Array[String]): Unit = {
+
+    getSetup(args) match {
+      case Some(setup) =>
+        val numRuns = intProperty(NumOfRunsPropertyName, DefaultNumOfRuns)
+
+        val bm = Benchmark(dirPrefix + setup.benchmarkFile)
+
+        println("file = \"" + bm.fileName + "\"")
+        println("arguments = {")
+        for (a <- setup.args) {
+          println("\t\"" + a + "\"")
+        }
+        println("}")
+        println("numRuns = " + numRuns)
+        println()
+
+        for (i <- 1 to numRuns) {
+          val prefix = s"#$i\t"
+          bm.go(prefix, setup.args:_*)
+        }
+
+
+      case None =>
+        println("Usage: java " + getClass.getName + " BENCHMARK-FILE [ARG[S...]]")
+        println("Use the \"" + NumOfRunsPropertyName + "\" VM property to set the number of runs (default is " + DefaultNumOfRuns + ").")
+        System.exit(1)
+    }
+
+
+
   }
 
 
