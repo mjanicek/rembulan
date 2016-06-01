@@ -4,17 +4,39 @@ import net.sandius.rembulan.LuaFormat;
 
 public final class LInteger extends LNumber {
 
-	public static final LInteger ZERO = valueOf(0L);
+	public static final LInteger ZERO = new LInteger(0L);
 
 	private final long value;
 
-	public LInteger(long value) {
+	private LInteger(long value) {
 		this.value = value;
 	}
 
+	private static class Cache {
+
+		// the cache array should be small enough to remain paged, and the test whether
+		// a value is cached should be cheap
+		static final int MIN = -256;
+		static final int MAX = 255;
+
+		private Cache() {
+			// not to be instantiated
+		}
+
+		private static final LInteger[] values;
+
+		static {
+			values = new LInteger[MAX - MIN + 1];
+			for (int i = MIN; i <= MAX; i++) {
+				values[i - MIN] = new LInteger(i);
+			}
+		}
+	}
+
 	public static LInteger valueOf(long value) {
-		// TODO: caching
-		return new LInteger(value);
+		return (value >= Cache.MIN && value <= Cache.MAX)
+				? Cache.values[(int) value - Cache.MIN]
+				: new LInteger(value);
 	}
 
 	@Override
