@@ -1,5 +1,6 @@
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.ExecutionContext;
@@ -299,15 +300,33 @@ public class DefaultStringLib extends StringLib {
 			}
 		}
 
+		private static void repeatChar(char c, int num, StringBuilder bld) {
+			for (int i = 0; i < num; i++) {
+				bld.append(c);
+			}
+		}
+
 		private static String padLeft(String s, char c, int width) {
 			int diff = width - s.length();
 
 			if (diff > 0) {
 				StringBuilder bld = new StringBuilder();
-				for (int i = 0; i < diff; i++) {
-					bld.append(c);
-				}
+				repeatChar(c, diff, bld);
 				bld.append(s);
+				return bld.toString();
+			}
+			else {
+				return s;
+			}
+		}
+
+		private static String padRight(String s, char c, int width) {
+			int diff = width - s.length();
+
+			if (diff > 0) {
+				StringBuilder bld = new StringBuilder();
+				bld.append(s);
+				repeatChar(c, diff, bld);
 				return bld.toString();
 			}
 			else {
@@ -343,94 +362,332 @@ public class DefaultStringLib extends StringLib {
 							: '9' + padLeft(Long.toString(x - L_9E18), '0', 18));
 		}
 
+		private int literal(String fmt, int from, StringBuilder bld) {
+			int index = from;
+			while (index < fmt.length()) {
+				char c = fmt.charAt(index++);
+
+				if (c != '%') {
+					bld.append(c);
+				}
+				else {
+					if (index < fmt.length() && fmt.charAt(index) == '%') {
+						// literal '%'
+						bld.append('%');
+						index += 1;
+					}
+					else {
+						return index;
+					}
+				}
+
+			}
+			return -1;
+		}
+
+		private IllegalArgumentException invalidOptionException(char c) {
+			return new IllegalArgumentException("invalid option '" + optionToString(c) + "' to 'format'");
+		}
+
+		private int setFlag(int flags, int mask) {
+			if ((flags & mask) != 0) {
+				throw new IllegalArgumentException("illegal format (repeated flags)");
+			}
+			return flags | mask;
+		}
+
+		private boolean hasFlag(int flags, int mask) {
+			return (flags & mask) != 0;
+		}
+
+		private String sign(boolean nonNegative, int flags) {
+			return nonNegative
+					? (hasFlag(flags, FLAG_SIGN_ALWAYS)
+							? "+"
+							: (hasFlag(flags, FLAG_ZERO_PAD)
+									? " "
+									: ""))
+					: "-";
+		}
+
+		private String altForm(long value, int flags, String prefix) {
+			return value != 0 && hasFlag(flags, FLAG_ALT_FORM) ? prefix : "";
+		}
+
+		private String padded(int precision, String digits) {
+			return precision >= 0
+					? padLeft("0".equals(digits) ? "" : digits, '0', precision)
+					: digits;
+		}
+
+		private String trimmed(int precision, String chars) {
+			return precision >= 0
+					? chars.substring(0, Math.min(chars.length(), precision))
+					: chars;
+		}
+
+		private String justified(int width, int flags, String digits) {
+			return width >= 0
+					? (hasFlag(flags, FLAG_LEFTJUSTIFY)
+							? padRight(digits, ' ', width)
+							: padLeft(digits, ' ', width))
+					: digits;
+		}
+
+		private static final int FLAG_LEFTJUSTIFY = 1 << 1;
+		private static final int FLAG_SIGN_ALWAYS = 1 << 2;
+		private static final int FLAG_SIGN_SPACE = 1 << 3;
+		private static final int FLAG_ZERO_PAD = 1 << 4;
+		private static final int FLAG_ALT_FORM = 1 << 5;
+
+		private int placeholder(String fmt, int from, StringBuilder bld, CallArguments args) {
+			if (!args.hasNext()) {
+				throw new BadArgumentException(args.size() + 1, name(), "no value");
+			}
+
+			int index = from;
+
+			char c;
+
+			int flags = 0;
+
+			// flags
+			{
+				boolean wasFlag = true;
+
+				do {
+					if (index < fmt.length()) {
+						c = fmt.charAt(index++);
+					}
+					else {
+						throw invalidOptionException('\0');
+					}
+
+					switch (c) {
+						case '-': flags = setFlag(flags, FLAG_LEFTJUSTIFY); break;
+						case '+': flags = setFlag(flags, FLAG_SIGN_ALWAYS); break;
+						case ' ': flags = setFlag(flags, FLAG_SIGN_SPACE); break;
+						case '0': flags = setFlag(flags, FLAG_ZERO_PAD); break;
+						case '#': flags = setFlag(flags, FLAG_ALT_FORM); break;
+
+						default:
+							// not a flag, take the character back
+							index -= 1;
+							wasFlag = false;
+							break;
+					}
+
+				} while (wasFlag);
+			}
+
+			// width
+			int width = -1;
+
+			{
+				boolean wasWidth = true;
+
+				do {
+					if (index < fmt.length()) {
+						c = fmt.charAt(index++);
+					}
+					else {
+						throw invalidOptionException('\0');
+					}
+
+					if (c >= '0' && c <= '9') {
+						width = Math.max(0, width) * 10 + (c - '0');
+						if (width >= 100) {
+							throw new IllegalArgumentException("illegal format (width or precision too long)");
+						}
+					}
+					else {
+						// not a width specifier, put back
+						index -= 1;
+						wasWidth = false;
+					}
+
+				} while (wasWidth);
+			}
+
+			// precision
+			int precision = -1;
+
+			{
+				if (index < fmt.length() && fmt.charAt(index) == '.') {
+					index += 1;  // skip the '.'
+					precision = 0;
+
+					boolean wasPrecision = true;
+					do {
+						if (index < fmt.length()) {
+							c = fmt.charAt(index++);
+						}
+						else {
+							throw invalidOptionException('\0');
+						}
+
+						if (c >= '0' && c <= '9') {
+							precision = precision * 10 + (c - '0');
+							if (precision >= 100) {
+								throw new IllegalArgumentException("illegal format (width or precision too long)");
+							}
+						}
+						else {
+							// not a width specifier, put back
+							index -= 1;
+							wasPrecision = false;
+						}
+
+					} while (wasPrecision);
+
+				}
+			}
+
+			// type
+			{
+				char d = fmt.charAt(index++);
+
+				final String result;
+
+				switch (d) {
+					case 'd':
+					case 'i': {
+						long l = args.nextInteger();
+
+						String ls = LuaFormat.toString(l);
+						String digits = l < 0 ? ls.substring(1) : ls;  // ignore the sign, we'll re-attach it later
+						result = justified(width, flags,
+								sign(l >= 0, flags) + padded(precision, digits));
+						break;
+					}
+
+					case 'u': {
+						long l = args.nextInteger();
+
+						String digits = longToUnsignedString(l);
+						result = justified(width, flags,
+								padded(precision, digits));
+						break;
+					}
+
+					case 'o': {
+						long l = args.nextInteger();
+
+						String digits = Long.toOctalString(l);
+						result = justified(width, flags,
+								altForm(l, flags, "0") + padded(precision, digits));
+						break;
+					}
+
+					case 'x':
+					case 'X': {
+						long l = args.nextInteger();
+
+						String digits = Long.toHexString(l);
+						String lowerCaseResult = justified(width, flags,
+								altForm(l, flags, "0x") + padded(precision, digits));
+
+						result = d == 'X' ? lowerCaseResult.toUpperCase() : lowerCaseResult;
+						break;
+					}
+
+					case 'c':
+						result = justified(width, flags, Character.toString((char) args.nextInteger()));
+						break;
+
+					case 'f':
+					case 'a':
+					case 'A':
+					case 'e':
+					case 'E':
+					case 'g':
+					case 'G': {
+						double v = args.nextNumber().doubleValue();
+
+						if (Double.isNaN(v) || Double.isInfinite(v)) {
+							final String chars;
+
+							chars = Double.isNaN(v)
+									? LuaFormat.NAN
+									: sign(v > 0, flags) + LuaFormat.POS_INF;
+
+							result = justified(width, flags, chars);
+						}
+						else {
+							StringBuilder fmtBld = new StringBuilder();
+							fmtBld.append('%');
+							if (hasFlag(flags, FLAG_LEFTJUSTIFY)) fmtBld.append('-');
+							if (hasFlag(flags, FLAG_SIGN_ALWAYS)) fmtBld.append('+');
+							if (hasFlag(flags, FLAG_SIGN_SPACE)) fmtBld.append(' ');
+							if (hasFlag(flags, FLAG_ZERO_PAD)) fmtBld.append('0');
+							if (hasFlag(flags, FLAG_ALT_FORM)) fmtBld.append('#');
+
+							if (width > 0) fmtBld.append(width);
+							// width required by Formatter, but not supplied
+							else if (hasFlag(flags, FLAG_ZERO_PAD)) fmtBld.append('1');
+
+							if (precision > 0) fmtBld.append('.').append(precision);
+							fmtBld.append(d);
+							String formatted = String.format(fmtBld.toString(), v);
+
+							if (d == 'a' || d == 'A') {
+								// insert the '+' sign to the exponent
+								int p = formatted.indexOf(d == 'a' ? 'p' : 'P') + 1;
+								if (formatted.charAt(p) != '-') {
+									formatted = formatted.substring(0, p) + '+' + formatted.substring(p);
+								}
+							}
+
+							result = formatted;
+						}
+
+						break;
+					}
+
+					case 's': {
+						Object v = args.nextAny();
+						String s = Conversions.objectAsString(v);
+						if (s != null) {
+							result = justified(width, flags, trimmed(precision, s));
+						}
+						else {
+							// TODO: use __tostring for non-string arguments
+							throw new UnsupportedOperationException("not implemented: tostring");
+						}
+						break;
+					}
+
+					case 'q': {
+						String s = args.nextString();
+						throw new UnsupportedOperationException("not implemented: %q");  // TODO
+					}
+
+					default:
+						throw new IllegalArgumentException("invalid option '" + optionToString(d) + "' to 'format'");
+
+				}
+
+				bld.append(result);
+			}
+
+			return index < fmt.length() ? index : -1;
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			String fmt = args.nextString();
 
 			StringBuilder bld = new StringBuilder();
 
-			int index = 0;
-			while (index < fmt.length()) {
-				final char c = fmt.charAt(index);
-
-				switch (c) {
-					case '%': {
-						index++;
-
-						final char d = index < fmt.length() ? fmt.charAt(index) : '\0';
-
-						if (d == '%') {
-							bld.append('%');
-						}
-						else {
-							if (!args.hasNext()) {
-								throw new BadArgumentException(args.size() + 1, name(), "no value");
-							}
-
-							switch (d) {
-
-								case 'd':
-								case 'i':
-									bld.append(args.nextInteger());
-									break;
-
-								case 'u':
-									bld.append(longToUnsignedString(args.nextInteger()));
-									break;
-
-								case 'o':
-									bld.append(Long.toOctalString(args.nextInteger()));
-									break;
-
-								case 'x':
-								case 'X': {
-									String hex = Long.toHexString(args.nextInteger());
-									bld.append(d == 'X' ? hex.toUpperCase() : hex);
-									break;
-								}
-
-								case 'c':
-									bld.append((char) args.nextInteger());
-									break;
-
-								case 's': {
-									Object v = args.nextAny();
-									String s = Conversions.objectAsString(v);
-									if (s != null) {
-										bld.append(s);
-									}
-									else {
-										// TODO: use __tostring for non-string arguments
-										throw new UnsupportedOperationException("not implemented: tostring");
-									}
-									break;
-								}
-
-								case 'q': {
-									String s = args.nextString();
-									throw new UnsupportedOperationException("not implemented: %q");  // TODO
-								}
-
-								default:
-									throw new IllegalArgumentException("invalid option '" + optionToString(d) + "' to 'format'");
-
-							}
-						}
-
-						break;
-					}
-
-					default:
-						bld.append(c);
-						break;
+			int idx = 0;
+			do {
+				idx = literal(fmt, idx, bld);
+				if (idx >= 0) {
+					idx = placeholder(fmt, idx, bld, args);
 				}
+			} while (idx >= 0);
 
-				index++;
-			}
-
-			String result = bld.toString();
-
-			context.getObjectSink().setTo(result);
+			context.getObjectSink().setTo(bld.toString());
 		}
 
 		@Override
