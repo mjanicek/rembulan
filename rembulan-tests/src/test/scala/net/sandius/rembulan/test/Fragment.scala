@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.core.{LFloat, LInteger, LNumber, LuaRuntimeException}
+import net.sandius.rembulan.core.{LNumber, LuaRuntimeException}
 import org.scalatest.FunSpec
 
 import scala.collection.mutable
@@ -285,7 +285,7 @@ object FragmentExpectations {
     case object NaN extends ValueMatch {
       override def matches(o: AnyRef) = {
         o match {
-          case d: LFloat if d.isNaN => true
+          case d: LNumber if d.isNaN => true
           case _ => false
         }
       }
@@ -299,10 +299,10 @@ object FragmentExpectations {
       case vm: ValueMatch => vm
       case null => Eq(null)
       case b: Boolean => Eq(java.lang.Boolean.valueOf(b))
-      case i: Int => Eq(LInteger.valueOf(i))
-      case l: Long => Eq(LInteger.valueOf(l))
-      case f: Float => Eq(LFloat.valueOf(f))
-      case d: Double => Eq(LFloat.valueOf(d))
+      case i: Int => Eq(LNumber.valueOf(i))
+      case l: Long => Eq(LNumber.valueOf(l))
+      case f: Float => Eq(LNumber.valueOf(f))
+      case d: Double => Eq(LNumber.valueOf(d))
       case s: String => Eq(s)
       case c: Class[_] => SubtypeOf(c)
       case _ => throw new IllegalArgumentException("illegal value: " + v)

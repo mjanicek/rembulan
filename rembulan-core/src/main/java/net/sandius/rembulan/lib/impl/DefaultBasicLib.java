@@ -6,7 +6,6 @@ import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
-import net.sandius.rembulan.core.LInteger;
 import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
@@ -274,7 +273,7 @@ public class DefaultBasicLib extends BasicLib {
 
 			Object o = table.rawget(index);
 			if (o != null) {
-				context.getObjectSink().setTo(LInteger.valueOf(index), o);
+				context.getObjectSink().setTo(LNumber.valueOf(index), o);
 				return null;
 			}
 			else {
@@ -339,7 +338,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Table t = args.nextTable();
-			context.getObjectSink().setTo(INext.INSTANCE, t, LInteger.ZERO);
+			context.getObjectSink().setTo(INext.INSTANCE, t, LNumber.INTEGER_ZERO);
 			return null;
 		}
 
@@ -396,9 +395,9 @@ public class DefaultBasicLib extends BasicLib {
 
 		public static final ToNumber INSTANCE = new ToNumber();
 
-		public static LInteger toNumber(String s, int base) {
+		public static LNumber toNumber(String s, int base) {
 			try {
-				return LInteger.valueOf(Long.parseLong(s.trim(), base));
+				return LNumber.valueOf(Long.parseLong(s.trim(), base));
 			}
 			catch (NumberFormatException ex) {
 				return null;
@@ -805,7 +804,7 @@ public class DefaultBasicLib extends BasicLib {
 				throw new BadArgumentException(1, name(), "table or string expected");
 			}
 
-			context.getObjectSink().setTo(LInteger.valueOf(result));
+			context.getObjectSink().setTo(LNumber.valueOf(result));
 			return null;
 		}
 
@@ -826,7 +825,7 @@ public class DefaultBasicLib extends BasicLib {
 
 			if (index instanceof String && ((String) index).startsWith("#")) {
 				// return the number of remaining args
-				context.getObjectSink().setTo(LInteger.valueOf(args.tailSize()));
+				context.getObjectSink().setTo(LNumber.valueOf(args.tailSize()));
 				return null;
 			}
 			else {

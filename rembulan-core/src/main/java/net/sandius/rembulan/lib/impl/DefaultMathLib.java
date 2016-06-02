@@ -4,8 +4,6 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LFloat;
-import net.sandius.rembulan.core.LInteger;
 import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -190,12 +188,12 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.abs(x));
+			return LNumber.valueOf(Math.abs(x));
 		}
 
 		@Override
 		protected LNumber op(long x) {
-			return LInteger.valueOf(Math.abs(x));
+			return LNumber.valueOf(Math.abs(x));
 		}
 
 	}
@@ -211,7 +209,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.acos(x));
+			return LNumber.valueOf(Math.acos(x));
 		}
 
 	}
@@ -227,7 +225,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.asin(x));
+			return LNumber.valueOf(Math.asin(x));
 		}
 
 	}
@@ -243,7 +241,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.atan(x));
+			return LNumber.valueOf(Math.atan(x));
 		}
 
 	}
@@ -261,13 +259,13 @@ public class DefaultMathLib extends MathLib {
 		protected LNumber op(double x) {
 			double d = Math.ceil(x);
 			long l = (long) d;
-			return d == (double) l ? LInteger.valueOf(l) : LFloat.valueOf(d);
+			return d == (double) l ? LNumber.valueOf(l) : LNumber.valueOf(d);
 		}
 
 		@Override
 		protected LNumber op(long x) {
 			// TODO: no need to unbox and box again
-			return LInteger.valueOf(x);
+			return LNumber.valueOf(x);
 		}
 
 	}
@@ -283,7 +281,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.cos(x));
+			return LNumber.valueOf(Math.cos(x));
 		}
 
 	}
@@ -299,7 +297,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.toDegrees(x));
+			return LNumber.valueOf(Math.toDegrees(x));
 		}
 
 	}
@@ -315,7 +313,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.exp(x));
+			return LNumber.valueOf(Math.exp(x));
 		}
 
 	}
@@ -333,12 +331,12 @@ public class DefaultMathLib extends MathLib {
 		protected LNumber op(double x) {
 			double d = Math.floor(x);
 			long l = (long) d;
-			return d == (double) l ? LInteger.valueOf(l) : LFloat.valueOf(d);
+			return d == (double) l ? LNumber.valueOf(l) : LNumber.valueOf(d);
 		}
 
 		@Override
 		protected LNumber op(long x) {
-			return LInteger.valueOf(x);
+			return LNumber.valueOf(x);
 		}
 
 	}
@@ -360,14 +358,14 @@ public class DefaultMathLib extends MathLib {
 			final LNumber result;
 
 			if (x.isFloat() || y.isFloat()) {
-				result = LFloat.valueOf(Math.IEEEremainder(x.doubleValue(), y.doubleValue()));
+				result = LNumber.valueOf(Math.IEEEremainder(x.doubleValue(), y.doubleValue()));
 			}
 			else {
 				long xi = x.longValue();
 				long yi = y.longValue();
 
 				if (yi != 0) {
-					result = LInteger.valueOf(xi % yi);
+					result = LNumber.valueOf(xi % yi);
 				}
 				else {
 					throw new BadArgumentException(2, name(), "zero");
@@ -405,7 +403,7 @@ public class DefaultMathLib extends MathLib {
 				result = ln;
 			}
 
-			context.getObjectSink().setTo(LFloat.valueOf(result));
+			context.getObjectSink().setTo(LNumber.valueOf(result));
 			return null;
 		}
 
@@ -505,7 +503,7 @@ public class DefaultMathLib extends MathLib {
 			long intPart = x.longValue();
 			double fltPart = x.doubleValue() - intPart;
 
-			context.getObjectSink().setTo(LInteger.valueOf(intPart), LFloat.valueOf(fltPart));
+			context.getObjectSink().setTo(LNumber.valueOf(intPart), LNumber.valueOf(fltPart));
 			return null;
 		}
 
@@ -522,7 +520,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.toRadians(x));
+			return LNumber.valueOf(Math.toRadians(x));
 		}
 
 	}
@@ -563,7 +561,7 @@ public class DefaultMathLib extends MathLib {
 
 			if (!args.hasNext()) {
 				// float in the range [0.0, 1.0)
-				result = LFloat.valueOf(random.nextDouble());
+				result = LNumber.valueOf(random.nextDouble());
 			}
 			else {
 				long m = args.nextInteger();
@@ -573,7 +571,7 @@ public class DefaultMathLib extends MathLib {
 					if (m < 1) {
 						throw new BadArgumentException(1, name(), "interval is empty");
 					}
-					result = LInteger.valueOf(1L + nextLong(m));
+					result = LNumber.valueOf(1L + nextLong(m));
 				}
 				else {
 					// integer in the range [m, n]
@@ -589,7 +587,7 @@ public class DefaultMathLib extends MathLib {
 						throw new BadArgumentException(1, name(), "interval too large");
 					}
 
-					result = LInteger.valueOf(m + nextLong(limit));
+					result = LNumber.valueOf(m + nextLong(limit));
 				}
 			}
 
@@ -639,7 +637,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.sin(x));
+			return LNumber.valueOf(Math.sin(x));
 		}
 
 	}
@@ -655,7 +653,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.sqrt(x));
+			return LNumber.valueOf(Math.sqrt(x));
 		}
 
 	}
@@ -671,7 +669,7 @@ public class DefaultMathLib extends MathLib {
 
 		@Override
 		protected LNumber op(double x) {
-			return LFloat.valueOf(Math.tan(x));
+			return LNumber.valueOf(Math.tan(x));
 		}
 
 	}

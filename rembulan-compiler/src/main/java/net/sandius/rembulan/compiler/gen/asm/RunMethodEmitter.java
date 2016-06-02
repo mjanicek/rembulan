@@ -5,7 +5,6 @@ import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
 import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.LFloat;
 import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
@@ -538,8 +537,9 @@ public class RunMethodEmitter {
 
 		// TODO: don't unbox and re-box
 		il.add(loadRegister(registerIndex, st, LNumber.class));
-		il.add(BoxedPrimitivesMethods.doubleValue(LNumber.class));
-		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LFloat.class)));
+		il.add(NumberMethods.toFloat());
+//		il.add(BoxedPrimitivesMethods.doubleValue(LNumber.class));
+//		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LNumber.class)));
 		il.add(storeToRegister(registerIndex, st));
 
 		return il;

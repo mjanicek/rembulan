@@ -5,6 +5,7 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
+import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public abstract class NumberMethods {
@@ -13,23 +14,45 @@ public abstract class NumberMethods {
 		// not to be instantiated
 	}
 
-	public static AbstractInsnNode unary(Class clazz, Class resultClazz, String methodName) {
+	public static AbstractInsnNode unary(String methodName) {
 		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(clazz),
+				INVOKESTATIC,
+				Type.getInternalName(LNumber.class),
 				methodName,
 				Type.getMethodDescriptor(
-						Type.getType(resultClazz)),
+						Type.getType(LNumber.class),
+						Type.getType(LNumber.class)),
 				false);
 	}
 
-	public static AbstractInsnNode binary(Class clazz, Class resultClazz, String methodName) {
+	public static AbstractInsnNode binary(String methodName) {
 		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(clazz),
+				INVOKESTATIC,
+				Type.getInternalName(LNumber.class),
 				methodName,
 				Type.getMethodDescriptor(
-						Type.getType(resultClazz),
+						Type.getType(LNumber.class),
+						Type.getType(LNumber.class),
+						Type.getType(LNumber.class)),
+				false);
+	}
+
+	public static AbstractInsnNode toInteger(Class clazz) {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(LNumber.class),
+				"toInteger",
+				Type.getMethodDescriptor(
+						Type.getType(LNumber.class)),
+				false);
+	}
+
+	public static AbstractInsnNode toFloat() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(LNumber.class),
+				"toFloat",
+				Type.getMethodDescriptor(
 						Type.getType(LNumber.class)),
 				false);
 	}

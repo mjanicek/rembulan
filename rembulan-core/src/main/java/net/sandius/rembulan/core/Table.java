@@ -10,14 +10,14 @@ public abstract class Table extends LuaObject {
 	public abstract Object rawget(Object key);
 
 	public Object rawget(int idx) {
-		return rawget(LInteger.valueOf(idx));
+		return rawget(LNumber.valueOf(idx));
 	}
 
 	// must throw an exception when key is nil or NaN
 	public abstract void rawset(Object key, Object value);
 
 	public void rawset(int idx, Object value) {
-		rawset(LInteger.valueOf(idx), value);
+		rawset(LNumber.valueOf(idx), value);
 	}
 
 	public abstract int rawlen();

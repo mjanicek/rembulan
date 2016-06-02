@@ -3,7 +3,6 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LInteger;
 import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.MetatableProvider;
@@ -87,7 +86,7 @@ public class LibUtils {
 			Object arg = args[index];
 			LNumber n = Conversions.objectAsLNumber(arg);
 			if (n != null) {
-				LInteger l = n.asExactInteger();
+				LNumber l = n.asExactInteger();
 				if (l != null) {
 					long ll = l.longValue();
 					if (ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE) {
@@ -114,7 +113,7 @@ public class LibUtils {
 			Object arg = args[index];
 			LNumber n = Conversions.objectAsLNumber(arg);
 			if (n != null) {
-				LInteger l = n.asExactInteger();
+				LNumber l = n.asExactInteger();
 				if (l != null) {
 					return l.longValue();
 				}

@@ -13,17 +13,17 @@ public abstract class ComparisonImplementation {
 
 		@Override
 		public boolean do_eq(Object a, Object b) {
-			return ((LNumber) a).eq((LNumber) b);
+			return LNumber.eq((LNumber) a, (LNumber) b);
 		}
 
 		@Override
 		public boolean do_lt(Object a, Object b) {
-			return ((LNumber) a).lt((LNumber) b);
+			return LNumber.lt((LNumber) a, (LNumber) b);
 		}
 
 		@Override
 		public boolean do_le(Object a, Object b) {
-			return ((LNumber) a).le((LNumber) b);
+			return LNumber.le((LNumber) a, (LNumber) b);
 		}
 
 	}

@@ -15,12 +15,12 @@ public abstract class Conversions {
 	}
 
 	@Deprecated
-	public static LInteger numberAsLong(LNumber n) {
+	public static LNumber numberAsLong(LNumber n) {
 		return n.asExactInteger();
 	}
 
 	public static Integer numberAsInt(LNumber n) {
-		LInteger l = numberAsLong(n);
+		LNumber l = numberAsLong(n);
 		if (l != null) {
 			long ll = l.longValue();
 			return ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE ? (int) ll : null;
@@ -69,11 +69,11 @@ public abstract class Conversions {
 	public static LNumber stringAsLNumber(String s) {
 		Long l = stringAsLong(s);
 		if (l != null) {
-			return LInteger.valueOf(l);
+			return LNumber.valueOf(l);
 		}
 		else {
 			Double d = stringAsDouble(s);
-			return d != null ? LFloat.valueOf(d) : null;
+			return d != null ? LNumber.valueOf(d) : null;
 		}
 	}
 
@@ -156,7 +156,7 @@ public abstract class Conversions {
 		return n;
 	}
 
-	public static LInteger objectAsLong(Object o) {
+	public static LNumber objectAsLong(Object o) {
 		LNumber n = objectAsLNumber(o);
 		return n != null ? numberAsLong(n) : null;
 	}

@@ -111,7 +111,7 @@ public abstract class RawOperators {
 		}
 		else if (a instanceof LNumber && b instanceof LNumber) {
 			// must denote the same mathematical value
-			return ((LNumber) a).eq((LNumber) b);
+			return LNumber.eq((LNumber) a, (LNumber) b);
 		}
 		else if (a instanceof Boolean || a instanceof String || a instanceof Invokable) {
 			// value-based equality

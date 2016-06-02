@@ -7,8 +7,6 @@ import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
 import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.LuaUtils;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
-import net.sandius.rembulan.core.LFloat;
-import net.sandius.rembulan.core.LInteger;
 import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
@@ -211,10 +209,10 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		il.add(new InsnNode(opcode));
 		if (resultIsLong) {
-			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(LInteger.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(LNumber.class)));
 		}
 		else {
-			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LFloat.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LNumber.class)));
 		}
 
 		return il;
@@ -228,10 +226,10 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				resultIsLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE,
 				argsAreLong ? Type.LONG_TYPE : Type.DOUBLE_TYPE));
 		if (resultIsLong) {
-			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(LInteger.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(LNumber.class)));
 		}
 		else {
-			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LFloat.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LNumber.class)));
 		}
 		return il;
 	}
@@ -410,18 +408,19 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		switch (StaticMathImplementation.MAY_BE_INTEGER.opType(st.typeAt(r_arg))) {
 
 			case Integer:
-				add(e.loadRegister(r_arg, st, LInteger.class));
-				add(NumberMethods.unary(LInteger.class, LInteger.class, methodName));
-				break;
-
+//				add(e.loadRegister(r_arg, st, LInteger.class));
+//				add(NumberMethods.unary(LInteger.class, LInteger.class, methodName));
+//				break;
+//
 			case Float:
-				add(e.loadRegister(r_arg, st, LFloat.class));
-				add(NumberMethods.unary(LFloat.class, LFloat.class, methodName));
-				break;
-
+//				add(e.loadRegister(r_arg, st, LFloat.class));
+//				add(NumberMethods.unary(LFloat.class, LFloat.class, methodName));
+//				break;
+//
 			case Number:
 				add(e.loadRegister(r_arg, st, LNumber.class));
-				add(NumberMethods.unary(LNumber.class, LNumber.class, methodName));
+//				add(DispatchMethods.numeric(methodName, 1));
+				add(NumberMethods.unary("unm"));
 				break;
 
 			case Any:
@@ -443,8 +442,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	@Override
 	public void visitBNot(Object id, SlotState st, int r_dest, int r_arg) {
 		if (st.typeAt(r_arg).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-			add(e.loadRegister(r_arg, st, LInteger.class));
-			add(NumberMethods.unary(LInteger.class, LInteger.class, "bnot"));
+			add(e.loadRegister(r_arg, st, LNumber.class));
+//			add(DispatchMethods.numeric("bnot", 1));
+			add(NumberMethods.unary("bnot"));
 		}
 		else {
 			RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();
@@ -478,7 +478,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			add(e.loadRegister(r_arg, st, String.class));
 			add(OperatorMethods.stringLen());
 			add(new InsnNode(I2L));
-			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, LInteger.class));
+			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, LNumber.class));
 		}
 		else {
 			RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();

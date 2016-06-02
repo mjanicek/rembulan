@@ -160,7 +160,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsFloatIfString(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.add(nb));
+			context.getObjectSink().setTo(LNumber.add(na, nb));
 			return null;
 		}
 		else {
@@ -169,7 +169,7 @@ public abstract class Dispatch {
 	}
 
 	public static LNumber add(LNumber a, LNumber b) {
-		return a.add(b);
+		return LNumber.add(a, b);
 	}
 
 	public static Preemption sub(ExecutionContext context, Object a, Object b) {
@@ -177,7 +177,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsFloatIfString(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.sub(nb));
+			context.getObjectSink().setTo(LNumber.sub(na, nb));
 			return null;
 		}
 		else {
@@ -186,7 +186,7 @@ public abstract class Dispatch {
 	}
 
 	public static LNumber sub(LNumber a, LNumber b) {
-		return a.sub(b);
+		return LNumber.sub(a, b);
 	}
 
 	public static Preemption mul(ExecutionContext context, Object a, Object b) {
@@ -194,7 +194,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsFloatIfString(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.mul(nb));
+			context.getObjectSink().setTo(LNumber.mul(na, nb));
 			return null;
 		}
 		else {
@@ -203,7 +203,7 @@ public abstract class Dispatch {
 	}
 
 	public static LNumber mul(LNumber a, LNumber b) {
-		return a.mul(b);
+		return LNumber.mul(a, b);
 	}
 
 	public static Preemption div(ExecutionContext context, Object a, Object b) {
@@ -211,7 +211,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsFloatIfString(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.div(nb));
+			context.getObjectSink().setTo(LNumber.div(na, nb));
 			return null;
 		}
 		else {
@@ -220,7 +220,7 @@ public abstract class Dispatch {
 	}
 
 	public static LNumber div(LNumber a, LNumber b) {
-		return a.div(b);
+		return LNumber.div(a, b);
 	}
 
 	public static Preemption mod(ExecutionContext context, Object a, Object b) {
@@ -228,7 +228,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsFloatIfString(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.mod(nb));
+			context.getObjectSink().setTo(LNumber.mod(na, nb));
 			return null;
 		}
 		else {
@@ -237,7 +237,7 @@ public abstract class Dispatch {
 	}
 
 	public static LNumber mod(LNumber a, LNumber b) {
-		return a.mod(b);
+		return LNumber.mod(a, b);
 	}
 
 	public static Preemption idiv(ExecutionContext context, Object a, Object b) {
@@ -245,7 +245,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsFloatIfString(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.idiv(nb));
+			context.getObjectSink().setTo(LNumber.idiv(na, nb));
 			return null;
 		}
 		else {
@@ -254,7 +254,7 @@ public abstract class Dispatch {
 	}
 
 	public static LNumber idiv(LNumber a, LNumber b) {
-		return a.idiv(b);
+		return LNumber.idiv(a, b);
 	}
 
 	public static Preemption pow(ExecutionContext context, Object a, Object b) {
@@ -262,7 +262,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsFloatIfString(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.pow(nb));
+			context.getObjectSink().setTo(LNumber.pow(na, nb));
 			return null;
 		}
 		else {
@@ -271,7 +271,7 @@ public abstract class Dispatch {
 	}
 
 	public static LNumber pow(LNumber a, LNumber b) {
-		return a.pow(b);
+		return LNumber.pow(a, b);
 	}
 
 	private static Preemption try_mt_bitwise(ExecutionContext context, String event, Object a, Object b) {
@@ -301,7 +301,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsLNumber(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.band(nb));
+			context.getObjectSink().setTo(LNumber.band(na, nb));
 			return null;
 		}
 		else {
@@ -314,7 +314,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsLNumber(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.bor(nb));
+			context.getObjectSink().setTo(LNumber.bor(na, nb));
 			return null;
 		}
 		else {
@@ -327,7 +327,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsLNumber(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.bxor(nb));
+			context.getObjectSink().setTo(LNumber.bxor(na, nb));
 			return null;
 		}
 		else {
@@ -340,7 +340,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsLNumber(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.shl(nb));
+			context.getObjectSink().setTo(LNumber.shl(na, nb));
 			return null;
 		}
 		else {
@@ -353,7 +353,7 @@ public abstract class Dispatch {
 		LNumber nb = Conversions.objectAsLNumber(b);
 
 		if (na != null && nb != null) {
-			context.getObjectSink().setTo(na.shr(nb));
+			context.getObjectSink().setTo(LNumber.shr(na, nb));
 			return null;
 		}
 		else {
@@ -364,7 +364,7 @@ public abstract class Dispatch {
 	public static Preemption unm(ExecutionContext context, Object o) {
 		LNumber no = Conversions.objectAsFloatIfString(o);
 		if (no != null) {
-			context.getObjectSink().setTo(no.unm());
+			context.getObjectSink().setTo(LNumber.unm(no));
 			return null;
 		}
 		else {
@@ -373,14 +373,14 @@ public abstract class Dispatch {
 	}
 
 	public static LNumber unm(LNumber n) {
-		return n.unm();
+		return LNumber.unm(n);
 	}
 
 	public static Preemption bnot(ExecutionContext context, Object o) {
 		LNumber no = Conversions.objectAsLNumber(o);
 
 		if (no != null) {
-			context.getObjectSink().setTo(no.bnot());
+			context.getObjectSink().setTo(LNumber.bnot(no));
 			return null;
 		}
 		else {
@@ -390,7 +390,7 @@ public abstract class Dispatch {
 
 	public static Preemption len(ExecutionContext context, Object o) {
 		if (o instanceof String) {
-			context.getObjectSink().setTo(LInteger.valueOf(RawOperators.stringLen((String) o)));
+			context.getObjectSink().setTo(LNumber.valueOf(RawOperators.stringLen((String) o)));
 			return null;
 		}
 		else {
@@ -399,7 +399,7 @@ public abstract class Dispatch {
 				return call(context, handler, o);
 			}
 			else if (o instanceof Table) {
-				context.getObjectSink().setTo(LInteger.valueOf(((Table) o).rawlen()));
+				context.getObjectSink().setTo(LNumber.valueOf(((Table) o).rawlen()));
 				return null;
 			}
 			else {
@@ -605,7 +605,7 @@ public abstract class Dispatch {
 	}
 
 	private static boolean isNonZero(LNumber n) {
-		return !n.eq(LInteger.ZERO);
+		return !LNumber.eq(LNumber.INTEGER_ZERO, n);
 	}
 
 	public static boolean continueLoop(LNumber index, LNumber limit, LNumber step) {
@@ -613,11 +613,11 @@ public abstract class Dispatch {
 			return false;  // step is zero or NaN
 		}
 
-		boolean ascending = LInteger.ZERO.lt(step);
+		boolean ascending = LNumber.lt(LNumber.INTEGER_ZERO, step);
 
 		return ascending
-				? index.le(limit)
-				: limit.le(index);
+				? LNumber.le(index, limit)
+				: LNumber.le(limit, index);
 	}
 
 }

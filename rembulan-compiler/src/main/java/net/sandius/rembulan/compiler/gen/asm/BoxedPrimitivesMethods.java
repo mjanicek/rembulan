@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.core.LFloat;
-import net.sandius.rembulan.core.LInteger;
+import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -76,26 +75,6 @@ public class BoxedPrimitivesMethods {
 				false);
 	}
 
-	public static AbstractInsnNode toLInteger(Class clazz) {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(clazz),
-				"toInteger",
-				Type.getMethodDescriptor(
-						Type.getType(LInteger.class)),
-				false);
-	}
-
-	public static AbstractInsnNode toLFloat(Class clazz) {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				Type.getInternalName(clazz),
-				"toFloat",
-				Type.getMethodDescriptor(
-						Type.getType(LFloat.class)),
-				false);
-	}
-
 	public static MethodInsnNode box(Type from, Type to) {
 		return new MethodInsnNode(
 				INVOKESTATIC,
@@ -137,11 +116,11 @@ public class BoxedPrimitivesMethods {
 		}
 		else if (k instanceof Double || k instanceof Float) {
 			il.add(ASMUtils.loadDouble(((Number) k).doubleValue()));
-			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LFloat.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(LNumber.class)));
 		}
 		else if (k instanceof Number) {
 			il.add(ASMUtils.loadLong(((Number) k).longValue()));
-			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(LInteger.class)));
+			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(LNumber.class)));
 		}
 		else if (k instanceof String) {
 			il.add(new LdcInsnNode(k));

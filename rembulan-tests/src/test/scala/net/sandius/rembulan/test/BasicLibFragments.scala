@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.core.{LFloat, LInteger}
+import net.sandius.rembulan.core.LNumber
 
 object BasicLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
@@ -211,8 +211,8 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return error()") failsWithLuaError (null)
       program ("return error(nil)") failsWithLuaError (null)
 
-      program ("error(1)") failsWithLuaError (LInteger.valueOf(1))
-      program ("error(1.0)") failsWithLuaError (LFloat.valueOf(1.0))
+      program ("error(1)") failsWithLuaError (LNumber.valueOf(1))
+      program ("error(1.0)") failsWithLuaError (LNumber.valueOf(1.0))
       program ("error(\"boom\")") failsWithLuaError "boom"
 
       program ("return pcall(error)") succeedsWith (false, null)

@@ -62,7 +62,7 @@ public abstract class Value {
 	}
 
 	public static boolean isNaN(Object o) {
-		return o instanceof LFloat && ((LFloat) o).isNaN();
+		return o instanceof LNumber && ((LNumber) o).isNaN();
 	}
 
 	public static double toFloat(Object o) {
