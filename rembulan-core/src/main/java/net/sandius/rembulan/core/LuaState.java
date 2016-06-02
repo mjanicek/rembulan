@@ -65,8 +65,8 @@ public abstract class LuaState implements MetatableProvider, TableFactory, Upval
 		return tableFactory().newTable(array, hash);
 	}
 
-	public void checkCpu(int cost) throws ControlThrowable {
-		preemptionContext().withdraw(cost);
+	public Preemption checkCpu(int cost) {
+		return preemptionContext().withdraw(cost);
 	}
 
 	public abstract PreemptionContext preemptionContext();

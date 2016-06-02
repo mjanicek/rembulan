@@ -168,12 +168,10 @@ object FragmentExecTestSuite {
     var totalCost = 0L
     private var allowance = 0L
 
-    override def withdraw(cost: Int): Unit = {
+    override def withdraw(cost: Int): Preemption = {
       totalCost += cost
       allowance -= cost
-      if (!allowed) {
-        preempt()
-      }
+      if (!allowed) preempt() else null
     }
 
     def deposit(n: Int): Unit = {

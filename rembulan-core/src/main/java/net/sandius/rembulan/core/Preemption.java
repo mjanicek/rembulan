@@ -41,6 +41,10 @@ public abstract class Preemption {
 			super(resumeStack);
 		}
 
+		public Pause() {
+			this(null);
+		}
+
 		@Override
 		public ControlThrowable toControlThrowable() {
 			return new Preempted(resumeStack());
