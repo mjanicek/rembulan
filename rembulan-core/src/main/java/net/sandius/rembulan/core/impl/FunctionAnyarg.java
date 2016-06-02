@@ -1,39 +1,39 @@
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.Preemption;
 
 public abstract class FunctionAnyarg extends Function {
 
 	@Override
-	public void invoke(ExecutionContext context) throws ControlThrowable {
-		invoke(context, new Object[] { });
+	public Preemption invoke(ExecutionContext context) {
+		return invoke(context, new Object[] { });
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
-		invoke(context, new Object[] { arg1 });
+	public Preemption invoke(ExecutionContext context, Object arg1) {
+		return invoke(context, new Object[] { arg1 });
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
-		invoke(context, new Object[] { arg1, arg2 });
+	public Preemption invoke(ExecutionContext context, Object arg1, Object arg2) {
+		return invoke(context, new Object[] { arg1, arg2 });
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3 });
+	public Preemption invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) {
+		return invoke(context, new Object[] { arg1, arg2, arg3 });
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3, arg4 });
+	public Preemption invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) {
+		return invoke(context, new Object[] { arg1, arg2, arg3, arg4 });
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3, arg4, arg5 });
+	public Preemption invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+		return invoke(context, new Object[] { arg1, arg2, arg3, arg4, arg5 });
 	}
 
 }

@@ -1,6 +1,5 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.CoroutineSwitch;
 import net.sandius.rembulan.core.ExecutionContext;
@@ -95,8 +94,9 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
+		public Preemption resumeError(ExecutionContext context, Object suspendedState, Object error) {
 			context.getObjectSink().setTo(Boolean.FALSE, error);
+			return null;
 		}
 
 	}
@@ -210,17 +210,18 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			}
 
 			@Override
-			public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			public Preemption invoke(ExecutionContext context, Object[] args) {
 				context.getObjectSink().reset();
 
 				CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, args);
 				ct.push(this, null);
-				throw ct;
+				return ct.toPreemption();
 			}
 
 			@Override
-			public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			public Preemption resume(ExecutionContext context, Object suspendedState) {
 				// no-op
+				return null;
 			}
 
 		}

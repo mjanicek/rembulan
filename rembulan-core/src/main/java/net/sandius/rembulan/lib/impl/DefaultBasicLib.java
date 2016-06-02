@@ -588,8 +588,9 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
+		public Preemption resumeError(ExecutionContext context, Object suspendedState, Object error) {
 			context.getObjectSink().setTo(Boolean.FALSE, error);
+			return null;
 		}
 
 	}
@@ -700,12 +701,9 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
+		public Preemption resumeError(ExecutionContext context, Object suspendedState, Object error) {
 			SavedState ss = (SavedState) suspendedState;
-			Preemption p = handleError(context, ss.handler, ss.depth, error);
-			if (p != null) {
-				throw p.toControlThrowable();
-			}
+			return handleError(context, ss.handler, ss.depth, error);
 		}
 
 	}

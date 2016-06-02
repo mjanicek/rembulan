@@ -63,9 +63,16 @@ public final class Coroutine {
 		static final BootstrapResumable INSTANCE = new BootstrapResumable();
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			Function target = (Function) suspendedState;
-			Dispatch.call(context, target, context.getObjectSink().toArray());
+			try {
+				Dispatch.call(context, target, context.getObjectSink().toArray());
+			}
+			catch (ControlThrowable ct) {
+				// don't add self
+				return ct.toPreemption();
+			}
+			return null;
 		}
 
 	}

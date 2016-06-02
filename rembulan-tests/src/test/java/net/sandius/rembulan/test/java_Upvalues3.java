@@ -3,6 +3,7 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.core.impl.Function0;
@@ -16,7 +17,7 @@ public class java_Upvalues3 extends Function0 {
 		this._ENV = _ENV;
 	}
 
-	private void run(ExecutionContext context, int rp, Object r_0, Object r_1, Object r_2) throws ControlThrowable {
+	private Preemption run(ExecutionContext context, int rp, Object r_0, Object r_1, Object r_2) {
 		try {
 			switch (rp) {
 				case 0:
@@ -45,7 +46,7 @@ public class java_Upvalues3 extends Function0 {
 						r_2 = ((Upvalue) r_0).get();
 					}
 					context.getObjectSink().setTo(r_2);
-					return;
+					return null;
 
 				default:
 					throw new IllegalStateException();
@@ -53,7 +54,7 @@ public class java_Upvalues3 extends Function0 {
 		}
 		catch (ControlThrowable ct) {
 			ct.push(this, snapshot(rp, r_0, r_1, r_2));
-			throw ct;
+			return ct.toPreemption();
 		}
 	}
 
@@ -62,15 +63,15 @@ public class java_Upvalues3 extends Function0 {
 	}
 
 	@Override
-	public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+	public Preemption resume(ExecutionContext context, Object suspendedState) {
 		DefaultSavedState ss = (DefaultSavedState) suspendedState;
 		Object[] regs = ss.registers();
-		run(context, ss.resumptionPoint(), regs[0], regs[1], regs[2]);
+		return run(context, ss.resumptionPoint(), regs[0], regs[1], regs[2]);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context) throws ControlThrowable {
-		run(context, 0, null, null, null);
+	public Preemption invoke(ExecutionContext context) {
+		return run(context, 0, null, null, null);
 	}
 
 	public static class f1 extends Function0 {
@@ -82,19 +83,20 @@ public class java_Upvalues3 extends Function0 {
 			this.x = x;
 		}
 
-		private void run(ExecutionContext context, int rp, Object r_0, Object r_1) throws ControlThrowable {
+		private Preemption run(ExecutionContext context, int rp, Object r_0, Object r_1) {
 			r_0 = x.get();
 			context.getObjectSink().setTo(r_0);
+			return null;
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void invoke(ExecutionContext context) throws ControlThrowable {
-			run(context, 0, null, null);
+		public Preemption invoke(ExecutionContext context) {
+			return run(context, 0, null, null);
 		}
 
 	}
@@ -108,19 +110,20 @@ public class java_Upvalues3 extends Function0 {
 			this.y = y;
 		}
 
-		private void run(ExecutionContext context, int rp, Object r_0, Object r_1) throws ControlThrowable {
+		private Preemption run(ExecutionContext context, int rp, Object r_0, Object r_1) {
 			r_0 = y.get();
 			context.getObjectSink().setTo(r_0);
+			return null;
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void invoke(ExecutionContext context) throws ControlThrowable {
-			run(context, 0, null, null);
+		public Preemption invoke(ExecutionContext context) {
+			return run(context, 0, null, null);
 		}
 
 	}

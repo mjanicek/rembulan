@@ -166,25 +166,20 @@ public abstract class LibFunction extends FunctionAnyarg {
 	protected abstract String name();
 
 	@Override
-	public final void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+	public final Preemption invoke(ExecutionContext context, Object[] args) {
 		CallArguments callArgs = new CallArguments(new LibUtils.NameMetamethodValueTypeNamer(context.getState()), name(), args);
-		Preemption p = invoke(context, callArgs);
-		if (p != null) {
-			throw p.toControlThrowable();
-		}
+		return invoke(context, callArgs);
 	}
 
 	@Override
-	public final void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-		Preemption p = _resume(context, suspendedState);
-		if (p != null) {
-			throw p.toControlThrowable();
-		}
+	public final Preemption resume(ExecutionContext context, Object suspendedState) {
+		return _resume(context, suspendedState);
 	}
 
-	protected abstract Preemption invoke(ExecutionContext context, CallArguments args) throws ControlThrowable;
+	protected abstract Preemption invoke(ExecutionContext context, CallArguments args);
 
 	// TODO: rename to resume() once the transition is done
+	@Deprecated
 	protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 		throw new NonsuspendableFunctionException(this.getClass());
 	}

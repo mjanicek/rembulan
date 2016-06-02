@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Invokable;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.alt.AltOperators;
 import net.sandius.rembulan.core.impl.Function2;
 import net.sandius.rembulan.core.impl.Function3;
@@ -204,21 +205,23 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
+		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2) {
 			Invokable f = (Invokable) arg1;
 			long l = ((Number) arg2).longValue();
 			if (l > 0) {
 				f.invoke(context, f, l - 1);
 				Number m = (Number) context.getObjectSink()._0();
 				context.getObjectSink().setTo(m.longValue() + 1);
+				return null;
 			}
 			else {
 				context.getObjectSink().setTo(n);
+				return null;
 			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -232,29 +235,39 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private Preemption run(ExecutionContext context, int pc, Object r_0, Object r_1) {
 			switch (pc) {
 				case 0:
 				case 1:
 					long l = ((Number) r_1).longValue();
 					if (l > 0) {
-						Dispatch.call(context, r_0, r_0, l - 1);
+						try {
+							Dispatch.call(context, r_0, r_0, l - 1);
+						}
+						catch (ControlThrowable ct) {
+							ct.push(this, null);
+							return ct.toPreemption();
+						}
 						Number m = (Number) context.getObjectSink()._0();
 						context.getObjectSink().setTo(m.longValue() + 1);
+						return null;
 					}
 					else {
 						context.getObjectSink().setTo(n);
+						return null;
 					}
+				default:
+					throw new IllegalStateException();
 			}
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
-			run(context, 0, arg1, arg2);
+		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2) {
+			return run(context, 0, arg1, arg2);
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -284,12 +297,13 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) {
 			run(context, 0, arg1, arg2, arg3);
+			return null;
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -303,7 +317,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -319,12 +333,13 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
+		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2) {
 			run(context, 0, arg1, arg2);
+			return null;
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -395,12 +410,18 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
-			run(context, 0, arg1, arg2);
+		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2) {
+			try {
+				run(context, 0, arg1, arg2);
+				return null;
+			}
+			catch (ControlThrowable ct) {
+				return ct.toPreemption();
+			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -435,12 +456,18 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
-			run(context, 0, arg1, arg2);
+		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2) {
+			try {
+				run(context, 0, arg1, arg2);
+				return null;
+			}
+			catch (ControlThrowable ct) {
+				return ct.toPreemption();
+			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -474,12 +501,13 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) {
 			run(context, 0, arg1, arg2, arg3);
+			return null;
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -513,12 +541,13 @@ public class CallReturnBenchmark {
 		}
 
 		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) {
 			run(context, 0, arg1, arg2, arg3);
+			return null;
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			throw new UnsupportedOperationException();
 		}
 

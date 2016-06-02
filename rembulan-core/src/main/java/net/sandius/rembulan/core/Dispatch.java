@@ -402,11 +402,12 @@ public abstract class Dispatch {
 	private static class ComparisonResumable implements Resumable {
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			Boolean b = (Boolean) suspendedState;
 			ObjectSink result = context.getObjectSink();
 			boolean resultValue = Conversions.objectToBoolean(result._0());
 			result.setTo(b == resultValue);
+			return null;
 		}
 
 	}

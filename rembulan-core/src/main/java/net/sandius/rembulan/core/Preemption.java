@@ -28,6 +28,12 @@ public abstract class Preemption {
 
 	public abstract ControlThrowable toControlThrowable();
 
+	public static void throwIfNonNull(Preemption p) throws ControlThrowable {
+		if (p != null) {
+			throw p.toControlThrowable();
+		}
+	}
+
 	public static class Pause extends Preemption {
 
 		Pause(Cons<ResumeInfo> resumeStack) {

@@ -1,7 +1,6 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
@@ -725,7 +724,7 @@ public class DefaultStringLib extends StringLib {
 			}
 
 			@Override
-			public void invoke(ExecutionContext context) throws ControlThrowable {
+			public Preemption invoke(ExecutionContext context) {
 				final String[] fullMatch = new String[] { null };
 				final ArrayList<Object> captures = new ArrayList<>();
 
@@ -755,6 +754,7 @@ public class DefaultStringLib extends StringLib {
 				if (nextIndex < 1) {
 					// no match
 					context.getObjectSink().reset();
+					return null;
 				}
 				else {
 					// match
@@ -767,11 +767,12 @@ public class DefaultStringLib extends StringLib {
 							context.getObjectSink().push(c);
 						}
 					}
+					return null;
 				}
 			}
 
 			@Override
-			public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			public Preemption resume(ExecutionContext context, Object suspendedState) {
 				throw new NonsuspendableFunctionException(this.getClass());
 			}
 		}
