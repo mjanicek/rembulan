@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.CoroutineSwitch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
 import net.sandius.rembulan.lib.CoroutineLib;
@@ -57,10 +58,11 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Function func = args.nextFunction();
 			Coroutine c = context.newCoroutine(func);
 			context.getObjectSink().setTo(c);
+			return null;
 		}
 
 	}
@@ -75,7 +77,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Coroutine coroutine = args.nextCoroutine();
 			Object[] resumeArgs = args.getTail();
 
@@ -83,13 +85,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 			CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, resumeArgs);
 			ct.push(this, null);
-
-			throw ct;
+			return ct.toPreemption();
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			context.getObjectSink().prepend(Boolean.TRUE);
+			return null;
 		}
 
 		@Override
@@ -109,15 +111,16 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			CoroutineSwitch.Yield ct = new CoroutineSwitch.Yield(args.getAll());
 			ct.push(this, null);
-			throw ct;
+			return ct.toPreemption();
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			// no-op, the resume arguments are on the stack already
+			return null;
 		}
 
 	}
@@ -132,8 +135,9 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			context.getObjectSink().setTo(context.canYield());
+			return null;
 		}
 
 	}
@@ -165,9 +169,10 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Coroutine coroutine = args.nextCoroutine();
 			context.getObjectSink().setTo(status(context, coroutine));
+			return null;
 		}
 
 	}
@@ -182,9 +187,10 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Coroutine c = context.getCurrentCoroutine();
 			context.getObjectSink().setTo(c, !c.canYield());
+			return null;
 		}
 
 	}
@@ -225,10 +231,11 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Function f = args.nextFunction();
 			Function result = new WrappedCoroutine(f, context);
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}

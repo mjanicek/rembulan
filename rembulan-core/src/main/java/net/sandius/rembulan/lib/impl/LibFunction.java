@@ -7,6 +7,8 @@ import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.core.Preempted;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
@@ -164,15 +166,26 @@ public abstract class LibFunction extends FunctionAnyarg {
 	protected abstract String name();
 
 	@Override
-	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+	public final void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 		CallArguments callArgs = new CallArguments(new LibUtils.NameMetamethodValueTypeNamer(context.getState()), name(), args);
-		invoke(context, callArgs);
+		Preemption p = invoke(context, callArgs);
+		if (p != null) {
+			throw p.toControlThrowable();
+		}
 	}
 
-	protected abstract void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable;
-
 	@Override
-	public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+	public final void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		Preemption p = _resume(context, suspendedState);
+		if (p != null) {
+			throw p.toControlThrowable();
+		}
+	}
+
+	protected abstract Preemption invoke(ExecutionContext context, CallArguments args) throws ControlThrowable;
+
+	// TODO: rename to resume() once the transition is done
+	protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 		throw new NonsuspendableFunctionException(this.getClass());
 	}
 

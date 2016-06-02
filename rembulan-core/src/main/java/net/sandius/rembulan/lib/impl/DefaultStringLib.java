@@ -9,6 +9,7 @@ import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.LInteger;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.impl.Function0;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.StringLib;
@@ -151,7 +152,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			int i = args.optNextInt(1);
 			int j = args.optNextInt(i);
@@ -168,6 +169,8 @@ public class DefaultStringLib extends StringLib {
 				char c = s.charAt(idx - 1);
 				context.getObjectSink().push(LInteger.valueOf(c));
 			}
+
+			return null;
 		}
 
 	}
@@ -182,7 +185,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			char[] chars = new char[args.size()];
 
 			for (int i = 0; i < chars.length; i++) {
@@ -191,6 +194,7 @@ public class DefaultStringLib extends StringLib {
 
 			String s = String.valueOf(chars);
 			context.getObjectSink().setTo(s);
+			return null;
 		}
 
 	}
@@ -205,7 +209,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Function f = args.nextFunction();
 			boolean strip = Conversions.objectToBoolean(args.optNextAny());
 
@@ -224,7 +228,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			String pattern = args.nextString();
 			int init = args.optNextInt(1);
@@ -237,9 +241,11 @@ public class DefaultStringLib extends StringLib {
 				int at = s.indexOf(pattern, init - 1);
 				if (at >= 0) {
 					context.getObjectSink().setTo(at + 1, at + pattern.length());
+					return null;
 				}
 				else {
 					context.getObjectSink().setTo(null);
+					return null;
 				}
 			}
 			else {
@@ -266,6 +272,7 @@ public class DefaultStringLib extends StringLib {
 				if (nextIndex < 1) {
 					// pattern not found
 					context.getObjectSink().setTo(null);
+					return null;
 				}
 				else {
 					// pattern found
@@ -277,6 +284,7 @@ public class DefaultStringLib extends StringLib {
 					for (Object c : captures) {
 						objectSink.push(c);
 					}
+					return null;
 				}
 			}
 		}
@@ -675,7 +683,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String fmt = args.nextString();
 
 			StringBuilder bld = new StringBuilder();
@@ -689,12 +697,13 @@ public class DefaultStringLib extends StringLib {
 			} while (idx >= 0);
 
 			context.getObjectSink().setTo(bld.toString());
+			return null;
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			// TODO: needed for tostring
-			super.resume(context, suspendedState);
+			return super._resume(context, suspendedState);
 		}
 
 	}
@@ -773,7 +782,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			String pattern = args.nextString();
 
@@ -782,6 +791,7 @@ public class DefaultStringLib extends StringLib {
 			Function f = new IteratorFunction(s, pat);
 
 			context.getObjectSink().setTo(f);
+			return null;
 		}
 
 	}
@@ -796,9 +806,10 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			context.getObjectSink().setTo(LInteger.valueOf(s.length()));
+			return null;
 		}
 
 	}
@@ -813,9 +824,10 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			context.getObjectSink().setTo(s.toLowerCase());
+			return null;
 		}
 
 	}
@@ -830,7 +842,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			String pattern = args.nextString();
 			int init = args.optNextInt(1);
@@ -857,6 +869,7 @@ public class DefaultStringLib extends StringLib {
 			if (nextIndex < 1) {
 				// no match found
 				context.getObjectSink().setTo(null);
+				return null;
 			}
 			else {
 				// match was found
@@ -870,6 +883,7 @@ public class DefaultStringLib extends StringLib {
 						context.getObjectSink().push(c);
 					}
 				}
+				return null;
 			}
 		}
 
@@ -885,7 +899,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			int n = args.nextInt();
 			String sep = args.optNextString("");
@@ -908,6 +922,7 @@ public class DefaultStringLib extends StringLib {
 			}
 
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -922,7 +937,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 
 			int len = s.length();
@@ -935,6 +950,7 @@ public class DefaultStringLib extends StringLib {
 			String result = String.valueOf(chars);
 
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -949,7 +965,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			int i = args.nextInt();
 			int j = args.optNextInt(-1);
@@ -961,6 +977,7 @@ public class DefaultStringLib extends StringLib {
 			String result = s.substring(i, j);
 
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -975,9 +992,10 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String s = args.nextString();
 			context.getObjectSink().setTo(s.toUpperCase());
+			return null;
 		}
 
 	}

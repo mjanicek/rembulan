@@ -8,6 +8,7 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LFloat;
 import net.sandius.rembulan.core.LInteger;
 import net.sandius.rembulan.core.LNumber;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.MathLib;
 import net.sandius.rembulan.util.Check;
@@ -170,10 +171,11 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			LNumber x = args.nextNumber();
 			LNumber result = x.isFloat() ? op(x.doubleValue()) : op(x.longValue());
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -352,7 +354,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			LNumber x = args.nextNumber();
 			LNumber y = args.nextNumber();
 
@@ -374,6 +376,7 @@ public class DefaultMathLib extends MathLib {
 			}
 
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -388,7 +391,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			LNumber x = args.nextNumber();
 			double ln = Math.log(x.doubleValue());
 			final double result;
@@ -404,6 +407,7 @@ public class DefaultMathLib extends MathLib {
 			}
 
 			context.getObjectSink().setTo(LFloat.valueOf(result));
+			return null;
 		}
 
 	}
@@ -438,7 +442,7 @@ public class DefaultMathLib extends MathLib {
 			return isMax ? "max" : "min";
 		}
 
-		private void run(ExecutionContext context, Object[] args, int idx, Object best) throws ControlThrowable {
+		private Preemption run(ExecutionContext context, Object[] args, int idx, Object best) {
 			for ( ; idx < args.length; idx++) {
 				Object o = args[idx];
 
@@ -452,7 +456,7 @@ public class DefaultMathLib extends MathLib {
 				}
 				catch (ControlThrowable ct) {
 					ct.push(this, new State(args, idx, best));
-					throw ct;
+					return ct.toPreemption();
 				}
 
 				if (Conversions.objectToBoolean(context.getObjectSink()._0())) {
@@ -462,16 +466,17 @@ public class DefaultMathLib extends MathLib {
 
 			// we're done
 			context.getObjectSink().setTo(best);
+			return null;
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object initial = args.nextAny();
-			run(context, args.getAll(), 1, initial);
+			return run(context, args.getAll(), 1, initial);
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			State ss = (State) suspendedState;
 
 			Object[] args = ss.args;
@@ -483,7 +488,7 @@ public class DefaultMathLib extends MathLib {
 				best = args[idx];
 			}
 
-			run(context, args, idx + 1, best);
+			return run(context, args, idx + 1, best);
 		}
 
 	}
@@ -498,13 +503,14 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			LNumber x = args.nextNumber();
 
 			long intPart = x.longValue();
 			double fltPart = x.doubleValue() - intPart;
 
 			context.getObjectSink().setTo(LInteger.valueOf(intPart), LFloat.valueOf(fltPart));
+			return null;
 		}
 
 	}
@@ -556,7 +562,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			final LNumber result;
 
 			if (!args.hasNext()) {
@@ -592,6 +598,7 @@ public class DefaultMathLib extends MathLib {
 			}
 
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -610,7 +617,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			LNumber arg = args.nextNumber();
 
 			long seed = arg.isFloat()
@@ -620,6 +627,7 @@ public class DefaultMathLib extends MathLib {
 			random.setSeed(seed);
 
 			context.getObjectSink().reset();
+			return null;
 		}
 
 	}
@@ -682,9 +690,10 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object x = args.nextAny();
 			context.getObjectSink().setTo(Conversions.objectAsLong(x));
+			return null;
 		}
 
 	}
@@ -699,7 +708,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object x = args.nextAny();
 
 			String result = x instanceof LNumber
@@ -709,6 +718,7 @@ public class DefaultMathLib extends MathLib {
 					: null;
 
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -723,10 +733,11 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			long x = args.nextInteger();
 			long y = args.nextInteger();
 			context.getObjectSink().setTo((x - y) < 0);
+			return null;
 		}
 
 	}

@@ -13,6 +13,7 @@ import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.PlainValueTypeNamer;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
@@ -160,7 +161,7 @@ public class DefaultBasicLib extends BasicLib {
 			return "print";
 		}
 
-		private void run(ExecutionContext context, Object[] args) throws ControlThrowable {
+		private Preemption run(ExecutionContext context, Object[] args) {
 			for (int i = 0; i < args.length; i++) {
 				Object a = args[i];
 				try {
@@ -168,7 +169,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 				catch (ControlThrowable ct) {
 					ct.push(this, Varargs.from(args, i + 1));
-					throw ct;
+					return ct.toPreemption();
 				}
 
 				Object s = context.getObjectSink()._0();
@@ -187,16 +188,17 @@ public class DefaultBasicLib extends BasicLib {
 
 			// returning nothing
 			context.getObjectSink().setTo();
+			return null;
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			run(context, args.args);
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
+			return run(context, args.args);
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			run(context, (Object[]) suspendedState);
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
+			return run(context, (Object[]) suspendedState);
 		}
 
 	}
@@ -211,9 +213,10 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
 			context.getObjectSink().setTo(typeName);
+			return null;
 		}
 
 	}
@@ -228,7 +231,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Table table = args.nextTable();
 			Object index = args.optNextAny();
 
@@ -244,10 +247,12 @@ public class DefaultBasicLib extends BasicLib {
 			if (nxt == null) {
 				// we've reached the end
 				context.getObjectSink().setTo(null);
+				return null;
 			}
 			else {
 				Object value = table.rawget(nxt);
 				context.getObjectSink().setTo(nxt, value);
+				return null;
 			}
 		}
 
@@ -263,7 +268,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Table table = args.nextTable();
 			int index = args.nextInt();
 
@@ -272,9 +277,11 @@ public class DefaultBasicLib extends BasicLib {
 			Object o = table.rawget(index);
 			if (o != null) {
 				context.getObjectSink().setTo(LInteger.valueOf(index), o);
+				return null;
 			}
 			else {
 				context.getObjectSink().setTo(null);
+				return null;
 			}
 		}
 
@@ -290,7 +297,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Table t = args.nextTable();
 			Object metamethod = Metatables.getMetamethod(context.getState(), MT_PAIRS, t);
 
@@ -300,22 +307,25 @@ public class DefaultBasicLib extends BasicLib {
 				}
 				catch (ControlThrowable ct) {
 					ct.push(this, null);
-					throw ct;
+					return ct.toPreemption();
 				}
 
 				ObjectSink os = context.getObjectSink();
 				os.setTo(os._0(), os._1(), os._2());
+				return null;
 			}
 			else {
 				ObjectSink os = context.getObjectSink();
 				os.setTo(Next.INSTANCE, t, null);
+				return null;
 			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			ObjectSink os = context.getObjectSink();
 			os.setTo(os._0(), os._1(), os._2());
+			return null;
 		}
 
 	}
@@ -330,9 +340,10 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Table t = args.nextTable();
 			context.getObjectSink().setTo(INext.INSTANCE, t, LInteger.ZERO);
+			return null;
 		}
 
 	}
@@ -351,7 +362,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object arg = args.nextAny();
 
 			Object meta = Metatables.getMetamethod(context.getState(), MT_TOSTRING, arg);
@@ -361,24 +372,26 @@ public class DefaultBasicLib extends BasicLib {
 				}
 				catch (ControlThrowable ct) {
 					ct.push(this, null);
-					throw ct;
+					return ct.toPreemption();
 				}
 
 				// resume
-				resume(context, null);
+				return _resume(context, null);
 			}
 			else {
 				// no metamethod, just call the default toString
 				String s = toString(arg);
 				context.getObjectSink().setTo(s);
+				return null;
 			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			// trim to single value
 			Object result = context.getObjectSink()._0();
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -402,12 +415,13 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			if (args.size() < 2) {
 				// no base
 				Object o = args.nextAny();
 				LNumber n = Conversions.objectAsLNumber(o);
 				context.getObjectSink().setTo(n);
+				return null;
 			}
 			else {
 				// first get the base, then retrieve the string, then check the base value
@@ -421,7 +435,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 
 				context.getObjectSink().setTo(toNumber(s, base));
-
+				return null;
 			}
 		}
 
@@ -438,7 +452,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object arg = args.nextAny();
 			Object meta = Metatables.getMetamethod(context.getState(), MT_METATABLE, arg);
 
@@ -447,6 +461,7 @@ public class DefaultBasicLib extends BasicLib {
 					: context.getState().getMetatable(arg);  // return the entire metatable
 
 			context.getObjectSink().setTo(result);
+			return null;
 		}
 
 	}
@@ -461,7 +476,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Table t = args.nextTable();
 			Table mt = args.nextTableOrNil();
 
@@ -471,6 +486,7 @@ public class DefaultBasicLib extends BasicLib {
 			else {
 				t.setMetatable(mt);
 				context.getObjectSink().setTo(t);
+				return null;
 			}
 		}
 
@@ -486,7 +502,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			// TODO: handle levels
 			Object arg1 = args.optNextAny();
 			throw new LuaRuntimeException(arg1);
@@ -504,9 +520,10 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			if (Conversions.objectToBoolean(args.nextAny())) {
 				context.getObjectSink().setToArray(args.getAll());
+				return null;
 			}
 			else {
 				final AssertionFailedException ex;
@@ -543,7 +560,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object callTarget = args.nextAny();
 			Object[] callArgs = args.getTail();
 
@@ -552,20 +569,22 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			catch (ControlThrowable ct) {
 				ct.push(this, null);
-				throw ct;
+				return ct.toPreemption();
 			}
 			catch (Exception ex) {
 				context.getObjectSink().setTo(Boolean.FALSE, Conversions.throwableToObject(ex));  // failure
-				return;
+				return null;
 			}
 
 			context.getObjectSink().prepend(Boolean.TRUE);  // success
+			return null;
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			// success
 			context.getObjectSink().prepend(Boolean.TRUE);
+			return null;
 		}
 
 		@Override
@@ -606,7 +625,7 @@ public class DefaultBasicLib extends BasicLib {
 			os.setTo(Boolean.FALSE, errorObject);
 		}
 
-		private void handleError(ExecutionContext context, Function handler, int depth, Object errorObject) throws ControlThrowable {
+		private Preemption handleError(ExecutionContext context, Function handler, int depth, Object errorObject) {
 			// we want to be able to handle nil error objects, so we need a separate flag
 			boolean isError = true;
 
@@ -619,7 +638,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 				catch (ControlThrowable ct) {
 					ct.push(this, new SavedState(handler, depth));
-					throw ct;
+					return ct.toPreemption();
 				}
 				catch (Exception e) {
 					errorObject = Conversions.throwableToObject(e);
@@ -629,15 +648,17 @@ public class DefaultBasicLib extends BasicLib {
 
 			if (!isError) {
 				prependFalseAndTrim(context);
+				return null;
 			}
 			else {
 				// depth must be >= MAX_DEPTH
 				context.getObjectSink().setTo(Boolean.FALSE, "error in error handling");
+				return null;
 			}
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object callTarget = args.optNextAny();
 			Function handler = args.nextFunction();
 			Object[] callArgs = args.getTail();
@@ -658,27 +679,33 @@ public class DefaultBasicLib extends BasicLib {
 
 			if (!isError) {
 				prependTrue(context);
+				return null;
 			}
 			else {
-				handleError(context, handler, 0, errorObject);
+				return handleError(context, handler, 0, errorObject);
 			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			SavedState ss = (SavedState) suspendedState;
 			if (ss.depth == 0) {
 				prependTrue(context);
+				return null;
 			}
 			else {
 				prependFalseAndTrim(context);
+				return null;
 			}
 		}
 
 		@Override
 		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
 			SavedState ss = (SavedState) suspendedState;
-			handleError(context, ss.handler, ss.depth, error);
+			Preemption p = handleError(context, ss.handler, ss.depth, error);
+			if (p != null) {
+				throw p.toControlThrowable();
+			}
 		}
 
 	}
@@ -693,10 +720,11 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object a = args.nextAny();
 			Object b = args.nextAny();
 			context.getObjectSink().setTo(RawOperators.raweq(a, b));
+			return null;
 		}
 
 	}
@@ -711,10 +739,11 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Table table = args.nextTable();
 			Object key = args.nextAny();
 			context.getObjectSink().setTo(table.rawget(key));
+			return null;
 		}
 
 	}
@@ -729,13 +758,14 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Table table = args.nextTable();
 			Object key = args.nextAny();
 			Object value = args.nextAny();
 
 			table.rawset(key, value);
 			context.getObjectSink().setTo(table);
+			return null;
 		}
 
 	}
@@ -750,7 +780,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			final long result;
 
 			// no need to distinguish missing value vs nil
@@ -769,6 +799,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 
 			context.getObjectSink().setTo(LInteger.valueOf(result));
+			return null;
 		}
 
 	}
@@ -783,12 +814,13 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			Object index = args.optNextAny();
 
 			if (index instanceof String && ((String) index).startsWith("#")) {
 				// return the number of remaining args
 				context.getObjectSink().setTo(LInteger.valueOf(args.tailSize()));
+				return null;
 			}
 			else {
 				args.reset();
@@ -803,6 +835,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 
 				context.getObjectSink().setToArray(Varargs.from(args.getAll(), from));
+				return null;
 			}
 		}
 

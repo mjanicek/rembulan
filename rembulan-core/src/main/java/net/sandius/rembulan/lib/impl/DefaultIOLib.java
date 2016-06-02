@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.Metatables;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Userdata;
@@ -226,10 +227,10 @@ public class DefaultIOLib extends IOLib {
 			}
 
 			@Override
-			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			protected Preemption invoke(ExecutionContext context, CallArguments args) {
 				IOFile f = nextFile(args);
-				System.out.println("YO!\t" + f.toString());
 				context.getObjectSink().setTo(f.toString());
+				return null;
 			}
 
 		}
@@ -244,7 +245,7 @@ public class DefaultIOLib extends IOLib {
 			}
 
 			@Override
-			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			protected Preemption invoke(ExecutionContext context, CallArguments args) {
 				IOFile f = nextFile(args);
 
 				while (args.hasNext()) {
@@ -259,6 +260,7 @@ public class DefaultIOLib extends IOLib {
 					}
 				}
 
+				return null;
 			}
 
 		}
@@ -288,7 +290,7 @@ public class DefaultIOLib extends IOLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			if (args.hasNext()) {
 				// open the argument for writing and set it as the default output file
 				throw new UnsupportedOperationException();  // TODO
@@ -297,6 +299,7 @@ public class DefaultIOLib extends IOLib {
 				// return the default output file
 				IOFile outFile = lib.getDefaultOutputFile();
 				context.getObjectSink().setTo(outFile);
+				return null;
 			}
 		}
 
@@ -316,7 +319,7 @@ public class DefaultIOLib extends IOLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected Preemption invoke(ExecutionContext context, CallArguments args) {
 			IOFile outFile = lib.getDefaultOutputFile();
 
 			Object[] writeCallArgs = Varargs.concat(new Object[] { outFile }, args.getAll());
@@ -326,15 +329,16 @@ public class DefaultIOLib extends IOLib {
 			}
 			catch (ControlThrowable ct) {
 				ct.push(this, outFile);
-				throw ct;
+				return ct.toPreemption();
 			}
 
-			resume(context, outFile);
+			return _resume(context, outFile);
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		protected Preemption _resume(ExecutionContext context, Object suspendedState) {
 			// results are already on the stack, this is a no-op
+			return null;
 		}
 
 	}
