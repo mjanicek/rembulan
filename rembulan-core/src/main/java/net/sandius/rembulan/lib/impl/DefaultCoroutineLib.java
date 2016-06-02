@@ -1,7 +1,6 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.Coroutine;
-import net.sandius.rembulan.core.CoroutineSwitch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.Preemption;
@@ -82,9 +81,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 			context.getObjectSink().reset();
 
-			CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, resumeArgs);
-			ct.push(this, null);
-			return ct.toPreemption();
+			Preemption.CoroutineSwitch.Resume p = new Preemption.CoroutineSwitch.Resume(coroutine, resumeArgs);
+			return p.push(this, null);
 		}
 
 		@Override
@@ -112,9 +110,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		protected Preemption invoke(ExecutionContext context, CallArguments args) {
-			CoroutineSwitch.Yield ct = new CoroutineSwitch.Yield(args.getAll());
-			ct.push(this, null);
-			return ct.toPreemption();
+			Preemption.CoroutineSwitch.Yield p = new Preemption.CoroutineSwitch.Yield(args.getAll());
+			return p.push(this, null);
 		}
 
 		@Override
@@ -212,10 +209,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			@Override
 			public Preemption invoke(ExecutionContext context, Object[] args) {
 				context.getObjectSink().reset();
-
-				CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, args);
-				ct.push(this, null);
-				return ct.toPreemption();
+				Preemption.CoroutineSwitch.Resume p = new Preemption.CoroutineSwitch.Resume(coroutine, args);
+				return p.push(this, null);
 			}
 
 			@Override

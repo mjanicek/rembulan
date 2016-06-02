@@ -64,9 +64,13 @@ public abstract class Preemption {
 
 			private final Object[] args;
 
-			public Yield(Cons<ResumeInfo> resumeStack, Object[] args) {
+			Yield(Cons<ResumeInfo> resumeStack, Object[] args) {
 				super(resumeStack);
 				this.args = Check.notNull(args);
+			}
+
+			public Yield(Object[] args) {
+				this(null, args);
 			}
 
 			@Override
@@ -86,10 +90,14 @@ public abstract class Preemption {
 			private final Coroutine coroutine;
 			private final Object[] args;
 
-			public Resume(Cons<ResumeInfo> resumeStack, Coroutine coroutine, Object[] args) {
+			Resume(Cons<ResumeInfo> resumeStack, Coroutine coroutine, Object[] args) {
 				super(resumeStack);
 				this.coroutine = Check.notNull(coroutine);
 				this.args = Check.notNull(args);
+			}
+
+			public Resume(Coroutine coroutine, Object[] args) {
+				this(null, coroutine, args);
 			}
 
 			public Coroutine target() {
