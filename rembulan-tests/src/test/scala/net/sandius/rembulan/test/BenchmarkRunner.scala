@@ -16,8 +16,8 @@ import scala.util.Try
 object BenchmarkRunner {
 
   case class Benchmark(fileName: String) {
-    def go(prefix: String, args: String*): Unit = {
-      doFile(prefix, fileName, args:_*)
+    def go(prefix: String, stepSize: Int, args: String*): Unit = {
+      doFile(prefix, stepSize, fileName, args:_*)
     }
   }
 
@@ -85,8 +85,7 @@ object BenchmarkRunner {
     result
   }
 
-  def doFile(prefix: String, filename: String, args: String*): Unit = {
-    val stepSize = 1000000
+  def doFile(prefix: String, stepSize: Int, filename: String, args: String*): Unit = {
     val pc = new CountingPreemptionContext()
 
     val exec = timed (prefix + "init") {
@@ -140,11 +139,15 @@ object BenchmarkRunner {
   val NumOfRunsPropertyName = "numRuns"
   val DefaultNumOfRuns = 3
 
+  val StepSizePropertyName = "stepSize"
+  val DefaultStepSize = 1000000
+
   def main(args: Array[String]): Unit = {
 
     getSetup(args) match {
       case Some(setup) =>
         val numRuns = intProperty(NumOfRunsPropertyName, DefaultNumOfRuns)
+        val stepSize = intProperty(StepSizePropertyName, DefaultStepSize)
 
         val bm = Benchmark(dirPrefix + setup.benchmarkFile)
 
@@ -155,17 +158,19 @@ object BenchmarkRunner {
         }
         println("}")
         println("numRuns = " + numRuns)
+        println("stepSize = " + stepSize)
         println()
 
         for (i <- 1 to numRuns) {
           val prefix = s"#$i\t"
-          bm.go(prefix, setup.args:_*)
+          bm.go(prefix, stepSize, setup.args:_*)
         }
 
 
       case None =>
         println("Usage: java " + getClass.getName + " BENCHMARK-FILE [ARG[S...]]")
         println("Use the \"" + NumOfRunsPropertyName + "\" VM property to set the number of runs (default is " + DefaultNumOfRuns + ").")
+        println("        \"" + StepSizePropertyName + "\" VM property to set the number of runs (default is " + DefaultStepSize + ").")
         System.exit(1)
     }
 
