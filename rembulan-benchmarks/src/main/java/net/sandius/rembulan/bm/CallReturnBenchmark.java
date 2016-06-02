@@ -241,12 +241,12 @@ public class CallReturnBenchmark {
 				case 1:
 					long l = ((Number) r_1).longValue();
 					if (l > 0) {
-						try {
-							Dispatch.call(context, r_0, r_0, l - 1);
-						}
-						catch (ControlThrowable ct) {
-							ct.push(this, null);
-							return ct.toPreemption();
+						{
+							Preemption p = Dispatch.call(context, r_0, r_0, l - 1);
+							if (p != null) {
+								p.push(this, null);
+								return p;
+							}
 						}
 						Number m = (Number) context.getObjectSink()._0();
 						context.getObjectSink().setTo(m.longValue() + 1);

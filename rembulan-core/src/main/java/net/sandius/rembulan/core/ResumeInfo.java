@@ -12,8 +12,8 @@ public class ResumeInfo {
 		this.savedState = savedState;
 	}
 
-	public void resume(ExecutionContext context) throws ControlThrowable {
-		resumable.resume(context, savedState);
+	public Preemption resume(ExecutionContext context) {
+		return resumable.resume(context, savedState);
 	}
 
 }

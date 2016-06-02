@@ -65,14 +65,9 @@ public final class Coroutine {
 		@Override
 		public Preemption resume(ExecutionContext context, Object suspendedState) {
 			Function target = (Function) suspendedState;
-			try {
-				Dispatch.call(context, target, context.getObjectSink().toArray());
-			}
-			catch (ControlThrowable ct) {
-				// don't add self
-				return ct.toPreemption();
-			}
-			return null;
+
+			// become the target
+			return Dispatch.call(context, target, context.getObjectSink().toArray());
 		}
 
 	}
@@ -124,7 +119,7 @@ public final class Coroutine {
 		}
 	}
 
-	private void saveFrames(ControlThrowable ct) {
+	private void saveFrames(Preemption ct) {
 		Iterator<ResumeInfo> it = ct.frames();
 		while (it.hasNext()) {
 			callStack = new Cons<>(it.next(), callStack);
@@ -138,11 +133,12 @@ public final class Coroutine {
 			ResumeInfo top = callStack.car;
 			callStack = callStack.cdr;
 
+			Preemption p = null;
 			try {
 				if (error == null) {
 					// no errors
-					top.resume(context);
-					Dispatch.evaluateTailCalls(context);
+					p = top.resume(context);
+					p = p == null ? Dispatch.evaluateTailCalls(context) : p;
 				}
 				else {
 					// there is an error to be handled
@@ -152,51 +148,63 @@ public final class Coroutine {
 						error = null;  // this exception will be handled
 
 						ProtectedResumable pr = (ProtectedResumable) top.resumable;
-						pr.resumeError(context, top.savedState, Conversions.throwableToObject(e));
-						Dispatch.evaluateTailCalls(context);
+
+						p = pr.resumeError(context, top.savedState, Conversions.throwableToObject(e));
+						p = p == null ? Dispatch.evaluateTailCalls(context) : p;
 					}
 					else {
 						// top is not protected, continue unwinding the stack
 					}
 				}
 			}
-			catch (CoroutineSwitch.Yield yield) {
-				saveFrames(yield);
-
-				Coroutine c = this.yield();
-				if (c != null) {
-					context.getObjectSink().setToArray(yield.args);
-					return new ResumeResult.Switch(c);
-				}
-				else {
-					error = new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
-				}
-			}
-			catch (CoroutineSwitch.Resume resume) {
-				saveFrames(resume);
-
-				final Coroutine c;
-				try {
-					c = this.resume(resume.coroutine);
-					context.getObjectSink().setToArray(resume.args);
-					return new ResumeResult.Switch(c);
-				}
-				catch (Exception ex) {
-					error = ex;
-				}
-			}
-			catch (Preempted preempted) {
-				saveFrames(preempted);
-				assert (callStack != null);
-				return ResumeResult.Pause.INSTANCE;
-			}
-			catch (ControlThrowable ct) {
-				throw new UnsupportedOperationException(ct);
-			}
 			catch (Exception ex) {
 				// unhandled exception: will try finding a handler in the next iteration
 				error = ex;
 			}
+
+			// process the preemption
+			if (p != null) {
+
+				if (p instanceof Preemption.Pause) {
+					saveFrames(p);
+					assert (callStack != null);
+					return ResumeResult.Pause.INSTANCE;
+				}
+				else if (p instanceof Preemption.CoroutineSwitch.Yield) {
+					saveFrames(p);
+
+					Preemption.CoroutineSwitch.Yield yield = (Preemption.CoroutineSwitch.Yield) p;
+
+					Coroutine c = this.yield();
+					if (c != null) {
+						context.getObjectSink().setToArray(yield.arguments());
+						return new ResumeResult.Switch(c);
+					}
+					else {
+						error = new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
+					}
+				}
+				else if (p instanceof Preemption.CoroutineSwitch.Resume) {
+					saveFrames(p);
+
+					Preemption.CoroutineSwitch.Resume resume = (Preemption.CoroutineSwitch.Resume) p;
+
+					final Coroutine c;
+					try {
+						c = this.resume(resume.target());
+						context.getObjectSink().setToArray(resume.arguments());
+						return new ResumeResult.Switch(c);
+					}
+					catch (Exception ex) {
+						error = ex;
+					}
+				}
+				else {
+					throw new UnsupportedOperationException(p.toString());
+				}
+
+			}
+
 		}
 
 		assert (callStack == null);

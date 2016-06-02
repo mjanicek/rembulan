@@ -1,6 +1,5 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
@@ -324,12 +323,10 @@ public class DefaultIOLib extends IOLib {
 
 			Object[] writeCallArgs = Varargs.concat(new Object[] { outFile }, args.getAll());
 
-			try {
-				Dispatch.call(context, IOFile.Write.INSTANCE, writeCallArgs);
-			}
-			catch (ControlThrowable ct) {
-				ct.push(this, outFile);
-				return ct.toPreemption();
+			Preemption p = Dispatch.call(context, IOFile.Write.INSTANCE, writeCallArgs);
+			if (p != null) {
+				p.push(this, outFile);
+				return p;
 			}
 
 			return _resume(context, outFile);

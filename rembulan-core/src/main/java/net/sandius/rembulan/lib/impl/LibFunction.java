@@ -1,13 +1,11 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
-import net.sandius.rembulan.core.Preempted;
 import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.ValueTypeNamer;

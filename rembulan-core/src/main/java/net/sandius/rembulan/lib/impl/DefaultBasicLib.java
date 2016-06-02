@@ -164,12 +164,12 @@ public class DefaultBasicLib extends BasicLib {
 		private Preemption run(ExecutionContext context, Object[] args) {
 			for (int i = 0; i < args.length; i++) {
 				Object a = args[i];
-				try {
-					Dispatch.call(context, ToString.INSTANCE, a);
-				}
-				catch (ControlThrowable ct) {
-					ct.push(this, Varargs.from(args, i + 1));
-					return ct.toPreemption();
+				{
+					Preemption p = Dispatch.call(context, ToString.INSTANCE, a);
+					if (p != null) {
+						p.push(this, Varargs.from(args, i + 1));
+						return p;
+					}
 				}
 
 				Object s = context.getObjectSink()._0();
@@ -302,12 +302,12 @@ public class DefaultBasicLib extends BasicLib {
 			Object metamethod = Metatables.getMetamethod(context.getState(), MT_PAIRS, t);
 
 			if (metamethod != null) {
-				try {
-					Dispatch.call(context, metamethod, t);
-				}
-				catch (ControlThrowable ct) {
-					ct.push(this, null);
-					return ct.toPreemption();
+				{
+					Preemption p = Dispatch.call(context, metamethod, t);
+					if (p != null) {
+						p.push(this, null);
+						return p;
+					}
 				}
 
 				ObjectSink os = context.getObjectSink();
@@ -367,12 +367,12 @@ public class DefaultBasicLib extends BasicLib {
 
 			Object meta = Metatables.getMetamethod(context.getState(), MT_TOSTRING, arg);
 			if (meta != null) {
-				try {
-					Dispatch.call(context, meta, arg);
-				}
-				catch (ControlThrowable ct) {
-					ct.push(this, null);
-					return ct.toPreemption();
+				{
+					Preemption p = Dispatch.call(context, meta, arg);
+					if (p != null) {
+						p.push(this, null);
+						return p;
+					}
 				}
 
 				// resume
@@ -564,16 +564,21 @@ public class DefaultBasicLib extends BasicLib {
 			Object callTarget = args.nextAny();
 			Object[] callArgs = args.getTail();
 
-			try {
-				Dispatch.call(context, callTarget, callArgs);
-			}
-			catch (ControlThrowable ct) {
-				ct.push(this, null);
-				return ct.toPreemption();
-			}
-			catch (Exception ex) {
-				context.getObjectSink().setTo(Boolean.FALSE, Conversions.throwableToObject(ex));  // failure
-				return null;
+			{
+				final Preemption p;
+
+				try {
+					p = Dispatch.call(context, callTarget, callArgs);
+				}
+				catch (Exception ex) {
+					context.getObjectSink().setTo(Boolean.FALSE, Conversions.throwableToObject(ex));  // failure
+					return null;
+				}
+
+				if (p != null) {
+					p.push(this, null);
+					return p;
+				}
 			}
 
 			context.getObjectSink().prepend(Boolean.TRUE);  // success
@@ -633,17 +638,23 @@ public class DefaultBasicLib extends BasicLib {
 			while (isError && depth < MAX_DEPTH) {
 				depth += 1;
 
-				try {
-					Dispatch.call(context, handler, errorObject);
-					isError = false;
-				}
-				catch (ControlThrowable ct) {
-					ct.push(this, new SavedState(handler, depth));
-					return ct.toPreemption();
-				}
-				catch (Exception e) {
-					errorObject = Conversions.throwableToObject(e);
-					isError = true;
+				{
+					Preemption p = null;
+
+					try {
+						p = Dispatch.call(context, handler, errorObject);
+						isError = false;
+					}
+					catch (Exception e) {
+						errorObject = Conversions.throwableToObject(e);
+						isError = true;
+					}
+
+					if (p != null) {
+						p.push(this, new SavedState(handler, depth));
+						return p;
+					}
+
 				}
 			}
 
@@ -667,15 +678,20 @@ public class DefaultBasicLib extends BasicLib {
 			Object errorObject = null;
 			boolean isError = false;  // need to distinguish nil error objects from no-error
 
-			try {
-				Dispatch.call(context, callTarget, callArgs);
-			}
-			catch (ControlThrowable ct) {
-				ct.push(this, new SavedState(handler, 0));
-			}
-			catch (Exception e) {
-				errorObject = Conversions.throwableToObject(e);
-				isError = true;
+			{
+				Preemption p = null;
+
+				try {
+					p = Dispatch.call(context, callTarget, callArgs);
+				}
+				catch (Exception e) {
+					errorObject = Conversions.throwableToObject(e);
+					isError = true;
+				}
+				if (p != null) {
+					p.push(this, new SavedState(handler, 0));
+					return p;
+				}
 			}
 
 			if (!isError) {

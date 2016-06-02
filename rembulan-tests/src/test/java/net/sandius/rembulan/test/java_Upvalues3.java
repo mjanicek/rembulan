@@ -1,6 +1,5 @@
 package net.sandius.rembulan.test;
 
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Preemption;
@@ -18,43 +17,44 @@ public class java_Upvalues3 extends Function0 {
 	}
 
 	private Preemption run(ExecutionContext context, int rp, Object r_0, Object r_1, Object r_2) {
-		try {
-			switch (rp) {
-				case 0:
-					r_0 = null;
-					r_1 = null;
-					rp = 1;
-					Dispatch.index(context, _ENV.get(), "g");
-				case 1:
-					r_2 = context.getObjectSink()._0();
-					if (r_2 == null) {
-						r_0 = context.getState().newUpvalue(r_0);
-						r_2 = new f1((Upvalue) r_0);
-						r_1 = r_2;
-						r_1 = context.getState().newUpvalue(r_1);
+		switch (rp) {
+			case 0:
+				r_0 = null;
+				r_1 = null;
+				rp = 1;
+				{
+					Preemption p;
+					p = Dispatch.index(context, _ENV.get(), "g");
+					if (p != null) {
+						p.push(this, snapshot(rp, r_0, r_1, r_2));
+						return p;
 					}
-					else {
-						r_1 = context.getState().newUpvalue(r_1);
-						r_2 = new f2((Upvalue) r_1);
-						r_0 = r_2;
-						r_0 = context.getState().newUpvalue(r_0);
-					}
-					if (((Upvalue) r_0).get() != null) {
-						r_2 = ((Upvalue) r_1).get();
-					}
-					else {
-						r_2 = ((Upvalue) r_0).get();
-					}
-					context.getObjectSink().setTo(r_2);
-					return null;
+				}
+			case 1:
+				r_2 = context.getObjectSink()._0();
+				if (r_2 == null) {
+					r_0 = context.getState().newUpvalue(r_0);
+					r_2 = new f1((Upvalue) r_0);
+					r_1 = r_2;
+					r_1 = context.getState().newUpvalue(r_1);
+				}
+				else {
+					r_1 = context.getState().newUpvalue(r_1);
+					r_2 = new f2((Upvalue) r_1);
+					r_0 = r_2;
+					r_0 = context.getState().newUpvalue(r_0);
+				}
+				if (((Upvalue) r_0).get() != null) {
+					r_2 = ((Upvalue) r_1).get();
+				}
+				else {
+					r_2 = ((Upvalue) r_0).get();
+				}
+				context.getObjectSink().setTo(r_2);
+				return null;
 
-				default:
-					throw new IllegalStateException();
-			}
-		}
-		catch (ControlThrowable ct) {
-			ct.push(this, snapshot(rp, r_0, r_1, r_2));
-			return ct.toPreemption();
+			default:
+				throw new IllegalStateException();
 		}
 	}
 

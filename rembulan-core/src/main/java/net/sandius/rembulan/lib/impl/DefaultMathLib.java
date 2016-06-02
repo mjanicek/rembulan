@@ -1,6 +1,5 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
@@ -446,17 +445,15 @@ public class DefaultMathLib extends MathLib {
 			for ( ; idx < args.length; idx++) {
 				Object o = args[idx];
 
-				try {
-					if (isMax) {
-						Dispatch.lt(context, best, o);
+				{
+					Preemption p = isMax
+							? Dispatch.lt(context, best, o)
+							: Dispatch.lt(context, o, best);
+
+					if (p != null) {
+						p.push(this, new State(args, idx, best));
+						return p;
 					}
-					else {
-						Dispatch.lt(context, o, best);
-					}
-				}
-				catch (ControlThrowable ct) {
-					ct.push(this, new State(args, idx, best));
-					return ct.toPreemption();
 				}
 
 				if (Conversions.objectToBoolean(context.getObjectSink()._0())) {
