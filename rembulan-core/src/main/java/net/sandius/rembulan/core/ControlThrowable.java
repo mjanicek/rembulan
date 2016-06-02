@@ -34,6 +34,4 @@ public abstract class ControlThrowable extends Throwable {
 		return resumeStack;
 	}
 
-	public abstract Preemption toPreemption();
-
 }

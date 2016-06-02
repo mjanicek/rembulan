@@ -12,9 +12,4 @@ public class Preempted extends ControlThrowable {
 		this(null);
 	}
 
-	@Override
-	public Preemption toPreemption() {
-		return new Preemption.Pause(resumeStack());
-	}
-
 }

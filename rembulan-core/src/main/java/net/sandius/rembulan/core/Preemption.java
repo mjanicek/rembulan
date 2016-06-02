@@ -27,14 +27,6 @@ public abstract class Preemption {
 		return resumeStack;
 	}
 
-	public abstract ControlThrowable toControlThrowable();
-
-	public static void throwIfNonNull(Preemption p) throws ControlThrowable {
-		if (p != null) {
-			throw p.toControlThrowable();
-		}
-	}
-
 	public static class Pause extends Preemption {
 
 		Pause(Cons<ResumeInfo> resumeStack) {
@@ -43,11 +35,6 @@ public abstract class Preemption {
 
 		public Pause() {
 			this(null);
-		}
-
-		@Override
-		public ControlThrowable toControlThrowable() {
-			return new Preempted(resumeStack());
 		}
 
 	}
@@ -78,11 +65,6 @@ public abstract class Preemption {
 				return args;
 			}
 
-			@Override
-			public ControlThrowable toControlThrowable() {
-				return new net.sandius.rembulan.core.CoroutineSwitch.Yield(resumeStack(), args);
-			}
-
 		}
 
 		public static final class Resume extends CoroutineSwitch {
@@ -107,11 +89,6 @@ public abstract class Preemption {
 			@Override
 			public Object[] arguments() {
 				return args;
-			}
-
-			@Override
-			public ControlThrowable toControlThrowable() {
-				return new net.sandius.rembulan.core.CoroutineSwitch.Resume(resumeStack(), coroutine, args);
 			}
 
 		}

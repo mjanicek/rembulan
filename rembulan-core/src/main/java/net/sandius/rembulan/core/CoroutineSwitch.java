@@ -22,11 +22,6 @@ public abstract class CoroutineSwitch extends ControlThrowable {
 			this(null, args);
 		}
 
-		@Override
-		public Preemption toPreemption() {
-			return new Preemption.CoroutineSwitch.Yield(resumeStack(), args);
-		}
-
 	}
 
 	public static final class Resume extends CoroutineSwitch {
@@ -42,11 +37,6 @@ public abstract class CoroutineSwitch extends ControlThrowable {
 
 		public Resume(Coroutine coroutine, Object[] args) {
 			this(null, coroutine, args);
-		}
-
-		@Override
-		public Preemption toPreemption() {
-			return new Preemption.CoroutineSwitch.Resume(resumeStack(), coroutine, args);
 		}
 
 	}
