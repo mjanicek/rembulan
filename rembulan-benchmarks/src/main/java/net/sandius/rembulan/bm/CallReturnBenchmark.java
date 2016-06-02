@@ -1,6 +1,5 @@
 package net.sandius.rembulan.bm;
 
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Invokable;
@@ -345,7 +344,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _1_1_recursiveInvoke(DummyLuaState luaState) throws ControlThrowable {
+	public void _1_1_recursiveInvoke(DummyLuaState luaState) {
 		Invokable f = new RecursiveInvokeFunc(100);
 		ObjectSink result = newSink();
 		ExecutionContext context = new DummyExecutionContext(luaState, result);
@@ -354,7 +353,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _1_2_recursiveCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _1_2_recursiveCall(DummyLuaState luaState) {
 		Invokable f = new RecursiveCallFunc(100);
 		ObjectSink result = newSink();
 		ExecutionContext context = new DummyExecutionContext(luaState, result);
@@ -363,7 +362,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _1_3_tailCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _1_3_tailCall(DummyLuaState luaState) {
 		Invokable f = new TailCallFunc(100);
 		ObjectSink result = newSink();
 		ExecutionContext context = new DummyExecutionContext(luaState, result);
@@ -372,7 +371,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _1_4_selfRecursiveTailCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _1_4_selfRecursiveTailCall(DummyLuaState luaState) {
 		Invokable f = new SelfRecursiveTailCallFunc(100);
 		ObjectSink result = newSink();
 		ExecutionContext context = new DummyExecutionContext(luaState, result);
@@ -391,7 +390,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -410,13 +409,8 @@ public class CallReturnBenchmark {
 
 		@Override
 		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2) {
-			try {
-				run(context, 0, arg1, arg2);
-				return null;
-			}
-			catch (ControlThrowable ct) {
-				return ct.toPreemption();
-			}
+			run(context, 0, arg1, arg2);
+			return null;
 		}
 
 		@Override
@@ -437,7 +431,7 @@ public class CallReturnBenchmark {
 			this.n = n;
 		}
 
-		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) throws ControlThrowable {
+		private void run(ExecutionContext context, int pc, Object r_0, Object r_1) {
 			switch (pc) {
 				case 0:
 				case 1:
@@ -456,13 +450,8 @@ public class CallReturnBenchmark {
 
 		@Override
 		public Preemption invoke(ExecutionContext context, Object arg1, Object arg2) {
-			try {
-				run(context, 0, arg1, arg2);
-				return null;
-			}
-			catch (ControlThrowable ct) {
-				return ct.toPreemption();
-			}
+			run(context, 0, arg1, arg2);
+			return null;
 		}
 
 		@Override
@@ -553,7 +542,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_2_0_recursiveOpCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _2_2_0_recursiveOpCall(DummyLuaState luaState) {
 		Invokable f = new RecursiveOpCallFunc(100);
 		ObjectSink result = newSink();
 		ExecutionContext context = new DummyExecutionContext(luaState, result);
@@ -562,7 +551,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_2_1_recursiveAltOpCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _2_2_1_recursiveAltOpCall(DummyLuaState luaState) {
 		Invokable f = new RecursiveAltOpCallFunc(100);
 		ObjectSink result = newSink();
 		ExecutionContext context = new DummyExecutionContext(luaState, result);
@@ -571,7 +560,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_3_0_tailOpCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _2_3_0_tailOpCall(DummyLuaState luaState) {
 		Invokable f = new TailCallOpFunc(100);
 		ObjectSink result = newSink();
 		ExecutionContext context = new DummyExecutionContext(luaState, result);
@@ -580,7 +569,7 @@ public class CallReturnBenchmark {
 	}
 
 	@Benchmark
-	public void _2_3_1_tailAltOpCall(DummyLuaState luaState) throws ControlThrowable {
+	public void _2_3_1_tailAltOpCall(DummyLuaState luaState) {
 		Invokable f = new TailCallAltOpFunc(100);
 		ObjectSink result = newSink();
 		ExecutionContext context = new DummyExecutionContext(luaState, result);
