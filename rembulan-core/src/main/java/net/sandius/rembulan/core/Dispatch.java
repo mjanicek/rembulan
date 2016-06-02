@@ -22,52 +22,58 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target) throws ControlThrowable {
+	public static Preemption mt_invoke(ExecutionContext context, Object target) {
 		Invokable fn = callTarget(context.getState(), target);
-		if (fn == target) fn.invoke(context);
-		else fn.invoke(context, target);
+		return fn == target
+				? fn.invoke(context)
+				: fn.invoke(context, target);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1) throws ControlThrowable {
+	public static Preemption mt_invoke(ExecutionContext context, Object target, Object arg1) {
 		Invokable fn = callTarget(context.getState(), target);
-		if (fn == target) fn.invoke(context, arg1);
-		else fn.invoke(context, target, arg1);
+		return fn == target
+				? fn.invoke(context, arg1)
+				: fn.invoke(context, target, arg1);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2) throws ControlThrowable {
+	public static Preemption mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2) {
 		Invokable fn = callTarget(context.getState(), target);
-		if (fn == target) fn.invoke(context, arg1, arg2);
-		else fn.invoke(context, target, arg1, arg2);
+		return fn == target
+				? fn.invoke(context, arg1, arg2)
+				: fn.invoke(context, target, arg1, arg2);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+	public static Preemption mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) {
 		Invokable fn = callTarget(context.getState(), target);
-		if (fn == target) fn.invoke(context, arg1, arg2, arg3);
-		else fn.invoke(context, target, arg1, arg2, arg3);
+		return fn == target
+				? fn.invoke(context, arg1, arg2, arg3)
+				: fn.invoke(context, target, arg1, arg2, arg3);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
+	public static Preemption mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
 		Invokable fn = callTarget(context.getState(), target);
-		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4);
-		else fn.invoke(context, target, arg1, arg2, arg3, arg4);
+		return fn == target
+				? fn.invoke(context, arg1, arg2, arg3, arg4)
+				: fn.invoke(context, target, arg1, arg2, arg3, arg4);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
+	public static Preemption mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
 		Invokable fn = callTarget(context.getState(), target);
-		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4, arg5);
-		else fn.invoke(context, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
+		return fn == target
+				? fn.invoke(context, arg1, arg2, arg3, arg4, arg5)
+				: fn.invoke(context, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object[] args) throws ControlThrowable {
+	public static Preemption mt_invoke(ExecutionContext context, Object target, Object[] args) {
 		Invokable fn = callTarget(context.getState(), target);
 		if (fn == target) {
-			fn.invoke(context, args);
+			return fn.invoke(context, args);
 		}
 		else {
 			Object[] mtArgs = new Object[args.length + 1];
 			mtArgs[0] = target;
 			System.arraycopy(args, 0, mtArgs, 1, args.length);
-			fn.invoke(context, mtArgs);
+			return fn.invoke(context, mtArgs);
 		}
 	}
 
@@ -75,50 +81,59 @@ public abstract class Dispatch {
 		ObjectSink r = context.getObjectSink();
 		while (r.isTailCall()) {
 			Object target = r.getTailCallTarget();
+			final Preemption p;
 			switch (r.size()) {
-				case 0: mt_invoke(context, target); break;
-				case 1: mt_invoke(context, target, r._0()); break;
-				case 2: mt_invoke(context, target, r._0(), r._1()); break;
-				case 3: mt_invoke(context, target, r._0(), r._1(), r._2()); break;
-				case 4: mt_invoke(context, target, r._0(), r._1(), r._2(), r._3()); break;
-				case 5: mt_invoke(context, target, r._0(), r._1(), r._2(), r._3(), r._4()); break;
-				default: mt_invoke(context, target, r.toArray()); break;
+				case 0: p = mt_invoke(context, target); break;
+				case 1: p = mt_invoke(context, target, r._0()); break;
+				case 2: p = mt_invoke(context, target, r._0(), r._1()); break;
+				case 3: p = mt_invoke(context, target, r._0(), r._1(), r._2()); break;
+				case 4: p = mt_invoke(context, target, r._0(), r._1(), r._2(), r._3()); break;
+				case 5: p = mt_invoke(context, target, r._0(), r._1(), r._2(), r._3(), r._4()); break;
+				default: p = mt_invoke(context, target, r.toArray()); break;
 			}
+			Preemption.throwIfNonNull(p);
 		}
 	}
 
 	public static void call(ExecutionContext context, Object target) throws ControlThrowable {
-		mt_invoke(context, target);
+		Preemption p = mt_invoke(context, target);
+		Preemption.throwIfNonNull(p);
 		evaluateTailCalls(context);
 	}
 
 	public static void call(ExecutionContext context, Object target, Object arg1) throws ControlThrowable {
-		mt_invoke(context, target, arg1);
+		Preemption p = mt_invoke(context, target, arg1);
+		Preemption.throwIfNonNull(p);
 		evaluateTailCalls(context);
 	}
 
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2) throws ControlThrowable {
-		mt_invoke(context, target, arg1, arg2);
+		Preemption p = mt_invoke(context, target, arg1, arg2);
+		Preemption.throwIfNonNull(p);
 		evaluateTailCalls(context);
 	}
 
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-		mt_invoke(context, target, arg1, arg2, arg3);
+		Preemption p = mt_invoke(context, target, arg1, arg2, arg3);
+		Preemption.throwIfNonNull(p);
 		evaluateTailCalls(context);
 	}
 
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
-		mt_invoke(context, target, arg1, arg2, arg3, arg4);
+		Preemption p = mt_invoke(context, target, arg1, arg2, arg3, arg4);
+		Preemption.throwIfNonNull(p);
 		evaluateTailCalls(context);
 	}
 
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
-		mt_invoke(context, target, arg1, arg2, arg3, arg4, arg5);
+		Preemption p = mt_invoke(context, target, arg1, arg2, arg3, arg4, arg5);
+		Preemption.throwIfNonNull(p);
 		evaluateTailCalls(context);
 	}
 
 	public static void call(ExecutionContext context, Object target, Object[] args) throws ControlThrowable {
-		mt_invoke(context, target, args);
+		Preemption p = mt_invoke(context, target, args);
+		Preemption.throwIfNonNull(p);
 		evaluateTailCalls(context);
 	}
 
