@@ -14,7 +14,11 @@ object Runner {
 
   def main(args: Array[String]): Unit = {
 
-    val program = BasicFragments.lookup("JustX").get
+    val program: Fragment = args.toList.headOption match {
+      case Some(n) => BasicFragments.lookup(n).get
+      case _ => throw new RuntimeException("No program name (1st command-line argument) specified!")
+    }
+
     val proto = loader.compile(program)
 
     section("LuaC version") {
