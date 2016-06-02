@@ -167,8 +167,7 @@ public class DefaultBasicLib extends BasicLib {
 				{
 					Preemption p = Dispatch.call(context, ToString.INSTANCE, a);
 					if (p != null) {
-						p.push(this, Varargs.from(args, i + 1));
-						return p;
+						return p.push(this, Varargs.from(args, i + 1));
 					}
 				}
 
@@ -305,8 +304,7 @@ public class DefaultBasicLib extends BasicLib {
 				{
 					Preemption p = Dispatch.call(context, metamethod, t);
 					if (p != null) {
-						p.push(this, null);
-						return p;
+						return p.push(this, null);
 					}
 				}
 
@@ -370,8 +368,7 @@ public class DefaultBasicLib extends BasicLib {
 				{
 					Preemption p = Dispatch.call(context, meta, arg);
 					if (p != null) {
-						p.push(this, null);
-						return p;
+						return p.push(this, null);
 					}
 				}
 
@@ -576,8 +573,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 
 				if (p != null) {
-					p.push(this, null);
-					return p;
+					return p.push(this, null);
 				}
 			}
 
@@ -651,8 +647,7 @@ public class DefaultBasicLib extends BasicLib {
 					}
 
 					if (p != null) {
-						p.push(this, new SavedState(handler, depth));
-						return p;
+						return p.push(this, new SavedState(handler, depth));
 					}
 
 				}
@@ -689,8 +684,7 @@ public class DefaultBasicLib extends BasicLib {
 					isError = true;
 				}
 				if (p != null) {
-					p.push(this, new SavedState(handler, 0));
-					return p;
+					return p.push(this, new SavedState(handler, 0));
 				}
 			}
 

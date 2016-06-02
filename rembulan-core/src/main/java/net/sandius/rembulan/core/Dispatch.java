@@ -446,8 +446,7 @@ public abstract class Dispatch {
 		Preemption p = call(context, handler, a, b);
 		if (p != null) {
 			// suspended in the metamethod call
-			p.push(ComparisonResumable.INSTANCE, cmpTo);
-			return p;
+			return p.push(ComparisonResumable.INSTANCE, cmpTo);
 		}
 		else {
 			// not suspended: set the result, possibly flipping it

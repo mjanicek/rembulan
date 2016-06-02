@@ -244,8 +244,7 @@ public class CallReturnBenchmark {
 						{
 							Preemption p = Dispatch.call(context, r_0, r_0, l - 1);
 							if (p != null) {
-								p.push(this, null);
-								return p;
+								return p.push(this, null);
 							}
 						}
 						Number m = (Number) context.getObjectSink()._0();

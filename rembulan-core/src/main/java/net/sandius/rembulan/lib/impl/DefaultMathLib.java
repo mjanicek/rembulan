@@ -451,8 +451,7 @@ public class DefaultMathLib extends MathLib {
 							: Dispatch.lt(context, o, best);
 
 					if (p != null) {
-						p.push(this, new State(args, idx, best));
-						return p;
+						return p.push(this, new State(args, idx, best));
 					}
 				}
 

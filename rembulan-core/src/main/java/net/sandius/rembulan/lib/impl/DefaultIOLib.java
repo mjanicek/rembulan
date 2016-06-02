@@ -325,8 +325,7 @@ public class DefaultIOLib extends IOLib {
 
 			Preemption p = Dispatch.call(context, IOFile.Write.INSTANCE, writeCallArgs);
 			if (p != null) {
-				p.push(this, outFile);
-				return p;
+				return p.push(this, outFile);
 			}
 
 			return _resume(context, outFile);

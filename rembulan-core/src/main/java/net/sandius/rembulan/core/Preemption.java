@@ -13,8 +13,9 @@ public abstract class Preemption {
 		this.resumeStack = resumeStack;
 	}
 
-	public void push(Resumable resumable, Object suspendedState) {
+	public Preemption push(Resumable resumable, Object suspendedState) {
 		resumeStack = new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack);
+		return this;
 	}
 
 	// LIFO iterator

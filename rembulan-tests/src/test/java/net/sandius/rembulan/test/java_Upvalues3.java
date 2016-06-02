@@ -26,8 +26,7 @@ public class java_Upvalues3 extends Function0 {
 					Preemption p;
 					p = Dispatch.index(context, _ENV.get(), "g");
 					if (p != null) {
-						p.push(this, snapshot(rp, r_0, r_1, r_2));
-						return p;
+						return p.push(this, snapshot(rp, r_0, r_1, r_2));
 					}
 				}
 			case 1:
