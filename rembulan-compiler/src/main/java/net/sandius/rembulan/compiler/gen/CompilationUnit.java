@@ -81,6 +81,12 @@ public class CompilationUnit {
 		this.generic = makeCompiledPrototype(fixedGenericParameters());
 	}
 
+	private static final boolean verifyAndPrint;
+	static {
+		String s = System.getProperty("net.sandius.rembulan.compiler.VerifyAndPrint");
+		verifyAndPrint = s != null && "true".equals(s.trim().toLowerCase());
+	};
+
 	public CompiledClass toCompiledClass() {
 		Iterable<Node> topoSorted = generic.sortTopologically();
 
@@ -103,10 +109,13 @@ public class CompilationUnit {
 		byte[] bytes = writer.toByteArray();
 
 		// verify bytecode
-//		ClassReader reader = new ClassReader(bytes);
-//		ClassVisitor tracer = new TraceClassVisitor(new PrintWriter(System.out));
-//		ClassVisitor checker = new CheckClassAdapter(tracer, true);
-//		reader.accept(checker, 0);
+
+		if (verifyAndPrint) {
+			ClassReader reader = new ClassReader(bytes);
+			ClassVisitor tracer = new TraceClassVisitor(new PrintWriter(System.out));
+			ClassVisitor checker = new CheckClassAdapter(tracer, true);
+			reader.accept(checker, 0);
+		}
 
 		return new CompiledClass(ctx.className(), ByteVector.wrap(bytes));
 	}
