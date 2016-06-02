@@ -111,7 +111,7 @@ public final class LFloat extends LNumber {
 	}
 
 	@Override
-	public LNumber unm() {
+	public LFloat unm() {
 		return LFloat.valueOf(-value);
 	}
 

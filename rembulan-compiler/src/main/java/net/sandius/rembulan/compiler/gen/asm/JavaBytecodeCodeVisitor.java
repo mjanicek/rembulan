@@ -406,27 +406,22 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 	@Override
 	public void visitUnm(Object id, SlotState st, int r_dest, int r_arg) {
+		String methodName = "unm";
 		switch (StaticMathImplementation.MAY_BE_INTEGER.opType(st.typeAt(r_arg))) {
 
-			// TODO: use LNumber methods instead of bytecode instructions
-
 			case Integer:
-				add(e.loadRegister(r_arg, st, LNumber.class));
-				add(BoxedPrimitivesMethods.unbox(LNumber.class, Type.LONG_TYPE));
-				add(new InsnNode(LNEG));
-				add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, LInteger.class));
+				add(e.loadRegister(r_arg, st, LInteger.class));
+				add(NumberMethods.unary(LInteger.class, LInteger.class, methodName));
 				break;
 
 			case Float:
-				add(e.loadRegister(r_arg, st, LNumber.class));
-				add(BoxedPrimitivesMethods.unbox(LNumber.class, Type.DOUBLE_TYPE));
-				add(new InsnNode(DNEG));
-				add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, LFloat.class));
+				add(e.loadRegister(r_arg, st, LFloat.class));
+				add(NumberMethods.unary(LFloat.class, LFloat.class, methodName));
 				break;
 
 			case Number:
 				add(e.loadRegister(r_arg, st, LNumber.class));
-				add(DispatchMethods.numeric(DispatchMethods.OP_UNM, 1));
+				add(NumberMethods.unary(LNumber.class, LNumber.class, methodName));
 				break;
 
 			case Any:
@@ -448,12 +443,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	@Override
 	public void visitBNot(Object id, SlotState st, int r_dest, int r_arg) {
 		if (st.typeAt(r_arg).isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
-			// TODO: call LNumber method
-			add(e.loadRegister(r_arg, st, LNumber.class));
-			add(BoxedPrimitivesMethods.longValue(LNumber.class));
-			add(ASMUtils.loadLong(-1L));
-			add(new InsnNode(LXOR));
-			add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, LInteger.class));
+			add(e.loadRegister(r_arg, st, LInteger.class));
+			add(NumberMethods.unary(LInteger.class, LInteger.class, "bnot"));
 		}
 		else {
 			RunMethodEmitter.ResumptionPoint rp = e.resumptionPoint();

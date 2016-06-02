@@ -143,7 +143,7 @@ public final class LInteger extends LNumber {
 	}
 
 	@Override
-	public LNumber unm() {
+	public LInteger unm() {
 		return LInteger.valueOf(-value);
 	}
 
