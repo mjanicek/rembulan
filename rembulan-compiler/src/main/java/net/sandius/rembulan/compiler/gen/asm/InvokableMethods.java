@@ -2,6 +2,7 @@ package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Invokable;
+import net.sandius.rembulan.core.Preemption;
 import org.objectweb.asm.tree.AbstractInsnNode;
 
 public class InvokableMethods {
@@ -12,7 +13,7 @@ public class InvokableMethods {
 
 	public static ReflectionUtils.Method invoke_method(int kind) {
 		return ReflectionUtils.virtualArgListMethodFromKind(
-				Invokable.class, "invoke", new Class[] { ExecutionContext.class }, kind);
+				Invokable.class, "invoke", Preemption.class, new Class[] { ExecutionContext.class }, kind);
 	}
 
 	public static AbstractInsnNode invoke(int kind) {

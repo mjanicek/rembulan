@@ -60,7 +60,7 @@ public class ReflectionUtils {
 
 	}
 
-	private static Method argListMethodFromKind(boolean isStatic, Class<?> owner, String name, Class<?>[] prefix, int kind) {
+	private static Method argListMethodFromKind(boolean isStatic, Class<?> owner, String name, Class<?> returnType, Class<?>[] prefix, int kind) {
 		ArrayList<Class<?>> args = new ArrayList<>();
 		if (prefix != null) {
 			Collections.addAll(args, prefix);
@@ -74,15 +74,15 @@ public class ReflectionUtils {
 			args.add(Object[].class);
 		}
 
-		return new Method(owner, name, isStatic, Void.TYPE, args.toArray(new Class<?>[0]));
+		return new Method(owner, name, isStatic, returnType, args.toArray(new Class<?>[0]));
 	}
 
-	public static Method staticArgListMethodFromKind(Class<?> owner, String name, Class<?>[] prefix, int kind) {
-		return argListMethodFromKind(true, owner, name, prefix, kind);
+	public static Method staticArgListMethodFromKind(Class<?> owner, String name, Class<?> returnType, Class<?>[] prefix, int kind) {
+		return argListMethodFromKind(true, owner, name, returnType, prefix, kind);
 	}
 
-	public static Method virtualArgListMethodFromKind(Class<?> owner, String name, Class<?>[] prefix, int kind) {
-		return argListMethodFromKind(false, owner, name, prefix, kind);
+	public static Method virtualArgListMethodFromKind(Class<?> owner, String name, Class<?> returnType, Class<?>[] prefix, int kind) {
+		return argListMethodFromKind(false, owner, name, returnType, prefix, kind);
 	}
 
 }

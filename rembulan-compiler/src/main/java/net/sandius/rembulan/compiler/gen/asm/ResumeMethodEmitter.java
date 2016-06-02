@@ -2,6 +2,7 @@ package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
@@ -31,7 +32,7 @@ public class ResumeMethodEmitter {
 				ACC_PUBLIC,
 				"resume",
 				Type.getMethodType(
-						Type.VOID_TYPE,
+						Type.getType(Preemption.class),
 						Type.getType(ExecutionContext.class),
 						ClassEmitter.savedStateType()).getDescriptor(),
 						null,
@@ -120,7 +121,7 @@ public class ResumeMethodEmitter {
 			// call run(...)
 			il.add(parent.runMethod().methodInvokeInsn());
 
-			il.add(new InsnNode(RETURN));
+			il.add(new InsnNode(ARETURN));
 			il.add(end);
 
 			locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));

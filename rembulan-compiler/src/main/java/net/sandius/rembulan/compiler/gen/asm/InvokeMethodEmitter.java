@@ -15,7 +15,7 @@ import java.util.List;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.ARETURN;
 
 public class InvokeMethodEmitter {
 
@@ -93,7 +93,7 @@ public class InvokeMethodEmitter {
 
 		il.add(parent.runMethod().methodInvokeInsn());
 
-		il.add(new InsnNode(RETURN));
+		il.add(new InsnNode(ARETURN));
 		il.add(end);
 
 		locals.add(new LocalVariableNode("this", parent.thisClassType().getDescriptor(), null, begin, end, 0));

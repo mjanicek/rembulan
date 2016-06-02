@@ -4,12 +4,12 @@ import net.sandius.rembulan.compiler.gen.CodeVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.PrototypeContext;
 import net.sandius.rembulan.compiler.gen.SlotState;
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LFloat;
 import net.sandius.rembulan.core.LNumber;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.util.Check;
@@ -18,12 +18,12 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TableSwitchInsnNode;
-import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
@@ -122,7 +122,7 @@ public class RunMethodEmitter {
 		for (int i = 0; i < numOfRegisters(); i++) {
 			args.add(Type.getType(Object.class));
 		}
-		return Type.getMethodType(Type.VOID_TYPE, args.toArray(new Type[0]));
+		return Type.getMethodType(Type.getType(Preemption.class), args.toArray(new Type[0]));
 	}
 
 	public MethodInsnNode methodInvokeInsn() {
@@ -135,7 +135,7 @@ public class RunMethodEmitter {
 	}
 
 	public static String[] exceptions() {
-		return new String[] { Type.getInternalName(ControlThrowable.class) };
+		return null;
 	}
 
 	protected int numOfRegisters() {
@@ -155,8 +155,6 @@ public class RunMethodEmitter {
 			errorState.add(errorState(l_error_state));
 			resumeSwitch.add(dispatchTable());
 			resumeHandler.add(resumptionHandler(l_handler_begin));
-
-			node.tryCatchBlocks.add(new TryCatchBlockNode(l_insns_begin, l_handler_begin, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
 		}
 
 		// local variable declaration
@@ -242,25 +240,23 @@ public class RunMethodEmitter {
 		InsnList il = new InsnList();
 
 		il.add(label);
-		il.add(ASMUtils.frameSame1(ControlThrowable.class));
-
-		il.add(new InsnNode(DUP));
+		il.add(ASMUtils.frameSame1(Preemption.class));
 
 		il.add(createSnapshot());
 
 		// register snapshot with the control exception
 		il.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
-				Type.getInternalName(ControlThrowable.class),
+				Type.getInternalName(Preemption.class),
 				"push",
 				Type.getMethodType(
-						Type.VOID_TYPE,
+						Type.getType(Preemption.class),
 						Type.getType(Resumable.class),
 						ClassEmitter.savedStateType()).getDescriptor(),
 				false));
 
-		// rethrow
-		il.add(new InsnNode(ATHROW));
+		// return
+		il.add(new InsnNode(ARETURN));
 
 		return il;
 	}
@@ -297,7 +293,7 @@ public class RunMethodEmitter {
 			this.index = index;
 		}
 
-		public LabelNode label() {
+		public LabelNode resumptionLabel() {
 			return _l(this);
 		}
 
@@ -311,7 +307,11 @@ public class RunMethodEmitter {
 		public InsnList resume() {
 			InsnList il = new InsnList();
 
-			il.add(label());
+			il.add(new InsnNode(DUP));
+			il.add(new JumpInsnNode(IFNONNULL, l_handler_begin));
+			il.add(new InsnNode(POP));
+
+			il.add(resumptionLabel());
 			il.add(ASMUtils.frameSame());
 
 			return il;
@@ -321,7 +321,7 @@ public class RunMethodEmitter {
 	public ResumptionPoint resumptionPoint() {
 		int idx = resumptionPoints.size();
 		ResumptionPoint rp = new ResumptionPoint(idx);
-		resumptionPoints.add(rp.label());
+		resumptionPoints.add(rp.resumptionLabel());
 		return rp;
 	}
 

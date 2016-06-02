@@ -770,7 +770,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadRegister(r_tgt, st));
 		add(e.mapInvokeArgumentsToKinds(r_tgt + 1, st, b, kind));
 		add(ObjectSinkMethods.tailCall(kind));
-		add(new InsnNode(RETURN));
+		add(new InsnNode(ACONST_NULL));
+		add(new InsnNode(ARETURN));
 	}
 
 	@Override
@@ -780,7 +781,8 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		add(e.loadObjectSink());
 		add(e.mapInvokeArgumentsToKinds(r_from, st, b, kind));
 		add(ObjectSinkMethods.setTo(kind));
-		add(new InsnNode(RETURN));
+		add(new InsnNode(ACONST_NULL));
+		add(new InsnNode(ARETURN));
 	}
 
 	@Override

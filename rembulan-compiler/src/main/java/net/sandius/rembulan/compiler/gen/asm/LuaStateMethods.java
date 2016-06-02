@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.Preemption;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
 import org.objectweb.asm.Type;
@@ -56,7 +57,7 @@ public class LuaStateMethods {
 				selfTpe().getInternalName(),
 				"checkCpu",
 				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
+						Type.getType(Preemption.class),
 						Type.INT_TYPE),
 				false);
 	}

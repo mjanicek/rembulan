@@ -5,6 +5,7 @@ import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LNumber;
+import net.sandius.rembulan.core.Preemption;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
@@ -86,7 +87,7 @@ public class DispatchMethods {
 				Type.getInternalName(Dispatch.class),
 				methodName,
 				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
+						Type.getType(Preemption.class),
 						args.toArray(new Type[0])),
 				false);
 	}
@@ -118,7 +119,7 @@ public class DispatchMethods {
 
 	private static ReflectionUtils.Method call_method(int kind) {
 		return ReflectionUtils.staticArgListMethodFromKind(
-				Dispatch.class, OP_CALL, new Class[] { ExecutionContext.class, Object.class }, kind);
+				Dispatch.class, OP_CALL, Preemption.class, new Class[] { ExecutionContext.class, Object.class }, kind);
 	}
 
 	public static AbstractInsnNode call(int kind) {

@@ -7,8 +7,6 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import java.util.Arrays;
-
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class ObjectSinkMethods {
@@ -107,12 +105,12 @@ public class ObjectSinkMethods {
 
 	private static ReflectionUtils.Method setTo_method(int kind) {
 		String methodName = kind > 0 ? "setTo" : "setToArray";
-		return ReflectionUtils.virtualArgListMethodFromKind(ObjectSink.class, methodName, null, kind);
+		return ReflectionUtils.virtualArgListMethodFromKind(ObjectSink.class, methodName, Void.TYPE, null, kind);
 	}
 
 	private static ReflectionUtils.Method tailCall_method(int kind) {
 		String methodName = "tailCall";
-		return ReflectionUtils.virtualArgListMethodFromKind(ObjectSink.class, methodName, new Class[] { Object.class }, kind);
+		return ReflectionUtils.virtualArgListMethodFromKind(ObjectSink.class, methodName, Void.TYPE, new Class[] { Object.class }, kind);
 	}
 
 	public static AbstractInsnNode setTo(int kind) {
