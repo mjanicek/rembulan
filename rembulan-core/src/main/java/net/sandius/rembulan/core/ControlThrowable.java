@@ -8,8 +8,12 @@ public abstract class ControlThrowable extends Throwable {
 
 	private Cons<ResumeInfo> resumeStack;
 
+	protected ControlThrowable(Cons<ResumeInfo> resumeStack) {
+		this.resumeStack = resumeStack;
+	}
+
 	protected ControlThrowable() {
-		this.resumeStack = null;
+		this(null);
 	}
 
 	@Override
@@ -25,5 +29,11 @@ public abstract class ControlThrowable extends Throwable {
 	public Iterator<ResumeInfo> frames() {
 		return Cons.newIterator(resumeStack);
 	}
+
+	protected Cons<ResumeInfo> resumeStack() {
+		return resumeStack;
+	}
+
+	public abstract Preemption toPreemption();
 
 }

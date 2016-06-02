@@ -9,8 +9,8 @@ public abstract class Preemption {
 
 	private Cons<ResumeInfo> resumeStack;
 
-	protected Preemption() {
-		this.resumeStack = null;
+	protected Preemption(Cons<ResumeInfo> resumeStack) {
+		this.resumeStack = resumeStack;
 	}
 
 	public void push(Resumable resumable, Object suspendedState) {
@@ -22,11 +22,30 @@ public abstract class Preemption {
 		return Cons.newIterator(resumeStack);
 	}
 
+	protected Cons<ResumeInfo> resumeStack() {
+		return resumeStack;
+	}
+
+	public abstract ControlThrowable toControlThrowable();
+
 	public static class Pause extends Preemption {
+
+		Pause(Cons<ResumeInfo> resumeStack) {
+			super(resumeStack);
+		}
+
+		@Override
+		public ControlThrowable toControlThrowable() {
+			return new Preempted(resumeStack());
+		}
 
 	}
 
 	public abstract static class CoroutineSwitch extends Preemption {
+
+		CoroutineSwitch(Cons<ResumeInfo> resumeStack) {
+			super(resumeStack);
+		}
 
 		public abstract Object[] arguments();
 
@@ -34,13 +53,19 @@ public abstract class Preemption {
 
 			private final Object[] args;
 
-			public Yield(Object[] args) {
+			public Yield(Cons<ResumeInfo> resumeStack, Object[] args) {
+				super(resumeStack);
 				this.args = Check.notNull(args);
 			}
 
 			@Override
 			public Object[] arguments() {
 				return args;
+			}
+
+			@Override
+			public ControlThrowable toControlThrowable() {
+				return new net.sandius.rembulan.core.CoroutineSwitch.Yield(resumeStack(), args);
 			}
 
 		}
@@ -50,7 +75,8 @@ public abstract class Preemption {
 			private final Coroutine coroutine;
 			private final Object[] args;
 
-			public Resume(Coroutine coroutine, Object[] args) {
+			public Resume(Cons<ResumeInfo> resumeStack, Coroutine coroutine, Object[] args) {
+				super(resumeStack);
 				this.coroutine = Check.notNull(coroutine);
 				this.args = Check.notNull(args);
 			}
@@ -62,6 +88,11 @@ public abstract class Preemption {
 			@Override
 			public Object[] arguments() {
 				return args;
+			}
+
+			@Override
+			public ControlThrowable toControlThrowable() {
+				return new net.sandius.rembulan.core.CoroutineSwitch.Resume(resumeStack(), coroutine, args);
 			}
 
 		}
