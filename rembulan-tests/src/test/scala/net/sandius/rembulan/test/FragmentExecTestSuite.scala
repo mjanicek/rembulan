@@ -137,7 +137,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
                   case Right(result) =>
                     println("Result: success (" + result.size + " values):")
                     for ((v, i) <- result.zipWithIndex) {
-                      println(i + ":" + "\t" + v + " (" + (if (v != null) v.getClass.getName else "null") + ")")
+                      println(i + ":" + "\t" + Conversions.toHumanReadableString(v) + " (" + (if (v != null) v.getClass.getName else "null") + ")")
                     }
                   case Left(ex) =>
                     println("Result: error: " + ex.getMessage)
