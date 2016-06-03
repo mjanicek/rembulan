@@ -85,7 +85,7 @@ public class LibUtils {
 			Object arg = args[index];
 			Number n = Conversions.objectAsNumber(arg);
 			if (n != null) {
-				Long l = Conversions.numberAsLong(n);
+				Long l = Conversions.numberAsExactLong(n);
 				if (l != null) {
 					long ll = l;
 					if (ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE) {
@@ -112,7 +112,7 @@ public class LibUtils {
 			Object arg = args[index];
 			Number n = Conversions.objectAsNumber(arg);
 			if (n != null) {
-				Long l = Conversions.numberAsLong(n);
+				Long l = Conversions.numberAsExactLong(n);
 				if (l != null) {
 					return l;
 				}

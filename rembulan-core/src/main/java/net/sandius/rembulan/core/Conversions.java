@@ -3,8 +3,6 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.util.Check;
 
-import java.math.BigDecimal;
-
 /*
  * "to" conversions always succeed (they never return null),
  * "as" conversions are successful if they return a non-null result, and signal failure
@@ -16,18 +14,39 @@ public abstract class Conversions {
 		// not to be instantiated
 	}
 
-	public static Long numberAsLong(Number n) {
+	/**
+	 * Converts the number {@code n} to a signed 64-bit integer.
+	 *
+	 * <p>Returns a non-{@code null} value denoting the same numeric value as {@code n},
+	 * or {@code null} if {@code n} has no integer representation.
+	 *
+	 * @param n  number to convert to integer, must not be {@code null}
+	 * @return a {@code Long} representing the number, or {@code null} if {@code n} cannot
+	 *           be represented by a signed 64-bit integer.
+	 */
+	public static Long numberAsExactLong(Number n) {
 		if (n instanceof Double || n instanceof Float) {
-			long l = n.longValue();
-			return (double) l == n.doubleValue() && l != Long.MAX_VALUE ? l : null;
+			double d = n.doubleValue();
+			long l = (long) d;
+			return (double) l == d ? l : null;
 		}
 		else {
 			return n.longValue();
 		}
 	}
 
+	/**
+	 * Converts the number {@code n} to a signed 32-bit integer.
+	 *
+	 * <p>Returns a non-{@code null} value denoting the same numeric value as {@code n},
+	 * or {@code null} if {@code n} has no integer representation.
+	 *
+	 * @param n  number to convert to integer, must not be {@code null}
+	 * @return a {@code Integer} representing the number, or {@code null} if {@code n} cannot
+	 *           be represented by a signed 32-bit integer.
+	 */
 	public static Integer numberAsInt(Number n) {
-		Long l = numberAsLong(n);
+		Long l = numberAsExactLong(n);
 		if (l != null) {
 			long ll = l;
 			int i = (int) ll;
@@ -160,7 +179,7 @@ public abstract class Conversions {
 
 	public static Long objectAsLong(Object o) {
 		Number n = objectAsNumber(o);
-		return n != null ? numberAsLong(n) : null;
+		return n != null ? numberAsExactLong(n) : null;
 	}
 
 	public static boolean objectToBoolean(Object o) {
