@@ -10,7 +10,6 @@ import net.sandius.rembulan.core.PlainValueTypeNamer;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Userdata;
-import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.util.Check;
 
 public class Operators {
@@ -221,37 +220,37 @@ public class Operators {
 	}
 
 	public static Object band(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 		return la != null && lb != null ? la & lb : tryMetamethodCall(state, Metatables.MT_BAND, a, b);
 	}
 
 	public static Object bor(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 		return la != null && lb != null ? la | lb : tryMetamethodCall(state, Metatables.MT_BOR, a, b);
 	}
 
 	public static Object bxor(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 		return la != null && lb != null ? la ^ lb : tryMetamethodCall(state, Metatables.MT_BXOR, a, b);
 	}
 
 	public static Object bnot(LuaState state, Object o) {
-		Long lo = Conversions.objectAsLong(o);
+		Long lo = Conversions.integerValueOf(o);
 		return lo != null ? ~lo : tryMetamethodCall(state, Metatables.MT_BNOT, o);
 	}
 
 	public static Object shl(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 		return la != null && lb != null ? la << lb : tryMetamethodCall(state, Metatables.MT_SHL, a, b);
 	}
 
 	public static Object shr(LuaState state, Object a, Object b) {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 		return la != null && lb != null ? la >>> lb : tryMetamethodCall(state, Metatables.MT_SHR, a, b);
 	}
 
@@ -295,7 +294,7 @@ public class Operators {
 				|| (a instanceof Userdata && b instanceof Userdata))
 				|| (ValueUtils.isLightUserdata(a) && ValueUtils.isLightUserdata(b))) {
 
-			return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_EQ, a, b));
+			return Conversions.booleanValueOf(tryMetamethodCall(state, Metatables.MT_EQ, a, b));
 		}
 		else {
 			return result;
@@ -327,7 +326,7 @@ public class Operators {
 			return RawOperators.rawlt((String) a, (String) b);
 		}
 
-		return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_LT, a, b));
+		return Conversions.booleanValueOf(tryMetamethodCall(state, Metatables.MT_LT, a, b));
 	}
 
 	public static boolean lt(LuaState state, long a, Object b) {
@@ -338,7 +337,7 @@ public class Operators {
 			return RawOperators.rawlt(ValueUtils.toInteger(a), ValueUtils.toFloat(b));
 		}
 
-		return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_LT, a, b));
+		return Conversions.booleanValueOf(tryMetamethodCall(state, Metatables.MT_LT, a, b));
 	}
 
 	public static boolean le(LuaState state, Object a, Object b) {
@@ -365,7 +364,7 @@ public class Operators {
 					a = tmp;
 				}
 
-				boolean result = Conversions.objectToBoolean(callHandler(handler, a, b));
+				boolean result = Conversions.booleanValueOf(callHandler(handler, a, b));
 
 				return flip ? !result : result;
 			}
@@ -384,15 +383,15 @@ public class Operators {
 	}
 
 	public static Object and(Object a, Object b) {
-		return Conversions.objectToBoolean(a) ? b : a;
+		return Conversions.booleanValueOf(a) ? b : a;
 	}
 
 	public static Object or(Object a, Object b) {
-		return Conversions.objectToBoolean(a) ? a : b;
+		return Conversions.booleanValueOf(a) ? a : b;
 	}
 
 	public static boolean not(Object o) {
-		return !Conversions.objectToBoolean(o);
+		return !Conversions.booleanValueOf(o);
 	}
 
 	public static Object index(LuaState state, Object table, Object key) {

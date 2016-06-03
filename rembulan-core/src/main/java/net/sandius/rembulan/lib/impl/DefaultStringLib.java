@@ -206,7 +206,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Function f = args.nextFunction();
-			boolean strip = Conversions.objectToBoolean(args.optNextAny());
+			boolean strip = Conversions.booleanValueOf(args.optNextAny());
 
 			throw new IllegalOperationAttemptException("unable to dump given function");
 		}
@@ -646,7 +646,7 @@ public class DefaultStringLib extends StringLib {
 
 					case 's': {
 						Object v = args.nextAny();
-						String s = Conversions.objectAsString(v);
+						String s = Conversions.stringValueOf(v);
 						if (s != null) {
 							result = justified(width, flags, trimmed(precision, s));
 						}

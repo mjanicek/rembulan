@@ -5,7 +5,6 @@ import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.legacy.Operators;
 import net.sandius.rembulan.core.RawOperators;
-import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.legacy.ValueUtils;
 
 public abstract class AltOperators {
@@ -83,8 +82,8 @@ public abstract class AltOperators {
 			return __bin_arith_op(na, nb).add(na, nb);
 		}
 		else if ((a instanceof String || a instanceof Number) || (b instanceof String || b instanceof Number)) {
-			Number na = Conversions.objectAsNumber(a);
-			Number nb = Conversions.objectAsNumber(b);
+			Number na = Conversions.numericalValueOf(a);
+			Number nb = Conversions.numericalValueOf(b);
 			if (na != null && nb != null) {
 				return __bin_arith_op(na, nb).add(na, nb);
 			}
@@ -100,8 +99,8 @@ public abstract class AltOperators {
 			return __bin_arith_op(na, nb).sub(na, nb);
 		}
 		else if ((a instanceof String || a instanceof Number) || (b instanceof String || b instanceof Number)) {
-			Number na = Conversions.objectAsNumber(a);
-			Number nb = Conversions.objectAsNumber(b);
+			Number na = Conversions.numericalValueOf(a);
+			Number nb = Conversions.numericalValueOf(b);
 			if (na != null && nb != null) {
 				return __bin_arith_op(na, nb).sub(na, nb);
 			}
@@ -120,7 +119,7 @@ public abstract class AltOperators {
 			return RawOperators.rawlt((String) a, (String) b);
 		}
 		else {
-			return Conversions.objectToBoolean(Operators.tryMetamethodCall(state, Metatables.MT_LT, a, b));
+			return Conversions.booleanValueOf(Operators.tryMetamethodCall(state, Metatables.MT_LT, a, b));
 		}
 	}
 

@@ -64,7 +64,7 @@ public class LibUtils {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-			Number n = Conversions.objectAsNumber(arg);
+			Number n = Conversions.numericalValueOf(arg);
 			if (n != null) {
 				return n;
 			}
@@ -83,9 +83,9 @@ public class LibUtils {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-			Number n = Conversions.objectAsNumber(arg);
+			Number n = Conversions.numericalValueOf(arg);
 			if (n != null) {
-				Long l = Conversions.numberAsExactLong(n);
+				Long l = Conversions.integerValueOf(n);
 				if (l != null) {
 					long ll = l;
 					if (ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE) {
@@ -110,9 +110,9 @@ public class LibUtils {
 		final String what;
 		if (index < args.length) {
 			Object arg = args[index];
-			Number n = Conversions.objectAsNumber(arg);
+			Number n = Conversions.numericalValueOf(arg);
 			if (n != null) {
-				Long l = Conversions.numberAsExactLong(n);
+				Long l = Conversions.integerValueOf(n);
 				if (l != null) {
 					return l;
 				}
@@ -136,10 +136,10 @@ public class LibUtils {
 
 		if (index < args.length) {
 			Object o = args[index];
-			Number n = Conversions.objectAsNumber(o);
+			Number n = Conversions.numericalValueOf(o);
 
 			if (n != null) {
-				Long l = Conversions.numberAsExactLong(n);
+				Long l = Conversions.integerValueOf(n);
 
 				if (l != null) {
 					long ll = l;
@@ -176,7 +176,7 @@ public class LibUtils {
 				}
 			}
 			else {
-				String s = Conversions.objectAsString(arg);
+				String s = Conversions.stringValueOf(arg);
 				if (s != null) {
 					return s;
 				}

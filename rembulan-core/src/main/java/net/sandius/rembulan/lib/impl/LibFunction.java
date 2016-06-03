@@ -103,7 +103,7 @@ public abstract class LibFunction extends FunctionAnyarg {
 
 		public boolean optNextBoolean(boolean defaultValue) {
 			if (hasNext()) {
-				return Conversions.objectToBoolean(nextAny());
+				return Conversions.booleanValueOf(nextAny());
 			}
 			else {
 				return defaultValue;

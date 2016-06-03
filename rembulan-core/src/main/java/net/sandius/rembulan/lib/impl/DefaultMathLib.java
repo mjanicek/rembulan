@@ -453,7 +453,7 @@ public class DefaultMathLib extends MathLib {
 					throw ct;
 				}
 
-				if (Conversions.objectToBoolean(context.getObjectSink()._0())) {
+				if (Conversions.booleanValueOf(context.getObjectSink()._0())) {
 					best = o;
 				}
 			}
@@ -477,7 +477,7 @@ public class DefaultMathLib extends MathLib {
 			Object best = ss.best;
 
 			// best <> args[idx] comparison has just finished
-			if (Conversions.objectToBoolean(context.getObjectSink()._0())) {
+			if (Conversions.booleanValueOf(context.getObjectSink()._0())) {
 				best = args[idx];
 			}
 
@@ -682,7 +682,7 @@ public class DefaultMathLib extends MathLib {
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Object x = args.nextAny();
-			context.getObjectSink().setTo(Conversions.objectAsLong(x));
+			context.getObjectSink().setTo(Conversions.integerValueOf(x));
 		}
 
 	}

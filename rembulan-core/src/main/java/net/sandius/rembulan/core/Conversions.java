@@ -15,148 +15,80 @@ public abstract class Conversions {
 	}
 
 	/**
-	 * Converts the number {@code n} to a signed 64-bit integer.
+	 * Returns the numerical value of the string {@code s}, or {@code null} if
+	 * {@code s} does not have a numerical value.
 	 *
-	 * <p>Returns a non-{@code null} value denoting the same numeric value as {@code n},
-	 * or {@code null} if {@code n} has no integer representation.
+	 * <p>If {@code s} is a valid Lua integer literal with optional sign, the numerical
+	 * value is the corresponding integer; if {@code s} is a valid Lua float literal with
+	 * optional sign, the numerical value is the corresponding float. Otherwise, the {@code s}
+	 * does not have a numerical value.
 	 *
-	 * @param n  number to convert to integer, must not be {@code null}
-	 * @return a {@code Long} representing the number, or {@code null} if {@code n} cannot
-	 *         be represented by a signed 64-bit integer
+	 * <p>Leading and trailing whitespace in {@code s} is ignored by this method.
 	 *
-	 * @throws NullPointerException if {@code n} is {@code null}
+	 * @param s  string to convert to numerical value, may be {@code null}
+	 * @return number representing the numerical value of {@code s},
+	 *         or {@code null} if {@code s} does not have a numerical value
 	 */
-	public static Long numberAsExactLong(Number n) {
-		if (n instanceof Double || n instanceof Float) {
-			double d = n.doubleValue();
-			long l = (long) d;
-			return (double) l == d ? l : null;
+	public static Number numericalValueOf(String s) {
+		String trimmed = s.trim();
+		try {
+			return Long.valueOf(LuaFormat.parseInteger(trimmed));
 		}
-		else {
-			return n.longValue();
-		}
-	}
-
-	/**
-	 * Converts the argument {@code o} to a number, coercing it into a Lua float
-	 * if {@code o} is a string that can be converted to a number.
-	 *
-	 * <p>If {@code o} is already a number, returns {@code o} cast to number. If {@code o} is
-	 * a string convertible to a number, it first converts the string to a number
-	 * following the syntactic and lexical rules of the Lua lexer, and then converts the result to
-	 * a Lua float. Returns {@code null} if the argument is not a number or a string convertible
-	 * to number.
-	 *
-	 * <p>Note that this method differs from {@link #objectAsNumber(Object)} in that it
-	 * coerces strings convertible to numbers into into floats rather than preserving
-	 * their canonical representation, and also note that this conversion happens <i>after</i>
-	 * the number has been parsed. Most significantly,
-	 *
-	 * <pre>
-	 *     Conversions.objectAsFloatIfString("-0")
-	 * </pre>
-	 *
-	 * yields {@code 0.0} rather than {@code 0} (as would be the case with {@code objectAsNumber}),
-	 * or {@code -0.0} (as it would in the case if the string was parsed directly as a float).
-	 *
-	 * @param o  object to convert to number, may be {@code null}
-	 *
-	 * @return number representing the object,
-	 *         or {@code null} if {@code o} cannot be coerced into a number.
-	 *
-	 * @see #objectAsNumber(Object)
-	 */
-	public static Number objectAsFloatIfString(Object o) {
-		if (o instanceof Number) {
-			return (Number) o;
-		}
-		else if (o instanceof String) {
-			String s = (String) o;
-
-			Double result;
+		catch (NumberFormatException ei) {
 			try {
-				result = Double.valueOf((double) LuaFormat.parseInteger(s));
+				return Double.valueOf(LuaFormat.parseFloat(trimmed));
 			}
-			catch (NumberFormatException ei) {
-				try {
-					result = Double.valueOf(LuaFormat.parseFloat(s));
-				}
-				catch (NumberFormatException ef) {
-					result = null;
-				}
+			catch (NumberFormatException ef) {
+				return null;
 			}
-			return result;
-		}
-		else {
-			return null;
 		}
 	}
 
 	/**
-	 * Returns the argument {@code o} as a number, coercing it into a number if it is
-	 * a string convertible to number.
+	 * Returns the numerical value of the object {@code o}, or {@code null} if {@code o}
+	 * does not have a numerical value.
 	 *
 	 * <p>If {@code o} is already a number, returns {@code o} cast to number. If {@code o}
-	 * is a string convertible to a number, it returns the number it represents (i.e.
-	 * an integer if the string is a valid integral literal, or a float if it is
-	 * a floating-point literal according to the syntactic and lexical rules of Lua).
+	 * is a string, returns its numerical value (see {@link #numericalValueOf(String)}).
+	 * Otherwise, returns {@code null}.
 	 *
-	 * <p>This method differs from {@link #objectAsFloatIfString(Object)} in that it
-	 * preserves the representation of coerced strings. In order to conform to Lua's
-	 * conversion rules for arithmetic operations, use {@link #objectAsFloatIfString(Object)}
-	 * rather than this method.
+	 * <p>This method differs from {@link #arithmeticValueOf(Object)} in that it
+	 * preserves the numerical value representation of coerced strings. For use in arithmetic
+	 * operations following Lua's argument conversion rules, use that method instead.
 	 *
-	 * @param o  object to convert to number, may be {@code null}
+	 * @param o  object to convert to numerical value, may be {@code null}
+	 * @return number representing the numerical value of {@code o},
+	 *         of {@code null} if {@code o} does not have a numerical value
 	 *
-	 * @return number representing the object,
-	 *         of {@code null} if {@code o} cannot be converted to a number.
-	 *
-	 * @see #objectAsFloatIfString(Object)
+	 * @see #arithmeticValueOf(Object)
 	 */
-	public static Number objectAsNumber(Object o) {
-		if (o instanceof Number) {
-			return (Number) o;
-		}
-		else if (o instanceof String) {
-			String s = (String) o;
-
-			Number result;
-			try {
-				result = Long.valueOf(LuaFormat.parseInteger(s));
-			}
-			catch (NumberFormatException ei) {
-				try {
-					result = Double.valueOf(LuaFormat.parseFloat(s));
-				}
-				catch (NumberFormatException ef) {
-					result = null;
-				}
-			}
-			return result;
-		}
-		else {
-			return null;
-		}
+	public static Number numericalValueOf(Object o) {
+		return o instanceof Number
+				? (Number) o
+				: o instanceof String
+						? numericalValueOf((String) o)
+						: null;
 	}
 
 	/**
-	 * Converts the argument {@code o} to a number, throwing an {@link IllegalArgumentException}
-	 * if the conversion fails.
+	 * Returns the numerical value of {@code o}, throwing an {@link IllegalArgumentException}
+	 * if {@code o} does not have a numerical value.
 	 *
-	 * <p>The conversion rules are those of {@link #objectAsNumber(Object)}; the only difference
+	 * <p>The conversion rules are those of {@link #numericalValueOf(Object)}; the only difference
 	 * is that this method throws an exception rather than returning {@code null} to signal errors.
 	 *
-	 * @param o  object to convert to number, may be {@code null}
+	 * @param o  object to convert to numerical value, may be {@code null}
 	 * @param name  value name for error reporting, may be {@code null}
-	 * @return number representing the object
+	 * @return number representing the numerical value of {@code o},
+	 *         guaranteed to be non-{@code null}
 	 *
 	 * @throws IllegalArgumentException if {@code o} is not a number or string convertible
 	 *                                  to number.
 	 *
-	 * @see #objectAsNumber(Object)
+	 * @see #numericalValueOf(Object)
 	 */
-	public static Number objectToNumber(Object o, String name) {
-		Number n = objectAsNumber(o);
+	public static Number toNumericalValue(Object o, String name) {
+		Number n = numericalValueOf(o);
 		if (n == null) {
 			throw new IllegalArgumentException(name + " must be a number");
 		}
@@ -165,32 +97,139 @@ public abstract class Conversions {
 		}
 	}
 
-	public static Long objectAsLong(Object o) {
-		Number n = objectAsNumber(o);
-		return n != null ? numberAsExactLong(n) : null;
+	/**
+	 * Returns the arithmetic value of the object {@code o}, or {@code null} if {@code o}
+	 * does not have an arithmetic value.
+	 *
+	 * <p>If {@code o} is a number, then that number is its arithmetic value. If {@code o}
+	 * is a string that has a numerical value (see {@link #numericalValueOf(String)}),
+	 * its arithmetic value is the numerical value converted to a float. Otherwise,
+	 * {@code o} does not have an arithmetic value.
+	 *
+	 * <p>Note that this method differs from {@link #numericalValueOf(Object)} in that it
+	 * coerces strings convertible to numbers into into floats rather than preserving
+	 * their numerical value representation, and also note that this conversion happens
+	 * <i>after</i> the numerical value has been determined. Most significantly,
+	 *
+	 * <pre>
+	 *     Conversions.arithmeticValueOf("-0")
+	 * </pre>
+	 *
+	 * yields {@code 0.0} rather than {@code 0} (as would be the case with
+	 * {@code numericalValueOf("-0")}), or {@code -0.0} (it would in the case if the string
+	 * was parsed directly as a float).
+	 *
+	 * @param o  object to convert to arithmetic value, may be {@code null}
+	 *
+	 * @return number representing the arithmetic value of {@code o},
+	 *         or {@code null} if {@code o} does not have an arithmetic value
+	 *
+	 * @see #numericalValueOf(Object)
+	 */
+	public static Number arithmeticValueOf(Object o) {
+		if (o instanceof Number) {
+			return (Number) o;
+		}
+		else if (o instanceof String) {
+			Number n = numericalValueOf((String) o);
+			return n != null ? floatValueOf(n) : null;
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
-	 * Converts the argument {@code o} to boolean.
+	 * Returns the integer value of the number {@code n}, or {@code null} if {@code n}
+	 * does not have an integer value.
 	 *
-	 * <p>Returns {@code false} if and only if {@code o} is <b>nil</b> or <b>false</b>.
+	 * <p>{@code n} has an integer value if and only if the number it denotes can be represented
+	 * as a signed 64-bit integer. That integer is then the integer value of {@code n}.
+	 * In other words, if {@code n} is a float, it has an integer value if and only if
+	 * it can be converted to a {@code long} without loss of precision.
+	 *
+	 * @param n  number to convert to integer, must not be {@code null}
+	 * @return a {@code Long} representing the integer value of {@code n},
+	 *         or {@code null} if {@code n} does not have integer value
+	 *
+	 * @throws NullPointerException if {@code n} is {@code null}
+	 */
+	public static Long integerValueOf(Number n) {
+		if (n instanceof Double || n instanceof Float) {
+			double d = n.doubleValue();
+			long l = (long) d;
+			return (double) l == d ? Long.valueOf(l) : null;
+		}
+		else if (n instanceof Long) {
+			return (Long) n;
+		}
+		else {
+			return Long.valueOf(n.longValue());
+		}
+	}
+
+	/**
+	 * Returns the integer value of the object {@code o}, or {@code null} if {@code o}
+	 * does not have an integer value.
+	 *
+	 * <p>The integer value of {@code o} is the integer value of its numerical value
+	 * (see {@link #numericalValueOf(Object)}), when it exists.
+	 *
+	 * @param o  object to be converted to integer, may be {@code null}
+	 * @return a {@code Long} representing the integer value of {@code o},
+	 *         or {@code null} if {@code o} does not have a integer value
+	 *
+	 * @see #integerValueOf(Number)
+	 */
+	public static Long integerValueOf(Object o) {
+		Number n = numericalValueOf(o);
+		return n != null ? integerValueOf(n) : null;
+	}
+
+	/**
+	 * Returns the float value of the number {@code n}.
+	 *
+	 * <p>The float value of {@code n} is its numerical value converted to {@code double}.
+	 *
+	 * @param n  the number to convert to float, must not be {@code null}
+	 * @return the float value of {@code n},
+	 *         guaranteed to be non-{@code null}
+	 *
+	 * @throws NullPointerException if {@code n} is {@code null}
+	 */
+	public static Double floatValueOf(Number n) {
+		return n instanceof Double
+				? (Double) n
+				: Double.valueOf(n.doubleValue());
+	}
+
+	/**
+	 * Returns the boolean value of the object {@code o}.
+	 *
+	 * <p>The boolean value of {@code o} is {@code false} if and only if {@code o} is <b>nil</b>
+	 * (i.e., {@code null}) or <b>false</b> (i.e., a {@link Boolean} {@code b} such
+	 * that {@code b.booleanValue() == false}).
 	 *
 	 * @param o  object to convert to boolean, may be {@code null}
 	 * @return {@code false} if {@code o} is <b>nil</b> or <b>false</b>, {@code true} otherwise
 	 */
-	public static boolean objectToBoolean(Object o) {
-		return !(o == null || (o instanceof Boolean && !((Boolean) o)));
+	public static boolean booleanValueOf(Object o) {
+		return !(o == null || (o instanceof Boolean && !((Boolean) o).booleanValue()));
 	}
 
 	/**
-	 * Returns the string representation of {@code n}.
+	 * Returns the string value of the number {@code n}.
+	 *
+	 * <p>The string value of integers is the result of {@link LuaFormat#toString(long)}
+	 * on their numerical value; similarly the string value of floats is the result
+	 * of {@link LuaFormat#toString(double)} on their numerical value.
 	 *
 	 * @param n  number to be converted to string, must not be {@code null}
-	 * @return string representation of {@code n}
+	 * @return string value of {@code n}, guaranteed to be non-{@code null}
 	 *
 	 * @throws NullPointerException if {@code n} is {@code null}
 	 */
-	public static String numberToString(Number n) {
+	public static String stringValueOf(Number n) {
 		if (n instanceof Double || n instanceof Float) {
 			return LuaFormat.toString(n.doubleValue());
 		}
@@ -200,18 +239,22 @@ public abstract class Conversions {
 	}
 
 	/**
-	 * Converts {@code o} (a string or number) to string, returning {@code null} if {@code o}
-	 * does not have a string representation.
+	 * Returns the string value of the object {@code o}, or {@code null} if {@code o} does
+	 * not have a string value.
+	 *
+	 * <p>If {@code o} is a string, that is the string value. If {@code o} is a number,
+	 * returns the string value of that number (see {@link #stringValueOf(Number)}).
+	 * Otherwise, {@code o} does not have a string value.
 	 *
 	 * @param o  object to be converted to string, may be {@code null}
-	 * @return string representation of {@code o}, or {@code null} if {@code o}
-	 *         is not a string or number
+	 * @return string value of {@code o}, or {@code null} if {@code o} does not have
+	 *         a string value
 	 */
-	public static String objectAsString(Object o) {
+	public static String stringValueOf(Object o) {
 		return o instanceof String
 				? (String) o
 				: o instanceof Number
-						? numberToString((Number) o)
+						? stringValueOf((Number) o)
 						: null;
 	}
 
@@ -221,9 +264,10 @@ public abstract class Conversions {
 	 * <p>The conversion rules are the following:
 	 *
 	 * <ul>
-	 *   <li>If {@code o} is a {@code string}, returns {@code o};</li>
-	 *   <li>if {@code o} is a {@code number}, returns its string representation;</li>
-	 *   <li>if {@code o} is <b>nil</b>, returns {@code "nil"};</li>
+	 *   <li>If {@code o} is a {@code string} or {@code number}, returns the string value
+	 *       of {@code o};</li>
+	 *   <li>if {@code o} is a {@code number}, returns its string value;</li>
+	 *   <li>if {@code o} is <b>nil</b> (i.e., {@code null}), returns {@code "nil"};</li>
 	 *   <li>if {@code o} is a {@code boolean}, returns {@code "true"} if {@code o} is <b>true</b>
 	 *       or {@code "false"} if {@code o} is <b>false</b>;</li>
 	 *   <li>otherwise, returns the string of the form {@code "TYPE: 0xHASH"}, where
@@ -233,18 +277,19 @@ public abstract class Conversions {
 	 *   </li>
 	 * </ul>
 	 *
-	 * <p>Note that this method ignores the object's {@link Object#toString() toString()} method
+	 * <p>Note that this method ignores the object's {@code toString()} method
 	 * and its {@code __tostring} metamethod.
 	 *
 	 * @param o  the object to be converted to string, may be {@code null}
+	 * @return human-readable string representation of {@code o}
 	 *
-	 * @see #objectAsString(Object)
+	 * @see #stringValueOf(Object)
 	 * @see BasicLib#_tostring()
 	 */
-	public static String objectToString(Object o) {
+	public static String toHumanReadableString(Object o) {
 		if (o == null) return LuaFormat.NIL;
 		else if (o instanceof String) return (String) o;
-		else if (o instanceof Number) return numberToString((Number) o);
+		else if (o instanceof Number) return stringValueOf((Number) o);
 		else if (o instanceof Boolean) return LuaFormat.toString(((Boolean) o).booleanValue());
 		else return String.format("%s: %#010x",
 					PlainValueTypeNamer.INSTANCE.typeNameOf(o),
@@ -260,8 +305,10 @@ public abstract class Conversions {
 	 *
 	 * @param t  throwable to convert to error object, must not be {@code null}
 	 * @return error object represented by {@code t}
+	 *
+	 * @throws NullPointerException if {@code t} is {@code null}
 	 */
-	public static Object throwableToErrorObject(Throwable t) {
+	public static Object toErrorObject(Throwable t) {
 		if (t instanceof LuaRuntimeException) {
 			return ((LuaRuntimeException) t).getErrorObject();
 		}

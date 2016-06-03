@@ -72,7 +72,7 @@ public class UtilMethods {
 		il.add(new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(Conversions.class),
-				"objectToNumber",
+				"toNumericalValue",
 				Type.getMethodDescriptor(
 						Type.getType(Number.class),
 						Type.getType(Object.class),
@@ -86,7 +86,7 @@ public class UtilMethods {
 		return new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(Conversions.class),
-				"objectToBoolean",
+				"booleanValueOf",
 				Type.getMethodDescriptor(
 						Type.BOOLEAN_TYPE,
 						Type.getType(Object.class)),

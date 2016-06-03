@@ -363,7 +363,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				// no metamethod, just call the default toString
-				String s = Conversions.objectToString(arg);
+				String s = Conversions.toHumanReadableString(arg);
 				context.getObjectSink().setTo(s);
 			}
 		}
@@ -400,7 +400,7 @@ public class DefaultBasicLib extends BasicLib {
 			if (args.size() < 2) {
 				// no base
 				Object o = args.nextAny();
-				Number n = Conversions.objectAsNumber(o);
+				Number n = Conversions.numericalValueOf(o);
 				context.getObjectSink().setTo(n);
 			}
 			else {
@@ -499,7 +499,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			if (Conversions.objectToBoolean(args.nextAny())) {
+			if (Conversions.booleanValueOf(args.nextAny())) {
 				context.getObjectSink().setToArray(args.getAll());
 			}
 			else {
@@ -507,7 +507,7 @@ public class DefaultBasicLib extends BasicLib {
 				if (args.hasNext()) {
 					// message is defined
 					Object message = args.nextAny();
-					String stringMessage = Conversions.objectAsString(message);
+					String stringMessage = Conversions.stringValueOf(message);
 					if (stringMessage != null) {
 						ex = new AssertionFailedException(stringMessage);
 					}
@@ -549,7 +549,7 @@ public class DefaultBasicLib extends BasicLib {
 				throw ct;
 			}
 			catch (Exception ex) {
-				context.getObjectSink().setTo(Boolean.FALSE, Conversions.throwableToErrorObject(ex));  // failure
+				context.getObjectSink().setTo(Boolean.FALSE, Conversions.toErrorObject(ex));  // failure
 				return;
 			}
 
@@ -616,7 +616,7 @@ public class DefaultBasicLib extends BasicLib {
 					throw ct;
 				}
 				catch (Exception e) {
-					errorObject = Conversions.throwableToErrorObject(e);
+					errorObject = Conversions.toErrorObject(e);
 					isError = true;
 				}
 			}
@@ -646,7 +646,7 @@ public class DefaultBasicLib extends BasicLib {
 				ct.push(this, new SavedState(handler, 0));
 			}
 			catch (Exception e) {
-				errorObject = Conversions.throwableToErrorObject(e);
+				errorObject = Conversions.toErrorObject(e);
 				isError = true;
 			}
 

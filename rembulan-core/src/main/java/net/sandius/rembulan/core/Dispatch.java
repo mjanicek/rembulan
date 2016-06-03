@@ -145,8 +145,8 @@ public abstract class Dispatch {
 	}
 
 	public static void add(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
+		Number na = Conversions.arithmeticValueOf(a);
+		Number nb = Conversions.arithmeticValueOf(b);
 		MathImplementation math = MathImplementation.arithmetic(na, nb);
 
 		if (math != null) {
@@ -162,8 +162,8 @@ public abstract class Dispatch {
 	}
 
 	public static void sub(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
+		Number na = Conversions.arithmeticValueOf(a);
+		Number nb = Conversions.arithmeticValueOf(b);
 		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_sub(na, nb));
@@ -178,8 +178,8 @@ public abstract class Dispatch {
 	}
 
 	public static void mul(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
+		Number na = Conversions.arithmeticValueOf(a);
+		Number nb = Conversions.arithmeticValueOf(b);
 		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_mul(na, nb));
@@ -194,8 +194,8 @@ public abstract class Dispatch {
 	}
 
 	public static void div(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
+		Number na = Conversions.arithmeticValueOf(a);
+		Number nb = Conversions.arithmeticValueOf(b);
 		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_div(na, nb));
@@ -210,8 +210,8 @@ public abstract class Dispatch {
 	}
 
 	public static void mod(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
+		Number na = Conversions.arithmeticValueOf(a);
+		Number nb = Conversions.arithmeticValueOf(b);
 		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_mod(na, nb));
@@ -226,8 +226,8 @@ public abstract class Dispatch {
 	}
 
 	public static void idiv(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
+		Number na = Conversions.arithmeticValueOf(a);
+		Number nb = Conversions.arithmeticValueOf(b);
 		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_idiv(na, nb));
@@ -242,8 +242,8 @@ public abstract class Dispatch {
 	}
 
 	public static void pow(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Number na = Conversions.objectAsFloatIfString(a);
-		Number nb = Conversions.objectAsFloatIfString(b);
+		Number na = Conversions.arithmeticValueOf(a);
+		Number nb = Conversions.arithmeticValueOf(b);
 		MathImplementation m = MathImplementation.arithmetic(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_pow(na, nb));
@@ -280,8 +280,8 @@ public abstract class Dispatch {
 	}
 
 	public static void band(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
 			context.getObjectSink().setTo(la & lb);
@@ -292,8 +292,8 @@ public abstract class Dispatch {
 	}
 
 	public static void bor(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
 			context.getObjectSink().setTo(la | lb);
@@ -304,8 +304,8 @@ public abstract class Dispatch {
 	}
 
 	public static void bxor(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
 			context.getObjectSink().setTo(la ^ lb);
@@ -316,8 +316,8 @@ public abstract class Dispatch {
 	}
 
 	public static void shl(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
 			context.getObjectSink().setTo(la << lb);
@@ -328,8 +328,8 @@ public abstract class Dispatch {
 	}
 
 	public static void shr(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Long la = Conversions.objectAsLong(a);
-		Long lb = Conversions.objectAsLong(b);
+		Long la = Conversions.integerValueOf(a);
+		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
 			context.getObjectSink().setTo(la >>> lb);
@@ -340,7 +340,7 @@ public abstract class Dispatch {
 	}
 
 	public static void unm(ExecutionContext context, Object o) throws ControlThrowable {
-		Number no = Conversions.objectAsFloatIfString(o);
+		Number no = Conversions.arithmeticValueOf(o);
 		MathImplementation m = MathImplementation.arithmetic(no);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_unm(no));
@@ -355,7 +355,7 @@ public abstract class Dispatch {
 	}
 
 	public static void bnot(ExecutionContext context, Object o) throws ControlThrowable {
-		Long lo = Conversions.objectAsLong(o);
+		Long lo = Conversions.integerValueOf(o);
 
 		if (lo != null) {
 			context.getObjectSink().setTo(~lo);
@@ -384,8 +384,8 @@ public abstract class Dispatch {
 	}
 
 	public static void concat(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		String sa = Conversions.objectAsString(a);
-		String sb = Conversions.objectAsString(b);
+		String sa = Conversions.stringValueOf(a);
+		String sb = Conversions.stringValueOf(b);
 
 		if (sa != null && sb != null) {
 			context.getObjectSink().setTo(sa.concat(sb));
@@ -407,7 +407,7 @@ public abstract class Dispatch {
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			Boolean b = (Boolean) suspendedState;
 			ObjectSink result = context.getObjectSink();
-			boolean resultValue = Conversions.objectToBoolean(result._0());
+			boolean resultValue = Conversions.booleanValueOf(result._0());
 			result.setTo(b == resultValue);
 		}
 
@@ -424,7 +424,7 @@ public abstract class Dispatch {
 		}
 		// not suspended: set the result, possibly flipping it
 		ObjectSink result = context.getObjectSink();
-		result.setTo(Conversions.objectToBoolean(result._0()) == cmpTo);
+		result.setTo(Conversions.booleanValueOf(result._0()) == cmpTo);
 	}
 
 	public static void eq(ExecutionContext context, Object a, Object b) throws ControlThrowable {

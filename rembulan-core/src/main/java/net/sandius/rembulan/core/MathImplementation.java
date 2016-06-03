@@ -141,7 +141,7 @@ public abstract class MathImplementation {
 
 	@Deprecated
 	public static MathImplementation arithmetic(Object a, Object b) {
-		return arithmetic(Conversions.objectAsFloatIfString(a), Conversions.objectAsFloatIfString(b));
+		return arithmetic(Conversions.arithmeticValueOf(a), Conversions.arithmeticValueOf(b));
 	}
 
 	public static MathImplementation arithmetic(Number a, Number b) {
@@ -159,7 +159,7 @@ public abstract class MathImplementation {
 
 	@Deprecated
 	public static MathImplementation arithmetic(Object o) {
-		return arithmetic(Conversions.objectAsFloatIfString(o));
+		return arithmetic(Conversions.arithmeticValueOf(o));
 	}
 
 	public static MathImplementation arithmetic(Number n) {
