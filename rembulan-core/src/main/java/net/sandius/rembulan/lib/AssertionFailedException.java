@@ -1,4 +1,6 @@
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.lib;
+
+import net.sandius.rembulan.core.LuaRuntimeException;
 
 public class AssertionFailedException extends LuaRuntimeException {
 

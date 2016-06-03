@@ -1,6 +1,7 @@
 package net.sandius.rembulan.test
 
 import net.sandius.rembulan.core._
+import net.sandius.rembulan.lib.AssertionFailedException
 import net.sandius.rembulan.{core => lua}
 
 object CoroutineFragments extends FragmentBundle with FragmentExpectations  {

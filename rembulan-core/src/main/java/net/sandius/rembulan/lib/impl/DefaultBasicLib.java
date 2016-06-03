@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.AssertionFailedException;
+import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
