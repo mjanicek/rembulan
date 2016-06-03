@@ -228,7 +228,6 @@ public class DefaultIOLib extends IOLib {
 			@Override
 			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 				IOFile f = nextFile(args);
-				System.out.println("YO!\t" + f.toString());
 				context.getObjectSink().setTo(f.toString());
 			}
 
