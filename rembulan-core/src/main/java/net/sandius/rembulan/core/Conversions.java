@@ -160,7 +160,9 @@ public abstract class Conversions {
 		if (n == null) {
 			throw new IllegalArgumentException(name + " must be a number");
 		}
-		return n;
+		else {
+			return n;
+		}
 	}
 
 	public static Long objectAsLong(Object o) {
