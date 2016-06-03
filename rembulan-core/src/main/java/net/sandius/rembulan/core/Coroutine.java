@@ -145,7 +145,7 @@ public final class Coroutine {
 						error = null;  // this exception will be handled
 
 						ProtectedResumable pr = (ProtectedResumable) top.resumable;
-						pr.resumeError(context, top.savedState, Conversions.throwableToObject(e));
+						pr.resumeError(context, top.savedState, Conversions.throwableToErrorObject(e));
 						Dispatch.evaluateTailCalls(context);
 					}
 					else {

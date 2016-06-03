@@ -6,6 +6,7 @@ import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.legacy.Operators;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Value;
+import net.sandius.rembulan.core.legacy.ValueUtils;
 
 public abstract class AltOperators {
 
@@ -68,11 +69,11 @@ public abstract class AltOperators {
 	protected static final FloatMathImpl FLOAT_MATH = new FloatMathImpl();
 
 	private static MathImpl __bin_arith_op(Number a, Number b) {
-		return (Value.isFloat(a) || Value.isFloat(b)) ? FLOAT_MATH : INTEGER_MATH;
+		return (ValueUtils.isFloat(a) || ValueUtils.isFloat(b)) ? FLOAT_MATH : INTEGER_MATH;
 	}
 
 	private static MathImpl __lt(Number a, Number b) {
-		return (Value.isFloat(a) || Value.isFloat(b)) ? FLOAT_MATH : INTEGER_MATH;
+		return (ValueUtils.isFloat(a) || ValueUtils.isFloat(b)) ? FLOAT_MATH : INTEGER_MATH;
 	}
 
 	public static Object add(LuaState state, Object a, Object b) {

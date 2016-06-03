@@ -1,7 +1,7 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.lib.BasicLib;
 
 /*
  * "to" conversions always succeed (they never return null),
@@ -22,7 +22,9 @@ public abstract class Conversions {
 	 *
 	 * @param n  number to convert to integer, must not be {@code null}
 	 * @return a {@code Long} representing the number, or {@code null} if {@code n} cannot
-	 *           be represented by a signed 64-bit integer.
+	 *         be represented by a signed 64-bit integer
+	 *
+	 * @throws NullPointerException if {@code n} is {@code null}
 	 */
 	public static Long numberAsExactLong(Number n) {
 		if (n instanceof Double || n instanceof Float) {
@@ -42,8 +44,10 @@ public abstract class Conversions {
 	 * or {@code null} if {@code n} has no integer representation.
 	 *
 	 * @param n  number to convert to integer, must not be {@code null}
-	 * @return a {@code Integer} representing the number, or {@code null} if {@code n} cannot
-	 *           be represented by a signed 32-bit integer.
+	 * @return an {@code Integer} representing the number, or {@code null} if {@code n} cannot
+	 *         be represented by a signed 32-bit integer.
+	 *
+	 * @throws NullPointerException if {@code n} is {@code null}
 	 */
 	public static Integer numberAsInt(Number n) {
 		Long l = numberAsExactLong(n);
@@ -58,58 +62,13 @@ public abstract class Conversions {
 		}
 	}
 
-	public static double stringToDouble(String s) throws NumberFormatException {
-		Check.notNull(s);
-
-		try {
-			return Double.parseDouble(s);
-		}
-		catch (NumberFormatException e0) {
-			// might be missing the trailing exponent for hex floating point constants
-			try {
-				return Double.parseDouble(s.trim() + "p0");
-			}
-			catch (NumberFormatException e1) {
-				throw new NumberFormatException("Not a number: " + s);
-			}
-		}
-	}
-
-	public static Long stringAsLong(String s) {
-		try {
-			return Long.parseLong(s);
-		}
-		catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
-	public static Double stringAsDouble(String s) {
-		try {
-			return stringToDouble(s);
-		}
-		catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
-	public static Number stringAsNumber(String s) {
-		Long l = stringAsLong(s);
-		return l != null ? l : (Number) stringAsDouble(s);
-	}
-
-	public static Number stringAsFloat(String s) {
-		Number n = stringAsNumber(s);
-		return n != null ? n.doubleValue() : null;
-	}
-
 	/**
 	 * Converts the argument {@code o} to a number, coercing it into a Lua float
 	 * if {@code o} is a string that can be converted to a number.
 	 *
 	 * <p>If {@code o} is already a number, returns {@code o} cast to number. If {@code o} is
 	 * a string convertible to a number, it first converts the string to a number
-	 * following the syntactic and lexical rules lexer, and then converts the result to
+	 * following the syntactic and lexical rules of the Lua lexer, and then converts the result to
 	 * a Lua float. Returns {@code null} if the argument is not a number or a string convertible
 	 * to number.
 	 *
@@ -122,7 +81,7 @@ public abstract class Conversions {
 	 *     Conversions.objectAsFloatIfString("-0")
 	 * </pre>
 	 *
-	 * yields {@code 0.0} rather than {@code 0} (as would be the case for {@code objectAsNumber}),
+	 * yields {@code 0.0} rather than {@code 0} (as would be the case with {@code objectAsNumber}),
 	 * or {@code -0.0} (as it would in the case if the string was parsed directly as a float).
 	 *
 	 * @param o  object to convert to number, may be {@code null}
@@ -133,11 +92,29 @@ public abstract class Conversions {
 	 * @see #objectAsNumber(Object)
 	 */
 	public static Number objectAsFloatIfString(Object o) {
-		return o instanceof Number
-				? (Number) o
-				: o instanceof String
-						? stringAsFloat((String) o)
-						: null;
+		if (o instanceof Number) {
+			return (Number) o;
+		}
+		else if (o instanceof String) {
+			String s = (String) o;
+
+			Double result;
+			try {
+				result = Double.valueOf((double) LuaFormat.parseInteger(s));
+			}
+			catch (NumberFormatException ei) {
+				try {
+					result = Double.valueOf(LuaFormat.parseFloat(s));
+				}
+				catch (NumberFormatException ef) {
+					result = null;
+				}
+			}
+			return result;
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**
@@ -157,18 +134,52 @@ public abstract class Conversions {
 	 * @param o  object to convert to number, may be {@code null}
 	 *
 	 * @return number representing the object,
-	 *         of {@code null} if {@code o} cannot be coerced into a number.
+	 *         of {@code null} if {@code o} cannot be converted to a number.
 	 *
 	 * @see #objectAsFloatIfString(Object)
 	 */
 	public static Number objectAsNumber(Object o) {
-		return o instanceof Number
-				? (Number) o
-				: o instanceof String
-						? stringAsNumber((String) o)
-						: null;
+		if (o instanceof Number) {
+			return (Number) o;
+		}
+		else if (o instanceof String) {
+			String s = (String) o;
+
+			Number result;
+			try {
+				result = Long.valueOf(LuaFormat.parseInteger(s));
+			}
+			catch (NumberFormatException ei) {
+				try {
+					result = Double.valueOf(LuaFormat.parseFloat(s));
+				}
+				catch (NumberFormatException ef) {
+					result = null;
+				}
+			}
+			return result;
+		}
+		else {
+			return null;
+		}
 	}
 
+	/**
+	 * Converts the argument {@code o} to a number, throwing an {@link IllegalArgumentException}
+	 * if the conversion fails.
+	 *
+	 * <p>The conversion rules are those of {@link #objectAsNumber(Object)}; the only difference
+	 * is that this method throws an exception rather than returning {@code null} to signal errors.
+	 *
+	 * @param o  object to convert to number, may be {@code null}
+	 * @param name  value name for error reporting, may be {@code null}
+	 * @return number representing the object
+	 *
+	 * @throws IllegalArgumentException if {@code o} is not a number or string convertible
+	 *                                  to number.
+	 *
+	 * @see #objectAsNumber(Object)
+	 */
 	public static Number objectToNumber(Object o, String name) {
 		Number n = objectAsNumber(o);
 		if (n == null) {
@@ -182,11 +193,26 @@ public abstract class Conversions {
 		return n != null ? numberAsExactLong(n) : null;
 	}
 
+	/**
+	 * Converts the argument {@code o} to boolean.
+	 *
+	 * <p>Returns {@code false} if and only if {@code o} is <b>nil</b> or <b>false</b>.
+	 *
+	 * @param o  object to convert to boolean, may be {@code null}
+	 * @return {@code false} if {@code o} is <b>nil</b> or <b>false</b>, {@code true} otherwise
+	 */
 	public static boolean objectToBoolean(Object o) {
 		return !(o == null || (o instanceof Boolean && !((Boolean) o)));
 	}
 
-	// FIXME: isn't this a coercion?
+	/**
+	 * Returns the string representation of {@code n}.
+	 *
+	 * @param n  number to be converted to string, must not be {@code null}
+	 * @return string representation of {@code n}
+	 *
+	 * @throws NullPointerException if {@code n} is {@code null}
+	 */
 	public static String numberToString(Number n) {
 		if (n instanceof Double || n instanceof Float) {
 			return LuaFormat.toString(n.doubleValue());
@@ -196,7 +222,14 @@ public abstract class Conversions {
 		}
 	}
 
-	// FIXME: isn't this a coercion?
+	/**
+	 * Converts {@code o} (a string or number) to string, returning {@code null} if {@code o}
+	 * does not have a string representation.
+	 *
+	 * @param o  object to be converted to string, may be {@code null}
+	 * @return string representation of {@code o}, or {@code null} if {@code o}
+	 *         is not a string or number
+	 */
 	public static String objectAsString(Object o) {
 		return o instanceof String
 				? (String) o
@@ -205,17 +238,58 @@ public abstract class Conversions {
 						: null;
 	}
 
+	/**
+	 * Converts the object {@code o} to a human-readable string format.
+	 *
+	 * <p>The conversion rules are the following:
+	 *
+	 * <ul>
+	 *   <li>If {@code o} is a {@code string}, returns {@code o};</li>
+	 *   <li>if {@code o} is a {@code number}, returns its string representation;</li>
+	 *   <li>if {@code o} is <b>nil</b>, returns {@code "nil"};</li>
+	 *   <li>if {@code o} is a {@code boolean}, returns {@code "true"} if {@code o} is <b>true</b>
+	 *       or {@code "false"} if {@code o} is <b>false</b>;</li>
+	 *   <li>otherwise, returns the string of the form {@code "TYPE: 0xHASH"}, where
+	 *       TYPE is the Lua type of {@code o}, and HASH
+	 *       is the {@link System#identityHashCode(Object) identity hash code} of {@code o}
+	 *       in hexadecimal format.
+	 *   </li>
+	 * </ul>
+	 *
+	 * <p>Note that this method ignores the object's {@link Object#toString() toString()} method
+	 * and its {@code __tostring} metamethod.
+	 *
+	 * @param o  the object to be converted to string, may be {@code null}
+	 *
+	 * @see #objectAsString(Object)
+	 * @see BasicLib#_tostring()
+	 */
 	public static String objectToString(Object o) {
-		String s = objectAsString(o);
-		return s != null ? s : (o != null ? o.toString() : LuaFormat.NIL);
+		if (o == null) return LuaFormat.NIL;
+		else if (o instanceof String) return (String) o;
+		else if (o instanceof Number) return numberToString((Number) o);
+		else if (o instanceof Boolean) return LuaFormat.toString(((Boolean) o).booleanValue());
+		else return String.format("%s: %#010x",
+					PlainValueTypeNamer.INSTANCE.typeNameOf(o),
+					System.identityHashCode(o));
 	}
 
-	public static Object throwableToObject(Throwable ex) {
-		if (ex instanceof LuaRuntimeException) {
-			return ((LuaRuntimeException) ex).getErrorObject();
+	/**
+	 * Converts a {@code Throwable} {@code t} to an error object.
+	 *
+	 * <p>If {@code t} is a {@link LuaRuntimeException}, the result of this operation
+	 * is the result of its {@link LuaRuntimeException#getErrorObject()}. Otherwise,
+	 * the result is {@link Throwable#getMessage()}.
+	 *
+	 * @param t  throwable to convert to error object, must not be {@code null}
+	 * @return error object represented by {@code t}
+	 */
+	public static Object throwableToErrorObject(Throwable t) {
+		if (t instanceof LuaRuntimeException) {
+			return ((LuaRuntimeException) t).getErrorObject();
 		}
 		else {
-			return ex.getMessage();
+			return t.getMessage();
 		}
 	}
 

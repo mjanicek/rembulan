@@ -1,6 +1,6 @@
 package net.sandius.rembulan.core.legacy;
 
-import net.sandius.rembulan.core.Coercions;
+import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.Invokable;
@@ -70,46 +70,55 @@ public class Operators {
 		return callHandler(handler, new Object[]{a, b, c});
 	}
 
+	private static Double stringAsDouble(String s) {
+		try {
+			return LuaFormat.parseFloat(s);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
 	public static Object add(LuaState state, Object a, Object b) {
-		if (Value.isInteger(a)) {
-			if (Value.isInteger(b)) {
-				return Value.toInteger(a) + Value.toInteger(b);
+		if (ValueUtils.isInteger(a)) {
+			if (ValueUtils.isInteger(b)) {
+				return ValueUtils.toInteger(a) + ValueUtils.toInteger(b);
 			}
-			else if (Value.isFloat(b)) {
-				return Value.toInteger(a) + Value.toFloat(b);
+			else if (ValueUtils.isFloat(b)) {
+				return ValueUtils.toInteger(a) + ValueUtils.toFloat(b);
 			}
 			else if (b instanceof String) {
-				Double db = Conversions.stringAsDouble((String) b);
+				Double db = stringAsDouble((String) b);
 				if (db != null) {
-					return Value.toInteger(a) + db;
+					return ValueUtils.toInteger(a) + db;
 				}
 			}
 		}
-		else if (Value.isFloat(a)) {
-			if (Value.isInteger(b)) {
-				return Value.toFloat(a) + Value.toInteger(b);
+		else if (ValueUtils.isFloat(a)) {
+			if (ValueUtils.isInteger(b)) {
+				return ValueUtils.toFloat(a) + ValueUtils.toInteger(b);
 			}
-			else if (Value.isFloat(b)) {
-				return Value.toFloat(a) + Value.toFloat(b);
+			else if (ValueUtils.isFloat(b)) {
+				return ValueUtils.toFloat(a) + ValueUtils.toFloat(b);
 			}
 			else if (b instanceof String) {
-				Double db = Conversions.stringAsDouble((String) b);
+				Double db = stringAsDouble((String) b);
 				if (db != null) {
-					return Value.toFloat(a) + db;
+					return ValueUtils.toFloat(a) + db;
 				}
 			}
 		}
 		else if (a instanceof String) {
-			Double da = Conversions.stringAsDouble((String) a);
+			Double da = stringAsDouble((String) a);
 			if (da != null) {
-				if (Value.isInteger(b)) {
-					return da + Value.toInteger(b);
+				if (ValueUtils.isInteger(b)) {
+					return da + ValueUtils.toInteger(b);
 				}
-				else if (Value.isFloat(b)) {
-					return da + Value.toFloat(b);
+				else if (ValueUtils.isFloat(b)) {
+					return da + ValueUtils.toFloat(b);
 				}
 				else if (b instanceof String) {
-					Double db = Conversions.stringAsDouble((String) b);
+					Double db = stringAsDouble((String) b);
 					if (db != null) {
 						return da + db;
 					}
@@ -121,45 +130,45 @@ public class Operators {
 	}
 
 	public static Object sub(LuaState state, Object a, Object b) {
-		if (Value.isInteger(a)) {
-			if (Value.isInteger(b)) {
-				return Value.toInteger(a) - Value.toInteger(b);
+		if (ValueUtils.isInteger(a)) {
+			if (ValueUtils.isInteger(b)) {
+				return ValueUtils.toInteger(a) - ValueUtils.toInteger(b);
 			}
-			else if (Value.isFloat(b)) {
-				return Value.toInteger(a) - Value.toFloat(b);
+			else if (ValueUtils.isFloat(b)) {
+				return ValueUtils.toInteger(a) - ValueUtils.toFloat(b);
 			}
 			else if (b instanceof String) {
-				Double db = Conversions.stringAsDouble((String) b);
+				Double db = stringAsDouble((String) b);
 				if (db != null) {
-					return Value.toInteger(a) - db;
+					return ValueUtils.toInteger(a) - db;
 				}
 			}
 		}
-		else if (Value.isFloat(a)) {
-			if (Value.isInteger(b)) {
-				return Value.toFloat(a) - Value.toInteger(b);
+		else if (ValueUtils.isFloat(a)) {
+			if (ValueUtils.isInteger(b)) {
+				return ValueUtils.toFloat(a) - ValueUtils.toInteger(b);
 			}
-			else if (Value.isFloat(b)) {
-				return Value.toFloat(a) - Value.toFloat(b);
+			else if (ValueUtils.isFloat(b)) {
+				return ValueUtils.toFloat(a) - ValueUtils.toFloat(b);
 			}
 			else if (b instanceof String) {
-				Double db = Conversions.stringAsDouble((String) b);
+				Double db = stringAsDouble((String) b);
 				if (db != null) {
-					return Value.toFloat(a) - db;
+					return ValueUtils.toFloat(a) - db;
 				}
 			}
 		}
 		else if (a instanceof String) {
-			Double da = Conversions.stringAsDouble((String) a);
+			Double da = stringAsDouble((String) a);
 			if (da != null) {
-				if (Value.isInteger(b)) {
-					return da - Value.toInteger(b);
+				if (ValueUtils.isInteger(b)) {
+					return da - ValueUtils.toInteger(b);
 				}
-				else if (Value.isFloat(b)) {
-					return da - Value.toFloat(b);
+				else if (ValueUtils.isFloat(b)) {
+					return da - ValueUtils.toFloat(b);
 				}
 				else if (b instanceof String) {
-					Double db = Conversions.stringAsDouble((String) b);
+					Double db = stringAsDouble((String) b);
 					if (db != null) {
 						return da - db;
 					}
@@ -247,8 +256,8 @@ public class Operators {
 	}
 
 	public static Object concat(LuaState state, Object a, Object b) {
-		String sa = Coercions.asString(a);
-		String sb = Coercions.asString(b);
+		String sa = ValueUtils.asString(a);
+		String sb = ValueUtils.asString(b);
 
 		if (sa != null && sb != null) {
 			return sa.concat(sb);
@@ -284,7 +293,7 @@ public class Operators {
 		if (!result &&
 				((a instanceof Table && b instanceof Table)
 				|| (a instanceof Userdata && b instanceof Userdata))
-				|| (Value.isLightUserdata(a) && Value.isLightUserdata(b))) {
+				|| (ValueUtils.isLightUserdata(a) && ValueUtils.isLightUserdata(b))) {
 
 			return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_EQ, a, b));
 		}
@@ -298,20 +307,20 @@ public class Operators {
 	}
 
 	public static boolean lt(LuaState state, Object a, Object b) {
-		if (Value.isInteger(a)) {
-			if (Value.isInteger(b)) {
-				return RawOperators.rawlt(Value.toInteger(a), Value.toInteger(b));
+		if (ValueUtils.isInteger(a)) {
+			if (ValueUtils.isInteger(b)) {
+				return RawOperators.rawlt(ValueUtils.toInteger(a), ValueUtils.toInteger(b));
 			}
-			else if (Value.isFloat(b)) {
-				return RawOperators.rawlt(Value.toInteger(a), Value.toFloat(b));
+			else if (ValueUtils.isFloat(b)) {
+				return RawOperators.rawlt(ValueUtils.toInteger(a), ValueUtils.toFloat(b));
 			}
 		}
-		else if (Value.isFloat(a)) {
-			if (Value.isInteger(b)) {
-				return RawOperators.rawlt(Value.toFloat(a), Value.toInteger(b));
+		else if (ValueUtils.isFloat(a)) {
+			if (ValueUtils.isInteger(b)) {
+				return RawOperators.rawlt(ValueUtils.toFloat(a), ValueUtils.toInteger(b));
 			}
-			else if (Value.isFloat(b)) {
-				return RawOperators.rawlt(Value.toFloat(a), Value.toFloat(b));
+			else if (ValueUtils.isFloat(b)) {
+				return RawOperators.rawlt(ValueUtils.toFloat(a), ValueUtils.toFloat(b));
 			}
 		}
 		else if (a instanceof String && b instanceof String) {
@@ -322,11 +331,11 @@ public class Operators {
 	}
 
 	public static boolean lt(LuaState state, long a, Object b) {
-		if (Value.isInteger(b)) {
-			return RawOperators.rawlt(Value.toInteger(a), Value.toInteger(b));
+		if (ValueUtils.isInteger(b)) {
+			return RawOperators.rawlt(ValueUtils.toInteger(a), ValueUtils.toInteger(b));
 		}
-		else if (Value.isFloat(b)) {
-			return RawOperators.rawlt(Value.toInteger(a), Value.toFloat(b));
+		else if (ValueUtils.isFloat(b)) {
+			return RawOperators.rawlt(ValueUtils.toInteger(a), ValueUtils.toFloat(b));
 		}
 
 		return Conversions.objectToBoolean(tryMetamethodCall(state, Metatables.MT_LT, a, b));

@@ -1,6 +1,5 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.core.AssertionFailedException;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Conversions;
@@ -15,7 +14,6 @@ import net.sandius.rembulan.core.PlainValueTypeNamer;
 import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
@@ -341,10 +339,6 @@ public class DefaultBasicLib extends BasicLib {
 
 		public static final ToString INSTANCE = new ToString();
 
-		public static String toString(Object o) {
-			return Conversions.objectToString(o);
-		}
-
 		@Override
 		protected String name() {
 			return "tostring";
@@ -369,7 +363,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				// no metamethod, just call the default toString
-				String s = toString(arg);
+				String s = Conversions.objectToString(arg);
 				context.getObjectSink().setTo(s);
 			}
 		}
@@ -555,7 +549,7 @@ public class DefaultBasicLib extends BasicLib {
 				throw ct;
 			}
 			catch (Exception ex) {
-				context.getObjectSink().setTo(Boolean.FALSE, Conversions.throwableToObject(ex));  // failure
+				context.getObjectSink().setTo(Boolean.FALSE, Conversions.throwableToErrorObject(ex));  // failure
 				return;
 			}
 
@@ -622,7 +616,7 @@ public class DefaultBasicLib extends BasicLib {
 					throw ct;
 				}
 				catch (Exception e) {
-					errorObject = Conversions.throwableToObject(e);
+					errorObject = Conversions.throwableToErrorObject(e);
 					isError = true;
 				}
 			}
@@ -652,7 +646,7 @@ public class DefaultBasicLib extends BasicLib {
 				ct.push(this, new SavedState(handler, 0));
 			}
 			catch (Exception e) {
-				errorObject = Conversions.throwableToObject(e);
+				errorObject = Conversions.throwableToErrorObject(e);
 				isError = true;
 			}
 

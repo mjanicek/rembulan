@@ -119,16 +119,9 @@ public abstract class RawOperators {
 			// value-based equality
 			return a.equals(b);
 		}
-		else if (a instanceof Table
-				|| a instanceof Thread
-				|| a instanceof Userdata
-				|| Value.isLightUserdata(a)) {
-
+		else {
 			// reference-based equality
 			return a == b;
-		}
-		else {
-			return false;
 		}
 	}
 

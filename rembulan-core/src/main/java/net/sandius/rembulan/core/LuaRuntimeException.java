@@ -4,11 +4,8 @@ public class LuaRuntimeException extends RuntimeException {
 
 	private final Object errorObject;
 
-	public LuaRuntimeException(String message) {
-		this.errorObject = message;
-	}
-
 	public LuaRuntimeException(Object errorObject) {
+		super();
 		this.errorObject = errorObject;
 	}
 

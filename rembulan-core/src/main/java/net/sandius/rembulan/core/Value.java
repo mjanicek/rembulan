@@ -36,63 +36,9 @@ public abstract class Value {
 		else return LuaType.LIGHTUSERDATA;
 	}
 
-	public static boolean isLightUserdata(Object o) {
-		return Value.typeOf(o) == LuaType.LIGHTUSERDATA;
-	}
-
-	public static Number asNumber(Object o) {
-		return o instanceof Number && (isInteger(o) || isFloat(o)) ? (Number) o : null;
-	}
-
-	public static boolean isInteger(Object o) {
-		return o instanceof Long || o instanceof Integer || o instanceof Short || o instanceof Byte;
-	}
-
-	public static long toInteger(Object o) {
-		if (!isInteger(o)) {
-			throw new IllegalArgumentException("Not an integer: " + o);
-		}
-		return ((Number) o).longValue();
-	}
-
-	public static boolean isFloat(Object o) {
-		return o instanceof Double || o instanceof Float;
-	}
-
 	public static boolean isNaN(Object o) {
-		return isFloat(o) && Double.isNaN(toFloat(o));
-	}
-
-	public static double toFloat(Object o) {
-		if (!isFloat(o)) {
-			throw new IllegalArgumentException("Not a float: " + o);
-		}
-		return ((Number) o).doubleValue();
-	}
-
-	public static boolean isNumber(Object o) {
-		return isInteger(o) || isFloat(o);
-	}
-
-	public static String toString(Object o) {
-		if (o == null) {
-			return "nil";
-		}
-		else {
-			if (isInteger(o)) return LuaFormat.toString(toInteger(o));
-			else if (isFloat(o)) return LuaFormat.toString(toFloat(o));
-			else return o.toString();
-		}
-	}
-
-	public static String asString(Object o) {
-		return o instanceof String
-				? (String) o
-				: (o instanceof Number
-						? (isFloat((Number) o)
-								? LuaFormat.toString(((Number) o).doubleValue())
-								: LuaFormat.toString(((Number) o).longValue()))
-						: null);
+		return (o instanceof Double || o instanceof Float)
+				&& Double.isNaN(((Number) o).doubleValue());
 	}
 
 }
