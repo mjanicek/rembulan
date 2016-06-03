@@ -38,31 +38,6 @@ public abstract class Conversions {
 	}
 
 	/**
-	 * Converts the number {@code n} to a signed 32-bit integer.
-	 *
-	 * <p>Returns a non-{@code null} value denoting the same numeric value as {@code n},
-	 * or {@code null} if {@code n} has no integer representation.
-	 *
-	 * @param n  number to convert to integer, must not be {@code null}
-	 * @return an {@code Integer} representing the number, or {@code null} if {@code n} cannot
-	 *         be represented by a signed 32-bit integer.
-	 *
-	 * @throws NullPointerException if {@code n} is {@code null}
-	 */
-	public static Integer numberAsInt(Number n) {
-		Long l = numberAsExactLong(n);
-		if (l != null) {
-			long ll = l;
-			int i = (int) ll;
-			return (long) i == ll ? i : null;
-		}
-		else {
-			// no integer representation
-			return null;
-		}
-	}
-
-	/**
 	 * Converts the argument {@code o} to a number, coercing it into a Lua float
 	 * if {@code o} is a string that can be converted to a number.
 	 *

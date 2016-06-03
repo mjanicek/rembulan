@@ -139,11 +139,12 @@ public class LibUtils {
 			Number n = Conversions.objectAsNumber(o);
 
 			if (n != null) {
-				Integer i = Conversions.numberAsInt(n);
-				if (i != null) {
-					int ii = i;
-					if (ii >= min && ii <= max) {
-						return ii;
+				Long l = Conversions.numberAsExactLong(n);
+
+				if (l != null) {
+					long ll = l;
+					if (ll >= min && ll <= max) {
+						return (int) ll;
 					}
 					else {
 						throw new BadArgumentException((index + 1), name, rangeName + " out of range");
