@@ -9,12 +9,8 @@ public abstract class ControlThrowable extends Throwable {
 	private Cons<ResumeInfo> resumeStack;
 
 	protected ControlThrowable() {
+		super(null, null, true, false);
 		this.resumeStack = null;
-	}
-
-	@Override
-	public synchronized Throwable fillInStackTrace() {
-		return this;
 	}
 
 	public void push(Resumable resumable, Object suspendedState) {
