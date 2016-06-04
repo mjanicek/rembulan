@@ -6,4 +6,8 @@ public class BadArgumentException extends IllegalArgumentException {
 		super("bad argument #" + argumentIndex + " to '" + functionName + "' (" + message + ")");
 	}
 
+	public BadArgumentException(int argumentIndex, String functionName, Throwable cause) {
+		this(argumentIndex, functionName, cause.getMessage());
+	}
+
 }

@@ -111,11 +111,11 @@ public abstract class LibFunction extends FunctionAnyarg {
 		}
 
 		public String nextString() {
-			return LibUtils.checkString(namer, name, args, index++);
+			return LibUtils.checkStringValue(namer, name, args, index++);
 		}
 
 		public String nextStrictString() {
-			return LibUtils.checkString(namer, name, args, index++, true);
+			return LibUtils.checkStrictString(namer, name, args, index++);
 		}
 
 		public String optNextString(String defaultValue) {

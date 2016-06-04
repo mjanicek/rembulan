@@ -59,140 +59,118 @@ public class LibUtils {
 
 	}
 
-	// FIXME: clean this up: redundant code!
-	public static Number checkNumber(ValueTypeNamer namer, String name, Object[] args, int index) {
-		final String what;
+	private static Object getArg(Object[] args, int index, String expected) {
 		if (index < args.length) {
-			Object arg = args[index];
+			return args[index];
+		}
+		else {
+			throw new UnexpectedArgumentException(expected, "no value");
+		}
+	}
+
+	private static int verifyRange(long value, int min, int max, String name) {
+		if (value >= min && value <= max) {
+			return (int) value;
+		}
+		else {
+			throw new IndexOutOfBoundsException(name + " out of range");
+		}
+	}
+
+	public static Number checkNumber(ValueTypeNamer namer, String name, Object[] args, int index) {
+		try {
+			Object arg = getArg(args, index, "number");
 			Number n = Conversions.numericalValueOf(arg);
 			if (n != null) {
 				return n;
 			}
 			else {
-				what = namer.typeNameOf(arg);
+				throw new UnexpectedArgumentException("number", namer.typeNameOf(arg));
 			}
 		}
-		else {
-			what = "no value";
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
 		}
-		throw new BadArgumentException((index + 1), name, "number expected, got " + what);
 	}
 
-	// FIXME: clean this up: redundant code!
 	public static int checkInt(ValueTypeNamer namer, String name, Object[] args, int index) {
-		final String what;
-		if (index < args.length) {
-			Object arg = args[index];
+		try {
+			Object arg = getArg(args, index, "number");
 			Number n = Conversions.numericalValueOf(arg);
 			if (n != null) {
-				Long l = Conversions.integerValueOf(n);
-				if (l != null) {
-					long ll = l;
-					if (ll >= Integer.MIN_VALUE && ll <= Integer.MAX_VALUE) {
-						return (int) ll;
-					}
-				}
-
-				throw new IllegalArgumentException("number has no integer representation");
+				return (int) Conversions.toIntegerValue(n);
 			}
 			else {
-				what = namer.typeNameOf(arg);
+				throw new UnexpectedArgumentException("number", namer.typeNameOf(arg));
 			}
 		}
-		else {
-			what = "no value";
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
 		}
-		throw new BadArgumentException((index + 1), name, "number expected, got " + what);
 	}
 
-	// FIXME: clean this up: redundant code!
 	public static long checkInteger(ValueTypeNamer namer, String name, Object[] args, int index) {
-		final String what;
-		if (index < args.length) {
-			Object arg = args[index];
-			Number n = Conversions.numericalValueOf(arg);
-			if (n != null) {
-				Long l = Conversions.integerValueOf(n);
-				if (l != null) {
-					return l;
-				}
-				else {
-					throw new IllegalArgumentException("number has no integer representation");
-				}
+		try {
+			Object arg = getArg(args, index, "number");
+			Long l = Conversions.integerValueOf(arg);
+			if (l != null) {
+				return l.longValue();
 			}
 			else {
-				what = namer.typeNameOf(arg);
+				throw new UnexpectedArgumentException("number", namer.typeNameOf(arg));
 			}
 		}
-		else {
-			what = "no value";
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
 		}
-		throw new BadArgumentException((index + 1), name, "number expected, got " + what);
 	}
 
-	// FIXME: clean this up: redundant code!
 	public static int checkRange(ValueTypeNamer namer, String name, Object[] args, int index, String rangeName, int min, int max) {
-		final String what;
-
-		if (index < args.length) {
-			Object o = args[index];
+		try {
+			Object o = getArg(args, index, "number");
 			Number n = Conversions.numericalValueOf(o);
 
 			if (n != null) {
-				Long l = Conversions.integerValueOf(n);
-
-				if (l != null) {
-					long ll = l;
-					if (ll >= min && ll <= max) {
-						return (int) ll;
-					}
-					else {
-						throw new BadArgumentException((index + 1), name, rangeName + " out of range");
-					}
-				}
-				else {
-					throw new BadArgumentException((index + 1), name, "number has no integer representation");
-				}
+				return verifyRange(Conversions.toIntegerValue(n), min, max, rangeName);
 			}
 			else {
-				what = namer.typeNameOf(o);
+				throw new UnexpectedArgumentException("number", namer.typeNameOf(o));
 			}
 		}
-		else {
-			what = "no value";
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
 		}
-
-		throw new BadArgumentException((index + 1), name, "number expected, got " + what);
 	}
 
-	// FIXME: clean this up: redundant code!
-	public static String checkString(ValueTypeNamer namer, String name, Object[] args, int index, boolean strict) {
-		final String what;
-		if (index < args.length) {
-			Object arg = args[index];
-			if (strict) {
-				if (arg instanceof String) {
-					return (String) arg;
-				}
+	public static String checkStrictString(ValueTypeNamer namer, String name, Object[] args, int index) {
+		try {
+			Object arg = getArg(args, index, "string");
+			if (arg instanceof String) {
+				return (String) arg;
 			}
 			else {
-				String s = Conversions.stringValueOf(arg);
-				if (s != null) {
-					return s;
-				}
+				throw new UnexpectedArgumentException("string", namer.typeNameOf(arg));
 			}
-
-			// not a string!
-			what = namer.typeNameOf(arg);
 		}
-		else {
-			what = "no value";
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
 		}
-		throw new BadArgumentException((index + 1), name, "string expected, got " + what);
 	}
 
-	public static String checkString(ValueTypeNamer namer, String name, Object[] args, int index) {
-		return checkString(namer, name, args, index, false);
+	public static String checkStringValue(ValueTypeNamer namer, String name, Object[] args, int index) {
+		try {
+			Object arg = getArg(args, index, "string");
+			String s = Conversions.stringValueOf(arg);
+			if (s != null) {
+				return s;
+			}
+			else {
+				throw new UnexpectedArgumentException("string", namer.typeNameOf(arg));
+			}
+		}
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
+		}
 	}
 
 	public static Table checkTableOrNil(String name, Object[] args, int index) {
@@ -208,58 +186,49 @@ public class LibUtils {
 		throw new BadArgumentException((index + 1), name, "nil or table expected");
 	}
 
-	// FIXME: clean this up: redundant code!
 	public static Table checkTable(ValueTypeNamer namer, String name, Object[] args, int index) {
-		final String what;
-		if (index < args.length) {
-			Object arg = args[index];
+		try {
+			Object arg = getArg(args, index, "table");
 			if (arg instanceof Table) {
 				return (Table) arg;
 			}
 			else {
-				what = namer.typeNameOf(arg);
+				throw new UnexpectedArgumentException("table", namer.typeNameOf(arg));
 			}
 		}
-		else {
-			what = "no value";
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
 		}
-		throw new BadArgumentException((index + 1), name, "table expected, got " + what);
 	}
 
-	// FIXME: clean this up: redundant code!
 	public static Function checkFunction(ValueTypeNamer namer, String name, Object[] args, int index) {
-		final String what;
-		if (index < args.length) {
-			Object arg = args[index];
+		try {
+			Object arg = getArg(args, index, "function");
 			if (arg instanceof Function) {
 				return (Function) arg;
 			}
 			else {
-				what = namer.typeNameOf(arg);
+				throw new UnexpectedArgumentException("function", namer.typeNameOf(arg));
 			}
 		}
-		else {
-			what = "no value";
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
 		}
-		throw new BadArgumentException((index + 1), name, "function expected, got " + what);
 	}
 
-	// FIXME: clean this up: redundant code!
 	public static Coroutine checkCoroutine(ValueTypeNamer namer, String name, Object[] args, int index) {
-		final String what;
-		if (index < args.length) {
-			Object arg = args[index];
+		try {
+			Object arg = getArg(args, index, "coroutine");
 			if (arg instanceof Coroutine) {
 				return (Coroutine) arg;
 			}
 			else {
-				what = namer.typeNameOf(arg);
+				throw new UnexpectedArgumentException("coroutine", namer.typeNameOf(arg));
 			}
 		}
-		else {
-			what = "no value";
+		catch (RuntimeException ex) {
+			throw new BadArgumentException((index + 1), name, ex);
 		}
-		throw new BadArgumentException((index + 1), name, "coroutine expected, got " + what);
 	}
 
 }

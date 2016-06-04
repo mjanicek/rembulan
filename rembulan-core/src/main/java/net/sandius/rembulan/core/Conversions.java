@@ -169,6 +169,30 @@ public abstract class Conversions {
 	}
 
 	/**
+	 * Returns the integer value of the number {@code n}, throwing
+	 * a {@link NoIntegerRepresentationException} if {@code n} does not have an integer value.
+	 *
+	 * <p>This is a variant of {@link #integerValueOf(Number)}; the difference is that
+	 * this method throws an exception rather than returning {@code null} to signal that
+	 * {@code n} does not have an integer value.
+	 *
+	 * @param n  object to be converted to integer, must not be {@code null}
+	 * @return integer value of {@code n}
+	 *
+	 * @throws NoIntegerRepresentationException if {@code n} does not have an integer value
+	 * @throws NullPointerException if {@code n} is {@code null}
+	 */
+	public static long toIntegerValue(Number n) {
+		Long l = integerValueOf(n);
+		if (l != null) {
+			return l.longValue();
+		}
+		else {
+			throw new NoIntegerRepresentationException();
+		}
+	}
+
+	/**
 	 * Returns the integer value of the object {@code o}, or {@code null} if {@code o}
 	 * does not have an integer value.
 	 *
