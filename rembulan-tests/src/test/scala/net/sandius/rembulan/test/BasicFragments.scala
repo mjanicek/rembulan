@@ -379,6 +379,17 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   ConcatNil in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to concatenate a nil value")
 
+  val ConcatNumeric = fragment ("ConcatNumeric") {
+    """local i = 1
+      |local f = 1.0
+      |local n
+      |if assert then n = i else n = f end
+      |return ":"..n
+    """
+  }
+  ConcatNumeric in EmptyContext succeedsWith (":1.0")
+  ConcatNumeric in BasicContext succeedsWith (":1")
+
   val Upvalues1 = fragment ("Upvalues1") {
     """local x = {}
       |for i = 0, 10 do
