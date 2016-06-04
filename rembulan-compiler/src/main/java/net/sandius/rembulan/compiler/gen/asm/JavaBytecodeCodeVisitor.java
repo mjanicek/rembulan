@@ -538,15 +538,15 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 					if (t.isSubtypeOf(LuaTypes.NUMBER_INTEGER)) {
 						add(e.loadNumericRegisterOrConstantValue(i, st, Type.LONG_TYPE));
-						add(OperatorMethods.unboxedNumberToLuaFormatString(Type.LONG_TYPE));
+						add(ConversionMethods.unboxedNumberToLuaFormatString(Type.LONG_TYPE));
 					}
 					else if (t.isSubtypeOf(LuaTypes.NUMBER_FLOAT)) {
 						add(e.loadNumericRegisterOrConstantValue(i, st, Type.DOUBLE_TYPE));
-						add(OperatorMethods.unboxedNumberToLuaFormatString(Type.DOUBLE_TYPE));
+						add(ConversionMethods.unboxedNumberToLuaFormatString(Type.DOUBLE_TYPE));
 					}
 					else {
 						add(e.loadRegister(i, st, Number.class));
-						add(OperatorMethods.boxedNumberToLuaFormatString());
+						add(ConversionMethods.boxedNumberToLuaFormatString());
 					}
 				}
 				else {
@@ -721,7 +721,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		}
 		else {
 			add(e.loadRegister(r_index, st));
-			add(UtilMethods.objectToBoolean());
+			add(ConversionMethods.booleanValueOf());
 		}
 
 		LabelNode trueBranch = e._l(trueBranchIdentity);

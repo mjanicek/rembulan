@@ -46,29 +46,6 @@ public class OperatorMethods {
 				false);
 	}
 
-	public static AbstractInsnNode unboxedNumberToLuaFormatString(Type tpe) {
-		Check.isTrue(tpe.equals(Type.DOUBLE_TYPE) || tpe.equals(Type.LONG_TYPE));
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(LuaFormat.class),
-				"toString",
-				Type.getMethodDescriptor(
-						Type.getType(String.class),
-						tpe),
-				false);
-	}
-
-	public static AbstractInsnNode boxedNumberToLuaFormatString() {
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Conversions.class),
-				"numberToString",
-				Type.getMethodDescriptor(
-						Type.getType(String.class),
-						Type.getType(Number.class)),
-				false);
-	}
-
 	public static AbstractInsnNode tableRawSetIntKey() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,

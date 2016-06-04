@@ -422,7 +422,7 @@ public class RunMethodEmitter {
 		}
 		else {
 			il.add(loadRegister(registerIndex, slots));
-			il.add(UtilMethods.objectToBoolean());
+			il.add(ConversionMethods.booleanValueOf());
 		}
 		return il;
 	}
@@ -525,7 +525,7 @@ public class RunMethodEmitter {
 		InsnList il = new InsnList();
 
 		il.add(loadRegister(r, st));
-		il.add(UtilMethods.objectToNumber(what));
+		il.add(ConversionMethods.toNumericalValue(what));
 		il.add(storeToRegister(r, st));
 
 		return il;

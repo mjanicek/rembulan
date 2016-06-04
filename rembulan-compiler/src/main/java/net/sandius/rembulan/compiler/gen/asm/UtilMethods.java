@@ -1,12 +1,9 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.impl.Varargs;
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
@@ -62,35 +59,6 @@ public class UtilMethods {
 				false));
 
 		return il;
-	}
-
-	public static InsnList objectToNumber(String what) {
-		Check.notNull(what);
-		InsnList il = new InsnList();
-
-		il.add(new LdcInsnNode(what));
-		il.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Conversions.class),
-				"toNumericalValue",
-				Type.getMethodDescriptor(
-						Type.getType(Number.class),
-						Type.getType(Object.class),
-						Type.getType(String.class)),
-				false));
-
-		return il;
-	}
-
-	public static AbstractInsnNode objectToBoolean() {
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Conversions.class),
-				"booleanValueOf",
-				Type.getMethodDescriptor(
-						Type.BOOLEAN_TYPE,
-						Type.getType(Object.class)),
-				false);
 	}
 
 	public static AbstractInsnNode StringBuilder_append(Type t) {
