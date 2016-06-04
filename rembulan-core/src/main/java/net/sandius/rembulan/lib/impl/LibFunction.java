@@ -12,11 +12,11 @@ public abstract class LibFunction extends FunctionAnyarg {
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-		CallArguments callArgs = new CallArguments(new LibUtils.NameMetamethodValueTypeNamer(context.getState()), name(), args);
+		ArgumentIterator callArgs = new ArgumentIterator(new LibUtils.NameMetamethodValueTypeNamer(context.getState()), name(), args);
 		invoke(context, callArgs);
 	}
 
-	protected abstract void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable;
+	protected abstract void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable;
 
 	@Override
 	public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {

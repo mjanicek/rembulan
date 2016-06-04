@@ -167,7 +167,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Number x = args.nextNumber();
 			Number result = x instanceof Float || x instanceof Double ? op(x.doubleValue()) : op(x.longValue());
 			context.getObjectSink().setTo(result);
@@ -348,7 +348,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Number x = args.nextNumber();
 			Number y = args.nextNumber();
 
@@ -386,7 +386,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Number x = args.nextNumber();
 			double ln = Math.log(x.doubleValue());
 			final double result;
@@ -463,7 +463,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object initial = args.nextAny();
 			run(context, args.getAll(), 1, initial);
 		}
@@ -496,7 +496,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Number x = args.nextNumber();
 
 			long intPart = x.longValue();
@@ -554,7 +554,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			final Number result;
 
 			if (!args.hasNext()) {
@@ -608,7 +608,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Number arg = args.nextNumber();
 
 			long seed = arg instanceof Double || arg instanceof Float
@@ -680,7 +680,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object x = args.nextAny();
 			context.getObjectSink().setTo(Conversions.integerValueOf(x));
 		}
@@ -697,7 +697,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object x = args.nextAny();
 
 			String result = x instanceof Number
@@ -721,7 +721,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			long x = args.nextInteger();
 			long y = args.nextInteger();
 			context.getObjectSink().setTo((x - y) < 0);

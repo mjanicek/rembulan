@@ -188,7 +188,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			run(context, args.getAll());
 		}
 
@@ -209,7 +209,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
 			context.getObjectSink().setTo(typeName);
 		}
@@ -226,7 +226,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table table = args.nextTable();
 			Object index = args.optNextAny();
 
@@ -261,7 +261,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table table = args.nextTable();
 			int index = args.nextInt();
 
@@ -288,7 +288,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table t = args.nextTable();
 			Object metamethod = Metatables.getMetamethod(context.getState(), MT_PAIRS, t);
 
@@ -328,7 +328,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table t = args.nextTable();
 			context.getObjectSink().setTo(INext.INSTANCE, t, 0L);
 		}
@@ -345,7 +345,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object arg = args.nextAny();
 
 			Object meta = Metatables.getMetamethod(context.getState(), MT_TOSTRING, arg);
@@ -396,7 +396,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			if (args.size() < 2) {
 				// no base
 				Object o = args.nextAny();
@@ -432,7 +432,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object arg = args.nextAny();
 			Object meta = Metatables.getMetamethod(context.getState(), MT_METATABLE, arg);
 
@@ -455,7 +455,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table t = args.nextTable();
 			Table mt = args.nextTableOrNil();
 
@@ -480,7 +480,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			// TODO: handle levels
 			Object arg1 = args.optNextAny();
 			throw new LuaRuntimeException(arg1);
@@ -498,7 +498,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			if (Conversions.booleanValueOf(args.nextAny())) {
 				context.getObjectSink().setToArray(args.getAll());
 			}
@@ -537,7 +537,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object callTarget = args.nextAny();
 			Object[] callArgs = args.getTail();
 
@@ -631,7 +631,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object callTarget = args.peekOrNil();
 			args.skip();
 			Function handler = args.nextFunction();
@@ -688,7 +688,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object a = args.nextAny();
 			Object b = args.nextAny();
 			context.getObjectSink().setTo(RawOperators.raweq(a, b));
@@ -706,7 +706,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table table = args.nextTable();
 			Object key = args.nextAny();
 			context.getObjectSink().setTo(table.rawget(key));
@@ -724,7 +724,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table table = args.nextTable();
 			Object key = args.nextAny();
 			Object value = args.nextAny();
@@ -745,7 +745,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			final long result;
 
 			// no need to distinguish missing value vs nil
@@ -778,7 +778,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object index = args.peekOrNil();
 
 			if (index instanceof String && ((String) index).startsWith("#")) {

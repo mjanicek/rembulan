@@ -150,7 +150,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			int i = args.optNextInt(1);
 			int j = args.optNextInt(i);
@@ -181,7 +181,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			char[] chars = new char[args.size()];
 
 			for (int i = 0; i < chars.length; i++) {
@@ -204,7 +204,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Function f = args.nextFunction();
 			boolean strip = args.optNextBoolean(false);
 
@@ -223,7 +223,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			String pattern = args.nextString();
 			int init = args.optNextInt(1);
@@ -440,7 +440,7 @@ public class DefaultStringLib extends StringLib {
 		private static final int FLAG_ZERO_PAD = 1 << 4;
 		private static final int FLAG_ALT_FORM = 1 << 5;
 
-		private int placeholder(String fmt, int from, StringBuilder bld, CallArguments args) {
+		private int placeholder(String fmt, int from, StringBuilder bld, ArgumentIterator args) {
 			if (!args.hasNext()) {
 				throw new BadArgumentException(args.size() + 1, name(), "no value");
 			}
@@ -674,7 +674,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String fmt = args.nextString();
 
 			StringBuilder bld = new StringBuilder();
@@ -772,7 +772,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			String pattern = args.nextString();
 
@@ -795,7 +795,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			context.getObjectSink().setTo((long) s.length());
 		}
@@ -812,7 +812,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			context.getObjectSink().setTo(s.toLowerCase());
 		}
@@ -829,7 +829,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			String pattern = args.nextString();
 			int init = args.optNextInt(1);
@@ -884,7 +884,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			int n = args.nextInt();
 			String sep = args.optNextString("");
@@ -921,7 +921,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 
 			int len = s.length();
@@ -948,7 +948,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			int i = args.nextInt();
 			int j = args.optNextInt(-1);
@@ -974,7 +974,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
 			context.getObjectSink().setTo(s.toUpperCase());
 		}

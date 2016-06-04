@@ -10,6 +10,7 @@ import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_FUNCTION;
@@ -18,7 +19,7 @@ import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_STRING;
 import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_TABLE;
 import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_THREAD;
 
-public class CallArguments {
+public class ArgumentIterator implements Iterator<Object> {
 
 	private final ValueTypeNamer namer;
 
@@ -26,15 +27,32 @@ public class CallArguments {
 	private final Object[] args;
 	private int index;
 
-	private CallArguments(ValueTypeNamer namer, String name, Object[] args, int index) {
+	private ArgumentIterator(ValueTypeNamer namer, String name, Object[] args, int index) {
 		this.namer = Check.notNull(namer);
 		this.name = Check.notNull(name);
 		this.args = Check.notNull(args);
 		this.index = Check.nonNegative(index);
 	}
 
-	public CallArguments(ValueTypeNamer namer, String name, Object[] args) {
+	public ArgumentIterator(ValueTypeNamer namer, String name, Object[] args) {
 		this(namer, name, args, 0);
+	}
+
+	@Override
+	public boolean hasNext() {
+		return index < args.length;
+	}
+
+	@Override
+	public Object next() {
+		Object o = peek();
+		skip();
+		return o;
+	}
+
+	@Override
+	public void remove() {
+		throw new UnsupportedOperationException();
 	}
 
 	public ValueTypeNamer namer() {
@@ -47,10 +65,6 @@ public class CallArguments {
 
 	public void skip() {
 		index += 1;
-	}
-
-	public boolean hasNext() {
-		return index < args.length;
 	}
 
 	public int size() {

@@ -208,7 +208,7 @@ public class DefaultIOLib extends IOLib {
 			}
 
 			@Override
-			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 				IOFile f = args.nextStrict(typeName(), IOFile.class);
 				context.getObjectSink().setTo(f.toString());
 			}
@@ -225,7 +225,7 @@ public class DefaultIOLib extends IOLib {
 			}
 
 			@Override
-			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+			protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 				IOFile f = args.nextStrict(typeName(), IOFile.class);
 
 				while (args.hasNext()) {
@@ -269,7 +269,7 @@ public class DefaultIOLib extends IOLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			if (args.hasNext()) {
 				// open the argument for writing and set it as the default output file
 				throw new UnsupportedOperationException();  // TODO
@@ -297,7 +297,7 @@ public class DefaultIOLib extends IOLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			IOFile outFile = lib.getDefaultOutputFile();
 
 			Object[] writeCallArgs = Varargs.concat(new Object[] { outFile }, args.getAll());

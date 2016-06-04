@@ -57,7 +57,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Function func = args.nextFunction();
 			Coroutine c = context.newCoroutine(func);
 			context.getObjectSink().setTo(c);
@@ -75,7 +75,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Coroutine coroutine = args.nextCoroutine();
 			Object[] resumeArgs = args.getTail();
 
@@ -109,7 +109,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			CoroutineSwitch.Yield ct = new CoroutineSwitch.Yield(args.getAll());
 			ct.push(this, null);
 			throw ct;
@@ -132,7 +132,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			context.getObjectSink().setTo(context.canYield());
 		}
 
@@ -165,7 +165,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Coroutine coroutine = args.nextCoroutine();
 			context.getObjectSink().setTo(status(context, coroutine));
 		}
@@ -182,7 +182,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Coroutine c = context.getCurrentCoroutine();
 			context.getObjectSink().setTo(c, !c.canYield());
 		}
@@ -225,7 +225,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Function f = args.nextFunction();
 			Function result = new WrappedCoroutine(f, context);
 			context.getObjectSink().setTo(result);
