@@ -148,25 +148,25 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """for i = "a", "b", "c" do end
     """
   }
-  IllegalForLoop1 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' limit must be a number")
+  IllegalForLoop1 in EmptyContext failsWith(classOf[ConversionException], "'for' limit must be a number")
 
   val IllegalForLoop2 = fragment ("IllegalForLoop2") {
     """for i = "a", 0, "c" do end
     """
   }
-  IllegalForLoop2 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' step must be a number")
+  IllegalForLoop2 in EmptyContext failsWith(classOf[ConversionException], "'for' step must be a number")
 
   val IllegalForLoop3 = fragment ("IllegalForLoop3") {
     """for i = "a", 0, 0 do end
     """
   }
-  IllegalForLoop3 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' initial value must be a number")
+  IllegalForLoop3 in EmptyContext failsWith(classOf[ConversionException], "'for' initial value must be a number")
 
   val IllegalForLoop4 = fragment ("IllegalForLoop4") {
     """for i = 1, "x" do end
     """
   }
-  IllegalForLoop4 in EmptyContext failsWith(classOf[IllegalArgumentException], "'for' limit must be a number")
+  IllegalForLoop4 in EmptyContext failsWith(classOf[ConversionException], "'for' limit must be a number")
 
   val NaNForLoop = fragment ("NaNForLoop") {
     """local n = 0
@@ -242,7 +242,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """
   }
   ForLoopMtAttempt in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
-  ForLoopMtAttempt in BasicContext failsWith (classOf[IllegalArgumentException], "'for' initial value must be a number")
+  ForLoopMtAttempt in BasicContext failsWith (classOf[ConversionException], "'for' initial value must be a number")
 
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3

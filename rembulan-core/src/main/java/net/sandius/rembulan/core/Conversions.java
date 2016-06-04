@@ -71,7 +71,7 @@ public abstract class Conversions {
 	}
 
 	/**
-	 * Returns the numerical value of {@code o}, throwing an {@link IllegalArgumentException}
+	 * Returns the numerical value of {@code o}, throwing a {@link ConversionException}
 	 * if {@code o} does not have a numerical value.
 	 *
 	 * <p>The conversion rules are those of {@link #numericalValueOf(Object)}; the only difference
@@ -82,15 +82,15 @@ public abstract class Conversions {
 	 * @return number representing the numerical value of {@code o},
 	 *         guaranteed to be non-{@code null}
 	 *
-	 * @throws IllegalArgumentException if {@code o} is not a number or string convertible
-	 *                                  to number.
+	 * @throws ConversionException if {@code o} is not a number or string convertible
+	 *                             to number.
 	 *
 	 * @see #numericalValueOf(Object)
 	 */
 	public static Number toNumericalValue(Object o, String name) {
 		Number n = numericalValueOf(o);
 		if (n == null) {
-			throw new IllegalArgumentException(name + " must be a number");
+			throw new ConversionException(name + " must be a number");
 		}
 		else {
 			return n;
