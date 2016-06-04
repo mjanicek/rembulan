@@ -535,8 +535,7 @@ public class RunMethodEmitter {
 		InsnList il = new InsnList();
 
 		il.add(loadRegister(registerIndex, st, Number.class));
-		il.add(BoxedPrimitivesMethods.doubleValue(Number.class));
-		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		il.add(ConversionMethods.floatValueOf());
 		il.add(storeToRegister(registerIndex, st));
 
 		return il;

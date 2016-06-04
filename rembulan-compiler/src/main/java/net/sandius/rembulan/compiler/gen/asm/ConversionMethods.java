@@ -35,6 +35,17 @@ public abstract class ConversionMethods {
 		return il;
 	}
 
+	public static AbstractInsnNode floatValueOf() {
+		return new MethodInsnNode(
+				INVOKESTATIC,
+				Type.getInternalName(Conversions.class),
+				"floatValueOf",
+				Type.getMethodDescriptor(
+						Type.getType(Double.class),
+						Type.getType(Object.class)),
+				false);
+	}
+
 	public static AbstractInsnNode booleanValueOf() {
 		return new MethodInsnNode(
 				INVOKESTATIC,
