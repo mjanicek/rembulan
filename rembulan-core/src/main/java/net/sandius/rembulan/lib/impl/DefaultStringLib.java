@@ -206,7 +206,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
 			Function f = args.nextFunction();
-			boolean strip = Conversions.booleanValueOf(args.optNextAny());
+			boolean strip = args.optNextBoolean(false);
 
 			throw new IllegalOperationAttemptException("unable to dump given function");
 		}
@@ -602,7 +602,7 @@ public class DefaultStringLib extends StringLib {
 					case 'E':
 					case 'g':
 					case 'G': {
-						double v = args.nextNumber().doubleValue();
+						double v = args.nextFloat();
 
 						if (Double.isNaN(v) || Double.isInfinite(v)) {
 							final String chars;

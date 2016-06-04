@@ -189,7 +189,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			run(context, args.args);
+			run(context, args.getAll());
 		}
 
 		@Override
@@ -404,15 +404,15 @@ public class DefaultBasicLib extends BasicLib {
 				context.getObjectSink().setTo(n);
 			}
 			else {
-				// first get the base, then retrieve the string, then check the base value
-				args.skip();
-				int base = args.nextInt();
-				args.reset();
-				String s = args.nextStrictString();
+				// We do the argument checking gymnastics in order to achieve the same error
+				// reporting as in PUC-Lua. We first check that base (#2) is an integer, then
+				// retrieve the string (#1), and then check that the base is within range.
 
-				if (base < Character.MIN_RADIX || base > Character.MAX_RADIX) {
-					throw new BadArgumentException(2, name(), "base out of range");
-				}
+				args.skip();
+				args.nextInteger();
+				args.rewind();
+				String s = args.nextStrictString();
+				int base = args.nextIntRange("base", Character.MIN_RADIX, Character.MAX_RADIX);
 
 				context.getObjectSink().setTo(toNumber(s, base));
 
@@ -632,7 +632,8 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Object callTarget = args.optNextAny();
+			Object callTarget = args.peekOrNil();
+			args.skip();
 			Function handler = args.nextFunction();
 			Object[] callArgs = args.getTail();
 
@@ -778,14 +779,14 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-			Object index = args.optNextAny();
+			Object index = args.peekOrNil();
 
 			if (index instanceof String && ((String) index).startsWith("#")) {
 				// return the number of remaining args
-				context.getObjectSink().setTo((long) args.tailSize());
+				int count = args.tailSize() - 1;
+				context.getObjectSink().setTo((long) count);
 			}
 			else {
-				args.reset();
 				int idx = args.nextIntRange("index", -args.size() + 1, Integer.MAX_VALUE);
 
 				int from = idx >= 0

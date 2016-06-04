@@ -10,7 +10,6 @@ import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.impl.DefaultUserdata;
 import net.sandius.rembulan.core.impl.Varargs;
-import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IOLib;
 import net.sandius.rembulan.lib.LibUtils;
@@ -199,23 +198,6 @@ public class DefaultIOLib extends IOLib {
 			out.write(s.getBytes());
 		}
 
-		protected static IOFile nextFile(LibFunction.CallArguments args) {
-			Check.notNull(args);
-
-			if (args.hasNext()) {
-				Object o = args.optNextAny();
-				if (o instanceof IOFile) {
-					return (IOFile) o;
-				}
-				else {
-					throw new BadArgumentException(1, args.name, typeName() + " expected, got " + args.namer().typeNameOf(o));
-				}
-			}
-			else {
-				throw new BadArgumentException(1, args.name, typeName() + " expected, got no value");
-			}
-		}
-
 		public static class ToString extends LibFunction {
 
 			public static final ToString INSTANCE = new ToString();
@@ -227,7 +209,7 @@ public class DefaultIOLib extends IOLib {
 
 			@Override
 			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-				IOFile f = nextFile(args);
+				IOFile f = args.nextStrict(typeName(), IOFile.class);
 				context.getObjectSink().setTo(f.toString());
 			}
 
@@ -244,7 +226,7 @@ public class DefaultIOLib extends IOLib {
 
 			@Override
 			protected void invoke(ExecutionContext context, CallArguments args) throws ControlThrowable {
-				IOFile f = nextFile(args);
+				IOFile f = args.nextStrict(typeName(), IOFile.class);
 
 				while (args.hasNext()) {
 					String s = args.nextString();
