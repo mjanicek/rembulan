@@ -9,7 +9,7 @@ class StringFragmentsRunSpec extends FragmentExecTestSuite {
 
   override def bundles = Seq(StringFragments)
   override def expectations = Seq(StringFragments)
-  override def contexts = Seq(Empty, Str)
+  override def contexts = Seq(Str)
 
   override def steps = Seq(1, Int.MaxValue)
 
