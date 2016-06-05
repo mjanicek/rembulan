@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.core.Table
+import net.sandius.rembulan.core.{Table, Upvalue}
 import net.sandius.rembulan.{core => lua}
 
 object DebugLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
@@ -84,6 +84,86 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
         """
       }
       UpdatesUpvalueValue in thisContext succeedsWith ("x", 1234.5, 1234.5)
+
+    }
+
+    about ("debug.upvalueid") {
+
+      program ("""return debug.upvalueid()""") failsWith "bad argument #2 to 'upvalueid' (number expected, got no value)"
+      program ("""return debug.upvalueid(1)""") failsWith "bad argument #2 to 'upvalueid' (number expected, got no value)"
+      program ("""return debug.upvalueid(1, 1)""") failsWith "bad argument #1 to 'upvalueid' (function expected, got number)"
+      program ("""return debug.upvalueid(1, 1.2)""") failsWith "bad argument #2 to 'upvalueid' (number has no integer representation)"
+
+      program ("""return debug.upvalueid(function() end, 1)""") failsWith "bad argument #2 to 'upvalueid' (invalid upvalue index)"
+
+      val ReturnsLightUserdata = fragment ("returns light userdata") {
+        """local id = debug.upvalueid(function() return x end, 1)
+          |return id, type(id)
+        """
+      }
+      ReturnsLightUserdata in thisContext succeedsWith (classOf[Upvalue], "userdata")
+
+      val ClosuresShareUpvalue = fragment ("closures referring to the same local variable share upvalues") {
+        """local x = 42
+          |
+          |local f = function() return x end
+          |local g = function(y) return x end
+          |
+          |return f == g, debug.upvalueid(f, 1) == debug.upvalueid(g, 1)
+        """
+      }
+      ClosuresShareUpvalue in thisContext succeedsWith (false, true)
+
+      val ClosuresShareENVUpvalue = fragment ("closures share the ENV upvalue") {
+        """local f = function() return debug end
+          |local g = function(y) return debug end
+          |
+          |return f == g, debug.upvalueid(f, 1) == debug.upvalueid(g, 1)
+        """
+      }
+      ClosuresShareENVUpvalue in thisContext succeedsWith (false, true)
+
+    }
+
+    about ("debug.upvaluejoin") {
+
+      program ("""return debug.upvaluejoin()""") failsWith "bad argument #2 to 'upvaluejoin' (number expected, got no value)"
+      program ("""return debug.upvaluejoin(1)""") failsWith "bad argument #2 to 'upvaluejoin' (number expected, got no value)"
+      program ("""return debug.upvaluejoin({}, 1)""") failsWith "bad argument #1 to 'upvaluejoin' (function expected, got table)"
+      program ("""return debug.upvaluejoin({}, 1.2)""") failsWith "bad argument #2 to 'upvaluejoin' (number has no integer representation)"
+
+      program ("""return debug.upvaluejoin(function() end, 1)""") failsWith "bad argument #2 to 'upvaluejoin' (invalid upvalue index)"
+
+      program ("""return debug.upvaluejoin(function() return x end, 1)""") failsWith "bad argument #4 to 'upvaluejoin' (number expected, got no value)"
+
+      // this error report appears to be a bug in PUC-Lua (as of 5.3.2)
+      program ("""return debug.upvaluejoin(function() return x end, 1, {})""") failsWith "bad argument #4 to 'upvaluejoin' (number expected, got "<<"table">>")"
+
+      program ("""return debug.upvaluejoin(function() return x end, 1, {}, 1)""") failsWith "bad argument #3 to 'upvaluejoin' (function expected, got table)"
+      program ("""return debug.upvaluejoin(function() return x end, 1, {}, 1.2)""") failsWith "bad argument #4 to 'upvaluejoin' (number has no integer representation)"
+
+      program ("""local y
+                 |return debug.upvaluejoin(function() return x end, 1, function() return y end, 1)
+               """) succeedsWith ()
+
+      val JoinsUpvalues = fragment ("joins upvalues") {
+        """local x = 42
+          |local y = "boom"
+          |
+          |local f = function() x = 10 end
+          |local g = function() return y end
+          |
+          |local g1 = g()
+          |debug.upvaluejoin(g, 1, f, 1)
+          |
+          |local g2 = g()
+          |f()
+          |local g3 = g()
+          |
+          |return g1, g2, g3
+        """
+      }
+      JoinsUpvalues in thisContext succeedsWith ("boom", 42, 10)
 
     }
 

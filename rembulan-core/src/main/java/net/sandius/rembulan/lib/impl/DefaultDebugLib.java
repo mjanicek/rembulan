@@ -6,6 +6,7 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;
 import net.sandius.rembulan.util.Check;
 
@@ -85,12 +86,12 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _upvalueid() {
-		return null;  // TODO
+		return UpvalueId.INSTANCE;
 	}
 
 	@Override
 	public Function _upvaluejoin() {
-		return null;  // TODO
+		return UpvalueJoin.INSTANCE;
 	}
 
 
@@ -106,6 +107,7 @@ public class DefaultDebugLib extends DebugLib {
 			this.field = Check.notNull(field);
 		}
 
+		// index is 0-based
 		public static UpvalueRef find(Function f, int index) {
 			Check.notNull(f);
 
@@ -271,6 +273,86 @@ public class DefaultDebugLib extends DebugLib {
 			}
 
 			context.getObjectSink().setTo(name);
+		}
+
+	}
+
+	public static class UpvalueId extends LibFunction {
+
+		public static final UpvalueId INSTANCE = new UpvalueId();
+
+		@Override
+		protected String name() {
+			return "upvalueid";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			args.goTo(1);
+			int n = args.nextInt();
+			args.goTo(0);
+			Function f = args.nextFunction();
+
+			UpvalueRef uvRef = UpvalueRef.find(f, n - 1);
+			if (uvRef == null) {
+				throw new BadArgumentException(2, name(), "invalid upvalue index");
+			}
+			else {
+				final Upvalue uv;
+				try {
+					uv = uvRef.get();
+				}
+				catch (IllegalAccessException ex) {
+					throw new LuaRuntimeException(ex);
+				}
+
+				context.getObjectSink().setTo(uv);
+			}
+		}
+
+	}
+
+	public static class UpvalueJoin extends LibFunction {
+
+		public static final UpvalueJoin INSTANCE = new UpvalueJoin();
+
+		@Override
+		protected String name() {
+			return "upvaluejoin";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			// read f1, n1
+			args.goTo(1);
+			int n1 = args.nextInt();
+			args.goTo(0);
+			Function f1 = args.nextFunction();
+
+			UpvalueRef uvRef1 = UpvalueRef.find(f1, n1 - 1);
+			if (uvRef1 == null) {
+				throw new BadArgumentException(2, name(), "invalid upvalue index");
+			}
+
+			// read f2, n2
+			args.goTo(3);
+			int n2 = args.nextInt();
+			args.goTo(2);
+			Function f2 = args.nextFunction();
+
+			UpvalueRef uvRef2 = UpvalueRef.find(f2, n2 - 1);
+			if (uvRef2 == null) {
+				throw new BadArgumentException(4, name(), "invalid upvalue index");
+			}
+
+			try {
+				uvRef1.set(uvRef2.get());
+			}
+			catch (IllegalAccessException ex) {
+				throw new LuaRuntimeException(ex);
+			}
+
+			context.getObjectSink().reset();
 		}
 
 	}
