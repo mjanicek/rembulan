@@ -177,7 +177,8 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
         "boolean" -> ("true", "false"),
         "string" -> ("\"hello\"", "\"world\""),
         "function" -> ("function() return 1 end", "function(x) return x * x end"),
-        "thread" -> ("coroutine.create(pcall)", "coroutine.create(error)")
+        "thread" -> ("coroutine.create(pcall)", "coroutine.create(error)"),
+        "light uservalue" -> ("debug.upvalueid(function() return mt end, 1)", "debug.upvalueid(function() return debug end, 1)")
       )
 
       for ((tpe, (setVarValue, getVarValue)) <- setup) {
