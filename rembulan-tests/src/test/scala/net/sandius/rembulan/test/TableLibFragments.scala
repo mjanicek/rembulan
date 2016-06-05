@@ -13,6 +13,17 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("table.unpack") {
 
+      program ("""return table.unpack()""") failsWith "attempt to get length of a nil value"
+      program ("""return table.unpack(1)""") failsWith "attempt to get length of a number value"
+      program ("""return table.unpack(1,2)""") failsWith "attempt to get length of a number value"
+      program ("""return table.unpack(1,2,3)""") failsWith "attempt to index a number value"
+
+      program ("""return table.unpack(1,2.3)""") failsWith "bad argument #2 to 'unpack' (number has no integer representation)"
+      program ("""return table.unpack(1,"x")""") failsWith "bad argument #2 to 'unpack' (number expected, got string)"
+      program ("""return table.unpack(1,2,"y")""") failsWith "bad argument #3 to 'unpack' (number expected, got string)"
+
+      program ("""local x; return table.unpack(1,x)""") failsWith "attempt to get length of a number value"
+
       program ("""return table.unpack({1,2,3}, -2, 2)""") succeedsWith (null, null, null, 1, 2)
       program ("""return table.unpack({3,2,1}, 3, 3)""") succeedsWith (1)
       program ("""return table.unpack({3,2,1}, 0, 1)""") succeedsWith (null, 3)
@@ -21,6 +32,9 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("""return table.unpack({3,2,1,0,-1}, 2)""") succeedsWith (2, 1, 0, -1)
       program ("""return table.unpack({1,0,-1})""") succeedsWith (1, 0, -1)
+
+      program ("""return table.unpack("hello")""") succeedsWith (null, null, null, null, null)
+      program ("""return table.unpack("1","2","3")""") succeedsWith (null, null)
 
       about ("__len metamethod") {
 
