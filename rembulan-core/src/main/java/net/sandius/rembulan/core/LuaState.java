@@ -22,11 +22,11 @@ public abstract class LuaState implements MetatableProvider, TableFactory, Upval
 			switch (type) {
 				case NIL: return nilMetatable();
 				case BOOLEAN: return booleanMetatable();
-				case LIGHTUSERDATA: return lightuserdataMetatable();
 				case NUMBER: return numberMetatable();
 				case STRING: return stringMetatable();
 				case FUNCTION: return functionMetatable();
 				case THREAD: return threadMetatable();
+				case USERDATA: return lightuserdataMetatable();
 				default: throw new IllegalStateException("Illegal type: " + type);
 			}
 		}
@@ -49,11 +49,11 @@ public abstract class LuaState implements MetatableProvider, TableFactory, Upval
 			switch (type) {
 				case NIL: return setNilMetatable(table);
 				case BOOLEAN: return setBooleanMetatable(table);
-				case LIGHTUSERDATA: return setLightUserdataMetatable(table);
 				case NUMBER: return setNumberMetatable(table);
 				case STRING: return setStringMetatable(table);
 				case FUNCTION: return setFunctionMetatable(table);
 				case THREAD: return setThreadMetatable(table);
+				case USERDATA: return setLightUserdataMetatable(table);
 				default: throw new IllegalStateException("Illegal type: " + type);
 			}
 		}

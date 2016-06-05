@@ -21,8 +21,8 @@ public abstract class Value {
 	 * string         java.lang.String
 	 * table          net.sandius.rembulan.core.Table
 	 * function       net.sandius.rembulan.core.Function
-	 * userdata       net.sandius.rembulan.core.Userdata
-	 * thread         net.sandius.rembulan.core.Coroutine
+	 * userdata       full userdata: net.sandius.rembulan.core.Userdata
+	 *                light userdata: any class other than those mentioned here
 	 */
 	public static LuaType typeOf(Object v) {
 		if (v == null) return LuaType.NIL;
@@ -31,9 +31,8 @@ public abstract class Value {
 		else if (v instanceof String) return LuaType.STRING;
 		else if (v instanceof Table) return LuaType.TABLE;
 		else if (v instanceof Invokable) return LuaType.FUNCTION;
-		else if (v instanceof Userdata) return LuaType.USERDATA;
 		else if (v instanceof Coroutine) return LuaType.THREAD;
-		else return LuaType.LIGHTUSERDATA;
+		else return LuaType.USERDATA;
 	}
 
 	public static boolean isNaN(Object o) {

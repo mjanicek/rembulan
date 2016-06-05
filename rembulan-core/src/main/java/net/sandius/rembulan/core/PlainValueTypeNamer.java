@@ -6,7 +6,6 @@ public class PlainValueTypeNamer implements ValueTypeNamer {
 
 	public static final String TYPENAME_NIL = "nil";
 	public static final String TYPENAME_BOOLEAN = "boolean";
-	public static final String TYPENAME_LIGHTUSERDATA = "lightuserdata";
 	public static final String TYPENAME_NUMBER = "number";
 	public static final String TYPENAME_STRING = "string";
 	public static final String TYPENAME_TABLE = "table";
@@ -20,7 +19,6 @@ public class PlainValueTypeNamer implements ValueTypeNamer {
 		switch (type) {
 			case NIL: return TYPENAME_NIL;
 			case BOOLEAN: return TYPENAME_BOOLEAN;
-			case LIGHTUSERDATA: return TYPENAME_LIGHTUSERDATA;
 			case NUMBER: return TYPENAME_NUMBER;
 			case STRING: return TYPENAME_STRING;
 			case TABLE: return TYPENAME_TABLE;

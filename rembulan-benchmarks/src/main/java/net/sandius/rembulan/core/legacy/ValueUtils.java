@@ -2,12 +2,13 @@ package net.sandius.rembulan.core.legacy;
 
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaType;
+import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.Value;
 
 public abstract class ValueUtils {
 
 	public static boolean isLightUserdata(Object o) {
-		return Value.typeOf(o) == LuaType.LIGHTUSERDATA;
+		return Value.typeOf(o) == LuaType.USERDATA && !(o instanceof Userdata);
 	}
 
 	public static boolean isInteger(Object o) {

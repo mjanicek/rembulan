@@ -4,7 +4,6 @@ public enum LuaType {
 
 	NIL,
 	BOOLEAN,
-	LIGHTUSERDATA,
 	NUMBER,
 	STRING,
 	TABLE,
