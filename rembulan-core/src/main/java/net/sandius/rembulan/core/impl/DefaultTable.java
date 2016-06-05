@@ -36,8 +36,10 @@ public class DefaultTable extends Table {
 		return mt;
 	}
 
-	public void setMetatable(Table mt) {
+	public Table setMetatable(Table mt) {
+		Table old = this.mt;
 		this.mt = mt;
+		return old;
 	}
 
 	@Override

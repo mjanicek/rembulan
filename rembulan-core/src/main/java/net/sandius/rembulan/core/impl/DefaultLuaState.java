@@ -108,6 +108,13 @@ public class DefaultLuaState extends LuaState {
 	}
 
 	@Override
+	public Table setFunctionMetatable(Table table) {
+		Table old = functionMetatable;
+		functionMetatable = table;
+		return old;
+	}
+
+	@Override
 	public Table setThreadMetatable(Table table) {
 		Table old = threadMetatable;
 		threadMetatable = table;

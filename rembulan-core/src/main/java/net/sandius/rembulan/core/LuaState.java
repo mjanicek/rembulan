@@ -36,8 +36,28 @@ public abstract class LuaState implements MetatableProvider, TableFactory, Upval
 	public abstract Table setBooleanMetatable(Table table);
 	public abstract Table setNumberMetatable(Table table);
 	public abstract Table setStringMetatable(Table table);
+	public abstract Table setFunctionMetatable(Table table);
 	public abstract Table setThreadMetatable(Table table);
 	public abstract Table setLightUserdataMetatable(Table table);
+
+	public Table setMetatable(Object o, Table table) {
+		if (o instanceof LuaObject) {
+			return ((LuaObject) o).setMetatable(table);
+		}
+		else {
+			LuaType type = Value.typeOf(o);
+			switch (type) {
+				case NIL: return setNilMetatable(table);
+				case BOOLEAN: return setBooleanMetatable(table);
+				case LIGHTUSERDATA: return setLightUserdataMetatable(table);
+				case NUMBER: return setNumberMetatable(table);
+				case STRING: return setStringMetatable(table);
+				case FUNCTION: return setFunctionMetatable(table);
+				case THREAD: return setThreadMetatable(table);
+				default: throw new IllegalStateException("Illegal type: " + type);
+			}
+		}
+	}
 
 	public abstract ObjectSinkFactory objectSinkFactory();
 

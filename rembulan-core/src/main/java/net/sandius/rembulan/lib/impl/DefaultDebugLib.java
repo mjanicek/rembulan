@@ -1,6 +1,9 @@
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.lib.DebugLib;
 
 public class DefaultDebugLib extends DebugLib {
@@ -27,7 +30,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _getmetatable() {
-		return null;  // TODO
+		return GetMetatable.INSTANCE;
 	}
 
 	@Override
@@ -57,7 +60,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _setmetatable() {
-		return null;  // TODO
+		return SetMetatable.INSTANCE;
 	}
 
 	@Override
@@ -83,6 +86,49 @@ public class DefaultDebugLib extends DebugLib {
 	@Override
 	public Function _upvaluejoin() {
 		return null;  // TODO
+	}
+
+
+	public static class GetMetatable extends LibFunction {
+
+		public static final GetMetatable INSTANCE = new GetMetatable();
+
+		@Override
+		protected String name() {
+			return "getmetatable";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Object value = args.nextAny();
+			Table mt = context.getState().getMetatable(value);
+			context.getObjectSink().setTo(mt);
+		}
+
+	}
+
+	public static class SetMetatable extends LibFunction {
+
+		public static final SetMetatable INSTANCE = new SetMetatable();
+
+		@Override
+		protected String name() {
+			return "setmetatable";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Object value = args.peekOrNil();
+			args.skip();
+			Table mt = args.nextTableOrNil();
+
+			// set the new metatable
+			context.getState().setMetatable(value, mt);
+
+			// return value
+			context.getObjectSink().setTo(value);
+		}
+
 	}
 
 }

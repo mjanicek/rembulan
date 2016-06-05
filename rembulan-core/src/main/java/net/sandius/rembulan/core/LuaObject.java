@@ -4,6 +4,6 @@ public abstract class LuaObject {
 
 	public abstract Table getMetatable();
 
-	public abstract void setMetatable(Table mt);
+	public abstract Table setMetatable(Table mt);
 
 }
