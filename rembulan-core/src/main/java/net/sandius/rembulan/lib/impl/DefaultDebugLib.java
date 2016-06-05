@@ -6,6 +6,7 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;
 import net.sandius.rembulan.util.Check;
@@ -51,7 +52,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _getuservalue() {
-		return null;  // TODO
+		return GetUserValue.INSTANCE;
 	}
 
 	@Override
@@ -76,7 +77,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _setuservalue() {
-		return null;  // TODO
+		return SetUserValue.INSTANCE;
 	}
 
 	@Override
@@ -353,6 +354,45 @@ public class DefaultDebugLib extends DebugLib {
 			}
 
 			context.getObjectSink().reset();
+		}
+
+	}
+
+	public static class GetUserValue extends LibFunction {
+
+		public static final GetUserValue INSTANCE = new GetUserValue();
+
+		@Override
+		protected String name() {
+			return "getuservalue";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Object o = args.peekOrNil();
+
+			Object result = o instanceof Userdata ? ((Userdata) o).getUserValue() : null;
+			context.getObjectSink().setTo(result);
+		}
+
+	}
+
+	public static class SetUserValue extends LibFunction {
+
+		public static final SetUserValue INSTANCE = new SetUserValue();
+
+		@Override
+		protected String name() {
+			return "setuservalue";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Userdata userdata = args.nextUserdata();
+			Object value = args.nextAny();
+
+			userdata.setUserValue(value);
+			context.getObjectSink().setTo(userdata);
 		}
 
 	}

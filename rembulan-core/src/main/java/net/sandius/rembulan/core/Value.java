@@ -40,4 +40,8 @@ public abstract class Value {
 				&& Double.isNaN(((Number) o).doubleValue());
 	}
 
+	public static boolean isLightUserdata(Object o) {
+		return typeOf(o) == LuaType.USERDATA && !(o instanceof Userdata);
+	}
+
 }

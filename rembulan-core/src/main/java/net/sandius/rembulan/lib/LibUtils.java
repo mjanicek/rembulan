@@ -5,12 +5,14 @@ import net.sandius.rembulan.core.MetatableProvider;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.PlainValueTypeNamer;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.util.Check;
 
 public class LibUtils {
 
 	public static final String MT_NAME = "__name";
+	public static final String TYPENAME_LIGHT_USERDATA = "light userdata";
 
 	public static Table init(LuaState state, Lib lib) {
 		Check.notNull(state);
@@ -41,7 +43,12 @@ public class LibUtils {
 				return (String) nameField;
 			}
 			else {
-				return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
+				if (Value.isLightUserdata(instance)) {
+					return TYPENAME_LIGHT_USERDATA;
+				}
+				else {
+					return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
+				}
 			}
 		}
 

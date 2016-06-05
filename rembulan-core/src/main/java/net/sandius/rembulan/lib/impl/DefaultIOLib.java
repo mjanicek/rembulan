@@ -171,7 +171,7 @@ public class DefaultIOLib extends IOLib {
 	}
 
 	protected IOFile newFile(InputStream in, OutputStream out) {
-		return new IOFile(in, out, fileMetatable);
+		return new IOFile(in, out, fileMetatable, null);
 	}
 
 	public static class IOFile extends DefaultUserdata {
@@ -179,8 +179,8 @@ public class DefaultIOLib extends IOLib {
 		private final InputStream in;
 		private final OutputStream out;
 
-		public IOFile(InputStream in, OutputStream out, Table metatable) {
-			super(metatable);
+		public IOFile(InputStream in, OutputStream out, Table metatable, Object userValue) {
+			super(metatable, userValue);
 			this.in = in;
 			this.out = out;
 		}

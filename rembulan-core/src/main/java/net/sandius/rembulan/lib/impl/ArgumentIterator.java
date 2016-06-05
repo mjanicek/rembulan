@@ -4,9 +4,12 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.Userdata;
+import net.sandius.rembulan.core.Value;
 import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BadArgumentException;
+import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.util.Check;
 
@@ -18,6 +21,7 @@ import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_NUMBER;
 import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_STRING;
 import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_TABLE;
 import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_THREAD;
+import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_USERDATA;
 
 public class ArgumentIterator implements Iterator<Object> {
 
@@ -317,6 +321,32 @@ public class ArgumentIterator implements Iterator<Object> {
 
 	public Coroutine nextCoroutine() {
 		return nextStrict(TYPENAME_THREAD, Coroutine.class);
+	}
+
+	public <T extends Userdata> T nextUserdata(String typeName, Class<T> clazz) {
+		return nextStrict(typeName, clazz);
+	}
+
+	public Userdata nextUserdata() {
+		return nextUserdata(TYPENAME_USERDATA, Userdata.class);
+	}
+
+	public Object nextLightUserdata() {
+		final Object result;
+		try {
+			Object o = peek(LibUtils.TYPENAME_LIGHT_USERDATA);
+			if (Value.isLightUserdata(o)) {
+				result = o;
+			}
+			else {
+				throw new UnexpectedArgumentException(LibUtils.TYPENAME_LIGHT_USERDATA, namer.typeNameOf(o));
+			}
+		}
+		catch (RuntimeException ex) {
+			throw badArgument(ex);
+		}
+		skip();
+		return result;
 	}
 
 }

@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.core.{Table, Upvalue}
+import net.sandius.rembulan.core.{Table, Upvalue, Userdata}
 import net.sandius.rembulan.{core => lua}
 
 object DebugLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
@@ -167,9 +167,35 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     }
 
+    about ("debug.getuservalue") {
+
+      program ("""return debug.getuservalue()""") succeedsWith (null)
+      program ("""return debug.getuservalue(1)""") succeedsWith (null)
+
+    }
+
+    about ("debug.setuservalue") {
+
+      program ("""return debug.setuservalue()""") failsWith "bad argument #1 to 'setuservalue' (userdata expected, got no value)"
+      program ("""return debug.setuservalue({})""") failsWith "bad argument #1 to 'setuservalue' (userdata expected, got table)"
+      program ("""return debug.setuservalue(debug.upvalueid(function() return debug end, 1), 1)""") failsWith "bad argument #1 to 'setuservalue' (userdata expected, got light userdata)"
+
+    }
+
   }
 
   in (FullContext) {
+
+    about ("debug.{get|set}uservalue") {
+
+      program ("""return debug.setuservalue(io.output())""") failsWith "bad argument #2 to 'setuservalue' (value expected)"
+      program (
+        """local udata = io.output()
+          |local uvalue = debug.getuservalue(debug.setuservalue(io.output(), "hello"))
+          |return udata, uvalue
+        """) succeedsWith (classOf[Userdata], "hello")
+
+    }
 
     about ("debug.{get|set}metatable") {
 
