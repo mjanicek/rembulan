@@ -1,5 +1,6 @@
 package net.sandius.rembulan.core.impl;
 
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Values;
@@ -44,11 +45,14 @@ public class DefaultTable extends Table {
 
 	@Override
 	public Object rawget(Object key) {
+		key = Conversions.normalise(key);
 		return key != null ? values.get(key) : null;
 	}
 
 	@Override
 	public void rawset(Object key, Object value) {
+		key = Conversions.normalise(key);
+
 		if (key == null) {
 			throw new IllegalArgumentException("table index is nil");
 		}

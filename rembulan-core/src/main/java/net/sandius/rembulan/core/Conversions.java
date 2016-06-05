@@ -98,6 +98,49 @@ public abstract class Conversions {
 	}
 
 	/**
+	 * Returns the number {@code n} in its canonical representation,
+	 * i.e. a {@link java.lang.Long} if {@code n} is a Lua integer, or a {@link java.lang.Double}
+	 * if {@code n} is a Lua float.
+	 *
+	 * @param n  number to convert to canonical representation, must not be {@code null}
+	 * @return an instance of {@code Long} if {@code n} is an integer, or an instance
+	 *         of {@code Double} if {@code n} is a float
+	 *
+	 * @throws NullPointerException if {@code n} is {@code null}
+	 */
+	public static Number toCanonicalNumber(Number n) {
+		if (n instanceof Long) {
+			// integer in its canonical representation
+			return n;
+		}
+		else if (n instanceof Double) {
+			// float in its canonical representation
+			return n;
+		}
+		else if (n instanceof Float) {
+			// re-box
+			return Double.valueOf(n.doubleValue());
+		}
+		else {
+			// re-box
+			return Long.valueOf(n.longValue());
+		}
+	}
+
+	/**
+	 * If {@code o} is a number, returns {@code n} in its canonical representation
+	 * (see {@link #toCanonicalNumber(Number)}). Otherwise, returns {@code o}.
+	 *
+	 * @param o  object to normalise, may be {@code null}
+	 * @return an instance of {@code Long} if {@code o} is an integer,
+	 *         an instance of {@code Double} if {@code o} is a float,
+	 *         or {@code o} if {@code o} is not a number
+	 */
+	public static Object normalise(Object o) {
+		return o instanceof Number ? toCanonicalNumber((Number) o) : o;
+	}
+
+	/**
 	 * Returns the arithmetic value of the object {@code o}, or {@code null} if {@code o}
 	 * does not have an arithmetic value.
 	 *
