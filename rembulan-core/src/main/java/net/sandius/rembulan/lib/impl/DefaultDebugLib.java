@@ -149,6 +149,48 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
+	public static class GetMetatable extends LibFunction {
+
+		public static final GetMetatable INSTANCE = new GetMetatable();
+
+		@Override
+		protected String name() {
+			return "getmetatable";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Object value = args.nextAny();
+			Table mt = context.getState().getMetatable(value);
+			context.getObjectSink().setTo(mt);
+		}
+
+	}
+
+	public static class SetMetatable extends LibFunction {
+
+		public static final SetMetatable INSTANCE = new SetMetatable();
+
+		@Override
+		protected String name() {
+			return "setmetatable";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Object value = args.peekOrNil();
+			args.skip();
+			Table mt = args.nextTableOrNil();
+
+			// set the new metatable
+			context.getState().setMetatable(value, mt);
+
+			// return value
+			context.getObjectSink().setTo(value);
+		}
+
+	}
+
 	public static class GetUpvalue extends LibFunction {
 
 		public static final GetUpvalue INSTANCE = new GetUpvalue();
@@ -188,48 +230,6 @@ public class DefaultDebugLib extends DebugLib {
 				context.getObjectSink().reset();
 			}
 
-		}
-
-	}
-
-	public static class GetMetatable extends LibFunction {
-
-		public static final GetMetatable INSTANCE = new GetMetatable();
-
-		@Override
-		protected String name() {
-			return "getmetatable";
-		}
-
-		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			Object value = args.nextAny();
-			Table mt = context.getState().getMetatable(value);
-			context.getObjectSink().setTo(mt);
-		}
-
-	}
-
-	public static class SetMetatable extends LibFunction {
-
-		public static final SetMetatable INSTANCE = new SetMetatable();
-
-		@Override
-		protected String name() {
-			return "setmetatable";
-		}
-
-		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			Object value = args.peekOrNil();
-			args.skip();
-			Table mt = args.nextTableOrNil();
-
-			// set the new metatable
-			context.getState().setMetatable(value, mt);
-
-			// return value
-			context.getObjectSink().setTo(value);
 		}
 
 	}
