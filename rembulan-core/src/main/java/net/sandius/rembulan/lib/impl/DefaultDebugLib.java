@@ -70,7 +70,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _setupvalue() {
-		return null;  // TODO
+		return SetUpvalue.INSTANCE;
 	}
 
 	@Override
@@ -93,16 +93,20 @@ public class DefaultDebugLib extends DebugLib {
 		return null;  // TODO
 	}
 
-	public static class GetUpvalue extends LibFunction {
 
-		public static final GetUpvalue INSTANCE = new GetUpvalue();
+	private static class UpvalueRef {
 
-		@Override
-		protected String name() {
-			return "getupvalue";
+		private final int index;
+		private final Function function;
+		private final Field field;
+
+		public UpvalueRef(int index, Function function, Field field) {
+			this.index = index;
+			this.function = Check.notNull(function);
+			this.field = Check.notNull(field);
 		}
 
-		private static Field findUpvalueField(Function f, int index) {
+		public static UpvalueRef find(Function f, int index) {
 			Check.notNull(f);
 
 			// find the index-th upvalue field
@@ -112,7 +116,8 @@ public class DefaultDebugLib extends DebugLib {
 				if (Upvalue.class.isAssignableFrom(fldType)) {
 					if (idx == index) {
 						// found it
-						return fld;
+						fld.setAccessible(true);
+						return new UpvalueRef(index, f, fld);
 					}
 					else {
 						idx += 1;
@@ -123,16 +128,32 @@ public class DefaultDebugLib extends DebugLib {
 			return null;
 		}
 
-		private static String upvalueName(Field field) {
-			Check.notNull(field);
+		public String name() {
 			return field.getName();
 		}
 
-		private static Upvalue upvalueInstance(Field field, Function instance) throws IllegalAccessException {
-			Check.notNull(field);
-			Check.notNull(instance);
-			field.setAccessible(true);
-			return (Upvalue) field.get(instance);
+		public int index() {
+			return index;
+		}
+
+		public Upvalue get() throws IllegalAccessException {
+			return (Upvalue) field.get(function);
+		}
+
+		public void set(Upvalue ref) throws IllegalAccessException {
+			Check.notNull(ref);
+			field.set(function, ref);
+		}
+
+	}
+
+	public static class GetUpvalue extends LibFunction {
+
+		public static final GetUpvalue INSTANCE = new GetUpvalue();
+
+		@Override
+		protected String name() {
+			return "getupvalue";
 		}
 
 		@Override
@@ -142,20 +163,20 @@ public class DefaultDebugLib extends DebugLib {
 			args.rewind();
 			Function f = args.nextFunction();
 
-			Field upvalueField = findUpvalueField(f, index - 1);
+			UpvalueRef uvRef = UpvalueRef.find(f, index - 1);
 
-			if (upvalueField != null) {
+			if (uvRef != null) {
+				final String name;
 				final Object value;
+
 				try {
-					Upvalue uv = upvalueInstance(upvalueField, f);
-					value = uv.get();  // assuming uv to be non-null
+					name = uvRef.name();
+					Upvalue uv = uvRef.get();
+					value = uv.get();
 				}
 				catch (IllegalAccessException ex) {
-					// shouldn't happen (we set the field accessor's accessible flag to true)
 					throw new LuaRuntimeException(ex);
 				}
-
-				String name = upvalueName(upvalueField);
 
 				context.getObjectSink().setTo(name, value);
 			}
@@ -207,6 +228,49 @@ public class DefaultDebugLib extends DebugLib {
 
 			// return value
 			context.getObjectSink().setTo(value);
+		}
+
+	}
+
+	public static class SetUpvalue extends LibFunction {
+
+		public static final SetUpvalue INSTANCE = new SetUpvalue();
+
+		@Override
+		protected String name() {
+			return "setupvalue";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			args.skip();
+			args.skip();
+			Object newValue = args.nextAny();
+			args.rewind();
+			args.skip();
+			int index = args.nextInt();
+			args.rewind();
+			Function f = args.nextFunction();
+
+			UpvalueRef uvRef = UpvalueRef.find(f, index - 1);
+
+			final String name;
+
+			if (uvRef != null) {
+				try {
+					name = uvRef.name();
+					Upvalue uv = uvRef.get();
+					uv.set(newValue);
+				}
+				catch (IllegalAccessException ex) {
+					throw new LuaRuntimeException(ex);
+				}
+			}
+			else {
+				name = null;
+			}
+
+			context.getObjectSink().setTo(name);
 		}
 
 	}

@@ -58,6 +58,35 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
     }
 
+    about ("debug.setupvalue") {
+
+      program ("""return debug.setupvalue()""") failsWith "bad argument #3 to 'setupvalue' (value expected)"
+      program ("""return debug.setupvalue(2)""") failsWith "bad argument #3 to 'setupvalue' (value expected)"
+      program ("""return debug.setupvalue(2, 1.2)""") failsWith "bad argument #3 to 'setupvalue' (value expected)"
+      program ("""return debug.setupvalue(x, 1.2, x)""") failsWith "bad argument #2 to 'setupvalue' (number has no integer representation)"
+      program ("""return debug.setupvalue(1, 1, 1)""") failsWith "bad argument #1 to 'setupvalue' (function expected, got number)"
+
+      val UpdatesLocalVariableValue = fragment ("updates local variable value") {
+        """local x = 42
+          |local f = function() return x end
+          |local name = debug.setupvalue(f, 1, "works!")
+          |return name, x, f()
+        """
+      }
+      UpdatesLocalVariableValue in thisContext succeedsWith ("x", "works!", "works!")
+
+      val UpdatesUpvalueValue = fragment ("updates the upvalue value") {
+        """local x = 42
+          |local f = function() return x end
+          |local name = debug.setupvalue(f, 1, "works!")
+          |x = 1234.5
+          |return name, x, f()
+        """
+      }
+      UpdatesUpvalueValue in thisContext succeedsWith ("x", 1234.5, 1234.5)
+
+    }
+
   }
 
   in (FullContext) {
