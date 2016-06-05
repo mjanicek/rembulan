@@ -1,6 +1,7 @@
 package net.sandius.rembulan.test
 
 import net.sandius.rembulan.core.Table
+import net.sandius.rembulan.{core => lua}
 
 object DebugLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
@@ -21,6 +22,39 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("""local x; return debug.setmetatable(1, x)""") succeedsWith (1)
       program ("""return debug.setmetatable(1, {})""") succeedsWith (1)
+
+    }
+
+    about ("debug.getupvalue") {
+
+      program ("""return debug.getupvalue()""") failsWith "bad argument #2 to 'getupvalue' (number expected, got no value)"
+      program ("""return debug.getupvalue(2)""") failsWith "bad argument #2 to 'getupvalue' (number expected, got no value)"
+      program ("""return debug.getupvalue(2, 1.2)""") failsWith "bad argument #2 to 'getupvalue' (number has no integer representation)"
+      program ("""return debug.getupvalue(1, 1)""") failsWith "bad argument #1 to 'getupvalue' (function expected, got number)"
+
+      program ("""return debug.getupvalue(function() return x end, 0)""") succeedsWith ()
+      program ("""return debug.getupvalue(function() return x end, 1)""") succeedsWith ("_ENV", classOf[Table])
+      program ("""return debug.getupvalue(function() return x end, 2)""") succeedsWith ()
+
+      val TwoENVFunctions = fragment ("retrieves the same value for two functions that reference _ENV") {
+        """local f = function() return x end
+          |local g = function() return y end
+          |local nf, vf = debug.getupvalue(f, 1)
+          |local ng, vg = debug.getupvalue(g, 1)
+          |return nf, vf, ng, vg, vf == vg
+        """
+      }
+      TwoENVFunctions in thisContext succeedsWith ("_ENV", classOf[Table], "_ENV", classOf[Table], true)
+
+      val TwoNonENVFunctions = fragment ("retrieves the correct upvalue values for non _ENV referencing functions") {
+        """local f = function() return 42 end
+          |local g = function() return f() end
+          |local nf, vf = debug.getupvalue(f, 1)
+          |local ng, vg = debug.getupvalue(g, 1)
+          |return nf, vf, ng, vg, vg == f
+        """
+      }
+      TwoNonENVFunctions in thisContext succeedsWith (null, null, "f", classOf[lua.Function], true)
 
     }
 
