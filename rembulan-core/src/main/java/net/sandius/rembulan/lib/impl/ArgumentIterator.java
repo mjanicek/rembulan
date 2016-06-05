@@ -5,7 +5,7 @@ import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Userdata;
-import net.sandius.rembulan.core.Value;
+import net.sandius.rembulan.core.Values;
 import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -335,7 +335,7 @@ public class ArgumentIterator implements Iterator<Object> {
 		final Object result;
 		try {
 			Object o = peek(LibUtils.TYPENAME_LIGHT_USERDATA);
-			if (Value.isLightUserdata(o)) {
+			if (Values.isLightUserdata(o)) {
 				result = o;
 			}
 			else {

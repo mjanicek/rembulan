@@ -3,9 +3,9 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaType;
 
-public abstract class Value {
+public abstract class Values {
 
-	private Value() {
+	private Values() {
 		// not to be instantiated or extended
 	}
 

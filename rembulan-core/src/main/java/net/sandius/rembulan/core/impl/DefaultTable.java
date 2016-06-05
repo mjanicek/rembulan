@@ -2,7 +2,7 @@ package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
-import net.sandius.rembulan.core.Value;
+import net.sandius.rembulan.core.Values;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,7 +52,7 @@ public class DefaultTable extends Table {
 		if (key == null) {
 			throw new IllegalArgumentException("table index is nil");
 		}
-		if (Value.isNaN(key)) {
+		if (Values.isNaN(key)) {
 			throw new IllegalArgumentException("table index is NaN");
 		}
 

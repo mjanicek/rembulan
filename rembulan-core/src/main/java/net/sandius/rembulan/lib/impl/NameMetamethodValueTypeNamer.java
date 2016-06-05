@@ -3,7 +3,7 @@ package net.sandius.rembulan.lib.impl;
 import net.sandius.rembulan.core.MetatableProvider;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.PlainValueTypeNamer;
-import net.sandius.rembulan.core.Value;
+import net.sandius.rembulan.core.Values;
 import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.lib.LibUtils;
 import net.sandius.rembulan.util.Check;
@@ -23,7 +23,7 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 			return (String) nameField;
 		}
 		else {
-			if (Value.isLightUserdata(instance)) {
+			if (Values.isLightUserdata(instance)) {
 				return LibUtils.TYPENAME_LIGHT_USERDATA;
 			}
 			else {
