@@ -33,8 +33,14 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""return table.unpack({3,2,1,0,-1}, 2)""") succeedsWith (2, 1, 0, -1)
       program ("""return table.unpack({1,0,-1})""") succeedsWith (1, 0, -1)
 
-      program ("""return table.unpack("hello")""") succeedsWith (null, null, null, null, null)
-      program ("""return table.unpack("1","2","3")""") succeedsWith (null, null)
+      program ("""return table.unpack("nono")""") failsWith "attempt to index a string value"
+
+      in (FullContext) {
+
+        program ("""return table.unpack("hello")""") succeedsWith (null, null, null, null, null)
+        program ("""return table.unpack("1","2","3")""") succeedsWith (null, null)
+
+      }
 
       about ("__len metamethod") {
 
