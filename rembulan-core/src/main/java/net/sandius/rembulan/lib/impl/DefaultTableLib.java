@@ -5,7 +5,8 @@ import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.NoIntegerRepresentationException;
+import net.sandius.rembulan.core.LuaRuntimeException;
+import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.lib.TableLib;
 
@@ -114,24 +115,40 @@ public class DefaultTableLib extends TableLib {
 						Object o = context.getObjectSink()._0();
 						Long l = Conversions.integerValueOf(o);
 						if (l == null) {
-							// #table is not an integer
-							// TODO: what error should we throw here?
-							throw new NoIntegerRepresentationException();
+							throw new LuaRuntimeException("object length is not an integer");
 						}
 						j = (int) l.longValue();
 					}
 					case 2:
 						// k is the index running from i to j (inclusive)
-						k = i;
 
-						if (k <= j) {
-							state = 3;
-							Dispatch.index(context, table, k++);
+						if (Metatables.getMetamethod(context.getState(), Metatables.MT_INDEX, table) == null) {
+							// no __index metamethod, we can use rawget
+
+							ArrayList<Object> r = new ArrayList<>();
+							for (k = i; k <= j; k++) {
+								r.add(table.rawget(k));
+							}
+							context.getObjectSink().setToArray(r.toArray(new Object[r.size()]));
+							return;
 						}
 						else {
-							// interval empty, no items
-							context.getObjectSink().reset();
-							return;
+							// table has the __index metamethod, need to go through Dispatch
+							// and be ready to be suspended
+
+							if (i <= j) {
+								k = i;
+								state = 3;
+								result = new ArrayList<>();  // allocate the result accumulator
+								Dispatch.index(context, table, k++);
+
+								// fall-through to state == 3
+							}
+							else {
+								// interval empty, we're done
+								context.getObjectSink().reset();
+								return;
+							}
 						}
 
 					case 3: {
@@ -152,8 +169,7 @@ public class DefaultTableLib extends TableLib {
 						}
 
 						assert (k > j);
-					}
-					case 4: {
+
 						// we're done!
 						context.getObjectSink().setToArray(result.toArray(new Object[result.size()]));
 						return;
@@ -177,16 +193,14 @@ public class DefaultTableLib extends TableLib {
 			final int i = args.optNextInt(1);
 			Integer maybeJ = args.hasNext() ? args.nextInt() : null;
 
-			final ArrayList<Object> result = new ArrayList<>();
-
 			if (maybeJ == null) {
 				// no explicit 'j' argument
-				run(context, 0, table, i, 0, 0, result);
+				run(context, 0, table, i, 0, 0, null);
 			}
 			else {
 				// explicit 'j', we can skip the computation of #len
 				int j = maybeJ.intValue();
-				run(context, 2, table, i, j, 0, result);
+				run(context, 2, table, i, j, 0, null);
 			}
 		}
 
