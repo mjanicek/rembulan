@@ -4,7 +4,6 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.impl.FunctionAnyarg;
-import net.sandius.rembulan.lib.LibUtils;
 
 public abstract class LibFunction extends FunctionAnyarg {
 
@@ -12,7 +11,7 @@ public abstract class LibFunction extends FunctionAnyarg {
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-		ArgumentIterator callArgs = new ArgumentIterator(new LibUtils.NameMetamethodValueTypeNamer(context.getState()), name(), args);
+		ArgumentIterator callArgs = new ArgumentIterator(new NameMetamethodValueTypeNamer(context.getState()), name(), args);
 		invoke(context, callArgs);
 	}
 
