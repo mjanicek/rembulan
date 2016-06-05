@@ -22,6 +22,38 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""return table.unpack({3,2,1,0,-1}, 2)""") succeedsWith (2, 1, 0, -1)
       program ("""return table.unpack({1,0,-1})""") succeedsWith (1, 0, -1)
 
+      about ("__len metamethod") {
+
+        program ("""return table.unpack(setmetatable({}, { __len = 3 }))""") failsWith "attempt to call a number value"
+
+        program ("""return table.unpack(setmetatable({}, { __len = function() error("boom") end }), -1, 1)""") succeedsWith (null, null, null)
+        program ("""return table.unpack(setmetatable({}, { __len = function() error("boom") end }), -1)""") failsWithLuaError "boom"
+
+        program ("""return table.unpack(setmetatable({}, { __len = function() return 2 end }), -1)""") succeedsWith (null, null, null, null)
+        program ("""return table.unpack(setmetatable({}, { __len = function() return "boo" end }), 1)""") failsWith "object length is not an integer"
+
+      }
+
+      about ("__index metamethod") {
+
+        program ("""return table.unpack(setmetatable({}, { __index = 3 }), 1, 2)""") failsWith "attempt to index a number value"
+
+        program ("""local mt = { __index = function(t, k) local x = k or 0; return x * x end }
+                   |return table.unpack(setmetatable({}, mt), -1, 3)
+                 """) succeedsWith (1, 0, 1, 4, 9)
+
+      }
+
+      about ("__len and __index metamethods") {
+
+        program ("""local mt = {
+                   |  __index = function(t, k) local x = k or 0; return x * x end,
+                   |  __len = function() return 5 end
+                   |}
+                   |return table.unpack(setmetatable({}, mt))
+                 """) succeedsWith (1, 4, 9, 16, 25)
+
+      }
 
     }
 
