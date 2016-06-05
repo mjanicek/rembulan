@@ -513,6 +513,7 @@ public abstract class Dispatch {
 				context.getObjectSink().setTo(value);
 				return;
 			}
+			// else fall through and check the __index a metamethod
 		}
 
 		Object handler = Metatables.getMetamethod(context.getState(), Metatables.MT_INDEX, table);
@@ -526,7 +527,7 @@ public abstract class Dispatch {
 			// call the handler
 			Invokable fn = (Invokable) handler;
 
-			fn.invoke(context, handler, table, key);
+			fn.invoke(context, table, key);
 			evaluateTailCalls(context);
 		}
 		else if (handler instanceof Table) {
@@ -534,7 +535,7 @@ public abstract class Dispatch {
 			index(context, handler, key);
 		}
 		else {
-			throw IllegalOperationAttemptException.index(table);
+			throw IllegalOperationAttemptException.index(key);
 		}
 	}
 
@@ -561,7 +562,7 @@ public abstract class Dispatch {
 			// call the handler
 			Invokable fn = (Invokable) handler;
 
-			fn.invoke(context, handler, table, key, value);
+			fn.invoke(context, table, key, value);
 			evaluateTailCalls(context);
 		}
 		else if (handler instanceof Table) {
