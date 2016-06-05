@@ -10,7 +10,7 @@ public abstract class LuaState implements MetatableProvider, TableFactory, Upval
 	public abstract Table stringMetatable();
 	public abstract Table functionMetatable();
 	public abstract Table threadMetatable();
-	public abstract Table lightuserdataMetatable();
+	public abstract Table lightUserdataMetatable();
 
 	@Override
 	public Table getMetatable(Object o) {
@@ -26,7 +26,7 @@ public abstract class LuaState implements MetatableProvider, TableFactory, Upval
 				case STRING: return stringMetatable();
 				case FUNCTION: return functionMetatable();
 				case THREAD: return threadMetatable();
-				case USERDATA: return lightuserdataMetatable();
+				case USERDATA: return lightUserdataMetatable();
 				default: throw new IllegalStateException("Illegal type: " + type);
 			}
 		}

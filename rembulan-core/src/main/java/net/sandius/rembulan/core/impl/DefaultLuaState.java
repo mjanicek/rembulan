@@ -75,7 +75,7 @@ public class DefaultLuaState extends LuaState {
 	}
 
 	@Override
-	public Table lightuserdataMetatable() {
+	public Table lightUserdataMetatable() {
 		return lightuserdataMetatable;
 	}
 
