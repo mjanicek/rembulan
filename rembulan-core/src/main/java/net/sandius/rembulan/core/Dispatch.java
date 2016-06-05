@@ -535,7 +535,7 @@ public abstract class Dispatch {
 			index(context, handler, key);
 		}
 		else {
-			throw IllegalOperationAttemptException.index(key);
+			throw IllegalOperationAttemptException.index(table, key);
 		}
 	}
 
@@ -570,7 +570,7 @@ public abstract class Dispatch {
 			newindex(context, handler, key, value);
 		}
 		else {
-			throw IllegalOperationAttemptException.index(table);
+			throw IllegalOperationAttemptException.index(table, key);
 		}
 	}
 

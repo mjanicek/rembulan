@@ -30,7 +30,8 @@ public class IllegalOperationAttemptException extends LuaRuntimeException {
 		return new IllegalOperationAttemptException("call", PlainValueTypeNamer.INSTANCE.typeNameOf(o));
 	}
 
-	public static IllegalOperationAttemptException index(Object o) {
+	public static IllegalOperationAttemptException index(Object table, Object key) {
+		Object o = table instanceof Table ? key : table;
 		return new IllegalOperationAttemptException("index", PlainValueTypeNamer.INSTANCE.typeNameOf(o));
 	}
 
