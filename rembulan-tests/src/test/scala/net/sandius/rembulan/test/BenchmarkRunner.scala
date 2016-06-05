@@ -4,6 +4,7 @@ import java.io.PrintStream
 import java.util.Scanner
 
 import net.sandius.rembulan.compiler.PrototypeCompilerChunkLoader
+import net.sandius.rembulan.compiler.gen.ChunkCompiler
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.{Exec, LuaState, PreemptionContext, Table}
 import net.sandius.rembulan.lib.LibUtils
@@ -16,8 +17,8 @@ import scala.util.Try
 object BenchmarkRunner {
 
   case class Benchmark(fileName: String) {
-    def go(prefix: String, stepSize: Int, args: String*): Unit = {
-      doFile(prefix, stepSize, fileName, args:_*)
+    def go(prefix: String, stepSize: Int, noCPUAccounting: Boolean, args: String*): Unit = {
+      doFile(prefix, stepSize, noCPUAccounting, fileName, args:_*)
     }
   }
 
@@ -27,6 +28,13 @@ object BenchmarkRunner {
 
   protected def intProperty(key: String, default: Int): Int = {
     Option(System.getProperty(key)) flatMap { s => Try(s.toInt).toOption } getOrElse default
+  }
+
+  protected def booleanProperty(key: String, default: Boolean): Boolean = {
+    Option(System.getProperty(key)) match {
+      case Some("true") => true
+      case _ => false
+    }
   }
 
   def initEnv(state: LuaState, args: Seq[String]): Table = {
@@ -54,7 +62,7 @@ object BenchmarkRunner {
     env
   }
 
-  def init(pc: PreemptionContext, filename: String, args: String*): Exec = {
+  def init(pc: PreemptionContext, noCPUAccounting: Boolean, filename: String, args: String*): Exec = {
     val resourceStream = getClass.getResourceAsStream(filename)
     require (resourceStream != null, "resource must exist, is null")
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
@@ -62,7 +70,13 @@ object BenchmarkRunner {
 
     val luacName = "luac53"
     val preemptionContext = pc
-    val ldr = new PrototypeCompilerChunkLoader(new LuaCPrototypeReader(luacName), getClass.getClassLoader)
+
+    val cpuMode = noCPUAccounting match {
+      case true => ChunkCompiler.CPUAccountingCompilationMode.NO_CPU_ACCOUNTING
+      case _ => ChunkCompiler.DEFAULT_MODE
+    }
+
+    val ldr = new PrototypeCompilerChunkLoader(new LuaCPrototypeReader(luacName), getClass.getClassLoader, cpuMode)
 
     val state = new DefaultLuaState.Builder()
         .withPreemptionContext(preemptionContext)
@@ -85,11 +99,11 @@ object BenchmarkRunner {
     result
   }
 
-  def doFile(prefix: String, stepSize: Int, filename: String, args: String*): Unit = {
+  def doFile(prefix: String, stepSize: Int, noCPUAccounting: Boolean, filename: String, args: String*): Unit = {
     val pc = new CountingPreemptionContext()
 
     val exec = timed (prefix + "init") {
-      init(pc, filename, args:_*)
+      init(pc, noCPUAccounting, filename, args:_*)
     }
 
     var steps = 0
@@ -112,14 +126,16 @@ object BenchmarkRunner {
     val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
 
     println(prefix + "Execution took %.1f ms".format(totalTimeMillis))
-    println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
-    println(prefix)
-    println(prefix + "Step size: " + stepSize + " LI")
-    println(prefix + "Num of steps: " + steps)
-    println(prefix + "Avg time per step: %.3f ms".format(totalTimeMillis / steps))
-    println(prefix)
-    println(prefix + "Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
-    println(prefix + "Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+    if (!noCPUAccounting) {
+      println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
+      println(prefix)
+      println(prefix + "Step size: " + stepSize + " LI")
+      println(prefix + "Num of steps: " + steps)
+      println(prefix + "Avg time per step: %.3f ms".format(totalTimeMillis / steps))
+      println(prefix)
+      println(prefix + "Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+      println(prefix + "Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+    }
     println()
   }
 
@@ -142,12 +158,16 @@ object BenchmarkRunner {
   val StepSizePropertyName = "stepSize"
   val DefaultStepSize = 1000000
 
+  val NoCPUAccountingPropertyName = "noCPUAccounting"
+  val DefaultNoCPUAccounting = false
+
   def main(args: Array[String]): Unit = {
 
     getSetup(args) match {
       case Some(setup) =>
         val numRuns = intProperty(NumOfRunsPropertyName, DefaultNumOfRuns)
         val stepSize = intProperty(StepSizePropertyName, DefaultStepSize)
+        val noCPUAccounting = booleanProperty(NoCPUAccountingPropertyName, DefaultNoCPUAccounting)
 
         val bm = Benchmark(dirPrefix + setup.benchmarkFile)
 
@@ -157,20 +177,24 @@ object BenchmarkRunner {
           println("\t\"" + a + "\"")
         }
         println("}")
-        println("numRuns = " + numRuns)
-        println("stepSize = " + stepSize)
+        println(NumOfRunsPropertyName + " = " + numRuns)
+        println(NoCPUAccountingPropertyName + " = " + noCPUAccounting)
+        if (!noCPUAccounting) {
+          println(StepSizePropertyName + " = " + stepSize)
+        }
         println()
 
         for (i <- 1 to numRuns) {
           val prefix = s"#$i\t"
-          bm.go(prefix, stepSize, setup.args:_*)
+          bm.go(prefix, stepSize, noCPUAccounting, setup.args:_*)
         }
 
 
       case None =>
         println("Usage: java " + getClass.getName + " BENCHMARK-FILE [ARG[S...]]")
         println("Use the \"" + NumOfRunsPropertyName + "\" VM property to set the number of runs (default is " + DefaultNumOfRuns + ").")
-        println("        \"" + StepSizePropertyName + "\" VM property to set the number of runs (default is " + DefaultStepSize + ").")
+        println("        \"" + StepSizePropertyName + "\" VM property to set the step size (default is " + DefaultStepSize + ").")
+        println("        \"" + NoCPUAccountingPropertyName + "\" VM property (true/false) to turn off CPU accounting (default is " + DefaultNoCPUAccounting + ")")
         System.exit(1)
     }
 

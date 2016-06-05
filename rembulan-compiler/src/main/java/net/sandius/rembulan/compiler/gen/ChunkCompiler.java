@@ -7,7 +7,9 @@ import net.sandius.rembulan.compiler.gen.block.Linear;
 import net.sandius.rembulan.compiler.gen.block.LinearSeq;
 import net.sandius.rembulan.compiler.gen.block.LinearSeqTransformation;
 import net.sandius.rembulan.compiler.gen.block.Nodes;
+import net.sandius.rembulan.compiler.gen.block.Predicates;
 import net.sandius.rembulan.lbc.Prototype;
+import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +19,21 @@ import java.util.Map;
 
 public class ChunkCompiler {
 
+	public enum CPUAccountingCompilationMode {
+		IN_EVERY_BASIC_BLOCK,
+		NO_CPU_ACCOUNTING
+	}
+
+	public static final CPUAccountingCompilationMode DEFAULT_MODE = CPUAccountingCompilationMode.IN_EVERY_BASIC_BLOCK;
+
+	private final CPUAccountingCompilationMode cpuAccountingCompilationMode;
+
+	public ChunkCompiler(CPUAccountingCompilationMode cpuAccountingCompilationMode) {
+		this.cpuAccountingCompilationMode = Check.notNull(cpuAccountingCompilationMode);
+	}
+
 	public ChunkCompiler() {
+		this(DEFAULT_MODE);
 	}
 
 	public Chunk compile(Prototype prototype, String name) {
@@ -72,7 +88,16 @@ public class ChunkCompiler {
 		cp.inlineInnerJumps();
 		cp.makeBlocks();
 
-		Nodes.applyTransformation(cp.callEntry, new CollectCPUAccounting());
+		switch (cpuAccountingCompilationMode) {
+			case IN_EVERY_BASIC_BLOCK:
+				Nodes.applyTransformation(cp.callEntry, new CollectCPUAccounting());
+				break;
+
+			case NO_CPU_ACCOUNTING:
+				Nodes.applyTransformation(cp.callEntry,
+						new LinearSeqTransformation.Remove(Predicates.isClass(AccountingNode.class)));
+				break;
+		}
 
 		// remove repeated line info nodes
 		Nodes.applyTransformation(cp.callEntry, new RemoveRedundantLineNodes());

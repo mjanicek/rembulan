@@ -14,10 +14,16 @@ public class PrototypeCompilerChunkLoader extends ChunkLoader {
 
 	private final PrototypeReader reader;
 	private final ChunkClassLoader chunkClassLoader;
+	private final ChunkCompiler.CPUAccountingCompilationMode cpuAccountingCompilationMode;
 
-	public PrototypeCompilerChunkLoader(PrototypeReader reader, ClassLoader classLoader) {
+	public PrototypeCompilerChunkLoader(PrototypeReader reader, ClassLoader classLoader, ChunkCompiler.CPUAccountingCompilationMode cpuAccountingCompilationMode) {
 		this.reader = Check.notNull(reader);
 		this.chunkClassLoader = new ChunkClassLoader(classLoader);
+		this.cpuAccountingCompilationMode = Check.notNull(cpuAccountingCompilationMode);
+	}
+
+	public PrototypeCompilerChunkLoader(PrototypeReader reader, ClassLoader classLoader) {
+		this(reader, classLoader, ChunkCompiler.DEFAULT_MODE);
 	}
 
 	@Override
@@ -29,7 +35,7 @@ public class PrototypeCompilerChunkLoader extends ChunkLoader {
 				throw new NullPointerException("Prototype is null");
 			}
 
-			ChunkCompiler compiler = new ChunkCompiler();
+			ChunkCompiler compiler = new ChunkCompiler(cpuAccountingCompilationMode);
 			Chunk chk = compiler.compile(proto, chunkName);
 
 			String mainClassName = chunkClassLoader.install(chk);
