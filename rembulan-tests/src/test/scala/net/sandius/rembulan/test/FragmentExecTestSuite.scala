@@ -6,7 +6,7 @@ import net.sandius.rembulan.compiler.PrototypeCompilerChunkLoader
 import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
-import net.sandius.rembulan.lib.LibUtils
+import net.sandius.rembulan.lib.{Lib, LibUtils}
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.parser.LuaCPrototypeReader
 import net.sandius.rembulan.test.FragmentExpectations.Env
@@ -29,6 +29,15 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   protected val Math = FragmentExpectations.Env.Math
   protected val Str = FragmentExpectations.Env.Str
   protected val IO = FragmentExpectations.Env.IO
+  protected val Tab = FragmentExpectations.Env.Tab
+  protected val Debug = FragmentExpectations.Env.Debug
+  protected val Full = FragmentExpectations.Env.Full
+
+  def installLib(state: LuaState, env: Table, name: String, impl: Lib): Unit = {
+    val lib = state.newTable()
+    impl.installInto(state, lib)
+    env.rawset(name, lib)
+  }
 
   protected def envForContext(state: LuaState, ctx: Env): Table = {
     ctx match {
@@ -38,30 +47,43 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
       case Coro =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        val coro = state.newTable()
-        new DefaultCoroutineLib().installInto(state, coro)
-        env.rawset("coroutine", coro)
+        installLib(state, env, "coroutine", new DefaultCoroutineLib())
         env
 
       case Math =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        val mathlib = state.newTable()
-        new DefaultMathLib().installInto(state, mathlib)
-        env.rawset("math", mathlib)
+        installLib(state, env, "math", new DefaultMathLib())
         env
 
       case Str =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        val str = state.newTable()
-        new DefaultStringLib().installInto(state, str)
-        env.rawset("string", str)
+        installLib(state, env, "string", new DefaultStringLib())
         env
 
       case IO =>
         val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        val io = state.newTable()
-        new DefaultIOLib(state).installInto(state, io)
-        env.rawset("io", io)
+        installLib(state, env, "io", new DefaultIOLib(state))
+        env
+
+      case Tab =>
+        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
+        installLib(state, env, "table", new DefaultTableLib())
+        env
+
+      case Debug =>
+        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
+        installLib(state, env, "debug", new DefaultDebugLib())
+        env
+
+      case Full =>
+        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
+        // TODO: module lib!
+        installLib(state, env, "coroutine", new DefaultCoroutineLib())
+        installLib(state, env, "math", new DefaultMathLib())
+        installLib(state, env, "string", new DefaultStringLib())
+        installLib(state, env, "io", new DefaultIOLib(state))
+        installLib(state, env, "table", new DefaultTableLib())
+        installLib(state, env, "debug", new DefaultDebugLib())
         env
 
     }

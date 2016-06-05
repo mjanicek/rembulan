@@ -67,6 +67,9 @@ trait FragmentExpectations {
   protected val MathContext = Env.Math
   protected val StringLibContext = Env.Str  // must not be called StringContext -- messes up with string interpolation
   protected val IOContext = Env.IO
+  protected val TableContext = Env.Tab
+  protected val DebugContext = Env.Debug
+  protected val FullContext = Env.Full
 
   private val expectations = mutable.Map.empty[Fragment, mutable.Map[Env, Expect]]
 
@@ -129,6 +132,11 @@ object FragmentExpectations {
     case object Math extends Env
     case object Str extends Env
     case object IO extends Env
+    case object Tab extends Env
+    case object Debug extends Env
+
+    case object Full extends Env
+
   }
 
   sealed trait Expect {
