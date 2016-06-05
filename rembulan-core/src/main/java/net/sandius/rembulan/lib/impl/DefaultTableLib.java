@@ -88,15 +88,15 @@ public class DefaultTableLib extends TableLib {
 
 			public final int state;
 
-			public final Table table;
+			public final Object obj;
 			public final int i;
 			public final int j;
 			public final int k;
 			public final ArrayList<Object> result;
 
-			public SuspendedState(int state, Table table, int i, int j, int k, ArrayList<Object> result) {
+			public SuspendedState(int state, Object obj, int i, int j, int k, ArrayList<Object> result) {
 				this.state = state;
-				this.table = table;
+				this.obj = obj;
 				this.i = i;
 				this.j = j;
 				this.k = k;
@@ -105,13 +105,36 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
-		private void run(ExecutionContext context, int state, Table table, int i, int j, int k, ArrayList<Object> result) throws ControlThrowable {
+		private static boolean hasLenMetamethod(ExecutionContext context, Table t) {
+			return Metatables.getMetamethod(context.getState(), Metatables.MT_LEN, t) != null;
+		}
+
+		private static boolean hasIndexMetamethod(ExecutionContext context, Table t) {
+			return Metatables.getMetamethod(context.getState(), Metatables.MT_INDEX, t) != null;
+		}
+
+		private static void unpackUsingRawGet(ExecutionContext context, Table t, int i, int j) {
+			ArrayList<Object> r = new ArrayList<>();
+			for (int k = i; k <= j; k++) {
+				r.add(t.rawget(k));
+			}
+			context.getObjectSink().setToArray(r.toArray(new Object[r.size()]));
+		}
+
+		private static final int STATE_LEN_PREPARE = 0;
+		private static final int STATE_LEN_RESUME = 1;
+		private static final int STATE_BEFORE_LOOP = 2;
+		private static final int STATE_LOOP = 3;
+
+		private void run(ExecutionContext context, int state, Object obj, int i, int j, int k, ArrayList<Object> result) throws ControlThrowable {
 			try {
 				switch (state) {
-					case 0:
-						state = 1;
-						Dispatch.len(context, table);
-					case 1: {
+
+					case STATE_LEN_PREPARE:
+						state = STATE_LEN_RESUME;
+						Dispatch.len(context, obj);  // may suspend, will pass #obj through the stack
+
+					case STATE_LEN_RESUME: {
 						Object o = context.getObjectSink()._0();
 						Long l = Conversions.integerValueOf(o);
 						if (l == null) {
@@ -119,49 +142,45 @@ public class DefaultTableLib extends TableLib {
 						}
 						j = (int) l.longValue();
 					}
-					case 2:
-						// k is the index running from i to j (inclusive)
 
-						if (Metatables.getMetamethod(context.getState(), Metatables.MT_INDEX, table) == null) {
-							// no __index metamethod, we can use rawget
+					case STATE_BEFORE_LOOP:
+						// j is known;
 
-							ArrayList<Object> r = new ArrayList<>();
-							for (k = i; k <= j; k++) {
-								r.add(table.rawget(k));
-							}
-							context.getObjectSink().setToArray(r.toArray(new Object[r.size()]));
+						// is this a clean table without __index?
+						if (obj instanceof Table && !hasIndexMetamethod(context, (Table) obj)) {
+							unpackUsingRawGet(context, (Table) obj, i, j);
 							return;
 						}
+
+						// generic case: go through Dispatch and be prepared to be suspended;
+						// k is the index running from i to j (inclusive)
+
+						if (i <= j) {
+							k = i;
+							state = STATE_LOOP;
+							result = new ArrayList<>();  // allocate the result accumulator
+							Dispatch.index(context, obj, k++);  // may suspend
+
+							// fall-through to state == STATE_LOOP
+						}
 						else {
-							// table has the __index metamethod, need to go through Dispatch
-							// and be ready to be suspended
-
-							if (i <= j) {
-								k = i;
-								state = 3;
-								result = new ArrayList<>();  // allocate the result accumulator
-								Dispatch.index(context, table, k++);
-
-								// fall-through to state == 3
-							}
-							else {
-								// interval empty, we're done
-								context.getObjectSink().reset();
-								return;
-							}
+							// interval empty, we're done
+							context.getObjectSink().reset();
+							return;
 						}
 
-					case 3: {
+					case STATE_LOOP: {
 						while (true) {
 							// k now points to the *next* item to retrieve; we've just processed
 							// (k - 1), need to add it to the results
 
-							Object o = context.getObjectSink()._0();
-							result.add(o);
+							Object v = context.getObjectSink()._0();
+							result.add(v);
 
 							// we may now continue
 							if (k <= j) {
-								Dispatch.index(context, table, k++);
+								state = STATE_LOOP;
+								Dispatch.index(context, obj, k++);  // may suspend
 							}
 							else {
 								break;
@@ -175,39 +194,45 @@ public class DefaultTableLib extends TableLib {
 						return;
 					}
 
-
 					default:
 						throw new IllegalStateException("Illegal state: " + state);
 				}
 			}
 			catch (ControlThrowable ct) {
-				ct.push(this, new SuspendedState(state, table, i, j, k, result));
+				ct.push(this, new SuspendedState(state, obj, i, j, k, result));
 				throw ct;
 			}
-
 		}
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			Table table = args.nextTable();
-			final int i = args.optNextInt(1);
-			Integer maybeJ = args.hasNext() ? args.nextInt() : null;
+			Object obj = args.peekOrNil();
+			args.skip();
+			int i = args.optNextInt(1);
 
-			if (maybeJ == null) {
-				// no explicit 'j' argument
-				run(context, 0, table, i, 0, 0, null);
+			final int state;
+			final int j;
+
+			if (args.hasNext()) {
+				j = args.nextInt();
+				state = STATE_BEFORE_LOOP;
+			}
+			else if (obj instanceof Table && !hasLenMetamethod(context, (Table) obj)) {
+				j = ((Table) obj).rawlen();  // safe to use rawlen
+				state = STATE_BEFORE_LOOP;
 			}
 			else {
-				// explicit 'j', we can skip the computation of #len
-				int j = maybeJ.intValue();
-				run(context, 2, table, i, j, 0, null);
+				j = 0;  // placeholder, will be retrieved in the run() method
+				state = STATE_LEN_PREPARE;
 			}
+
+			run(context, state, obj, i, j, 0, null);
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			SuspendedState ss = (SuspendedState) suspendedState;
-			run(context, ss.state, ss.table, ss.i, ss.j, ss.k, ss.result);
+			run(context, ss.state, ss.obj, ss.i, ss.j, ss.k, ss.result);
 		}
 
 	}
