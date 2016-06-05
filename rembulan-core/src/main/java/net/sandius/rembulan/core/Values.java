@@ -12,17 +12,19 @@ public abstract class Values {
 	/*
 	 * Mappings between types:
 	 *
-	 * Lua            Java (Rembulan)
-	 * --------------------------------
-	 * nil            null pointer
-	 * boolean        java.lang.Boolean
-	 * lightuserdata  any class other than these mentioned
-	 * number         java.lang.Number; java.lang.Long for integers, java.lang.Double for floats
-	 * string         java.lang.String
-	 * table          net.sandius.rembulan.core.Table
-	 * function       net.sandius.rembulan.core.Function
-	 * userdata       full userdata: net.sandius.rembulan.core.Userdata
-	 *                light userdata: any class other than those mentioned here
+	 * Lua       |  Java (Rembulan)
+	 * ----------+---------------------
+	 * nil       |  null pointer
+	 * boolean   |  java.lang.Boolean
+	 * number    |  java.lang.Number;
+	 *           |  floats: java.lang.Double (canonical), java.lang.Float
+	 *           |  integers: any other subclass of Number, java.lang.Long being
+	 *           |            the canonical representation
+	 * string    |  java.lang.String
+	 * table     |  net.sandius.rembulan.core.Table
+	 * function  |  net.sandius.rembulan.core.Function
+	 * userdata  |  full userdata: net.sandius.rembulan.core.Userdata
+	 *           |  light userdata: any class other than those mentioned here
 	 */
 	public static LuaType typeOf(Object v) {
 		if (v == null) return LuaType.NIL;
