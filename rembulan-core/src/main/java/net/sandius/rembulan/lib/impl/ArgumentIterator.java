@@ -59,12 +59,16 @@ public class ArgumentIterator implements Iterator<Object> {
 		return namer;
 	}
 
-	public void rewind() {
-		index = 0;
-	}
-
 	public void skip() {
 		index += 1;
+	}
+
+	public void goTo(int index) {
+		this.index = index;
+	}
+
+	public void rewind() {
+		goTo(0);
 	}
 
 	public int size() {
