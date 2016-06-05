@@ -209,7 +209,7 @@ public class DefaultIOLib extends IOLib {
 
 			@Override
 			protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-				IOFile f = args.nextStrict(typeName(), IOFile.class);
+				IOFile f = args.nextUserdata(typeName(), IOFile.class);
 				context.getObjectSink().setTo(f.toString());
 			}
 
@@ -226,7 +226,7 @@ public class DefaultIOLib extends IOLib {
 
 			@Override
 			protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-				IOFile f = args.nextStrict(typeName(), IOFile.class);
+				IOFile f = args.nextUserdata(typeName(), IOFile.class);
 
 				while (args.hasNext()) {
 					String s = args.nextString();
