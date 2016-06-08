@@ -47,4 +47,27 @@ public class LuaFormat {
 		}
 	}
 
+	public static Long tryParseInteger(String s) {
+		try {
+			return parseInteger(s);
+		}
+		catch (NumberFormatException ex) {
+			return null;
+		}
+	}
+
+	public static Double tryParseFloat(String s) {
+		try {
+			return parseFloat(s);
+		}
+		catch (NumberFormatException ex) {
+			return null;
+		}
+	}
+
+	public static Number tryParseNumeral(String s) {
+		Long l = tryParseInteger(s);
+		return l != null ? l : (Number) tryParseFloat(s);
+	}
+
 }
