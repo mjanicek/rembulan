@@ -1,8 +1,7 @@
 package net.sandius.rembulan.parser;
 
-import net.sandius.rembulan.parser.ast.BinaryOperation;
 import net.sandius.rembulan.parser.ast.Expr;
-import net.sandius.rembulan.parser.ast.UnaryOperation;
+import net.sandius.rembulan.parser.ast.Operator;
 import net.sandius.rembulan.util.Check;
 
 class ExprBuilder {
@@ -13,12 +12,12 @@ class ExprBuilder {
 		this.expr = null;
 	}
 
-	public void add(UnaryOperation op) {
+	public void add(Operator.Unary op) {
 		Check.notNull(op);
 		throw new UnsupportedOperationException();  // TODO
 	}
 
-	public void add(BinaryOperation op) {
+	public void add(Operator.Binary op) {
 		Check.notNull(op);
 		throw new UnsupportedOperationException();  // TODO
 	}

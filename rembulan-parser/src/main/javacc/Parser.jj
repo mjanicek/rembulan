@@ -279,8 +279,8 @@ List<LValue> VarList() :
 
 Expr Expr() :
 {
-	UnaryOperation uop;
-	BinaryOperation bop;
+	Operator.Unary uop;
+	Operator.Binary bop;
 	Expr e;
 
 	ExprBuilder bld = new ExprBuilder();
@@ -508,40 +508,40 @@ FieldInitialiser FieldInitialiser() :
 		 ‘<’ | ‘<=’ | ‘>’ | ‘>=’ | ‘==’ | ‘~=’ |
 		 and | or
 */
-BinaryOperation BinOp() :
+Operator.Binary BinOp() :
 { }
 {
-	<PLUS>     { return BinaryOperation.ADD; }
-|	<MINUS>    { return BinaryOperation.SUB; }
-|	<MUL>      { return BinaryOperation.MUL; }
-|	<DIV>      { return BinaryOperation.DIV; }
-|	<IDIV>     { return BinaryOperation.IDIV; }
-|	<POW>      { return BinaryOperation.POW; }
-|	<MOD>      { return BinaryOperation.MOD; }
-|	<BAND>     { return BinaryOperation.BAND; }
-|	<BNOT>     { return BinaryOperation.BXOR; }
-|	<BOR>      { return BinaryOperation.BOR; }
-|	<SHR>      { return BinaryOperation.SHL; }
-|	<SHL>      { return BinaryOperation.SHR; }
-|	<DBL_DOT>  { return BinaryOperation.CONCAT; }
-|	<LT>       { return BinaryOperation.LT; }
-|	<LE>       { return BinaryOperation.LE; }
-|	<GT>       { return BinaryOperation.GT; }
-|	<GE>       { return BinaryOperation.GE; }
-|	<EQ>       { return BinaryOperation.EQ; }
-|	<NEQ>      { return BinaryOperation.NEQ; }
-|	<AND>      { return BinaryOperation.AND; }
-|	<OR>       { return BinaryOperation.OR; }
+	<PLUS>     { return Operator.Binary.ADD; }
+|	<MINUS>    { return Operator.Binary.SUB; }
+|	<MUL>      { return Operator.Binary.MUL; }
+|	<DIV>      { return Operator.Binary.DIV; }
+|	<IDIV>     { return Operator.Binary.IDIV; }
+|	<POW>      { return Operator.Binary.POW; }
+|	<MOD>      { return Operator.Binary.MOD; }
+|	<BAND>     { return Operator.Binary.BAND; }
+|	<BNOT>     { return Operator.Binary.BXOR; }
+|	<BOR>      { return Operator.Binary.BOR; }
+|	<SHR>      { return Operator.Binary.SHL; }
+|	<SHL>      { return Operator.Binary.SHR; }
+|	<DBL_DOT>  { return Operator.Binary.CONCAT; }
+|	<LT>       { return Operator.Binary.LT; }
+|	<LE>       { return Operator.Binary.LE; }
+|	<GT>       { return Operator.Binary.GT; }
+|	<GE>       { return Operator.Binary.GE; }
+|	<EQ>       { return Operator.Binary.EQ; }
+|	<NEQ>      { return Operator.Binary.NEQ; }
+|	<AND>      { return Operator.Binary.AND; }
+|	<OR>       { return Operator.Binary.OR; }
 }
 
 /*
 	unop ::= ‘-’ | not | ‘#’ | ‘~’
 */
-UnaryOperation UnOp() :
+Operator.Unary UnOp() :
 { }
 {
-	<MINUS>  { return UnaryOperation.UNM; }
-|	<NOT>    { return UnaryOperation.NOT; }
-|	<LEN>    { return UnaryOperation.LEN; }
-|	<BNOT>   { return UnaryOperation.BNOT; }
+	<MINUS>  { return Operator.Unary.UNM; }
+|	<NOT>    { return Operator.Unary.NOT; }
+|	<LEN>    { return Operator.Unary.LEN; }
+|	<BNOT>   { return Operator.Unary.BNOT; }
 }
