@@ -1,0 +1,547 @@
+options {
+	STATIC = false;
+	JDK_VERSION = "1.7";
+	ERROR_REPORTING = true;
+	UNICODE_INPUT = true;
+	DEBUG_LOOKAHEAD = false;
+	DEBUG_PARSER = false;
+	DEBUG_TOKEN_MANAGER = false;
+
+	// FIXME: remove when done
+//	FORCE_LA_CHECK = true;
+}
+
+PARSER_BEGIN(Parser)
+package net.sandius.rembulan.parser;
+
+import net.sandius.rembulan.parser.ast.*;
+import java.util.*;
+
+import static java.util.Collections.*;
+
+public class Parser {
+
+	private static List<Statement> none() {
+		return Collections.<Statement>emptyList();
+	}
+
+	private static List<Statement> one(Statement v) {
+		return Collections.<Statement>singletonList(v);
+	}
+
+	private static List<Statement> pair(Statement u, Statement v) {
+		List<Statement> l = new ArrayList<Statement>();
+		l.add(u);
+		l.add(v);
+		return Collections.<Statement>unmodifiableList(l);
+	}
+
+}
+
+PARSER_END(Parser)
+
+/* Whitespace */
+SKIP :
+{
+	" " | "\t" | "\n" | "\r" | "\f"
+}
+
+
+/* Comments */
+
+// TODO: multi-line comments, nested comments
+
+//MORE :
+//{
+//  "%" : IN_LINE_COMMENT
+//}
+
+SPECIAL_TOKEN :
+{
+	<LINE_COMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")? >
+}
+
+/* Keywords */
+TOKEN :
+{
+	<AND: "and">
+|	<BREAK: "break">
+|	<DO: "do">
+|	<ELSE: "else">
+|	<ELSEIF: "elseif">
+|	<END: "end">
+|	<FALSE: "false">
+|	<FOR: "for">
+|	<FUNCTION: "function">
+|	<GOTO: "goto">
+|	<IF: "if">
+|	<IN: "in">
+|	<LOCAL: "local">
+|	<NIL: "nil">
+|	<NOT: "not">
+|	<OR: "or">
+|	<REPEAT: "repeat">
+|	<RETURN: "return">
+|	<THEN: "then">
+|	<TRUE: "true">
+|	<UNTIL: "until">
+|	<WHILE: "while">
+}
+
+/* Literals */
+TOKEN :
+{
+	<NAME: ["a"-"z", "A"-"Z", "_"] (["a"-"z", "A"-"Z", "_", "0"-"9"])*>
+}
+
+/* Numerals and strings */
+TOKEN :
+{
+	// Numerals
+	<NUMERAL: <DEC_NUMERAL> | <HEX_NUMERAL>>
+
+|	<#DECDIGIT: ["0"-"9"]>
+|	<#HEXDIGIT: ["0"-"9", "a"-"f", "A"-"F"]>
+|	<#SIGN: ["+","-"]>
+|	<#DECEXP: ["e","E"]>
+|	<#HEX: "0" ["x","X"]>
+|	<#HEXEXP: ["p","P"]>
+
+|	<#DEC_NUMERAL: (<DECDIGIT>)+ ("." (<DECDIGIT>)*)? (<DECEXP> (<SIGN>)? (<DECDIGIT>)+)?>
+|	<#HEX_NUMERAL: <HEX> (<HEXDIGIT>)+ ("." (<HEXDIGIT>)*)? (<HEXEXP> (<SIGN>)? (<DECDIGIT>)+)?>
+
+	// String literals
+|	<LITERAL_STRING: <DOUBLE_QUOTED_STRING> | <SINGLE_QUOTED_STRING>>
+|	<#DOUBLE_QUOTED_STRING: "\"" (<ESCAPED> | ~["\\","\""] | "\\\"")* "\"">
+|	<#SINGLE_QUOTED_STRING: "'" (<ESCAPED> | ~["\\","'"] | "\\'")* "'">
+
+|	<#ESCAPED: <HEXCHAR> | <DECCHAR> | <UNICODE> | <CHAR>>
+|	<#HEXCHAR: "\\" "x" (<HEXDIGIT>){2}>
+|	<#DECCHAR: "\\" (<DECDIGIT>){1,3}>
+|	<#UNICODE: "\\" "u" "{" (<HEXDIGIT>)+ "}">
+|	<#CHAR: "\\" ("a" | "b" | "f" | "n" | "r" | "t" | "v") >
+|	<#LF: ("\n" | "\r" | "\r\n") >
+
+// TODO: the \z escape sequence
+// TODO: long brackets
+
+}
+
+/* Other tokens */
+TOKEN :
+{
+	// operators
+	<PLUS: "+">
+|	<MINUS: "-">
+|	<MUL: "*">
+|	<DIV: "/">
+|	<MOD: "%">
+|	<POW: "^">
+|	<LEN: "#">
+|	<BAND: "&">
+|	<BNOT: "~">  // FIXME: this is a BNOT and BXOR
+|	<BOR: "|">
+|	<SHL: "<<">
+|	<SHR: ">>">
+|	<IDIV: "//">
+|	<DBL_DOT: "..">  // string concatenation
+
+	// comparison operators
+|	<EQ: "==">
+|	<NEQ: "~=">
+|	<LE: "<=">
+|	<GE: ">=">
+|	<LT: "<">
+|	<GT: ">">
+
+	// other
+|	<ASSIGN: "=">
+|	<PAREN_OPEN: "(">
+|	<PAREN_CLOSE: ")">
+|	<CURLY_OPEN: "{">
+|	<CURLY_CLOSE: "}">
+|	<SQUARE_OPEN: "[">
+|	<SQUARE_CLOSE: "]">
+|	<DOUBLE_COLON: "::">
+|	<SEMICOLON: ";">
+|	<COLON: ":">
+|	<COMMA: ",">
+|	<DOT: ".">
+|	<VARARGS: "...">
+}
+
+TOKEN :
+{
+	<FIELD_SEPARATOR: <COMMA> | <SEMICOLON>>
+}
+
+Name Name() :
+{
+	Token t;
+}
+{
+    t=<NAME>  { return Name.fromString(t.image); }
+}
+
+StringLiteral StringLiteral() :
+{
+	Token t;
+}
+{
+	t=<LITERAL_STRING>  { return StringLiteral.fromString(t.image); }
+}
+
+Numeral Numeral() :
+{
+	Token t;
+}
+{
+	t=<NUMERAL>  { return Numeral.fromString(t.image); }
+}
+
+Chunk Chunk() :
+{
+	Block b;
+}
+{
+	b=Block()  { return new Chunk(b); }
+}
+
+Block Block() :
+{
+	List<Statement> ss;
+	List<Statement> stats = new ArrayList<Statement>();
+	ReturnStatement ret = null;
+}
+{
+	(ss=Statement() { stats.addAll(ss); })* (ret=ReturnStatement())? { return new Block(Collections.unmodifiableList(stats), ret); }
+}
+
+List<Statement> Statement() :
+{
+	Name n;
+	Expr e, f;
+	Expr g = null;
+	Block b;
+
+	FunctionName fn;
+	FunctionLiteral fb;
+
+	List<LValue> vars;
+	List<Name> names;
+	List<Expr> exprs = Collections.emptyList();
+
+	Statement s;
+	List<Statement> ss = new ArrayList<Statement>();
+}
+{
+	<SEMICOLON>  { return none(); }
+|	LOOKAHEAD(3) vars=VarList() <ASSIGN> exprs=ExprList()  { return one(new AssignStatement(vars, exprs)); }
+|	s=CallStatement()  { return one(s); }
+|   <DOUBLE_COLON> n=Name() <DOUBLE_COLON> { return one(new LabelStatement(n)); }
+|	<BREAK>  { return one(new BreakStatement()); }
+|	<GOTO> n=Name()  { return one(new GotoStatement(n)); }
+|	<DO> b=Block() <END>  { return one(new DoStatement(b)); }
+|	<WHILE> e=Expr() <DO> b=Block() <END>  { return one(new WhileStatement(e, b)); }
+|	<REPEAT> b=Block() <UNTIL> e=Expr()  { return one(new RepeatUntilStatement(e, b)); }
+|	s=IfStatement()  { return one(s); }
+|	LOOKAHEAD(3) <FOR> n=Name() <ASSIGN> e=Expr() <COMMA> f=Expr() (<COMMA> g=Expr())? <DO> b=Block() <END>  { return one(new NumericForStatement(n, e, f, g, b)); }
+|	<FOR> names=NameList() <IN> exprs=ExprList() <DO> b=Block() <END>  { return one(new GenericForStatement(names, exprs, b)); }
+
+|	<FUNCTION> fn=FunctionName() fb=FunctionBody()  {
+		if (fn.isMethod()) {
+			// if fn is a method, it changes fb's signature (adds a "self" field)
+			fb = new FunctionLiteral(fb.params().prepend(Name.fromString("self")), fb.block());
+		}
+		return one(new AssignStatement(Collections.<LValue>singletonList(fn.toLValue()), Collections.<Expr>singletonList(new FunctionDefExpr(fb))));
+	}
+
+|	LOOKAHEAD(2) <LOCAL> <FUNCTION> n=Name() fb=FunctionBody()  {
+		return pair(
+			LocalDeclStatement.singleton(n),
+			new AssignStatement(Collections.<LValue>singletonList(new Var(n)), Collections.<Expr>singletonList(new FunctionDefExpr(fb)))
+		);
+	}
+
+|	<LOCAL> names=NameList() (<ASSIGN> exprs=ExprList())?  {
+		return one(LocalDeclStatement.of(names, exprs));
+	}
+}
+
+List<LValue> VarList() :
+{
+	LValue v;
+	List<LValue> vs = new ArrayList<LValue>();
+}
+{
+    v=Var() { vs.add(v); } (<COMMA> v=Var() { vs.add(v); })*  { return Collections.unmodifiableList(vs); }
+}
+
+Expr Expr() :
+{
+	UnaryOperation uop;
+	BinaryOperation bop;
+	Expr e;
+
+	ExprBuilder bld = new ExprBuilder();
+}
+{
+	(uop=UnOp() { bld.add(uop); })* e=SimpleExpr() { bld.add(e); }
+			(LOOKAHEAD(2) bop=BinOp() { bld.add(bop); } (uop=UnOp() { bld.add(uop); })* e=SimpleExpr() { bld.add(e); })*
+			{ return bld.build(); }
+}
+
+Expr SimpleExpr() :
+{
+	Token t;
+	Literal l;
+	Expr e;
+	FunctionLiteral fn;
+}
+{
+	<NIL>    { return new LiteralExpr(NilLiteral.INSTANCE); }
+|	<FALSE>  { return new LiteralExpr(BooleanLiteral.FALSE); }
+|	<TRUE>   { return new LiteralExpr(BooleanLiteral.TRUE); }
+|	l=Numeral()  { return new LiteralExpr(l); }
+|	l=StringLiteral()  {return new LiteralExpr(l); }
+|	<VARARGS>  { return new VarargsExpr(); }
+|	<FUNCTION> fn=FunctionBody()  { return new FunctionDefExpr(fn); }
+|	e=PrefixExpr()  { return e; }
+|	e=TableConstructor()  { return e; }
+}
+
+LValue Var() :
+{
+	LValue lv;
+	LValueSuffix suffix;
+}
+{
+	lv=__Var0() (LOOKAHEAD(2) suffix=__VarSuffix() { lv = suffix.applyOn(lv); })*  { return lv; }
+}
+
+LValue __Var0() :
+{
+	Name n;
+	Expr e;
+	LValueSuffix suffix;
+}
+{
+	n=Name()  { return new Var(n); }
+|   <PAREN_OPEN> e=Expr() <PAREN_CLOSE> suffix=__VarSuffix()  { return suffix.applyOn(e); }
+}
+
+LValueSuffix __VarSuffix() :
+{
+	InvokeOp inv;
+	Expr e;
+	List<InvokeOp> invokes = new ArrayList<InvokeOp>();
+}
+{
+	(inv=__InvokeOp() { invokes.add(inv); })* e=__FieldAccessOp()  { return new LValueSuffix(invokes, e); }
+}
+
+Expr VarExpr() :
+{
+	LValue lv;
+	Expr e;
+}
+{
+	LOOKAHEAD(3) lv=Var()  { return new DerefExpr(lv); }
+|	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return e; }
+}
+
+List<Expr> Args() :
+{
+	Expr e;
+	Literal l;
+	List<Expr> es = Collections.emptyList();
+}
+{
+	<PAREN_OPEN> (es=ExprList())? <PAREN_CLOSE>  { return es; }
+|	e=TableConstructor()  { return Collections.<Expr>singletonList(e); }
+|	l=StringLiteral()  { return Collections.<Expr>singletonList(new LiteralExpr(l)); }
+}
+
+Expr PrefixExpr() :
+{
+	Expr e;
+	InvokeOp inv;
+}
+{
+	e=VarExpr() (LOOKAHEAD(2) inv=__InvokeOp() { e=inv.on(e); })*  { return e; }
+}
+
+CallStatement CallStatement() :
+{
+	Expr e;
+	InvokeOp inv;
+	CallExpr call = null;
+}
+{
+	e=VarExpr() (LOOKAHEAD(2) inv=__InvokeOp() { call=inv.on(call != null ? call : e); })+  { return new CallStatement(call); }
+}
+
+IfStatement IfStatement() :
+{
+	Expr e;
+	Block b;
+	ConditionalBlock ift;
+	ArrayList<ConditionalBlock> elifs = new ArrayList<ConditionalBlock>();
+	Block els = null;
+}
+{
+	<IF> e=Expr() <THEN> b=Block() { ift = new ConditionalBlock(e, b); }
+			(<ELSEIF> e=Expr() <THEN> b=Block() { elifs.add(new ConditionalBlock(e, b)); } )*
+			(<ELSE> els=Block())?
+			<END>  { return new IfStatement(ift, elifs, els); }
+}
+
+/*
+	retstat ::= return [explist] [‘;’]
+*/
+ReturnStatement ReturnStatement() :
+{
+	List<Expr> exprs = Collections.emptyList();
+}
+{
+	<RETURN> (exprs=ExprList())? (<SEMICOLON>)? { return new ReturnStatement(exprs); }
+}
+
+FunctionName FunctionName() :
+{
+	Name n;
+	ArrayList<Name> ns = new ArrayList<Name>();
+	Name m = null;
+}
+{
+	n=Name() (<DOT> n=Name() { ns.add(n); })* (<COLON> m=Name())?  { return FunctionName.of(n, ns, m); }
+}
+
+Expr __FieldAccessOp() :
+{
+	Expr e;
+	Name n;
+}
+{
+	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE>  { return e; }
+|	<DOT> n=Name()  { return new LiteralExpr(StringLiteral.fromName(n)); }
+}
+
+InvokeOp __InvokeOp() :
+{
+	Name n;
+	List<Expr> params;
+}
+{	params=Args()  { return new InvokeOp(params, null); }
+|	<COLON> n=Name() params=Args()  { return new InvokeOp(params, n); }
+}
+
+
+List<Name> NameList() :
+{
+	Name n;
+	ArrayList<Name> ns = new ArrayList<Name>();
+}
+{
+	n=Name() { ns.add(n); } (LOOKAHEAD(2) <COMMA> n=Name() { ns.add(n); })*  { return Collections.unmodifiableList(ns); }
+}
+
+List<Expr> ExprList() :
+{
+	Expr e;
+	ArrayList<Expr> es = new ArrayList<Expr>();
+}
+{
+	e=Expr() { es.add(e); } (<COMMA> e=Expr() { es.add(e); })* { return Collections.unmodifiableList(es); }
+}
+
+FunctionLiteral FunctionBody() :
+{
+	FunctionParams params = FunctionParams.empty();
+	Block block;
+}
+{
+	<PAREN_OPEN> (params=FunctionParams())? <PAREN_CLOSE> block=Block() <END>  { return new FunctionLiteral(params, block); }
+}
+
+FunctionParams FunctionParams() :
+{
+	List<Name> params = Collections.emptyList();
+	boolean vararg = false;
+}
+{
+	params=NameList() (<COMMA> <VARARGS> { vararg = true; })?  { return new FunctionParams(params, vararg); }
+|	<VARARGS>  { return new FunctionParams(params, true); }
+}
+
+TableConstructorExpr TableConstructor() :
+{
+	List<FieldInitialiser> fields = Collections.emptyList();
+}
+{
+	<CURLY_OPEN> (fields=FieldInitialiserList())? <CURLY_CLOSE>  { return new TableConstructorExpr(fields); }
+}
+
+List<FieldInitialiser> FieldInitialiserList() :
+{
+	FieldInitialiser f;
+	ArrayList<FieldInitialiser> fs = new ArrayList<FieldInitialiser>();
+}
+{
+	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) <FIELD_SEPARATOR> f=FieldInitialiser() { fs.add(f); })* (<FIELD_SEPARATOR>)?  { return Collections.unmodifiableList(fs); }
+}
+
+FieldInitialiser FieldInitialiser() :
+{
+	Expr e, f;
+	Name n;
+}
+{
+	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE> <ASSIGN> f=Expr()  { return new FieldInitialiser(e, f); }
+|	LOOKAHEAD(2) n=Name() <ASSIGN> e=Expr()  { return new FieldInitialiser(new LiteralExpr(StringLiteral.fromName(n)), e); }
+|	e=Expr()  { return new FieldInitialiser(null, e); }
+}
+
+/*
+	binop ::=  ‘+’ | ‘-’ | ‘*’ | ‘/’ | ‘//’ | ‘^’ | ‘%’ |
+		 ‘&’ | ‘~’ | ‘|’ | ‘>>’ | ‘<<’ | ‘..’ |
+		 ‘<’ | ‘<=’ | ‘>’ | ‘>=’ | ‘==’ | ‘~=’ |
+		 and | or
+*/
+BinaryOperation BinOp() :
+{ }
+{
+	<PLUS>     { return BinaryOperation.ADD; }
+|	<MINUS>    { return BinaryOperation.SUB; }
+|	<MUL>      { return BinaryOperation.MUL; }
+|	<DIV>      { return BinaryOperation.DIV; }
+|	<IDIV>     { return BinaryOperation.IDIV; }
+|	<POW>      { return BinaryOperation.POW; }
+|	<MOD>      { return BinaryOperation.MOD; }
+|	<BAND>     { return BinaryOperation.BAND; }
+|	<BNOT>     { return BinaryOperation.BXOR; }
+|	<BOR>      { return BinaryOperation.BOR; }
+|	<SHR>      { return BinaryOperation.SHL; }
+|	<SHL>      { return BinaryOperation.SHR; }
+|	<DBL_DOT>  { return BinaryOperation.CONCAT; }
+|	<LT>       { return BinaryOperation.LT; }
+|	<LE>       { return BinaryOperation.LE; }
+|	<GT>       { return BinaryOperation.GT; }
+|	<GE>       { return BinaryOperation.GE; }
+|	<EQ>       { return BinaryOperation.EQ; }
+|	<NEQ>      { return BinaryOperation.NEQ; }
+|	<AND>      { return BinaryOperation.AND; }
+|	<OR>       { return BinaryOperation.OR; }
+}
+
+/*
+	unop ::= ‘-’ | not | ‘#’ | ‘~’
+*/
+UnaryOperation UnOp() :
+{ }
+{
+	<MINUS>  { return UnaryOperation.UNM; }
+|	<NOT>    { return UnaryOperation.NOT; }
+|	<LEN>    { return UnaryOperation.LEN; }
+|	<BNOT>   { return UnaryOperation.BNOT; }
+}
