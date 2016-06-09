@@ -42,6 +42,8 @@ trait FragmentBundle {
 
   private val fragments = ArrayBuffer.empty[Fragment]
 
+  def name: String = this.getClass.getSimpleName
+
   protected def register(fragment: Fragment): Fragment = {
     fragments.append(fragment)
     fragment
