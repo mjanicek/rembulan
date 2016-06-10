@@ -12,4 +12,9 @@ public class TableConstructorExpr implements Expr {
 		this.fields = Check.notNull(fields);
 	}
 
+	@Override
+	public String toString() {
+		return "(newtable [" + Util.listToString(fields, ", ") + "])";
+	}
+
 }

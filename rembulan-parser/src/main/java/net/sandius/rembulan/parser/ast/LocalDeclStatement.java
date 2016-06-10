@@ -31,5 +31,9 @@ public class LocalDeclStatement implements Statement {
 		return of(Collections.singletonList(n));
 	}
 
+	@Override
+	public String toString() {
+		return "(local [" + Util.listToString(names, ", ") + "] [" + Util.listToString(initialisers, ", ") + "])";
+	}
 
 }

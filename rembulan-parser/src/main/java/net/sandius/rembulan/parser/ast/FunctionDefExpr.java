@@ -10,4 +10,9 @@ public class FunctionDefExpr implements Expr {
 		this.body = Check.notNull(body);
 	}
 
+	@Override
+	public String toString() {
+		return "(fndef " + body + ")";
+	}
+
 }

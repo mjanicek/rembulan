@@ -29,4 +29,9 @@ public class FunctionParams {
 		return new FunctionParams(Collections.unmodifiableList(pp), vararg);
 	}
 
+	@Override
+	public String toString() {
+		return "(fnparam [" + Util.listToString(params, ", ") + "] vararg=" + vararg + ")";
+	}
+
 }

@@ -14,4 +14,9 @@ public class DoStatement implements Statement {
 		return block;
 	}
 
+	@Override
+	public String toString() {
+		return "(do " + block + ")";
+	}
+
 }

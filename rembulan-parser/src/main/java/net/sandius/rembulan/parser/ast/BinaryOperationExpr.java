@@ -14,4 +14,9 @@ public class BinaryOperationExpr implements Expr {
 		this.right = Check.notNull(right);
 	}
 
+	@Override
+	public String toString() {
+		return "(" + op + " " + left + " " + right + ")";
+	}
+
 }

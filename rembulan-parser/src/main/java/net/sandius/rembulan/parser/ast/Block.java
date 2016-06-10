@@ -14,4 +14,9 @@ public class Block {
 		this.ret = ret;
 	}
 
+	@Override
+	public String toString() {
+		return "(block [" + Util.listToString(statements, ",\n")+ "]\n" + (ret != null ? ret : "no-ret") + ")";
+	}
+
 }

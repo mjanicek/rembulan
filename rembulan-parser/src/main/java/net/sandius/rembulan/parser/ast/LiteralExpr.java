@@ -14,4 +14,9 @@ public class LiteralExpr implements Expr {
 		return value;
 	}
 
+	@Override
+	public String toString() {
+		return "(literal " + value + ")";
+	}
+
 }

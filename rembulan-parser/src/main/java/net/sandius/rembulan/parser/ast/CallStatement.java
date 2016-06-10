@@ -10,4 +10,9 @@ public class CallStatement implements Statement {
 		this.call = Check.notNull(call);
 	}
 
+	@Override
+	public String toString() {
+		return "(call-stat " + call + ")";
+	}
+
 }

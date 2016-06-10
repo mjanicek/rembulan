@@ -14,4 +14,9 @@ public class LabelStatement implements Statement {
 		return labelName;
 	}
 
+	@Override
+	public String toString() {
+		return "(label-def " + labelName + ")";
+	}
+
 }

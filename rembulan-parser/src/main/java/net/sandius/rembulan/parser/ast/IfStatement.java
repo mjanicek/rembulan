@@ -16,4 +16,9 @@ public class IfStatement implements Statement {
 		this.elseBlock = elseBlock;
 	}
 
+	@Override
+	public String toString() {
+		return "(if " + main + " [" + Util.listToString(elifs, ",\n") + "] " + (elseBlock != null ? elseBlock : "no-else") + ")";
+	}
+
 }

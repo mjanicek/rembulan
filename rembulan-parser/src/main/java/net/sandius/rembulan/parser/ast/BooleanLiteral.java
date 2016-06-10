@@ -19,4 +19,9 @@ public class BooleanLiteral implements Literal {
 		return value;
 	}
 
+	@Override
+	public String toString() {
+		return "(bool " + (value ? "true" : "false") + ")";
+	}
+
 }

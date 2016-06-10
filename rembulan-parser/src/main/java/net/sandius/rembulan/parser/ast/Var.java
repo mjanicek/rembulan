@@ -10,4 +10,9 @@ public class Var implements LValue {
 		this.name = Check.notNull(name);
 	}
 
+	@Override
+	public String toString() {
+		return "(var " + name + ")";
+	}
+
 }

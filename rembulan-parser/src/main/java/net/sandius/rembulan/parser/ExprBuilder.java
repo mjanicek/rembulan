@@ -31,24 +31,31 @@ class ExprBuilder {
 	}
 
 	// true iff a takes precedence over b
-	private static boolean hasLesserPrecedence(Operator a, Operator top) {
-		Check.notNull(a);
+	private static boolean hasLesserPrecedence(Operator newOp, Operator top) {
+		Check.notNull(newOp);
 		Check.notNull(top);
 
-		return a.precedence() < top.precedence()
-				|| (a.precedence() == top.precedence()
-				&& isRightAssociative(a));
+		if (newOp instanceof Operator.Unary) {
+			return false;
+		}
+
+		return (!isRightAssociative(newOp) && newOp.precedence() <= top.precedence())
+				|| (isRightAssociative(newOp) && newOp.precedence() < top.precedence());
 	}
 
 	private void makeOp(Operator op) {
 		if (op instanceof Operator.Binary) {
 			Expr r = operandStack.pop();
 			Expr l = operandStack.pop();
-			operandStack.push(new BinaryOperationExpr((Operator.Binary) op, l, r));
+			Expr e = new BinaryOperationExpr((Operator.Binary) op, l, r);
+			System.out.println("pushing expr: " + e);
+			operandStack.push(e);
 		}
 		else if (op instanceof Operator.Unary) {
 			Expr a = operandStack.pop();
-			operandStack.push(new UnaryOperationExpr((Operator.Unary) op, a));
+			Expr e = new UnaryOperationExpr((Operator.Unary) op, a);
+			System.out.println("pushing expr: " + e);
+			operandStack.push(e);
 		}
 		else {
 			throw new IllegalStateException("Illegal operator: " + op);
@@ -57,6 +64,7 @@ class ExprBuilder {
 
 	public void add(Operator op) {
 		Check.notNull(op);
+		System.out.println("adding op: " + op);
 
 		while (!operatorStack.isEmpty() && hasLesserPrecedence(op, operatorStack.peek())) {
 			makeOp(operatorStack.pop());
@@ -67,6 +75,8 @@ class ExprBuilder {
 
 	public void add(Expr expr) {
 		Check.notNull(expr);
+		System.out.println("adding expr: " + expr);
+
 		operandStack.push(expr);
 	}
 

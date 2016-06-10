@@ -12,4 +12,9 @@ public class ReturnStatement {
 		this.exprs = Check.notNull(exprs);
 	}
 
+	@Override
+	public String toString() {
+		return "(ret [" + Util.listToString(exprs, ", ") + "])";
+	}
+
 }

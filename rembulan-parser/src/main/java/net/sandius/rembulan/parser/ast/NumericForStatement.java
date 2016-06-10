@@ -18,4 +18,9 @@ public class NumericForStatement implements Statement {
 		this.block = Check.notNull(block);
 	}
 
+	@Override
+	public String toString() {
+		return "(numeric-for " + name + " " + init + " " + limit + " (opt " + (step != null ? step : "no-step") + ") " + block + ")";
+	}
+
 }

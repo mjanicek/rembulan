@@ -32,6 +32,11 @@ public abstract class Numeral implements Literal {
 			return value;
 		}
 
+		@Override
+		public String toString() {
+			return "(int " + value + ")";
+		}
+
 	}
 
 	public static class FloatNumeral extends Numeral {
@@ -44,6 +49,11 @@ public abstract class Numeral implements Literal {
 
 		public double value() {
 			return value;
+		}
+
+		@Override
+		public String toString() {
+			return "(flt " + value + ")";
 		}
 
 	}

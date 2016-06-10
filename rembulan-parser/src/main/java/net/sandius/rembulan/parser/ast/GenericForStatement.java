@@ -16,4 +16,9 @@ public class GenericForStatement implements Statement {
 		this.block = Check.notNull(block);
 	}
 
+	@Override
+	public String toString() {
+		return "(generic-for [" + Util.listToString(names, ", ") + "] [" + Util.listToString(exprs, ", ") + "] " + block + ")";
+	}
+
 }

@@ -20,4 +20,9 @@ public class WhileStatement implements Statement {
 		return block;
 	}
 
+	@Override
+	public String toString() {
+		return "(while " + condition + " " + block + ")";
+	}
+
 }

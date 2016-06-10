@@ -14,4 +14,9 @@ public class AssignStatement implements Statement {
 		this.exps = Check.notNull(exps);
 	}
 
+	@Override
+	public String toString() {
+		return "(local [" + Util.listToString(vars, ", ") + "] [" + Util.listToString(exps, ", ") + "])";
+	}
+
 }

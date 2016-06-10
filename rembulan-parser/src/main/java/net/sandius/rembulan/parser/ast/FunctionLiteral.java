@@ -21,4 +21,9 @@ public class FunctionLiteral {
 		return block;
 	}
 
+	@Override
+	public String toString() {
+		return "(fnliteral " + params + " " + block + ")";
+	}
+
 }

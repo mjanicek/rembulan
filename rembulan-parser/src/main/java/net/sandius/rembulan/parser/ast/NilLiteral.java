@@ -7,4 +7,9 @@ public class NilLiteral implements Literal {
 	private NilLiteral() {
 	}
 
+	@Override
+	public String toString() {
+		return "(nil)";
+	}
+
 }

@@ -20,4 +20,9 @@ public class RepeatUntilStatement implements Statement {
 		return block;
 	}
 
+	@Override
+	public String toString() {
+		return "(repeat-until " + condition + " " + block + ")";
+	}
+
 }

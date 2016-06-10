@@ -12,6 +12,10 @@ public abstract class CallExpr implements Expr {
 		this.args = Check.notNull(args);
 	}
 
+	public List<Expr> args() {
+		return args;
+	}
+
 	public static class FunctionCallExpr extends CallExpr {
 
 		private final Expr fn;
@@ -19,6 +23,11 @@ public abstract class CallExpr implements Expr {
 		public FunctionCallExpr(Expr fn, List<Expr> args) {
 			super(args);
 			this.fn = Check.notNull(fn);
+		}
+
+		@Override
+		public String toString() {
+			return "(call-fn " + fn + " [" + Util.listToString(args(), ", ") + "])";
 		}
 
 	}
@@ -32,6 +41,11 @@ public abstract class CallExpr implements Expr {
 			super(args);
 			this.target = Check.notNull(target);
 			this.methodName = Check.notNull(methodName);
+		}
+
+		@Override
+		public String toString() {
+			return "(call-method " + target + " " + methodName + " [" + Util.listToString(args(), ", ") + "])";
 		}
 
 	}

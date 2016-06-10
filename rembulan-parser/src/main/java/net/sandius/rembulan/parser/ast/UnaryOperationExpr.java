@@ -12,4 +12,9 @@ public class UnaryOperationExpr implements Expr {
 		this.arg = Check.notNull(arg);
 	}
 
+	@Override
+	public String toString() {
+		return "(" + op + " " + arg + ")";
+	}
+
 }

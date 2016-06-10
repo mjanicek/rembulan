@@ -5,6 +5,8 @@ options {
 	UNICODE_INPUT = true;
 	DEBUG_LOOKAHEAD = false;
 	DEBUG_PARSER = false;
+//	DEBUG_LOOKAHEAD = true;
+//	DEBUG_PARSER = true;
 	DEBUG_TOKEN_MANAGER = false;
 
 	// FIXME: remove when done
@@ -199,12 +201,19 @@ Numeral Numeral() :
 	t=<NUMERAL>  { return Numeral.fromString(t.image); }
 }
 
+// FIXME: remove when done?
+void Eof() :
+{ }
+{
+	<EOF>
+}
+
 Chunk Chunk() :
 {
 	Block b;
 }
 {
-	b=Block()  { return new Chunk(b); }
+	b=Block() <EOF> { return new Chunk(b); }
 }
 
 Block Block() :
@@ -236,8 +245,7 @@ List<Statement> Statement() :
 }
 {
 	<SEMICOLON>  { return none(); }
-|	LOOKAHEAD(3) vars=VarList() <ASSIGN> exprs=ExprList()  { return one(new AssignStatement(vars, exprs)); }
-|	s=CallStatement()  { return one(s); }
+|	s=AssignOrCall()  { return one(s); }
 |   <DOUBLE_COLON> n=Name() <DOUBLE_COLON> { return one(new LabelStatement(n)); }
 |	<BREAK>  { return one(new BreakStatement()); }
 |	<GOTO> n=Name()  { return one(new GotoStatement(n)); }
@@ -268,14 +276,14 @@ List<Statement> Statement() :
 	}
 }
 
-List<LValue> VarList() :
-{
-	LValue v;
-	List<LValue> vs = new ArrayList<LValue>();
-}
-{
-    v=Var() { vs.add(v); } (<COMMA> v=Var() { vs.add(v); })*  { return Collections.unmodifiableList(vs); }
-}
+//List<LValue> VarList() :
+//{
+//	LValue v;
+//	List<LValue> vs = new ArrayList<LValue>();
+//}
+//{
+//    v=Var() { vs.add(v); } (<COMMA> v=Var() { vs.add(v); })*  { return Collections.unmodifiableList(vs); }
+//}
 
 Expr Expr() :
 {
@@ -310,6 +318,89 @@ Expr SimpleExpr() :
 |	e=TableConstructor()  { return e; }
 }
 
+Expr PrefixExpr() :
+{
+	Expr e;
+	PostfixOp op;
+}
+{
+	e=VarExpr() (LOOKAHEAD(2) op=__PostfixOp() { e=op.on(e); })*  { return e; }
+}
+
+Expr VarExpr() :
+{
+	LValue lv;
+	Name n;
+	Expr e;
+}
+{
+//	LOOKAHEAD(3) lv=Var()  { return new DerefExpr(lv); }
+	n=Name()  { return new DerefExpr(new Var(n)); }
+|	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return e; }
+}
+
+PostfixOp __PostfixOp() :
+{
+	PostfixOp op;
+}
+{
+	op=__FieldAccessOp()  { return op; }
+|	op=__InvokeOp()  { return op; }
+}
+
+Statement AssignOrCall() :
+{
+	Expr e;
+	AssignRest ar;
+}
+{
+	e=PrefixExpr()
+	(ar=AssignOrCallRest()
+		{
+			if (e instanceof LValue) {
+				return ar.prepend((LValue) e);
+			}
+			else {
+				throw new ParseException("lvalue expected");
+			}
+		}
+	)?
+
+	{
+		if (e instanceof CallExpr) {
+			return new CallStatement((CallExpr) e);
+		}
+		else {
+			throw new ParseException("function call expected");
+		}
+	}
+}
+
+AssignRest AssignOrCallRest() :
+{
+	LValue v;
+	List<LValue> vs = new ArrayList<LValue>();
+	List<Expr> es;
+}
+{
+	// single assignment
+	<ASSIGN> es=ExprList()  { return new AssignRest(es); }
+
+	// multiple assignments
+|	(<COMMA> v=Var() { vs.add(v); })+ <ASSIGN> es=ExprList()  { return new AssignRest(Collections.unmodifiableList(vs), es); }
+}
+
+LValue __Var() :
+{
+	Name n;
+	Expr e;
+	FieldAccessOp fa;
+}
+{
+	LOOKAHEAD(2) n=Name()  { return new Var(n); }
+|	e=PrefixExpr() fa=__FieldAccessOp()  { return fa.on(e); }
+}
+
 LValue Var() :
 {
 	LValue lv;
@@ -333,21 +424,11 @@ LValue __Var0() :
 LValueSuffix __VarSuffix() :
 {
 	InvokeOp inv;
-	Expr e;
+	FieldAccessOp e;
 	List<InvokeOp> invokes = new ArrayList<InvokeOp>();
 }
 {
-	(inv=__InvokeOp() { invokes.add(inv); })* e=__FieldAccessOp()  { return new LValueSuffix(invokes, e); }
-}
-
-Expr VarExpr() :
-{
-	LValue lv;
-	Expr e;
-}
-{
-	LOOKAHEAD(3) lv=Var()  { return new DerefExpr(lv); }
-|	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return e; }
+	(inv=__InvokeOp() { invokes.add(inv); })* e=__FieldAccessOp()  { return new LValueSuffix(invokes, e.keyExpr()); }
 }
 
 List<Expr> Args() :
@@ -362,15 +443,6 @@ List<Expr> Args() :
 |	l=StringLiteral()  { return Collections.<Expr>singletonList(new LiteralExpr(l)); }
 }
 
-Expr PrefixExpr() :
-{
-	Expr e;
-	InvokeOp inv;
-}
-{
-	e=VarExpr() (LOOKAHEAD(2) inv=__InvokeOp() { e=inv.on(e); })*  { return e; }
-}
-
 CallStatement CallStatement() :
 {
 	Expr e;
@@ -379,6 +451,21 @@ CallStatement CallStatement() :
 }
 {
 	e=VarExpr() (LOOKAHEAD(2) inv=__InvokeOp() { call=inv.on(call != null ? call : e); })+  { return new CallStatement(call); }
+}
+
+Statement FunctionCallOrAssignment() :
+{
+	List<LValue> vars;
+	List<Expr> exprs = Collections.emptyList();
+
+	Statement s;
+	LValue v;
+}
+{
+	v=Var()  { return null; }
+
+//	LOOKAHEAD(VarList() <ASSIGN>) vars=VarList() <ASSIGN> exprs=ExprList()  { return new AssignStatement(vars, exprs); }
+//|	s=CallStatement()  { return s; }
 }
 
 IfStatement IfStatement() :
@@ -417,14 +504,14 @@ FunctionName FunctionName() :
 	n=Name() (<DOT> n=Name() { ns.add(n); })* (<COLON> m=Name())?  { return FunctionName.of(n, ns, m); }
 }
 
-Expr __FieldAccessOp() :
+FieldAccessOp __FieldAccessOp() :
 {
 	Expr e;
 	Name n;
 }
 {
-	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE>  { return e; }
-|	<DOT> n=Name()  { return new LiteralExpr(StringLiteral.fromName(n)); }
+	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE>  { return new FieldAccessOp(e); }
+|	<DOT> n=Name()  { return new FieldAccessOp(new LiteralExpr(StringLiteral.fromName(n))); }
 }
 
 InvokeOp __InvokeOp() :
@@ -476,10 +563,21 @@ FunctionParams FunctionParams() :
 
 TableConstructorExpr TableConstructor() :
 {
-	List<FieldInitialiser> fields = Collections.emptyList();
+//	List<FieldInitialiser> fields = Collections.emptyList();
+	FieldInitialiser fi;
+	List<FieldInitialiser> fields = new ArrayList<FieldInitialiser>();
 }
 {
 	<CURLY_OPEN> (fields=FieldInitialiserList())? <CURLY_CLOSE>  { return new TableConstructorExpr(fields); }
+//	<CURLY_OPEN> (fields=FieldInitialiserList() (<FIELD_SEPARATOR>)?)? <CURLY_CLOSE>  { return new TableConstructorExpr(fields); }
+//	<CURLY_OPEN> (fi=FieldInitialiser() { fields.add(fi); } (<FIELD_SEPARATOR>)?)* <CURLY_CLOSE>  { return new TableConstructorExpr(Collections.unmodifiableList(fields)); }
+}
+
+void Sep() :
+{ }
+{
+	<COMMA>
+|	<SEMICOLON>
 }
 
 List<FieldInitialiser> FieldInitialiserList() :
@@ -488,7 +586,11 @@ List<FieldInitialiser> FieldInitialiserList() :
 	ArrayList<FieldInitialiser> fs = new ArrayList<FieldInitialiser>();
 }
 {
-	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) <FIELD_SEPARATOR> f=FieldInitialiser() { fs.add(f); })* (<FIELD_SEPARATOR>)?  { return Collections.unmodifiableList(fs); }
+	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) Sep() f=FieldInitialiser() { fs.add(f); })* (Sep())?  { return Collections.unmodifiableList(fs); }
+
+//	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) <FIELD_SEPARATOR> f=FieldInitialiser() { fs.add(f); })* (<FIELD_SEPARATOR>)?  { return Collections.unmodifiableList(fs); }
+//	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) <FIELD_SEPARATOR> f=FieldInitialiser() { fs.add(f); })*  { return Collections.unmodifiableList(fs); }
+//	(f=FieldInitialiser() { fs.add(f); } <FIELD_SEPARATOR>)*  { return Collections.unmodifiableList(fs); }
 }
 
 FieldInitialiser FieldInitialiser() :
@@ -521,8 +623,8 @@ Operator.Binary BinOp() :
 |	<BAND>     { return Operator.Binary.BAND; }
 |	<BNOT>     { return Operator.Binary.BXOR; }
 |	<BOR>      { return Operator.Binary.BOR; }
-|	<SHR>      { return Operator.Binary.SHL; }
-|	<SHL>      { return Operator.Binary.SHR; }
+|	<SHR>      { return Operator.Binary.SHR; }
+|	<SHL>      { return Operator.Binary.SHL; }
 |	<DBL_DOT>  { return Operator.Binary.CONCAT; }
 |	<LT>       { return Operator.Binary.LT; }
 |	<LE>       { return Operator.Binary.LE; }

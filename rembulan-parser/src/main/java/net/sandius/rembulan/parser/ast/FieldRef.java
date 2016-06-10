@@ -12,4 +12,9 @@ public class FieldRef implements LValue {
 		this.key = Check.notNull(key);
 	}
 
+	@Override
+	public String toString() {
+		return "(field-ref " + object + " "  + key + ")";
+	}
+
 }

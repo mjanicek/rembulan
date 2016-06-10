@@ -7,7 +7,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-class InvokeOp {
+class InvokeOp extends PostfixOp {
 
 	private final List<Expr> args;
 	private final Name method;  // may be null
@@ -17,6 +17,7 @@ class InvokeOp {
 		this.method = method;
 	}
 
+	@Override
 	public CallExpr on(Expr exp) {
 		return method != null
 				? new CallExpr.MethodCallExpr(exp, method, args)

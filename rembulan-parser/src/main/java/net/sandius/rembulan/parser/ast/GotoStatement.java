@@ -14,4 +14,9 @@ public class GotoStatement implements Statement {
 		return labelName;
 	}
 
+	@Override
+	public String toString() {
+		return "(goto " + labelName + ")";
+	}
+
 }
