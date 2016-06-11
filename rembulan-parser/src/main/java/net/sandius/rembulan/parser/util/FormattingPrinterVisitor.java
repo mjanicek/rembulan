@@ -55,6 +55,17 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 		expr.accept(this);
 	}
 
+	private void printVarExpr(Expr expr) {
+		if (expr instanceof LValueExpr) {
+			printExpr(expr);
+		}
+		else {
+			out.print("(");
+			printExpr(expr);
+			out.print(")");
+		}
+	}
+
 	private <T extends Expr> void printExprList(Iterable<T> args) {
 		Iterator<T> it = args.iterator();
 		while (it.hasNext()) {
@@ -80,6 +91,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 		doIndent();
 		out.println("do");
 		block.accept(subVisitor());
+		doIndent();
 		out.println("end");
 	}
 
@@ -140,6 +152,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 			out.print("else");
 			elseBlock.accept(subVisitor());
 		}
+		doIndent();
 		out.println("end");
 	}
 
@@ -158,6 +171,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 		}
 		out.println(" do");
 		block.accept(subVisitor());
+		doIndent();
 		out.println("end");
 	}
 
@@ -170,6 +184,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 		printExprList(exprs);
 		out.println(" do");
 		block.accept(subVisitor());
+		doIndent();
 		out.println("end");
 	}
 
@@ -180,6 +195,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 		printExpr(condition);
 		out.println(" do");
 		block.accept(subVisitor());
+		doIndent();
 		out.println("end");
 	}
 
@@ -221,15 +237,15 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 
 	@Override
 	public void visitFieldRef(Expr object, Expr key) {
-		printExpr(object);
-		out.print(".[");
+		printVarExpr(object);
+		out.print("[");
 		printExpr(key);
 		out.print("]");
 	}
 
 	@Override
 	public void visitFunctionCall(Expr fn, List<Expr> args) {
-		printExpr(fn);
+		printVarExpr(fn);
 		out.print("(");
 		printExprList(args);
 		out.print(")");
@@ -237,9 +253,9 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 
 	@Override
 	public void visitMethodCall(Expr target, Name methodName, List<Expr> args) {
-		printExpr(target);
+		printVarExpr(target);
 		out.print(":");
-		out.print(methodName);
+		printName(methodName);
 		out.print("(");
 		printExprList(args);
 		out.print(")");
@@ -260,6 +276,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 		out.print(")");
 		out.println();
 		body.block().accept(subVisitor());
+		doIndent();
 		out.print("end");
 	}
 
@@ -342,7 +359,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 			case UNM:  return "-";
 			case BNOT: return "~";
 			case LEN:  return "#";
-			case NOT:  return "not";
+			case NOT:  return "not ";  // note the space
 			default: throw new IllegalArgumentException("Illegal operator: " + op);
 		}
 	}

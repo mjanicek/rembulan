@@ -161,6 +161,28 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
 
             chunk mustNot be (null)
           }
+
+          it ("pretty-printed is parseable can be pretty-printed") {
+            val code = f.code
+            val chunk = tryParseChunk(code)
+
+            val bais = new ByteArrayOutputStream()
+            val pw = new PrintWriter(bais)
+            val visitor = new FormattingPrinterVisitor(pw)
+            chunk.block().accept(visitor)
+            pw.flush()
+
+            val prettyPrinted = String.valueOf(bais.toByteArray map { _.toChar })
+            try {
+              val reparsed = tryParseChunk(prettyPrinted)
+              reparsed mustNot be (null)
+            }
+            catch {
+              case ex: Throwable =>
+                println(prettyPrinted)
+                throw ex
+            }
+          }
         }
       }
     }
