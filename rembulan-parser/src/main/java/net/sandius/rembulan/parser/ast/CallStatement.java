@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class CallStatement implements Statement {
+public class CallStatement extends BodyStatement {
 
 	private final CallExpr call;
 

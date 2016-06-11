@@ -4,19 +4,18 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public class Block implements StatementVisitable {
+public class Block {
 
-	private final List<Statement> statements;
+	private final List<BodyStatement> statements;
 	private final ReturnStatement ret;  // may be null
 
-	public Block(List<Statement> statements, ReturnStatement ret) {
+	public Block(List<BodyStatement> statements, ReturnStatement ret) {
 		this.statements = Check.notNull(statements);
 		this.ret = ret;
 	}
 
-	@Override
 	public void accept(StatementVisitor visitor) {
-		for (Statement s : statements) {
+		for (BodyStatement s : statements) {
 			s.accept(visitor);
 		}
 		if (ret != null) {

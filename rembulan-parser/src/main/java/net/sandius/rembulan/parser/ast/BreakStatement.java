@@ -1,6 +1,6 @@
 package net.sandius.rembulan.parser.ast;
 
-public class BreakStatement implements Statement {
+public class BreakStatement extends BodyStatement {
 
 	@Override
 	public void accept(StatementVisitor visitor) {

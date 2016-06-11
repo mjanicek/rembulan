@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public class IfStatement implements Statement {
+public class IfStatement extends BodyStatement {
 
 	private final ConditionalBlock main;
 	private final List<ConditionalBlock> elifs;

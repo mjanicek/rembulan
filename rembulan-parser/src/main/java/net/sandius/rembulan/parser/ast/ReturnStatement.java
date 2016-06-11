@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public class ReturnStatement implements StatementVisitable {
+public class ReturnStatement implements Statement {
 
 	private final List<Expr> exprs;
 

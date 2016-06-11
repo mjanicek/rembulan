@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class NumericForStatement implements Statement {
+public class NumericForStatement extends BodyStatement {
 
 	private final Name name;
 	private final Expr init;

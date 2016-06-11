@@ -1,5 +1,7 @@
 package net.sandius.rembulan.parser.ast;
 
-public interface Statement extends StatementVisitable {
+public interface Statement {
+
+	void accept(StatementVisitor visitor);
 
 }

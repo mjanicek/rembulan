@@ -5,7 +5,7 @@ import net.sandius.rembulan.util.Check;
 import java.util.Collections;
 import java.util.List;
 
-public class LocalDeclStatement implements Statement {
+public class LocalDeclStatement extends BodyStatement {
 
 	private final List<Name> names;
 	private final List<Expr> initialisers;

@@ -23,19 +23,19 @@ import static java.util.Collections.*;
 
 public class Parser {
 
-	private static List<Statement> none() {
-		return Collections.<Statement>emptyList();
+	private static List<BodyStatement> none() {
+		return Collections.<BodyStatement>emptyList();
 	}
 
-	private static List<Statement> one(Statement v) {
-		return Collections.<Statement>singletonList(v);
+	private static List<BodyStatement> one(BodyStatement v) {
+		return Collections.<BodyStatement>singletonList(v);
 	}
 
-	private static List<Statement> pair(Statement u, Statement v) {
-		List<Statement> l = new ArrayList<Statement>();
+	private static List<BodyStatement> pair(BodyStatement u, BodyStatement v) {
+		List<BodyStatement> l = new ArrayList<BodyStatement>();
 		l.add(u);
 		l.add(v);
-		return Collections.<Statement>unmodifiableList(l);
+		return Collections.<BodyStatement>unmodifiableList(l);
 	}
 
 }
@@ -218,15 +218,15 @@ Chunk Chunk() :
 
 Block Block() :
 {
-	List<Statement> ss;
-	List<Statement> stats = new ArrayList<Statement>();
+	List<BodyStatement> ss;
+	List<BodyStatement> stats = new ArrayList<BodyStatement>();
 	ReturnStatement ret = null;
 }
 {
-	(ss=Statement() { stats.addAll(ss); })* (ret=ReturnStatement())? { return new Block(Collections.unmodifiableList(stats), ret); }
+	(ss=BodyStatement() { stats.addAll(ss); })* (ret=ReturnStatement())? { return new Block(Collections.unmodifiableList(stats), ret); }
 }
 
-List<Statement> Statement() :
+List<BodyStatement> BodyStatement() :
 {
 	Name n;
 	Expr e, f;
@@ -240,8 +240,8 @@ List<Statement> Statement() :
 	List<Name> names;
 	List<Expr> exprs = Collections.emptyList();
 
-	Statement s;
-	List<Statement> ss = new ArrayList<Statement>();
+	BodyStatement s;
+	List<BodyStatement> ss = new ArrayList<BodyStatement>();
 }
 {
 	<SEMICOLON>  { return none(); }
@@ -347,7 +347,7 @@ PostfixOp __PostfixOp() :
 |	op=__InvokeOp()  { return op; }
 }
 
-Statement AssignOrCall() :
+BodyStatement AssignOrCall() :
 {
 	Expr e;
 	AssignRest ar;

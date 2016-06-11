@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class WhileStatement implements Statement {
+public class WhileStatement extends BodyStatement {
 
 	private final Expr condition;
 	private final Block block;

@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class DoStatement implements Statement {
+public class DoStatement extends BodyStatement {
 
 	private final Block block;
 

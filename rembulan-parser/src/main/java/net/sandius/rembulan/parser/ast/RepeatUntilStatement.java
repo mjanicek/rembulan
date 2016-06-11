@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class RepeatUntilStatement implements Statement {
+public class RepeatUntilStatement extends BodyStatement {
 
 	private final Expr condition;
 	private final Block block;

@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public class AssignStatement implements Statement {
+public class AssignStatement extends BodyStatement {
 
 	private final List<LValueExpr> vars;
 	private final List<Expr> exprs;

@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class GotoStatement implements Statement {
+public class GotoStatement extends BodyStatement {
 
 	private final Name labelName;
 
