@@ -1,8 +1,8 @@
 package net.sandius.rembulan.parser
 
-import java.io.{ByteArrayInputStream, PrintWriter}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintWriter}
 
-import net.sandius.rembulan.parser.ast.Chunk
+import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.parser.util.FormattingPrinterVisitor
 import net.sandius.rembulan.test._
 import org.junit.runner.RunWith
@@ -25,6 +25,15 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     TableLibFragments
   )
 
+  def exprToString(expr: Expr): String = {
+    val baos = new ByteArrayOutputStream()
+    val pw = new PrintWriter(baos)
+    val visitor = new FormattingPrinterVisitor(pw)
+    expr.accept(visitor)
+    pw.flush()
+    String.valueOf(baos.toByteArray map { _.toChar })
+  }
+
   def tryParseChunk(code: String): Chunk = {
     val bais = new ByteArrayInputStream(code.getBytes)
     new Parser(bais).Chunk()
@@ -38,7 +47,7 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     val result = parser.Expr()
     parser.Eof()
 
-    println("--> " + result)
+    println("--> " + exprToString(result))
     println()
   }
 

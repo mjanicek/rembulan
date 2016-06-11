@@ -18,4 +18,9 @@ public class TableConstructorExpr implements RValueExpr {
 		return "(newtable [" + Util.listToString(fields, ", ") + "])";
 	}
 
+	@Override
+	public void accept(ExprVisitor visitor) {
+		visitor.visitTableConstructor(fields);
+	}
+
 }

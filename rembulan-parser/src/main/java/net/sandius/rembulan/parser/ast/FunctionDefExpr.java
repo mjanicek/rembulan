@@ -15,4 +15,9 @@ public class FunctionDefExpr implements RValueExpr {
 		return "(fndef " + body + ")";
 	}
 
+	@Override
+	public void accept(ExprVisitor visitor) {
+		visitor.visitFunctionDef(body);
+	}
+
 }

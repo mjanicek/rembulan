@@ -4,15 +4,22 @@ import net.sandius.rembulan.parser.ast.Block;
 import net.sandius.rembulan.parser.ast.CallExpr;
 import net.sandius.rembulan.parser.ast.ConditionalBlock;
 import net.sandius.rembulan.parser.ast.Expr;
+import net.sandius.rembulan.parser.ast.ExprVisitor;
+import net.sandius.rembulan.parser.ast.FieldInitialiser;
+import net.sandius.rembulan.parser.ast.FunctionLiteral;
+import net.sandius.rembulan.parser.ast.FunctionParams;
 import net.sandius.rembulan.parser.ast.LValueExpr;
+import net.sandius.rembulan.parser.ast.Literal;
 import net.sandius.rembulan.parser.ast.Name;
+import net.sandius.rembulan.parser.ast.Operator;
 import net.sandius.rembulan.parser.ast.StatementVisitor;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
+import java.util.Iterator;
 import java.util.List;
 
-public class FormattingPrinterVisitor implements StatementVisitor {
+public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor {
 
 	private final PrintWriter out;
 	private final String indentString;
@@ -38,6 +45,36 @@ public class FormattingPrinterVisitor implements StatementVisitor {
 		return new FormattingPrinterVisitor(out, indentString, indent + 1);
 	}
 
+	private void printName(Name n) {
+		out.print(n.value());
+	}
+
+	private void printExpr(Expr expr) {
+		out.print("(");
+		expr.accept(this);
+		out.print(")");
+	}
+
+	private <T extends Expr> void printExprList(Iterable<T> args) {
+		Iterator<T> it = args.iterator();
+		while (it.hasNext()) {
+			it.next().accept(this);
+			if (it.hasNext()) {
+				out.print(", ");
+			}
+		}
+	}
+
+	private void printNameList(Iterable<Name> names) {
+		Iterator<Name> it = names.iterator();
+		while (it.hasNext()) {
+			printName(it.next());
+			if (it.hasNext()) {
+				out.print(", ");
+			}
+		}
+	}
+
 	@Override
 	public void visitDo(Block block) {
 		doIndent();
@@ -50,22 +87,23 @@ public class FormattingPrinterVisitor implements StatementVisitor {
 	public void visitReturn(List<Expr> exprs) {
 		doIndent();
 		out.print("return ");
-		out.print(Util.listToString(exprs, ", "));
+		printExprList(exprs);
 		out.println();
 	}
 
 	@Override
 	public void visitCall(CallExpr call) {
 		doIndent();
-		out.println(call);
+		call.accept(this);
+		out.println();
 	}
 
 	@Override
 	public void visitAssignment(List<LValueExpr> vars, List<Expr> exprs) {
 		doIndent();
-		out.print(Util.listToString(vars, ", "));
+		printExprList(vars);
 		out.print(" = ");
-		out.print(Util.listToString(exprs, ", "));
+		printExprList(exprs);
 		out.println();
 	}
 
@@ -73,16 +111,16 @@ public class FormattingPrinterVisitor implements StatementVisitor {
 	public void visitLocalDecl(List<Name> names, List<Expr> initialisers) {
 		doIndent();
 		out.print("local ");
-		out.print(Util.listToString(names, ", "));
+		printNameList(names);
 		if (!initialisers.isEmpty()) {
 			out.print(" = ");
-			out.print(Util.listToString(initialisers, ", "));
+			printExprList(initialisers);
 		}
 		out.println();
 	}
 
 	private void printConditionalBlock(ConditionalBlock cbl) {
-		out.print(cbl.condition());
+		printExpr(cbl.condition());
 		out.println(" then");
 		cbl.block().accept(subVisitor());
 	}
@@ -109,14 +147,14 @@ public class FormattingPrinterVisitor implements StatementVisitor {
 	public void visitNumericFor(Name name, Expr init, Expr limit, Expr step, Block block) {
 		doIndent();
 		out.print("for ");
-		out.print(name);
+		printName(name);
 		out.print(" = ");
-		out.print(init);
+		printExpr(init);
 		out.print(", ");
-		out.print(limit);
+		printExpr(limit);
 		if (step != null) {
 			out.print(", ");
-			out.print(step);
+			printExpr(step);
 		}
 		out.println(" do");
 		block.accept(subVisitor());
@@ -127,9 +165,9 @@ public class FormattingPrinterVisitor implements StatementVisitor {
 	public void visitGenericFor(List<Name> names, List<Expr> exprs, Block block) {
 		doIndent();
 		out.print("for ");
-		out.print(Util.listToString(names, ", "));
+		printNameList(names);
 		out.print(" in ");
-		out.print(Util.listToString(exprs, ", "));
+		printExprList(exprs);
 		out.println(" do");
 		block.accept(subVisitor());
 		out.println("end");
@@ -139,7 +177,7 @@ public class FormattingPrinterVisitor implements StatementVisitor {
 	public void visitWhile(Expr condition, Block block) {
 		doIndent();
 		out.print("while ");
-		out.print(condition);
+		printExpr(condition);
 		out.println(" do");
 		block.accept(subVisitor());
 		out.println("end");
@@ -151,7 +189,7 @@ public class FormattingPrinterVisitor implements StatementVisitor {
 		out.println("repeat");
 		block.accept(subVisitor());
 		out.print("until ");
-		out.println(condition);
+		printExpr(condition);
 	}
 
 	@Override
@@ -164,15 +202,143 @@ public class FormattingPrinterVisitor implements StatementVisitor {
 	public void visitGoto(Name labelName) {
 		doIndent();
 		out.print("goto ");
-		out.println(labelName);
+		printName(labelName);
+		out.println();
 	}
 
 	@Override
 	public void visitLabel(Name labelName) {
 		doIndent();
 		out.print("::");
-		out.print(labelName);
+		printName(labelName);
 		out.println("::");
+	}
+
+	@Override
+	public void visitVar(Name name) {
+		printName(name);
+	}
+
+	@Override
+	public void visitFieldRef(Expr object, Expr key) {
+		printExpr(object);
+		out.print(".[");
+		printExpr(key);
+		out.print("]");
+	}
+
+	@Override
+	public void visitFunctionCall(Expr fn, List<Expr> args) {
+		printExpr(fn);
+		out.print("(");
+		printExprList(args);
+		out.print(")");
+	}
+
+	@Override
+	public void visitMethodCall(Expr target, Name methodName, List<Expr> args) {
+		printExpr(target);
+		out.print(":");
+		out.print(methodName);
+		out.print("(");
+		printExprList(args);
+		out.print(")");
+	}
+
+	@Override
+	public void visitFunctionDef(FunctionLiteral body) {
+		out.print("function ");
+		out.print("(");
+		FunctionParams params = body.params();
+		printNameList(params.names());
+		if (params.isVararg()) {
+			if (!params.names().isEmpty()) {
+				out.print(", ");
+			}
+			out.print("...");
+		}
+		out.print(")");
+		out.println();
+		body.block().accept(subVisitor());
+		out.print("end");
+	}
+
+	@Override
+	public void visitLiteral(Literal value) {
+		out.print(value);
+	}
+
+	@Override
+	public void visitTableConstructor(List<FieldInitialiser> fields) {
+		out.print("{");
+		out.print(Util.listToString(fields, ", "));
+		out.print("}");
+	}
+
+	@Override
+	public void visitVarargs() {
+		out.print("...");
+	}
+
+	private static String binOp(Operator.Binary op) {
+		switch (op) {
+			case ADD:  return "+";
+			case SUB:  return "-";
+			case MUL:  return "*";
+			case DIV:  return "/";
+			case IDIV: return "//";
+			case MOD:  return "%";
+			case POW:  return "^";
+
+			case CONCAT: return "..";
+
+			case BAND: return "&";
+			case BOR:  return "|";
+			case BXOR: return "~";
+			case SHL:  return "<<";
+			case SHR:  return ">>";
+
+			case EQ:  return "==";
+			case NEQ: return "~=";
+			case LT:  return "<";
+			case LE:  return "<=";
+			case GT:  return ">";
+			case GE:  return ">=";
+
+			case AND: return "and";
+			case OR:  return "or";
+
+			default: throw new IllegalArgumentException("Illegal operator: " + op);
+		}
+	}
+
+	@Override
+	public void visitBinaryOperation(Operator.Binary op, Expr left, Expr right) {
+		out.print("(");
+		printExpr(left);
+		out.print(" ");
+		out.print(binOp(op));
+		out.print(" ");
+		printExpr(right);
+		out.print(")");
+	}
+
+	private static String unOp(Operator.Unary op) {
+		switch (op) {
+			case UNM:  return "-";
+			case BNOT: return "~";
+			case LEN:  return "#";
+			case NOT:  return "not";
+			default: throw new IllegalArgumentException("Illegal operator: " + op);
+		}
+	}
+
+	@Override
+	public void visitUnaryOperation(Operator.Unary op, Expr arg) {
+		out.print("(");
+		out.print(unOp(op));
+		printExpr(arg);
+		out.print(")");
 	}
 
 }

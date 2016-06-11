@@ -7,4 +7,9 @@ public class VarargsExpr implements RValueExpr {
 		return "(varargs)";
 	}
 
+	@Override
+	public void accept(ExprVisitor visitor) {
+		visitor.visitVarargs();
+	}
+
 }

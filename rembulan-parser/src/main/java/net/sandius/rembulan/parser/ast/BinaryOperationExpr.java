@@ -19,4 +19,9 @@ public class BinaryOperationExpr implements RValueExpr {
 		return "(" + op + " " + left + " " + right + ")";
 	}
 
+	@Override
+	public void accept(ExprVisitor visitor) {
+		visitor.visitBinaryOperation(op, left, right);
+	}
+
 }

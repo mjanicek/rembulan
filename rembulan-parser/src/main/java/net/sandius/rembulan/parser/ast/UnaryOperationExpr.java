@@ -17,4 +17,9 @@ public class UnaryOperationExpr implements RValueExpr {
 		return "(" + op + " " + arg + ")";
 	}
 
+	@Override
+	public void accept(ExprVisitor visitor) {
+		visitor.visitUnaryOperation(op, arg);
+	}
+
 }

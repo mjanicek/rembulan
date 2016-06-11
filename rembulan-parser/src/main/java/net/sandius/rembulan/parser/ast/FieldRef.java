@@ -17,4 +17,9 @@ public class FieldRef implements LValueExpr, RValueExpr {
 		return "(field-ref " + object + " "  + key + ")";
 	}
 
+	@Override
+	public void accept(ExprVisitor visitor) {
+		visitor.visitFieldRef(object, key);
+	}
+
 }

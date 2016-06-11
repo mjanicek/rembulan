@@ -22,6 +22,14 @@ public class FunctionParams {
 		return new FunctionParams(l, false);
 	}
 
+	public List<Name> names() {
+		return params;
+	}
+
+	public boolean isVararg() {
+		return vararg;
+	}
+
 	public FunctionParams prepend(Name n) {
 		Check.notNull(n);
 		List<Name> pp = new ArrayList<>();

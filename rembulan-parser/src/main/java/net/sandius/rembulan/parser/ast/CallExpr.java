@@ -31,6 +31,11 @@ public abstract class CallExpr implements RValueExpr {
 			return "(call-fn " + fn + " [" + Util.listToString(args(), ", ") + "])";
 		}
 
+		@Override
+		public void accept(ExprVisitor visitor) {
+			visitor.visitFunctionCall(fn, args());
+		}
+
 	}
 
 	public static class MethodCallExpr extends CallExpr {
@@ -47,6 +52,11 @@ public abstract class CallExpr implements RValueExpr {
 		@Override
 		public String toString() {
 			return "(call-method " + target + " " + methodName + " [" + Util.listToString(args(), ", ") + "])";
+		}
+
+		@Override
+		public void accept(ExprVisitor visitor) {
+			visitor.visitMethodCall(target, methodName, args());
 		}
 
 	}
