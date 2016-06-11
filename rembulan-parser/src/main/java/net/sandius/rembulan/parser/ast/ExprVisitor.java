@@ -12,7 +12,7 @@ public interface ExprVisitor {
 
 	void visitMethodCall(Expr target, Name methodName, List<Expr> args);
 
-	void visitFunctionDef(FunctionLiteral body);
+	void visitFunctionDef(FunctionLiteral fn);
 
 	void visitLiteral(Literal value);
 

@@ -8,7 +8,6 @@ import net.sandius.rembulan.parser.ast.Expr;
 import net.sandius.rembulan.parser.ast.ExprVisitor;
 import net.sandius.rembulan.parser.ast.FieldInitialiser;
 import net.sandius.rembulan.parser.ast.FunctionLiteral;
-import net.sandius.rembulan.parser.ast.FunctionParams;
 import net.sandius.rembulan.parser.ast.LValueExpr;
 import net.sandius.rembulan.parser.ast.Literal;
 import net.sandius.rembulan.parser.ast.LiteralVisitor;
@@ -262,20 +261,19 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitFunctionDef(FunctionLiteral body) {
+	public void visitFunctionDef(FunctionLiteral fn) {
 		out.print("function ");
 		out.print("(");
-		FunctionParams params = body.params();
-		printNameList(params.names());
-		if (params.isVararg()) {
-			if (!params.names().isEmpty()) {
+		printNameList(fn.params().names());
+		if (fn.params().isVararg()) {
+			if (!fn.params().names().isEmpty()) {
 				out.print(", ");
 			}
 			out.print("...");
 		}
 		out.print(")");
 		out.println();
-		body.block().accept(subVisitor());
+		fn.block().accept(subVisitor());
 		doIndent();
 		out.print("end");
 	}

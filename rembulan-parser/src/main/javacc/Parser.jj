@@ -266,7 +266,15 @@ List<BodyStatement> BodyStatement() :
 |	<FUNCTION> n=Name() { names.add(n); } (<DOT> n=Name() { names.add(n); })* (<COLON> m=Name())? fb=FunctionBody()  {
 		if (m != null) {
 			// defining a method: change fb's signature by prepending a "self" field
-			fb = new FunctionLiteral(fb.params().prepend(Name.fromString("self")), fb.block());
+			FunctionLiteral.Params params = fb.params();
+			List<Name> ps = new ArrayList<Name>();
+			ps.add(Name.fromString("self"));
+			ps.addAll(fb.params().names());
+			ps = Collections.unmodifiableList(ps);
+			params = new FunctionLiteral.Params(ps, params.isVararg());
+			fb = new FunctionLiteral(params, fb.block());
+
+			// append method name to the overall name list
 			names.add(m);
 		}
 		return one(new AssignStatement(Collections.<LValueExpr>singletonList(toLValueExpr(names)), Collections.<Expr>singletonList(new FunctionDefExpr(fb))));
@@ -477,21 +485,21 @@ List<Expr> ExprList() :
 
 FunctionLiteral FunctionBody() :
 {
-	FunctionParams params = FunctionParams.empty();
+	FunctionLiteral.Params params = FunctionLiteral.Params.empty();
 	Block block;
 }
 {
 	<PAREN_OPEN> (params=FunctionParams())? <PAREN_CLOSE> block=Block() <END>  { return new FunctionLiteral(params, block); }
 }
 
-FunctionParams FunctionParams() :
+FunctionLiteral.Params FunctionParams() :
 {
 	List<Name> params = Collections.emptyList();
 	boolean vararg = false;
 }
 {
-	params=NameList() (<COMMA> <VARARGS> { vararg = true; })?  { return new FunctionParams(params, vararg); }
-|	<VARARGS>  { return new FunctionParams(params, true); }
+	params=NameList() (<COMMA> <VARARGS> { vararg = true; })?  { return new FunctionLiteral.Params(params, vararg); }
+|	<VARARGS>  { return new FunctionLiteral.Params(params, true); }
 }
 
 TableConstructorExpr TableConstructor() :
