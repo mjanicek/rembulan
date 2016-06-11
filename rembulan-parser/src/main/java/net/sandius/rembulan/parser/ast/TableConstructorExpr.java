@@ -1,5 +1,6 @@
 package net.sandius.rembulan.parser.ast;
 
+import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;

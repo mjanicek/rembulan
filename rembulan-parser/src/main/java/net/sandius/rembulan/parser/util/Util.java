@@ -1,4 +1,4 @@
-package net.sandius.rembulan.parser.ast;
+package net.sandius.rembulan.parser.util;
 
 import java.util.Iterator;
 import java.util.List;

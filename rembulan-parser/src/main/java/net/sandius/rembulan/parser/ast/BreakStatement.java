@@ -7,4 +7,9 @@ public class BreakStatement implements Statement {
 		return "(break)";
 	}
 
+	@Override
+	public void accept(StatementVisitor visitor) {
+		visitor.visitBreak();
+	}
+
 }

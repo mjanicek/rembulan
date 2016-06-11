@@ -1,8 +1,9 @@
 package net.sandius.rembulan.parser
 
-import java.io.ByteArrayInputStream
+import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.parser.ast.Chunk
+import net.sandius.rembulan.parser.util.FormattingPrinterVisitor
 import net.sandius.rembulan.test._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -141,7 +142,12 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
 
             val chunk = tryParseChunk(code)
             println("--RESULT-BEGIN--")
-            println(chunk)
+
+            val pw = new PrintWriter(System.out)
+            val visitor = new FormattingPrinterVisitor(pw)
+            chunk.block().accept(visitor)
+            pw.flush()
+
             println("---RESULT-END---")
 
             chunk mustNot be (null)

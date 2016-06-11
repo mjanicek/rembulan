@@ -17,4 +17,12 @@ public class ConditionalBlock {
 		return "(cond-block " + condition + " " + block + ")";
 	}
 
+	public Expr condition() {
+		return condition;
+	}
+
+	public Block block() {
+		return block;
+	}
+
 }

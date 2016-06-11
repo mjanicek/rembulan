@@ -1,5 +1,6 @@
 package net.sandius.rembulan.parser.ast;
 
+import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Collections;
@@ -34,6 +35,11 @@ public class LocalDeclStatement implements Statement {
 	@Override
 	public String toString() {
 		return "(local [" + Util.listToString(names, ", ") + "] [" + Util.listToString(initialisers, ", ") + "])";
+	}
+
+	@Override
+	public void accept(StatementVisitor visitor) {
+		visitor.visitLocalDecl(names, initialisers);
 	}
 
 }

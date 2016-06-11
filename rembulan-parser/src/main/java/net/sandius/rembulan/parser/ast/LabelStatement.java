@@ -19,4 +19,9 @@ public class LabelStatement implements Statement {
 		return "(label-def " + labelName + ")";
 	}
 
+	@Override
+	public void accept(StatementVisitor visitor) {
+		visitor.visitLabel(labelName);
+	}
+
 }

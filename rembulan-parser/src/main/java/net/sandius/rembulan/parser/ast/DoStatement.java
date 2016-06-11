@@ -19,4 +19,9 @@ public class DoStatement implements Statement {
 		return "(do " + block + ")";
 	}
 
+	@Override
+	public void accept(StatementVisitor visitor) {
+		visitor.visitDo(block);
+	}
+
 }

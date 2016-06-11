@@ -25,4 +25,9 @@ public class RepeatUntilStatement implements Statement {
 		return "(repeat-until " + condition + " " + block + ")";
 	}
 
+	@Override
+	public void accept(StatementVisitor visitor) {
+		visitor.visitRepeatUntil(condition, block);
+	}
+
 }

@@ -25,4 +25,9 @@ public class WhileStatement implements Statement {
 		return "(while " + condition + " " + block + ")";
 	}
 
+	@Override
+	public void accept(StatementVisitor visitor) {
+		visitor.visitWhile(condition, block);
+	}
+
 }

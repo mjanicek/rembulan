@@ -1,5 +1,6 @@
 package net.sandius.rembulan.parser.ast;
 
+import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
@@ -19,6 +20,11 @@ public class GenericForStatement implements Statement {
 	@Override
 	public String toString() {
 		return "(generic-for [" + Util.listToString(names, ", ") + "] [" + Util.listToString(exprs, ", ") + "] " + block + ")";
+	}
+
+	@Override
+	public void accept(StatementVisitor visitor) {
+		visitor.visitGenericFor(names, exprs, block);
 	}
 
 }

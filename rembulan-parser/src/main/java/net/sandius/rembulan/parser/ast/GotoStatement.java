@@ -19,4 +19,9 @@ public class GotoStatement implements Statement {
 		return "(goto " + labelName + ")";
 	}
 
+	@Override
+	public void accept(StatementVisitor visitor) {
+		visitor.visitGoto(labelName);
+	}
+
 }
