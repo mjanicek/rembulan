@@ -38,6 +38,14 @@ public class Parser {
 		return Collections.<BodyStatement>unmodifiableList(l);
 	}
 
+	private static LValueExpr toLValueExpr(List<Name> names) {
+		LValueExpr lv = null;
+		for (Name n : names) {
+			lv = lv != null ? new FieldRef(lv, new LiteralExpr(StringLiteral.fromName(n))) : new Var(n);
+		}
+		return lv;
+	}
+
 }
 
 PARSER_END(Parser)
@@ -228,16 +236,15 @@ Block Block() :
 
 List<BodyStatement> BodyStatement() :
 {
-	Name n;
+	Name n, m = null;
 	Expr e, f;
 	Expr g = null;
 	Block b;
 
-	FunctionName fn;
 	FunctionLiteral fb;
 
 	List<LValueExpr> vars;
-	List<Name> names;
+	List<Name> names = new ArrayList<Name>();
 	List<Expr> exprs = Collections.emptyList();
 
 	BodyStatement s;
@@ -256,12 +263,13 @@ List<BodyStatement> BodyStatement() :
 |	LOOKAHEAD(3) <FOR> n=Name() <ASSIGN> e=Expr() <COMMA> f=Expr() (<COMMA> g=Expr())? <DO> b=Block() <END>  { return one(new NumericForStatement(n, e, f, g, b)); }
 |	<FOR> names=NameList() <IN> exprs=ExprList() <DO> b=Block() <END>  { return one(new GenericForStatement(names, exprs, b)); }
 
-|	<FUNCTION> fn=FunctionName() fb=FunctionBody()  {
-		if (fn.isMethod()) {
-			// if fn is a method, it changes fb's signature (adds a "self" field)
+|	<FUNCTION> n=Name() { names.add(n); } (<DOT> n=Name() { names.add(n); })* (<COLON> m=Name())? fb=FunctionBody()  {
+		if (m != null) {
+			// defining a method: change fb's signature by prepending a "self" field
 			fb = new FunctionLiteral(fb.params().prepend(Name.fromString("self")), fb.block());
+			names.add(m);
 		}
-		return one(new AssignStatement(Collections.<LValueExpr>singletonList(fn.toLValueExpr()), Collections.<Expr>singletonList(new FunctionDefExpr(fb))));
+		return one(new AssignStatement(Collections.<LValueExpr>singletonList(toLValueExpr(names)), Collections.<Expr>singletonList(new FunctionDefExpr(fb))));
 	}
 
 |	LOOKAHEAD(2) <LOCAL> <FUNCTION> n=Name() fb=FunctionBody()  {
@@ -275,15 +283,6 @@ List<BodyStatement> BodyStatement() :
 		return one(LocalDeclStatement.of(names, exprs));
 	}
 }
-
-//List<LValueExpr> VarList() :
-//{
-//	LValueExpr v;
-//	List<LValueExpr> vs = new ArrayList<LValueExpr>();
-//}
-//{
-//    v=Var() { vs.add(v); } (<COMMA> v=Var() { vs.add(v); })*  { return Collections.unmodifiableList(vs); }
-//}
 
 Expr Expr() :
 {
@@ -386,10 +385,10 @@ AssignRest AssignOrCallRest() :
 	<ASSIGN> es=ExprList()  { return new AssignRest(es); }
 
 	// multiple assignments
-|	(<COMMA> v=__Var() { vs.add(v); })+ <ASSIGN> es=ExprList()  { return new AssignRest(Collections.unmodifiableList(vs), es); }
+|	(<COMMA> v=LValue() { vs.add(v); })+ <ASSIGN> es=ExprList()  { return new AssignRest(Collections.unmodifiableList(vs), es); }
 }
 
-LValueExpr __Var() :
+LValueExpr LValue() :
 {
 	Name n;
 	Expr e;
@@ -436,16 +435,6 @@ ReturnStatement ReturnStatement() :
 }
 {
 	<RETURN> (exprs=ExprList())? (<SEMICOLON>)? { return new ReturnStatement(exprs); }
-}
-
-FunctionName FunctionName() :
-{
-	Name n;
-	ArrayList<Name> ns = new ArrayList<Name>();
-	Name m = null;
-}
-{
-	n=Name() (<DOT> n=Name() { ns.add(n); })* (<COLON> m=Name())?  { return FunctionName.of(n, ns, m); }
 }
 
 FieldAccessOp __FieldAccessOp() :
