@@ -13,11 +13,6 @@ public class UnaryOperationExpr implements RValueExpr {
 	}
 
 	@Override
-	public String toString() {
-		return "(" + op + " " + arg + ")";
-	}
-
-	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitUnaryOperation(op, arg);
 	}

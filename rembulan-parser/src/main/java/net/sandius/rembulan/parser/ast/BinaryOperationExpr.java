@@ -15,11 +15,6 @@ public class BinaryOperationExpr implements RValueExpr {
 	}
 
 	@Override
-	public String toString() {
-		return "(" + op + " " + left + " " + right + ")";
-	}
-
-	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitBinaryOperation(op, left, right);
 	}

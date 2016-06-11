@@ -27,11 +27,6 @@ public abstract class CallExpr implements RValueExpr {
 		}
 
 		@Override
-		public String toString() {
-			return "(call-fn " + fn + " [" + Util.listToString(args(), ", ") + "])";
-		}
-
-		@Override
 		public void accept(ExprVisitor visitor) {
 			visitor.visitFunctionCall(fn, args());
 		}
@@ -47,11 +42,6 @@ public abstract class CallExpr implements RValueExpr {
 			super(args);
 			this.target = Check.notNull(target);
 			this.methodName = Check.notNull(methodName);
-		}
-
-		@Override
-		public String toString() {
-			return "(call-method " + target + " " + methodName + " [" + Util.listToString(args(), ", ") + "])";
 		}
 
 		@Override

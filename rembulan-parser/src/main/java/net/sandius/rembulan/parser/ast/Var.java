@@ -11,11 +11,6 @@ public class Var implements LValueExpr, RValueExpr {
 	}
 
 	@Override
-	public String toString() {
-		return "(var " + name + ")";
-	}
-
-	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitVar(name);
 	}

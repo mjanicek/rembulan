@@ -15,11 +15,6 @@ public class LiteralExpr implements RValueExpr {
 	}
 
 	@Override
-	public String toString() {
-		return "(literal " + value + ")";
-	}
-
-	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitLiteral(value);
 	}
