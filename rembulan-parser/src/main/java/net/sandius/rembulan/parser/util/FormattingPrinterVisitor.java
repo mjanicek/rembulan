@@ -271,7 +271,21 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	@Override
 	public void visitTableConstructor(List<FieldInitialiser> fields) {
 		out.print("{");
-		out.print(Util.listToString(fields, ", "));
+		Iterator<FieldInitialiser> it = fields.iterator();
+		while (it.hasNext()) {
+			FieldInitialiser fi = it.next();
+			Expr k = fi.key();
+			if (k != null) {
+				out.print("[");
+				printExpr(k);
+				out.print("] = ");
+			}
+			printExpr(fi.value());
+
+			if (it.hasNext()) {
+				out.print(", ");
+			}
+		}
 		out.print("}");
 	}
 

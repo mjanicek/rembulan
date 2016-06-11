@@ -12,9 +12,12 @@ public class FieldInitialiser {
 		this.valueExpr = Check.notNull(valueExpr);
 	}
 
-	@Override
-	public String toString() {
-		return "(field-init " + (keyExpr != null ? keyExpr : "anon") + " " + valueExpr + ")";
+	public Expr key() {
+		return keyExpr;
+	}
+
+	public Expr value() {
+		return valueExpr;
 	}
 
 }
