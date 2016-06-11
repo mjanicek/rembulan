@@ -70,9 +70,74 @@ public class LuaFormat {
 		return l != null ? l : (Number) tryParseFloat(s);
 	}
 
-	public static String escape(String s) {
-		// TODO
-		return "\"" + s + "\"";
+	/**
+	 * The '\a' character.
+	 */
+	public static final char CHAR_BELL = 0x07;
+
+	/**
+	 * The '\v' character.
+	 */
+	public static final char CHAR_VERTICAL_TAB = 0x0b;
+
+	private static boolean isASCIIPrintable(char c) {
+		// ASCII printable character range
+		return c >= 32 && c < 127;
+	}
+
+	private static int shortEscape(char c) {
+		switch (c) {
+			case CHAR_BELL: return 'a';
+			case '\b': return 'b';
+			case '\f': return 'f';
+			case '\n': return 'n';
+			case '\r': return 'r';
+			case '\t': return 't';
+			case CHAR_VERTICAL_TAB: return 'v';
+			default: return -1;
+		}
+	}
+
+	private static char hex(int i) {
+		// i must be between 0x0 and 0xf
+		return i < 0xa ? (char) ((int) '0' + i) : (char) ((int) 'a' + i - 0xa);
+	}
+
+	public static String escape(CharSequence s) {
+		Check.notNull(s);
+		StringBuilder bld = new StringBuilder();
+		bld.append('"');
+
+		for (int i = 0; i < s.length(); i++) {
+			char c = s.charAt(i);
+
+			if (isASCIIPrintable(c)) {
+				bld.append(c);
+			}
+			else {
+				// escaping
+				bld.append('\'');
+
+				int esc = shortEscape(c);
+
+				if (esc != -1) {
+					bld.append((char) esc);
+				}
+				else {
+					if ((int) c <= 0xff) {
+						bld.append('x');
+						bld.append(hex(((int) c >>> 8) & 0xf));
+						bld.append(hex((int) c & 0xf));
+					}
+					else {
+						bld.append(Integer.toString((int) c));
+					}
+				}
+			}
+		}
+
+		bld.append('"');
+		return bld.toString();
 	}
 
 }
