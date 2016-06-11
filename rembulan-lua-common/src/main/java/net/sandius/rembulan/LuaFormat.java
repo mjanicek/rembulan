@@ -70,4 +70,9 @@ public class LuaFormat {
 		return l != null ? l : (Number) tryParseFloat(s);
 	}
 
+	public static String escape(String s) {
+		// TODO
+		return "\"" + s + "\"";
+	}
+
 }
