@@ -659,7 +659,8 @@ public class DefaultStringLib extends StringLib {
 
 					case 'q': {
 						String s = args.nextString();
-						throw new UnsupportedOperationException("not implemented: %q");  // TODO
+						result = LuaFormat.escape(s);
+						break;
 					}
 
 					default:
