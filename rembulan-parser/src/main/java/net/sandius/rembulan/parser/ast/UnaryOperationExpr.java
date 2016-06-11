@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class UnaryOperationExpr implements Expr {
+public class UnaryOperationExpr implements RValueExpr {
 
 	private final Operator.Unary op;
 	private final Expr arg;

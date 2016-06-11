@@ -1,6 +1,6 @@
 package net.sandius.rembulan.parser;
 
-import net.sandius.rembulan.parser.ast.LValue;
+import net.sandius.rembulan.parser.ast.LValueExpr;
 import net.sandius.rembulan.parser.ast.LiteralExpr;
 import net.sandius.rembulan.parser.ast.Name;
 import net.sandius.rembulan.parser.ast.StringLiteral;
@@ -33,8 +33,8 @@ class FunctionName {
 		return new FieldAccessOp(new LiteralExpr(StringLiteral.fromName(n)));
 	}
 
-	public LValue toLValue() {
-		LValue lv = new Var(base);
+	public LValueExpr toLValueExpr() {
+		LValueExpr lv = new Var(base);
 		for (Name n : dotted) {
 			lv = nameToFieldAccess(n).on(lv);
 		}

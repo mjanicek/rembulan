@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class FunctionDefExpr implements Expr {
+public class FunctionDefExpr implements RValueExpr {
 
 	private final FunctionLiteral body;
 

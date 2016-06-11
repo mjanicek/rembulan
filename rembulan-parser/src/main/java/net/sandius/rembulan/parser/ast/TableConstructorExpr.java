@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public class TableConstructorExpr implements Expr {
+public class TableConstructorExpr implements RValueExpr {
 
 	private final List<FieldInitialiser> fields;
 

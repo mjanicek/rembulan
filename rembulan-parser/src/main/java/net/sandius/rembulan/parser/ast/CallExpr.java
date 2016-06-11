@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public abstract class CallExpr implements Expr {
+public abstract class CallExpr implements RValueExpr {
 
 	private final List<Expr> args;
 

@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class FieldRef implements LValue, Expr {
+public class FieldRef implements LValueExpr, RValueExpr {
 
 	private final Expr object;
 	private final Expr key;

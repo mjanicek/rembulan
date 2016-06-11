@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class BinaryOperationExpr implements Expr {
+public class BinaryOperationExpr implements RValueExpr {
 
 	private final Operator.Binary op;
 	private final Expr left;

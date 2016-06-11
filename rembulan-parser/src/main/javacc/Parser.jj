@@ -236,7 +236,7 @@ List<Statement> Statement() :
 	FunctionName fn;
 	FunctionLiteral fb;
 
-	List<LValue> vars;
+	List<LValueExpr> vars;
 	List<Name> names;
 	List<Expr> exprs = Collections.emptyList();
 
@@ -261,13 +261,13 @@ List<Statement> Statement() :
 			// if fn is a method, it changes fb's signature (adds a "self" field)
 			fb = new FunctionLiteral(fb.params().prepend(Name.fromString("self")), fb.block());
 		}
-		return one(new AssignStatement(Collections.<LValue>singletonList(fn.toLValue()), Collections.<Expr>singletonList(new FunctionDefExpr(fb))));
+		return one(new AssignStatement(Collections.<LValueExpr>singletonList(fn.toLValueExpr()), Collections.<Expr>singletonList(new FunctionDefExpr(fb))));
 	}
 
 |	LOOKAHEAD(2) <LOCAL> <FUNCTION> n=Name() fb=FunctionBody()  {
 		return pair(
 			LocalDeclStatement.singleton(n),
-			new AssignStatement(Collections.<LValue>singletonList(new Var(n)), Collections.<Expr>singletonList(new FunctionDefExpr(fb)))
+			new AssignStatement(Collections.<LValueExpr>singletonList(new Var(n)), Collections.<Expr>singletonList(new FunctionDefExpr(fb)))
 		);
 	}
 
@@ -276,10 +276,10 @@ List<Statement> Statement() :
 	}
 }
 
-//List<LValue> VarList() :
+//List<LValueExpr> VarList() :
 //{
-//	LValue v;
-//	List<LValue> vs = new ArrayList<LValue>();
+//	LValueExpr v;
+//	List<LValueExpr> vs = new ArrayList<LValueExpr>();
 //}
 //{
 //    v=Var() { vs.add(v); } (<COMMA> v=Var() { vs.add(v); })*  { return Collections.unmodifiableList(vs); }
@@ -329,7 +329,7 @@ Expr PrefixExpr() :
 
 Expr VarExpr() :
 {
-	LValue lv;
+	LValueExpr lv;
 	Name n;
 	Expr e;
 }
@@ -356,8 +356,8 @@ Statement AssignOrCall() :
 	e=PrefixExpr()
 	(ar=AssignOrCallRest()
 		{
-			if (e instanceof LValue) {
-				return ar.prepend((LValue) e);
+			if (e instanceof LValueExpr) {
+				return ar.prepend((LValueExpr) e);
 			}
 			else {
 				throw new ParseException("lvalue expected");
@@ -377,8 +377,8 @@ Statement AssignOrCall() :
 
 AssignRest AssignOrCallRest() :
 {
-	LValue v;
-	List<LValue> vs = new ArrayList<LValue>();
+	LValueExpr v;
+	List<LValueExpr> vs = new ArrayList<LValueExpr>();
 	List<Expr> es;
 }
 {
@@ -389,7 +389,7 @@ AssignRest AssignOrCallRest() :
 |	(<COMMA> v=__Var() { vs.add(v); })+ <ASSIGN> es=ExprList()  { return new AssignRest(Collections.unmodifiableList(vs), es); }
 }
 
-LValue __Var() :
+LValueExpr __Var() :
 {
 	Name n;
 	Expr e;
