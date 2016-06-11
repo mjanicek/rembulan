@@ -6,7 +6,6 @@ import net.sandius.rembulan.parser.ast.CallExpr;
 import net.sandius.rembulan.parser.ast.ConditionalBlock;
 import net.sandius.rembulan.parser.ast.Expr;
 import net.sandius.rembulan.parser.ast.ExprVisitor;
-import net.sandius.rembulan.parser.ast.FieldInitialiser;
 import net.sandius.rembulan.parser.ast.FunctionLiteral;
 import net.sandius.rembulan.parser.ast.LValueExpr;
 import net.sandius.rembulan.parser.ast.Literal;
@@ -14,6 +13,7 @@ import net.sandius.rembulan.parser.ast.LiteralVisitor;
 import net.sandius.rembulan.parser.ast.Name;
 import net.sandius.rembulan.parser.ast.Operator;
 import net.sandius.rembulan.parser.ast.StatementVisitor;
+import net.sandius.rembulan.parser.ast.TableConstructorExpr;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
@@ -284,11 +284,11 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitTableConstructor(List<FieldInitialiser> fields) {
+	public void visitTableConstructor(List<TableConstructorExpr.FieldInitialiser> fields) {
 		out.print("{");
-		Iterator<FieldInitialiser> it = fields.iterator();
+		Iterator<TableConstructorExpr.FieldInitialiser> it = fields.iterator();
 		while (it.hasNext()) {
-			FieldInitialiser fi = it.next();
+			TableConstructorExpr.FieldInitialiser fi = it.next();
 			Expr k = fi.key();
 			if (k != null) {
 				out.print("[");

@@ -180,11 +180,6 @@ TOKEN :
 |	<VARARGS: "...">
 }
 
-TOKEN :
-{
-	<FIELD_SEPARATOR: <COMMA> | <SEMICOLON>>
-}
-
 Name Name() :
 {
 	Token t;
@@ -504,45 +499,38 @@ FunctionLiteral.Params FunctionParams() :
 
 TableConstructorExpr TableConstructor() :
 {
-//	List<FieldInitialiser> fields = Collections.emptyList();
-	FieldInitialiser fi;
-	List<FieldInitialiser> fields = new ArrayList<FieldInitialiser>();
+	TableConstructorExpr.FieldInitialiser fi;
+	List<TableConstructorExpr.FieldInitialiser> fields = new ArrayList<TableConstructorExpr.FieldInitialiser>();
 }
 {
 	<CURLY_OPEN> (fields=FieldInitialiserList())? <CURLY_CLOSE>  { return new TableConstructorExpr(fields); }
-//	<CURLY_OPEN> (fields=FieldInitialiserList() (<FIELD_SEPARATOR>)?)? <CURLY_CLOSE>  { return new TableConstructorExpr(fields); }
-//	<CURLY_OPEN> (fi=FieldInitialiser() { fields.add(fi); } (<FIELD_SEPARATOR>)?)* <CURLY_CLOSE>  { return new TableConstructorExpr(Collections.unmodifiableList(fields)); }
 }
 
-void Sep() :
+void FieldSeparator() :
 { }
 {
 	<COMMA>
 |	<SEMICOLON>
 }
 
-List<FieldInitialiser> FieldInitialiserList() :
+List<TableConstructorExpr.FieldInitialiser> FieldInitialiserList() :
 {
-	FieldInitialiser f;
-	ArrayList<FieldInitialiser> fs = new ArrayList<FieldInitialiser>();
+	TableConstructorExpr.FieldInitialiser f;
+	ArrayList<TableConstructorExpr.FieldInitialiser> fs = new ArrayList<TableConstructorExpr.FieldInitialiser>();
 }
 {
-	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) Sep() f=FieldInitialiser() { fs.add(f); })* (Sep())?  { return Collections.unmodifiableList(fs); }
-
-//	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) <FIELD_SEPARATOR> f=FieldInitialiser() { fs.add(f); })* (<FIELD_SEPARATOR>)?  { return Collections.unmodifiableList(fs); }
-//	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) <FIELD_SEPARATOR> f=FieldInitialiser() { fs.add(f); })*  { return Collections.unmodifiableList(fs); }
-//	(f=FieldInitialiser() { fs.add(f); } <FIELD_SEPARATOR>)*  { return Collections.unmodifiableList(fs); }
+	f=FieldInitialiser() { fs.add(f); } (LOOKAHEAD(2) FieldSeparator() f=FieldInitialiser() { fs.add(f); })* (FieldSeparator())?  { return Collections.unmodifiableList(fs); }
 }
 
-FieldInitialiser FieldInitialiser() :
+TableConstructorExpr.FieldInitialiser FieldInitialiser() :
 {
 	Expr e, f;
 	Name n;
 }
 {
-	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE> <ASSIGN> f=Expr()  { return new FieldInitialiser(e, f); }
-|	LOOKAHEAD(2) n=Name() <ASSIGN> e=Expr()  { return new FieldInitialiser(new LiteralExpr(StringLiteral.fromName(n)), e); }
-|	e=Expr()  { return new FieldInitialiser(null, e); }
+	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE> <ASSIGN> f=Expr()  { return new TableConstructorExpr.FieldInitialiser(e, f); }
+|	LOOKAHEAD(2) n=Name() <ASSIGN> e=Expr()  { return new TableConstructorExpr.FieldInitialiser(new LiteralExpr(StringLiteral.fromName(n)), e); }
+|	e=Expr()  { return new TableConstructorExpr.FieldInitialiser(null, e); }
 }
 
 /*

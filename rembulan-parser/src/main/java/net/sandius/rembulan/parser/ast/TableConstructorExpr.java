@@ -18,4 +18,24 @@ public class TableConstructorExpr implements RValueExpr {
 		visitor.visitTableConstructor(fields);
 	}
 
+	public static class FieldInitialiser {
+
+		private final Expr keyExpr;  // may be null
+		private final Expr valueExpr;
+
+		public FieldInitialiser(Expr keyExpr, Expr valueExpr) {
+			this.keyExpr = keyExpr;
+			this.valueExpr = Check.notNull(valueExpr);
+		}
+
+		public Expr key() {
+			return keyExpr;
+		}
+
+		public Expr value() {
+			return valueExpr;
+		}
+
+	}
+
 }

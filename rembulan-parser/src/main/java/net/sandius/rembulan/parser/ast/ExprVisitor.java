@@ -16,7 +16,7 @@ public interface ExprVisitor {
 
 	void visitLiteral(Literal value);
 
-	void visitTableConstructor(List<FieldInitialiser> fields);
+	void visitTableConstructor(List<TableConstructorExpr.FieldInitialiser> fields);
 
 	void visitVarargs();
 
