@@ -52,9 +52,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	private void printExpr(Expr expr) {
-		out.print("(");
 		expr.accept(this);
-		out.print(")");
 	}
 
 	private <T extends Expr> void printExprList(Iterable<T> args) {
