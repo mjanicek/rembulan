@@ -20,8 +20,8 @@ public class BooleanLiteral implements Literal {
 	}
 
 	@Override
-	public String toString() {
-		return "(bool " + (value ? "true" : "false") + ")";
+	public void accept(LiteralVisitor visitor) {
+		visitor.visitBoolean(value);
 	}
 
 }

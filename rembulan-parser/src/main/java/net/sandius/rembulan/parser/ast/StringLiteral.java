@@ -44,8 +44,8 @@ public class StringLiteral implements Literal {
 	}
 
 	@Override
-	public String toString() {
-		return "(str \"" + value + "\")";
+	public void accept(LiteralVisitor visitor) {
+		visitor.visitString(value);
 	}
 
 }

@@ -8,8 +8,8 @@ public class NilLiteral implements Literal {
 	}
 
 	@Override
-	public String toString() {
-		return "(nil)";
+	public void accept(LiteralVisitor visitor) {
+		visitor.visitNil();
 	}
 
 }

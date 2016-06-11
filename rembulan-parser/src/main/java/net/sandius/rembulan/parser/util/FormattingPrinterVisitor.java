@@ -1,5 +1,6 @@
 package net.sandius.rembulan.parser.util;
 
+import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.parser.ast.Block;
 import net.sandius.rembulan.parser.ast.CallExpr;
 import net.sandius.rembulan.parser.ast.ConditionalBlock;
@@ -10,6 +11,7 @@ import net.sandius.rembulan.parser.ast.FunctionLiteral;
 import net.sandius.rembulan.parser.ast.FunctionParams;
 import net.sandius.rembulan.parser.ast.LValueExpr;
 import net.sandius.rembulan.parser.ast.Literal;
+import net.sandius.rembulan.parser.ast.LiteralVisitor;
 import net.sandius.rembulan.parser.ast.Name;
 import net.sandius.rembulan.parser.ast.Operator;
 import net.sandius.rembulan.parser.ast.StatementVisitor;
@@ -19,7 +21,7 @@ import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
 
-public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor {
+public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, LiteralVisitor {
 
 	private final PrintWriter out;
 	private final String indentString;
@@ -265,7 +267,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor {
 
 	@Override
 	public void visitLiteral(Literal value) {
-		out.print(value);
+		value.accept(this);
 	}
 
 	@Override
@@ -339,6 +341,31 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor {
 		out.print(unOp(op));
 		printExpr(arg);
 		out.print(")");
+	}
+
+	@Override
+	public void visitNil() {
+		out.print(LuaFormat.NIL);
+	}
+
+	@Override
+	public void visitBoolean(boolean value) {
+		out.print(LuaFormat.toString(value));
+	}
+
+	@Override
+	public void visitInteger(long value) {
+		out.print(LuaFormat.toString(value));
+	}
+
+	@Override
+	public void visitFloat(double value) {
+		out.print(LuaFormat.toString(value));
+	}
+
+	@Override
+	public void visitString(String value) {
+		out.print(LuaFormat.escape(value));
 	}
 
 }

@@ -33,8 +33,8 @@ public abstract class Numeral implements Literal {
 		}
 
 		@Override
-		public String toString() {
-			return "(int " + value + ")";
+		public void accept(LiteralVisitor visitor) {
+			visitor.visitInteger(value);
 		}
 
 	}
@@ -52,8 +52,8 @@ public abstract class Numeral implements Literal {
 		}
 
 		@Override
-		public String toString() {
-			return "(flt " + value + ")";
+		public void accept(LiteralVisitor visitor) {
+			visitor.visitFloat(value);
 		}
 
 	}
