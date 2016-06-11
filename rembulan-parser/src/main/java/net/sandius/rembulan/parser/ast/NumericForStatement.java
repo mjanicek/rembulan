@@ -19,11 +19,6 @@ public class NumericForStatement implements Statement {
 	}
 
 	@Override
-	public String toString() {
-		return "(numeric-for " + name + " " + init + " " + limit + " (opt " + (step != null ? step : "no-step") + ") " + block + ")";
-	}
-
-	@Override
 	public void accept(StatementVisitor visitor) {
 		visitor.visitNumericFor(name, init, limit, step, block);
 	}

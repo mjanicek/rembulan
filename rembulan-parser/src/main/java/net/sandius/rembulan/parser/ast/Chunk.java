@@ -14,9 +14,4 @@ public class Chunk {
 		return block;
 	}
 
-	@Override
-	public String toString() {
-		return "(chunk " + block + ")";
-	}
-
 }

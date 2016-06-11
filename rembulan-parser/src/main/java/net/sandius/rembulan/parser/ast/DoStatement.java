@@ -15,11 +15,6 @@ public class DoStatement implements Statement {
 	}
 
 	@Override
-	public String toString() {
-		return "(do " + block + ")";
-	}
-
-	@Override
 	public void accept(StatementVisitor visitor) {
 		visitor.visitDo(block);
 	}

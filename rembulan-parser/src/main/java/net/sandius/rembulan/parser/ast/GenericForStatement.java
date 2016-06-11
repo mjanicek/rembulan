@@ -1,6 +1,5 @@
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
@@ -15,11 +14,6 @@ public class GenericForStatement implements Statement {
 		this.names = Check.notNull(names);
 		this.exprs = Check.notNull(exprs);
 		this.block = Check.notNull(block);
-	}
-
-	@Override
-	public String toString() {
-		return "(generic-for [" + Util.listToString(names, ", ") + "] [" + Util.listToString(exprs, ", ") + "] " + block + ")";
 	}
 
 	@Override

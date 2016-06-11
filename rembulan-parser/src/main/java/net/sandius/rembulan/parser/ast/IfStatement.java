@@ -1,6 +1,5 @@
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
@@ -15,11 +14,6 @@ public class IfStatement implements Statement {
 		this.main = Check.notNull(main);
 		this.elifs = Check.notNull(elifs);
 		this.elseBlock = elseBlock;
-	}
-
-	@Override
-	public String toString() {
-		return "(if " + main + " [" + Util.listToString(elifs, ",\n") + "] " + (elseBlock != null ? elseBlock : "no-else") + ")";
 	}
 
 	@Override

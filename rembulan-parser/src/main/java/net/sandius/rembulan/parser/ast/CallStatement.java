@@ -11,11 +11,6 @@ public class CallStatement implements Statement {
 	}
 
 	@Override
-	public String toString() {
-		return "(call-stat " + call + ")";
-	}
-
-	@Override
 	public void accept(StatementVisitor visitor) {
 		visitor.visitCall(call);
 	}

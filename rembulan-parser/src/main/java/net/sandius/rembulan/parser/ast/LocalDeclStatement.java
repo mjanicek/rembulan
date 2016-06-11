@@ -1,6 +1,5 @@
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Collections;
@@ -30,11 +29,6 @@ public class LocalDeclStatement implements Statement {
 	public static final LocalDeclStatement singleton(Name n) {
 		Check.notNull(n);
 		return of(Collections.singletonList(n));
-	}
-
-	@Override
-	public String toString() {
-		return "(local [" + Util.listToString(names, ", ") + "] [" + Util.listToString(initialisers, ", ") + "])";
 	}
 
 	@Override

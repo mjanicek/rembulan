@@ -15,11 +15,6 @@ public class GotoStatement implements Statement {
 	}
 
 	@Override
-	public String toString() {
-		return "(goto " + labelName + ")";
-	}
-
-	@Override
 	public void accept(StatementVisitor visitor) {
 		visitor.visitGoto(labelName);
 	}

@@ -12,11 +12,6 @@ public class ConditionalBlock {
 		this.block = Check.notNull(block);
 	}
 
-	@Override
-	public String toString() {
-		return "(cond-block " + condition + " " + block + ")";
-	}
-
 	public Expr condition() {
 		return condition;
 	}

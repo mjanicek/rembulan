@@ -15,11 +15,6 @@ public class LabelStatement implements Statement {
 	}
 
 	@Override
-	public String toString() {
-		return "(label-def " + labelName + ")";
-	}
-
-	@Override
 	public void accept(StatementVisitor visitor) {
 		visitor.visitLabel(labelName);
 	}
