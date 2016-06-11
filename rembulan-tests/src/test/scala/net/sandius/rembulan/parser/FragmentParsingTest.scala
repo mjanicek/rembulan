@@ -39,6 +39,15 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     new Parser(bais).Chunk()
   }
 
+  def prettyPrint(chunk: Chunk): String = {
+    val bais = new ByteArrayOutputStream()
+    val pw = new PrintWriter(bais)
+    val visitor = new FormattingPrinterVisitor(pw)
+    chunk.block().accept(visitor)
+    pw.flush()
+    String.valueOf(bais.toByteArray map { _.toChar })
+  }
+
   def tryParseExpr(s: String): Unit = {
     println("\"" + s + "\"")
 
@@ -162,17 +171,8 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
             chunk mustNot be (null)
           }
 
-          it ("pretty-printed is parseable can be pretty-printed") {
-            val code = f.code
-            val chunk = tryParseChunk(code)
-
-            val bais = new ByteArrayOutputStream()
-            val pw = new PrintWriter(bais)
-            val visitor = new FormattingPrinterVisitor(pw)
-            chunk.block().accept(visitor)
-            pw.flush()
-
-            val prettyPrinted = String.valueOf(bais.toByteArray map { _.toChar })
+          it ("pretty-printed is parsable") {
+            val prettyPrinted = prettyPrint(tryParseChunk(f.code))
             try {
               val reparsed = tryParseChunk(prettyPrinted)
               reparsed mustNot be (null)
