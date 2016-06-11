@@ -29,17 +29,17 @@ class FunctionName {
 		return method != null;
 	}
 
-	private static LValueSuffix nameToSuffix(Name n) {
-		return new LValueSuffix(new LiteralExpr(StringLiteral.fromName(n)));
+	private static FieldAccessOp nameToFieldAccess(Name n) {
+		return new FieldAccessOp(new LiteralExpr(StringLiteral.fromName(n)));
 	}
 
 	public LValue toLValue() {
 		LValue lv = new Var(base);
 		for (Name n : dotted) {
-			lv = nameToSuffix(n).applyOn(lv);
+			lv = nameToFieldAccess(n).on(lv);
 		}
 		if (method != null) {
-			lv = nameToSuffix(method).applyOn(lv);
+			lv = nameToFieldAccess(method).on(lv);
 		}
 		return lv;
 	}

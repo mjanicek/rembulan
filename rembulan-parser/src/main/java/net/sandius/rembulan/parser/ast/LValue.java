@@ -1,4 +1,4 @@
 package net.sandius.rembulan.parser.ast;
 
-public interface LValue {
+public interface LValue extends Expr {
 }

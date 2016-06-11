@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class Var implements LValue {
+public class Var implements LValue, Expr {
 
 	private final Name name;
 

@@ -1,6 +1,5 @@
 package net.sandius.rembulan.parser;
 
-import net.sandius.rembulan.parser.ast.DerefExpr;
 import net.sandius.rembulan.parser.ast.Expr;
 import net.sandius.rembulan.parser.ast.FieldRef;
 import net.sandius.rembulan.util.Check;
@@ -18,8 +17,8 @@ class FieldAccessOp extends PostfixOp {
 	}
 
 	@Override
-	public DerefExpr on(Expr exp) {
-		return new DerefExpr(new FieldRef(exp, keyExpr));
+	public FieldRef on(Expr exp) {
+		return new FieldRef(exp, keyExpr);
 	}
 
 }

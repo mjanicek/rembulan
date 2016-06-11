@@ -334,8 +334,7 @@ Expr VarExpr() :
 	Expr e;
 }
 {
-//	LOOKAHEAD(3) lv=Var()  { return new DerefExpr(lv); }
-	n=Name()  { return new DerefExpr(new Var(n)); }
+	n=Name()  { return new Var(n); }
 |	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return e; }
 }
 
@@ -387,7 +386,7 @@ AssignRest AssignOrCallRest() :
 	<ASSIGN> es=ExprList()  { return new AssignRest(es); }
 
 	// multiple assignments
-|	(<COMMA> v=Var() { vs.add(v); })+ <ASSIGN> es=ExprList()  { return new AssignRest(Collections.unmodifiableList(vs), es); }
+|	(<COMMA> v=__Var() { vs.add(v); })+ <ASSIGN> es=ExprList()  { return new AssignRest(Collections.unmodifiableList(vs), es); }
 }
 
 LValue __Var() :
@@ -401,36 +400,6 @@ LValue __Var() :
 |	e=PrefixExpr() fa=__FieldAccessOp()  { return fa.on(e); }
 }
 
-LValue Var() :
-{
-	LValue lv;
-	LValueSuffix suffix;
-}
-{
-	lv=__Var0() (LOOKAHEAD(2) suffix=__VarSuffix() { lv = suffix.applyOn(lv); })*  { return lv; }
-}
-
-LValue __Var0() :
-{
-	Name n;
-	Expr e;
-	LValueSuffix suffix;
-}
-{
-	n=Name()  { return new Var(n); }
-|   <PAREN_OPEN> e=Expr() <PAREN_CLOSE> suffix=__VarSuffix()  { return suffix.applyOn(e); }
-}
-
-LValueSuffix __VarSuffix() :
-{
-	InvokeOp inv;
-	FieldAccessOp e;
-	List<InvokeOp> invokes = new ArrayList<InvokeOp>();
-}
-{
-	(inv=__InvokeOp() { invokes.add(inv); })* e=__FieldAccessOp()  { return new LValueSuffix(invokes, e.keyExpr()); }
-}
-
 List<Expr> Args() :
 {
 	Expr e;
@@ -441,31 +410,6 @@ List<Expr> Args() :
 	<PAREN_OPEN> (es=ExprList())? <PAREN_CLOSE>  { return es; }
 |	e=TableConstructor()  { return Collections.<Expr>singletonList(e); }
 |	l=StringLiteral()  { return Collections.<Expr>singletonList(new LiteralExpr(l)); }
-}
-
-CallStatement CallStatement() :
-{
-	Expr e;
-	InvokeOp inv;
-	CallExpr call = null;
-}
-{
-	e=VarExpr() (LOOKAHEAD(2) inv=__InvokeOp() { call=inv.on(call != null ? call : e); })+  { return new CallStatement(call); }
-}
-
-Statement FunctionCallOrAssignment() :
-{
-	List<LValue> vars;
-	List<Expr> exprs = Collections.emptyList();
-
-	Statement s;
-	LValue v;
-}
-{
-	v=Var()  { return null; }
-
-//	LOOKAHEAD(VarList() <ASSIGN>) vars=VarList() <ASSIGN> exprs=ExprList()  { return new AssignStatement(vars, exprs); }
-//|	s=CallStatement()  { return s; }
 }
 
 IfStatement IfStatement() :
