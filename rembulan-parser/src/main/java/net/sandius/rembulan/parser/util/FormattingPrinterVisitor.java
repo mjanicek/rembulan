@@ -6,7 +6,6 @@ import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
-import java.util.List;
 
 public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, LiteralVisitor {
 
