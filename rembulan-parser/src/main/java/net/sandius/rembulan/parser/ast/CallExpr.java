@@ -26,9 +26,13 @@ public abstract class CallExpr extends Expr {
 			this.fn = Check.notNull(fn);
 		}
 
+		public Expr fn() {
+			return fn;
+		}
+
 		@Override
 		public void accept(ExprVisitor visitor) {
-			visitor.visitFunctionCall(fn, args());
+			visitor.visit(this);
 		}
 
 	}
@@ -44,9 +48,17 @@ public abstract class CallExpr extends Expr {
 			this.methodName = Check.notNull(methodName);
 		}
 
+		public Expr target() {
+			return target;
+		}
+
+		public Name methodName() {
+			return methodName;
+		}
+
 		@Override
 		public void accept(ExprVisitor visitor) {
-			visitor.visitMethodCall(target, methodName, args());
+			visitor.visit(this);
 		}
 
 	}

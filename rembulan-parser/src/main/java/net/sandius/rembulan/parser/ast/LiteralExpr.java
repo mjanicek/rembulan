@@ -17,7 +17,7 @@ public class LiteralExpr extends Expr {
 
 	@Override
 	public void accept(ExprVisitor visitor) {
-		visitor.visitLiteral(value);
+		visitor.visit(this);
 	}
 
 }

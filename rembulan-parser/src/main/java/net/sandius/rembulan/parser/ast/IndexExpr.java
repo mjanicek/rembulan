@@ -13,9 +13,17 @@ public class IndexExpr extends LValueExpr {
 		this.key = Check.notNull(key);
 	}
 
+	public Expr object() {
+		return object;
+	}
+
+	public Expr key() {
+		return key;
+	}
+
 	@Override
 	public void accept(ExprVisitor visitor) {
-		visitor.visitIndex(object, key);
+		visitor.visit(this);
 	}
 
 }

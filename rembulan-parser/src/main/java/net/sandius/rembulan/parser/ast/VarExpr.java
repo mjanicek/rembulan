@@ -11,9 +11,13 @@ public class VarExpr extends LValueExpr {
 		this.name = Check.notNull(name);
 	}
 
+	public Name name() {
+		return name;
+	}
+
 	@Override
 	public void accept(ExprVisitor visitor) {
-		visitor.visitVar(name);
+		visitor.visit(this);
 	}
 
 }

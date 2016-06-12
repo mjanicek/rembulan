@@ -15,9 +15,21 @@ public class BinaryOperationExpr extends Expr {
 		this.right = Check.notNull(right);
 	}
 
+	public Operator.Binary op() {
+		return op;
+	}
+
+	public Expr left() {
+		return left;
+	}
+
+	public Expr right() {
+		return right;
+	}
+
 	@Override
 	public void accept(ExprVisitor visitor) {
-		visitor.visitBinaryOperation(op, left, right);
+		visitor.visit(this);
 	}
 
 }

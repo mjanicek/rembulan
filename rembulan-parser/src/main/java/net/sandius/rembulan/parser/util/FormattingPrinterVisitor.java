@@ -218,40 +218,43 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitVar(Name name) {
-		printName(name);
+	public void visit(VarExpr node) {
+		printName(node.name());
 	}
 
 	@Override
-	public void visitIndex(Expr object, Expr key) {
-		printVarExpr(object);
+	public void visit(IndexExpr node) {
+		printVarExpr(node.object());
 		out.print("[");
-		printExpr(key);
+		printExpr(node.key());
 		out.print("]");
 	}
 
 	@Override
-	public void visitFunctionCall(Expr fn, List<Expr> args) {
-		printVarExpr(fn);
+	public void visit(CallExpr.FunctionCallExpr node) {
+		printVarExpr(node.fn());
 		out.print("(");
-		printExprList(args);
+		printExprList(node.args());
 		out.print(")");
 	}
 
 	@Override
-	public void visitMethodCall(Expr target, Name methodName, List<Expr> args) {
-		printVarExpr(target);
+	public void visit(CallExpr.MethodCallExpr node) {
+		printVarExpr(node.target());
 		out.print(":");
-		printName(methodName);
+		printName(node.methodName());
 		out.print("(");
-		printExprList(args);
+		printExprList(node.args());
 		out.print(")");
 	}
 
 	@Override
-	public void visitFunctionDef(FunctionLiteral fn) {
+	public void visit(FunctionDefExpr node) {
 		out.print("function ");
 		out.print("(");
+
+		FunctionLiteral fn = node.body();
+
 		printNameList(fn.params().names());
 		if (fn.params().isVararg()) {
 			if (!fn.params().names().isEmpty()) {
@@ -267,14 +270,14 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitLiteral(Literal value) {
-		value.accept(this);
+	public void visit(LiteralExpr node) {
+		node.value().accept(this);
 	}
 
 	@Override
-	public void visitTableConstructor(List<TableConstructorExpr.FieldInitialiser> fields) {
+	public void visit(TableConstructorExpr node) {
 		out.print("{");
-		Iterator<TableConstructorExpr.FieldInitialiser> it = fields.iterator();
+		Iterator<TableConstructorExpr.FieldInitialiser> it = node.fields().iterator();
 		while (it.hasNext()) {
 			TableConstructorExpr.FieldInitialiser fi = it.next();
 			Expr k = fi.key();
@@ -293,7 +296,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitVarargs() {
+	public void visit(VarargsExpr node) {
 		out.print("...");
 	}
 
@@ -330,13 +333,13 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitBinaryOperation(Operator.Binary op, Expr left, Expr right) {
+	public void visit(BinaryOperationExpr node) {
 		out.print("(");
-		printExpr(left);
+		printExpr(node.left());
 		out.print(" ");
-		out.print(binOp(op));
+		out.print(binOp(node.op()));
 		out.print(" ");
-		printExpr(right);
+		printExpr(node.right());
 		out.print(")");
 	}
 
@@ -351,10 +354,10 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitUnaryOperation(Operator.Unary op, Expr arg) {
+	public void visit(UnaryOperationExpr node) {
 		out.print("(");
-		out.print(unOp(op));
-		printExpr(arg);
+		out.print(unOp(node.op()));
+		printExpr(node.arg());
 		out.print(")");
 	}
 

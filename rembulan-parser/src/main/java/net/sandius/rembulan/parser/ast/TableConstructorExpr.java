@@ -13,9 +13,13 @@ public class TableConstructorExpr extends Expr {
 		this.fields = Check.notNull(fields);
 	}
 
+	public List<FieldInitialiser> fields() {
+		return fields;
+	}
+
 	@Override
 	public void accept(ExprVisitor visitor) {
-		visitor.visitTableConstructor(fields);
+		visitor.visit(this);
 	}
 
 	public static class FieldInitialiser {

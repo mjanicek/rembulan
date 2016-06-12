@@ -1,27 +1,25 @@
 package net.sandius.rembulan.parser.ast;
 
-import java.util.List;
-
 public interface ExprVisitor {
 
-	void visitVar(Name name);
+	void visit(VarExpr node);
 
-	void visitIndex(Expr object, Expr key);
+	void visit(IndexExpr node);
 
-	void visitFunctionCall(Expr fn, List<Expr> args);
+	void visit(CallExpr.FunctionCallExpr node);
 
-	void visitMethodCall(Expr target, Name methodName, List<Expr> args);
+	void visit(CallExpr.MethodCallExpr node);
 
-	void visitFunctionDef(FunctionLiteral fn);
+	void visit(FunctionDefExpr node);
 
-	void visitLiteral(Literal value);
+	void visit(LiteralExpr node);
 
-	void visitTableConstructor(List<TableConstructorExpr.FieldInitialiser> fields);
+	void visit(TableConstructorExpr node);
 
-	void visitVarargs();
+	void visit(VarargsExpr node);
 
-	void visitBinaryOperation(Operator.Binary op, Expr left, Expr right);
+	void visit(BinaryOperationExpr node);
 
-	void visitUnaryOperation(Operator.Unary op, Expr arg);
+	void visit(UnaryOperationExpr node);
 
 }

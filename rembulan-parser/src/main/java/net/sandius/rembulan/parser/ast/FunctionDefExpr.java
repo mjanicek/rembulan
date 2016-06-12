@@ -11,9 +11,13 @@ public class FunctionDefExpr extends Expr {
 		this.body = Check.notNull(body);
 	}
 
+	public FunctionLiteral body() {
+		return body;
+	}
+
 	@Override
 	public void accept(ExprVisitor visitor) {
-		visitor.visitFunctionDef(body);
+		visitor.visit(this);
 	}
 
 }

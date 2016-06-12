@@ -13,9 +13,17 @@ public class UnaryOperationExpr extends Expr {
 		this.arg = Check.notNull(arg);
 	}
 
+	public Operator.Unary op() {
+		return op;
+	}
+
+	public Expr arg() {
+		return arg;
+	}
+
 	@Override
 	public void accept(ExprVisitor visitor) {
-		visitor.visitUnaryOperation(op, arg);
+		visitor.visit(this);
 	}
 
 }
