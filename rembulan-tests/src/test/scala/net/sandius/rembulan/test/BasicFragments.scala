@@ -453,6 +453,15 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   Tables in EmptyContext succeedsWith (classOf[lua.Table])
 
+  val TableFloatsConvertedToInts = fragment ("TableFloatsConvertedToInts") {
+    """local t = {}
+      |t[2.0] = "hello"
+      |t[3] = "there"
+      |return t[2], t[3.0]
+    """
+  }
+  TableFloatsConvertedToInts in EmptyContext succeedsWith ("hello", "there")
+
   val Self = fragment ("Self") {
     """local function GET(tab, k) return tab[k] end
       |local function SET(tab, k, v) tab[k] = v end
@@ -469,6 +478,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """
   }
   Self in EmptyContext succeedsWith (null, "hello")
+
+  val DuplicateFnParams = fragment ("DuplicateFnParams") {
+    """local function f(x, x) return x end
+      |return f(1), f(1, 2)
+    """
+  }
+  DuplicateFnParams in EmptyContext succeedsWith (null, 2)
 
   val BlockLocals = fragment ("BlockLocals") {
     """do
