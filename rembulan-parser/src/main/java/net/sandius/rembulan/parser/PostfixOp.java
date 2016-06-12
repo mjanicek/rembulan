@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser;
 
 import net.sandius.rembulan.parser.ast.CallExpr;
 import net.sandius.rembulan.parser.ast.Expr;
-import net.sandius.rembulan.parser.ast.FieldRef;
+import net.sandius.rembulan.parser.ast.IndexExpr;
 import net.sandius.rembulan.parser.ast.Name;
 import net.sandius.rembulan.parser.ast.SourceInfo;
 import net.sandius.rembulan.util.Check;
@@ -28,8 +28,8 @@ abstract class PostfixOp {
 		}
 
 		@Override
-		public FieldRef on(Expr exp) {
-			return new FieldRef(src, exp, keyExpr);
+		public IndexExpr on(Expr exp) {
+			return new IndexExpr(src, exp, keyExpr);
 		}
 
 	}

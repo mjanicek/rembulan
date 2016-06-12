@@ -331,7 +331,7 @@ List<BodyStatement> BodyStatement() :
 		return pair(
 				LocalDeclStatement.singleton(src(t), sn.element()),
 				new AssignStatement(src(t),
-						Collections.<LValueExpr>singletonList(new Var(sn.sourceInfo(), sn.element())),
+						Collections.<LValueExpr>singletonList(new VarExpr(sn.sourceInfo(), sn.element())),
 						Collections.<Expr>singletonList(new FunctionDefExpr(src(u), fb))));
 	}
 
@@ -393,7 +393,7 @@ Expr VarExpr() :
 	Expr e;
 }
 {
-	sn=SrcName()  { return new Var(sn.sourceInfo(), sn.element()); }
+	sn=SrcName()  { return new VarExpr(sn.sourceInfo(), sn.element()); }
 |	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return e; }
 }
 
@@ -457,7 +457,7 @@ LValueExpr LValue() :
 	PostfixOp.FieldAccess fa;
 }
 {
-	LOOKAHEAD(2) sn=SrcName()  { return new Var(sn.sourceInfo(), sn.element()); }
+	LOOKAHEAD(2) sn=SrcName()  { return new VarExpr(sn.sourceInfo(), sn.element()); }
 |	e=PrefixExpr() fa=__FieldAccessOp()  { return fa.on(e); }
 }
 

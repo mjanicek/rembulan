@@ -6,7 +6,7 @@ public interface ExprVisitor {
 
 	void visitVar(Name name);
 
-	void visitFieldRef(Expr object, Expr key);
+	void visitIndex(Expr object, Expr key);
 
 	void visitFunctionCall(Expr fn, List<Expr> args);
 

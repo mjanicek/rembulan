@@ -235,7 +235,7 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitFieldRef(Expr object, Expr key) {
+	public void visitIndex(Expr object, Expr key) {
 		printVarExpr(object);
 		out.print("[");
 		printExpr(key);
