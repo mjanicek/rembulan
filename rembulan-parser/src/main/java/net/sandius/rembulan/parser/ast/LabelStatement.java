@@ -6,7 +6,8 @@ public class LabelStatement extends BodyStatement {
 
 	private final Name labelName;
 
-	public LabelStatement(Name labelName) {
+	public LabelStatement(SourceInfo src, Name labelName) {
+		super(src);
 		this.labelName = Check.notNull(labelName);
 	}
 

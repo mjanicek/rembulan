@@ -1,21 +1,27 @@
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
 public class TableConstructorExpr implements RValueExpr {
 
+	private final SourceInfo src;
 	private final List<FieldInitialiser> fields;
 
-	public TableConstructorExpr(List<FieldInitialiser> fields) {
+	public TableConstructorExpr(SourceInfo src, List<FieldInitialiser> fields) {
+		this.src = Check.notNull(src);
 		this.fields = Check.notNull(fields);
 	}
 
 	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitTableConstructor(fields);
+	}
+
+	@Override
+	public SourceInfo sourceInfo() {
+		return src;
 	}
 
 	public static class FieldInitialiser {

@@ -6,7 +6,8 @@ public class DoStatement extends BodyStatement {
 
 	private final Block block;
 
-	public DoStatement(Block block) {
+	public DoStatement(SourceInfo src, Block block) {
+		super(src);
 		this.block = Check.notNull(block);
 	}
 

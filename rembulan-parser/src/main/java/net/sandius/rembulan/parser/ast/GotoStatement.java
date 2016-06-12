@@ -6,7 +6,8 @@ public class GotoStatement extends BodyStatement {
 
 	private final Name labelName;
 
-	public GotoStatement(Name labelName) {
+	public GotoStatement(SourceInfo src, Name labelName) {
+		super(src);
 		this.labelName = Check.notNull(labelName);
 	}
 

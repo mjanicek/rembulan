@@ -3,6 +3,7 @@ package net.sandius.rembulan.parser;
 import net.sandius.rembulan.parser.ast.BinaryOperationExpr;
 import net.sandius.rembulan.parser.ast.Expr;
 import net.sandius.rembulan.parser.ast.Operator;
+import net.sandius.rembulan.parser.ast.SourceInfo;
 import net.sandius.rembulan.parser.ast.UnaryOperationExpr;
 import net.sandius.rembulan.util.Check;
 
@@ -11,19 +12,11 @@ import java.util.Stack;
 class ExprBuilder {
 
 	private final Stack<Expr> operandStack;
-	private final Stack<Operator> operatorStack;
+	private final Stack<SourceElement<Operator>> operatorStack;
 
 	ExprBuilder() {
 		this.operandStack = new Stack<>();
 		this.operatorStack = new Stack<>();
-	}
-
-	public void add(Operator.Unary op) {
-		add((Operator) op);
-	}
-
-	public void add(Operator.Binary op) {
-		add((Operator) op);
 	}
 
 	private static boolean isRightAssociative(Operator op) {
@@ -41,30 +34,35 @@ class ExprBuilder {
 						: newOp.precedence() <= top.precedence());
 	}
 
-	private void makeOp(Operator op) {
+	private void makeOp(SourceElement<Operator> srcOp) {
+		SourceInfo src = srcOp.sourceInfo();
+		Operator op = srcOp.element();
+
 		if (op instanceof Operator.Binary) {
 			Expr r = operandStack.pop();
 			Expr l = operandStack.pop();
-			operandStack.push(new BinaryOperationExpr((Operator.Binary) op, l, r));
+			operandStack.push(new BinaryOperationExpr(src, (Operator.Binary) op, l, r));
 		}
 		else if (op instanceof Operator.Unary) {
 			Expr a = operandStack.pop();
-			operandStack.push(new UnaryOperationExpr((Operator.Unary) op, a));
+			operandStack.push(new UnaryOperationExpr(src, (Operator.Unary) op, a));
 		}
 		else {
 			throw new IllegalStateException("Illegal operator: " + op);
 		}
 	}
 
-	public void add(Operator op) {
+	public void addOp(SourceInfo src, Operator op) {
+		Check.notNull(src);
 		Check.notNull(op);
-		while (!operatorStack.isEmpty() && hasLesserPrecedence(op, operatorStack.peek())) {
+
+		while (!operatorStack.isEmpty() && hasLesserPrecedence(op, operatorStack.peek().element())) {
 			makeOp(operatorStack.pop());
 		}
-		operatorStack.push(op);
+		operatorStack.push(SourceElement.of(src, op));
 	}
 
-	public void add(Expr expr) {
+	public void addExpr(Expr expr) {
 		Check.notNull(expr);
 		operandStack.push(expr);
 	}

@@ -6,7 +6,8 @@ public class CallStatement extends BodyStatement {
 
 	private final CallExpr call;
 
-	public CallStatement(CallExpr call) {
+	public CallStatement(SourceInfo src, CallExpr call) {
+		super(src);
 		this.call = Check.notNull(call);
 	}
 

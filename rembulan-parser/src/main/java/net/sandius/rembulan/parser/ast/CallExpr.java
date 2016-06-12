@@ -1,15 +1,16 @@
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
 public abstract class CallExpr implements RValueExpr {
 
+	private final SourceInfo src;
 	private final List<Expr> args;
 
-	public CallExpr(List<Expr> args) {
+	public CallExpr(SourceInfo src, List<Expr> args) {
+		this.src = Check.notNull(src);
 		this.args = Check.notNull(args);
 	}
 
@@ -17,12 +18,17 @@ public abstract class CallExpr implements RValueExpr {
 		return args;
 	}
 
+	@Override
+	public SourceInfo sourceInfo() {
+		return src;
+	}
+
 	public static class FunctionCallExpr extends CallExpr {
 
 		private final Expr fn;
 
-		public FunctionCallExpr(Expr fn, List<Expr> args) {
-			super(args);
+		public FunctionCallExpr(SourceInfo src, Expr fn, List<Expr> args) {
+			super(src, args);
 			this.fn = Check.notNull(fn);
 		}
 
@@ -38,8 +44,8 @@ public abstract class CallExpr implements RValueExpr {
 		private final Expr target;
 		private final Name methodName;
 
-		public MethodCallExpr(Expr target, Name methodName, List<Expr> args) {
-			super(args);
+		public MethodCallExpr(SourceInfo src, Expr target, Name methodName, List<Expr> args) {
+			super(src, args);
 			this.target = Check.notNull(target);
 			this.methodName = Check.notNull(methodName);
 		}

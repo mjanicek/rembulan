@@ -9,10 +9,10 @@ import java.util.List;
 
 class InvokeOp extends PostfixOp {
 
-	private final List<Expr> args;
 	private final Name method;  // may be null
+	private final SourceElement<List<Expr>> args;
 
-	public InvokeOp(List<Expr> args, Name method) {
+	public InvokeOp(SourceElement<List<Expr>> args, Name method) {
 		this.args = Check.notNull(args);
 		this.method = method;
 	}
@@ -20,8 +20,8 @@ class InvokeOp extends PostfixOp {
 	@Override
 	public CallExpr on(Expr exp) {
 		return method != null
-				? new CallExpr.MethodCallExpr(exp, method, args)
-				: new CallExpr.FunctionCallExpr(exp, args);
+				? new CallExpr.MethodCallExpr(args.sourceInfo(), exp, method, args.element())
+				: new CallExpr.FunctionCallExpr(args.sourceInfo(), exp, args.element());
 	}
 
 }

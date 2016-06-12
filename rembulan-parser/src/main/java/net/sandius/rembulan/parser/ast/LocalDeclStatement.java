@@ -10,7 +10,8 @@ public class LocalDeclStatement extends BodyStatement {
 	private final List<Name> names;
 	private final List<Expr> initialisers;
 
-	private LocalDeclStatement(List<Name> names, List<Expr> initialisers) {
+	private LocalDeclStatement(SourceInfo src, List<Name> names, List<Expr> initialisers) {
+		super(src);
 		this.names = Check.notNull(names);
 		if (names.isEmpty()) {
 			throw new IllegalArgumentException("name list must not be empty");
@@ -18,17 +19,16 @@ public class LocalDeclStatement extends BodyStatement {
 		this.initialisers = Check.notNull(initialisers);
 	}
 
-	public static final LocalDeclStatement of(List<Name> names, List<Expr> initialisers) {
-		return new LocalDeclStatement(names, initialisers);
+	public static final LocalDeclStatement of(SourceInfo src, List<Name> names, List<Expr> initialisers) {
+		return new LocalDeclStatement(src, names, initialisers);
 	}
 
-	public static final LocalDeclStatement of(List<Name> names) {
-		return of(names, Collections.<Expr>emptyList());
+	public static final LocalDeclStatement of(SourceInfo src, List<Name> names) {
+		return of(src, names, Collections.<Expr>emptyList());
 	}
 
-	public static final LocalDeclStatement singleton(Name n) {
-		Check.notNull(n);
-		return of(Collections.singletonList(n));
+	public static final LocalDeclStatement singleton(SourceInfo src, Name n) {
+		return of(src, Collections.singletonList(Check.notNull(n)));
 	}
 
 	@Override

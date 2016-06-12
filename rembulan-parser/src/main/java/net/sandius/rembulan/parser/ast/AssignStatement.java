@@ -9,7 +9,8 @@ public class AssignStatement extends BodyStatement {
 	private final List<LValueExpr> vars;
 	private final List<Expr> exprs;
 
-	public AssignStatement(List<LValueExpr> vars, List<Expr> exprs) {
+	public AssignStatement(SourceInfo src, List<LValueExpr> vars, List<Expr> exprs) {
+		super(src);
 		this.vars = Check.notNull(vars);
 		this.exprs = Check.notNull(exprs);
 	}
