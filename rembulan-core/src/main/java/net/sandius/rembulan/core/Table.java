@@ -9,6 +9,7 @@ public abstract class Table extends LuaObject {
 	}
 
 	// must throw an exception when key is nil or NaN
+	// must also convert floats to integers when possible
 	public abstract void rawset(Object key, Object value);
 
 	public void rawset(int idx, Object value) {

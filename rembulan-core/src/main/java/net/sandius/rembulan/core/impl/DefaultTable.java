@@ -43,15 +43,25 @@ public class DefaultTable extends Table {
 		return old;
 	}
 
+	private static Object normalisedToInteger(Object o) {
+		if (o instanceof Double) {
+			Long l = Conversions.integerValueOf((Double) o);
+			return l != null ? l : o;
+		}
+		else {
+			return o;
+		}
+	}
+
 	@Override
 	public Object rawget(Object key) {
-		key = Conversions.normalise(key);
+		key = normalisedToInteger(Conversions.normalise(key));
 		return key != null ? values.get(key) : null;
 	}
 
 	@Override
 	public void rawset(Object key, Object value) {
-		key = Conversions.normalise(key);
+		key = normalisedToInteger(Conversions.normalise(key));
 
 		if (key == null) {
 			throw new IllegalArgumentException("table index is nil");
