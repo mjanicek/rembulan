@@ -4,24 +4,18 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public class ReturnStatement implements Statement {
+public class ReturnStatement extends Statement {
 
-	private final SourceInfo src;
 	private final List<Expr> exprs;
 
 	public ReturnStatement(SourceInfo src, List<Expr> exprs) {
-		this.src = Check.notNull(src);
+		super(src);
 		this.exprs = Check.notNull(exprs);
 	}
 
 	@Override
 	public void accept(StatementVisitor visitor) {
 		visitor.visitReturn(exprs);
-	}
-
-	@Override
-	public SourceInfo sourceInfo() {
-		return src;
 	}
 
 }

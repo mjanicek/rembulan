@@ -2,13 +2,12 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class LiteralExpr implements RValueExpr {
+public class LiteralExpr extends Expr {
 
-	private final SourceInfo src;
 	private final Literal value;
 
 	public LiteralExpr(SourceInfo src, Literal value) {
-		this.src = Check.notNull(src);
+		super(src);
 		this.value = Check.notNull(value);
 	}
 
@@ -19,11 +18,6 @@ public class LiteralExpr implements RValueExpr {
 	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitLiteral(value);
-	}
-
-	@Override
-	public SourceInfo sourceInfo() {
-		return src;
 	}
 
 }

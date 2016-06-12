@@ -1,23 +1,14 @@
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
-public class VarargsExpr implements RValueExpr {
-
-	private final SourceInfo src;
+public class VarargsExpr extends Expr {
 
 	public VarargsExpr(SourceInfo src) {
-		this.src = Check.notNull(src);
+		super(src);
 	}
 
 	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitVarargs();
-	}
-
-	@Override
-	public SourceInfo sourceInfo() {
-		return src;
 	}
 
 }

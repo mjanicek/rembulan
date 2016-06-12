@@ -2,14 +2,13 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class UnaryOperationExpr implements RValueExpr {
+public class UnaryOperationExpr extends Expr {
 
-	private final SourceInfo src;
 	private final Operator.Unary op;
 	private final Expr arg;
 
 	public UnaryOperationExpr(SourceInfo src, Operator.Unary op, Expr arg) {
-		this.src = Check.notNull(src);
+		super(src);
 		this.op = Check.notNull(op);
 		this.arg = Check.notNull(arg);
 	}
@@ -17,11 +16,6 @@ public class UnaryOperationExpr implements RValueExpr {
 	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitUnaryOperation(op, arg);
-	}
-
-	@Override
-	public SourceInfo sourceInfo() {
-		return src;
 	}
 
 }

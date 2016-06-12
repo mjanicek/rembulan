@@ -4,23 +4,17 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public abstract class CallExpr implements RValueExpr {
+public abstract class CallExpr extends Expr {
 
-	private final SourceInfo src;
 	private final List<Expr> args;
 
 	public CallExpr(SourceInfo src, List<Expr> args) {
-		this.src = Check.notNull(src);
+		super(src);
 		this.args = Check.notNull(args);
 	}
 
 	public List<Expr> args() {
 		return args;
-	}
-
-	@Override
-	public SourceInfo sourceInfo() {
-		return src;
 	}
 
 	public static class FunctionCallExpr extends CallExpr {

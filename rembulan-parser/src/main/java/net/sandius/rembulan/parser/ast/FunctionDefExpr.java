@@ -2,24 +2,18 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public class FunctionDefExpr implements RValueExpr {
+public class FunctionDefExpr extends Expr {
 
-	private final SourceInfo src;
 	private final FunctionLiteral body;
 
 	public FunctionDefExpr(SourceInfo src, FunctionLiteral body) {
-		this.src = Check.notNull(src);
+		super(src);
 		this.body = Check.notNull(body);
 	}
 
 	@Override
 	public void accept(ExprVisitor visitor) {
 		visitor.visitFunctionDef(body);
-	}
-
-	@Override
-	public SourceInfo sourceInfo() {
-		return src;
 	}
 
 }
