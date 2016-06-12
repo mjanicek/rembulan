@@ -454,7 +454,7 @@ LValueExpr LValue() :
 {
 	SourceElement<Name> sn;
 	Expr e;
-	FieldAccessOp fa;
+	PostfixOp.FieldAccess fa;
 }
 {
 	LOOKAHEAD(2) sn=SrcName()  { return new Var(sn.sourceInfo(), sn.element()); }
@@ -502,24 +502,24 @@ ReturnStatement ReturnStatement() :
 	t=<RETURN> (exprs=ExprList())? (<SEMICOLON>)? { return new ReturnStatement(src(t), exprs); }
 }
 
-FieldAccessOp __FieldAccessOp() :
+PostfixOp.FieldAccess __FieldAccessOp() :
 {
 	Token t;
 	Expr e;
 	SourceElement<Name> sn;
 }
 {
-	t=<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE>  { return new FieldAccessOp(src(t), e); }
-|	t=<DOT> sn=SrcName()  { return new FieldAccessOp(src(t), new LiteralExpr(sn.sourceInfo(), StringLiteral.fromName(sn.element()))); }
+	t=<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE>  { return new PostfixOp.FieldAccess(src(t), e); }
+|	t=<DOT> sn=SrcName()  { return new PostfixOp.FieldAccess(src(t), new LiteralExpr(sn.sourceInfo(), StringLiteral.fromName(sn.element()))); }
 }
 
-InvokeOp __InvokeOp() :
+PostfixOp.Invoke __InvokeOp() :
 {
 	Name n;
 	SourceElement<List<Expr>> args;
 }
-{	args=Args()  { return new InvokeOp(args, null); }
-|	<COLON> n=Name() args=Args()  { return new InvokeOp(args, n); }
+{	args=Args()  { return new PostfixOp.Invoke(args, null); }
+|	<COLON> n=Name() args=Args()  { return new PostfixOp.Invoke(args, n); }
 }
 
 
