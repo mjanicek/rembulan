@@ -3,7 +3,7 @@ package net.sandius.rembulan.parser;
 import net.sandius.rembulan.parser.ast.SourceInfo;
 import net.sandius.rembulan.util.Check;
 
-public class SourceElement<T> {
+class SourceElement<T> {
 
 	public final SourceInfo src;
 	public final T elem;
