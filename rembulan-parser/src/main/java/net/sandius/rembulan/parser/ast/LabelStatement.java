@@ -17,7 +17,7 @@ public class LabelStatement extends BodyStatement {
 
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitLabel(labelName);
+		visitor.visit(this);
 	}
 
 }

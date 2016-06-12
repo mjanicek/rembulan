@@ -13,7 +13,7 @@ public class RepeatUntilStatement extends BodyStatement {
 		this.block = Check.notNull(block);
 	}
 
-	public Expr exp() {
+	public Expr condition() {
 		return condition;
 	}
 
@@ -23,7 +23,7 @@ public class RepeatUntilStatement extends BodyStatement {
 
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitRepeatUntil(condition, block);
+		visitor.visit(this);
 	}
 
 }

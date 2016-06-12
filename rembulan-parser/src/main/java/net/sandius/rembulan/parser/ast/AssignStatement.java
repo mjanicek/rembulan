@@ -15,9 +15,17 @@ public class AssignStatement extends BodyStatement {
 		this.exprs = Check.notNull(exprs);
 	}
 
+	public List<LValueExpr> vars() {
+		return vars;
+	}
+
+	public List<Expr> exprs() {
+		return exprs;
+	}
+
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitAssignment(vars, exprs);
+		visitor.visit(this);
 	}
 
 }

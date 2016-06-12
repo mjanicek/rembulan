@@ -13,9 +13,13 @@ public class ReturnStatement extends Statement {
 		this.exprs = Check.notNull(exprs);
 	}
 
+	public List<Expr> exprs() {
+		return exprs;
+	}
+
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitReturn(exprs);
+		visitor.visit(this);
 	}
 
 }

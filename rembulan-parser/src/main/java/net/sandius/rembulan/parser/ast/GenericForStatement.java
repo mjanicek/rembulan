@@ -17,9 +17,21 @@ public class GenericForStatement extends BodyStatement {
 		this.block = Check.notNull(block);
 	}
 
+	public List<Name> names() {
+		return names;
+	}
+
+	public List<Expr> exprs() {
+		return exprs;
+	}
+
+	public Block block() {
+		return block;
+	}
+
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitGenericFor(names, exprs, block);
+		visitor.visit(this);
 	}
 
 }

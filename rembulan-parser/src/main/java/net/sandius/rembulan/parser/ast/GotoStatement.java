@@ -17,7 +17,7 @@ public class GotoStatement extends BodyStatement {
 
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitGoto(labelName);
+		visitor.visit(this);
 	}
 
 }

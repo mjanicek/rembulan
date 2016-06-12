@@ -31,9 +31,17 @@ public class LocalDeclStatement extends BodyStatement {
 		return of(src, Collections.singletonList(Check.notNull(n)));
 	}
 
+	public List<Name> names() {
+		return names;
+	}
+
+	public List<Expr> initialisers() {
+		return initialisers;
+	}
+
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitLocalDecl(names, initialisers);
+		visitor.visit(this);
 	}
 
 }

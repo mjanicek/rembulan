@@ -4,16 +4,20 @@ import net.sandius.rembulan.util.Check;
 
 public class CallStatement extends BodyStatement {
 
-	private final CallExpr call;
+	private final CallExpr callExpr;
 
-	public CallStatement(SourceInfo src, CallExpr call) {
+	public CallStatement(SourceInfo src, CallExpr callExpr) {
 		super(src);
-		this.call = Check.notNull(call);
+		this.callExpr = Check.notNull(callExpr);
+	}
+
+	public CallExpr callExpr() {
+		return callExpr;
 	}
 
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitCall(call);
+		visitor.visit(this);
 	}
 
 }

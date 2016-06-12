@@ -17,9 +17,21 @@ public class IfStatement extends BodyStatement {
 		this.elseBlock = elseBlock;
 	}
 
+	public ConditionalBlock main() {
+		return main;
+	}
+
+	public List<ConditionalBlock> elifs() {
+		return elifs;
+	}
+
+	public Block elseBlock() {
+		return elseBlock;
+	}
+
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitIf(main, elifs, elseBlock);
+		visitor.visit(this);
 	}
 
 }

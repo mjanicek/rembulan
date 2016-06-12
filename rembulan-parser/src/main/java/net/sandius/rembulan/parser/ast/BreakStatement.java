@@ -8,7 +8,7 @@ public class BreakStatement extends BodyStatement {
 
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitBreak();
+		visitor.visit(this);
 	}
 
 }

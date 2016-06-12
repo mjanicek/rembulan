@@ -17,7 +17,7 @@ public class DoStatement extends BodyStatement {
 
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitDo(block);
+		visitor.visit(this);
 	}
 
 }

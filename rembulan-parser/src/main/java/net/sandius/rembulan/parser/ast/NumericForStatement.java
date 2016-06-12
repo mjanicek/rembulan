@@ -19,9 +19,29 @@ public class NumericForStatement extends BodyStatement {
 		this.block = Check.notNull(block);
 	}
 
+	public Name name() {
+		return name;
+	}
+
+	public Expr init() {
+		return init;
+	}
+
+	public Expr limit() {
+		return limit;
+	}
+
+	public Expr step() {
+		return step;
+	}
+
+	public Block block() {
+		return block;
+	}
+
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitNumericFor(name, init, limit, step, block);
+		visitor.visit(this);
 	}
 
 }

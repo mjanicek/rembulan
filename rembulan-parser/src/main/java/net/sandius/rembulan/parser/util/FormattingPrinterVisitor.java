@@ -1,19 +1,7 @@
 package net.sandius.rembulan.parser.util;
 
 import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.parser.ast.Block;
-import net.sandius.rembulan.parser.ast.CallExpr;
-import net.sandius.rembulan.parser.ast.ConditionalBlock;
-import net.sandius.rembulan.parser.ast.Expr;
-import net.sandius.rembulan.parser.ast.ExprVisitor;
-import net.sandius.rembulan.parser.ast.FunctionLiteral;
-import net.sandius.rembulan.parser.ast.LValueExpr;
-import net.sandius.rembulan.parser.ast.Literal;
-import net.sandius.rembulan.parser.ast.LiteralVisitor;
-import net.sandius.rembulan.parser.ast.Name;
-import net.sandius.rembulan.parser.ast.Operator;
-import net.sandius.rembulan.parser.ast.StatementVisitor;
-import net.sandius.rembulan.parser.ast.TableConstructorExpr;
+import net.sandius.rembulan.parser.ast.*;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
@@ -86,46 +74,46 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitDo(Block block) {
+	public void visit(DoStatement node) {
 		doIndent();
 		out.println("do");
-		block.accept(subVisitor());
+		node.block().accept(subVisitor());
 		doIndent();
 		out.println("end");
 	}
 
 	@Override
-	public void visitReturn(List<Expr> exprs) {
+	public void visit(ReturnStatement node) {
 		doIndent();
 		out.print("return ");
-		printExprList(exprs);
+		printExprList(node.exprs());
 		out.println();
 	}
 
 	@Override
-	public void visitCall(CallExpr call) {
+	public void visit(CallStatement node) {
 		doIndent();
-		call.accept(this);
+		node.callExpr().accept(this);
 		out.println();
 	}
 
 	@Override
-	public void visitAssignment(List<LValueExpr> vars, List<Expr> exprs) {
+	public void visit(AssignStatement node) {
 		doIndent();
-		printExprList(vars);
+		printExprList(node.vars());
 		out.print(" = ");
-		printExprList(exprs);
+		printExprList(node.exprs());
 		out.println();
 	}
 
 	@Override
-	public void visitLocalDecl(List<Name> names, List<Expr> initialisers) {
+	public void visit(LocalDeclStatement node) {
 		doIndent();
 		out.print("local ");
-		printNameList(names);
-		if (!initialisers.isEmpty()) {
+		printNameList(node.names());
+		if (!node.initialisers().isEmpty()) {
 			out.print(" = ");
-			printExprList(initialisers);
+			printExprList(node.initialisers());
 		}
 		out.println();
 	}
@@ -137,95 +125,95 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitIf(ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock) {
+	public void visit(IfStatement node) {
 		doIndent();
 		out.print("if ");
-		printConditionalBlock(main);
-		for (ConditionalBlock cbl : elifs) {
+		printConditionalBlock(node.main());
+		for (ConditionalBlock cbl : node.elifs()) {
 			doIndent();
 			out.print("elseif ");
 			printConditionalBlock(cbl);
 		}
-		if (elseBlock != null) {
+		if (node.elseBlock() != null) {
 			doIndent();
 			out.print("else");
-			elseBlock.accept(subVisitor());
+			node.elseBlock().accept(subVisitor());
 		}
 		doIndent();
 		out.println("end");
 	}
 
 	@Override
-	public void visitNumericFor(Name name, Expr init, Expr limit, Expr step, Block block) {
+	public void visit(NumericForStatement node) {
 		doIndent();
 		out.print("for ");
-		printName(name);
+		printName(node.name());
 		out.print(" = ");
-		printExpr(init);
+		printExpr(node.init());
 		out.print(", ");
-		printExpr(limit);
-		if (step != null) {
+		printExpr(node.limit());
+		if (node.step() != null) {
 			out.print(", ");
-			printExpr(step);
+			printExpr(node.step());
 		}
 		out.println(" do");
-		block.accept(subVisitor());
+		node.block().accept(subVisitor());
 		doIndent();
 		out.println("end");
 	}
 
 	@Override
-	public void visitGenericFor(List<Name> names, List<Expr> exprs, Block block) {
+	public void visit(GenericForStatement node) {
 		doIndent();
 		out.print("for ");
-		printNameList(names);
+		printNameList(node.names());
 		out.print(" in ");
-		printExprList(exprs);
+		printExprList(node.exprs());
 		out.println(" do");
-		block.accept(subVisitor());
+		node.block().accept(subVisitor());
 		doIndent();
 		out.println("end");
 	}
 
 	@Override
-	public void visitWhile(Expr condition, Block block) {
+	public void visit(WhileStatement node) {
 		doIndent();
 		out.print("while ");
-		printExpr(condition);
+		printExpr(node.condition());
 		out.println(" do");
-		block.accept(subVisitor());
+		node.block().accept(subVisitor());
 		doIndent();
 		out.println("end");
 	}
 
 	@Override
-	public void visitRepeatUntil(Expr condition, Block block) {
+	public void visit(RepeatUntilStatement node) {
 		doIndent();
 		out.println("repeat");
-		block.accept(subVisitor());
+		node.block().accept(subVisitor());
 		out.print("until ");
-		printExpr(condition);
+		printExpr(node.condition());
 	}
 
 	@Override
-	public void visitBreak() {
+	public void visit(BreakStatement node) {
 		doIndent();
 		out.println("break");
 	}
 
 	@Override
-	public void visitGoto(Name labelName) {
+	public void visit(GotoStatement node) {
 		doIndent();
 		out.print("goto ");
-		printName(labelName);
+		printName(node.labelName());
 		out.println();
 	}
 
 	@Override
-	public void visitLabel(Name labelName) {
+	public void visit(LabelStatement node) {
 		doIndent();
 		out.print("::");
-		printName(labelName);
+		printName(node.labelName());
 		out.println("::");
 	}
 

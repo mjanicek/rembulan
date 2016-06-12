@@ -23,7 +23,7 @@ public class WhileStatement extends BodyStatement {
 
 	@Override
 	public void accept(StatementVisitor visitor) {
-		visitor.visitWhile(condition, block);
+		visitor.visit(this);
 	}
 
 }

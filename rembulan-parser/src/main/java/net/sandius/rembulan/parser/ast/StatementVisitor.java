@@ -1,33 +1,31 @@
 package net.sandius.rembulan.parser.ast;
 
-import java.util.List;
-
 public interface StatementVisitor {
 
-	void visitDo(Block block);
+	void visit(DoStatement node);
 
-	void visitReturn(List<Expr> exprs);
+	void visit(ReturnStatement node);
 
-	void visitCall(CallExpr call);
+	void visit(CallStatement node);
 
-	void visitAssignment(List<LValueExpr> vars, List<Expr> exprs);
+	void visit(AssignStatement node);
 
-	void visitLocalDecl(List<Name> names, List<Expr> initialisers);
+	void visit(LocalDeclStatement node);
 
-	void visitIf(ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock);
+	void visit(IfStatement node);
 
-	void visitNumericFor(Name name, Expr init, Expr limit, Expr step, Block block);
+	void visit(NumericForStatement node);
 
-	void visitGenericFor(List<Name> names, List<Expr> exprs, Block block);
+	void visit(GenericForStatement node);
 
-	void visitWhile(Expr condition, Block block);
+	void visit(WhileStatement node);
 
-	void visitRepeatUntil(Expr condition, Block block);
+	void visit(RepeatUntilStatement node);
 
-	void visitBreak();
+	void visit(BreakStatement node);
 
-	void visitGoto(Name labelName);
+	void visit(GotoStatement node);
 
-	void visitLabel(Name labelName);
+	void visit(LabelStatement node);
 
 }
