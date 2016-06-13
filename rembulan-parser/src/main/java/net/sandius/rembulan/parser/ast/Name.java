@@ -1,5 +1,9 @@
 package net.sandius.rembulan.parser.ast;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 public class Name {
 
 	private final String value;
@@ -12,12 +16,23 @@ public class Name {
 		return new Name(s);
 	}
 
-	public static boolean isValidName(String s) {
-		if (s == null) {
-			return false;
-		}
+	private static final Set<String> keywords;
+	
+	static {
+		Set<String> ks = new HashSet<>();
+		Collections.addAll(ks,
+				"and", "break", "do", "else", "elseif", "end", "false", "for",
+				"function", "goto", "if", "in", "local", "nil", "not", "or",
+				"repeat", "return", "then", "true", "until", "while");
+		keywords = Collections.unmodifiableSet(ks);
+	}
 
-		if (s.isEmpty()) {
+	public static boolean isKeyword(String s) {
+		return s != null && keywords.contains(s);
+	}
+
+	public static boolean isValidName(String s) {
+		if (s == null || s.isEmpty() || isKeyword(s)) {
 			return false;
 		}
 
