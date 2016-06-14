@@ -2,9 +2,10 @@ package net.sandius.rembulan.parser.ast;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
-public class Name {
+public final class Name {
 
 	private final String value;
 
@@ -14,6 +15,19 @@ public class Name {
 
 	public static Name fromString(String s) {
 		return new Name(s);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Name name = (Name) o;
+		return Objects.equals(value, name.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(value);
 	}
 
 	private static final Set<String> keywords;
