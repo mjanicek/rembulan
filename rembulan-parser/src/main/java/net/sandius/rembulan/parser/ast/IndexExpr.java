@@ -21,9 +21,23 @@ public class IndexExpr extends LValueExpr {
 		return key;
 	}
 
+	public IndexExpr update(Expr object, Expr key) {
+		if (this.object.equals(object) && this.key.equals(key)) {
+			return this;
+		}
+		else {
+			return new IndexExpr(sourceInfo(), object, key);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public Expr acceptTransformer(ExprTransformer tf) {
+		return tf.transform(this);
 	}
 
 }

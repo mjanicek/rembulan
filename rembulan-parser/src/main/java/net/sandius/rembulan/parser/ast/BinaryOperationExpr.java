@@ -27,9 +27,23 @@ public class BinaryOperationExpr extends Expr {
 		return right;
 	}
 
+	public BinaryOperationExpr update(Expr left, Expr right) {
+		if (this.left.equals(left) && this.right.equals(right)) {
+			return this;
+		}
+		else {
+			return new BinaryOperationExpr(sourceInfo(), op, left, right);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public Expr acceptTransformer(ExprTransformer tf) {
+		return tf.transform(this);
 	}
 
 }

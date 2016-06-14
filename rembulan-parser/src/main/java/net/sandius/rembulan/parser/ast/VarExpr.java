@@ -20,4 +20,9 @@ public class VarExpr extends LValueExpr {
 		visitor.visit(this);
 	}
 
+	@Override
+	public Expr acceptTransformer(ExprTransformer tf) {
+		return tf.transform(this);
+	}
+
 }

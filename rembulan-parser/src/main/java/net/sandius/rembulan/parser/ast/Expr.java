@@ -15,4 +15,6 @@ public abstract class Expr implements SyntaxElement, Visitable {
 		return src;
 	}
 
+	public abstract Expr acceptTransformer(ExprTransformer tf);
+
 }

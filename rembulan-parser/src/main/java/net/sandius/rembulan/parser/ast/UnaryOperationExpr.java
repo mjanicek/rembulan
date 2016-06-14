@@ -21,9 +21,23 @@ public class UnaryOperationExpr extends Expr {
 		return arg;
 	}
 
+	public UnaryOperationExpr update(Expr arg) {
+		if (this.arg.equals(arg)) {
+			return this;
+		}
+		else {
+			return new UnaryOperationExpr(sourceInfo(), op, arg);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public Expr acceptTransformer(ExprTransformer tf) {
+		return tf.transform(this);
 	}
 
 }

@@ -6,7 +6,7 @@ import java.util.List;
 
 public abstract class CallExpr extends Expr {
 
-	private final List<Expr> args;
+	protected final List<Expr> args;
 
 	public CallExpr(SourceInfo src, List<Expr> args) {
 		super(src);
@@ -30,9 +30,23 @@ public abstract class CallExpr extends Expr {
 			return fn;
 		}
 
+		public FunctionCallExpr update(Expr fn, List<Expr> args) {
+			if (this.fn.equals(fn) && this.args.equals(args)) {
+				return this;
+			}
+			else {
+				return new FunctionCallExpr(sourceInfo(), fn, args);
+			}
+		}
+
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.visit(this);
+		}
+
+		@Override
+		public Expr acceptTransformer(ExprTransformer tf) {
+			return tf.transform(this);
 		}
 
 	}
@@ -56,9 +70,23 @@ public abstract class CallExpr extends Expr {
 			return methodName;
 		}
 
+		public MethodCallExpr update(Expr target, Name methodName, List<Expr> args) {
+			if (this.target.equals(target) && this.methodName.equals(methodName) && this.args.equals(args)) {
+				return this;
+			}
+			else {
+				return new MethodCallExpr(sourceInfo(), target, methodName, args);
+			}
+		}
+
 		@Override
 		public void accept(Visitor visitor) {
 			visitor.visit(this);
+		}
+
+		@Override
+		public Expr acceptTransformer(ExprTransformer tf) {
+			return tf.transform(this);
 		}
 
 	}
