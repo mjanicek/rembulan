@@ -7,7 +7,7 @@ public class VarargsExpr extends Expr {
 	}
 
 	@Override
-	public void accept(ExprVisitor visitor) {
+	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
 

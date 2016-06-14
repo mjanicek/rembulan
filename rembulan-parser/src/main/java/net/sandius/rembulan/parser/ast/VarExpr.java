@@ -16,7 +16,7 @@ public class VarExpr extends LValueExpr {
 	}
 
 	@Override
-	public void accept(ExprVisitor visitor) {
+	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
 

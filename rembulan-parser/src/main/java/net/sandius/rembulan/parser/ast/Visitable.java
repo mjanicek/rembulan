@@ -1,6 +1,6 @@
 package net.sandius.rembulan.parser.ast;
 
-public interface Literal {
+public interface Visitable {
 
 	void accept(Visitor visitor);
 

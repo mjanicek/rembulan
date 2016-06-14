@@ -7,7 +7,7 @@ import net.sandius.rembulan.util.Check;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
-public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, LiteralVisitor {
+public class FormattingPrinterVisitor implements Visitor {
 
 	private final PrintWriter out;
 	private final String indentString;
@@ -361,28 +361,27 @@ public class FormattingPrinterVisitor implements StatementVisitor, ExprVisitor, 
 	}
 
 	@Override
-	public void visitNil() {
+	public void visit(NilLiteral node) {
 		out.print(LuaFormat.NIL);
 	}
 
 	@Override
-	public void visitBoolean(boolean value) {
-		out.print(LuaFormat.toString(value));
+	public void visit(BooleanLiteral node) {
+		out.print(LuaFormat.toString(node.value()));
 	}
 
 	@Override
-	public void visitInteger(long value) {
-		out.print(LuaFormat.toString(value));
+	public void visit(Numeral.IntegerNumeral node) {
+		out.print(LuaFormat.toString(node.value()));
 	}
 
 	@Override
-	public void visitFloat(double value) {
-		out.print(LuaFormat.toString(value));
+	public void visit(Numeral.FloatNumeral node) {
+		out.print(LuaFormat.toString(node.value()));
 	}
 
 	@Override
-	public void visitString(String value) {
-		out.print(LuaFormat.escape(value));
+	public void visit(StringLiteral node) {
+		out.print(LuaFormat.escape(node.value()));
 	}
-
 }

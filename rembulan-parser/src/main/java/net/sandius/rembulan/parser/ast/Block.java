@@ -14,7 +14,16 @@ public class Block {
 		this.ret = ret;
 	}
 
-	public void accept(StatementVisitor visitor) {
+	public List<BodyStatement> statements() {
+		return statements;
+	}
+
+	public ReturnStatement returnStatement() {
+		return ret;
+	}
+
+	@Deprecated
+	public void accept(Visitor visitor) {
 		for (BodyStatement s : statements) {
 			s.accept(visitor);
 		}

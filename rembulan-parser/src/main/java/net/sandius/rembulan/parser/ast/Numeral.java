@@ -33,8 +33,8 @@ public abstract class Numeral implements Literal {
 		}
 
 		@Override
-		public void accept(LiteralVisitor visitor) {
-			visitor.visitInteger(value);
+		public void accept(Visitor visitor) {
+			visitor.visit(this);
 		}
 
 	}
@@ -52,8 +52,8 @@ public abstract class Numeral implements Literal {
 		}
 
 		@Override
-		public void accept(LiteralVisitor visitor) {
-			visitor.visitFloat(value);
+		public void accept(Visitor visitor) {
+			visitor.visit(this);
 		}
 
 	}

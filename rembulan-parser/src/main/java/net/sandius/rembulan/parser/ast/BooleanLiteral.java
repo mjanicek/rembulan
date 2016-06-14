@@ -20,8 +20,8 @@ public class BooleanLiteral implements Literal {
 	}
 
 	@Override
-	public void accept(LiteralVisitor visitor) {
-		visitor.visitBoolean(value);
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 
 }

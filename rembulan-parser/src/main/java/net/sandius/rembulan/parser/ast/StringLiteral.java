@@ -154,8 +154,8 @@ public class StringLiteral implements Literal {
 	}
 
 	@Override
-	public void accept(LiteralVisitor visitor) {
-		visitor.visitString(value);
+	public void accept(Visitor visitor) {
+		visitor.visit(this);
 	}
 
 }

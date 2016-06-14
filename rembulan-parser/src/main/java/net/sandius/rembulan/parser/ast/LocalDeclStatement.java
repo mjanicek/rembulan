@@ -40,7 +40,7 @@ public class LocalDeclStatement extends BodyStatement {
 	}
 
 	@Override
-	public void accept(StatementVisitor visitor) {
+	public void accept(Visitor visitor) {
 		visitor.visit(this);
 	}
 

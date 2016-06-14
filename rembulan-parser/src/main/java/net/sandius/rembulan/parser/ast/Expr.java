@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-public abstract class Expr implements SyntaxElement {
+public abstract class Expr implements SyntaxElement, Visitable {
 
 	private SourceInfo src;
 
@@ -14,7 +14,5 @@ public abstract class Expr implements SyntaxElement {
 	public SourceInfo sourceInfo() {
 		return src;
 	}
-
-	public abstract void accept(ExprVisitor visitor);
 
 }
