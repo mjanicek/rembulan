@@ -1,6 +1,6 @@
 package net.sandius.rembulan.parser.ast;
 
-public class BooleanLiteral implements Literal {
+public class BooleanLiteral extends Literal {
 
 	public static final BooleanLiteral TRUE = new BooleanLiteral(true);
 	public static final BooleanLiteral FALSE = new BooleanLiteral(false);

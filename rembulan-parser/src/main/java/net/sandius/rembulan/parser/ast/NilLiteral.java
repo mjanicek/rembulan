@@ -1,6 +1,6 @@
 package net.sandius.rembulan.parser.ast;
 
-public class NilLiteral implements Literal {
+public class NilLiteral extends Literal {
 
 	public static final NilLiteral INSTANCE = new NilLiteral();
 

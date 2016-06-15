@@ -3,7 +3,7 @@ package net.sandius.rembulan.parser.ast;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.util.Check;
 
-public class StringLiteral implements Literal {
+public class StringLiteral extends Literal {
 
 	private final String value;
 

@@ -3,7 +3,7 @@ package net.sandius.rembulan.parser.ast;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.util.Check;
 
-public abstract class Numeral implements Literal {
+public abstract class Numeral extends Literal {
 
 	private Numeral() {
 

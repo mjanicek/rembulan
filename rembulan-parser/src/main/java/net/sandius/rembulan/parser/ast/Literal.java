@@ -1,7 +1,7 @@
 package net.sandius.rembulan.parser.ast;
 
-public interface Literal {
+public abstract class Literal {
 
-	Literal accept(Transformer tf);
+	public abstract Literal accept(Transformer tf);
 
 }
