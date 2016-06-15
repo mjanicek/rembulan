@@ -8,8 +8,8 @@ public class NilLiteral implements Literal {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
+	public Literal acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

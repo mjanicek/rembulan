@@ -37,11 +37,6 @@ public class BinaryOperationExpr extends Expr {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
-
-	@Override
 	public Expr acceptTransformer(Transformer tf) {
 		return tf.transform(this);
 	}

@@ -34,7 +34,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	public void visit(ReturnStatement node) {
 		visitPreReturn(node);
 		for (Expr e : node.exprs()) {
-			e.accept(this);
+			e.acceptTransformer(this);
 		}
 		visitPostReturn(node);
 	}
@@ -45,7 +45,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(CallStatement node) {
 		visitPreCallStatement(node);
-		node.callExpr().accept(this);
+		node.callExpr().acceptTransformer(this);
 		visitPostCallStatement(node);
 	}
 
@@ -56,7 +56,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	public void visit(AssignStatement node) {
 		visitPreAssignStatement(node);
 		for (Expr e : node.exprs()) {
-			e.accept(this);
+			e.acceptTransformer(this);
 		}
 		visitPostAssignStatement(node);
 	}
@@ -68,7 +68,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	public void visit(LocalDeclStatement node) {
 		visitPreLocalDeclStatement(node);
 		for (Expr e : node.initialisers()) {
-			e.accept(this);
+			e.acceptTransformer(this);
 		}
 		visitPostLocalDeclStatement(node);
 	}
@@ -109,7 +109,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(WhileStatement node) {
 		visitPreWhile(node);
-		node.condition().accept(this);
+		node.condition().acceptTransformer(this);
 		visit(node.block());
 		visitPostWhile(node);
 	}
@@ -121,7 +121,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	public void visit(RepeatUntilStatement node) {
 		visitPreRepeat(node);
 		visit(node.block());
-		node.condition().accept(this);
+		node.condition().acceptTransformer(this);
 		visitPostRepeat(node);
 	}
 
@@ -131,8 +131,8 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(IndexExpr node) {
 		visitPreIndex(node);
-		node.key().accept(this);
-		node.object().accept(this);
+		node.key().acceptTransformer(this);
+		node.object().acceptTransformer(this);
 		visitPostIndex(node);
 	}
 
@@ -142,9 +142,9 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(CallExpr.FunctionCallExpr node) {
 		visitPreFunctionCall(node);
-		node.fn().accept(this);
+		node.fn().acceptTransformer(this);
 		for (Expr e : node.args()) {
-			e.accept(this);
+			e.acceptTransformer(this);
 		}
 		visitPostFunctionCall(node);
 	}
@@ -155,9 +155,9 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(CallExpr.MethodCallExpr node) {
 		visitPreMethodCall(node);
-		node.target().accept(this);
+		node.target().acceptTransformer(this);
 		for (Expr e : node.args()) {
-			e.accept(this);
+			e.acceptTransformer(this);
 		}
 		visitPostMethodCall(node);
 	}
@@ -173,8 +173,8 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(BinaryOperationExpr node) {
 		visitPreBinaryOp(node);
-		node.left().accept(this);
-		node.right().accept(this);
+		node.left().acceptTransformer(this);
+		node.right().acceptTransformer(this);
 		visitPostBinaryOp(node);
 	}
 
@@ -184,7 +184,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(UnaryOperationExpr node) {
 		visitPreUnaryOp(node);
-		node.arg().accept(this);
+		node.arg().acceptTransformer(this);
 		visitPostUnaryOp(node);
 	}
 

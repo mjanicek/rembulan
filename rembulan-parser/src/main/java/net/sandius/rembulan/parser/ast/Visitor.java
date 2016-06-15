@@ -196,12 +196,42 @@ public abstract class Visitor extends Transformer {
 
 	public abstract void visit(NilLiteral node);
 
+	@Override
+	public Literal transform(NilLiteral l) {
+		visit(l);
+		return l;
+	}
+
 	public abstract void visit(BooleanLiteral node);
+
+	@Override
+	public Literal transform(BooleanLiteral l) {
+		visit(l);
+		return l;
+	}
 
 	public abstract void visit(Numeral.IntegerNumeral node);
 
+	@Override
+	public Literal transform(Numeral.IntegerNumeral l) {
+		visit(l);
+		return l;
+	}
+
 	public abstract void visit(Numeral.FloatNumeral node);
 
+	@Override
+	public Literal transform(Numeral.FloatNumeral l) {
+		visit(l);
+		return l;
+	}
+
 	public abstract void visit(StringLiteral node);
+
+	@Override
+	public Literal transform(StringLiteral l) {
+		visit(l);
+		return l;
+	}
 
 }

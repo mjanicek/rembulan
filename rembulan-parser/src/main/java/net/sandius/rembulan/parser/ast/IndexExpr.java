@@ -31,11 +31,6 @@ public class IndexExpr extends LValueExpr {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
-
-	@Override
 	public LValueExpr acceptTransformer(Transformer tf) {
 		return tf.transform(this);
 	}

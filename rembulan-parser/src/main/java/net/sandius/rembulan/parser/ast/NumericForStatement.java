@@ -52,11 +52,6 @@ public class NumericForStatement extends BodyStatement {
 	}
 
 	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
-
-	@Override
 	public BodyStatement acceptTransformer(Transformer tf) {
 		return tf.transform(this);
 	}

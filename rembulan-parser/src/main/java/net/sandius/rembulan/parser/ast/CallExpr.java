@@ -40,11 +40,6 @@ public abstract class CallExpr extends Expr {
 		}
 
 		@Override
-		public void accept(Visitor visitor) {
-			visitor.visit(this);
-		}
-
-		@Override
 		public Expr acceptTransformer(Transformer tf) {
 			return tf.transform(this);
 		}
@@ -77,11 +72,6 @@ public abstract class CallExpr extends Expr {
 			else {
 				return new MethodCallExpr(sourceInfo(), target, methodName, args);
 			}
-		}
-
-		@Override
-		public void accept(Visitor visitor) {
-			visitor.visit(this);
 		}
 
 		@Override

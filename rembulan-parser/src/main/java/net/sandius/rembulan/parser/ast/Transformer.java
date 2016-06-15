@@ -175,4 +175,24 @@ public abstract class Transformer {
 		return e.update(Collections.unmodifiableList(result));
 	}
 
+	public Literal transform(NilLiteral l) {
+		return l;
+	}
+
+	public Literal transform(BooleanLiteral l) {
+		return l;
+	}
+
+	public Literal transform(Numeral.IntegerNumeral l) {
+		return l;
+	}
+
+	public Literal transform(Numeral.FloatNumeral l) {
+		return l;
+	}
+
+	public Literal transform(StringLiteral l) {
+		return l;
+	}
+
 }

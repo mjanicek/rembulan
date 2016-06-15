@@ -26,11 +26,6 @@ public class ReturnStatement extends Statement {
 		}
 	}
 
-	@Override
-	public void accept(Visitor visitor) {
-		visitor.visit(this);
-	}
-
 	public ReturnStatement acceptTransformer(Transformer tf) {
 		return tf.transform(this);
 	}
