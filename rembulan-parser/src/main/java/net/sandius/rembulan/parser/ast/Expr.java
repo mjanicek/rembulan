@@ -1,24 +1,9 @@
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
-public abstract class Expr implements SyntaxElement {
-
-	private final SourceInfo src;
-	private final Attributes attr;
+public abstract class Expr extends SyntaxElement {
 
 	protected Expr(SourceInfo src, Attributes attr) {
-		this.src = Check.notNull(src);
-		this.attr = Check.notNull(attr);
-	}
-
-	@Override
-	public SourceInfo sourceInfo() {
-		return src;
-	}
-
-	public Attributes attributes() {
-		return attr;
+		super(src, attr);
 	}
 
 	public abstract Expr accept(Transformer tf);
