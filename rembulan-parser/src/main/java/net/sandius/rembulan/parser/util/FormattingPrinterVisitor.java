@@ -7,7 +7,7 @@ import net.sandius.rembulan.util.Check;
 import java.io.PrintWriter;
 import java.util.Iterator;
 
-public class FormattingPrinterVisitor implements Visitor {
+public class FormattingPrinterVisitor extends Visitor {
 
 	private final PrintWriter out;
 	private final String indentString;

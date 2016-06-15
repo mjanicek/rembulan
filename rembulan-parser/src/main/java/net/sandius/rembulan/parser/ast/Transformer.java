@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Transformer {
+public abstract class Transformer {
 
 	public Block transform(Block block) {
 		List<BodyStatement> stats = new ArrayList<>();

@@ -18,7 +18,7 @@ import net.sandius.rembulan.parser.ast.UnaryOperationExpr;
 import net.sandius.rembulan.parser.ast.Visitor;
 import net.sandius.rembulan.parser.ast.WhileStatement;
 
-public abstract class DepthFirstVisitor implements Visitor {
+public abstract class DepthFirstVisitor extends Visitor {
 
 	@Override
 	public void visit(DoStatement node) {
