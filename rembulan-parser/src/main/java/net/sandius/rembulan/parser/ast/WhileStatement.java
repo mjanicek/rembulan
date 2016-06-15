@@ -7,10 +7,14 @@ public class WhileStatement extends BodyStatement {
 	private final Expr condition;
 	private final Block block;
 
-	public WhileStatement(SourceInfo src, Expr condition, Block block) {
-		super(src);
+	public WhileStatement(SourceInfo src, Attributes attr, Expr condition, Block block) {
+		super(src, attr);
 		this.condition = Check.notNull(condition);
 		this.block = Check.notNull(block);
+	}
+
+	public WhileStatement(SourceInfo src, Expr condition, Block block) {
+		this(src, Attributes.empty(), condition, block);
 	}
 
 	public Expr condition() {
@@ -26,7 +30,7 @@ public class WhileStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new WhileStatement(sourceInfo(), condition, block);
+			return new WhileStatement(sourceInfo(), attributes(), condition, block);
 		}
 	}
 

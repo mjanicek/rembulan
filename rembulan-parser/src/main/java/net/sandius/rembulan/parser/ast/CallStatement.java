@@ -6,9 +6,13 @@ public class CallStatement extends BodyStatement {
 
 	private final CallExpr callExpr;
 
-	public CallStatement(SourceInfo src, CallExpr callExpr) {
-		super(src);
+	public CallStatement(SourceInfo src, Attributes attr, CallExpr callExpr) {
+		super(src, attr);
 		this.callExpr = Check.notNull(callExpr);
+	}
+
+	public CallStatement(SourceInfo src, CallExpr callExpr) {
+		this(src, Attributes.empty(), callExpr);
 	}
 
 	public CallExpr callExpr() {
@@ -20,7 +24,7 @@ public class CallStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new CallStatement(sourceInfo(), callExpr);
+			return new CallStatement(sourceInfo(), attributes(), callExpr);
 		}
 	}
 

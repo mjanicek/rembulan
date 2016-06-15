@@ -6,9 +6,13 @@ public class LabelStatement extends BodyStatement {
 
 	private final Name labelName;
 
-	public LabelStatement(SourceInfo src, Name labelName) {
-		super(src);
+	public LabelStatement(SourceInfo src, Attributes attr, Name labelName) {
+		super(src, attr);
 		this.labelName = Check.notNull(labelName);
+	}
+
+	public LabelStatement(SourceInfo src, Name labelName) {
+		this(src, Attributes.empty(), labelName);
 	}
 
 	public Name labelName() {
@@ -20,7 +24,7 @@ public class LabelStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new LabelStatement(sourceInfo(), labelName);
+			return new LabelStatement(sourceInfo(), attributes(), labelName);
 		}
 	}
 

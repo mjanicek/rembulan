@@ -12,13 +12,17 @@ public class NumericForStatement extends BodyStatement {
 	private final Expr step;  // may be null
 	private final Block block;
 
-	public NumericForStatement(SourceInfo src, Name name, Expr init, Expr limit, Expr step, Block block) {
-		super(src);
+	public NumericForStatement(SourceInfo src, Attributes attr, Name name, Expr init, Expr limit, Expr step, Block block) {
+		super(src, attr);
 		this.name = Check.notNull(name);
 		this.init = Check.notNull(init);
 		this.limit = Check.notNull(limit);
 		this.step = step;
 		this.block = Check.notNull(block);
+	}
+
+	public NumericForStatement(SourceInfo src, Name name, Expr init, Expr limit, Expr step, Block block) {
+		this(src, Attributes.empty(), name, init, limit, step, block);
 	}
 
 	public Name name() {
@@ -47,7 +51,7 @@ public class NumericForStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new NumericForStatement(sourceInfo(), name, init, limit, step, block);
+			return new NumericForStatement(sourceInfo(), attributes(), name, init, limit, step, block);
 		}
 	}
 

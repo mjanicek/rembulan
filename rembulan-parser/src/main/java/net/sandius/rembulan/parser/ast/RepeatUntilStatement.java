@@ -7,10 +7,14 @@ public class RepeatUntilStatement extends BodyStatement {
 	private final Expr condition;
 	private final Block block;
 
-	public RepeatUntilStatement(SourceInfo src, Expr condition, Block block) {
-		super(src);
+	public RepeatUntilStatement(SourceInfo src, Attributes attr, Expr condition, Block block) {
+		super(src, attr);
 		this.condition = Check.notNull(condition);
 		this.block = Check.notNull(block);
+	}
+
+	public RepeatUntilStatement(SourceInfo src, Expr condition, Block block) {
+		this(src, Attributes.empty(), condition, block);
 	}
 
 	public Expr condition() {
@@ -26,7 +30,7 @@ public class RepeatUntilStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new RepeatUntilStatement(sourceInfo(), condition, block);
+			return new RepeatUntilStatement(sourceInfo(), attributes(), condition, block);
 		}
 	}
 

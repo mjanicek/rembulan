@@ -12,10 +12,6 @@ public abstract class Statement implements SyntaxElement {
 		this.attr = Check.notNull(attr);
 	}
 
-	protected Statement(SourceInfo src) {
-		this(src, Attributes.empty());
-	}
-
 	@Override
 	public SourceInfo sourceInfo() {
 		return src;

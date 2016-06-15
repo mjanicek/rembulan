@@ -5,8 +5,8 @@ package net.sandius.rembulan.parser.ast;
  */
 public abstract class LValueExpr extends Expr {
 
-	protected LValueExpr(SourceInfo src) {
-		super(src);
+	protected LValueExpr(SourceInfo src, Attributes attr) {
+		super(src, attr);
 	}
 
 	@Override

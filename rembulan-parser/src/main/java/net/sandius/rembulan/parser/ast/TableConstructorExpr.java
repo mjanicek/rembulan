@@ -9,9 +9,13 @@ public class TableConstructorExpr extends Expr {
 
 	private final List<FieldInitialiser> fields;
 
-	public TableConstructorExpr(SourceInfo src, List<FieldInitialiser> fields) {
-		super(src);
+	public TableConstructorExpr(SourceInfo src, Attributes attr, List<FieldInitialiser> fields) {
+		super(src, attr);
 		this.fields = Check.notNull(fields);
+	}
+
+	public TableConstructorExpr(SourceInfo src, List<FieldInitialiser> fields) {
+		this(src, Attributes.empty(), fields);
 	}
 
 	public static class FieldInitialiser {
@@ -52,7 +56,7 @@ public class TableConstructorExpr extends Expr {
 			return this;
 		}
 		else {
-			return new TableConstructorExpr(sourceInfo(), fields);
+			return new TableConstructorExpr(sourceInfo(), attributes(), fields);
 		}
 	}
 

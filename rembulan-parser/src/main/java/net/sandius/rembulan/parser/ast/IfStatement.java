@@ -10,11 +10,15 @@ public class IfStatement extends BodyStatement {
 	private final List<ConditionalBlock> elifs;
 	private final Block elseBlock;  // may be null
 
-	public IfStatement(SourceInfo src, ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock) {
-		super(src);
+	public IfStatement(SourceInfo src, Attributes attr, ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock) {
+		super(src, attr);
 		this.main = Check.notNull(main);
 		this.elifs = Check.notNull(elifs);
 		this.elseBlock = elseBlock;
+	}
+
+	public IfStatement(SourceInfo src, ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock) {
+		this(src, Attributes.empty(), main, elifs, elseBlock);
 	}
 
 	public ConditionalBlock main() {
@@ -34,7 +38,7 @@ public class IfStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new IfStatement(sourceInfo(), main, elifs, elseBlock);
+			return new IfStatement(sourceInfo(), attributes(), main, elifs, elseBlock);
 		}
 	}
 

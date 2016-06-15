@@ -6,9 +6,13 @@ public class VarExpr extends LValueExpr {
 
 	private final Name name;
 
-	public VarExpr(SourceInfo src, Name name) {
-		super(src);
+	public VarExpr(SourceInfo src, Attributes attr, Name name) {
+		super(src, attr);
 		this.name = Check.notNull(name);
+	}
+
+	public VarExpr(SourceInfo src, Name name) {
+		this(src, Attributes.empty(), name);
 	}
 
 	public Name name() {

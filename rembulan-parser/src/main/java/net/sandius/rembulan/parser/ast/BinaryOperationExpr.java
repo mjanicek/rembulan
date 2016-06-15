@@ -8,11 +8,15 @@ public class BinaryOperationExpr extends Expr {
 	private final Expr left;
 	private final Expr right;
 
-	public BinaryOperationExpr(SourceInfo src, Operator.Binary op, Expr left, Expr right) {
-		super(src);
+	public BinaryOperationExpr(SourceInfo src, Attributes attr, Operator.Binary op, Expr left, Expr right) {
+		super(src, attr);
 		this.op = Check.notNull(op);
 		this.left = Check.notNull(left);
 		this.right = Check.notNull(right);
+	}
+
+	public BinaryOperationExpr(SourceInfo src, Operator.Binary op, Expr left, Expr right) {
+		this(src, Attributes.empty(), op, left, right);
 	}
 
 	public Operator.Binary op() {
@@ -32,7 +36,7 @@ public class BinaryOperationExpr extends Expr {
 			return this;
 		}
 		else {
-			return new BinaryOperationExpr(sourceInfo(), op, left, right);
+			return new BinaryOperationExpr(sourceInfo(), attributes(), op, left, right);
 		}
 	}
 

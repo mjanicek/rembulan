@@ -6,9 +6,13 @@ public class GotoStatement extends BodyStatement {
 
 	private final Name labelName;
 
-	public GotoStatement(SourceInfo src, Name labelName) {
-		super(src);
+	public GotoStatement(SourceInfo src, Attributes attr, Name labelName) {
+		super(src, attr);
 		this.labelName = Check.notNull(labelName);
+	}
+
+	public GotoStatement(SourceInfo src, Name labelName) {
+		this(src, Attributes.empty(), labelName);
 	}
 
 	public Name labelName() {
@@ -20,7 +24,7 @@ public class GotoStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new GotoStatement(sourceInfo(), labelName);
+			return new GotoStatement(sourceInfo(), attributes(), labelName);
 		}
 	}
 

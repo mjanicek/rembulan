@@ -12,10 +12,6 @@ public abstract class Expr implements SyntaxElement {
 		this.attr = Check.notNull(attr);
 	}
 
-	protected Expr(SourceInfo src) {
-		this(src, Attributes.empty());
-	}
-
 	@Override
 	public SourceInfo sourceInfo() {
 		return src;

@@ -10,8 +10,8 @@ public class LocalDeclStatement extends BodyStatement {
 	private final List<Name> names;
 	private final List<Expr> initialisers;
 
-	private LocalDeclStatement(SourceInfo src, List<Name> names, List<Expr> initialisers) {
-		super(src);
+	private LocalDeclStatement(SourceInfo src, Attributes attr, List<Name> names, List<Expr> initialisers) {
+		super(src, attr);
 		this.names = Check.notNull(names);
 		if (names.isEmpty()) {
 			throw new IllegalArgumentException("name list must not be empty");
@@ -20,7 +20,7 @@ public class LocalDeclStatement extends BodyStatement {
 	}
 
 	public static final LocalDeclStatement of(SourceInfo src, List<Name> names, List<Expr> initialisers) {
-		return new LocalDeclStatement(src, names, initialisers);
+		return new LocalDeclStatement(src, Attributes.empty(), names, initialisers);
 	}
 
 	public static final LocalDeclStatement of(SourceInfo src, List<Name> names) {
@@ -44,7 +44,7 @@ public class LocalDeclStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new LocalDeclStatement(sourceInfo(), names, initialisers);
+			return new LocalDeclStatement(sourceInfo(), attributes(), names, initialisers);
 		}
 	}
 

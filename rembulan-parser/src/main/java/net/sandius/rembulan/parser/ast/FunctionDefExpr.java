@@ -6,9 +6,13 @@ public class FunctionDefExpr extends Expr {
 
 	private final FunctionLiteral body;
 
-	public FunctionDefExpr(SourceInfo src, FunctionLiteral body) {
-		super(src);
+	public FunctionDefExpr(SourceInfo src, Attributes attr, FunctionLiteral body) {
+		super(src, attr);
 		this.body = Check.notNull(body);
+	}
+
+	public FunctionDefExpr(SourceInfo src, FunctionLiteral body) {
+		this(src, Attributes.empty(), body);
 	}
 
 	public FunctionLiteral body() {
