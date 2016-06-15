@@ -21,10 +21,6 @@ public class NumericForStatement extends BodyStatement {
 		this.block = Check.notNull(block);
 	}
 
-	public NumericForStatement(SourceInfo src, Name name, Expr init, Expr limit, Expr step, Block block) {
-		this(src, Attributes.empty(), name, init, limit, step, block);
-	}
-
 	public Name name() {
 		return name;
 	}

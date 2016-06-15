@@ -11,10 +11,6 @@ public class LabelStatement extends BodyStatement {
 		this.labelName = Check.notNull(labelName);
 	}
 
-	public LabelStatement(SourceInfo src, Name labelName) {
-		this(src, Attributes.empty(), labelName);
-	}
-
 	public Name labelName() {
 		return labelName;
 	}

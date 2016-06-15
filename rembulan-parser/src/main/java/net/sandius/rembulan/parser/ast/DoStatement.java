@@ -11,10 +11,6 @@ public class DoStatement extends BodyStatement {
 		this.block = Check.notNull(block);
 	}
 
-	public DoStatement(SourceInfo src, Block block) {
-		this(src, Attributes.empty(), block);
-	}
-
 	public Block block() {
 		return block;
 	}

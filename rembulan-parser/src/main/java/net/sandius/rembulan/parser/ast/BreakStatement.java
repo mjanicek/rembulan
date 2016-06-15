@@ -6,10 +6,6 @@ public class BreakStatement extends BodyStatement {
 		super(src, attr);
 	}
 
-	public BreakStatement(SourceInfo src) {
-		this(src, Attributes.empty());
-	}
-
 	@Override
 	public BodyStatement accept(Transformer tf) {
 		return tf.transform(this);

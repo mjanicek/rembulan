@@ -13,10 +13,6 @@ public class ReturnStatement extends Statement {
 		this.exprs = Check.notNull(exprs);
 	}
 
-	public ReturnStatement(SourceInfo src, List<Expr> exprs) {
-		this(src, Attributes.empty(), exprs);
-	}
-
 	public List<Expr> exprs() {
 		return exprs;
 	}

@@ -17,10 +17,6 @@ public class IfStatement extends BodyStatement {
 		this.elseBlock = elseBlock;
 	}
 
-	public IfStatement(SourceInfo src, ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock) {
-		this(src, Attributes.empty(), main, elifs, elseBlock);
-	}
-
 	public ConditionalBlock main() {
 		return main;
 	}

@@ -11,10 +11,6 @@ public class GotoStatement extends BodyStatement {
 		this.labelName = Check.notNull(labelName);
 	}
 
-	public GotoStatement(SourceInfo src, Name labelName) {
-		this(src, Attributes.empty(), labelName);
-	}
-
 	public Name labelName() {
 		return labelName;
 	}

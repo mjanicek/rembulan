@@ -15,10 +15,6 @@ public class AssignStatement extends BodyStatement {
 		this.exprs = Check.notNull(exprs);
 	}
 
-	public AssignStatement(SourceInfo src, List<LValueExpr> vars, List<Expr> exprs) {
-		this(src, Attributes.empty(), vars, exprs);
-	}
-
 	public List<LValueExpr> vars() {
 		return vars;
 	}

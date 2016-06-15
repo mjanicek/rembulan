@@ -13,10 +13,6 @@ public class WhileStatement extends BodyStatement {
 		this.block = Check.notNull(block);
 	}
 
-	public WhileStatement(SourceInfo src, Expr condition, Block block) {
-		this(src, Attributes.empty(), condition, block);
-	}
-
 	public Expr condition() {
 		return condition;
 	}

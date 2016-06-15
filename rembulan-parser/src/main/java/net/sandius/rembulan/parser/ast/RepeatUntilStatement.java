@@ -13,10 +13,6 @@ public class RepeatUntilStatement extends BodyStatement {
 		this.block = Check.notNull(block);
 	}
 
-	public RepeatUntilStatement(SourceInfo src, Expr condition, Block block) {
-		this(src, Attributes.empty(), condition, block);
-	}
-
 	public Expr condition() {
 		return condition;
 	}

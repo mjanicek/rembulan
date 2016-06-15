@@ -280,32 +280,32 @@ List<BodyStatement> BodyStatement() :
 |	s=AssignOrCall()  { return one(s); }
 
 	// label
-|   t=<DOUBLE_COLON> n=Name() <DOUBLE_COLON> { return one(new LabelStatement(src(t), n)); }
+|   t=<DOUBLE_COLON> n=Name() <DOUBLE_COLON> { return one(Statements.labelStatement(src(t), n)); }
 
 	// break
-|	t=<BREAK>  { return one(new BreakStatement(src(t))); }
+|	t=<BREAK>  { return one(Statements.breakStatement(src(t))); }
 
 	// goto
-|	t=<GOTO> n=Name()  { return one(new GotoStatement(src(t), n)); }
+|	t=<GOTO> n=Name()  { return one(Statements.gotoStatement(src(t), n)); }
 
 	// nested block
-|	t=<DO> b=Block() <END>  { return one(new DoStatement(src(t), b)); }
+|	t=<DO> b=Block() <END>  { return one(Statements.doStatement(src(t), b)); }
 
 	// while loop
-|	t=<WHILE> e=Expr() <DO> b=Block() <END>  { return one(new WhileStatement(src(t), e, b)); }
+|	t=<WHILE> e=Expr() <DO> b=Block() <END>  { return one(Statements.whileStatement(src(t), e, b)); }
 
 	// repeat-until loop
-|	t=<REPEAT> b=Block() <UNTIL> e=Expr()  { return one(new RepeatUntilStatement(src(t), e, b)); }
+|	t=<REPEAT> b=Block() <UNTIL> e=Expr()  { return one(Statements.repeatUntilStatement(src(t), e, b)); }
 
 	// if-then-else
 |	s=IfStatement()  { return one(s); }
 
 	// numeric for
-|	LOOKAHEAD(3) t=<FOR> n=Name() <ASSIGN> e=Expr() <COMMA> f=Expr() (<COMMA> g=Expr())? <DO> b=Block() <END>  { return one(new NumericForStatement(src(t), n, e, f, g, b)); }
+|	LOOKAHEAD(3) t=<FOR> n=Name() <ASSIGN> e=Expr() <COMMA> f=Expr() (<COMMA> g=Expr())? <DO> b=Block() <END>  { return one(Statements.numericForStatement(src(t), n, e, f, g, b)); }
 
 	// generic for
 |	t=<FOR> names=NameList() <IN> exprs=ExprList() <DO> b=Block() <END>  {
-		return one(new GenericForStatement(src(t), toNameList(names), exprs, b));
+		return one(Statements.genericForStatement(src(t), toNameList(names), exprs, b));
 	}
 
 	// function definition
@@ -321,7 +321,7 @@ List<BodyStatement> BodyStatement() :
 			fb = new FunctionLiteral(params, fb.block());
 		}
 
-		return one(new AssignStatement(src(t),
+		return one(Statements.assignStatement(src(t),
 				Collections.<LValueExpr>singletonList(fnb.get()),
 				Collections.<Expr>singletonList(Exprs.functionDef(src(t), fb))));
 	}
@@ -329,15 +329,15 @@ List<BodyStatement> BodyStatement() :
 	// local function definition
 |	LOOKAHEAD(2) t=<LOCAL> u=<FUNCTION> sn=SrcName() fb=FunctionBody()  {
 		return pair(
-				LocalDeclStatement.singleton(src(t), sn.element()),
-				new AssignStatement(src(t),
+				Statements.localDeclStatement(src(t), sn.element()),
+				Statements.assignStatement(src(t),
 						Collections.<LValueExpr>singletonList(Exprs.var(sn.sourceInfo(), sn.element())),
 						Collections.<Expr>singletonList(Exprs.functionDef(src(u), fb))));
 	}
 
 	// locals declaration
 |	t=<LOCAL> names=NameList() (<ASSIGN> exprs=ExprList())?  {
-		return one(LocalDeclStatement.of(src(t), toNameList(names), exprs));
+		return one(Statements.localDeclStatement(src(t), toNameList(names), exprs));
 	}
 }
 
@@ -427,7 +427,7 @@ BodyStatement AssignOrCall() :
 	{
 		if (e instanceof CallExpr) {
 			CallExpr ce = (CallExpr) e;
-			return new CallStatement(ce.sourceInfo(), ce);
+			return Statements.callStatement(ce.sourceInfo(), ce);
 		}
 		else {
 			throw new ParseException("function call expected");
@@ -487,7 +487,7 @@ IfStatement IfStatement() :
 	t=<IF> e=Expr() <THEN> b=Block() { ift = new ConditionalBlock(e, b); }
 			(<ELSEIF> e=Expr() <THEN> b=Block() { elifs.add(new ConditionalBlock(e, b)); } )*
 			(<ELSE> els=Block())?
-			<END>  { return new IfStatement(src(t), ift, elifs, els); }
+			<END>  { return Statements.ifStatement(src(t), ift, elifs, els); }
 }
 
 /*
@@ -499,7 +499,7 @@ ReturnStatement ReturnStatement() :
 	List<Expr> exprs = Collections.emptyList();
 }
 {
-	t=<RETURN> (exprs=ExprList())? (<SEMICOLON>)? { return new ReturnStatement(src(t), exprs); }
+	t=<RETURN> (exprs=ExprList())? (<SEMICOLON>)? { return Statements.returnStatement(src(t), exprs); }
 }
 
 PostfixOp.FieldAccess __FieldAccessOp() :

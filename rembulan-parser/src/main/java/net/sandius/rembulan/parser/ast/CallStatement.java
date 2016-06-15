@@ -11,10 +11,6 @@ public class CallStatement extends BodyStatement {
 		this.callExpr = Check.notNull(callExpr);
 	}
 
-	public CallStatement(SourceInfo src, CallExpr callExpr) {
-		this(src, Attributes.empty(), callExpr);
-	}
-
 	public CallExpr callExpr() {
 		return callExpr;
 	}

@@ -32,7 +32,7 @@ class AssignRest {
 		List<LValueExpr> vs = new ArrayList<>();
 		vs.add(v);
 		vs.addAll(vars);
-		return new AssignStatement(src, Collections.unmodifiableList(vs), exprs);
+		return Statements.assignStatement(src, Collections.unmodifiableList(vs), exprs);
 	}
 
 }

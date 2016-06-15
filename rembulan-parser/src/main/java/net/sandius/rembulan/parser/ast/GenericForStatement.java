@@ -17,10 +17,6 @@ public class GenericForStatement extends BodyStatement {
 		this.block = Check.notNull(block);
 	}
 
-	public GenericForStatement(SourceInfo src, List<Name> names, List<Expr> exprs, Block block) {
-		this(src, Attributes.empty(), names, exprs, block);
-	}
-
 	public List<Name> names() {
 		return names;
 	}
