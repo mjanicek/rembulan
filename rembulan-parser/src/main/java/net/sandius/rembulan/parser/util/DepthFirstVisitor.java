@@ -23,7 +23,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(DoStatement node) {
 		visitPreDo(node);
-		node.block().accept(this);
+		visit(node.block());
 		visitPostDo(node);
 	}
 
@@ -110,7 +110,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	public void visit(WhileStatement node) {
 		visitPreWhile(node);
 		node.condition().accept(this);
-		node.block().accept(this);
+		visit(node.block());
 		visitPostWhile(node);
 	}
 
@@ -120,7 +120,7 @@ public abstract class DepthFirstVisitor extends Visitor {
 	@Override
 	public void visit(RepeatUntilStatement node) {
 		visitPreRepeat(node);
-		node.block().accept(this);
+		visit(node.block());
 		node.condition().accept(this);
 		visitPostRepeat(node);
 	}

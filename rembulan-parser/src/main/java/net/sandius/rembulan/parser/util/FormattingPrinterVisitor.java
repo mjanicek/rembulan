@@ -73,10 +73,20 @@ public class FormattingPrinterVisitor extends Visitor {
 	}
 
 	@Override
+	public void visit(Block block) {
+		for (BodyStatement s : block.statements()) {
+			s.accept(this);
+		}
+		if (block.returnStatement() != null) {
+			block.returnStatement().accept(this);
+		}
+	}
+
+	@Override
 	public void visit(DoStatement node) {
 		doIndent();
 		out.println("do");
-		node.block().accept(subVisitor());
+		visit(node.block());
 		doIndent();
 		out.println("end");
 	}
@@ -120,7 +130,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	private void printConditionalBlock(ConditionalBlock cbl) {
 		printExpr(cbl.condition());
 		out.println(" then");
-		cbl.block().accept(subVisitor());
+		subVisitor().visit(cbl.block());
 	}
 
 	@Override
@@ -136,7 +146,7 @@ public class FormattingPrinterVisitor extends Visitor {
 		if (node.elseBlock() != null) {
 			doIndent();
 			out.print("else");
-			node.elseBlock().accept(subVisitor());
+			subVisitor().visit(node.elseBlock());
 		}
 		doIndent();
 		out.println("end");
@@ -156,7 +166,7 @@ public class FormattingPrinterVisitor extends Visitor {
 			printExpr(node.step());
 		}
 		out.println(" do");
-		node.block().accept(subVisitor());
+		subVisitor().visit(node.block());
 		doIndent();
 		out.println("end");
 	}
@@ -169,7 +179,7 @@ public class FormattingPrinterVisitor extends Visitor {
 		out.print(" in ");
 		printExprList(node.exprs());
 		out.println(" do");
-		node.block().accept(subVisitor());
+		subVisitor().visit(node.block());
 		doIndent();
 		out.println("end");
 	}
@@ -180,7 +190,7 @@ public class FormattingPrinterVisitor extends Visitor {
 		out.print("while ");
 		printExpr(node.condition());
 		out.println(" do");
-		node.block().accept(subVisitor());
+		subVisitor().visit(node.block());
 		doIndent();
 		out.println("end");
 	}
@@ -189,7 +199,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	public void visit(RepeatUntilStatement node) {
 		doIndent();
 		out.println("repeat");
-		node.block().accept(subVisitor());
+		subVisitor().visit(node.block());
 		out.print("until ");
 		printExpr(node.condition());
 	}
@@ -263,7 +273,7 @@ public class FormattingPrinterVisitor extends Visitor {
 		}
 		out.print(")");
 		out.println();
-		fn.block().accept(subVisitor());
+		subVisitor().visit(fn.block());
 		doIndent();
 		out.print("end");
 	}

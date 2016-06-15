@@ -32,14 +32,4 @@ public class Block {
 		}
 	}
 
-	@Deprecated
-	public void accept(Visitor visitor) {
-		for (BodyStatement s : statements) {
-			s.accept(visitor);
-		}
-		if (ret != null) {
-			ret.accept(visitor);
-		}
-	}
-
 }

@@ -43,7 +43,7 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     val bais = new ByteArrayOutputStream()
     val pw = new PrintWriter(bais)
     val visitor = new FormattingPrinterVisitor(pw)
-    chunk.block().accept(visitor)
+    visitor.visit(chunk.block())
     pw.flush()
     String.valueOf(bais.toByteArray map { _.toChar })
   }
@@ -163,7 +163,7 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
 
             val pw = new PrintWriter(System.out)
             val visitor = new FormattingPrinterVisitor(pw)
-            chunk.block().accept(visitor)
+            visitor.visit(chunk.block())
             pw.flush()
 
             println("---RESULT-END---")
