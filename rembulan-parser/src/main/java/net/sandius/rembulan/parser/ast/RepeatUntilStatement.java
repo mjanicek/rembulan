@@ -7,8 +7,8 @@ public class RepeatUntilStatement extends BodyStatement {
 	private final Expr condition;
 	private final Block block;
 
-	public RepeatUntilStatement(SourceInfo src, Attributes attr, Expr condition, Block block) {
-		super(src, attr);
+	public RepeatUntilStatement(Attributes attr, Expr condition, Block block) {
+		super(attr);
 		this.condition = Check.notNull(condition);
 		this.block = Check.notNull(block);
 	}
@@ -26,7 +26,7 @@ public class RepeatUntilStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new RepeatUntilStatement(sourceInfo(), attributes(), condition, block);
+			return new RepeatUntilStatement(attributes(), condition, block);
 		}
 	}
 

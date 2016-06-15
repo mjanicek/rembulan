@@ -6,8 +6,8 @@ public class LiteralExpr extends Expr {
 
 	private final Literal value;
 
-	public LiteralExpr(SourceInfo src, Attributes attr, Literal value) {
-		super(src, attr);
+	public LiteralExpr(Attributes attr, Literal value) {
+		super(attr);
 		this.value = Check.notNull(value);
 	}
 
@@ -20,7 +20,7 @@ public class LiteralExpr extends Expr {
 			return this;
 		}
 		else {
-			return new LiteralExpr(sourceInfo(), attributes(), value);
+			return new LiteralExpr(attributes(), value);
 		}
 	}
 

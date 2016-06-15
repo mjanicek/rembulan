@@ -6,8 +6,8 @@ public class VarExpr extends LValueExpr {
 
 	private final Name name;
 
-	public VarExpr(SourceInfo src, Attributes attr, Name name) {
-		super(src, attr);
+	public VarExpr(Attributes attr, Name name) {
+		super(attr);
 		this.name = Check.notNull(name);
 	}
 

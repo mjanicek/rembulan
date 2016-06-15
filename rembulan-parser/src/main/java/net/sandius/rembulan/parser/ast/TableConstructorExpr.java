@@ -9,8 +9,8 @@ public class TableConstructorExpr extends Expr {
 
 	private final List<FieldInitialiser> fields;
 
-	public TableConstructorExpr(SourceInfo src, Attributes attr, List<FieldInitialiser> fields) {
-		super(src, attr);
+	public TableConstructorExpr(Attributes attr, List<FieldInitialiser> fields) {
+		super(attr);
 		this.fields = Check.notNull(fields);
 	}
 
@@ -52,7 +52,7 @@ public class TableConstructorExpr extends Expr {
 			return this;
 		}
 		else {
-			return new TableConstructorExpr(sourceInfo(), attributes(), fields);
+			return new TableConstructorExpr(attributes(), fields);
 		}
 	}
 

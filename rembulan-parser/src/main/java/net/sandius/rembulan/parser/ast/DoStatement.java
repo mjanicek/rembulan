@@ -6,8 +6,8 @@ public class DoStatement extends BodyStatement {
 
 	private final Block block;
 
-	public DoStatement(SourceInfo src, Attributes attr, Block block) {
-		super(src, attr);
+	public DoStatement(Attributes attr, Block block) {
+		super(attr);
 		this.block = Check.notNull(block);
 	}
 
@@ -20,7 +20,7 @@ public class DoStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new DoStatement(sourceInfo(), attributes(), block);
+			return new DoStatement(attributes(), block);
 		}
 	}
 

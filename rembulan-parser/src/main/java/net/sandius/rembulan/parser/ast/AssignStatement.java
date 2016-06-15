@@ -9,8 +9,8 @@ public class AssignStatement extends BodyStatement {
 	private final List<LValueExpr> vars;
 	private final List<Expr> exprs;
 
-	public AssignStatement(SourceInfo src, Attributes attr, List<LValueExpr> vars, List<Expr> exprs) {
-		super(src, attr);
+	public AssignStatement(Attributes attr, List<LValueExpr> vars, List<Expr> exprs) {
+		super(attr);
 		this.vars = Check.notNull(vars);
 		this.exprs = Check.notNull(exprs);
 	}
@@ -28,7 +28,7 @@ public class AssignStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new AssignStatement(sourceInfo(), attributes(), vars, exprs);
+			return new AssignStatement(attributes(), vars, exprs);
 		}
 	}
 

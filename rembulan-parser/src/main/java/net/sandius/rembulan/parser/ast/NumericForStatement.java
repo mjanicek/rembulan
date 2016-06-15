@@ -12,8 +12,8 @@ public class NumericForStatement extends BodyStatement {
 	private final Expr step;  // may be null
 	private final Block block;
 
-	public NumericForStatement(SourceInfo src, Attributes attr, Name name, Expr init, Expr limit, Expr step, Block block) {
-		super(src, attr);
+	public NumericForStatement(Attributes attr, Name name, Expr init, Expr limit, Expr step, Block block) {
+		super(attr);
 		this.name = Check.notNull(name);
 		this.init = Check.notNull(init);
 		this.limit = Check.notNull(limit);
@@ -47,7 +47,7 @@ public class NumericForStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new NumericForStatement(sourceInfo(), attributes(), name, init, limit, step, block);
+			return new NumericForStatement(attributes(), name, init, limit, step, block);
 		}
 	}
 

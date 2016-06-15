@@ -7,8 +7,8 @@ public class WhileStatement extends BodyStatement {
 	private final Expr condition;
 	private final Block block;
 
-	public WhileStatement(SourceInfo src, Attributes attr, Expr condition, Block block) {
-		super(src, attr);
+	public WhileStatement(Attributes attr, Expr condition, Block block) {
+		super(attr);
 		this.condition = Check.notNull(condition);
 		this.block = Check.notNull(block);
 	}
@@ -26,7 +26,7 @@ public class WhileStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new WhileStatement(sourceInfo(), attributes(), condition, block);
+			return new WhileStatement(attributes(), condition, block);
 		}
 	}
 

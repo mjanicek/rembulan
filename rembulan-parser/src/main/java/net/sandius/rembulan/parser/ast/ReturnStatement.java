@@ -8,8 +8,8 @@ public class ReturnStatement extends Statement {
 
 	private final List<Expr> exprs;
 
-	public ReturnStatement(SourceInfo src, Attributes attr, List<Expr> exprs) {
-		super(src, attr);
+	public ReturnStatement(Attributes attr, List<Expr> exprs) {
+		super(attr);
 		this.exprs = Check.notNull(exprs);
 	}
 
@@ -22,7 +22,7 @@ public class ReturnStatement extends Statement {
 			return this;
 		}
 		else {
-			return new ReturnStatement(sourceInfo(), attributes(), exprs);
+			return new ReturnStatement(attributes(), exprs);
 		}
 	}
 

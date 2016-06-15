@@ -6,8 +6,8 @@ public class FunctionDefExpr extends Expr {
 
 	private final FunctionLiteral body;
 
-	public FunctionDefExpr(SourceInfo src, Attributes attr, FunctionLiteral body) {
-		super(src, attr);
+	public FunctionDefExpr(Attributes attr, FunctionLiteral body) {
+		super(attr);
 		this.body = Check.notNull(body);
 	}
 
@@ -20,7 +20,7 @@ public class FunctionDefExpr extends Expr {
 			return this;
 		}
 		else {
-			return new FunctionDefExpr(sourceInfo(), attributes(), body);
+			return new FunctionDefExpr(attributes(), body);
 		}
 	}
 

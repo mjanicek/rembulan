@@ -7,8 +7,8 @@ public class IndexExpr extends LValueExpr {
 	private final Expr object;
 	private final Expr key;
 
-	public IndexExpr(SourceInfo src, Attributes attr, Expr object, Expr key) {
-		super(src, attr);
+	public IndexExpr(Attributes attr, Expr object, Expr key) {
+		super(attr);
 		this.object = Check.notNull(object);
 		this.key = Check.notNull(key);
 	}
@@ -26,7 +26,7 @@ public class IndexExpr extends LValueExpr {
 			return this;
 		}
 		else {
-			return new IndexExpr(sourceInfo(), attributes(), object, key);
+			return new IndexExpr(attributes(), object, key);
 		}
 	}
 

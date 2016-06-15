@@ -8,8 +8,8 @@ public class BinaryOperationExpr extends Expr {
 	private final Expr left;
 	private final Expr right;
 
-	public BinaryOperationExpr(SourceInfo src, Attributes attr, Operator.Binary op, Expr left, Expr right) {
-		super(src, attr);
+	public BinaryOperationExpr(Attributes attr, Operator.Binary op, Expr left, Expr right) {
+		super(attr);
 		this.op = Check.notNull(op);
 		this.left = Check.notNull(left);
 		this.right = Check.notNull(right);
@@ -32,7 +32,7 @@ public class BinaryOperationExpr extends Expr {
 			return this;
 		}
 		else {
-			return new BinaryOperationExpr(sourceInfo(), attributes(), op, left, right);
+			return new BinaryOperationExpr(attributes(), op, left, right);
 		}
 	}
 

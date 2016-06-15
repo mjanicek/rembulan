@@ -4,16 +4,14 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class SyntaxElement {
 
-	private final SourceInfo src;
 	private final Attributes attr;
 
-	protected SyntaxElement(SourceInfo src, Attributes attr) {
-		this.src = Check.notNull(src);
+	protected SyntaxElement(Attributes attr) {
 		this.attr = Check.notNull(attr);
 	}
 
 	public SourceInfo sourceInfo() {
-		return src;
+		return attr.get(SourceInfo.class);
 	}
 
 	public Attributes attributes() {

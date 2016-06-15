@@ -2,8 +2,8 @@ package net.sandius.rembulan.parser.ast;
 
 public class BreakStatement extends BodyStatement {
 
-	public BreakStatement(SourceInfo src, Attributes attr) {
-		super(src, attr);
+	public BreakStatement(Attributes attr) {
+		super(attr);
 	}
 
 	@Override

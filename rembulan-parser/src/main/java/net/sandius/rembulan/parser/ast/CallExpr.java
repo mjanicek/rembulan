@@ -8,8 +8,8 @@ public abstract class CallExpr extends Expr {
 
 	protected final List<Expr> args;
 
-	protected CallExpr(SourceInfo src, Attributes attr, List<Expr> args) {
-		super(src, attr);
+	protected CallExpr(Attributes attr, List<Expr> args) {
+		super(attr);
 		this.args = Check.notNull(args);
 	}
 
@@ -21,8 +21,8 @@ public abstract class CallExpr extends Expr {
 
 		private final Expr fn;
 
-		public FunctionCallExpr(SourceInfo src, Attributes attr, Expr fn, List<Expr> args) {
-			super(src, attr, args);
+		public FunctionCallExpr(Attributes attr, Expr fn, List<Expr> args) {
+			super(attr, args);
 			this.fn = Check.notNull(fn);
 		}
 
@@ -35,7 +35,7 @@ public abstract class CallExpr extends Expr {
 				return this;
 			}
 			else {
-				return new FunctionCallExpr(sourceInfo(), attributes(), fn, args);
+				return new FunctionCallExpr(attributes(), fn, args);
 			}
 		}
 
@@ -51,8 +51,8 @@ public abstract class CallExpr extends Expr {
 		private final Expr target;
 		private final Name methodName;
 
-		public MethodCallExpr(SourceInfo src, Attributes attr, Expr target, Name methodName, List<Expr> args) {
-			super(src, attr, args);
+		public MethodCallExpr(Attributes attr, Expr target, Name methodName, List<Expr> args) {
+			super(attr, args);
 			this.target = Check.notNull(target);
 			this.methodName = Check.notNull(methodName);
 		}
@@ -70,7 +70,7 @@ public abstract class CallExpr extends Expr {
 				return this;
 			}
 			else {
-				return new MethodCallExpr(sourceInfo(), attributes(), target, methodName, args);
+				return new MethodCallExpr(attributes(), target, methodName, args);
 			}
 		}
 

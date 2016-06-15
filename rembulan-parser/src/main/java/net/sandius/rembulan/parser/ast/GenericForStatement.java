@@ -10,8 +10,8 @@ public class GenericForStatement extends BodyStatement {
 	private final List<Expr> exprs;
 	private final Block block;
 
-	public GenericForStatement(SourceInfo src, Attributes attr, List<Name> names, List<Expr> exprs, Block block) {
-		super(src, attr);
+	public GenericForStatement(Attributes attr, List<Name> names, List<Expr> exprs, Block block) {
+		super(attr);
 		this.names = Check.notNull(names);
 		this.exprs = Check.notNull(exprs);
 		this.block = Check.notNull(block);
@@ -34,7 +34,7 @@ public class GenericForStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new GenericForStatement(sourceInfo(), attributes(), names, exprs, block);
+			return new GenericForStatement(attributes(), names, exprs, block);
 		}
 	}
 

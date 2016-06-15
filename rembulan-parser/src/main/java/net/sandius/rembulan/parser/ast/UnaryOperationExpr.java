@@ -7,8 +7,8 @@ public class UnaryOperationExpr extends Expr {
 	private final Operator.Unary op;
 	private final Expr arg;
 
-	public UnaryOperationExpr(SourceInfo src, Attributes attr, Operator.Unary op, Expr arg) {
-		super(src, attr);
+	public UnaryOperationExpr(Attributes attr, Operator.Unary op, Expr arg) {
+		super(attr);
 		this.op = Check.notNull(op);
 		this.arg = Check.notNull(arg);
 	}
@@ -26,7 +26,7 @@ public class UnaryOperationExpr extends Expr {
 			return this;
 		}
 		else {
-			return new UnaryOperationExpr(sourceInfo(), attributes(), op, arg);
+			return new UnaryOperationExpr(attributes(), op, arg);
 		}
 	}
 

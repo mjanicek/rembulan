@@ -2,7 +2,6 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
-import java.util.Collections;
 import java.util.List;
 
 public class LocalDeclStatement extends BodyStatement {
@@ -10,8 +9,8 @@ public class LocalDeclStatement extends BodyStatement {
 	private final List<Name> names;
 	private final List<Expr> initialisers;
 
-	public LocalDeclStatement(SourceInfo src, Attributes attr, List<Name> names, List<Expr> initialisers) {
-		super(src, attr);
+	public LocalDeclStatement(Attributes attr, List<Name> names, List<Expr> initialisers) {
+		super(attr);
 		this.names = Check.notNull(names);
 		if (names.isEmpty()) {
 			throw new IllegalArgumentException("name list must not be empty");
@@ -32,7 +31,7 @@ public class LocalDeclStatement extends BodyStatement {
 			return this;
 		}
 		else {
-			return new LocalDeclStatement(sourceInfo(), attributes(), names, initialisers);
+			return new LocalDeclStatement(attributes(), names, initialisers);
 		}
 	}
 
