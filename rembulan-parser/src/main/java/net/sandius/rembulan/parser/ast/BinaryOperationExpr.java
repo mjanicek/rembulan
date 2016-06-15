@@ -15,10 +15,6 @@ public class BinaryOperationExpr extends Expr {
 		this.right = Check.notNull(right);
 	}
 
-	public BinaryOperationExpr(SourceInfo src, Operator.Binary op, Expr left, Expr right) {
-		this(src, Attributes.empty(), op, left, right);
-	}
-
 	public Operator.Binary op() {
 		return op;
 	}

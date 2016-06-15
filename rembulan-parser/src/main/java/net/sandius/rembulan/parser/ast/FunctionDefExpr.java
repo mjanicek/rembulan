@@ -11,10 +11,6 @@ public class FunctionDefExpr extends Expr {
 		this.body = Check.notNull(body);
 	}
 
-	public FunctionDefExpr(SourceInfo src, FunctionLiteral body) {
-		this(src, Attributes.empty(), body);
-	}
-
 	public FunctionLiteral body() {
 		return body;
 	}

@@ -26,10 +26,6 @@ public abstract class CallExpr extends Expr {
 			this.fn = Check.notNull(fn);
 		}
 
-		public FunctionCallExpr(SourceInfo src, Expr fn, List<Expr> args) {
-			this(src, Attributes.empty(), fn, args);
-		}
-
 		public Expr fn() {
 			return fn;
 		}
@@ -59,10 +55,6 @@ public abstract class CallExpr extends Expr {
 			super(src, attr, args);
 			this.target = Check.notNull(target);
 			this.methodName = Check.notNull(methodName);
-		}
-
-		public MethodCallExpr(SourceInfo src, Expr target, Name methodName, List<Expr> args) {
-			this(src, Attributes.empty(), target, methodName, args);
 		}
 
 		public Expr target() {

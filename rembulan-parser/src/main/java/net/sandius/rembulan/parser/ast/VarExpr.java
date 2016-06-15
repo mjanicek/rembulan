@@ -11,10 +11,6 @@ public class VarExpr extends LValueExpr {
 		this.name = Check.notNull(name);
 	}
 
-	public VarExpr(SourceInfo src, Name name) {
-		this(src, Attributes.empty(), name);
-	}
-
 	public Name name() {
 		return name;
 	}

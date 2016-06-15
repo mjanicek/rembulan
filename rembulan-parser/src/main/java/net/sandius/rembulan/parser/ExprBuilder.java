@@ -1,10 +1,8 @@
 package net.sandius.rembulan.parser;
 
-import net.sandius.rembulan.parser.ast.BinaryOperationExpr;
 import net.sandius.rembulan.parser.ast.Expr;
 import net.sandius.rembulan.parser.ast.Operator;
 import net.sandius.rembulan.parser.ast.SourceInfo;
-import net.sandius.rembulan.parser.ast.UnaryOperationExpr;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Stack;
@@ -41,11 +39,11 @@ class ExprBuilder {
 		if (op instanceof Operator.Binary) {
 			Expr r = operandStack.pop();
 			Expr l = operandStack.pop();
-			operandStack.push(new BinaryOperationExpr(src, (Operator.Binary) op, l, r));
+			operandStack.push(Exprs.binaryOperation(src, (Operator.Binary) op, l, r));
 		}
 		else if (op instanceof Operator.Unary) {
 			Expr a = operandStack.pop();
-			operandStack.push(new UnaryOperationExpr(src, (Operator.Unary) op, a));
+			operandStack.push(Exprs.unaryOperation(src, (Operator.Unary) op, a));
 		}
 		else {
 			throw new IllegalStateException("Illegal operator: " + op);

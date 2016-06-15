@@ -11,10 +11,6 @@ public class LiteralExpr extends Expr {
 		this.value = Check.notNull(value);
 	}
 
-	public LiteralExpr(SourceInfo src, Literal value) {
-		this(src, Attributes.empty(), value);
-	}
-
 	public Literal value() {
 		return value;
 	}

@@ -14,10 +14,6 @@ public class TableConstructorExpr extends Expr {
 		this.fields = Check.notNull(fields);
 	}
 
-	public TableConstructorExpr(SourceInfo src, List<FieldInitialiser> fields) {
-		this(src, Attributes.empty(), fields);
-	}
-
 	public static class FieldInitialiser {
 
 		private final Expr keyExpr;  // may be null

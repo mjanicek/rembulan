@@ -6,10 +6,6 @@ public class VarargsExpr extends Expr {
 		super(src, attr);
 	}
 
-	public VarargsExpr(SourceInfo src) {
-		this(src, Attributes.empty());
-	}
-
 	@Override
 	public Expr accept(Transformer tf) {
 		return tf.transform(this);

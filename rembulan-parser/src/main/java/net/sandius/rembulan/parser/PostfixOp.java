@@ -29,7 +29,7 @@ abstract class PostfixOp {
 
 		@Override
 		public IndexExpr on(Expr exp) {
-			return new IndexExpr(src, exp, keyExpr);
+			return Exprs.index(src, exp, keyExpr);
 		}
 
 	}
@@ -47,8 +47,8 @@ abstract class PostfixOp {
 		@Override
 		public CallExpr on(Expr exp) {
 			return method != null
-					? new CallExpr.MethodCallExpr(args.sourceInfo(), exp, method, args.element())
-					: new CallExpr.FunctionCallExpr(args.sourceInfo(), exp, args.element());
+					? Exprs.methodCall(args.sourceInfo(), exp, method, args.element())
+					: Exprs.functionCall(args.sourceInfo(), exp, args.element());
 		}
 
 	}

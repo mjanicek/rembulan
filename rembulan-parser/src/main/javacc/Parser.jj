@@ -323,7 +323,7 @@ List<BodyStatement> BodyStatement() :
 
 		return one(new AssignStatement(src(t),
 				Collections.<LValueExpr>singletonList(fnb.get()),
-				Collections.<Expr>singletonList(new FunctionDefExpr(src(t), fb))));
+				Collections.<Expr>singletonList(Exprs.functionDef(src(t), fb))));
 	}
 
 	// local function definition
@@ -331,8 +331,8 @@ List<BodyStatement> BodyStatement() :
 		return pair(
 				LocalDeclStatement.singleton(src(t), sn.element()),
 				new AssignStatement(src(t),
-						Collections.<LValueExpr>singletonList(new VarExpr(sn.sourceInfo(), sn.element())),
-						Collections.<Expr>singletonList(new FunctionDefExpr(src(u), fb))));
+						Collections.<LValueExpr>singletonList(Exprs.var(sn.sourceInfo(), sn.element())),
+						Collections.<Expr>singletonList(Exprs.functionDef(src(u), fb))));
 	}
 
 	// locals declaration
@@ -367,13 +367,13 @@ Expr SimpleExpr() :
 	FunctionLiteral fn;
 }
 {
-	t=<NIL>    { return new LiteralExpr(src(t), NilLiteral.INSTANCE); }
-|	t=<FALSE>  { return new LiteralExpr(src(t), BooleanLiteral.FALSE); }
-|	t=<TRUE>   { return new LiteralExpr(src(t), BooleanLiteral.TRUE); }
-|	sn=Num()  { return new LiteralExpr(sn.sourceInfo(), sn.element()); }
-|	ss=Str()  {return new LiteralExpr(ss.sourceInfo(), ss.element()); }
-|	t=<VARARGS>  { return new VarargsExpr(src(t)); }
-|	t=<FUNCTION> fn=FunctionBody()  { return new FunctionDefExpr(src(t), fn); }
+	t=<NIL>    { return Exprs.literal(src(t), NilLiteral.INSTANCE); }
+|	t=<FALSE>  { return Exprs.literal(src(t), BooleanLiteral.FALSE); }
+|	t=<TRUE>   { return Exprs.literal(src(t), BooleanLiteral.TRUE); }
+|	sn=Num()  { return Exprs.literal(sn.sourceInfo(), sn.element()); }
+|	ss=Str()  {return Exprs.literal(ss.sourceInfo(), ss.element()); }
+|	t=<VARARGS>  { return Exprs.varargs(src(t)); }
+|	t=<FUNCTION> fn=FunctionBody()  { return Exprs.functionDef(src(t), fn); }
 |	e=PrefixExpr()  { return e; }
 |	e=TableConstructor()  { return e; }
 }
@@ -393,7 +393,7 @@ Expr VarExpr() :
 	Expr e;
 }
 {
-	sn=SrcName()  { return new VarExpr(sn.sourceInfo(), sn.element()); }
+	sn=SrcName()  { return Exprs.var(sn.sourceInfo(), sn.element()); }
 |	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return e; }
 }
 
@@ -457,7 +457,7 @@ LValueExpr LValue() :
 	PostfixOp.FieldAccess fa;
 }
 {
-	LOOKAHEAD(2) sn=SrcName()  { return new VarExpr(sn.sourceInfo(), sn.element()); }
+	LOOKAHEAD(2) sn=SrcName()  { return Exprs.var(sn.sourceInfo(), sn.element()); }
 |	e=PrefixExpr() fa=__FieldAccessOp()  { return fa.on(e); }
 }
 
@@ -471,7 +471,7 @@ SourceElement<List<Expr>> Args() :
 {
 	t=<PAREN_OPEN> (es=ExprList())? <PAREN_CLOSE>  { return new SourceElement<List<Expr>>(src(t), es); }
 |	e=TableConstructor()  { return new SourceElement<List<Expr>>(e.sourceInfo(), Collections.<Expr>singletonList(e)); }
-|	ss=Str()  { return new SourceElement<List<Expr>>(ss.sourceInfo(), Collections.<Expr>singletonList(new LiteralExpr(ss.sourceInfo(), ss.element()))); }
+|	ss=Str()  { return new SourceElement<List<Expr>>(ss.sourceInfo(), Collections.<Expr>singletonList(Exprs.literal(ss.sourceInfo(), ss.element()))); }
 }
 
 IfStatement IfStatement() :
@@ -510,7 +510,7 @@ PostfixOp.FieldAccess __FieldAccessOp() :
 }
 {
 	t=<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE>  { return new PostfixOp.FieldAccess(src(t), e); }
-|	t=<DOT> sn=SrcName()  { return new PostfixOp.FieldAccess(src(t), new LiteralExpr(sn.sourceInfo(), StringLiteral.fromName(sn.element()))); }
+|	t=<DOT> sn=SrcName()  { return new PostfixOp.FieldAccess(src(t), Exprs.literal(sn.sourceInfo(), StringLiteral.fromName(sn.element()))); }
 }
 
 PostfixOp.Invoke __InvokeOp() :
@@ -567,7 +567,7 @@ TableConstructorExpr TableConstructor() :
 	List<TableConstructorExpr.FieldInitialiser> fields = new ArrayList<TableConstructorExpr.FieldInitialiser>();
 }
 {
-	t=<CURLY_OPEN> (fields=FieldInitialiserList())? <CURLY_CLOSE>  { return new TableConstructorExpr(src(t), fields); }
+	t=<CURLY_OPEN> (fields=FieldInitialiserList())? <CURLY_CLOSE>  { return Exprs.tableConstructor(src(t), fields); }
 }
 
 void FieldSeparator() :
@@ -592,9 +592,9 @@ TableConstructorExpr.FieldInitialiser FieldInitialiser() :
 	SourceElement<Name> sn;
 }
 {
-	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE> <ASSIGN> f=Expr()  { return new TableConstructorExpr.FieldInitialiser(e, f); }
-|	LOOKAHEAD(2) sn=SrcName() <ASSIGN> e=Expr()  { return new TableConstructorExpr.FieldInitialiser(new LiteralExpr(sn.sourceInfo(), StringLiteral.fromName(sn.element())), e); }
-|	e=Expr()  { return new TableConstructorExpr.FieldInitialiser(null, e); }
+	<SQUARE_OPEN> e=Expr() <SQUARE_CLOSE> <ASSIGN> f=Expr()  { return Exprs.fieldInitialiser(e, f); }
+|	LOOKAHEAD(2) sn=SrcName() <ASSIGN> e=Expr()  { return Exprs.fieldInitialiser(Exprs.literal(sn.sourceInfo(), StringLiteral.fromName(sn.element())), e); }
+|	e=Expr()  { return Exprs.fieldInitialiser(null, e); }
 }
 
 /*

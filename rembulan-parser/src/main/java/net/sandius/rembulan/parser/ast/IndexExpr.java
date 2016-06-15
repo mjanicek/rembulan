@@ -13,10 +13,6 @@ public class IndexExpr extends LValueExpr {
 		this.key = Check.notNull(key);
 	}
 
-	public IndexExpr(SourceInfo src, Expr object, Expr key) {
-		this(src, Attributes.empty(), object, key);
-	}
-
 	public Expr object() {
 		return object;
 	}

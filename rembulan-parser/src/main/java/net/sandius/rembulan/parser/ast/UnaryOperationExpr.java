@@ -13,10 +13,6 @@ public class UnaryOperationExpr extends Expr {
 		this.arg = Check.notNull(arg);
 	}
 
-	public UnaryOperationExpr(SourceInfo src, Operator.Unary op, Expr arg) {
-		this(src, Attributes.empty(), op, arg);
-	}
-
 	public Operator.Unary op() {
 		return op;
 	}
