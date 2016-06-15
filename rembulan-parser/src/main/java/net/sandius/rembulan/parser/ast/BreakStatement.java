@@ -11,4 +11,9 @@ public class BreakStatement extends BodyStatement {
 		visitor.visit(this);
 	}
 
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
+	}
+
 }

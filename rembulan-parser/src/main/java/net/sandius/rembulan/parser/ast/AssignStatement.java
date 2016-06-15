@@ -23,9 +23,23 @@ public class AssignStatement extends BodyStatement {
 		return exprs;
 	}
 
+	public AssignStatement update(List<LValueExpr> vars, List<Expr> exprs) {
+		if (this.vars.equals(vars) && this.exprs.equals(exprs)) {
+			return this;
+		}
+		else {
+			return new AssignStatement(sourceInfo(), vars, exprs);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

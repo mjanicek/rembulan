@@ -36,7 +36,7 @@ public class UnaryOperationExpr extends Expr {
 	}
 
 	@Override
-	public Expr acceptTransformer(ExprTransformer tf) {
+	public Expr acceptTransformer(Transformer tf) {
 		return tf.transform(this);
 	}
 

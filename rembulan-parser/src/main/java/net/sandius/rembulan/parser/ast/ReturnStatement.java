@@ -17,9 +17,22 @@ public class ReturnStatement extends Statement {
 		return exprs;
 	}
 
+	public ReturnStatement update(List<Expr> exprs) {
+		if (this.exprs.equals(exprs)) {
+			return this;
+		}
+		else {
+			return new ReturnStatement(sourceInfo(), exprs);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	public ReturnStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

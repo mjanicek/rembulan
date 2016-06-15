@@ -15,9 +15,23 @@ public class CallStatement extends BodyStatement {
 		return callExpr;
 	}
 
+	public CallStatement update(CallExpr callExpr) {
+		if (this.callExpr.equals(callExpr)) {
+			return this;
+		}
+		else {
+			return new CallStatement(sourceInfo(), callExpr);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

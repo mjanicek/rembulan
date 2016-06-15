@@ -36,7 +36,7 @@ public class IndexExpr extends LValueExpr {
 	}
 
 	@Override
-	public Expr acceptTransformer(ExprTransformer tf) {
+	public LValueExpr acceptTransformer(Transformer tf) {
 		return tf.transform(this);
 	}
 

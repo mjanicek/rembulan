@@ -21,9 +21,23 @@ public class WhileStatement extends BodyStatement {
 		return block;
 	}
 
+	public WhileStatement update(Expr condition, Block block) {
+		if (this.condition.equals(condition) && this.block.equals(block)) {
+			return this;
+		}
+		else {
+			return new WhileStatement(sourceInfo(), condition, block);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

@@ -3,6 +3,7 @@ package net.sandius.rembulan.parser.ast;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Block {
 
@@ -20,6 +21,15 @@ public class Block {
 
 	public ReturnStatement returnStatement() {
 		return ret;
+	}
+
+	public Block update(List<BodyStatement> statements, ReturnStatement ret) {
+		if (this.statements.equals(statements) && Objects.equals(this.ret, ret)) {
+			return this;
+		}
+		else {
+			return new Block(statements, ret);
+		}
 	}
 
 	@Deprecated

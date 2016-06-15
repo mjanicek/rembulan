@@ -21,9 +21,23 @@ public class RepeatUntilStatement extends BodyStatement {
 		return block;
 	}
 
+	public RepeatUntilStatement update(Expr condition, Block block) {
+		if (this.condition.equals(condition) && this.block.equals(block)) {
+			return this;
+		}
+		else {
+			return new RepeatUntilStatement(sourceInfo(), condition, block);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

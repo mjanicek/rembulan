@@ -2,6 +2,8 @@ package net.sandius.rembulan.parser.ast;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.Objects;
+
 public class NumericForStatement extends BodyStatement {
 
 	private final Name name;
@@ -39,9 +41,24 @@ public class NumericForStatement extends BodyStatement {
 		return block;
 	}
 
+	public NumericForStatement update(Name name, Expr init, Expr limit, Expr step, Block block) {
+		if (this.name.equals(name) && this.init.equals(init) && this.limit.equals(limit)
+				&& Objects.equals(this.step, step) && this.block.equals(block)) {
+			return this;
+		}
+		else {
+			return new NumericForStatement(sourceInfo(), name, init, limit, step, block);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

@@ -29,9 +29,23 @@ public class GenericForStatement extends BodyStatement {
 		return block;
 	}
 
+	public GenericForStatement update(List<Name> names, List<Expr> exprs, Block block) {
+		if (this.names.equals(names) && this.exprs.equals(exprs) && this.block.equals(block)) {
+			return this;
+		}
+		else {
+			return new GenericForStatement(sourceInfo(), names, exprs, block);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

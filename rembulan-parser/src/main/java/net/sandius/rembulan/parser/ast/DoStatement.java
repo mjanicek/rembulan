@@ -15,9 +15,23 @@ public class DoStatement extends BodyStatement {
 		return block;
 	}
 
+	public DoStatement update(Block block) {
+		if (this.block.equals(block)) {
+			return this;
+		}
+		else {
+			return new DoStatement(sourceInfo(), block);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

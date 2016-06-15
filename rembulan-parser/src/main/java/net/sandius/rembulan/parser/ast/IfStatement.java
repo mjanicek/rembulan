@@ -29,9 +29,23 @@ public class IfStatement extends BodyStatement {
 		return elseBlock;
 	}
 
+	public IfStatement update(ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock) {
+		if (this.main.equals(main) && this.elifs.equals(elifs) && this.elseBlock.equals(elseBlock)) {
+			return this;
+		}
+		else {
+			return new IfStatement(sourceInfo(), main, elifs, elseBlock);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

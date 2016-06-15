@@ -6,4 +6,6 @@ public abstract class BodyStatement extends Statement {
 		super(src);
 	}
 
+	public abstract BodyStatement acceptTransformer(Transformer tf);
+
 }

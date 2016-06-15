@@ -12,7 +12,7 @@ public class VarargsExpr extends Expr {
 	}
 
 	@Override
-	public Expr acceptTransformer(ExprTransformer tf) {
+	public Expr acceptTransformer(Transformer tf) {
 		return tf.transform(this);
 	}
 

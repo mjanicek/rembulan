@@ -15,9 +15,23 @@ public class LabelStatement extends BodyStatement {
 		return labelName;
 	}
 
+	public LabelStatement update(Name labelName) {
+		if (this.labelName.equals(labelName)) {
+			return this;
+		}
+		else {
+			return new LabelStatement(sourceInfo(), labelName);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

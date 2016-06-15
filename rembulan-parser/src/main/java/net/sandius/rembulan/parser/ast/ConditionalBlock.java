@@ -20,4 +20,13 @@ public class ConditionalBlock {
 		return block;
 	}
 
+	public ConditionalBlock update(Expr condition, Block block) {
+		if (this.condition.equals(condition) && this.block.equals(block)) {
+			return this;
+		}
+		else {
+			return new ConditionalBlock(condition, block);
+		}
+	}
+
 }

@@ -39,9 +39,23 @@ public class LocalDeclStatement extends BodyStatement {
 		return initialisers;
 	}
 
+	public LocalDeclStatement update(List<Name> names, List<Expr> initialisers) {
+		if (this.names.equals(names) && this.initialisers.equals(initialisers)) {
+			return this;
+		}
+		else {
+			return new LocalDeclStatement(sourceInfo(), names, initialisers);
+		}
+	}
+
 	@Override
 	public void accept(Visitor visitor) {
 		visitor.visit(this);
+	}
+
+	@Override
+	public BodyStatement acceptTransformer(Transformer tf) {
+		return tf.transform(this);
 	}
 
 }

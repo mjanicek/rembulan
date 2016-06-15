@@ -9,4 +9,7 @@ public abstract class LValueExpr extends Expr {
 		super(src);
 	}
 
+	@Override
+	public abstract LValueExpr acceptTransformer(Transformer tf);
+
 }
