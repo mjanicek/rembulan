@@ -19,6 +19,15 @@ public class LiteralExpr extends Expr {
 		return value;
 	}
 
+	public LiteralExpr update(Literal value) {
+		if (this.value.equals(value)) {
+			return this;
+		}
+		else {
+			return new LiteralExpr(sourceInfo(), attributes(), value);
+		}
+	}
+
 	@Override
 	public Expr accept(Transformer tf) {
 		return tf.transform(this);

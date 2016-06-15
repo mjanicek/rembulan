@@ -19,6 +19,15 @@ public class FunctionDefExpr extends Expr {
 		return body;
 	}
 
+	public FunctionDefExpr update(FunctionLiteral body) {
+		if (this.body.equals(body)) {
+			return this;
+		}
+		else {
+			return new FunctionDefExpr(sourceInfo(), attributes(), body);
+		}
+	}
+
 	@Override
 	public Expr accept(Transformer tf) {
 		return tf.transform(this);
