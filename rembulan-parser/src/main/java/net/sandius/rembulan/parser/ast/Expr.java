@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class Expr implements SyntaxElement {
 
-	private SourceInfo src;
+	private final SourceInfo src;
 	private final Attributes attr;
 
 	protected Expr(SourceInfo src, Attributes attr) {
