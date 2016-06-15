@@ -15,6 +15,6 @@ public abstract class Expr implements SyntaxElement {
 		return src;
 	}
 
-	public abstract Expr acceptTransformer(Transformer tf);
+	public abstract Expr accept(Transformer tf);
 
 }

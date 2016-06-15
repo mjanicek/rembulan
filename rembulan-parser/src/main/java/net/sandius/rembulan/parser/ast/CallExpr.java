@@ -40,7 +40,7 @@ public abstract class CallExpr extends Expr {
 		}
 
 		@Override
-		public Expr acceptTransformer(Transformer tf) {
+		public Expr accept(Transformer tf) {
 			return tf.transform(this);
 		}
 
@@ -75,7 +75,7 @@ public abstract class CallExpr extends Expr {
 		}
 
 		@Override
-		public Expr acceptTransformer(Transformer tf) {
+		public Expr accept(Transformer tf) {
 			return tf.transform(this);
 		}
 

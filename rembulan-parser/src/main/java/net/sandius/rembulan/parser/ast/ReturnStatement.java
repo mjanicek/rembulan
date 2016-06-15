@@ -26,7 +26,7 @@ public class ReturnStatement extends Statement {
 		}
 	}
 
-	public ReturnStatement acceptTransformer(Transformer tf) {
+	public ReturnStatement accept(Transformer tf) {
 		return tf.transform(this);
 	}
 

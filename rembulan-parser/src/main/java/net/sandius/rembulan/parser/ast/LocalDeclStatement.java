@@ -49,7 +49,7 @@ public class LocalDeclStatement extends BodyStatement {
 	}
 
 	@Override
-	public BodyStatement acceptTransformer(Transformer tf) {
+	public BodyStatement accept(Transformer tf) {
 		return tf.transform(this);
 	}
 

@@ -20,7 +20,7 @@ public class BooleanLiteral implements Literal {
 	}
 
 	@Override
-	public Literal acceptTransformer(Transformer tf) {
+	public Literal accept(Transformer tf) {
 		return tf.transform(this);
 	}
 

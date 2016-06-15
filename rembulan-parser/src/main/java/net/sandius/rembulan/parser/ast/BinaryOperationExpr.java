@@ -37,7 +37,7 @@ public class BinaryOperationExpr extends Expr {
 	}
 
 	@Override
-	public Expr acceptTransformer(Transformer tf) {
+	public Expr accept(Transformer tf) {
 		return tf.transform(this);
 	}
 

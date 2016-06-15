@@ -33,7 +33,7 @@ public abstract class Numeral implements Literal {
 		}
 
 		@Override
-		public Literal acceptTransformer(Transformer tf) {
+		public Literal accept(Transformer tf) {
 			return tf.transform(this);
 		}
 
@@ -52,7 +52,7 @@ public abstract class Numeral implements Literal {
 		}
 
 		@Override
-		public Literal acceptTransformer(Transformer tf) {
+		public Literal accept(Transformer tf) {
 			return tf.transform(this);
 		}
 

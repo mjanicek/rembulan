@@ -9,10 +9,10 @@ public abstract class Transformer {
 	public Block transform(Block block) {
 		List<BodyStatement> stats = new ArrayList<>();
 		for (BodyStatement bs : block.statements()) {
-			stats.add(bs.acceptTransformer(this));
+			stats.add(bs.accept(this));
 		}
 		ReturnStatement ret = block.returnStatement() != null
-				? block.returnStatement().acceptTransformer(this)
+				? block.returnStatement().accept(this)
 				: null;
 
 		return block.update(Collections.unmodifiableList(stats), ret);
@@ -38,12 +38,12 @@ public abstract class Transformer {
 
 	public BodyStatement transform(CallStatement node) {
 		// transformation result must be a CallExpr -- otherwise throws a ClassCastException
-		return node.update((CallExpr) node.callExpr().acceptTransformer(this));
+		return node.update((CallExpr) node.callExpr().accept(this));
 	}
 
 	public ConditionalBlock transform(ConditionalBlock cb) {
 		return cb.update(
-				cb.condition().acceptTransformer(this),
+				cb.condition().accept(this),
 				transform(cb.block()));
 	}
 
@@ -65,9 +65,9 @@ public abstract class Transformer {
 	public BodyStatement transform(NumericForStatement node) {
 		return node.update(
 				transform(node.name()),
-				node.init().acceptTransformer(this),
-				node.limit().acceptTransformer(this),
-				node.step() != null ? node.step().acceptTransformer(this) : null,
+				node.init().accept(this),
+				node.limit().accept(this),
+				node.step() != null ? node.step().accept(this) : null,
 				transform(node.block()));
 	}
 
@@ -80,13 +80,13 @@ public abstract class Transformer {
 
 	public BodyStatement transform(RepeatUntilStatement node) {
 		return node.update(
-				node.condition().acceptTransformer(this),
+				node.condition().accept(this),
 				transform(node.block()));
 	}
 
 	public BodyStatement transform(WhileStatement node) {
 		return node.update(
-				node.condition().acceptTransformer(this),
+				node.condition().accept(this),
 				transform(node.block()));
 	}
 
@@ -105,7 +105,7 @@ public abstract class Transformer {
 	protected List<Expr> transformExprList(List<Expr> exprs) {
 		List<Expr> result = new ArrayList<>();
 		for (Expr e : exprs) {
-			result.add(e.acceptTransformer(this));
+			result.add(e.accept(this));
 		}
 		return Collections.unmodifiableList(result);
 	}
@@ -113,7 +113,7 @@ public abstract class Transformer {
 	protected List<LValueExpr> transformVarList(List<LValueExpr> lvalues) {
 		List<LValueExpr> result = new ArrayList<>();
 		for (LValueExpr e : lvalues) {
-			result.add(e.acceptTransformer(this));
+			result.add(e.accept(this));
 		}
 		return Collections.unmodifiableList(result);
 	}
@@ -132,15 +132,15 @@ public abstract class Transformer {
 	}
 
 	public Expr transform(CallExpr.FunctionCallExpr e) {
-		return e.update(e.fn().acceptTransformer(this), transformExprList(e.args()));
+		return e.update(e.fn().accept(this), transformExprList(e.args()));
 	}
 
 	public Expr transform(CallExpr.MethodCallExpr e) {
-		return e.update(e.target().acceptTransformer(this), e.methodName(), transformExprList(e.args()));
+		return e.update(e.target().accept(this), e.methodName(), transformExprList(e.args()));
 	}
 
 	public LValueExpr transform(IndexExpr e) {
-		return e.update(e.object().acceptTransformer(this), e.key().acceptTransformer(this));
+		return e.update(e.object().accept(this), e.key().accept(this));
 	}
 
 	public LValueExpr transform(VarExpr e) {
@@ -148,11 +148,11 @@ public abstract class Transformer {
 	}
 
 	public Expr transform(BinaryOperationExpr e) {
-		return e.update(e.left().acceptTransformer(this), e.right().acceptTransformer(this));
+		return e.update(e.left().accept(this), e.right().accept(this));
 	}
 
 	public Expr transform(UnaryOperationExpr e) {
-		return e.update(e.arg().acceptTransformer(this));
+		return e.update(e.arg().accept(this));
 	}
 
 	public Expr transform(LiteralExpr e) {
@@ -170,7 +170,7 @@ public abstract class Transformer {
 	public Expr transform(TableConstructorExpr e) {
 		List<TableConstructorExpr.FieldInitialiser> result = new ArrayList<>();
 		for (TableConstructorExpr.FieldInitialiser fi : e.fields()) {
-			result.add(fi.update(fi.key().acceptTransformer(this), fi.value().acceptTransformer(this)));
+			result.add(fi.update(fi.key().accept(this), fi.value().accept(this)));
 		}
 		return e.update(Collections.unmodifiableList(result));
 	}

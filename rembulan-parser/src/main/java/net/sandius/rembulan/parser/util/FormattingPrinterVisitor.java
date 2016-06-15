@@ -38,7 +38,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	}
 
 	private void printExpr(Expr expr) {
-		expr.acceptTransformer(this);
+		expr.accept(this);
 	}
 
 	private void printVarExpr(Expr expr) {
@@ -55,7 +55,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	private <T extends Expr> void printExprList(Iterable<T> args) {
 		Iterator<T> it = args.iterator();
 		while (it.hasNext()) {
-			it.next().acceptTransformer(this);
+			it.next().accept(this);
 			if (it.hasNext()) {
 				out.print(", ");
 			}
@@ -75,10 +75,10 @@ public class FormattingPrinterVisitor extends Visitor {
 	@Override
 	public void visit(Block block) {
 		for (BodyStatement s : block.statements()) {
-			s.acceptTransformer(this);
+			s.accept(this);
 		}
 		if (block.returnStatement() != null) {
-			block.returnStatement().acceptTransformer(this);
+			block.returnStatement().accept(this);
 		}
 	}
 
@@ -102,7 +102,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	@Override
 	public void visit(CallStatement node) {
 		doIndent();
-		node.callExpr().acceptTransformer(this);
+		node.callExpr().accept(this);
 		out.println();
 	}
 
@@ -280,7 +280,7 @@ public class FormattingPrinterVisitor extends Visitor {
 
 	@Override
 	public void visit(LiteralExpr node) {
-		node.value().acceptTransformer(this);
+		node.value().accept(this);
 	}
 
 	@Override

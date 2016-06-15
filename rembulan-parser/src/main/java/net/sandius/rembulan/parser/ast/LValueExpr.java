@@ -10,6 +10,6 @@ public abstract class LValueExpr extends Expr {
 	}
 
 	@Override
-	public abstract LValueExpr acceptTransformer(Transformer tf);
+	public abstract LValueExpr accept(Transformer tf);
 
 }
