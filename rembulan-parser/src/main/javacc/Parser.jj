@@ -29,6 +29,10 @@ public class Parser {
 		return new SourceInfo(t.beginLine, t.beginColumn);
 	}
 
+	private static Attributes attr(Token t) {
+		return Attributes.of(src(t));
+	}
+
 	private static List<BodyStatement> none() {
 		return Collections.<BodyStatement>emptyList();
 	}
@@ -259,7 +263,7 @@ List<BodyStatement> BodyStatement() :
 	Expr g = null;
 	Block b;
 
-	FunctionLiteral fb;
+	FunctionDefExpr fb;
 
 	List<LValueExpr> vars;
 	List<SourceElement<Name>> names = new ArrayList<SourceElement<Name>>();
@@ -314,16 +318,20 @@ List<BodyStatement> BodyStatement() :
 			(u=<COLON> sn=SrcName() { fnb.addColonName(src(u), sn); })?
 			fb=FunctionBody()  {
 
-		if (fnb.isMethod()) {
-			// defining a method: change fb's signature by prepending a "self" field
-			FunctionLiteral.Params params = fb.params();
-			params = new FunctionLiteral.Params(prependName(Name.fromString("self"), params.names()), params.isVararg());
-			fb = new FunctionLiteral(params, fb.block());
+		{
+			FunctionDefExpr.Params params = fb.params();
+			Block blk = fb.block();
+
+			if (fnb.isMethod()) {
+				// defining a method: change fb's signature by prepending a "self" field
+				params = params.update(prependName(Name.fromString("self"), params.names()), params.isVararg());
+			}
+
+			// re-instantiate with adjusted param list and source information
+			fb = Exprs.functionDef(src(t), params, blk);
 		}
 
-		return one(Statements.assignStatement(src(t),
-				Collections.<LValueExpr>singletonList(fnb.get()),
-				Collections.<Expr>singletonList(Exprs.functionDef(src(t), fb))));
+		return one(Statements.assignStatement(src(t), fnb.get(), fb));
 	}
 
 	// local function definition
@@ -332,7 +340,7 @@ List<BodyStatement> BodyStatement() :
 				Statements.localDeclStatement(src(t), sn.element()),
 				Statements.assignStatement(src(t),
 						Collections.<LValueExpr>singletonList(Exprs.var(sn.sourceInfo(), sn.element())),
-						Collections.<Expr>singletonList(Exprs.functionDef(src(u), fb))));
+						Collections.<Expr>singletonList(Exprs.functionDef(src(u), fb.params(), fb.block()))));
 	}
 
 	// locals declaration
@@ -364,7 +372,7 @@ Expr SimpleExpr() :
 	SourceElement<StringLiteral> ss;
 	SourceElement<Numeral> sn;
 	Expr e;
-	FunctionLiteral fn;
+	FunctionDefExpr fn;
 }
 {
 	t=<NIL>    { return Exprs.literal(src(t), NilLiteral.INSTANCE); }
@@ -373,7 +381,7 @@ Expr SimpleExpr() :
 |	sn=Num()  { return Exprs.literal(sn.sourceInfo(), sn.element()); }
 |	ss=Str()  {return Exprs.literal(ss.sourceInfo(), ss.element()); }
 |	t=<VARARGS>  { return Exprs.varargs(src(t)); }
-|	t=<FUNCTION> fn=FunctionBody()  { return Exprs.functionDef(src(t), fn); }
+|	t=<FUNCTION> fn=FunctionBody()  { return Exprs.functionDef(src(t), fn.params(), fn.block()); }
 |	e=PrefixExpr()  { return e; }
 |	e=TableConstructor()  { return e; }
 }
@@ -541,23 +549,24 @@ List<Expr> ExprList() :
 	e=Expr() { es.add(e); } (<COMMA> e=Expr() { es.add(e); })* { return Collections.unmodifiableList(es); }
 }
 
-FunctionLiteral FunctionBody() :
+FunctionDefExpr FunctionBody() :
 {
-	FunctionLiteral.Params params = FunctionLiteral.Params.empty();
+	Token t;
+	FunctionDefExpr.Params params = FunctionDefExpr.Params.empty();
 	Block block;
 }
 {
-	<PAREN_OPEN> (params=FunctionParams())? <PAREN_CLOSE> block=Block() <END>  { return new FunctionLiteral(params, block); }
+	t=<PAREN_OPEN> (params=FunctionParams())? <PAREN_CLOSE> block=Block() <END>  { return Exprs.functionDef(src(t), params, block); }
 }
 
-FunctionLiteral.Params FunctionParams() :
+FunctionDefExpr.Params FunctionParams() :
 {
 	List<SourceElement<Name>> params;
 	boolean vararg = false;
 }
 {
-	params=NameList() (<COMMA> <VARARGS> { vararg = true; })?  { return new FunctionLiteral.Params(toNameList(params), vararg); }
-|	<VARARGS>  { return new FunctionLiteral.Params(Collections.<Name>emptyList(), true); }
+	params=NameList() (<COMMA> <VARARGS> { vararg = true; })?  { return new FunctionDefExpr.Params(toNameList(params), vararg); }
+|	<VARARGS>  { return new FunctionDefExpr.Params(Collections.<Name>emptyList(), true); }
 }
 
 TableConstructorExpr TableConstructor() :

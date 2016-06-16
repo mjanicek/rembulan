@@ -2,12 +2,15 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintWriter}
 
-import net.sandius.rembulan.parser.ast.{Chunk, Expr}
+import net.sandius.rembulan.parser.analysis.{FunctionVarInfo, NameResolutionTransformer}
+import net.sandius.rembulan.parser.ast._
 import net.sandius.rembulan.parser.util.FormattingPrinterVisitor
 import net.sandius.rembulan.test._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
+
+import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
 class FragmentParsingTest extends FunSpec with MustMatchers {
@@ -37,6 +40,34 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
   def tryParseChunk(code: String): Chunk = {
     val bais = new ByteArrayInputStream(code.getBytes)
     new Parser(bais).Chunk()
+  }
+
+  def resolveNames(chunk: Chunk): Chunk = {
+    new NameResolutionTransformer().transform(chunk)
+  }
+
+  def extractVarInfo(chunk: Chunk): Map[Object, (FunctionDefExpr.Params, FunctionVarInfo)] = {
+    val m = mutable.Map.empty[Object, (FunctionDefExpr.Params, FunctionVarInfo)]
+
+    val visitor = new Transformer() {
+      override def transform(chunk: Chunk) = {
+        for (vi <- Option(chunk.attributes().get(classOf[FunctionVarInfo]))) {
+          m += (chunk -> (FunctionDefExpr.Params.emptyVararg(), vi))
+        }
+        super.transform(chunk)
+      }
+
+      override def transform(e: FunctionDefExpr) = {
+        for (vi <- Option(e.attributes().get(classOf[FunctionVarInfo]))) {
+          m += (e -> (e.params(), vi))
+        }
+        super.transform(e)
+      }
+    }
+
+    visitor.transform(chunk)
+
+    m.toMap
   }
 
   def prettyPrint(chunk: Chunk): String = {
@@ -151,6 +182,7 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     describe ("from " + b.name + " :") {
       for (f <- b.all) {
         describe (f.description) {
+
           it ("can be parsed") {
             val code = f.code
 
@@ -183,6 +215,46 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
                 throw ex
             }
           }
+
+          it ("resolves names") {
+            val parsedChunk = tryParseChunk(f.code)
+            val resolvedChunk = resolveNames(parsedChunk)
+
+            println("---BEGIN---")
+            val pp = prettyPrint(resolvedChunk)
+            println(pp)
+            println("----END----")
+
+            println()
+
+            println("VarInfos:")
+            println("---------")
+
+            for ((o, (params, varInfo)) <- extractVarInfo(resolvedChunk)) {
+              val lineInfo: Option[SourceInfo] = o match {
+                case se: SyntaxElement => Option(se.sourceInfo())
+                case _ => None
+              }
+
+              val lineSuffix = lineInfo match {
+                case Some(si) => " at " + si.toString
+                case _ => ""
+              }
+
+              val numParams = params.names().size()
+              val numLocals = varInfo.locals().size()
+              val numUpvals = varInfo.upvalues().size()
+              val declaredVararg = params.isVararg.toString
+              val actualVararg = varInfo.isVararg().toString
+
+              println(o + lineSuffix)
+              println("--> %d params, %d locals, %d upvals, vararg:%s/%s (declared/actual)".format(
+                numParams, numLocals, numUpvals, declaredVararg, actualVararg))
+              println()
+            }
+
+          }
+
         }
       }
     }

@@ -28,6 +28,10 @@ public abstract class Statements {
 		return new AssignStatement(attr(src), vars, exprs);
 	}
 
+	public static AssignStatement assignStatement(SourceInfo src, LValueExpr var, Expr expr) {
+		return new AssignStatement(attr(src), Collections.singletonList(var), Collections.singletonList(expr));
+	}
+
 	public static LocalDeclStatement localDeclStatement(SourceInfo src, List<Name> names, List<Expr> initialisers) {
 		return new LocalDeclStatement(attr(src), names, initialisers);
 	}

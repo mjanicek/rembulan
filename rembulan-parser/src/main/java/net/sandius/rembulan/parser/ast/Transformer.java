@@ -6,6 +6,10 @@ import java.util.List;
 
 public abstract class Transformer {
 
+	public Chunk transform(Chunk chunk) {
+		return chunk.update(transform(chunk.block()));
+	}
+
 	public Block transform(Block block) {
 		List<BodyStatement> stats = new ArrayList<>();
 		for (BodyStatement bs : block.statements()) {
@@ -59,7 +63,7 @@ public abstract class Transformer {
 		return node.update(
 				transform(node.main()),
 				transformConditionalBlockList(node.elifs()),
-				transform(node.elseBlock()));
+				node.elseBlock() != null ? transform(node.elseBlock()) : null);
 	}
 
 	public BodyStatement transform(NumericForStatement node) {
@@ -164,13 +168,17 @@ public abstract class Transformer {
 	}
 
 	public Expr transform(FunctionDefExpr e) {
-		return e;
+		return e.update(transform(e.params()), transform(e.block()));
+	}
+
+	public FunctionDefExpr.Params transform(FunctionDefExpr.Params ps) {
+		return ps.update(transformNameList(ps.names()), ps.isVararg());
 	}
 
 	public Expr transform(TableConstructorExpr e) {
 		List<TableConstructorExpr.FieldInitialiser> result = new ArrayList<>();
 		for (TableConstructorExpr.FieldInitialiser fi : e.fields()) {
-			result.add(fi.update(fi.key().accept(this), fi.value().accept(this)));
+			result.add(fi.update(fi.key() != null ? fi.key().accept(this) : null, fi.value().accept(this)));
 		}
 		return e.update(Collections.unmodifiableList(result));
 	}

@@ -262,18 +262,16 @@ public class FormattingPrinterVisitor extends Visitor {
 		out.print("function ");
 		out.print("(");
 
-		FunctionLiteral fn = node.body();
-
-		printNameList(fn.params().names());
-		if (fn.params().isVararg()) {
-			if (!fn.params().names().isEmpty()) {
+		printNameList(node.params().names());
+		if (node.params().isVararg()) {
+			if (!node.params().names().isEmpty()) {
 				out.print(", ");
 			}
 			out.print("...");
 		}
 		out.print(")");
 		out.println();
-		subVisitor().visit(fn.block());
+		subVisitor().visit(node.block());
 		doIndent();
 		out.print("end");
 	}

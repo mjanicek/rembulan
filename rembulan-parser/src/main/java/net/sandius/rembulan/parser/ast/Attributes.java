@@ -68,4 +68,8 @@ public final class Attributes {
 		}
 	}
 
+	public boolean has(Class<?> clazz) {
+		return get(clazz) != null;
+	}
+
 }

@@ -18,8 +18,8 @@ public abstract class Exprs {
 		return new LiteralExpr(attr(src), value);
 	}
 
-	public static FunctionDefExpr functionDef(SourceInfo src, FunctionLiteral body) {
-		return new FunctionDefExpr(attr(src), body);
+	public static FunctionDefExpr functionDef(SourceInfo src, FunctionDefExpr.Params params, Block block) {
+		return new FunctionDefExpr(attr(src), params, block);
 	}
 
 	public static TableConstructorExpr tableConstructor(SourceInfo src, List<TableConstructorExpr.FieldInitialiser> fields) {

@@ -3,6 +3,7 @@ package net.sandius.rembulan.parser.ast;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
+import java.util.Objects;
 
 public class IfStatement extends BodyStatement {
 
@@ -30,7 +31,7 @@ public class IfStatement extends BodyStatement {
 	}
 
 	public IfStatement update(ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock) {
-		if (this.main.equals(main) && this.elifs.equals(elifs) && this.elseBlock.equals(elseBlock)) {
+		if (this.main.equals(main) && this.elifs.equals(elifs) && Objects.equals(this.elseBlock, elseBlock)) {
 			return this;
 		}
 		else {
