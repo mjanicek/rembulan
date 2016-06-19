@@ -2,12 +2,12 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class Vararg extends IRNode {
+public class StackGet extends IRNode {
 
 	private final Temp dest;
 	private final int idx;
 
-	public Vararg(Temp dest, int idx) {
+	public StackGet(Temp dest, int idx) {
 		this.dest = Check.notNull(dest);
 		this.idx = idx;
 	}

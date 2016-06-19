@@ -5,7 +5,8 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 import net.sandius.rembulan.compiler.IRTranslatorTransformer
 import net.sandius.rembulan.compiler.ir.IRNode
 import net.sandius.rembulan.compiler.util.IRPrinterVisitor
-import net.sandius.rembulan.parser.ast.Expr
+import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
+import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import org.junit.runner.RunWith
 import org.scalatest.{FunSpec, MustMatchers}
 import org.scalatest.junit.JUnitRunner
@@ -23,18 +24,29 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     result
   }
 
+  def parseChunk(s: String): Chunk = {
+    val bais = new ByteArrayInputStream(s.getBytes)
+    val parser = new Parser(bais)
+    parser.Chunk()
+  }
+
+  def resolveNames(c: Chunk): Chunk = {
+    new NameResolutionTransformer().transform(c)
+  }
+
   describe ("expression") {
 
     describe ("can be translated to IR:") {
 
       for ((s, o) <- Expressions.get if o) {
 
-        it (s) {
+        val ss = "return " + s
 
-          val expr = parseExpr(s)
+        it (ss) {
+          val ck = resolveNames(parseChunk(ss))
 
           val translator = new IRTranslatorTransformer()
-          expr.accept(translator)
+          translator.transform(ck)
 
           val ns = translator.nodes().asScala.toList
 
@@ -47,7 +59,6 @@ class IRTranslationTest extends FunSpec with MustMatchers {
           pw.flush()
 
           println()
-
         }
 
       }

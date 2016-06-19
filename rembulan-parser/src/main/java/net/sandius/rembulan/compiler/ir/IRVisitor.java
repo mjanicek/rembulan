@@ -2,42 +2,54 @@ package net.sandius.rembulan.compiler.ir;
 
 public abstract class IRVisitor {
 
-	public void visit(LoadConst.Nil node) { }
+	public abstract void visit(LoadConst.Nil node);
 
-	public void visit(LoadConst.Bool node) { }
+	public abstract void visit(LoadConst.Bool node);
 
-	public void visit(LoadConst.Int node) { }
+	public abstract void visit(LoadConst.Int node);
 
-	public void visit(LoadConst.Flt node) { }
+	public abstract void visit(LoadConst.Flt node);
 
-	public void visit(LoadConst.Str node) { }
-
-
-	public void visit(BinOp node) { }
-
-	public void visit(UnOp node) { }
+	public abstract void visit(LoadConst.Str node);
 
 
-	public void visit(TabGet node) { }
+	public abstract void visit(BinOp node);
 
-	public void visit(TabSet node) { }
-
-
-	public void visit(VarLoad node) { }
-
-	public void visit(VarStore node) { }
+	public abstract void visit(UnOp node);
 
 
-	public void visit(UpLoad node) { }
+	public abstract void visit(TabNew node);
 
-	public void visit(UpStore node) { }
+	public abstract void visit(TabGet node);
 
-	public void visit(Vararg node) { }
+	public abstract void visit(TabSet node);
+
+	public abstract void visit(TabStackAppend node);
 
 
-	public void visit(ArrayGet node) { }
+	public abstract void visit(VarLoad node);
+
+	public abstract void visit(VarStore node);
 
 
-	public void visit(Dup node) { }
+	public abstract void visit(UpLoad node);
+
+	public abstract void visit(UpStore node);
+
+	public abstract void visit(Vararg node);
+
+
+	public abstract void visit(ArrayGet node);
+
+
+	public abstract void visit(Dup node);
+
+
+	public abstract void visit(Ret node);
+
+	public abstract void visit(Call node);
+
+
+	public abstract void visit(StackGet node);
 
 }

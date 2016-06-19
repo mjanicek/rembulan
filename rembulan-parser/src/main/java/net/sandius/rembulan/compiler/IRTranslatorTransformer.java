@@ -2,23 +2,88 @@ package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
+import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
+import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 
 public class IRTranslatorTransformer extends Transformer {
 
+	private final RegProvider provider;
+	private final Stack<Temp> temps;
 	private final List<IRNode> insns;
 	private boolean assigning;
+	private boolean wasCall;
+
+	private final Map<Variable, Var> vars;
+	private final Map<Variable, UpVar> uvs;
 
 	public IRTranslatorTransformer() {
+		this.provider = new RegProvider();
+		this.temps = new Stack<>();
 		this.insns = new ArrayList<>();
 		this.assigning = false;
+		this.wasCall = false;
+
+		this.vars = new HashMap<>();
+		this.uvs = new HashMap<>();
 	}
 
 	public List<IRNode> nodes() {
 		return insns;
+	}
+
+	private Temp popTemp() {
+		if (wasCall) {
+			wasCall = false;
+			Temp t = provider.newTemp();
+			insns.add(new StackGet(t, 0));
+			return t;
+		}
+		else {
+			return temps.pop();
+		}
+
+//		if (!temps.isEmpty()) {
+//			return temps.pop();
+//		}
+//		else {
+//			Check.isTrue(wasCall);
+//			wasCall = false;
+//			Temp t = provider.newTemp();
+//			insns.add(new StackGet(t, 0));
+//			return t;
+//		}
+	}
+	
+	private Var var(Variable v) {
+		Var w = vars.get(v);
+		if (w != null) {
+			return w;
+		}
+		else {
+			w = provider.newVar();
+			vars.put(v, w);
+			return w;
+		}
+	}
+
+	private UpVar upVar(Variable v) {
+		UpVar w = uvs.get(v);
+		if (w != null) {
+			return w;
+		}
+		else {
+			w = provider.newUpVar();
+			uvs.put(v, w);
+			return w;
+		}
 	}
 
 	@Override
@@ -27,15 +92,25 @@ public class IRTranslatorTransformer extends Transformer {
 
 		if (rv.isUpvalue()) {
 			// upvalue
-			insns.add(assigning
-					? new UpStore(TranslationUtils.upVar(rv.variable()))
-					: new UpLoad(TranslationUtils.upVar(rv.variable())));
+			if (assigning) {
+				insns.add(new UpStore(upVar(rv.variable())));
+			}
+			else {
+				Temp dest = provider.newTemp();
+				temps.push(dest);
+				insns.add(new UpLoad(dest, upVar(rv.variable())));
+			}
 		}
 		else {
 			// local variable
-			insns.add(assigning
-					? new VarStore(TranslationUtils.var(rv.variable()))
-					: new VarLoad(TranslationUtils.var(rv.variable())));
+			if (assigning) {
+				insns.add(new VarStore(var(rv.variable())));
+			}
+			else {
+				Temp dest = provider.newTemp();
+				temps.push(dest);
+				insns.add(new VarLoad(dest, var(rv.variable())));
+			}
 		}
 
 		return e;
@@ -44,40 +119,57 @@ public class IRTranslatorTransformer extends Transformer {
 	@Override
 	public LValueExpr transform(IndexExpr e) {
 		e.object().accept(this);
+		Temp obj = popTemp();
 		e.key().accept(this);
-		insns.add(assigning
-				? new TabSet()
-				: new TabGet());
+		Temp key = popTemp();
+
+		Temp dest = provider.newTemp();
+		temps.push(dest);
+
+		Check.isFalse(assigning);  // FIXME
+
+		insns.add(new TabGet(dest, obj, key));
+
 		return e;
 	}
 
 	@Override
 	public Literal transform(NilLiteral l) {
-		insns.add(new LoadConst.Nil());
+		Temp dest = provider.newTemp();
+		temps.push(dest);
+		insns.add(new LoadConst.Nil(dest));
 		return l;
 	}
 
 	@Override
 	public Literal transform(BooleanLiteral l) {
-		insns.add(new LoadConst.Bool(l.value()));
+		Temp dest = provider.newTemp();
+		temps.push(dest);
+		insns.add(new LoadConst.Bool(dest, l.value()));
 		return l;
 	}
 
 	@Override
 	public Literal transform(Numeral.IntegerNumeral l) {
-		insns.add(new LoadConst.Int(l.value()));
+		Temp dest = provider.newTemp();
+		temps.push(dest);
+		insns.add(new LoadConst.Int(dest, l.value()));
 		return l;
 	}
 
 	@Override
 	public Literal transform(Numeral.FloatNumeral l) {
-		insns.add(new LoadConst.Flt(l.value()));
+		Temp dest = provider.newTemp();
+		temps.push(dest);
+		insns.add(new LoadConst.Flt(dest, l.value()));
 		return l;
 	}
 
 	@Override
 	public Literal transform(StringLiteral l) {
-		insns.add(new LoadConst.Str(l.value()));
+		Temp dest = provider.newTemp();
+		temps.push(dest);
+		insns.add(new LoadConst.Str(dest, l.value()));
 		return l;
 	}
 
@@ -99,9 +191,14 @@ public class IRTranslatorTransformer extends Transformer {
 		Expr r = swap ? e.left() : e.right();
 
 		l.accept(this);
+		Temp left = popTemp();
 		r.accept(this);
+		Temp right = popTemp();
 
-		insns.add(new BinOp(op));
+		Temp dest = provider.newTemp();
+		temps.push(dest);
+
+		insns.add(new BinOp(op, dest, left, right));
 		
 		return e;
 	}
@@ -109,28 +206,67 @@ public class IRTranslatorTransformer extends Transformer {
 	@Override
 	public Expr transform(UnaryOperationExpr e) {
 		e.arg().accept(this);
-		insns.add(new UnOp(TranslationUtils.uop(e.op())));
+
+		Temp arg = popTemp();
+		Temp dest = provider.newTemp();
+		temps.push(dest);
+
+		insns.add(new UnOp(TranslationUtils.uop(e.op()), dest, arg));
 		return e;
 	}
 
 	@Override
 	public Expr transform(VarargsExpr e) {
-		insns.add(new Vararg());
+		Temp dest = provider.newTemp();
+		temps.push(dest);
 
 		// FIXME -- decided by the consumer!
-		insns.add(new ArrayGet(0));
+		insns.add(new Vararg(dest, 0));
 
 		return e;
 	}
 
 	@Override
 	public Expr transform(CallExpr.FunctionCallExpr e) {
-		throw new UnsupportedOperationException();  // TODO
+		e.fn().accept(this);
+		Temp fn = popTemp();
+
+		List<Temp> as = new ArrayList<>();
+		for (Expr a : e.args()) {
+			a.accept(this);
+			as.add(popTemp());
+		}
+
+		insns.add(new Call(fn, new VList.Fixed(Collections.unmodifiableList(as))));
+
+		wasCall = true;
+
+		return e;
 	}
 
 	@Override
 	public Expr transform(CallExpr.MethodCallExpr e) {
-		throw new UnsupportedOperationException();  // TODO
+		e.target().accept(this);
+		Temp fn = popTemp();
+
+		transform(StringLiteral.fromName(e.methodName()));
+		Temp n = popTemp();
+
+		Temp callTgt = provider.newTemp();
+		insns.add(new TabGet(callTgt, fn, n));
+
+		List<Temp> as = new ArrayList<>();
+		as.add(fn);
+		for (Expr a : e.args()) {
+			a.accept(this);
+			as.add(popTemp());
+		}
+
+		insns.add(new Call(callTgt, new VList.Fixed(Collections.unmodifiableList(as))));
+
+		wasCall = true;
+
+		return e;
 	}
 
 	@Override
@@ -140,7 +276,56 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public Expr transform(TableConstructorExpr e) {
-		throw new UnsupportedOperationException();  // TODO
+		int array = 0;
+		int hash = 0;
+
+		Temp dest = provider.newTemp();
+
+		for (TableConstructorExpr.FieldInitialiser fi : e.fields()) {
+			if (fi.key() == null) {
+				array += 1;
+			}
+			else {
+				hash += 1;
+			}
+		}
+
+		temps.push(dest);
+		insns.add(new TabNew(dest, array, hash));
+
+		int i = 1;
+		for (TableConstructorExpr.FieldInitialiser fi : e.fields()) {
+			if (fi.key() == null) {
+				Temp d = provider.newTemp();
+				temps.push(d);
+				insns.add(new LoadConst.Int(d, (long) i++));
+			}
+			else {
+				fi.key().accept(this);
+			}
+			Temp k = popTemp();
+
+			fi.value().accept(this);
+			Temp v = popTemp();
+
+			insns.add(new TabSet(dest, k, v));
+		}
+
+		return e;
+	}
+
+	@Override
+	public ReturnStatement transform(ReturnStatement node) {
+		List<Temp> args = new ArrayList<>();
+
+		for (Expr e : node.exprs()) {
+			e.accept(this);
+			args.add(popTemp());
+		}
+
+		insns.add(new Ret(Collections.unmodifiableList(args)));
+
+		return node;
 	}
 
 }

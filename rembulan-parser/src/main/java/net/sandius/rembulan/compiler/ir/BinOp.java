@@ -26,13 +26,31 @@ public class BinOp extends IRNode {
 	}
 
 	private final Op op;
+	private final Temp dest;
+	private final Temp left;
+	private final Temp right;
 
-	public BinOp(Op op) {
+	public BinOp(Op op, Temp dest, Temp left, Temp right) {
 		this.op = Check.notNull(op);
+		this.dest = Check.notNull(dest);
+		this.left = Check.notNull(left);
+		this.right = Check.notNull(right);
 	}
 
 	public Op op() {
 		return op;
+	}
+
+	public Temp dest() {
+		return dest;
+	}
+
+	public Temp left() {
+		return left;
+	}
+
+	public Temp right() {
+		return right;
 	}
 
 	@Override

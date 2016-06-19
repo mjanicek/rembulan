@@ -2,6 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
+@Deprecated
 public class ArrayGet extends IRNode {
 
 	private final int index;

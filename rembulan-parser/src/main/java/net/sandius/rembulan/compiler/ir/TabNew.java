@@ -2,22 +2,28 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class Vararg extends IRNode {
+public class TabNew extends IRNode {
 
 	private final Temp dest;
-	private final int idx;
+	private final int array;
+	private final int hash;
 
-	public Vararg(Temp dest, int idx) {
+	public TabNew(Temp dest, int array, int hash) {
 		this.dest = Check.notNull(dest);
-		this.idx = idx;
+		this.array = array;
+		this.hash = hash;
 	}
 
 	public Temp dest() {
 		return dest;
 	}
 
-	public int idx() {
-		return idx;
+	public int array() {
+		return array;
+	}
+
+	public int hash() {
+		return hash;
 	}
 
 	@Override

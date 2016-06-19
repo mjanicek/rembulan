@@ -36,6 +36,7 @@ object Expressions {
 
   ok ("-1 ^ -2 .. -3 + 10")
 
+  ok ("...")
   ok ("... << 2")
 
   ok ("function () end")
@@ -53,12 +54,20 @@ object Expressions {
   ok ("{1, 2, 3, 4, 5}")
   ok ("{1, 2, 3, 4, 5,}")
 
+  ok ("{f()}")
+  ok ("{(f())}")
+  ok ("{f(),'boo'}")
+
+  ok ("{...}")
+
   nok ("{;}")
 
   ok ("#t")
 
   ok ("(4).x")
   ok ("(4)()")
+
+  ok ("f() + 1")
 
   ok ("(...).x + 1")
 
