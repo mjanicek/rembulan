@@ -502,6 +502,18 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   Tailcalls in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
 
+  val YesTailcall = fragment ("YesTailcall") {
+    """return (function () return 1, 2 end)()
+    """
+  }
+  YesTailcall in EmptyContext succeedsWith (1, 2)
+
+  val NoTailcall = fragment ("NoTailcall") {
+    """return ((function () return 1, 2 end)())
+    """
+  }
+  NoTailcall in EmptyContext succeedsWith (1)
+
   val FuncWith2Params = fragment ("FuncWith2Params") {
     """local f = function (x, y)
       |    return x + y
