@@ -560,6 +560,18 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   IndeterminateVarargs in EmptyContext succeedsWith (false)
 
+  val MultiTableConstructor = fragment ("MultiTableConstructor") {
+    """return #({(function() return 3, 2, 1 end)()})
+    """
+  }
+  MultiTableConstructor in EmptyContext succeedsWith (3)
+
+  val NoMultiTableConstructor = fragment ("NoMultiTableConstructor") {
+    """return #({((function() return 3, 2, 1 end)())})
+    """
+  }
+  NoMultiTableConstructor in EmptyContext succeedsWith (1)
+
   val NilTestInlining = fragment ("NilTestInlining") {
     """local a
       |if a then
