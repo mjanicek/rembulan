@@ -49,6 +49,16 @@ public interface Operator {
 			return leftAssoc;
 		}
 
+		public Binary swap() {
+			switch (this) {
+				case LT: return GT;
+				case LE: return GE;
+				case GT: return LT;
+				case GE: return LE;
+				default: return this;
+			}
+		}
+
 	}
 
 	enum Unary implements Operator {

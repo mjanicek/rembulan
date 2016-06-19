@@ -160,7 +160,7 @@ public abstract class Transformer {
 	}
 
 	public Expr transform(LiteralExpr e) {
-		return e;
+		return e.update(e.value().accept(this));
 	}
 
 	public Expr transform(VarargsExpr e) {
