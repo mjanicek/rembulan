@@ -100,7 +100,7 @@ public class IRPrinterVisitor extends IRVisitor {
 
 	@Override
 	public void visit(VarStore node) {
-		ps.println("\tvarstore " + node.var());
+		ps.println("\tvarstore " + node.var() + " " + node.src());
 	}
 
 	@Override
@@ -110,7 +110,7 @@ public class IRPrinterVisitor extends IRVisitor {
 
 	@Override
 	public void visit(UpStore node) {
-		ps.println("\tupstore " + node.upval());
+		ps.println("\tupstore " + node.upval() + " " + node.src());
 	}
 
 	@Override

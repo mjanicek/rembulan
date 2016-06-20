@@ -5,6 +5,7 @@ import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
+import net.sandius.rembulan.parser.ast.util.AttributeUtils;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
@@ -20,6 +21,9 @@ public class IRTranslatorTransformer extends Transformer {
 	private final RegProvider provider;
 	private final Stack<Temp> temps;
 	private final List<IRNode> insns;
+
+	private final Stack<Label> breakLabels;
+
 	private boolean assigning;
 	private boolean onStack;
 
@@ -32,6 +36,7 @@ public class IRTranslatorTransformer extends Transformer {
 		this.insns = new ArrayList<>();
 		this.assigning = false;
 		this.onStack = false;
+		this.breakLabels = new Stack<>();
 
 		this.vars = new HashMap<>();
 		this.uvs = new HashMap<>();
@@ -84,7 +89,8 @@ public class IRTranslatorTransformer extends Transformer {
 		if (rv.isUpvalue()) {
 			// upvalue
 			if (assigning) {
-				insns.add(new UpStore(upVar(rv.variable())));
+				Temp src = popTemp();
+				insns.add(new UpStore(upVar(rv.variable()), src));
 			}
 			else {
 				Temp dest = provider.newTemp();
@@ -95,7 +101,8 @@ public class IRTranslatorTransformer extends Transformer {
 		else {
 			// local variable
 			if (assigning) {
-				insns.add(new VarStore(var(rv.variable())));
+				Temp src = popTemp();
+				insns.add(new VarStore(var(rv.variable()), src));
 			}
 			else {
 				Temp dest = provider.newTemp();
@@ -109,17 +116,25 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public LValueExpr transform(IndexExpr e) {
+		boolean as = assigning;
+		assigning = false;
+
 		e.object().accept(this);
 		Temp obj = popTemp();
 		e.key().accept(this);
 		Temp key = popTemp();
 
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		assigning = as;
 
-		Check.isFalse(assigning);  // FIXME
-
-		insns.add(new TabGet(dest, obj, key));
+		if (assigning) {
+			Temp value = popTemp();
+			insns.add(new TabSet(obj, key, value));
+		}
+		else {
+			Temp dest = provider.newTemp();
+			temps.push(dest);
+			insns.add(new TabGet(dest, obj, key));
+		}
 
 		return e;
 	}
@@ -403,6 +418,28 @@ public class IRTranslatorTransformer extends Transformer {
 		return e;
 	}
 
+	private void nestedBlock(Block b) {
+		for (BodyStatement bs : b.statements()) {
+			bs.accept(this);
+		}
+		if (b.returnStatement() != null) {
+			b.returnStatement().accept(this);
+		}
+	}
+
+	private void mainBlock(Block b) {
+		nestedBlock(b);
+		if (b.returnStatement() == null) {
+			insns.add(new Ret(vlist(Collections.<Expr>emptyList())));
+		}
+	}
+
+	@Override
+	public Chunk transform(Chunk chunk) {
+		mainBlock(chunk.block());
+		return chunk;
+	}
+
 	@Override
 	public ReturnStatement transform(ReturnStatement node) {
 		if (node.exprs().size() == 1 && node.exprs().get(0) instanceof CallExpr) {
@@ -428,6 +465,183 @@ public class IRTranslatorTransformer extends Transformer {
 			insns.add(new Ret(args));
 		}
 
+		return node;
+	}
+
+	@Override
+	public BodyStatement transform(AssignStatement node) {
+		List<Temp> ts = new ArrayList<>();
+
+		for (Expr e : node.exprs()) {
+			e.accept(this);
+			ts.add(popTemp());
+		}
+
+		Iterator<Temp> it = ts.iterator();
+		for (LValueExpr lv : node.vars()) {
+
+			final Temp src;
+			if (it.hasNext()) {
+				src = it.next();
+			}
+			else {
+				src = provider.newTemp();
+				insns.add(new LoadConst.Nil(src));
+			}
+
+			temps.push(src);
+			assigning = true;
+			lv.accept(this);
+			assigning = false;
+		}
+
+		return node;
+	}
+
+	@Override
+	public BodyStatement transform(LocalDeclStatement node) {
+		List<Temp> ts = new ArrayList<>();
+
+		for (Expr e : node.initialisers()) {
+			e.accept(this);
+			ts.add(popTemp());
+		}
+
+		Iterator<Temp> it = ts.iterator();
+		for (Name n : node.names()) {
+			// TODO: find the variable for n!
+			Variable w = new Variable();  // FIXME
+			Var v = var(w);
+
+			final Temp src;
+			if (it.hasNext()) {
+				src = it.next();
+			}
+			else {
+				src = provider.newTemp();
+				insns.add(new LoadConst.Nil(src));
+			}
+
+			insns.add(new VarStore(v, src));
+		}
+
+		return node;
+	}
+
+	private void condBlock(ConditionalBlock cb, Label l_else, Label l_done) {
+		Check.notNull(l_done);
+
+		cb.condition().accept(this);
+		Temp c = popTemp();
+
+		insns.add(new CJmp(c, false, l_else != null ? l_else : l_done));
+		nestedBlock(cb.block());
+
+		if (l_else != null) {
+			insns.add(new Jmp(l_done));
+		}
+	}
+
+	private Label nextLabel(Iterator<Label> ls) {
+		return ls.hasNext() ? ls.next() : null;
+	}
+
+	@Override
+	public BodyStatement transform(IfStatement node) {
+		Label l_done = provider.newLabel();
+
+		List<Label> nexts = new ArrayList<>();
+		for (ConditionalBlock cb : node.elifs()) {
+			nexts.add(provider.newLabel());
+		}
+		if (node.elseBlock() != null) {
+			nexts.add(provider.newLabel());
+		}
+
+		Iterator<Label> ls = nexts.iterator();
+
+		Label l_next = nextLabel(ls);
+		condBlock(node.main(), l_next, l_done);
+		for (ConditionalBlock cb : node.elifs()) {
+			assert (l_next != null);
+			insns.add(l_next);
+			l_next = nextLabel(ls);
+
+			condBlock(cb, l_next, l_done);
+		}
+
+		if (node.elseBlock() != null) {
+			assert (l_next != null);
+			insns.add(l_next);
+			nestedBlock(node.elseBlock());
+		}
+
+		insns.add(l_done);
+
+		return node;
+	}
+
+	@Override
+	public BodyStatement transform(NumericForStatement node) {
+		throw new UnsupportedOperationException("numeric for-loop");  // TODO
+	}
+
+	@Override
+	public BodyStatement transform(GenericForStatement node) {
+		throw new UnsupportedOperationException("generic for-loop");  // TODO
+	}
+
+	@Override
+	public BodyStatement transform(WhileStatement node) {
+		Label l_test = provider.newLabel();
+		Label l_done = provider.newLabel();
+
+		insns.add(l_test);
+		node.condition().accept(this);
+		Temp c = popTemp();
+		insns.add(new CJmp(c, false, l_done));
+
+		breakLabels.push(l_done);
+		nestedBlock(node.block());
+		breakLabels.pop();
+
+		insns.add(new Jmp(l_test));
+
+		insns.add(l_done);
+
+		return node;
+	}
+
+	@Override
+	public BodyStatement transform(RepeatUntilStatement node) {
+		throw new UnsupportedOperationException("repeat-until loop");  // TODO
+	}
+
+	@Override
+	public BodyStatement transform(LabelStatement node) {
+		throw new UnsupportedOperationException("label statement");  // TODO
+	}
+
+	@Override
+	public BodyStatement transform(GotoStatement node) {
+		throw new UnsupportedOperationException("goto statement");  // TODO
+	}
+
+	@Override
+	public BodyStatement transform(BreakStatement node) {
+		if (breakLabels.isEmpty()) {
+			throw new IllegalStateException("<break> at " + AttributeUtils.sourceInfoString(node) + " not inside a loop");
+		}
+		else {
+			Label l = breakLabels.peek();
+			insns.add(new Jmp(l));
+		}
+		return node;
+	}
+
+	@Override
+	public BodyStatement transform(CallStatement node) {
+		node.callExpr().accept(this);
 		return node;
 	}
 
