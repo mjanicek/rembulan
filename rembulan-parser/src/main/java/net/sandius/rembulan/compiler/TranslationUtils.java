@@ -33,9 +33,7 @@ abstract class TranslationUtils {
 			case EQ:  return BinOp.Op.EQ;
 			case NEQ: return BinOp.Op.NEQ;
 			case LT:  return BinOp.Op.LT;
-
-			case AND: return BinOp.Op.AND;
-			case OR:  return BinOp.Op.OR;
+			case LE:  return BinOp.Op.LE;
 
 			default: return null;
 		}

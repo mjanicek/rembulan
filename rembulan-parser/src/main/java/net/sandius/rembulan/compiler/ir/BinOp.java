@@ -11,6 +11,7 @@ public class BinOp extends IRNode {
 		DIV,
 		MOD,
 		IDIV,
+		POW,
 		CONCAT,
 		BAND,
 		BOR,
@@ -20,9 +21,7 @@ public class BinOp extends IRNode {
 		EQ,
 		NEQ,
 		LT,
-		AND,
-		OR,
-		POW
+		LE
 	}
 
 	private final Op op;

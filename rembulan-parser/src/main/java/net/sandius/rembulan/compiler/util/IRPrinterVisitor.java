@@ -2,10 +2,14 @@ package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.compiler.ir.BinOp;
+import net.sandius.rembulan.compiler.ir.CJmp;
 import net.sandius.rembulan.compiler.ir.Call;
 import net.sandius.rembulan.compiler.ir.Dup;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
+import net.sandius.rembulan.compiler.ir.Jmp;
+import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.LoadConst;
+import net.sandius.rembulan.compiler.ir.Mov;
 import net.sandius.rembulan.compiler.ir.Ret;
 import net.sandius.rembulan.compiler.ir.StackGet;
 import net.sandius.rembulan.compiler.ir.TCall;
@@ -142,4 +146,23 @@ public class IRPrinterVisitor extends IRVisitor {
 		ps.println("\tstackget " + node.dest() + " " + node.idx());
 	}
 
+	@Override
+	public void visit(Mov node) {
+		ps.println("\tmov " + node.dest() + " " + node.src());
+	}
+
+	@Override
+	public void visit(Label node) {
+		ps.println(node + ":");
+	}
+
+	@Override
+	public void visit(Jmp node) {
+		ps.println("\tjmp " + node.target());
+	}
+
+	@Override
+	public void visit(CJmp node) {
+		ps.println("\tcjmp " + node.addr() + " " + node.expected() + " " + node.jmpDest());
+	}
 }

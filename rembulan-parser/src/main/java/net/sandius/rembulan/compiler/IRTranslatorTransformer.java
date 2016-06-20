@@ -163,30 +163,81 @@ public class IRTranslatorTransformer extends Transformer {
 		return l;
 	}
 
-	@Override
-	public Expr transform(BinaryOperationExpr e) {
-		BinOp.Op op = TranslationUtils.bop(e.op());
+	private void and(Expr left, Expr right) {
+		Temp dest = provider.newTemp();
+		Label l_false = provider.newLabel();
+		Label l_done = provider.newLabel();
+
+		left.accept(this);
+		Temp l = popTemp();
+
+		insns.add(new CJmp(l, false, l_false));
+
+		right.accept(this);
+		Temp r = popTemp();
+		insns.add(new Mov(dest, r));
+		insns.add(new Jmp(l_done));
+
+		insns.add(l_false);
+		insns.add(new Mov(dest, l));
+
+		insns.add(l_done);
+		temps.push(dest);
+	}
+
+	private void or(Expr left, Expr right) {
+		Temp dest = provider.newTemp();
+		Label l_true = provider.newLabel();
+		Label l_done = provider.newLabel();
+
+		left.accept(this);
+		Temp l = popTemp();
+
+		insns.add(new CJmp(l, true, l_true));
+
+		right.accept(this);
+		Temp r = popTemp();
+		insns.add(new Mov(dest, r));
+		insns.add(new Jmp(l_done));
+
+		insns.add(l_true);
+		insns.add(new Mov(dest, l));
+
+		insns.add(l_done);
+		temps.push(dest);
+	}
+
+	private void eagerBinOp(Operator.Binary op, Expr left, Expr right) {
+		BinOp.Op bop = TranslationUtils.bop(op);
 		boolean swap = false;
 
-		if (op == null) {
-			op = TranslationUtils.bop(e.op().swap());
+		if (bop == null) {
+			bop = TranslationUtils.bop(op.swap());
 			swap = true;
 		}
 
-		if (op == null) {
-			throw new UnsupportedOperationException("Binary operator not supported: " + e.op());
+		if (bop == null) {
+			throw new UnsupportedOperationException("Binary operator not supported: " + op);
 		}
 
-		e.left().accept(this);
-		Temp left = popTemp();
-		e.right().accept(this);
-		Temp right = popTemp();
+		left.accept(this);
+		Temp l = popTemp();
+		right.accept(this);
+		Temp r = popTemp();
 
 		Temp dest = provider.newTemp();
 		temps.push(dest);
 
-		insns.add(new BinOp(op, dest, swap ? right : left, swap ? left : right));
-		
+		insns.add(new BinOp(bop, dest, swap ? r : l, swap ? l : r));
+	}
+
+	@Override
+	public Expr transform(BinaryOperationExpr e) {
+		switch (e.op()) {
+			case AND: and(e.left(), e.right()); break;
+			case OR: or(e.left(), e.right()); break;
+			default: eagerBinOp(e.op(), e.left(), e.right()); break;
+		}
 		return e;
 	}
 

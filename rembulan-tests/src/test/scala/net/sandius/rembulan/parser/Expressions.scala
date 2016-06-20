@@ -101,8 +101,15 @@ object Expressions {
   ok ("not not x")
   ok ("x or y")
   ok ("x and y")
+  ok ("x or y or z")
+
+  ok ("x and y or z")
 
   ok ("x or y > 0")
+
+  ok ("x >= 0 and x <= 10")
+  ok ("x < 0 or x > 10")
+
   ok ("not not x == false and x ~= nil")
 
 }
