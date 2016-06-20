@@ -35,87 +35,87 @@ public class IRPrinterVisitor extends IRVisitor {
 
 	@Override
 	public void visit(LoadConst.Nil node) {
-		ps.println("(ldnil " + node.dest() + ")");
+		ps.println("\tldnil " + node.dest());
 	}
 
 	@Override
 	public void visit(LoadConst.Bool node) {
-		ps.println("(ldbool " + node.dest() + " " + node.value() + ")");
+		ps.println("\tldbool " + node.dest() + " " + node.value());
 	}
 
 	@Override
 	public void visit(LoadConst.Int node) {
-		ps.println("(ldint " + node.dest() + " " + node.value() + ")");
+		ps.println("\tldint " + node.dest() + " " + node.value());
 	}
 
 	@Override
 	public void visit(LoadConst.Flt node) {
-		ps.println("(ldflt " + node.dest() + " " + node.value() + ")");
+		ps.println("\tldflt " + node.dest() + " " + node.value());
 	}
 
 	@Override
 	public void visit(LoadConst.Str node) {
-		ps.println("(ldstr " + node.dest() + " " + LuaFormat.escape(node.value()) + ")");
+		ps.println("\tldstr " + node.dest() + " " + LuaFormat.escape(node.value()));
 	}
 
 	@Override
 	public void visit(BinOp node) {
-		ps.println("(" + node.op().toString().toLowerCase() + " " + node.dest() + " " + node.left() + " " + node.right() + ")");
+		ps.println("\t" + node.op().toString().toLowerCase() + " " + node.dest() + " " + node.left() + " " + node.right());
 	}
 
 	@Override
 	public void visit(UnOp node) {
-		ps.println("(" + node.op().toString().toLowerCase() + " " + node.dest() + " " + node.arg() + ")");
+		ps.println("\t" + node.op().toString().toLowerCase() + " " + node.dest() + " " + node.arg());
 	}
 
 	@Override
 	public void visit(TabNew node) {
-		ps.println("(tabnew " + node.dest() + " " + node.array() + " " + node.hash() + ")");
+		ps.println("\ttabnew " + node.dest() + " " + node.array() + " " + node.hash());
 	}
 
 	@Override
 	public void visit(TabGet node) {
-		ps.println("(tabget " + node.dest() + " " + node.obj() + " " + node.key() + ")");
+		ps.println("\ttabget " + node.dest() + " " + node.obj() + " " + node.key());
 	}
 
 	@Override
 	public void visit(TabSet node) {
-		ps.println("(tabset " + node.dest() + " " + node.key() + " " + node.value() + ")");
+		ps.println("\ttabset " + node.dest() + " " + node.key() + " " + node.value());
 	}
 
 	@Override
 	public void visit(TabStackAppend node) {
-		ps.println("(tabstackappend " + node.dest() + ")");
+		ps.println("\ttabstackappend " + node.dest());
 	}
 
 	@Override
 	public void visit(VarLoad node) {
-		ps.println("(varload " + node.dest() + " " + node.var() + ")");
+		ps.println("\tvarload " + node.dest() + " " + node.var());
 	}
 
 	@Override
 	public void visit(VarStore node) {
-		ps.println("varstore " + node.var());
+		ps.println("\tvarstore " + node.var());
 	}
 
 	@Override
 	public void visit(UpLoad node) {
-		ps.println("(upload " + node.dest() + " " + node.upval() + ")");
+		ps.println("\tupload " + node.dest() + " " + node.upval());
 	}
 
 	@Override
 	public void visit(UpStore node) {
-		ps.println("upstore " + node.upval());
+		ps.println("\tupstore " + node.upval());
 	}
 
 	@Override
 	public void visit(Vararg node) {
-		ps.println("(vararg)");
+		ps.println("\tvararg");
 	}
 
 	@Override
 	public void visit(Dup node) {
-		ps.println("dup");
+		ps.println("\tdup");
 	}
 
 	private static String vlistToString(VList vl) {
@@ -124,22 +124,22 @@ public class IRPrinterVisitor extends IRVisitor {
 
 	@Override
 	public void visit(Ret node) {
-		ps.println("(ret " + vlistToString(node.args()) + ")");
+		ps.println("\tret " + vlistToString(node.args()));
 	}
 
 	@Override
 	public void visit(Call node) {
-		ps.println("(call " + node.fn() + " " + vlistToString(node.args()) + ")");
+		ps.println("\tcall " + node.fn() + " " + vlistToString(node.args()));
 	}
 
 	@Override
 	public void visit(TCall node) {
-		ps.println("(tcall " + node.target() + " " + vlistToString(node.args()) + ")");
+		ps.println("\ttcall " + node.target() + " " + vlistToString(node.args()));
 	}
 
 	@Override
 	public void visit(StackGet node) {
-		ps.println("(stackget " + node.dest() + " " + node.idx() + ")");
+		ps.println("\tstackget " + node.dest() + " " + node.idx());
 	}
 
 }
