@@ -97,6 +97,11 @@ object Expressions {
 
   ok ("f(...)")
 
+  ok ("not x")
+  ok ("not not x")
+  ok ("x or y")
+  ok ("x and y")
+
   ok ("x or y > 0")
   ok ("not not x == false and x ~= nil")
 
