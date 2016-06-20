@@ -124,21 +124,23 @@ public class IRPrinterVisitor extends IRVisitor {
 		ps.println("dup");
 	}
 
+	private static String vlistToString(VList vl) {
+		return "(" + (vl.isMulti() ? "multi" : "fixed") + " [" + Util.listToString(vl.addrs(), " ") + "])";
+	}
+
 	@Override
 	public void visit(Ret node) {
-		ps.println("(ret " + Util.listToString(node.args(), " ") + ")");
+		ps.println("(ret " + vlistToString(node.args()) + ")");
 	}
 
 	@Override
 	public void visit(Call node) {
-		Check.isTrue(node.args() instanceof VList.Fixed);
-		ps.println("(call " + node.fn() + " (fixed " + Util.listToString(((VList.Fixed) node.args()).addrs(), " ") + "))");
+		ps.println("(call " + node.fn() + " " + vlistToString(node.args()) + ")");
 	}
 
 	@Override
 	public void visit(TCall node) {
-		Check.isTrue(node.args() instanceof VList.Fixed);
-		ps.println("(tcall " + node.target() + " (fixed " + Util.listToString(((VList.Fixed) node.args()).addrs(), " ") + "))");
+		ps.println("(tcall " + node.target() + " " + vlistToString(node.args()) + ")");
 	}
 
 	@Override

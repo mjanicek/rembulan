@@ -222,46 +222,68 @@ public class IRTranslatorTransformer extends Transformer {
 		return e;
 	}
 
-	@Override
-	public Expr transform(CallExpr.FunctionCallExpr e) {
-		e.fn().accept(this);
-		Temp fn = popTemp();
-
+	private VList vlist(Temp prefix, List<Expr> exprs) {
 		List<Temp> as = new ArrayList<>();
-		for (Expr a : e.args()) {
-			a.accept(this);
-			as.add(popTemp());
+		if (prefix != null) {
+			as.add(prefix);
 		}
 
-		insns.add(new Call(fn, new VList.Fixed(Collections.unmodifiableList(as))));
+		boolean multi = false;
+		Iterator<Expr> it = exprs.iterator();
+		while (it.hasNext()) {
+			Expr e = it.next();
+			e.accept(this);
 
+			if (it.hasNext() || !onStack) {
+				as.add(popTemp());
+			}
+			else {
+				// multi-value expression in tail position
+//				onStack = false;  // TODO: ?
+				multi = true;
+			}
+		}
+
+		return new VList(Collections.unmodifiableList(as), multi);
+	}
+
+	private VList vlist(List<Expr> exprs) {
+		return vlist(null, exprs);
+	}
+
+	private Call call(CallExpr.FunctionCallExpr e) {
+		e.fn().accept(this);
+		Temp fn = popTemp();
+		VList vl = vlist(e.args());
+		return new Call(fn, vl);
+	}
+
+	private Call call(CallExpr.MethodCallExpr e) {
+		e.target().accept(this);
+		Temp obj = popTemp();
+
+		transform(StringLiteral.fromName(e.methodName()));
+		Temp method = popTemp();
+
+		Temp fn = provider.newTemp();
+		insns.add(new TabGet(fn, obj, method));
+
+		VList vl = vlist(obj, e.args());
+
+		return new Call(fn, vl);
+	}
+
+	@Override
+	public Expr transform(CallExpr.FunctionCallExpr e) {
+		insns.add(call(e));
 		onStack = true;
-
 		return e;
 	}
 
 	@Override
 	public Expr transform(CallExpr.MethodCallExpr e) {
-		e.target().accept(this);
-		Temp fn = popTemp();
-
-		transform(StringLiteral.fromName(e.methodName()));
-		Temp n = popTemp();
-
-		Temp callTgt = provider.newTemp();
-		insns.add(new TabGet(callTgt, fn, n));
-
-		List<Temp> as = new ArrayList<>();
-		as.add(fn);
-		for (Expr a : e.args()) {
-			a.accept(this);
-			as.add(popTemp());
-		}
-
-		insns.add(new Call(callTgt, new VList.Fixed(Collections.unmodifiableList(as))));
-
+		insns.add(call(e));
 		onStack = true;
-
 		return e;
 	}
 
@@ -305,15 +327,14 @@ public class IRTranslatorTransformer extends Transformer {
 			Temp k = popTemp();
 
 			fi.value().accept(this);
-			if (it.hasNext() || !onStack) {
+			if (fi.key() != null || it.hasNext() || !onStack) {
 				Temp v = popTemp();
 				insns.add(new TabSet(dest, k, v));
 			}
 			else {
 //				// multi-value expression in tail position
 				insns.add(new TabStackAppend(dest));
-				onStack = false;
-//				throw new UnsupportedOperationException();  // TODO
+				onStack = false;  // FIXME: check this
 			}
 		}
 
@@ -324,25 +345,25 @@ public class IRTranslatorTransformer extends Transformer {
 	public ReturnStatement transform(ReturnStatement node) {
 		if (node.exprs().size() == 1 && node.exprs().get(0) instanceof CallExpr) {
 			// tail call
-			throw new UnsupportedOperationException("tail call");  // TODO
-		}
-		else {
-			List<Temp> args = new ArrayList<>();
 
-			Iterator<Expr> it = node.exprs().iterator();
-			while (it.hasNext()) {
-				Expr e = it.next();
-				e.accept(this);
-				if (it.hasNext() || !onStack) {
-					args.add(popTemp());
-				}
-				else {
-					// multi-value expression in tail position
-					throw new UnsupportedOperationException("multi-value expr in tail position");  // TODO
-				}
+			CallExpr ce = (CallExpr) node.exprs().get(0);
+
+			final Call c;
+			if (ce instanceof CallExpr.FunctionCallExpr) {
+				c = call((CallExpr.FunctionCallExpr) ce);
+			}
+			else if (ce instanceof CallExpr.MethodCallExpr) {
+				c = call((CallExpr.MethodCallExpr) ce);
+			}
+			else {
+				throw new IllegalStateException("Illegal call expression: " + ce);
 			}
 
-			insns.add(new Ret(Collections.unmodifiableList(args)));
+			insns.add(new TCall(c.fn(), c.args()));
+		}
+		else {
+			VList args = vlist(node.exprs());
+			insns.add(new Ret(args));
 		}
 
 		return node;

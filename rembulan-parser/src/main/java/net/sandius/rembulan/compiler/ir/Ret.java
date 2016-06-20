@@ -2,17 +2,15 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-import java.util.List;
-
 public class Ret extends IRNode {
 
-	private final List<Temp> args;
+	private final VList args;
 
-	public Ret(List<Temp> args) {
+	public Ret(VList args) {
 		this.args = Check.notNull(args);
 	}
 
-	public List<Temp> args() {
+	public VList args() {
 		return args;
 	}
 

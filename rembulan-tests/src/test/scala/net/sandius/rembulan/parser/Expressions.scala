@@ -82,6 +82,7 @@ object Expressions {
   ok ("f:g()")
 
   ok ("f(f(f))")
+  ok ("f(f(f(f)))")
 
   ok ("f()")
   ok ("f.x()")

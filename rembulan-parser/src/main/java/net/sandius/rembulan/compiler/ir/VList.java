@@ -4,28 +4,22 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public abstract class VList {
+public class VList {
 
-	public static class Fixed extends VList {
+	private final List<Temp> addrs;
+	private final boolean multi;
 
-		private final List<Temp> addrs;
-
-		public Fixed(List<Temp> addrs) {
-			this.addrs = Check.notNull(addrs);
-		}
-
-		public List<Temp> addrs() {
-			return addrs;
-		}
-
+	public VList(List<Temp> addrs, boolean multi) {
+		this.addrs = Check.notNull(addrs);
+		this.multi = multi;
 	}
 
-	public static class Multi extends VList {
+	public List<Temp> addrs() {
+		return addrs;
+	}
 
-		public Multi() {
-			throw new UnsupportedOperationException();  // TODO
-		}
-
+	public boolean isMulti() {
+		return multi;
 	}
 
 }
