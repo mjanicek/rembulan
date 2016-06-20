@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.compiler.ir.ArrayGet;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.Call;
 import net.sandius.rembulan.compiler.ir.Dup;
@@ -112,11 +111,6 @@ public class IRPrinterVisitor extends IRVisitor {
 	@Override
 	public void visit(Vararg node) {
 		ps.println("(vararg)");
-	}
-
-	@Override
-	public void visit(ArrayGet node) {
-		ps.println("arrayget " + node.index());
 	}
 
 	@Override

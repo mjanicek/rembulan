@@ -39,9 +39,6 @@ public abstract class IRVisitor {
 	public abstract void visit(Vararg node);
 
 
-	public abstract void visit(ArrayGet node);
-
-
 	public abstract void visit(Dup node);
 
 
