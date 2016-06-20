@@ -47,6 +47,8 @@ public abstract class IRVisitor {
 
 	public abstract void visit(Ret node);
 
+	public abstract void visit(TCall node);
+
 	public abstract void visit(Call node);
 
 

@@ -9,6 +9,7 @@ import net.sandius.rembulan.util.Check;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -19,7 +20,7 @@ public class IRTranslatorTransformer extends Transformer {
 	private final Stack<Temp> temps;
 	private final List<IRNode> insns;
 	private boolean assigning;
-	private boolean wasCall;
+	private boolean onStack;
 
 	private final Map<Variable, Var> vars;
 	private final Map<Variable, UpVar> uvs;
@@ -29,7 +30,7 @@ public class IRTranslatorTransformer extends Transformer {
 		this.temps = new Stack<>();
 		this.insns = new ArrayList<>();
 		this.assigning = false;
-		this.wasCall = false;
+		this.onStack = false;
 
 		this.vars = new HashMap<>();
 		this.uvs = new HashMap<>();
@@ -40,8 +41,8 @@ public class IRTranslatorTransformer extends Transformer {
 	}
 
 	private Temp popTemp() {
-		if (wasCall) {
-			wasCall = false;
+		if (onStack) {
+			onStack = false;
 			Temp t = provider.newTemp();
 			insns.add(new StackGet(t, 0));
 			return t;
@@ -49,17 +50,6 @@ public class IRTranslatorTransformer extends Transformer {
 		else {
 			return temps.pop();
 		}
-
-//		if (!temps.isEmpty()) {
-//			return temps.pop();
-//		}
-//		else {
-//			Check.isTrue(wasCall);
-//			wasCall = false;
-//			Temp t = provider.newTemp();
-//			insns.add(new StackGet(t, 0));
-//			return t;
-//		}
 	}
 	
 	private Var var(Variable v) {
@@ -217,11 +207,17 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public Expr transform(VarargsExpr e) {
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		insns.add(new Vararg());
+		onStack = true;
+		return e;
+	}
 
-		// FIXME -- decided by the consumer!
-		insns.add(new Vararg(dest, 0));
+	@Override
+	public Expr transform(ParenExpr e) {
+		e.multiExpr().accept(this);
+
+		Temp dest = popTemp();
+		temps.push(dest);
 
 		return e;
 	}
@@ -239,7 +235,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 		insns.add(new Call(fn, new VList.Fixed(Collections.unmodifiableList(as))));
 
-		wasCall = true;
+		onStack = true;
 
 		return e;
 	}
@@ -264,7 +260,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 		insns.add(new Call(callTgt, new VList.Fixed(Collections.unmodifiableList(as))));
 
-		wasCall = true;
+		onStack = true;
 
 		return e;
 	}
@@ -294,7 +290,10 @@ public class IRTranslatorTransformer extends Transformer {
 		insns.add(new TabNew(dest, array, hash));
 
 		int i = 1;
-		for (TableConstructorExpr.FieldInitialiser fi : e.fields()) {
+		Iterator<TableConstructorExpr.FieldInitialiser> it = e.fields().iterator();
+		while (it.hasNext()) {
+			TableConstructorExpr.FieldInitialiser fi = it.next();
+
 			if (fi.key() == null) {
 				Temp d = provider.newTemp();
 				temps.push(d);
@@ -306,9 +305,16 @@ public class IRTranslatorTransformer extends Transformer {
 			Temp k = popTemp();
 
 			fi.value().accept(this);
-			Temp v = popTemp();
-
-			insns.add(new TabSet(dest, k, v));
+			if (it.hasNext() || !onStack) {
+				Temp v = popTemp();
+				insns.add(new TabSet(dest, k, v));
+			}
+			else {
+//				// multi-value expression in tail position
+				insns.add(new TabStackAppend(dest));
+				onStack = false;
+//				throw new UnsupportedOperationException();  // TODO
+			}
 		}
 
 		return e;
@@ -316,14 +322,28 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public ReturnStatement transform(ReturnStatement node) {
-		List<Temp> args = new ArrayList<>();
-
-		for (Expr e : node.exprs()) {
-			e.accept(this);
-			args.add(popTemp());
+		if (node.exprs().size() == 1 && node.exprs().get(0) instanceof CallExpr) {
+			// tail call
+			throw new UnsupportedOperationException("tail call");  // TODO
 		}
+		else {
+			List<Temp> args = new ArrayList<>();
 
-		insns.add(new Ret(Collections.unmodifiableList(args)));
+			Iterator<Expr> it = node.exprs().iterator();
+			while (it.hasNext()) {
+				Expr e = it.next();
+				e.accept(this);
+				if (it.hasNext() || !onStack) {
+					args.add(popTemp());
+				}
+				else {
+					// multi-value expression in tail position
+					throw new UnsupportedOperationException("multi-value expr in tail position");  // TODO
+				}
+			}
+
+			insns.add(new Ret(Collections.unmodifiableList(args)));
+		}
 
 		return node;
 	}

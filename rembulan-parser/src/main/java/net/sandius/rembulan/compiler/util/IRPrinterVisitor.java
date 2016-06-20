@@ -9,6 +9,7 @@ import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.LoadConst;
 import net.sandius.rembulan.compiler.ir.Ret;
 import net.sandius.rembulan.compiler.ir.StackGet;
+import net.sandius.rembulan.compiler.ir.TCall;
 import net.sandius.rembulan.compiler.ir.TabGet;
 import net.sandius.rembulan.compiler.ir.TabNew;
 import net.sandius.rembulan.compiler.ir.TabSet;
@@ -110,7 +111,7 @@ public class IRPrinterVisitor extends IRVisitor {
 
 	@Override
 	public void visit(Vararg node) {
-		ps.println("(vararg " + node.dest() + " " + node.idx() + ")");
+		ps.println("(vararg)");
 	}
 
 	@Override
@@ -132,6 +133,12 @@ public class IRPrinterVisitor extends IRVisitor {
 	public void visit(Call node) {
 		Check.isTrue(node.args() instanceof VList.Fixed);
 		ps.println("(call " + node.fn() + " (fixed " + Util.listToString(((VList.Fixed) node.args()).addrs(), " ") + "))");
+	}
+
+	@Override
+	public void visit(TCall node) {
+		Check.isTrue(node.args() instanceof VList.Fixed);
+		ps.println("(tcall " + node.target() + " (fixed " + Util.listToString(((VList.Fixed) node.args()).addrs(), " ") + "))");
 	}
 
 	@Override

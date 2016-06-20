@@ -37,6 +37,7 @@ object Expressions {
   ok ("-1 ^ -2 .. -3 + 10")
 
   ok ("...")
+  ok ("(...)")
   ok ("... << 2")
 
   ok ("function () end")
@@ -59,6 +60,7 @@ object Expressions {
   ok ("{f(),'boo'}")
 
   ok ("{...}")
+  ok ("{x = ...}")
 
   nok ("{;}")
 
@@ -68,6 +70,7 @@ object Expressions {
   ok ("(4)()")
 
   ok ("f() + 1")
+  ok ("f(...) + 1")
 
   ok ("(...).x + 1")
 
@@ -90,6 +93,8 @@ object Expressions {
   ok ("f.x().y()")
 
   ok ("f() * 1 << 2")
+
+  ok ("f(...)")
 
   ok ("x or y > 0")
   ok ("not not x == false and x ~= nil")
