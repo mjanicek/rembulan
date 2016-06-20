@@ -307,6 +307,13 @@ public class FormattingPrinterVisitor extends Visitor {
 		out.print("...");
 	}
 
+	@Override
+	public void visit(ParenExpr node) {
+		out.print("(");
+		node.multiExpr().accept(this);
+		out.print(")");
+	}
+
 	private static String binOp(Operator.Binary op) {
 		switch (op) {
 			case ADD:  return "+";

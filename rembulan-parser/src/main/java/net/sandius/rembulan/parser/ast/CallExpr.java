@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public abstract class CallExpr extends Expr {
+public abstract class CallExpr extends MultiExpr {
 
 	protected final List<Expr> args;
 

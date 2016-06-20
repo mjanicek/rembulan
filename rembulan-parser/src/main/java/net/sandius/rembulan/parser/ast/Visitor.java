@@ -178,6 +178,14 @@ public abstract class Visitor extends Transformer {
 		return e;
 	}
 
+	public abstract void visit(ParenExpr node);
+
+	@Override
+	public Expr transform(ParenExpr e) {
+		visit(e);
+		return e;
+	}
+
 	public abstract void visit(BinaryOperationExpr node);
 
 	@Override

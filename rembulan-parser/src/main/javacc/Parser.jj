@@ -402,7 +402,7 @@ Expr VarExpr() :
 }
 {
 	sn=SrcName()  { return Exprs.var(sn.sourceInfo(), sn.element()); }
-|	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return e; }
+|	<PAREN_OPEN> e=Expr() <PAREN_CLOSE>  { return Exprs.paren(e); }
 }
 
 PostfixOp __PostfixOp() :

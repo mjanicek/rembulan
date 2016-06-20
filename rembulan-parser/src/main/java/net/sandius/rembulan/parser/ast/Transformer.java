@@ -167,6 +167,11 @@ public abstract class Transformer {
 		return e;
 	}
 
+	public Expr transform(ParenExpr e) {
+		Expr f = e.multiExpr().accept(this);
+		return f instanceof MultiExpr ? e.update((MultiExpr) f) : f;
+	}
+
 	public Expr transform(FunctionDefExpr e) {
 		return e.update(transform(e.params()), transform(e.block()));
 	}

@@ -1,6 +1,6 @@
 package net.sandius.rembulan.parser.ast;
 
-public class VarargsExpr extends Expr {
+public class VarargsExpr extends MultiExpr {
 
 	public VarargsExpr(Attributes attr) {
 		super(attr);

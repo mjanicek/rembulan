@@ -50,6 +50,15 @@ public abstract class Exprs {
 		return new CallExpr.MethodCallExpr(attr(src), target, methodName, args);
 	}
 
+	public static Expr paren(Expr expr) {
+		if (expr instanceof MultiExpr) {
+			return new ParenExpr(expr.attributes(), (MultiExpr) expr);
+		}
+		else {
+			return expr;
+		}
+	}
+
 	public static BinaryOperationExpr binaryOperation(SourceInfo src, Operator.Binary op, Expr left, Expr right) {
 		return new BinaryOperationExpr(attr(src), op, left,right);
 	}
