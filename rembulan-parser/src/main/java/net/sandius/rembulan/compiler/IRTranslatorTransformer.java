@@ -508,9 +508,8 @@ public class IRTranslatorTransformer extends Transformer {
 		}
 
 		Iterator<Temp> it = ts.iterator();
-		for (Name n : node.names()) {
-			// TODO: find the variable for n!
-			Variable w = new Variable();  // FIXME
+
+		for (Variable w : TranslationUtils.varMapping(node).vars()) {
 			Var v = var(w);
 
 			final Temp src;

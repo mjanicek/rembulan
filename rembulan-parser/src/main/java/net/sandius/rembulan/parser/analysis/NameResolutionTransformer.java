@@ -18,6 +18,8 @@ import net.sandius.rembulan.parser.ast.Transformer;
 import net.sandius.rembulan.parser.ast.VarExpr;
 import net.sandius.rembulan.parser.ast.VarargsExpr;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class NameResolutionTransformer extends Transformer {
@@ -61,10 +63,14 @@ public class NameResolutionTransformer extends Transformer {
 	@Override
 	public BodyStatement transform(LocalDeclStatement node) {
 		List<Name> ns = transformNameList(node.names());
+		List<Variable> vs = new ArrayList<>();
 		for (Name n : ns) {
-			fnScope.addLocal(n);
+			Variable v = fnScope.addLocal(n);
+			vs.add(v);
 		}
-		return node.update(ns, transformExprList(node.initialisers()));
+		return node
+				.update(ns, transformExprList(node.initialisers()))
+				.with(new VarMapping(Collections.unmodifiableList(vs)));
 	}
 
 	@Override

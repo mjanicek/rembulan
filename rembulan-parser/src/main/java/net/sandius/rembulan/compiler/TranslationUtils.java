@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
+import net.sandius.rembulan.parser.analysis.VarMapping;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
 import net.sandius.rembulan.parser.ast.util.AttributeUtils;
@@ -67,12 +68,12 @@ abstract class TranslationUtils {
 		return info;
 	}
 
-	public static UpVar upVar(Variable v) {
-		throw new UnsupportedOperationException();  // TODO
-	}
-
-	public static Var var(Variable variable) {
-		throw new UnsupportedOperationException();  // TODO
+	public static VarMapping varMapping(SyntaxElement e) {
+		VarMapping vm = e.attributes().get(VarMapping.class);
+		if (vm == null) {
+			throw new IllegalStateException("No var mapping at " + AttributeUtils.sourceInfoString(e));
+		}
+		return vm;
 	}
 
 }

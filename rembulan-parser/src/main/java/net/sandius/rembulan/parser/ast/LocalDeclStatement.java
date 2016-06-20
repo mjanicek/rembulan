@@ -35,6 +35,15 @@ public class LocalDeclStatement extends BodyStatement {
 		}
 	}
 
+	public LocalDeclStatement withAttributes(Attributes attr) {
+		if (attributes().equals(attr)) return this;
+		else return new LocalDeclStatement(attr, names, initialisers);
+	}
+
+	public LocalDeclStatement with(Object o) {
+		return this.withAttributes(attributes().with(o));
+	}
+
 	@Override
 	public BodyStatement accept(Transformer tf) {
 		return tf.transform(this);
