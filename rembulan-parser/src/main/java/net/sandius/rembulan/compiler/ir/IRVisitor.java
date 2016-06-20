@@ -59,4 +59,7 @@ public abstract class IRVisitor {
 
 	public abstract void visit(CJmp node);
 
+
+	public abstract void visit(Closure node);
+
 }

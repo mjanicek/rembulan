@@ -42,6 +42,7 @@ object Expressions {
 
   ok ("function () end")
   ok ("function (x) return x * x end")
+  ok ("function () return x end")
 
   ok ("x.y")
   ok ("x.y.z")
@@ -71,6 +72,10 @@ object Expressions {
 
   ok ("f() + 1")
   ok ("f(...) + 1")
+
+  ok ("(function () return x end)()")
+  ok ("(function (x) return x end)(10)")
+  ok ("(function (x) return x * x end)(10) + 1")
 
   ok ("(...).x + 1")
 

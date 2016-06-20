@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.ir.*;
+import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
@@ -56,6 +57,14 @@ abstract class TranslationUtils {
 			throw new IllegalStateException("Unresolved variable '" + e.name().value() + "' at " + AttributeUtils.sourceInfoString(e));
 		}
 		return rv;
+	}
+
+	public static FunctionVarInfo funcVarInfo(SyntaxElement e) {
+		FunctionVarInfo info = e.attributes().get(FunctionVarInfo.class);
+		if (info == null) {
+			throw new IllegalStateException("No var info at " + AttributeUtils.sourceInfoString(e));
+		}
+		return info;
 	}
 
 	public static UpVar upVar(Variable v) {

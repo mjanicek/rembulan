@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.ir.*;
+import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
@@ -337,7 +338,20 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public Expr transform(FunctionDefExpr e) {
-		throw new UnsupportedOperationException();  // TODO
+		Temp dest = provider.newTemp();
+
+		FunctionVarInfo info = TranslationUtils.funcVarInfo(e);
+
+		List<Var> uvs = new ArrayList<>();
+		for (Variable.Ref uv : info.upvalues()) {
+			// FIXME
+			uvs.add(var(uv.var()));
+		}
+
+		insns.add(new Closure(dest, Collections.unmodifiableList(uvs)));
+
+		temps.push(dest);
+		return e;
 	}
 
 	@Override

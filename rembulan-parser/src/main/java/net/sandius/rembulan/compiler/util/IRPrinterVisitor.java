@@ -4,6 +4,7 @@ import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.CJmp;
 import net.sandius.rembulan.compiler.ir.Call;
+import net.sandius.rembulan.compiler.ir.Closure;
 import net.sandius.rembulan.compiler.ir.Dup;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.Jmp;
@@ -165,4 +166,10 @@ public class IRPrinterVisitor extends IRVisitor {
 	public void visit(CJmp node) {
 		ps.println("\tcjmp " + node.addr() + " " + node.expected() + " " + node.jmpDest());
 	}
+
+	@Override
+	public void visit(Closure node) {
+		ps.println("\tclosure " + node.dest() + " [" + Util.listToString(node.args(), " ") + "]");
+	}
+
 }
