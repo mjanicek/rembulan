@@ -177,18 +177,15 @@ public class IRTranslatorTransformer extends Transformer {
 			throw new UnsupportedOperationException("Binary operator not supported: " + e.op());
 		}
 
-		Expr l = swap ? e.right() : e.left();
-		Expr r = swap ? e.left() : e.right();
-
-		l.accept(this);
+		e.left().accept(this);
 		Temp left = popTemp();
-		r.accept(this);
+		e.right().accept(this);
 		Temp right = popTemp();
 
 		Temp dest = provider.newTemp();
 		temps.push(dest);
 
-		insns.add(new BinOp(op, dest, left, right));
+		insns.add(new BinOp(op, dest, swap ? right : left, swap ? left : right));
 		
 		return e;
 	}
