@@ -25,8 +25,12 @@ public class VarMapping {
 		return vars;
 	}
 
+	public Variable get(int idx) {
+		return vars.get(idx);
+	}
+
 	public Variable get() {
-		return vars.get(0);
+		return get(0);
 	}
 
 }

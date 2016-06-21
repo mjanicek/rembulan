@@ -595,6 +595,9 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(NumericForStatement node) {
+		Label l_top = provider.newLabel();
+		Label l_done = provider.newLabel();
+
 		node.init().accept(this);
 		Temp t_var0 = toNumber(popTemp());
 
@@ -616,9 +619,6 @@ public class IRTranslatorTransformer extends Transformer {
 
 		Var v_var = var(new Variable());  // FIXME
 		insns.add(new VarStore(v_var, t_var1));
-
-		Label l_top = provider.newLabel();
-		Label l_done = provider.newLabel();
 
 		insns.add(l_top);
 
@@ -650,7 +650,77 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(GenericForStatement node) {
-		throw new UnsupportedOperationException("generic for-loop");  // TODO
+		Label l_top = provider.newLabel();
+		Label l_done = provider.newLabel();
+
+		VarMapping vm = TranslationUtils.varMapping(node);
+
+		Temp t_f = provider.newTemp();
+		Temp t_s = provider.newTemp();
+		Temp t_var0 = provider.newTemp();
+
+		Var v_var = provider.newVar();  // FIXME
+
+		// local f, s, var = explist
+		{
+			int i = 0;
+			for (Expr e : node.exprs()) {
+				e.accept(this);
+
+				switch (i) {
+					case 0: t_f = popTemp(); break;
+					case 1: t_s = popTemp(); break;
+					case 2: t_var0 = popTemp(); break;
+					default: popTemp(); break;  // discard result
+				}
+
+				i += 1;
+			}
+
+			// pad with nils if necessary; note that the cases fall through!
+			switch (i) {
+				case 0: insns.add(new LoadConst.Nil(t_f));
+				case 1: insns.add(new LoadConst.Nil(t_s));
+				case 2: insns.add(new LoadConst.Nil(t_var0));
+				default:
+			}
+
+			insns.add(new VarStore(v_var, t_var0));
+		}
+
+		insns.add(l_top);
+
+		Temp t_var1 = provider.newTemp();
+		insns.add(new VarLoad(t_var1, v_var));
+
+		List<Temp> ts = new ArrayList<>();
+		ts.add(t_s);
+		ts.add(t_var1);
+		insns.add(new Call(t_f, new VList(Collections.unmodifiableList(ts), false)));
+
+		for (int i = 0; i < node.names().size(); i++) {
+			Var v = var(vm.get(i));
+			Temp t = provider.newTemp();
+			insns.add(new StackGet(t, i));
+			insns.add(new VarStore(v, t));
+		}
+
+		Temp t_v1 = provider.newTemp();
+		insns.add(new VarLoad(t_v1, var(vm.get(0))));
+
+		insns.add(new JmpIfNil(t_v1, l_done));
+
+		insns.add(new VarStore(v_var, t_v1));
+
+		breakLabels.push(l_done);
+		nestedBlock(node.block());
+		breakLabels.pop();
+
+		insns.add(new Jmp(l_top));
+
+		insns.add(l_done);
+
+		return node;
 	}
 
 	@Override

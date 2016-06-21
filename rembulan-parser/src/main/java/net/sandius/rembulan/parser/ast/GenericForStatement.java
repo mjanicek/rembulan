@@ -38,6 +38,15 @@ public class GenericForStatement extends BodyStatement {
 		}
 	}
 
+	public GenericForStatement withAttributes(Attributes attr) {
+		if (attributes().equals(attr)) return this;
+		else return new GenericForStatement(attr, names, exprs, block);
+	}
+
+	public GenericForStatement with(Object o) {
+		return this.withAttributes(attributes().with(o));
+	}
+
 	@Override
 	public BodyStatement accept(Transformer tf) {
 		return tf.transform(this);

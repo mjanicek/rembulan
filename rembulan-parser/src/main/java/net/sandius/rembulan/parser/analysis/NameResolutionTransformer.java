@@ -92,10 +92,16 @@ public class NameResolutionTransformer extends Transformer {
 	public BodyStatement transform(GenericForStatement node) {
 		List<Name> ns = transformNameList(node.names());
 		List<Expr> es = transformExprList(node.exprs());
+
+		List<Variable> vs = new ArrayList<>();
 		for (Name n : ns) {
-			fnScope.addLocal(n);
+			Variable v = fnScope.addLocal(n);
+			vs.add(v);
 		}
-		return node.update(ns, es, transform(node.block()));
+
+		return node
+				.update(ns, es, transform(node.block()))
+				.with(new VarMapping(Collections.unmodifiableList(vs)));
 	}
 
 	@Override

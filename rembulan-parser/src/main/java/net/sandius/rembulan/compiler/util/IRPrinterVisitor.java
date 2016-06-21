@@ -9,6 +9,7 @@ import net.sandius.rembulan.compiler.ir.Closure;
 import net.sandius.rembulan.compiler.ir.Dup;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.Jmp;
+import net.sandius.rembulan.compiler.ir.JmpIfNil;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.LoadConst;
 import net.sandius.rembulan.compiler.ir.Mov;
@@ -182,6 +183,11 @@ public class IRPrinterVisitor extends IRVisitor {
 	@Override
 	public void visit(CheckForEnd node) {
 		ps.println("\tcheckforend " + node.var() + " " + node.limit() + " " + node.step() + " " + node.label());
+	}
+
+	@Override
+	public void visit(JmpIfNil node) {
+		ps.println("\tjmpifnil " + node.addr() + " " + node.jmpDest());
 	}
 
 }
