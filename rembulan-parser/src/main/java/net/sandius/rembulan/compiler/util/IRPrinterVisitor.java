@@ -4,6 +4,7 @@ import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.CJmp;
 import net.sandius.rembulan.compiler.ir.Call;
+import net.sandius.rembulan.compiler.ir.CheckForEnd;
 import net.sandius.rembulan.compiler.ir.Closure;
 import net.sandius.rembulan.compiler.ir.Dup;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
@@ -18,6 +19,7 @@ import net.sandius.rembulan.compiler.ir.TabGet;
 import net.sandius.rembulan.compiler.ir.TabNew;
 import net.sandius.rembulan.compiler.ir.TabSet;
 import net.sandius.rembulan.compiler.ir.TabStackAppend;
+import net.sandius.rembulan.compiler.ir.ToNumber;
 import net.sandius.rembulan.compiler.ir.UnOp;
 import net.sandius.rembulan.compiler.ir.UpLoad;
 import net.sandius.rembulan.compiler.ir.UpStore;
@@ -170,6 +172,16 @@ public class IRPrinterVisitor extends IRVisitor {
 	@Override
 	public void visit(Closure node) {
 		ps.println("\tclosure " + node.dest() + " [" + Util.listToString(node.args(), " ") + "]");
+	}
+
+	@Override
+	public void visit(ToNumber node) {
+		ps.println("\ttonumber " + node.dest() + " " + node.src());
+	}
+
+	@Override
+	public void visit(CheckForEnd node) {
+		ps.println("\tcheckforend " + node.var() + " " + node.limit() + " " + node.step() + " " + node.label());
 	}
 
 }

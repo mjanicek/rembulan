@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
+import net.sandius.rembulan.parser.analysis.VarMapping;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
 import net.sandius.rembulan.parser.ast.util.AttributeUtils;
@@ -580,9 +581,71 @@ public class IRTranslatorTransformer extends Transformer {
 		return node;
 	}
 
+	private Temp toNumber(Temp addr) {
+		Temp t = provider.newTemp();
+		insns.add(new ToNumber(t, addr));
+		return t;
+	}
+
+	private Temp loadConst(int i) {
+		Temp t = provider.newTemp();
+		insns.add(new LoadConst.Int(t, i));
+		return t;
+	}
+
 	@Override
 	public BodyStatement transform(NumericForStatement node) {
-		throw new UnsupportedOperationException("numeric for-loop");  // TODO
+		node.init().accept(this);
+		Temp t_var0 = toNumber(popTemp());
+
+		node.limit().accept(this);
+		Temp t_limit = toNumber(popTemp());
+
+		final Temp t_step;
+		if (node.step() != null) {
+			node.step().accept(this);
+			t_step = toNumber(popTemp());
+		}
+		else {
+			t_step = loadConst(1);
+		}
+
+		// var = var - step
+		Temp t_var1 = provider.newTemp();
+		insns.add(new BinOp(BinOp.Op.SUB, t_var1, t_var0, t_step));
+
+		Var v_var = var(new Variable());  // FIXME
+		insns.add(new VarStore(v_var, t_var1));
+
+		Label l_top = provider.newLabel();
+		Label l_done = provider.newLabel();
+
+		insns.add(l_top);
+
+		Temp t_var2 = provider.newTemp();
+		insns.add(new VarLoad(t_var2, v_var));
+
+		Temp t_var3 = provider.newTemp();
+		insns.add(new BinOp(BinOp.Op.ADD, t_var3, t_var2, t_step));
+
+		// check end-condition
+		insns.add(new CheckForEnd(t_var3, t_limit, t_step, l_done));
+
+		insns.add(new VarStore(v_var, t_var3));
+
+		VarMapping vm = TranslationUtils.varMapping(node);
+		Var v_v = var(vm.get());
+		insns.add(new VarStore(v_v, t_var3));
+
+		breakLabels.push(l_done);
+		nestedBlock(node.block());
+		breakLabels.pop();
+
+		insns.add(new Jmp(l_top));
+
+		insns.add(l_done);
+
+		return node;
 	}
 
 	@Override

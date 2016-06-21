@@ -81,9 +81,11 @@ public class NameResolutionTransformer extends Transformer {
 		Expr limit = node.limit().accept(this);
 		Expr step = node.step() != null ? node.step().accept(this) : null;
 
-		fnScope.addLocal(n);
+		Variable v = fnScope.addLocal(n);
 
-		return node.update(n, init, limit, step, transform(node.block()));
+		return node
+				.update(n, init, limit, step, transform(node.block()))
+				.with(new VarMapping(v));
 	}
 
 	@Override

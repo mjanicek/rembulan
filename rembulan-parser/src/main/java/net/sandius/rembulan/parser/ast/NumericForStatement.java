@@ -51,6 +51,15 @@ public class NumericForStatement extends BodyStatement {
 		}
 	}
 
+	public NumericForStatement withAttributes(Attributes attr) {
+		if (attributes().equals(attr)) return this;
+		else return new NumericForStatement(attr, name, init, limit, step, block);
+	}
+
+	public NumericForStatement with(Object o) {
+		return this.withAttributes(attributes().with(o));
+	}
+
 	@Override
 	public BodyStatement accept(Transformer tf) {
 		return tf.transform(this);

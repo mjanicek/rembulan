@@ -62,4 +62,8 @@ public abstract class IRVisitor {
 
 	public abstract void visit(Closure node);
 
+	public abstract void visit(ToNumber node);
+
+	public abstract void visit(CheckForEnd node);
+
 }
