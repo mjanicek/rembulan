@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.compiler.IRTranslatorTransformer
 import net.sandius.rembulan.compiler.ir.IRNode
-import net.sandius.rembulan.compiler.util.IRPrinterVisitor
+import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.test._
@@ -48,6 +48,13 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     new NameResolutionTransformer().transform(c)
   }
 
+  def verify(nodes: Iterable[IRNode]): Unit = {
+    val visitor = new TempUseVerifierVisitor()
+    for (n <- nodes) {
+      n.accept(visitor)
+    }
+  }
+
   describe ("expression") {
 
     describe ("can be translated to IR:") {
@@ -73,6 +80,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
           pw.flush()
 
           println()
+
+          verify(ns)
         }
 
       }
@@ -108,6 +117,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             pw.flush()
 
             println()
+
+            verify(ns)
           }
         }
       }

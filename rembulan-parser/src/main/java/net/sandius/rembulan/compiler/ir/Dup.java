@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.ir;
 
+@Deprecated
 public class Dup extends IRNode {
 
 	public Dup() {
