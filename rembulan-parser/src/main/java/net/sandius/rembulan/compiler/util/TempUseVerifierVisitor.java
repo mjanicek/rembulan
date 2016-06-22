@@ -92,7 +92,7 @@ public class TempUseVerifierVisitor extends IRVisitor {
 
 	@Override
 	public void visit(TabStackAppend node) {
-		assign(node.dest());
+		use(node.dest());
 	}
 
 	@Override
