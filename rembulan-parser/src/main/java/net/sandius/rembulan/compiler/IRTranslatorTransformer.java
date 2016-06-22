@@ -46,8 +46,8 @@ public class IRTranslatorTransformer extends Transformer {
 		this.uvs = new HashMap<>();
 	}
 
-	public Iterator<IRNode> nodes() {
-		return insns.build().nodes();
+	public Blocks blocks() {
+		return insns.build();
 	}
 
 	private Temp popTemp() {

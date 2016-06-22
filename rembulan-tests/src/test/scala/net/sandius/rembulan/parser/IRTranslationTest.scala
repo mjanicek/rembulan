@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, PrintWriter}
 
-import net.sandius.rembulan.compiler.IRTranslatorTransformer
+import net.sandius.rembulan.compiler.{Blocks, IRTranslatorTransformer}
 import net.sandius.rembulan.compiler.ir.IRNode
 import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
@@ -48,9 +48,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     new NameResolutionTransformer().transform(c)
   }
 
-  def verify(nodes: Iterable[IRNode]): Unit = {
+  def verify(blocks: Blocks): Unit = {
     val visitor = new TempUseVerifierVisitor()
-    for (n <- nodes) {
+    for (n <- blocks.nodes.asScala) {
       n.accept(visitor)
     }
   }
@@ -68,20 +68,18 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
           val translator = new IRTranslatorTransformer()
           translator.transform(ck)
-
-          val ns = translator.nodes().asScala.toList
+          val blocks = translator.blocks()
 
           val pw = new PrintWriter(System.out)
           val printer = new IRPrinterVisitor(pw)
-
-          for (n <- ns) {
+          for (n <- blocks.nodes().asScala) {
             n.accept(printer)
           }
           pw.flush()
 
           println()
 
-          verify(ns)
+          verify(blocks)
         }
 
       }
@@ -105,20 +103,18 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
             val translator = new IRTranslatorTransformer()
             translator.transform(ck)
-
-            val ns = translator.nodes().asScala.toList
+            val blocks = translator.blocks()
 
             val pw = new PrintWriter(System.out)
             val printer = new IRPrinterVisitor(pw)
-
-            for (n <- ns) {
+            for (n <- blocks.nodes().asScala) {
               n.accept(printer)
             }
             pw.flush()
 
             println()
 
-            verify(ns)
+            verify(blocks)
           }
         }
       }
