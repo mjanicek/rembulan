@@ -21,6 +21,18 @@ public class BasicBlock {
 		this.end = Check.notNull(end);
 	}
 
+	public Label label() {
+		return label;
+	}
+
+	public List<IRNode> body() {
+		return body;
+	}
+
+	public BlockTermNode end() {
+		return end;
+	}
+
 	public Iterator<IRNode> iterator() {
 		return new Iterator<IRNode>() {
 
