@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.util;
 
+import net.sandius.rembulan.compiler.BlocksVisitor;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.util.Check;
 
@@ -8,7 +9,7 @@ import java.util.Set;
 
 // A visitor that checks that each temp is assigned to before used, and that no temp
 // is assigned to more than once.
-public class TempUseVerifierVisitor extends IRVisitor {
+public class TempUseVerifierVisitor extends BlocksVisitor {
 
 	private final Set<Temp> assignedTo;
 	private final Set<Temp> used;

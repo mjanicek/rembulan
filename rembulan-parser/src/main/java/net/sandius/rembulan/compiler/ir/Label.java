@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.ir;
 
-public class Label extends IRNode {
+public class Label {
 
 	private final int idx;
 
@@ -17,7 +17,6 @@ public class Label extends IRNode {
 		return idx;
 	}
 
-	@Override
 	public void accept(IRVisitor visitor) {
 		visitor.visit(this);
 	}

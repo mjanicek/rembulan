@@ -1,12 +1,13 @@
 package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.LuaFormat;
+import net.sandius.rembulan.compiler.BasicBlock;
+import net.sandius.rembulan.compiler.BlocksVisitor;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.CJmp;
 import net.sandius.rembulan.compiler.ir.Call;
 import net.sandius.rembulan.compiler.ir.CheckForEnd;
 import net.sandius.rembulan.compiler.ir.Closure;
-import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.Jmp;
 import net.sandius.rembulan.compiler.ir.JmpIfNil;
 import net.sandius.rembulan.compiler.ir.Label;
@@ -33,7 +34,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
 
-public class IRPrinterVisitor extends IRVisitor {
+public class IRPrinterVisitor extends BlocksVisitor {
 
 	private final PrintWriter ps;
 

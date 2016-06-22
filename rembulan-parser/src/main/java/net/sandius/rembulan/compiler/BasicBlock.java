@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler;
 import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.Label;
+import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Iterator;
@@ -48,7 +49,8 @@ public class BasicBlock {
 				if (idx < body.size() + 1) {
 					if (idx < 0) {
 						idx += 1;
-						return label;
+						return new ToNext(label);  // FIXME
+//						return label;
 					}
 					else if (idx >= body.size()) {
 						idx += 1;

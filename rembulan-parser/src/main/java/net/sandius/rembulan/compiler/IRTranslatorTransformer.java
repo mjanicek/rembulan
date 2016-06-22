@@ -35,7 +35,7 @@ public class IRTranslatorTransformer extends Transformer {
 	public IRTranslatorTransformer() {
 		this.provider = new RegProvider();
 
-		this.insns = new BlockBuilder(provider.newLabel());
+		this.insns = new BlockBuilder();
 
 		this.temps = new Stack<>();
 		this.assigning = false;
@@ -185,8 +185,8 @@ public class IRTranslatorTransformer extends Transformer {
 
 	private void and(Expr left, Expr right) {
 		Temp dest = provider.newTemp();
-		Label l_false = provider.newLabel();
-		Label l_done = provider.newLabel();
+		Label l_false = insns.newLabel();
+		Label l_done = insns.newLabel();
 
 		left.accept(this);
 		Temp l = popTemp();
@@ -207,8 +207,8 @@ public class IRTranslatorTransformer extends Transformer {
 
 	private void or(Expr left, Expr right) {
 		Temp dest = provider.newTemp();
-		Label l_true = provider.newLabel();
-		Label l_done = provider.newLabel();
+		Label l_true = insns.newLabel();
+		Label l_done = insns.newLabel();
 
 		left.accept(this);
 		Temp l = popTemp();
@@ -551,14 +551,14 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(IfStatement node) {
-		Label l_done = provider.newLabel();
+		Label l_done = insns.newLabel();
 
 		List<Label> nexts = new ArrayList<>();
 		for (ConditionalBlock cb : node.elifs()) {
-			nexts.add(provider.newLabel());
+			nexts.add(insns.newLabel());
 		}
 		if (node.elseBlock() != null) {
-			nexts.add(provider.newLabel());
+			nexts.add(insns.newLabel());
 		}
 
 		Iterator<Label> ls = nexts.iterator();
@@ -598,8 +598,8 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(NumericForStatement node) {
-		Label l_top = provider.newLabel();
-		Label l_done = provider.newLabel();
+		Label l_top = insns.newLabel();
+		Label l_done = insns.newLabel();
 
 		node.init().accept(this);
 		Temp t_var0 = toNumber(popTemp());
@@ -653,8 +653,8 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(GenericForStatement node) {
-		Label l_top = provider.newLabel();
-		Label l_done = provider.newLabel();
+		Label l_top = insns.newLabel();
+		Label l_done = insns.newLabel();
 
 		VarMapping vm = TranslationUtils.varMapping(node);
 
@@ -728,8 +728,8 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(WhileStatement node) {
-		Label l_test = provider.newLabel();
-		Label l_done = provider.newLabel();
+		Label l_test = insns.newLabel();
+		Label l_done = insns.newLabel();
 
 		insns.add(l_test);
 		node.condition().accept(this);

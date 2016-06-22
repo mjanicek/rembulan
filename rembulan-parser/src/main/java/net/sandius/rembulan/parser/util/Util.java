@@ -9,9 +9,9 @@ public abstract class Util {
 		// not to be instantiated
 	}
 
-	public static String listToString(List<?> l, String sep) {
+	public static String iterableToString(Iterable<?> collection, String sep) {
 		StringBuilder bld = new StringBuilder();
-		Iterator<?> it = l.iterator();
+		Iterator<?> it = collection.iterator();
 		while (it.hasNext()) {
 			bld.append(it.next());
 			if (it.hasNext()) {
@@ -19,6 +19,10 @@ public abstract class Util {
 			}
 		}
 		return bld.toString();
+	}
+
+	public static String listToString(List<?> l, String sep) {
+		return iterableToString(l, sep);
 	}
 
 }

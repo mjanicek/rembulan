@@ -3,7 +3,6 @@ package net.sandius.rembulan.parser
 import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.compiler.{Blocks, IRTranslatorTransformer}
-import net.sandius.rembulan.compiler.ir.IRNode
 import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
@@ -11,8 +10,6 @@ import net.sandius.rembulan.test._
 import org.junit.runner.RunWith
 import org.scalatest.{FunSpec, MustMatchers}
 import org.scalatest.junit.JUnitRunner
-
-import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class IRTranslationTest extends FunSpec with MustMatchers {
@@ -50,9 +47,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
   def verify(blocks: Blocks): Unit = {
     val visitor = new TempUseVerifierVisitor()
-    for (n <- blocks.nodes.asScala) {
-      n.accept(visitor)
-    }
+    visitor.visit(blocks)
   }
 
   describe ("expression") {
@@ -72,9 +67,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
           val pw = new PrintWriter(System.out)
           val printer = new IRPrinterVisitor(pw)
-          for (n <- blocks.nodes().asScala) {
-            n.accept(printer)
-          }
+          printer.visit(blocks)
           pw.flush()
 
           println()
@@ -107,9 +100,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
             val pw = new PrintWriter(System.out)
             val printer = new IRPrinterVisitor(pw)
-            for (n <- blocks.nodes().asScala) {
-              n.accept(printer)
-            }
+            printer.visit(blocks)
             pw.flush()
 
             println()
