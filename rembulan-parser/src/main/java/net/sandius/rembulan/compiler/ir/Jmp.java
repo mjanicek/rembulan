@@ -2,16 +2,17 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class Jmp extends IRNode {
+public class Jmp extends IRNode implements JmpNode {
 
-	private final Label target;
+	private final Label jmpDest;
 
-	public Jmp(Label target) {
-		this.target = Check.notNull(target);
+	public Jmp(Label jmpDest) {
+		this.jmpDest = Check.notNull(jmpDest);
 	}
 
-	public Label target() {
-		return target;
+	@Override
+	public Label jmpDest() {
+		return jmpDest;
 	}
 
 	@Override

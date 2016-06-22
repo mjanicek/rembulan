@@ -156,7 +156,7 @@ public class IRPrinterVisitor extends IRVisitor {
 
 	@Override
 	public void visit(Jmp node) {
-		ps.println("\tjmp " + node.target());
+		ps.println("\tjmp " + node.jmpDest());
 	}
 
 	@Override
@@ -176,7 +176,7 @@ public class IRPrinterVisitor extends IRVisitor {
 
 	@Override
 	public void visit(CheckForEnd node) {
-		ps.println("\tcheckforend " + node.var() + " " + node.limit() + " " + node.step() + " " + node.label());
+		ps.println("\tcheckforend " + node.var() + " " + node.limit() + " " + node.step() + " " + node.jmpDest());
 	}
 
 	@Override

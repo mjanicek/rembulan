@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class CheckForEnd extends IRNode {
+public class CheckForEnd extends IRNode implements JmpNode {
 
 	private final Temp var;
 	private final Temp limit;
@@ -28,7 +28,8 @@ public class CheckForEnd extends IRNode {
 		return step;
 	}
 
-	public Label label() {
+	@Override
+	public Label jmpDest() {
 		return label;
 	}
 

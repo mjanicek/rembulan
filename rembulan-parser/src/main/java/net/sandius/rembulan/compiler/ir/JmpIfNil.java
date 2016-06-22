@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class JmpIfNil extends IRNode {
+public class JmpIfNil extends IRNode implements JmpNode {
 
 	private final Temp addr;
 	private final Label jmpDest;
@@ -16,6 +16,7 @@ public class JmpIfNil extends IRNode {
 		return addr;
 	}
 
+	@Override
 	public Label jmpDest() {
 		return jmpDest;
 	}
