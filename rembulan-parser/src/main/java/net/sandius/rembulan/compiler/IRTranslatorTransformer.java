@@ -33,9 +33,10 @@ public class IRTranslatorTransformer extends Transformer {
 	private final Map<Variable, UpVar> uvs;
 
 	public IRTranslatorTransformer() {
-		this.insns = new BlockBuilder();
-
 		this.provider = new RegProvider();
+
+		this.insns = new BlockBuilder(provider.newLabel());
+
 		this.temps = new Stack<>();
 		this.assigning = false;
 		this.onStack = false;
