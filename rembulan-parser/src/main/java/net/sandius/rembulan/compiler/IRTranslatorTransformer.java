@@ -19,9 +19,10 @@ import java.util.Stack;
 
 public class IRTranslatorTransformer extends Transformer {
 
+	private final BlockBuilder insns;
+
 	private final RegProvider provider;
 	private final Stack<Temp> temps;
-	private final List<IRNode> insns;
 
 	private final Stack<Label> breakLabels;
 
@@ -32,9 +33,10 @@ public class IRTranslatorTransformer extends Transformer {
 	private final Map<Variable, UpVar> uvs;
 
 	public IRTranslatorTransformer() {
+		this.insns = new BlockBuilder();
+
 		this.provider = new RegProvider();
 		this.temps = new Stack<>();
-		this.insns = new ArrayList<>();
 		this.assigning = false;
 		this.onStack = false;
 		this.breakLabels = new Stack<>();
@@ -44,7 +46,7 @@ public class IRTranslatorTransformer extends Transformer {
 	}
 
 	public Iterator<IRNode> nodes() {
-		return insns.iterator();
+		return insns.nodes();
 	}
 
 	private Temp popTemp() {
