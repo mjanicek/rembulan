@@ -1,5 +1,5 @@
 package net.sandius.rembulan.compiler.ir;
 
-public interface BlockTermNode {
+public abstract class BlockTermNode extends IRNode {
 
 }

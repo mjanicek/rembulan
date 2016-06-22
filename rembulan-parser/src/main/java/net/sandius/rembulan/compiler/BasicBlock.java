@@ -52,7 +52,7 @@ public class BasicBlock {
 					}
 					else if (idx >= body.size()) {
 						idx += 1;
-						return (IRNode) end;  // FIXME
+						return end;
 					}
 					else {
 						return body.get(idx++);

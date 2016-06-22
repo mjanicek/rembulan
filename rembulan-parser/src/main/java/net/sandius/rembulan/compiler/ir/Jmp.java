@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class Jmp extends IRNode implements JmpNode, BlockTermNode {
+public class Jmp extends BlockTermNode implements JmpNode {
 
 	private final Label jmpDest;
 

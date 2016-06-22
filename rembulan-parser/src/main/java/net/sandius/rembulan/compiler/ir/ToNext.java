@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class ToNext extends IRNode implements BlockTermNode {
+public class ToNext extends BlockTermNode {
 
 	private final Label label;
 
