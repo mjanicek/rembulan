@@ -43,8 +43,8 @@ public class IRTranslatorTransformer extends Transformer {
 		this.uvs = new HashMap<>();
 	}
 
-	public List<IRNode> nodes() {
-		return insns;
+	public Iterator<IRNode> nodes() {
+		return insns.iterator();
 	}
 
 	private Temp popTemp() {
