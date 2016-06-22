@@ -28,7 +28,7 @@ public class BlockBuilder {
 				if (it == null) {
 					if (idx < blocks.size()) {
 						Block b = blocks.get(idx);
-						it = b.insns.iterator();
+						it = b.iterator();
 					}
 					else {
 						return false;
@@ -80,6 +80,40 @@ public class BlockBuilder {
 		private Block(Label label) {
 			this.label = Check.notNull(label);
 			this.insns = new ArrayList<>();
+		}
+
+		public Iterator<IRNode> iterator() {
+			return new Iterator<IRNode>() {
+
+				private int idx = -1;
+
+				@Override
+				public boolean hasNext() {
+					return idx < insns.size();
+				}
+
+				@Override
+				public IRNode next() {
+					if (idx < insns.size()) {
+						if (idx < 0) {
+							idx += 1;
+							return label;
+						}
+						else {
+							return insns.get(idx++);
+						}
+					}
+					else {
+						throw new NoSuchElementException();
+					}
+				}
+
+				@Override
+				public void remove() {
+					throw new UnsupportedOperationException();
+				}
+
+			};
 		}
 
 	}
