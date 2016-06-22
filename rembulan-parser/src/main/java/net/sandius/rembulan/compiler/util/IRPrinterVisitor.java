@@ -6,7 +6,6 @@ import net.sandius.rembulan.compiler.ir.CJmp;
 import net.sandius.rembulan.compiler.ir.Call;
 import net.sandius.rembulan.compiler.ir.CheckForEnd;
 import net.sandius.rembulan.compiler.ir.Closure;
-import net.sandius.rembulan.compiler.ir.Dup;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.Jmp;
 import net.sandius.rembulan.compiler.ir.JmpIfNil;
@@ -119,11 +118,6 @@ public class IRPrinterVisitor extends IRVisitor {
 	@Override
 	public void visit(Vararg node) {
 		ps.println("\tvararg");
-	}
-
-	@Override
-	public void visit(Dup node) {
-		ps.println("\tdup");
 	}
 
 	private static String vlistToString(VList vl) {

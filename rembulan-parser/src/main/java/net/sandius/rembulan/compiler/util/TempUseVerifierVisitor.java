@@ -120,11 +120,6 @@ public class TempUseVerifierVisitor extends IRVisitor {
 		// no effect on temps
 	}
 
-	@Override
-	public void visit(Dup node) {
-		throw new UnsupportedOperationException();
-	}
-
 	private void useVList(VList vl) {
 		Check.notNull(vl);
 		for (Temp t : vl.addrs()) {
