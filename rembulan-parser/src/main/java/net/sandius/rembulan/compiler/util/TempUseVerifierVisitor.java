@@ -193,4 +193,9 @@ public class TempUseVerifierVisitor extends IRVisitor {
 		use(node.addr());
 	}
 
+	@Override
+	public void visit(ToNext node) {
+		// no effect on temps
+	}
+
 }

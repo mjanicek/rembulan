@@ -47,7 +47,7 @@ public class IRTranslatorTransformer extends Transformer {
 	}
 
 	public Iterator<IRNode> nodes() {
-		return insns.nodes();
+		return insns.build().nodes();
 	}
 
 	private Temp popTemp() {

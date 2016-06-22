@@ -65,4 +65,5 @@ public abstract class IRVisitor {
 
 	public abstract void visit(JmpIfNil node);
 
+	public abstract void visit(ToNext node);
 }

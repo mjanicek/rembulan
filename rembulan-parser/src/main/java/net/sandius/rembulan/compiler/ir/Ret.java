@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class Ret extends IRNode {
+public class Ret extends IRNode implements BlockTermNode {
 
 	private final VList args;
 

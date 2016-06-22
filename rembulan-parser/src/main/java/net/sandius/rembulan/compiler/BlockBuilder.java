@@ -1,15 +1,16 @@
 package net.sandius.rembulan.compiler;
 
+import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.JmpNode;
 import net.sandius.rembulan.compiler.ir.Label;
+import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 public class BlockBuilder {
 
@@ -23,57 +24,22 @@ public class BlockBuilder {
 		blocks.add(new Block(entryLabel));
 	}
 
-	public Iterator<IRNode> nodes() {
-		return new Iterator<IRNode>() {
-
-			private int idx = 0;
-			private Iterator<IRNode> it = null;
-
-			@Override
-			public boolean hasNext() {
-				if (it == null) {
-					if (idx < blocks.size()) {
-						Block b = blocks.get(idx);
-						it = b.iterator();
-					}
-					else {
-						return false;
-					}
-				}
-
-				assert (it != null);
-
-				if (it.hasNext()) {
-					return true;
-				}
-				else {
-					it = null;
-					idx += 1;
-					return hasNext();
-				}
-			}
-
-			@Override
-			public IRNode next() {
-				if (it != null) {
-					return it.next();
-				}
-				else {
-					throw new NoSuchElementException();
-				}
-			}
-
-			@Override
-			public void remove() {
-				throw new UnsupportedOperationException();
-			}
-
-		};
+	public Blocks build() {
+		ArrayList<BasicBlock> blks = new ArrayList<>();
+		for (Block b : blocks) {
+			blks.add(b.toBasicBlock());
+		}
+		return new Blocks(blks);
 	}
 
 	private void appendToCurrentBlock(IRNode node) {
 		Block currentBlock = blocks.get(blocks.size() - 1);
 		currentBlock.insns.add(node);
+	}
+
+	private IRNode lastNode() {
+		Block currentBlock = blocks.get(blocks.size() - 1);
+		return currentBlock.lastNode();
 	}
 
 	public void add(IRNode node) {
@@ -109,9 +75,14 @@ public class BlockBuilder {
 	}
 
 	private void defLabel(Label l) {
+		if (!(lastNode() instanceof BlockTermNode)) {
+			appendToCurrentBlock(new ToNext(l));
+		}
+
 		Integer uses = pending.get(l);
 		if (uses != null && uses > 1) {
 			blocks.add(new Block(l));
+			pending.remove(l);
 		}
 		else {
 			appendToCurrentBlock(l);
@@ -138,6 +109,11 @@ public class BlockBuilder {
 			ArrayList<IRNode> pred = new ArrayList<>(b.insns.subList(0, idx));
 			ArrayList<IRNode> succ = new ArrayList<>(b.insns.subList(idx + 1, b.insns.size()));
 
+			IRNode predLast = idx > 0 ? pred.get(idx - 1) : null;
+			if (!(predLast instanceof BlockTermNode)) {
+				pred.add(new ToNext(l));
+			}
+
 			// replace blocks
 			blocks.set(bIdx, new Block(b.head, pred));
 			blocks.add(bIdx + 1, new Block(l, succ));
@@ -158,38 +134,22 @@ public class BlockBuilder {
 			this(head, new ArrayList<IRNode>());
 		}
 
-		public Iterator<IRNode> iterator() {
-			return new Iterator<IRNode>() {
+		public IRNode lastNode() {
+			int idx = insns.size() - 1;
+			return idx >= 0 ? insns.get(idx) : null;
+		}
 
-				private int idx = -1;
-
-				@Override
-				public boolean hasNext() {
-					return idx < insns.size();
-				}
-
-				@Override
-				public IRNode next() {
-					if (idx < insns.size()) {
-						if (idx < 0) {
-							idx += 1;
-							return head;
-						}
-						else {
-							return insns.get(idx++);
-						}
-					}
-					else {
-						throw new NoSuchElementException();
-					}
-				}
-
-				@Override
-				public void remove() {
-					throw new UnsupportedOperationException();
-				}
-
-			};
+		public BasicBlock toBasicBlock() {
+			IRNode last = lastNode();
+			if (last instanceof BlockTermNode) {
+				return new BasicBlock(
+						head,
+						Collections.unmodifiableList(insns.subList(0, insns.size() - 1)),
+						(BlockTermNode) last);
+			}
+			else {
+				throw new IllegalStateException("expecting terminal node at block end");
+			}
 		}
 
 	}

@@ -19,6 +19,7 @@ import net.sandius.rembulan.compiler.ir.TabGet;
 import net.sandius.rembulan.compiler.ir.TabNew;
 import net.sandius.rembulan.compiler.ir.TabSet;
 import net.sandius.rembulan.compiler.ir.TabStackAppend;
+import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.compiler.ir.ToNumber;
 import net.sandius.rembulan.compiler.ir.UnOp;
 import net.sandius.rembulan.compiler.ir.UpLoad;
@@ -182,6 +183,11 @@ public class IRPrinterVisitor extends IRVisitor {
 	@Override
 	public void visit(JmpIfNil node) {
 		ps.println("\tjmpifnil " + node.addr() + " " + node.jmpDest());
+	}
+
+	@Override
+	public void visit(ToNext node) {
+		ps.println("\t; fall through to " + node.label());
 	}
 
 }
