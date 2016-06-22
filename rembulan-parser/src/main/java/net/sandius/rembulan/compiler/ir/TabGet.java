@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class TabGet extends IRNode {
+public class TabGet extends BodyNode {
 
 	private final Temp dest;
 	private final Temp obj;

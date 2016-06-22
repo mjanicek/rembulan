@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 
-public class Closure extends IRNode {
+public class Closure extends BodyNode {
 
 	private final Temp dest;
 	private final List<Var> args;

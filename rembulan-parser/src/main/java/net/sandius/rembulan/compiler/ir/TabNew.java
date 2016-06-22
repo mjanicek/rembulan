@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class TabNew extends IRNode {
+public class TabNew extends BodyNode {
 
 	private final Temp dest;
 	private final int array;

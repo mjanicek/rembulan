@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class BinOp extends IRNode {
+public class BinOp extends BodyNode {
 
 	public enum Op {
 		ADD,

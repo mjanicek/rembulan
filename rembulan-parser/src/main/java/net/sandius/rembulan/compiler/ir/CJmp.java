@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class CJmp extends IRNode implements JmpNode {
+public class CJmp extends BodyNode implements JmpNode {
 
 	private final Temp addr;
 	private final boolean expected;

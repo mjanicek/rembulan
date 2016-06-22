@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class VarLoad extends IRNode {
+public class VarLoad extends BodyNode {
 
 	private final Temp dest;
 	private final Var var;

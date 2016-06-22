@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public abstract class LoadConst extends IRNode {
+public abstract class LoadConst extends BodyNode {
 
 	private final Temp dest;
 

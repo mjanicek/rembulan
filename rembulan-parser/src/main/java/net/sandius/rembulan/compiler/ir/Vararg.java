@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.ir;
 
-public class Vararg extends IRNode {
+public class Vararg extends BodyNode {
 
 	public Vararg() {
 	}

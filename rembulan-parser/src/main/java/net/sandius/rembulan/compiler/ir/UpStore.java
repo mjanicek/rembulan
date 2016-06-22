@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class UpStore extends IRNode {
+public class UpStore extends BodyNode {
 
 	private final UpVar uv;
 	private final Temp src;

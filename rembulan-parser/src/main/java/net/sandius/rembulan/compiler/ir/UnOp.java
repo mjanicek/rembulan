@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class UnOp extends IRNode {
+public class UnOp extends BodyNode {
 
 	public enum Op {
 		UNM,
