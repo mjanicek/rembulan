@@ -2,17 +2,15 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class CJmp extends BranchNode implements JmpNode {
+public class CJmp extends BranchNode {
 
 	private final Temp addr;
 	private final boolean expected;
 
-	private final Label jmpDest;
-
-	public CJmp(Temp addr, boolean expected, Label jmpDest) {
+	public CJmp(Temp addr, boolean expected, Label jmpDest, Label next) {
+		super(jmpDest, next);
 		this.addr = Check.notNull(addr);
 		this.expected = expected;
-		this.jmpDest = Check.notNull(jmpDest);
 	}
 
 	public Temp addr() {
@@ -21,11 +19,6 @@ public class CJmp extends BranchNode implements JmpNode {
 
 	public boolean expected() {
 		return expected;
-	}
-
-	@Override
-	public Label jmpDest() {
-		return jmpDest;
 	}
 
 	@Override

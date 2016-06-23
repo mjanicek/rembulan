@@ -2,23 +2,17 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class JmpIfNil extends BranchNode implements JmpNode {
+public class JmpIfNil extends BranchNode {
 
 	private final Temp addr;
-	private final Label jmpDest;
 
-	public JmpIfNil(Temp addr, Label jmpDest) {
+	public JmpIfNil(Temp addr, Label jmpDest, Label next) {
+		super(jmpDest, next);
 		this.addr = Check.notNull(addr);
-		this.jmpDest = Check.notNull(jmpDest);
 	}
 
 	public Temp addr() {
 		return addr;
-	}
-
-	@Override
-	public Label jmpDest() {
-		return jmpDest;
 	}
 
 	@Override

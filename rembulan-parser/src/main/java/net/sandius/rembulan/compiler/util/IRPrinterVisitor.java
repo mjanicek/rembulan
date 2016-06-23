@@ -164,6 +164,7 @@ public class IRPrinterVisitor extends BlocksVisitor {
 	@Override
 	public void visit(CJmp node) {
 		ps.println("\tcjmp " + node.addr() + " " + node.expected() + " " + node.jmpDest());
+		ps.println("\t; else fall through to " + node.next());
 	}
 
 	@Override
@@ -179,11 +180,13 @@ public class IRPrinterVisitor extends BlocksVisitor {
 	@Override
 	public void visit(CheckForEnd node) {
 		ps.println("\tcheckforend " + node.var() + " " + node.limit() + " " + node.step() + " " + node.jmpDest());
+		ps.println("\t; else fall through to " + node.next());
 	}
 
 	@Override
 	public void visit(JmpIfNil node) {
 		ps.println("\tjmpifnil " + node.addr() + " " + node.jmpDest());
+		ps.println("\t; else fall through to " + node.next());
 	}
 
 	@Override
