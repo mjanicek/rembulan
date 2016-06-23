@@ -31,6 +31,12 @@
       <version>${project.parent.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>net.sandius.rembulan</groupId>
+      <artifactId>rembulan-compiler</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+
   </dependencies>
 
   <build>

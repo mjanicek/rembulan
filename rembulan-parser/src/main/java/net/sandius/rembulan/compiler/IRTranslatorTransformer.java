@@ -6,6 +6,7 @@ import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.VarMapping;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
+import net.sandius.rembulan.parser.ast.Chunk;
 import net.sandius.rembulan.parser.ast.util.AttributeUtils;
 import net.sandius.rembulan.util.Check;
 

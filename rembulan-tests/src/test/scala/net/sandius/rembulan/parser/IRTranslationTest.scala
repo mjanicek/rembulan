@@ -2,6 +2,7 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, PrintWriter}
 
+import net.sandius.rembulan.compiler.analysis.TyperVisitor
 import net.sandius.rembulan.compiler.{Blocks, IRTranslatorTransformer}
 import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
@@ -10,6 +11,8 @@ import net.sandius.rembulan.test._
 import org.junit.runner.RunWith
 import org.scalatest.{FunSpec, MustMatchers}
 import org.scalatest.junit.JUnitRunner
+
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class IRTranslationTest extends FunSpec with MustMatchers {
@@ -48,6 +51,15 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   def verify(blocks: Blocks): Unit = {
     val visitor = new TempUseVerifierVisitor()
     visitor.visit(blocks)
+  }
+
+  def assignTypes(blocks: Blocks): Unit = {
+    val visitor = new TyperVisitor()
+    visitor.visit(blocks)
+
+    for ((v, t) <- visitor.types().asScala) {
+      println(v + " -> " + t)
+    }
   }
 
   describe ("expression") {
@@ -106,6 +118,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             println()
 
             verify(blocks)
+            assignTypes(blocks)
           }
         }
       }
