@@ -2,6 +2,8 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.Collections;
+
 public class TCall extends BlockTermNode {
 
 	private final Val target;
@@ -18,6 +20,11 @@ public class TCall extends BlockTermNode {
 
 	public VList args() {
 		return args;
+	}
+
+	@Override
+	public Iterable<Label> nextLabels() {
+		return Collections.emptyList();
 	}
 
 	@Override

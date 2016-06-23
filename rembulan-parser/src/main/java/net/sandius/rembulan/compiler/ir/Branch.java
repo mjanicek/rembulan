@@ -2,6 +2,10 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class Branch extends BlockTermNode implements JmpNode {
 
 	private final Condition condition;
@@ -25,6 +29,14 @@ public class Branch extends BlockTermNode implements JmpNode {
 
 	public Label next() {
 		return next;
+	}
+
+	@Override
+	public Iterable<Label> nextLabels() {
+		List<Label> tmp = new ArrayList<>(2);
+		tmp.add(next());
+		tmp.add(jmpDest());
+		return Collections.unmodifiableList(tmp);
 	}
 
 	@Override

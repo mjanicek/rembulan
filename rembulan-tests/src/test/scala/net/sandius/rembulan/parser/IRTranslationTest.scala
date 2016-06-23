@@ -57,7 +57,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     val visitor = new TyperVisitor()
     visitor.visit(blocks)
 
-    for ((v, t) <- visitor.types().asScala) {
+    for ((v, t) <- visitor.valTypes().asScala) {
       println(v + " -> " + t)
     }
   }

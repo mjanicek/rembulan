@@ -2,6 +2,8 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.Collections;
+
 public class Ret extends BlockTermNode {
 
 	private final VList args;
@@ -12,6 +14,11 @@ public class Ret extends BlockTermNode {
 
 	public VList args() {
 		return args;
+	}
+
+	@Override
+	public Iterable<Label> nextLabels() {
+		return Collections.emptyList();
 	}
 
 	@Override

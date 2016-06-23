@@ -27,6 +27,10 @@ public class Blocks {
 		}
 	}
 
+	public Label entryLabel() {
+		return blocks.get(0).label();
+	}
+
 	public BasicBlock getBlock(Label l) {
 		Integer idx = heads.get(l);
 		if (idx != null) {

@@ -2,6 +2,8 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.Collections;
+
 public class Jmp extends BlockTermNode implements JmpNode {
 
 	private final Label jmpDest;
@@ -13,6 +15,11 @@ public class Jmp extends BlockTermNode implements JmpNode {
 	@Override
 	public Label jmpDest() {
 		return jmpDest;
+	}
+
+	@Override
+	public Iterable<Label> nextLabels() {
+		return Collections.singletonList(jmpDest());
 	}
 
 	@Override

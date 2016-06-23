@@ -1,14 +1,22 @@
 package net.sandius.rembulan.compiler.analysis;
 
+import net.sandius.rembulan.compiler.BasicBlock;
+import net.sandius.rembulan.compiler.Blocks;
 import net.sandius.rembulan.compiler.BlocksVisitor;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.util.Check;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MAY_BE_INTEGER;
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_FLOAT;
@@ -17,18 +25,65 @@ import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.M
 public class TyperVisitor extends BlocksVisitor {
 
 	private final Map<Val, Type> valTypes;
+	private final Map<PhiVal, Type> phiValTypes;
+
+	private final Queue<Label> open;
+
+	private boolean changed;
 
 	public TyperVisitor() {
 		this.valTypes = new HashMap<>();
+		this.phiValTypes = new HashMap<>();
+		this.open = new ArrayDeque<>();
 	}
 
-	public Map<Val, Type> types() {
-		return Collections.unmodifiableMap(valTypes);
+	public Map<AbstractVal, Type> valTypes() {
+		Map<AbstractVal, Type> result = new HashMap<>();
+		for (Val v : valTypes.keySet()) {
+			result.put(v, valTypes.get(v));
+		}
+		for (PhiVal pv : phiValTypes.keySet()) {
+			result.put(pv, phiValTypes.get(pv));
+		}
+		return Collections.unmodifiableMap(result);
 	}
 
 	private void assign(Val v, Type t) {
-		if (valTypes.put(v, t) != null) {
+		Check.notNull(v);
+		Check.notNull(t);
+
+		Type ot = valTypes.put(v, t);
+		if (t.equals(ot)) {
+			// no change
+		}
+		else if (ot == null) {
+			// initial assign
+			changed = true;
+		}
+		else {
 			throw new IllegalStateException(v + " assigned to more than once");
+		}
+	}
+
+	private void assign(PhiVal pv, Type t) {
+		Check.notNull(pv);
+		Check.notNull(t);
+
+		Type ot = phiValTypes.get(pv);
+		if (ot != null) {
+			Type nt = ot.join(t);
+			if (!ot.equals(nt)) {
+				phiValTypes.put(pv, nt);
+				changed = true;
+			}
+			else {
+				// no change
+			}
+		}
+		else {
+			// initial assign
+			phiValTypes.put(pv, t);
+			changed = true;
 		}
 	}
 
@@ -40,6 +95,35 @@ public class TyperVisitor extends BlocksVisitor {
 		else {
 			return t;
 		}
+	}
+
+	private Type typeOf(PhiVal pv) {
+		Type t = phiValTypes.get(pv);
+		if (t == null) {
+			throw new IllegalStateException(pv + " not assigned to yet");
+		}
+		else {
+			return t;
+		}
+	}
+
+	@Override
+	public void visit(Blocks blocks) {
+		open.add(blocks.entryLabel());
+
+		while (!open.isEmpty()) {
+			Label l = open.poll();
+			BasicBlock b = blocks.getBlock(l);
+
+			changed = false;
+			visit(b);
+			if (changed) {
+				for (Label nxt : b.end().nextLabels()) {
+					open.add(nxt);
+				}
+			}
+		}
+
 	}
 
 	@Override
@@ -208,14 +292,12 @@ public class TyperVisitor extends BlocksVisitor {
 
 	@Override
 	public void visit(PhiStore node) {
-		// TODO
-		// no effect on vals
+		assign(node.dest(), typeOf(node.src()));
 	}
 
 	@Override
 	public void visit(PhiLoad node) {
-		// TODO
-		assign(node.dest(), LuaTypes.ANY);
+		assign(node.dest(), typeOf(node.src()));
 	}
 
 	@Override
