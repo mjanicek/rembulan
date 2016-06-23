@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class JmpIfNil extends BodyNode implements JmpNode {
+public class JmpIfNil extends BranchNode implements JmpNode {
 
 	private final Temp addr;
 	private final Label jmpDest;

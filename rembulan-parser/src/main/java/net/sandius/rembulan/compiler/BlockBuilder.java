@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.ir.BlockTermNode;
+import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.JmpNode;
 import net.sandius.rembulan.compiler.ir.Label;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +25,8 @@ public class BlockBuilder {
 	private final Set<Label> pending;
 
 	private int labelIdx;
+
+	private Label currentLabel;
 
 	public BlockBuilder() {
 		this.labelDefOrder = new ArrayList<>();
@@ -42,7 +44,9 @@ public class BlockBuilder {
 	}
 
 	private void appendToCurrentBlock(IRNode node) {
-		Label currentLabel = labelDefOrder.get(labelDefOrder.size() - 1);
+		if (currentLabel == null) {
+			throw new IllegalStateException("Adding a node outside a block");
+		}
 		blocks.get(currentLabel).add(node);
 	}
 
@@ -53,9 +57,24 @@ public class BlockBuilder {
 			throw new IllegalStateException("Label already used: " + label);
 		}
 		labelDefOrder.add(label);
+		currentLabel = label;
 	}
 
-	public void add(IRNode node) {
+	public void add(BodyNode node) {
+		Check.notNull(node);
+
+		if (node instanceof JmpNode) {
+			useLabel(((JmpNode) node).jmpDest());
+		}
+
+		if (currentLabel == null) {
+			add(newLabel());
+		}
+
+		appendToCurrentBlock(node);
+	}
+
+	public void add(BlockTermNode node) {
 		Check.notNull(node);
 
 		if (node instanceof JmpNode) {
@@ -63,6 +82,7 @@ public class BlockBuilder {
 		}
 
 		appendToCurrentBlock(node);
+		currentLabel = null;
 	}
 
 	private int uses(Label l) {
