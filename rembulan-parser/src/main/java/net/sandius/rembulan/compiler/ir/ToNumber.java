@@ -4,19 +4,19 @@ import net.sandius.rembulan.util.Check;
 
 public class ToNumber extends BodyNode {
 
-	private final Temp dest;
-	private final Temp src;
+	private final Val dest;
+	private final Val src;
 
-	public ToNumber(Temp dest, Temp src) {
+	public ToNumber(Val dest, Val src) {
 		this.dest = Check.notNull(dest);
 		this.src = Check.notNull(src);
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 
-	public Temp src() {
+	public Val src() {
 		return src;
 	}
 

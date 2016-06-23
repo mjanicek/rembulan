@@ -22,7 +22,7 @@ public class IRTranslatorTransformer extends Transformer {
 	private final BlockBuilder insns;
 
 	private final RegProvider provider;
-	private final Stack<Temp> temps;
+	private final Stack<AbstractVal> vals;
 
 	private final Stack<Label> breakLabels;
 
@@ -37,7 +37,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 		this.insns = new BlockBuilder();
 
-		this.temps = new Stack<>();
+		this.vals = new Stack<>();
 		this.assigning = false;
 		this.onStack = false;
 		this.breakLabels = new Stack<>();
@@ -50,15 +50,26 @@ public class IRTranslatorTransformer extends Transformer {
 		return insns.build();
 	}
 
-	private Temp popTemp() {
+	private Val popVal() {
 		if (onStack) {
 			onStack = false;
-			Temp t = provider.newTemp();
-			insns.add(new StackGet(t, 0));
-			return t;
+			Val v = provider.newVal();
+			insns.add(new StackGet(v, 0));
+			return v;
 		}
 		else {
-			return temps.pop();
+			AbstractVal aval = vals.pop();
+			if (aval instanceof PhiVal) {
+				Val v = provider.newVal();
+				insns.add(new PhiLoad(v, (PhiVal) aval));
+				return v;
+			}
+			else if (aval instanceof Val) {
+				return (Val) aval;
+			}
+			else {
+				throw new UnsupportedOperationException("Unknown abstract value: " + aval);
+			}
 		}
 	}
 	
@@ -93,24 +104,24 @@ public class IRTranslatorTransformer extends Transformer {
 		if (rv.isUpvalue()) {
 			// upvalue
 			if (assigning) {
-				Temp src = popTemp();
+				Val src = popVal();
 				insns.add(new UpStore(upVar(rv.variable()), src));
 			}
 			else {
-				Temp dest = provider.newTemp();
-				temps.push(dest);
+				Val dest = provider.newVal();
+				vals.push(dest);
 				insns.add(new UpLoad(dest, upVar(rv.variable())));
 			}
 		}
 		else {
 			// local variable
 			if (assigning) {
-				Temp src = popTemp();
+				Val src = popVal();
 				insns.add(new VarStore(var(rv.variable()), src));
 			}
 			else {
-				Temp dest = provider.newTemp();
-				temps.push(dest);
+				Val dest = provider.newVal();
+				vals.push(dest);
 				insns.add(new VarLoad(dest, var(rv.variable())));
 			}
 		}
@@ -124,19 +135,19 @@ public class IRTranslatorTransformer extends Transformer {
 		assigning = false;
 
 		e.object().accept(this);
-		Temp obj = popTemp();
+		Val obj = popVal();
 		e.key().accept(this);
-		Temp key = popTemp();
+		Val key = popVal();
 
 		assigning = as;
 
 		if (assigning) {
-			Temp value = popTemp();
+			Val value = popVal();
 			insns.add(new TabSet(obj, key, value));
 		}
 		else {
-			Temp dest = provider.newTemp();
-			temps.push(dest);
+			Val dest = provider.newVal();
+			vals.push(dest);
 			insns.add(new TabGet(dest, obj, key));
 		}
 
@@ -145,86 +156,86 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public Literal transform(NilLiteral l) {
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		Val dest = provider.newVal();
+		vals.push(dest);
 		insns.add(new LoadConst.Nil(dest));
 		return l;
 	}
 
 	@Override
 	public Literal transform(BooleanLiteral l) {
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		Val dest = provider.newVal();
+		vals.push(dest);
 		insns.add(new LoadConst.Bool(dest, l.value()));
 		return l;
 	}
 
 	@Override
 	public Literal transform(Numeral.IntegerNumeral l) {
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		Val dest = provider.newVal();
+		vals.push(dest);
 		insns.add(new LoadConst.Int(dest, l.value()));
 		return l;
 	}
 
 	@Override
 	public Literal transform(Numeral.FloatNumeral l) {
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		Val dest = provider.newVal();
+		vals.push(dest);
 		insns.add(new LoadConst.Flt(dest, l.value()));
 		return l;
 	}
 
 	@Override
 	public Literal transform(StringLiteral l) {
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		Val dest = provider.newVal();
+		vals.push(dest);
 		insns.add(new LoadConst.Str(dest, l.value()));
 		return l;
 	}
 
 	private void and(Expr left, Expr right) {
-		Temp dest = provider.newTemp();
+		PhiVal dest = provider.newPhiVal();
 		Label l_false = insns.newLabel();
 		Label l_done = insns.newLabel();
 
 		left.accept(this);
-		Temp l = popTemp();
+		Val l = popVal();
 
 		insns.addBranch(new Branch.Condition.Bool(l, false), l_false);
 
 		right.accept(this);
-		Temp r = popTemp();
-		insns.add(new Mov(dest, r));
+		Val r = popVal();
+		insns.add(new PhiStore(dest, r));
 		insns.add(new Jmp(l_done));
 
 		insns.add(l_false);
-		insns.add(new Mov(dest, l));
+		insns.add(new PhiStore(dest, l));
 
 		insns.add(l_done);
-		temps.push(dest);
+		vals.push(dest);
 	}
 
 	private void or(Expr left, Expr right) {
-		Temp dest = provider.newTemp();
+		PhiVal dest = provider.newPhiVal();
 		Label l_true = insns.newLabel();
 		Label l_done = insns.newLabel();
 
 		left.accept(this);
-		Temp l = popTemp();
+		Val l = popVal();
 
 		insns.addBranch(new Branch.Condition.Bool(l, true), l_true);
 
 		right.accept(this);
-		Temp r = popTemp();
-		insns.add(new Mov(dest, r));
+		Val r = popVal();
+		insns.add(new PhiStore(dest, r));
 		insns.add(new Jmp(l_done));
 
 		insns.add(l_true);
-		insns.add(new Mov(dest, l));
+		insns.add(new PhiStore(dest, l));
 
 		insns.add(l_done);
-		temps.push(dest);
+		vals.push(dest);
 	}
 
 	private void eagerBinOp(Operator.Binary op, Expr left, Expr right) {
@@ -241,12 +252,12 @@ public class IRTranslatorTransformer extends Transformer {
 		}
 
 		left.accept(this);
-		Temp l = popTemp();
+		Val l = popVal();
 		right.accept(this);
-		Temp r = popTemp();
+		Val r = popVal();
 
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		Val dest = provider.newVal();
+		vals.push(dest);
 
 		insns.add(new BinOp(bop, dest, swap ? r : l, swap ? l : r));
 	}
@@ -265,9 +276,9 @@ public class IRTranslatorTransformer extends Transformer {
 	public Expr transform(UnaryOperationExpr e) {
 		e.arg().accept(this);
 
-		Temp arg = popTemp();
-		Temp dest = provider.newTemp();
-		temps.push(dest);
+		Val arg = popVal();
+		Val dest = provider.newVal();
+		vals.push(dest);
 
 		insns.add(new UnOp(TranslationUtils.uop(e.op()), dest, arg));
 		return e;
@@ -284,14 +295,14 @@ public class IRTranslatorTransformer extends Transformer {
 	public Expr transform(ParenExpr e) {
 		e.multiExpr().accept(this);
 
-		Temp dest = popTemp();
-		temps.push(dest);
+		Val dest = popVal();
+		vals.push(dest);
 
 		return e;
 	}
 
-	private VList vlist(Temp prefix, List<Expr> exprs) {
-		List<Temp> as = new ArrayList<>();
+	private VList vlist(Val prefix, List<Expr> exprs) {
+		List<Val> as = new ArrayList<>();
 		if (prefix != null) {
 			as.add(prefix);
 		}
@@ -303,7 +314,7 @@ public class IRTranslatorTransformer extends Transformer {
 			e.accept(this);
 
 			if (it.hasNext() || !onStack) {
-				as.add(popTemp());
+				as.add(popVal());
 			}
 			else {
 				// multi-value expression in tail position
@@ -321,19 +332,19 @@ public class IRTranslatorTransformer extends Transformer {
 
 	private Call call(CallExpr.FunctionCallExpr e) {
 		e.fn().accept(this);
-		Temp fn = popTemp();
+		Val fn = popVal();
 		VList vl = vlist(e.args());
 		return new Call(fn, vl);
 	}
 
 	private Call call(CallExpr.MethodCallExpr e) {
 		e.target().accept(this);
-		Temp obj = popTemp();
+		Val obj = popVal();
 
 		transform(StringLiteral.fromName(e.methodName()));
-		Temp method = popTemp();
+		Val method = popVal();
 
-		Temp fn = provider.newTemp();
+		Val fn = provider.newVal();
 		insns.add(new TabGet(fn, obj, method));
 
 		VList vl = vlist(obj, e.args());
@@ -357,7 +368,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public Expr transform(FunctionDefExpr e) {
-		Temp dest = provider.newTemp();
+		Val dest = provider.newVal();
 
 		FunctionVarInfo info = TranslationUtils.funcVarInfo(e);
 
@@ -369,7 +380,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 		insns.add(new Closure(dest, Collections.unmodifiableList(uvs)));
 
-		temps.push(dest);
+		vals.push(dest);
 		return e;
 	}
 
@@ -378,7 +389,7 @@ public class IRTranslatorTransformer extends Transformer {
 		int array = 0;
 		int hash = 0;
 
-		Temp dest = provider.newTemp();
+		Val dest = provider.newVal();
 
 		for (TableConstructorExpr.FieldInitialiser fi : e.fields()) {
 			if (fi.key() == null) {
@@ -389,7 +400,7 @@ public class IRTranslatorTransformer extends Transformer {
 			}
 		}
 
-		temps.push(dest);
+		vals.push(dest);
 		insns.add(new TabNew(dest, array, hash));
 
 		int i = 1;
@@ -398,18 +409,18 @@ public class IRTranslatorTransformer extends Transformer {
 			TableConstructorExpr.FieldInitialiser fi = it.next();
 
 			if (fi.key() == null) {
-				Temp d = provider.newTemp();
-				temps.push(d);
+				Val d = provider.newVal();
+				vals.push(d);
 				insns.add(new LoadConst.Int(d, (long) i++));
 			}
 			else {
 				fi.key().accept(this);
 			}
-			Temp k = popTemp();
+			Val k = popVal();
 
 			fi.value().accept(this);
 			if (fi.key() != null || it.hasNext() || !onStack) {
-				Temp v = popTemp();
+				Val v = popVal();
 				insns.add(new TabSet(dest, k, v));
 			}
 			else {
@@ -474,26 +485,26 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(AssignStatement node) {
-		List<Temp> ts = new ArrayList<>();
+		List<Val> ts = new ArrayList<>();
 
 		for (Expr e : node.exprs()) {
 			e.accept(this);
-			ts.add(popTemp());
+			ts.add(popVal());
 		}
 
-		Iterator<Temp> it = ts.iterator();
+		Iterator<Val> it = ts.iterator();
 		for (LValueExpr lv : node.vars()) {
 
-			final Temp src;
+			final Val src;
 			if (it.hasNext()) {
 				src = it.next();
 			}
 			else {
-				src = provider.newTemp();
+				src = provider.newVal();
 				insns.add(new LoadConst.Nil(src));
 			}
 
-			temps.push(src);
+			vals.push(src);
 			assigning = true;
 			lv.accept(this);
 			assigning = false;
@@ -504,24 +515,24 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(LocalDeclStatement node) {
-		List<Temp> ts = new ArrayList<>();
+		List<Val> ts = new ArrayList<>();
 
 		for (Expr e : node.initialisers()) {
 			e.accept(this);
-			ts.add(popTemp());
+			ts.add(popVal());
 		}
 
-		Iterator<Temp> it = ts.iterator();
+		Iterator<Val> it = ts.iterator();
 
 		for (Variable w : TranslationUtils.varMapping(node).vars()) {
 			Var v = var(w);
 
-			final Temp src;
+			final Val src;
 			if (it.hasNext()) {
 				src = it.next();
 			}
 			else {
-				src = provider.newTemp();
+				src = provider.newVal();
 				insns.add(new LoadConst.Nil(src));
 			}
 
@@ -535,7 +546,7 @@ public class IRTranslatorTransformer extends Transformer {
 		Check.notNull(l_done);
 
 		cb.condition().accept(this);
-		Temp c = popTemp();
+		Val c = popVal();
 
 		insns.addBranch(new Branch.Condition.Bool(c, false), l_else != null ? l_else : l_done);
 		nestedBlock(cb.block());
@@ -584,14 +595,14 @@ public class IRTranslatorTransformer extends Transformer {
 		return node;
 	}
 
-	private Temp toNumber(Temp addr) {
-		Temp t = provider.newTemp();
+	private Val toNumber(Val addr) {
+		Val t = provider.newVal();
 		insns.add(new ToNumber(t, addr));
 		return t;
 	}
 
-	private Temp loadConst(int i) {
-		Temp t = provider.newTemp();
+	private Val loadConst(int i) {
+		Val t = provider.newVal();
 		insns.add(new LoadConst.Int(t, i));
 		return t;
 	}
@@ -602,22 +613,22 @@ public class IRTranslatorTransformer extends Transformer {
 		Label l_done = insns.newLabel();
 
 		node.init().accept(this);
-		Temp t_var0 = toNumber(popTemp());
+		Val t_var0 = toNumber(popVal());
 
 		node.limit().accept(this);
-		Temp t_limit = toNumber(popTemp());
+		Val t_limit = toNumber(popVal());
 
-		final Temp t_step;
+		final Val t_step;
 		if (node.step() != null) {
 			node.step().accept(this);
-			t_step = toNumber(popTemp());
+			t_step = toNumber(popVal());
 		}
 		else {
 			t_step = loadConst(1);
 		}
 
 		// var = var - step
-		Temp t_var1 = provider.newTemp();
+		Val t_var1 = provider.newVal();
 		insns.add(new BinOp(BinOp.Op.SUB, t_var1, t_var0, t_step));
 
 		Var v_var = var(new Variable());  // FIXME
@@ -625,10 +636,10 @@ public class IRTranslatorTransformer extends Transformer {
 
 		insns.add(l_top);
 
-		Temp t_var2 = provider.newTemp();
+		Val t_var2 = provider.newVal();
 		insns.add(new VarLoad(t_var2, v_var));
 
-		Temp t_var3 = provider.newTemp();
+		Val t_var3 = provider.newVal();
 		insns.add(new BinOp(BinOp.Op.ADD, t_var3, t_var2, t_step));
 
 		// check end-condition
@@ -658,9 +669,9 @@ public class IRTranslatorTransformer extends Transformer {
 
 		VarMapping vm = TranslationUtils.varMapping(node);
 
-		Temp t_f = provider.newTemp();
-		Temp t_s = provider.newTemp();
-		Temp t_var0 = provider.newTemp();
+		Val t_f = provider.newVal();
+		Val t_s = provider.newVal();
+		Val t_var0 = provider.newVal();
 
 		Var v_var = provider.newVar();  // FIXME
 
@@ -671,10 +682,10 @@ public class IRTranslatorTransformer extends Transformer {
 				e.accept(this);
 
 				switch (i) {
-					case 0: t_f = popTemp(); break;
-					case 1: t_s = popTemp(); break;
-					case 2: t_var0 = popTemp(); break;
-					default: popTemp(); break;  // discard result
+					case 0: t_f = popVal(); break;
+					case 1: t_s = popVal(); break;
+					case 2: t_var0 = popVal(); break;
+					default: popVal(); break;  // discard result
 				}
 
 				i += 1;
@@ -693,22 +704,22 @@ public class IRTranslatorTransformer extends Transformer {
 
 		insns.add(l_top);
 
-		Temp t_var1 = provider.newTemp();
+		Val t_var1 = provider.newVal();
 		insns.add(new VarLoad(t_var1, v_var));
 
-		List<Temp> ts = new ArrayList<>();
+		List<Val> ts = new ArrayList<>();
 		ts.add(t_s);
 		ts.add(t_var1);
 		insns.add(new Call(t_f, new VList(Collections.unmodifiableList(ts), false)));
 
 		for (int i = 0; i < node.names().size(); i++) {
 			Var v = var(vm.get(i));
-			Temp t = provider.newTemp();
+			Val t = provider.newVal();
 			insns.add(new StackGet(t, i));
 			insns.add(new VarStore(v, t));
 		}
 
-		Temp t_v1 = provider.newTemp();
+		Val t_v1 = provider.newVal();
 		insns.add(new VarLoad(t_v1, var(vm.get(0))));
 
 		insns.addBranch(new Branch.Condition.Nil(t_v1), l_done);
@@ -733,7 +744,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 		insns.add(l_test);
 		node.condition().accept(this);
-		Temp c = popTemp();
+		Val c = popVal();
 		insns.addBranch(new Branch.Condition.Bool(c, false), l_done);
 
 		breakLabels.push(l_done);

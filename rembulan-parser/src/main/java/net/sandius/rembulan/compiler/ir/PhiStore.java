@@ -2,21 +2,21 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class Mov extends BodyNode {
+public class PhiStore extends BodyNode {
 
-	private final Temp dest;
-	private final Temp src;
+	private final PhiVal dest;
+	private final Val src;
 
-	public Mov(Temp dest, Temp src) {
+	public PhiStore(PhiVal dest, Val src) {
 		this.dest = Check.notNull(dest);
 		this.src = Check.notNull(src);
 	}
 
-	public Temp dest() {
+	public PhiVal dest() {
 		return dest;
 	}
 
-	public Temp src() {
+	public Val src() {
 		return src;
 	}
 

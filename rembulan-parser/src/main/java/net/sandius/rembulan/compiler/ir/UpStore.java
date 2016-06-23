@@ -5,9 +5,9 @@ import net.sandius.rembulan.util.Check;
 public class UpStore extends BodyNode {
 
 	private final UpVar uv;
-	private final Temp src;
+	private final Val src;
 
-	public UpStore(UpVar uv, Temp src) {
+	public UpStore(UpVar uv, Val src) {
 		this.uv = Check.notNull(uv);
 		this.src = Check.notNull(src);
 	}
@@ -16,7 +16,7 @@ public class UpStore extends BodyNode {
 		return uv;
 	}
 
-	public Temp src() {
+	public Val src() {
 		return src;
 	}
 

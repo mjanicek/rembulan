@@ -4,15 +4,15 @@ import net.sandius.rembulan.util.Check;
 
 public class TCall extends BlockTermNode {
 
-	private final Temp target;
+	private final Val target;
 	private final VList args;
 
-	public TCall(Temp target, VList args) {
+	public TCall(Val target, VList args) {
 		this.target = Check.notNull(target);
 		this.args = Check.notNull(args);
 	}
 
-	public Temp target() {
+	public Val target() {
 		return target;
 	}
 

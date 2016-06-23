@@ -2,22 +2,22 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class VarLoad extends BodyNode {
+public class PhiLoad extends BodyNode {
 
 	private final Val dest;
-	private final Var var;
+	private final PhiVal src;
 
-	public VarLoad(Val dest, Var var) {
+	public PhiLoad(Val dest, PhiVal src) {
 		this.dest = Check.notNull(dest);
-		this.var = Check.notNull(var);
+		this.src = Check.notNull(src);
 	}
 
 	public Val dest() {
 		return dest;
 	}
 
-	public Var var() {
-		return var;
+	public PhiVal src() {
+		return src;
 	}
 
 	@Override

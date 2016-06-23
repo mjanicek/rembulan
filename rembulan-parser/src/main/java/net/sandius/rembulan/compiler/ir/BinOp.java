@@ -25,11 +25,11 @@ public class BinOp extends BodyNode {
 	}
 
 	private final Op op;
-	private final Temp dest;
-	private final Temp left;
-	private final Temp right;
+	private final Val dest;
+	private final Val left;
+	private final Val right;
 
-	public BinOp(Op op, Temp dest, Temp left, Temp right) {
+	public BinOp(Op op, Val dest, Val left, Val right) {
 		this.op = Check.notNull(op);
 		this.dest = Check.notNull(dest);
 		this.left = Check.notNull(left);
@@ -40,15 +40,15 @@ public class BinOp extends BodyNode {
 		return op;
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 
-	public Temp left() {
+	public Val left() {
 		return left;
 	}
 
-	public Temp right() {
+	public Val right() {
 		return right;
 	}
 

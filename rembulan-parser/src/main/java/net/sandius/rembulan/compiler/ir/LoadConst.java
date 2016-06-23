@@ -4,19 +4,19 @@ import net.sandius.rembulan.util.Check;
 
 public abstract class LoadConst extends BodyNode {
 
-	private final Temp dest;
+	private final Val dest;
 
-	private LoadConst(Temp dest) {
+	private LoadConst(Val dest) {
 		this.dest = Check.notNull(dest);
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 
 	public static class Nil extends LoadConst {
 
-		public Nil(Temp dest) {
+		public Nil(Val dest) {
 			super(dest);
 		}
 
@@ -31,7 +31,7 @@ public abstract class LoadConst extends BodyNode {
 		
 		private final boolean value;
 		
-		public Bool(Temp dest, boolean value) {
+		public Bool(Val dest, boolean value) {
 			super(dest);
 			this.value = value;
 		}
@@ -51,7 +51,7 @@ public abstract class LoadConst extends BodyNode {
 
 		private final long value;
 
-		public Int(Temp dest, long value) {
+		public Int(Val dest, long value) {
 			super(dest);
 			this.value = value;
 		}
@@ -71,7 +71,7 @@ public abstract class LoadConst extends BodyNode {
 
 		private final double value;
 
-		public Flt(Temp dest, double value) {
+		public Flt(Val dest, double value) {
 			super(dest);
 			this.value = value;
 		}
@@ -91,7 +91,7 @@ public abstract class LoadConst extends BodyNode {
 
 		private final String value;
 
-		public Str(Temp dest, String value) {
+		public Str(Val dest, String value) {
 			super(dest);
 			this.value = Check.notNull(value);
 		}

@@ -42,13 +42,13 @@ public class Branch extends BlockTermNode implements JmpNode {
 
 		public static class Nil extends Condition {
 
-			private final Temp addr;
+			private final Val addr;
 
-			public Nil(Temp addr) {
+			public Nil(Val addr) {
 				this.addr = Check.notNull(addr);
 			}
 
-			public Temp addr() {
+			public Val addr() {
 				return addr;
 			}
 
@@ -61,15 +61,15 @@ public class Branch extends BlockTermNode implements JmpNode {
 
 		public static class Bool extends Condition {
 
-			private final Temp addr;
+			private final Val addr;
 			private final boolean expected;
 
-			public Bool(Temp addr, boolean expected) {
+			public Bool(Val addr, boolean expected) {
 				this.addr = Check.notNull(addr);
 				this.expected = expected;
 			}
 
-			public Temp addr() {
+			public Val addr() {
 				return addr;
 			}
 
@@ -86,25 +86,25 @@ public class Branch extends BlockTermNode implements JmpNode {
 
 		public static class NumLoopEnd extends Condition {
 
-			private final Temp var;
-			private final Temp limit;
-			private final Temp step;
+			private final Val var;
+			private final Val limit;
+			private final Val step;
 
-			public NumLoopEnd(Temp var, Temp limit, Temp step) {
+			public NumLoopEnd(Val var, Val limit, Val step) {
 				this.var = Check.notNull(var);
 				this.limit = Check.notNull(limit);
 				this.step = Check.notNull(step);
 			}
 
-			public Temp var() {
+			public Val var() {
 				return var;
 			}
 
-			public Temp limit() {
+			public Val limit() {
 				return limit;
 			}
 
-			public Temp step() {
+			public Val step() {
 				return step;
 			}
 

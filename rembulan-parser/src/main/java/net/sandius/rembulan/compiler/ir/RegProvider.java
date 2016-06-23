@@ -2,18 +2,24 @@ package net.sandius.rembulan.compiler.ir;
 
 public class RegProvider {
 
-	private int tempIdx;
+	private int valIdx;
+	private int phiValIdx;
 	private int varIdx;
 	private int uvIdx;
 
 	public RegProvider() {
-		this.tempIdx = 0;
+		this.valIdx = 0;
+		this.phiValIdx = 0;
 		this.varIdx = 0;
 		this.uvIdx = 0;
 	}
 
-	public Temp newTemp() {
-		return new Temp(tempIdx++);
+	public Val newVal() {
+		return new Val(valIdx++);
+	}
+
+	public PhiVal newPhiVal() {
+		return new PhiVal(phiValIdx++);
 	}
 
 	public Var newVar() {

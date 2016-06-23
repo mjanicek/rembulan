@@ -48,7 +48,9 @@ public abstract class IRVisitor {
 
 	public abstract void visit(StackGet node);
 
-	public abstract void visit(Mov node);
+	public abstract void visit(PhiStore node);
+
+	public abstract void visit(PhiLoad node);
 
 	public abstract void visit(Label node);
 

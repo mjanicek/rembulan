@@ -11,27 +11,35 @@ import java.util.Set;
 // is assigned to more than once.
 public class TempUseVerifierVisitor extends BlocksVisitor {
 
-	private final Set<Temp> assignedTo;
-	private final Set<Temp> used;
+	private final Set<Val> assignedTo;
+	private final Set<Val> used;
 
 	public TempUseVerifierVisitor() {
 		this.assignedTo = new HashSet<>();
 		this.used = new HashSet<>();
 	}
 
-	private void assign(Temp t) {
-		Check.notNull(t);
-		if (!assignedTo.add(t)) {
-			throw new IllegalStateException(t.toString() + " assigned to more than once");
+	private void assign(Val v) {
+		Check.notNull(v);
+		if (!assignedTo.add(v)) {
+			throw new IllegalStateException(v.toString() + " assigned to more than once");
 		}
 	}
 
-	private void use(Temp t) {
-		Check.notNull(t);
-		if (!assignedTo.contains(t)) {
-			throw new IllegalStateException(t.toString() + " used before assigned to");
+	private void assign(PhiVal v) {
+		// TODO
+	}
+
+	private void use(Val v) {
+		Check.notNull(v);
+		if (!assignedTo.contains(v)) {
+			throw new IllegalStateException(v.toString() + " used before assigned to");
 		}
-		used.add(t);
+		used.add(v);
+	}
+
+	private void use(PhiVal v) {
+		// TODO
 	}
 
 	@Override
@@ -123,7 +131,7 @@ public class TempUseVerifierVisitor extends BlocksVisitor {
 
 	private void useVList(VList vl) {
 		Check.notNull(vl);
-		for (Temp t : vl.addrs()) {
+		for (Val t : vl.addrs()) {
 			use(t);
 		}
 	}
@@ -151,7 +159,13 @@ public class TempUseVerifierVisitor extends BlocksVisitor {
 	}
 
 	@Override
-	public void visit(Mov node) {
+	public void visit(PhiStore node) {
+		use(node.src());
+		assign(node.dest());
+	}
+
+	@Override
+	public void visit(PhiLoad node) {
 		use(node.src());
 		assign(node.dest());
 	}

@@ -6,15 +6,15 @@ import java.util.List;
 
 public class Closure extends BodyNode {
 
-	private final Temp dest;
+	private final Val dest;
 	private final List<Var> args;
 
-	public Closure(Temp dest, List<Var> args) {
+	public Closure(Val dest, List<Var> args) {
 		this.dest = Check.notNull(dest);
 		this.args = Check.notNull(args);
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 

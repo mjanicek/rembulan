@@ -12,10 +12,10 @@ public class UnOp extends BodyNode {
 	}
 
 	private final Op op;
-	private final Temp dest;
-	private final Temp arg;
+	private final Val dest;
+	private final Val arg;
 
-	public UnOp(Op op, Temp dest, Temp arg) {
+	public UnOp(Op op, Val dest, Val arg) {
 		this.op = Check.notNull(op);
 		this.dest = Check.notNull(dest);
 		this.arg = Check.notNull(arg);
@@ -25,11 +25,11 @@ public class UnOp extends BodyNode {
 		return op;
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 
-	public Temp arg() {
+	public Val arg() {
 		return arg;
 	}
 

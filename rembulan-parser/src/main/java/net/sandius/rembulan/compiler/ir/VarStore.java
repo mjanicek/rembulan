@@ -5,9 +5,9 @@ import net.sandius.rembulan.util.Check;
 public class VarStore extends BodyNode {
 
 	private final Var var;
-	private final Temp src;
+	private final Val src;
 
-	public VarStore(Var var, Temp src) {
+	public VarStore(Var var, Val src) {
 		this.var = Check.notNull(var);
 		this.src = Check.notNull(src);
 	}
@@ -17,7 +17,7 @@ public class VarStore extends BodyNode {
 		return var;
 	}
 
-	public Temp src() {
+	public Val src() {
 		return src;
 	}
 

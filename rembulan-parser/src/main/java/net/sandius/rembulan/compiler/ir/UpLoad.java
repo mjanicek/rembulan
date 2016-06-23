@@ -4,15 +4,15 @@ import net.sandius.rembulan.util.Check;
 
 public class UpLoad extends BodyNode {
 
-	private final Temp dest;
+	private final Val dest;
 	private final UpVar uv;
 
-	public UpLoad(Temp dest, UpVar uv) {
+	public UpLoad(Val dest, UpVar uv) {
 		this.dest = Check.notNull(dest);
 		this.uv = Check.notNull(uv);
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 

@@ -4,17 +4,17 @@ import net.sandius.rembulan.util.Check;
 
 public class TabNew extends BodyNode {
 
-	private final Temp dest;
+	private final Val dest;
 	private final int array;
 	private final int hash;
 
-	public TabNew(Temp dest, int array, int hash) {
+	public TabNew(Val dest, int array, int hash) {
 		this.dest = Check.notNull(dest);
 		this.array = array;
 		this.hash = hash;
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 

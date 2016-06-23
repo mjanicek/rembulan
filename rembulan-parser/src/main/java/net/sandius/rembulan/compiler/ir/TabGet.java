@@ -4,25 +4,25 @@ import net.sandius.rembulan.util.Check;
 
 public class TabGet extends BodyNode {
 
-	private final Temp dest;
-	private final Temp obj;
-	private final Temp key;
+	private final Val dest;
+	private final Val obj;
+	private final Val key;
 
-	public TabGet(Temp dest, Temp obj, Temp key) {
+	public TabGet(Val dest, Val obj, Val key) {
 		this.dest = Check.notNull(dest);
 		this.obj = Check.notNull(obj);
 		this.key = Check.notNull(key);
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 
-	public Temp obj() {
+	public Val obj() {
 		return obj;
 	}
 
-	public Temp key() {
+	public Val key() {
 		return key;
 	}
 

@@ -9,7 +9,8 @@ import net.sandius.rembulan.compiler.ir.Closure;
 import net.sandius.rembulan.compiler.ir.Jmp;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.LoadConst;
-import net.sandius.rembulan.compiler.ir.Mov;
+import net.sandius.rembulan.compiler.ir.PhiLoad;
+import net.sandius.rembulan.compiler.ir.PhiStore;
 import net.sandius.rembulan.compiler.ir.Ret;
 import net.sandius.rembulan.compiler.ir.StackGet;
 import net.sandius.rembulan.compiler.ir.TCall;
@@ -144,8 +145,13 @@ public class IRPrinterVisitor extends BlocksVisitor {
 	}
 
 	@Override
-	public void visit(Mov node) {
-		ps.println("\tmov " + node.dest() + " " + node.src());
+	public void visit(PhiStore node) {
+		ps.println("\tphistore " + node.dest() + " " + node.src());
+	}
+
+	@Override
+	public void visit(PhiLoad node) {
+		ps.println("\tphiload " + node.dest() + " " + node.src());
 	}
 
 	@Override

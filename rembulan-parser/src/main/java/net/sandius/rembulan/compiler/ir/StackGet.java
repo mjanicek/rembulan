@@ -4,15 +4,15 @@ import net.sandius.rembulan.util.Check;
 
 public class StackGet extends BodyNode {
 
-	private final Temp dest;
+	private final Val dest;
 	private final int idx;
 
-	public StackGet(Temp dest, int idx) {
+	public StackGet(Val dest, int idx) {
 		this.dest = Check.notNull(dest);
 		this.idx = idx;
 	}
 
-	public Temp dest() {
+	public Val dest() {
 		return dest;
 	}
 
