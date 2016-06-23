@@ -3,7 +3,6 @@ package net.sandius.rembulan.compiler;
 import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.Branch;
-import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.JmpNode;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.ToNext;
@@ -20,22 +19,26 @@ import java.util.Set;
 
 public class BlockBuilder {
 
-	private final List<Label> labelDefOrder;
 	private final Map<Label, Integer> uses;
-	private final Map<Label, ArrayList<IRNode>> blocks;
 	private final Set<Label> pending;
+	private final Set<Label> visited;
+
+	private final List<BasicBlock> basicBlocks;
 
 	private int labelIdx;
 
-	private Label currentLabel;
+	private Block currentBlock;
 
 	public BlockBuilder() {
-		this.labelDefOrder = new ArrayList<>();
 		this.uses = new HashMap<>();
-		this.blocks = new HashMap<>();
 		this.pending = new HashSet<>();
+		this.visited = new HashSet<>();
+
+		this.basicBlocks = new ArrayList<>();
 
 		labelIdx = 0;
+
+		this.currentBlock = null;
 
 		add(newLabel());
 	}
@@ -44,21 +47,36 @@ public class BlockBuilder {
 		return new Label(labelIdx++);
 	}
 
-	private void appendToCurrentBlock(IRNode node) {
-		if (currentLabel == null) {
+	private void closeCurrentBlock(BlockTermNode end) {
+		if (currentBlock == null) {
+			throw new IllegalStateException("No current block is open");
+		}
+		basicBlocks.add(currentBlock.toBasicBlock(end));
+		currentBlock = null;
+	}
+
+	private void appendToCurrentBlock(BodyNode node) {
+		if (currentBlock == null) {
 			throw new IllegalStateException("Adding a node outside a block");
 		}
-		blocks.get(currentLabel).add(node);
+		currentBlock.add(node);
 	}
 
 	public void add(Label label) {
 		Check.notNull(label);
 		pending.remove(label);
-		if (blocks.put(label, new ArrayList<IRNode>()) != null) {
+
+		if (!visited.add(label)) {
 			throw new IllegalStateException("Label already used: " + label);
 		}
-		labelDefOrder.add(label);
-		currentLabel = label;
+
+		if (currentBlock != null) {
+			closeCurrentBlock(new ToNext(label));
+		}
+
+		assert (currentBlock == null);
+
+		currentBlock = new Block(label);
 	}
 
 	public void add(BodyNode node) {
@@ -68,17 +86,7 @@ public class BlockBuilder {
 			useLabel(((JmpNode) node).jmpDest());
 		}
 
-//		if (currentLabel == null) {
-//			add(newLabel());
-//		}
-
 		appendToCurrentBlock(node);
-	}
-
-	public void addBranch(Branch.Condition cond, Label dest) {
-		Label next = newLabel();
-		add(new Branch(cond, dest, next));
-		add(next);
 	}
 
 	public void add(BlockTermNode node) {
@@ -88,8 +96,13 @@ public class BlockBuilder {
 			useLabel(((JmpNode) node).jmpDest());
 		}
 
-		appendToCurrentBlock(node);
-		currentLabel = null;
+		closeCurrentBlock(node);
+	}
+
+	public void addBranch(Branch.Condition cond, Label dest) {
+		Label next = newLabel();
+		add(new Branch(cond, dest, next));
+		add(next);
 	}
 
 	private int uses(Label l) {
@@ -101,80 +114,40 @@ public class BlockBuilder {
 	private void useLabel(Label l) {
 		Check.notNull(l);
 		uses.put(l, uses(l) + 1);
-		if (!blocks.containsKey(l)) {
+		if (!visited.contains(l)) {
 			pending.add(l);
 		}
 	}
 
-	private static <T> T last(List<T> ns) {
-		int sz = ns.size();
-		return sz > 0 ? ns.get(sz - 1) : null;
-	}
+	private static class Block {
 
-	private static List<IRNode> copyList(List<IRNode> l) {
-		return Collections.unmodifiableList(new ArrayList<>(l));
+		private final Label label;
+		private final List<BodyNode> body;
+
+		private Block(Label label) {
+			this.label = label;
+			this.body = new ArrayList<>();
+		}
+
+		public void add(BodyNode n) {
+			body.add(n);
+		}
+
+		public BasicBlock toBasicBlock(BlockTermNode end) {
+			return new BasicBlock(label, Collections.unmodifiableList(body), end);
+		}
+
 	}
 
 	public Blocks build() {
 		if (!pending.isEmpty()) {
 			throw new IllegalStateException("Label(s) not defined: " + Util.iterableToString(pending, ", "));
 		}
-
-		ArrayList<BasicBlock> basicBlocks = new ArrayList<>();
-
-		Label label = null;
-		final ArrayList<IRNode> buf = new ArrayList<>();
-
-		for (Label l : labelDefOrder) {
-			if (label == null) {
-				// this is the initial block
-				label = l;
-			}
-			else if (uses(l) > 0 || last(buf) instanceof BlockTermNode) {
-				// start of a new basic block
-
-				IRNode last = last(buf);
-				final List<IRNode> body;
-				final BlockTermNode end;
-
-				if (last instanceof BlockTermNode) {
-					body = copyList(buf.subList(0, buf.size() - 1));
-					end = (BlockTermNode) last;
-				}
-				else {
-					body = copyList(buf);
-					end = new ToNext(l);  // falling through
-				}
-
-				basicBlocks.add(new BasicBlock(label, body, end));
-
-				label = l;
-				buf.clear();
-			}
-			else {
-				// label can be omitted: previous node falls through & is not a target of jumps
-			}
-
-			buf.addAll(blocks.get(l));
-		}
-
-		assert (label != null);
-
-		// last pending block
-
-		IRNode last = last(buf);
-		if ((last instanceof BlockTermNode)) {
-			basicBlocks.add(new BasicBlock(
-					label,
-					copyList(buf.subList(0, buf.size() - 1)),
-					(BlockTermNode) last));
-		}
-		else {
-			// falling off the end
+		if (currentBlock != null) {
 			throw new IllegalStateException("Control reaches end of function");
 		}
 
-		return new Blocks(basicBlocks);
+		return new Blocks(new ArrayList<>(basicBlocks));
 	}
 
 }
