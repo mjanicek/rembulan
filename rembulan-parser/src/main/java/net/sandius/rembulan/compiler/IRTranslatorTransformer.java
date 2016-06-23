@@ -551,7 +551,7 @@ public class IRTranslatorTransformer extends Transformer {
 		insns.addBranch(new Branch.Condition.Bool(c, false), l_else != null ? l_else : l_done);
 		nestedBlock(cb.block());
 
-		if (l_else != null) {
+		if (l_else != null && insns.isInBlock()) {
 			insns.add(new Jmp(l_done));
 		}
 	}

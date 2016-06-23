@@ -47,6 +47,10 @@ public class BlockBuilder {
 		return new Label(labelIdx++);
 	}
 
+	public boolean isInBlock() {
+		return currentBlock != null;
+	}
+
 	private void closeCurrentBlock(BlockTermNode end) {
 		if (currentBlock == null) {
 			throw new IllegalStateException("No current block is open");
