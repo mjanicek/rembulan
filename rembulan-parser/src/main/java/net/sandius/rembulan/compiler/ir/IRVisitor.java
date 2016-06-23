@@ -54,16 +54,18 @@ public abstract class IRVisitor {
 
 	public abstract void visit(Jmp node);
 
-	public abstract void visit(CJmp node);
-
 
 	public abstract void visit(Closure node);
 
 	public abstract void visit(ToNumber node);
 
-	public abstract void visit(CheckForEnd node);
-
-	public abstract void visit(JmpIfNil node);
-
 	public abstract void visit(ToNext node);
+
+
+	public abstract void visit(Branch branch);
+
+	public abstract void visit(Branch.Condition.Nil cond);
+	public abstract void visit(Branch.Condition.Bool cond);
+	public abstract void visit(Branch.Condition.NumLoopEnd cond);
+
 }

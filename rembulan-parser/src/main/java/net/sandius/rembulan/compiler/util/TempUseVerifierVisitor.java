@@ -167,11 +167,6 @@ public class TempUseVerifierVisitor extends BlocksVisitor {
 	}
 
 	@Override
-	public void visit(CJmp node) {
-		use(node.addr());
-	}
-
-	@Override
 	public void visit(Closure node) {
 		assign(node.dest());
 	}
@@ -183,15 +178,25 @@ public class TempUseVerifierVisitor extends BlocksVisitor {
 	}
 
 	@Override
-	public void visit(CheckForEnd node) {
-		use(node.var());
-		use(node.limit());
-		use(node.step());
+	public void visit(Branch branch) {
+		branch.condition().accept(this);
 	}
 
 	@Override
-	public void visit(JmpIfNil node) {
-		use(node.addr());
+	public void visit(Branch.Condition.Nil cond) {
+		use(cond.addr());
+	}
+
+	@Override
+	public void visit(Branch.Condition.Bool cond) {
+		use(cond.addr());
+	}
+
+	@Override
+	public void visit(Branch.Condition.NumLoopEnd cond) {
+		use(cond.var());
+		use(cond.limit());
+		use(cond.step());
 	}
 
 	@Override

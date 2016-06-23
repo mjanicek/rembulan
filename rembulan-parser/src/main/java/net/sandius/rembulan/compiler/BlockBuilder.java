@@ -2,13 +2,10 @@ package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.BodyNode;
-import net.sandius.rembulan.compiler.ir.CJmp;
-import net.sandius.rembulan.compiler.ir.CheckForEnd;
+import net.sandius.rembulan.compiler.ir.Branch;
 import net.sandius.rembulan.compiler.ir.IRNode;
-import net.sandius.rembulan.compiler.ir.JmpIfNil;
 import net.sandius.rembulan.compiler.ir.JmpNode;
 import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.compiler.ir.Temp;
 import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
@@ -78,21 +75,9 @@ public class BlockBuilder {
 		appendToCurrentBlock(node);
 	}
 
-	public void addCJmp(Temp addr, boolean expected, Label jmpDest) {
+	public void addBranch(Branch.Condition cond, Label dest) {
 		Label next = newLabel();
-		add(new CJmp(addr, expected, jmpDest, next));
-		add(next);
-	}
-
-	public void addCheckForEnd(Temp var, Temp limit, Temp step, Label label) {
-		Label next = newLabel();
-		add(new CheckForEnd(var, limit, step, label, next));
-		add(next);
-	}
-
-	public void addJmpIfNil(Temp addr, Label jmpDest) {
-		Label next = newLabel();
-		add(new JmpIfNil(addr, jmpDest, next));
+		add(new Branch(cond, dest, next));
 		add(next);
 	}
 

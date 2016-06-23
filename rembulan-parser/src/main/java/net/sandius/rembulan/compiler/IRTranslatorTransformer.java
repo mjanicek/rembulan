@@ -191,7 +191,7 @@ public class IRTranslatorTransformer extends Transformer {
 		left.accept(this);
 		Temp l = popTemp();
 
-		insns.addCJmp(l, false, l_false);
+		insns.addBranch(new Branch.Condition.Bool(l, false), l_false);
 
 		right.accept(this);
 		Temp r = popTemp();
@@ -213,7 +213,7 @@ public class IRTranslatorTransformer extends Transformer {
 		left.accept(this);
 		Temp l = popTemp();
 
-		insns.addCJmp(l, true, l_true);
+		insns.addBranch(new Branch.Condition.Bool(l, true), l_true);
 
 		right.accept(this);
 		Temp r = popTemp();
@@ -537,7 +537,7 @@ public class IRTranslatorTransformer extends Transformer {
 		cb.condition().accept(this);
 		Temp c = popTemp();
 
-		insns.addCJmp(c, false, l_else != null ? l_else : l_done);
+		insns.addBranch(new Branch.Condition.Bool(c, false), l_else != null ? l_else : l_done);
 		nestedBlock(cb.block());
 
 		if (l_else != null) {
@@ -632,7 +632,7 @@ public class IRTranslatorTransformer extends Transformer {
 		insns.add(new BinOp(BinOp.Op.ADD, t_var3, t_var2, t_step));
 
 		// check end-condition
-		insns.addCheckForEnd(t_var3, t_limit, t_step, l_done);
+		insns.addBranch(new Branch.Condition.NumLoopEnd(t_var3, t_limit, t_step), l_done);
 
 		insns.add(new VarStore(v_var, t_var3));
 
@@ -711,7 +711,7 @@ public class IRTranslatorTransformer extends Transformer {
 		Temp t_v1 = provider.newTemp();
 		insns.add(new VarLoad(t_v1, var(vm.get(0))));
 
-		insns.addJmpIfNil(t_v1, l_done);
+		insns.addBranch(new Branch.Condition.Nil(t_v1), l_done);
 
 		insns.add(new VarStore(v_var, t_v1));
 
@@ -734,7 +734,7 @@ public class IRTranslatorTransformer extends Transformer {
 		insns.add(l_test);
 		node.condition().accept(this);
 		Temp c = popTemp();
-		insns.addCJmp(c, false, l_done);
+		insns.addBranch(new Branch.Condition.Bool(c, false), l_done);
 
 		breakLabels.push(l_done);
 		nestedBlock(node.block());

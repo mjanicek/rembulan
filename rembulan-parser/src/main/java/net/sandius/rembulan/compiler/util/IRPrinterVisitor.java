@@ -1,15 +1,12 @@
 package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.compiler.BasicBlock;
 import net.sandius.rembulan.compiler.BlocksVisitor;
 import net.sandius.rembulan.compiler.ir.BinOp;
-import net.sandius.rembulan.compiler.ir.CJmp;
+import net.sandius.rembulan.compiler.ir.Branch;
 import net.sandius.rembulan.compiler.ir.Call;
-import net.sandius.rembulan.compiler.ir.CheckForEnd;
 import net.sandius.rembulan.compiler.ir.Closure;
 import net.sandius.rembulan.compiler.ir.Jmp;
-import net.sandius.rembulan.compiler.ir.JmpIfNil;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.LoadConst;
 import net.sandius.rembulan.compiler.ir.Mov;
@@ -162,9 +159,26 @@ public class IRPrinterVisitor extends BlocksVisitor {
 	}
 
 	@Override
-	public void visit(CJmp node) {
-		ps.println("\tcjmp " + node.addr() + " " + node.expected() + " " + node.jmpDest());
+	public void visit(Branch node) {
+		ps.print("\tif (");
+		node.condition().accept(this);
+		ps.println(") " + node.jmpDest());
 		ps.println("\t; else fall through to " + node.next());
+	}
+
+	@Override
+	public void visit(Branch.Condition.Nil cond) {
+		ps.print("nil " + cond.addr());
+	}
+
+	@Override
+	public void visit(Branch.Condition.Bool cond) {
+		ps.print(cond.expected() + " " + cond.addr());
+	}
+
+	@Override
+	public void visit(Branch.Condition.NumLoopEnd cond) {
+		ps.print("loopend " + cond.var() + " " + cond.limit() + " " + cond.step());
 	}
 
 	@Override
@@ -175,18 +189,6 @@ public class IRPrinterVisitor extends BlocksVisitor {
 	@Override
 	public void visit(ToNumber node) {
 		ps.println("\ttonumber " + node.dest() + " " + node.src());
-	}
-
-	@Override
-	public void visit(CheckForEnd node) {
-		ps.println("\tcheckforend " + node.var() + " " + node.limit() + " " + node.step() + " " + node.jmpDest());
-		ps.println("\t; else fall through to " + node.next());
-	}
-
-	@Override
-	public void visit(JmpIfNil node) {
-		ps.println("\tjmpifnil " + node.addr() + " " + node.jmpDest());
-		ps.println("\t; else fall through to " + node.next());
 	}
 
 	@Override
