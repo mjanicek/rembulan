@@ -11,12 +11,9 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MAY_BE_INTEGER;
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_FLOAT;
@@ -26,15 +23,91 @@ public class TyperVisitor extends BlocksVisitor {
 
 	private final Map<Val, Type> valTypes;
 	private final Map<PhiVal, Type> phiValTypes;
+	private final Map<Label, VarState> varStates;
 
 	private final Queue<Label> open;
 
 	private boolean changed;
+	private VarState currentVarState;
 
 	public TyperVisitor() {
 		this.valTypes = new HashMap<>();
 		this.phiValTypes = new HashMap<>();
+		this.varStates = new HashMap<>();
 		this.open = new ArrayDeque<>();
+	}
+
+	private static Type joinTypes(Type a, Type b) {
+		return a == null ? b : (b == null ? a : a.join(b));
+	}
+
+	private VarState currentVarState() {
+		return currentVarState;
+	}
+
+	private class VarState {
+
+		private final Map<Var, Type> types;
+
+		private VarState(Map<Var, Type> types) {
+			this.types = Check.notNull(types);
+		}
+
+		public VarState() {
+			this(new HashMap<Var, Type>());
+		}
+
+		public VarState copy() {
+			return new VarState(new HashMap<>(types));
+		}
+
+		public void store(Var v, Type t) {
+			types.put(Check.notNull(v), Check.notNull(t));
+		}
+
+		public Type load(Var v) {
+			Type t = types.get(Check.notNull(v));
+			if (t == null) {
+				throw new IllegalStateException(v + " used before stored into");
+			}
+			else {
+				return t;
+			}
+		}
+
+		public boolean joinWith(VarState that) {
+			Check.notNull(that);
+
+			Map<Var, Type> result = new HashMap<>();
+			for (Var v : this.types.keySet()) {
+				Type t = joinTypes(types.get(v), that.types.get(v));
+				result.put(v, Check.notNull(t));
+			}
+			for (Var v : that.types.keySet()) {
+				Type t = joinTypes(types.get(v), that.types.get(v));
+				result.put(v, Check.notNull(t));
+			}
+			if (!result.equals(types)) {
+				types.clear();
+				types.putAll(result);
+				return true;
+			}
+			else {
+				return false;
+			}
+		}
+	}
+
+	private VarState varState(Label l) {
+		VarState vs = varStates.get(l);
+		if (vs == null) {
+			VarState nvs = new VarState();
+			varStates.put(l, nvs);
+			return nvs;
+		}
+		else {
+			return vs;
+		}
 	}
 
 	public Map<AbstractVal, Type> valTypes() {
@@ -61,7 +134,8 @@ public class TyperVisitor extends BlocksVisitor {
 			changed = true;
 		}
 		else {
-			throw new IllegalStateException(v + " assigned to more than once");
+			changed = true;
+//			throw new IllegalStateException(v + " assigned to more than once");
 		}
 	}
 
@@ -124,6 +198,29 @@ public class TyperVisitor extends BlocksVisitor {
 			}
 		}
 
+	}
+
+	@Override
+	public void visit(BasicBlock block) {
+		currentVarState = varState(block.label()).copy();
+
+		changed = false;
+		super.visit(block);
+
+		for (Label nxt : block.end().nextLabels()) {
+			VarState vs = varState(nxt);
+			if (vs.joinWith(currentVarState)) {
+				changed = true;
+			}
+		}
+
+		if (changed) {
+			for (Label nxt : block.end().nextLabels()) {
+				open.add(nxt);
+			}
+		}
+
+		currentVarState = null;
 	}
 
 	@Override
@@ -242,14 +339,13 @@ public class TyperVisitor extends BlocksVisitor {
 
 	@Override
 	public void visit(VarLoad node) {
-		// TODO
-		assign(node.dest(), LuaTypes.ANY);
+		Type t = currentVarState().load(node.var());
+		assign(node.dest(), t);
 	}
 
 	@Override
 	public void visit(VarStore node) {
-		// TODO: keep track of the value
-		// no effect on vals
+		currentVarState().store(node.var(), typeOf(node.src()));
 	}
 
 	@Override
