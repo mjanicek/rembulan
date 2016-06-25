@@ -4,14 +4,14 @@ import net.sandius.rembulan.util.Check;
 
 public class TabStackAppend extends BodyNode {
 
-	private final Val dest;
+	private final Val obj;
 
-	public TabStackAppend(Val dest) {
-		this.dest = Check.notNull(dest);
+	public TabStackAppend(Val obj) {
+		this.obj = Check.notNull(obj);
 	}
 
-	public Val dest() {
-		return dest;
+	public Val obj() {
+		return obj;
 	}
 
 	@Override

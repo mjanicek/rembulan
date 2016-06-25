@@ -87,12 +87,12 @@ public class IRPrinterVisitor extends BlocksVisitor {
 
 	@Override
 	public void visit(TabSet node) {
-		ps.println("\ttabset " + node.dest() + " " + node.key() + " " + node.value());
+		ps.println("\ttabset " + node.obj() + " " + node.key() + " " + node.value());
 	}
 
 	@Override
 	public void visit(TabStackAppend node) {
-		ps.println("\ttabstackappend " + node.dest());
+		ps.println("\ttabstackappend " + node.obj());
 	}
 
 	@Override
