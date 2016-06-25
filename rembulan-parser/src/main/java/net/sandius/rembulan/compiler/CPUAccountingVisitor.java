@@ -7,9 +7,7 @@ import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.util.DefaultNodeActionVisitor;
 import net.sandius.rembulan.util.Check;
 
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 public class CPUAccountingVisitor extends BlockTransformerVisitor {
 
