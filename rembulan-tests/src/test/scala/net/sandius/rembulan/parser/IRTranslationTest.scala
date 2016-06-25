@@ -13,6 +13,7 @@ import org.junit.runner.RunWith
 import org.scalatest.{FunSpec, MustMatchers}
 import org.scalatest.junit.JUnitRunner
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
@@ -112,6 +113,40 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
   }
 
+  case class CompileResult(blocks: Blocks, types: TypeInfo)
+
+  def compile(chunk: Chunk): CompileResult = {
+    val resolved = resolveNames(chunk)
+
+    val translator = new IRTranslatorTransformer()
+    translator.transform(resolved)
+
+    val blocks = translator.blocks()
+    val withCpu = insertCpuAccounting(blocks)
+
+    def pass(blocks: Blocks, types: TypeInfo): Blocks = {
+      val inlined = inlineBranches(blocks, types)
+      val filtered = BlocksSimplifier.filterUnreachableBlocks(inlined)
+      val merged = BlocksSimplifier.mergeBlocks(filtered)
+      merged
+    }
+
+    @tailrec
+    def loop(blocks: Blocks): (Blocks, TypeInfo) = {
+      val types = assignTypes(blocks)
+      val opt = pass(blocks, types)
+      if (blocks == opt) {
+        (opt, types)
+      }
+      else {
+        loop(opt)
+      }
+    }
+
+    val (bs, types) = loop(withCpu)
+    CompileResult(bs, types)
+  }
+
   for (b <- bundles) {
     describe ("from " + b.name + " :") {
       for (f <- b.all) {
@@ -123,23 +158,12 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             println(code)
             println("---END---")
 
-            val ck = resolveNames(parseChunk(code))
+            val cr = compile(parseChunk(code))
 
-            val translator = new IRTranslatorTransformer()
-            translator.transform(ck)
-            val blocks = translator.blocks()
+            printBlocks(cr.blocks)
+            printTypes(cr.types)
 
-            val withCpu = insertCpuAccounting(blocks)
-
-            val types = assignTypes(withCpu)
-            val inlined = inlineBranches(withCpu, types)
-            val filtered = BlocksSimplifier.filterUnreachableBlocks(inlined)
-            val merged = BlocksSimplifier.mergeBlocks(filtered)
-
-            printBlocks(merged)
-            printTypes(types)
-
-            verify(blocks)
+            verify(cr.blocks)
           }
         }
       }
