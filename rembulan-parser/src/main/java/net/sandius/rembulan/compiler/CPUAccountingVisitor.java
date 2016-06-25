@@ -11,13 +11,13 @@ import java.util.Iterator;
 
 public class CPUAccountingVisitor extends BlockTransformerVisitor {
 
-	private final NodeAccountingVisitor accounter;
+	private final Account acc;
 
-	private static class NodeAccountingVisitor extends DefaultNodeActionVisitor {
+	public static abstract class Account {
 
 		private int cost;
 
-		public int cost() {
+		public int get() {
 			return cost;
 		}
 
@@ -25,25 +25,63 @@ public class CPUAccountingVisitor extends BlockTransformerVisitor {
 			cost = 0;
 		}
 
+		protected void add(int c) {
+			cost += Check.nonNegative(c);
+		}
+
+		public abstract void cpuNode(CPUWithdraw node);
+
+		public abstract void otherNode(IRNode node);
+
+	}
+
+	public static final Account INITIALISE = new Account() {
+		@Override
+		public void cpuNode(CPUWithdraw node) {
+			// no-op
+		}
+
+		@Override
+		public void otherNode(IRNode node) {
+			add(1);
+		}
+	};
+
+	public static final Account COLLECT = new Account() {
+		@Override
+		public void cpuNode(CPUWithdraw node) {
+			add(node.cost());
+		}
+
+		@Override
+		public void otherNode(IRNode node) {
+			// no-op
+		}
+	};
+
+	private static class Visitor extends DefaultNodeActionVisitor {
+
+		private final Account account;
+
+		public Visitor(Account account) {
+			this.account = Check.notNull(account);
+		}
+
 		@Override
 		protected void action(IRNode node) {
-			cost += 1;
+			account.otherNode(node);
 		}
 
 		@Override
 		public void visit(CPUWithdraw node) {
-			cost += node.cost();
+			account.cpuNode(node);
 		}
 
 	}
 
-	public CPUAccountingVisitor(NodeAccountingVisitor visitor) {
-		super(Check.notNull(visitor));
-		this.accounter = visitor;
-	}
-
-	public CPUAccountingVisitor() {
-		this(new NodeAccountingVisitor());
+	public CPUAccountingVisitor(Account acc) {
+		super(new Visitor(acc));
+		this.acc = Check.notNull(acc);
 	}
 
 	private static void removeCPUNodes(Iterable<BodyNode> nodes) {
@@ -59,14 +97,14 @@ public class CPUAccountingVisitor extends BlockTransformerVisitor {
 	@Override
 	public void postVisit(BasicBlock block) {
 		try {
-			int cost = accounter.cost();
+			int cost = acc.get();
 			removeCPUNodes(currentBody());
 			if (cost > 0) {
 				currentBody().add(0, new CPUWithdraw(cost));
 			}
 		}
 		finally {
-			accounter.reset();
+			acc.reset();
 		}
 	}
 

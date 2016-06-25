@@ -56,7 +56,13 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def insertCpuAccounting(blocks: Blocks): Blocks = {
-    val visitor = new CPUAccountingVisitor()
+    val visitor = new CPUAccountingVisitor(CPUAccountingVisitor.INITIALISE)
+    visitor.visit(blocks)
+    visitor.result()
+  }
+
+  def collectCpuAccounting(blocks: Blocks): Blocks = {
+    val visitor = new CPUAccountingVisitor(CPUAccountingVisitor.COLLECT)
     visitor.visit(blocks)
     visitor.result()
   }
@@ -125,7 +131,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     val withCpu = insertCpuAccounting(blocks)
 
     def pass(blocks: Blocks, types: TypeInfo): Blocks = {
-      val inlined = inlineBranches(blocks, types)
+      val withCpu = collectCpuAccounting(blocks)
+      val inlined = inlineBranches(withCpu, types)
       val filtered = BlocksSimplifier.filterUnreachableBlocks(inlined)
       val merged = BlocksSimplifier.mergeBlocks(filtered)
       merged
