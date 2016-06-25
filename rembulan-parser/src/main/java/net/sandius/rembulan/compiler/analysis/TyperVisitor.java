@@ -10,7 +10,6 @@ import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
