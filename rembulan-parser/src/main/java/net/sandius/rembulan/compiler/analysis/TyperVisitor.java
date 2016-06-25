@@ -37,6 +37,10 @@ public class TyperVisitor extends BlocksVisitor {
 		this.open = new ArrayDeque<>();
 	}
 
+	public TypeInfo valTypes() {
+		return TypeInfo.of(valTypes, phiValTypes);
+	}
+
 	private static Type joinTypes(Type a, Type b) {
 		return a == null ? b : (b == null ? a : a.join(b));
 	}
@@ -108,17 +112,6 @@ public class TyperVisitor extends BlocksVisitor {
 		else {
 			return vs;
 		}
-	}
-
-	public Map<AbstractVal, Type> valTypes() {
-		Map<AbstractVal, Type> result = new HashMap<>();
-		for (Val v : valTypes.keySet()) {
-			result.put(v, valTypes.get(v));
-		}
-		for (PhiVal pv : phiValTypes.keySet()) {
-			result.put(pv, phiValTypes.get(pv));
-		}
-		return Collections.unmodifiableMap(result);
 	}
 
 	private void assign(Val v, Type t) {
