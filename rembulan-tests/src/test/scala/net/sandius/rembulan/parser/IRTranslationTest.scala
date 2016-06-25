@@ -2,7 +2,8 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, PrintWriter}
 
-import net.sandius.rembulan.compiler.analysis.TyperVisitor
+import net.sandius.rembulan.compiler.analysis.{BranchInlinerVisitor, TyperVisitor}
+import net.sandius.rembulan.compiler.ir.Branch
 import net.sandius.rembulan.compiler.{Blocks, BlocksVisitor, IRTranslatorTransformer}
 import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
@@ -54,13 +55,34 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def assignTypes(blocks: Blocks): Unit = {
-    val visitor = new TyperVisitor()
-    visitor.visit(blocks)
-    val types = visitor.valTypes()
+    val typer = new TyperVisitor()
+    typer.visit(blocks)
+    val types = typer.valTypes()
 
     for (v <- types.vals().asScala) {
       println(v + " -> " + types.typeOf(v))
     }
+
+    println()
+
+    def branchToString(b: Branch): String = {
+      "branch [" + b.jmpDest() + " | " + b.next() + "]"
+    }
+
+    val handler = new BranchInlinerVisitor.InlineHandler {
+      override def inlineAsTrue(b: Branch) = {
+        println(branchToString(b) + " can be inlined to TRUE (" + b.jmpDest() + ")")
+      }
+      override def inlineAsFalse(b: Branch) = {
+        println(branchToString(b) + " can be inlined to FALSE (" + b.next() + ")")
+      }
+      override def noInline(b: Branch) = {
+        println(branchToString(b) + " cannot be inlined")
+      }
+    }
+    val inliner = new BlocksVisitor(new BranchInlinerVisitor(types, handler))
+
+    inliner.visit(blocks)
   }
 
   describe ("expression") {
