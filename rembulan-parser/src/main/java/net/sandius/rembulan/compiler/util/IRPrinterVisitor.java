@@ -2,31 +2,7 @@ package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.compiler.BlocksVisitor;
-import net.sandius.rembulan.compiler.ir.BinOp;
-import net.sandius.rembulan.compiler.ir.Branch;
-import net.sandius.rembulan.compiler.ir.Call;
-import net.sandius.rembulan.compiler.ir.Closure;
-import net.sandius.rembulan.compiler.ir.Jmp;
-import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.compiler.ir.LoadConst;
-import net.sandius.rembulan.compiler.ir.PhiLoad;
-import net.sandius.rembulan.compiler.ir.PhiStore;
-import net.sandius.rembulan.compiler.ir.Ret;
-import net.sandius.rembulan.compiler.ir.StackGet;
-import net.sandius.rembulan.compiler.ir.TCall;
-import net.sandius.rembulan.compiler.ir.TabGet;
-import net.sandius.rembulan.compiler.ir.TabNew;
-import net.sandius.rembulan.compiler.ir.TabSet;
-import net.sandius.rembulan.compiler.ir.TabStackAppend;
-import net.sandius.rembulan.compiler.ir.ToNext;
-import net.sandius.rembulan.compiler.ir.ToNumber;
-import net.sandius.rembulan.compiler.ir.UnOp;
-import net.sandius.rembulan.compiler.ir.UpLoad;
-import net.sandius.rembulan.compiler.ir.UpStore;
-import net.sandius.rembulan.compiler.ir.VList;
-import net.sandius.rembulan.compiler.ir.VarLoad;
-import net.sandius.rembulan.compiler.ir.VarStore;
-import net.sandius.rembulan.compiler.ir.Vararg;
+import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
@@ -200,6 +176,11 @@ public class IRPrinterVisitor extends BlocksVisitor {
 	@Override
 	public void visit(ToNext node) {
 		ps.println("\t; fall through to " + node.label());
+	}
+
+	@Override
+	public void visit(CPUWithdraw node) {
+		ps.println("cpu " + node.cost());
 	}
 
 }

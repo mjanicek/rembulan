@@ -145,4 +145,8 @@ public abstract class IRVisitor {
 		if (v != null) v.visit(cond);
 	}
 
+	public void visit(CPUWithdraw node) {
+		if (v != null) v.visit(node);
+	}
+
 }
