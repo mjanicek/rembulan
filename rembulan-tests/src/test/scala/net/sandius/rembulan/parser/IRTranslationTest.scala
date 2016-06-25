@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.compiler.analysis.{BranchInlinerVisitor, TypeInfo, TyperVisitor}
 import net.sandius.rembulan.compiler.ir.Branch
-import net.sandius.rembulan.compiler.{Blocks, BlocksVisitor, CPUAccountingVisitor, IRTranslatorTransformer}
+import net.sandius.rembulan.compiler._
 import net.sandius.rembulan.compiler.util.{BlocksSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
@@ -107,10 +107,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
           val translator = new IRTranslatorTransformer()
           translator.transform(ck)
-          val blocks = translator.blocks()
-          printBlocks(blocks)
-
-          verify(blocks)
+          val fn = translator.result()
+          printBlocks(fn.blocks)
+          verify(fn.blocks)
         }
 
       }
@@ -119,16 +118,21 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
   }
 
-  case class CompileResult(blocks: Blocks, types: TypeInfo)
+  case class CompileResult(blocks: Blocks, types: TypeInfo, nested: Seq[CompileResult])
 
-  def compile(chunk: Chunk): CompileResult = {
+  def translate(chunk: Chunk): IRFunc = {
     val resolved = resolveNames(chunk)
-
     val translator = new IRTranslatorTransformer()
     translator.transform(resolved)
+    translator.result()
+  }
 
-    val blocks = translator.blocks()
-    val withCpu = insertCpuAccounting(blocks)
+  def compile(fn: IRFunc): CompileResult = {
+
+    // compile children first
+    val children = for (f <- fn.nested.asScala) yield compile(f)
+
+    val withCpu = insertCpuAccounting(fn.blocks)
 
     def pass(blocks: Blocks, types: TypeInfo): Blocks = {
       val withCpu = collectCpuAccounting(blocks)
@@ -151,7 +155,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     }
 
     val (bs, types) = loop(withCpu)
-    CompileResult(bs, types)
+    CompileResult(bs, types, children.toSeq)
   }
 
   for (b <- bundles) {
@@ -165,12 +169,26 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             println(code)
             println("---END---")
 
-            val cr = compile(parseChunk(code))
+            val ir = translate(parseChunk(code))
+            val cr = compile(ir)
 
-            printBlocks(cr.blocks)
-            printTypes(cr.types)
+            def printCompileResult(cr: CompileResult): Unit = {
+              println("Blocks:")
+              printBlocks(cr.blocks)
+              println()
 
-            verify(cr.blocks)
+              println("Value types:")
+              printTypes(cr.types)
+              println()
+
+              for ((ncr, i)  <- cr.nested.zipWithIndex) {
+                println("Nested function #" + i)
+                println()
+                printCompileResult(ncr)
+              }
+            }
+
+            printCompileResult(cr)
           }
         }
       }
