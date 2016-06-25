@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 import net.sandius.rembulan.compiler.analysis.{BranchInlinerVisitor, TypeInfo, TyperVisitor}
 import net.sandius.rembulan.compiler.ir.Branch
 import net.sandius.rembulan.compiler.{Blocks, BlocksVisitor, IRTranslatorTransformer}
-import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
+import net.sandius.rembulan.compiler.util.{BlocksSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.test._
@@ -125,8 +125,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
             val types = assignTypes(blocks)
             val inlined = inlineBranches(blocks, types)
+            val filtered = BlocksSimplifier.filterUnreachableBlocks(inlined)
 
-            printBlocks(inlined)
+            printBlocks(filtered)
             printTypes(types)
 
             verify(blocks)
