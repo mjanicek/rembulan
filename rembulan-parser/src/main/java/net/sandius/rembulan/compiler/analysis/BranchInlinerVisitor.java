@@ -34,7 +34,7 @@ public class BranchInlinerVisitor extends IRVisitor {
 	public void visit(Branch branch) {
 		try {
 			inline = null;
-			super.visit(branch);
+			branch.condition().accept(this);
 			if (inline != null) {
 				if (inline) {
 					handler.inlineAsTrue(branch);
@@ -58,7 +58,7 @@ public class BranchInlinerVisitor extends IRVisitor {
 		if (t.isSubtypeOf(LuaTypes.NIL)) {
 			inline = Boolean.TRUE;
 		}
-		else if (t.isSubtypeOf(LuaTypes.ANY)) {
+		else if (t.isSubtypeOf(LuaTypes.ANY) && !t.equals(LuaTypes.ANY)) {
 			inline = Boolean.FALSE;
 		}
 		else {
@@ -73,7 +73,7 @@ public class BranchInlinerVisitor extends IRVisitor {
 			// t evaluates to false
 			inline = !cond.expected();
 		}
-		else if (t.isSubtypeOf(LuaTypes.ANY) && !t.isSubtypeOf(LuaTypes.BOOLEAN)) {
+		else if (t.isSubtypeOf(LuaTypes.ANY) && !t.equals(LuaTypes.ANY) && !t.isSubtypeOf(LuaTypes.BOOLEAN)) {
 			// t evaluates to true
 			inline = cond.expected();
 		}
