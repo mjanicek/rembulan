@@ -4,7 +4,7 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.compiler.analysis.{BranchInlinerVisitor, TypeInfo, TyperVisitor}
 import net.sandius.rembulan.compiler.ir.Branch
-import net.sandius.rembulan.compiler.{Blocks, BlocksVisitor, IRTranslatorTransformer}
+import net.sandius.rembulan.compiler.{Blocks, BlocksVisitor, CPUAccountingVisitor, IRTranslatorTransformer}
 import net.sandius.rembulan.compiler.util.{BlocksSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
@@ -52,6 +52,12 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   def verify(blocks: Blocks): Unit = {
     val visitor = new BlocksVisitor(new TempUseVerifierVisitor())
     visitor.visit(blocks)
+  }
+
+  def insertCpuAccounting(blocks: Blocks): Blocks = {
+    val visitor = new CPUAccountingVisitor()
+    visitor.visit(blocks)
+    visitor.result()
   }
 
   def assignTypes(blocks: Blocks): TypeInfo = {
@@ -123,8 +129,10 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             translator.transform(ck)
             val blocks = translator.blocks()
 
-            val types = assignTypes(blocks)
-            val inlined = inlineBranches(blocks, types)
+            val withCpu = insertCpuAccounting(blocks)
+
+            val types = assignTypes(withCpu)
+            val inlined = inlineBranches(withCpu, types)
             val filtered = BlocksSimplifier.filterUnreachableBlocks(inlined)
             val merged = BlocksSimplifier.mergeBlocks(filtered)
 

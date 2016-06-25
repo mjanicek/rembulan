@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class CPUWithdraw extends IRNode {
+public class CPUWithdraw extends BodyNode {
 
 	private final int cost;
 

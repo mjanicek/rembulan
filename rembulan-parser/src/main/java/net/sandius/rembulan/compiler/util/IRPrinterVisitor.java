@@ -180,7 +180,7 @@ public class IRPrinterVisitor extends BlocksVisitor {
 
 	@Override
 	public void visit(CPUWithdraw node) {
-		ps.println("cpu " + node.cost());
+		ps.println("\tcpu " + node.cost());
 	}
 
 }

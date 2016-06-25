@@ -5,7 +5,6 @@ import net.sandius.rembulan.compiler.Blocks;
 import net.sandius.rembulan.compiler.BlocksVisitor;
 import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.BodyNode;
-import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.util.Check;
@@ -49,7 +48,9 @@ public class BlockTransformerVisitor extends BlocksVisitor {
 
 		BasicBlock bb = block;
 		try {
+			preVisit(block);
 			super.visit(block);
+			postVisit(block);
 			bb = new BasicBlock(label, Collections.unmodifiableList(body), end);
 		}
 		finally {
@@ -83,5 +84,12 @@ public class BlockTransformerVisitor extends BlocksVisitor {
 		end = node;
 	}
 
+	protected void preVisit(BasicBlock block) {
+
+	}
+
+	protected void postVisit(BasicBlock block) {
+
+	}
 
 }
