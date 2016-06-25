@@ -27,6 +27,10 @@ public class BlockTransformerVisitor extends BlocksVisitor {
 		this.basicBlocks = new ArrayList<>();
 	}
 
+	public BlockTransformerVisitor() {
+		this(null);
+	}
+
 	public Blocks result() {
 		return Blocks.of(basicBlocks);
 	}

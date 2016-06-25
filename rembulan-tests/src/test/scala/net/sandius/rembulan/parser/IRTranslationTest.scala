@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, PrintWriter}
 
-import net.sandius.rembulan.compiler.analysis.{BranchInlinerVisitor, TyperVisitor}
+import net.sandius.rembulan.compiler.analysis.{BranchInlinerVisitor, TypeInfo, TyperVisitor}
 import net.sandius.rembulan.compiler.ir.Branch
 import net.sandius.rembulan.compiler.{Blocks, BlocksVisitor, IRTranslatorTransformer}
 import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
@@ -54,35 +54,31 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     visitor.visit(blocks)
   }
 
-  def assignTypes(blocks: Blocks): Unit = {
-    val typer = new TyperVisitor()
-    typer.visit(blocks)
-    val types = typer.valTypes()
+  def assignTypes(blocks: Blocks): TypeInfo = {
+    val visitor = new TyperVisitor()
+    visitor.visit(blocks)
+    visitor.valTypes()
+  }
 
+  def inlineBranches(blocks: Blocks, types: TypeInfo): Blocks = {
+    val visitor = new BranchInlinerVisitor(types)
+    visitor.visit(blocks)
+    visitor.result()
+  }
+
+  def printTypes(types: TypeInfo): Unit = {
     for (v <- types.vals().asScala) {
       println(v + " -> " + types.typeOf(v))
     }
+  }
+
+  def printBlocks(blocks: Blocks): Unit = {
+    val pw = new PrintWriter(System.out)
+    val printer = new IRPrinterVisitor(pw)
+    printer.visit(blocks)
+    pw.flush()
 
     println()
-
-    def branchToString(b: Branch): String = {
-      "branch [" + b.jmpDest() + " | " + b.next() + "]"
-    }
-
-    val handler = new BranchInlinerVisitor.InlineHandler {
-      override def inlineAsTrue(b: Branch) = {
-        println(branchToString(b) + " can be inlined to TRUE (" + b.jmpDest() + ")")
-      }
-      override def inlineAsFalse(b: Branch) = {
-        println(branchToString(b) + " can be inlined to FALSE (" + b.next() + ")")
-      }
-      override def noInline(b: Branch) = {
-        println(branchToString(b) + " cannot be inlined")
-      }
-    }
-    val inliner = new BlocksVisitor(new BranchInlinerVisitor(types, handler))
-
-    inliner.visit(blocks)
   }
 
   describe ("expression") {
@@ -99,13 +95,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
           val translator = new IRTranslatorTransformer()
           translator.transform(ck)
           val blocks = translator.blocks()
-
-          val pw = new PrintWriter(System.out)
-          val printer = new IRPrinterVisitor(pw)
-          printer.visit(blocks)
-          pw.flush()
-
-          println()
+          printBlocks(blocks)
 
           verify(blocks)
         }
@@ -133,15 +123,13 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             translator.transform(ck)
             val blocks = translator.blocks()
 
-            val pw = new PrintWriter(System.out)
-            val printer = new IRPrinterVisitor(pw)
-            printer.visit(blocks)
-            pw.flush()
+            val types = assignTypes(blocks)
+            val inlined = inlineBranches(blocks, types)
 
-            println()
+            printBlocks(inlined)
+            printTypes(types)
 
             verify(blocks)
-            assignTypes(blocks)
           }
         }
       }

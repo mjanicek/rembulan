@@ -3,31 +3,20 @@ package net.sandius.rembulan.compiler.analysis;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.Branch;
-import net.sandius.rembulan.compiler.ir.IRVisitor;
+import net.sandius.rembulan.compiler.ir.Jmp;
+import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
-public class BranchInlinerVisitor extends IRVisitor {
+public class BranchInlinerVisitor extends BlockTransformerVisitor {
 
 	private final TypeInfo types;
-	private final InlineHandler handler;
 
 	private Boolean inline;
 	private BlockTermNode result;
 
-	public static interface InlineHandler {
-
-		void noInline(Branch b);
-
-		void inlineAsTrue(Branch b);
-
-		void inlineAsFalse(Branch b);
-
-	}
-
-	public BranchInlinerVisitor(TypeInfo types, InlineHandler handler) {
+	public BranchInlinerVisitor(TypeInfo types) {
 		this.types = Check.notNull(types);
-		this.handler = Check.notNull(handler);
 	}
 
 	@Override
@@ -37,14 +26,11 @@ public class BranchInlinerVisitor extends IRVisitor {
 			branch.condition().accept(this);
 			if (inline != null) {
 				if (inline) {
-					handler.inlineAsTrue(branch);
+					setEnd(new ToNext(branch.next()));
 				}
 				else {
-					handler.inlineAsFalse(branch);
+					setEnd(new Jmp(branch.jmpDest()));
 				}
-			}
-			else {
-				handler.noInline(branch);
 			}
 		}
 		finally {
