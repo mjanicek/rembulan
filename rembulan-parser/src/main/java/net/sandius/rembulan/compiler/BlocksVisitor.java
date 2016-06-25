@@ -1,11 +1,19 @@
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.compiler.ir.IRNode;
-import net.sandius.rembulan.compiler.ir.IRVisitor;
+import net.sandius.rembulan.compiler.ir.*;
+import net.sandius.rembulan.util.Check;
 
 import java.util.Iterator;
 
-public abstract class BlocksVisitor extends IRVisitor {
+public class BlocksVisitor extends IRVisitor {
+
+	public BlocksVisitor(IRVisitor visitor) {
+		super(visitor);
+	}
+
+	public BlocksVisitor() {
+		super();
+	}
 
 	public void visit(Blocks blocks) {
 		Iterator<BasicBlock> it = blocks.blockIterator();

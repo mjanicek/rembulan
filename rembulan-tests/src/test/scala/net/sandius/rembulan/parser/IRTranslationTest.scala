@@ -3,7 +3,7 @@ package net.sandius.rembulan.parser
 import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.compiler.analysis.TyperVisitor
-import net.sandius.rembulan.compiler.{Blocks, IRTranslatorTransformer}
+import net.sandius.rembulan.compiler.{Blocks, BlocksVisitor, IRTranslatorTransformer}
 import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
@@ -49,7 +49,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def verify(blocks: Blocks): Unit = {
-    val visitor = new TempUseVerifierVisitor()
+    val visitor = new BlocksVisitor(new TempUseVerifierVisitor())
     visitor.visit(blocks)
   }
 
