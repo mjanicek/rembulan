@@ -126,8 +126,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             val types = assignTypes(blocks)
             val inlined = inlineBranches(blocks, types)
             val filtered = BlocksSimplifier.filterUnreachableBlocks(inlined)
+            val merged = BlocksSimplifier.mergeBlocks(filtered)
 
-            printBlocks(filtered)
+            printBlocks(merged)
             printTypes(types)
 
             verify(blocks)

@@ -16,7 +16,7 @@ public class Blocks {
 	private final List<BasicBlock> blocks;
 	private final Map<Label, Integer> heads;
 
-	protected Blocks(List<BasicBlock> blocks, Map<Label, Integer> heads) {
+	private Blocks(List<BasicBlock> blocks, Map<Label, Integer> heads) {
 		this.blocks = Check.notNull(blocks);
 		this.heads = Check.notNull(heads);
 	}
@@ -36,6 +36,10 @@ public class Blocks {
 	}
 
 	public static Blocks of(List<BasicBlock> blocks) {
+		Check.notNull(blocks);
+		if (blocks.isEmpty()) {
+			throw new IllegalArgumentException("Empty block sequence");
+		}
 		Map<Label, Integer> index = buildIndex(blocks);
 		return new Blocks(new ArrayList<>(blocks), index);
 	}
