@@ -178,9 +178,11 @@ public class TyperVisitor extends BlocksVisitor {
 	public void visit(Blocks blocks) {
 		open.add(blocks.entryLabel());
 
+		Map<Label, BasicBlock> index = blocks.index();
+
 		while (!open.isEmpty()) {
 			Label l = open.poll();
-			BasicBlock b = blocks.getBlock(l);
+			BasicBlock b = index.get(l);
 
 			changed = false;
 			visit(b);

@@ -1,63 +1,84 @@
 package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.ir.Label;
+import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.UnmodifiableIterator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.Set;
 
 public class Blocks {
 
 	private final List<BasicBlock> blocks;
-	private final Map<Label, Integer> heads;
 
-	private Blocks(List<BasicBlock> blocks, Map<Label, Integer> heads) {
-		this.blocks = Check.notNull(blocks);
-		this.heads = Check.notNull(heads);
-	}
-
-	// index for hashmap-based lookup
-	private static Map<Label, Integer> buildIndex(List<BasicBlock> blocks) {
-		Map<Label, Integer> heads = new HashMap<>();
-		for (int i = 0; i < blocks.size(); i++) {
-			BasicBlock b = blocks.get(i);
-			Integer old = heads.put(b.label(), i);
-			if (old != null) {
-				throw new IllegalStateException("Redefining label " + b.label()
-						+ " (in block #" + i + ", already defined in #" + old + ")");
-			}
-		}
-		return heads;
+	private Blocks(List<BasicBlock> blocks) {
+		this.blocks = Check.notNull(verify(blocks));
 	}
 
 	public static Blocks of(List<BasicBlock> blocks) {
+		return new Blocks(new ArrayList<>(Check.notNull(blocks)));
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Blocks that = (Blocks) o;
+		return this.blocks.equals(that.blocks);
+	}
+
+	@Override
+	public int hashCode() {
+		return blocks.hashCode();
+	}
+
+	private static List<BasicBlock> verify(List<BasicBlock> blocks) {
 		Check.notNull(blocks);
 		if (blocks.isEmpty()) {
 			throw new IllegalArgumentException("Empty block sequence");
 		}
-		Map<Label, Integer> index = buildIndex(blocks);
-		return new Blocks(new ArrayList<>(blocks), index);
+		Set<Label> defs = new HashSet<>();
+		Set<Label> pending = new HashSet<>();
+		for (BasicBlock b : blocks) {
+			Label l = b.label();
+			if (!defs.add(l)) {
+				throw new IllegalArgumentException("Label " + l + " defined more than once");
+			}
+			else {
+				pending.remove(l);
+			}
+
+			for (Label nxt : b.end().nextLabels()) {
+				if (!defs.contains(nxt)) {
+					pending.add(nxt);
+				}
+			}
+		}
+
+		if (!pending.isEmpty()) {
+			throw new IllegalStateException("Label(s) not defined: " + Util.iterableToString(pending, ", "));
+		}
+
+		return blocks;
+	}
+
+	// index for hashmap-based lookup
+	public Map<Label, BasicBlock> index() {
+		Map<Label, BasicBlock> result = new HashMap<>();
+		for (BasicBlock b : blocks) {
+			result.put(b.label(), b);
+		}
+		return result;
 	}
 
 	public Label entryLabel() {
 		return blocks.get(0).label();
-	}
-
-	public BasicBlock getBlock(Label l) {
-		Integer idx = heads.get(l);
-		if (idx != null) {
-			BasicBlock result = blocks.get(idx);
-			assert (result.label().equals(l));
-			return result;
-		}
-		else {
-			throw new NoSuchElementException();
-		}
 	}
 
 	public Iterator<BasicBlock> blockIterator() {

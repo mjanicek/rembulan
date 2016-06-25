@@ -34,6 +34,8 @@ public abstract class BlocksSimplifier {
 	}
 
 	private static Map<Label, Integer> uses(Blocks blocks) {
+		Map<Label, BasicBlock> index = blocks.index();
+
 		Map<Label, Integer> uses = new HashMap<>();
 		Stack<Label> open = new Stack<>();
 		open.add(blocks.entryLabel());
@@ -41,7 +43,7 @@ public abstract class BlocksSimplifier {
 		while (!open.isEmpty()) {
 			Label l = open.pop();
 			if (visit(uses, l)) {
-				BasicBlock b = blocks.getBlock(l);
+				BasicBlock b = index.get(l);
 				for (Label n : b.end().nextLabels()) {
 					open.add(n);
 				}
