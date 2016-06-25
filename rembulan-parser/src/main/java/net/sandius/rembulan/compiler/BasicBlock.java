@@ -6,6 +6,7 @@ import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
+import java.util.Objects;
 
 public class BasicBlock {
 
@@ -17,6 +18,21 @@ public class BasicBlock {
 		this.label = Check.notNull(label);
 		this.body = Check.notNull(body);
 		this.end = Check.notNull(end);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		BasicBlock that = (BasicBlock) o;
+		return this.label.equals(that.label) &&
+				this.body.equals(that.body) &&
+				this.end.equals(that.end);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(label, body, end);
 	}
 
 	public Label label() {

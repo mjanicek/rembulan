@@ -151,7 +151,7 @@ public class BlockBuilder {
 			throw new IllegalStateException("Control reaches end of function");
 		}
 
-		return new Blocks(new ArrayList<>(basicBlocks));
+		return Blocks.of(basicBlocks);
 	}
 
 }
