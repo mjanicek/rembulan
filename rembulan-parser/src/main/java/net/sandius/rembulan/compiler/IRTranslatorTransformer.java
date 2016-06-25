@@ -319,7 +319,7 @@ public class IRTranslatorTransformer extends Transformer {
 			}
 			else {
 				// multi-value expression in tail position
-//				onStack = false;  // TODO: ?
+				onStack = false;
 				multi = true;
 			}
 		}
