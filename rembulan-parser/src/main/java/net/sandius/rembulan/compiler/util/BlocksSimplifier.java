@@ -67,7 +67,7 @@ public abstract class BlocksSimplifier {
 			}
 		}
 
-		return Blocks.of(result);
+		return Blocks.of(blocks.params(), result);
 	}
 
 	private static BasicBlock merge(BasicBlock a, BasicBlock b) {
@@ -123,7 +123,7 @@ public abstract class BlocksSimplifier {
 
 		result.add(a);
 
-		return Blocks.of(result);
+		return Blocks.of(blocks.params(), result);
 	}
 
 }

@@ -111,7 +111,7 @@ public class NameResolutionTransformer extends Transformer {
 		fnScope.enterBlock();
 		FunctionDefExpr.Params ps = transform(e.params());
 		for (Name n : ps.names()) {
-			fnScope.addLocal(n);
+			fnScope.addParam(n);
 		}
 
 		e = e.update(ps, transform(e.block()));

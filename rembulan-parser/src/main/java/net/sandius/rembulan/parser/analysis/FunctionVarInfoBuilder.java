@@ -13,6 +13,7 @@ class FunctionVarInfoBuilder {
 	private final FunctionVarInfoBuilder parent;
 
 	private final Stack<BlockScope> blockScopes;
+	private final List<Variable> params;
 	private final List<Variable> locals;
 	private final List<Variable.Ref> upvals;
 	private boolean varargsUsed;
@@ -20,6 +21,7 @@ class FunctionVarInfoBuilder {
 	public FunctionVarInfoBuilder(FunctionVarInfoBuilder parent) {
 		this.parent = parent;
 		this.blockScopes = new Stack<>();
+		this.params = new ArrayList<>();
 		this.locals = new ArrayList<>();
 		this.upvals = new ArrayList<>();
 		this.varargsUsed = false;
@@ -37,6 +39,12 @@ class FunctionVarInfoBuilder {
 
 	public void leaveBlock() {
 		blockScopes.pop();
+	}
+
+	public Variable addParam(Name n) {
+		Variable v = addLocal(n);
+		params.add(v);
+		return v;
 	}
 
 	public Variable addLocal(Name n) {
@@ -92,6 +100,7 @@ class FunctionVarInfoBuilder {
 
 	public FunctionVarInfo toVarInfo() {
 		return new FunctionVarInfo(
+				Collections.unmodifiableList(params),
 				Collections.unmodifiableList(locals),
 				Collections.unmodifiableList(upvals),
 				varargsUsed);

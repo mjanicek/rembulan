@@ -177,6 +177,11 @@ public class TyperVisitor extends BlocksVisitor {
 	public void visit(Blocks blocks) {
 		open.add(blocks.entryLabel());
 
+		VarState vs = varState(blocks.entryLabel());
+		for (Var p : blocks.params()) {
+			vs.store(p, LuaTypes.DYNAMIC);
+		}
+
 		Map<Label, BasicBlock> index = blocks.index();
 
 		while (!open.isEmpty()) {

@@ -6,14 +6,20 @@ import java.util.List;
 
 public class FunctionVarInfo {
 
+	private final List<Variable> params;
 	private final List<Variable> locals;
 	private final List<Variable.Ref> upvalues;
 	private final boolean vararg;
 
-	public FunctionVarInfo(List<Variable> locals, List<Variable.Ref> upvalues, boolean vararg) {
+	public FunctionVarInfo(List<Variable> params, List<Variable> locals, List<Variable.Ref> upvalues, boolean vararg) {
+		this.params = Check.notNull(params);
 		this.locals = Check.notNull(locals);
 		this.upvalues = Check.notNull(upvalues);
 		this.vararg = vararg;
+	}
+
+	public List<Variable> params() {
+		return params;
 	}
 
 	public List<Variable> locals() {

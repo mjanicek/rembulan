@@ -6,6 +6,7 @@ import net.sandius.rembulan.compiler.ir.Branch;
 import net.sandius.rembulan.compiler.ir.JmpNode;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.ToNext;
+import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
@@ -143,7 +144,7 @@ public class BlockBuilder {
 
 	}
 
-	public Blocks build() {
+	public Blocks build(List<Var> params) {
 		if (!pending.isEmpty()) {
 			throw new IllegalStateException("Label(s) not defined: " + Util.iterableToString(pending, ", "));
 		}
@@ -151,7 +152,7 @@ public class BlockBuilder {
 			throw new IllegalStateException("Control reaches end of function");
 		}
 
-		return Blocks.of(basicBlocks);
+		return Blocks.of(params, basicBlocks);
 	}
 
 }

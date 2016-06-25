@@ -1,11 +1,14 @@
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.compiler.ir.*;
+import net.sandius.rembulan.compiler.ir.BinOp;
+import net.sandius.rembulan.compiler.ir.UnOp;
 import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.VarMapping;
-import net.sandius.rembulan.parser.analysis.Variable;
-import net.sandius.rembulan.parser.ast.*;
+import net.sandius.rembulan.parser.ast.Chunk;
+import net.sandius.rembulan.parser.ast.Operator;
+import net.sandius.rembulan.parser.ast.SyntaxElement;
+import net.sandius.rembulan.parser.ast.VarExpr;
 import net.sandius.rembulan.parser.ast.util.AttributeUtils;
 
 abstract class TranslationUtils {
@@ -64,6 +67,14 @@ abstract class TranslationUtils {
 		FunctionVarInfo info = e.attributes().get(FunctionVarInfo.class);
 		if (info == null) {
 			throw new IllegalStateException("No var info at " + AttributeUtils.sourceInfoString(e));
+		}
+		return info;
+	}
+
+	public static FunctionVarInfo funcVarInfo(Chunk c) {
+		FunctionVarInfo info = c.attributes().get(FunctionVarInfo.class);
+		if (info == null) {
+			throw new IllegalStateException("No var info in chunk");
 		}
 		return info;
 	}

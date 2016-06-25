@@ -33,6 +33,8 @@ public class IRTranslatorTransformer extends Transformer {
 	private final Map<Variable, Var> vars;
 	private final Map<Variable, UpVar> uvs;
 
+	private final List<Var> params;
+
 	private final List<IRFunc> nestedFuncs;
 
 	public IRTranslatorTransformer() {
@@ -48,11 +50,13 @@ public class IRTranslatorTransformer extends Transformer {
 		this.vars = new HashMap<>();
 		this.uvs = new HashMap<>();
 
+		this.params = new ArrayList<>();
+
 		this.nestedFuncs = new ArrayList<>();
 	}
 
 	public IRFunc result() {
-		return new IRFunc(insns.build(), Collections.unmodifiableList(nestedFuncs));
+		return new IRFunc(insns.build(params), Collections.unmodifiableList(nestedFuncs));
 	}
 
 	private Val popVal() {
@@ -371,21 +375,22 @@ public class IRTranslatorTransformer extends Transformer {
 		return e;
 	}
 
-	private IRFunc nestedFunc(FunctionDefExpr e) {
+	private IRFunc nestedFunc(FunctionVarInfo fi, Block b) {
 		IRTranslatorTransformer visitor = new IRTranslatorTransformer();
-		visitor.mainBlock(e.block());
+		visitor.addParams(fi);
+		visitor.mainBlock(b);
 		return visitor.result();
 	}
 
 	@Override
 	public Expr transform(FunctionDefExpr e) {
-		IRFunc fn = nestedFunc(e);
+		FunctionVarInfo info = TranslationUtils.funcVarInfo(e);
+
+		IRFunc fn = nestedFunc(info, e.block());
 		int idx = nestedFuncs.size();
 		nestedFuncs.add(fn);
 
 		Val dest = provider.newVal();
-
-		FunctionVarInfo info = TranslationUtils.funcVarInfo(e);
 
 		List<Var> uvs = new ArrayList<>();
 		for (Variable.Ref uv : info.upvalues()) {
@@ -464,8 +469,16 @@ public class IRTranslatorTransformer extends Transformer {
 		}
 	}
 
+	private void addParams(FunctionVarInfo fi) {
+		for (Variable v : fi.params()) {
+			Var w = var(v);
+			params.add(w);
+		}
+	}
+
 	@Override
 	public Chunk transform(Chunk chunk) {
+		addParams(TranslationUtils.funcVarInfo(chunk));
 		mainBlock(chunk.block());
 		return chunk;
 	}
