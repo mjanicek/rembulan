@@ -105,11 +105,16 @@ class IRTranslationTest extends FunSpec with MustMatchers {
         it (ss) {
           val ck = resolveNames(parseChunk(ss))
 
-          val translator = new IRTranslatorTransformer()
+          val modBuilder = new ModuleBuilder()
+          val translator = new IRTranslatorTransformer(modBuilder)
           translator.transform(ck)
-          val fn = translator.result()
-          printBlocks(fn.blocks)
-          verify(fn)
+          val mod = modBuilder.build()
+          for (fn <- mod.fns().asScala) {
+            println("Function [" + fn.id + "]")
+            println()
+            printBlocks(fn.blocks)
+            verify(fn)
+          }
         }
 
       }
@@ -118,20 +123,18 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
   }
 
-  case class CompileResult(fn: IRFunc, types: TypeInfo, nested: Seq[CompileResult])
+  case class CompiledFn(fn: IRFunc, types: TypeInfo)
+  case class CompiledModule(fns: Seq[CompiledFn])
 
-  def translate(chunk: Chunk): IRFunc = {
+  def translate(chunk: Chunk): Module = {
     val resolved = resolveNames(chunk)
-    val translator = new IRTranslatorTransformer()
+    val modBuilder = new ModuleBuilder()
+    val translator = new IRTranslatorTransformer(modBuilder)
     translator.transform(resolved)
-    translator.result()
+    modBuilder.build()
   }
 
-  def compile(fn: IRFunc): CompileResult = {
-
-    // compile children first
-    val children = for (f <- fn.nested.asScala) yield compile(f)
-
+  def compile(fn: IRFunc): CompiledFn = {
     val withCpu = insertCpuAccounting(fn)
 
     def pass(fn: IRFunc, types: TypeInfo): IRFunc = {
@@ -155,7 +158,11 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     }
 
     val (fnl, types) = loop(withCpu)
-    CompileResult(fnl, types, children.toSeq)
+    CompiledFn(fnl, types)
+  }
+
+  def compile(mod: Module): CompiledModule = {
+    CompiledModule(for (fn <- mod.fns().asScala) yield compile(fn))
   }
 
   for (b <- bundles) {
@@ -170,26 +177,25 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             println("---END---")
 
             val ir = translate(parseChunk(code))
-            val cr = compile(ir)
+            val cmod = compile(ir)
 
-            def printCompileResult(cr: CompileResult): Unit = {
-              println("Function [" + cr.fn.id + "]" + (if (cr.fn.id.isRoot) " (main)" else ""))
+            def printCompiledFn(cfn: CompiledFn): Unit = {
+              println("Function [" + cfn.fn.id + "]" + (if (cfn.fn.id.isRoot) " (main)" else ""))
               println()
 
               println("Blocks:")
-              printBlocks(cr.fn.blocks)
+              printBlocks(cfn.fn.blocks)
               println()
 
               println("Value types:")
-              printTypes(cr.types)
+              printTypes(cfn.types)
               println()
-
-              for ((ncr, i)  <- cr.nested.zipWithIndex) {
-                printCompileResult(ncr)
-              }
             }
 
-            printCompileResult(cr)
+            for (cfn <- cmod.fns) {
+              printCompiledFn(cfn)
+            }
+
           }
         }
       }

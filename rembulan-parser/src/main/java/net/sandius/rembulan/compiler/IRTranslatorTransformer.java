@@ -20,6 +20,8 @@ import java.util.Stack;
 
 public class IRTranslatorTransformer extends Transformer {
 
+	private final ModuleBuilder moduleBuilder;
+
 	private final FunctionId id;
 
 	private final BlockBuilder insns;
@@ -37,9 +39,10 @@ public class IRTranslatorTransformer extends Transformer {
 
 	private final List<Var> params;
 
-	private final List<IRFunc> nestedFuncs;
+	private int numNestedFns;
 
-	private IRTranslatorTransformer(FunctionId id) {
+	private IRTranslatorTransformer(ModuleBuilder moduleBuilder, FunctionId id) {
+		this.moduleBuilder = Check.notNull(moduleBuilder);
 		this.id = Check.notNull(id);
 
 		this.provider = new RegProvider();
@@ -56,15 +59,15 @@ public class IRTranslatorTransformer extends Transformer {
 
 		this.params = new ArrayList<>();
 
-		this.nestedFuncs = new ArrayList<>();
+		this.numNestedFns = 0;
 	}
 
-	public IRTranslatorTransformer() {
-		this(FunctionId.root());
+	public IRTranslatorTransformer(ModuleBuilder moduleBuilder) {
+		this(moduleBuilder, FunctionId.root());
 	}
 
-	public IRFunc result() {
-		return new IRFunc(id, Collections.unmodifiableList(params), insns.build(), Collections.unmodifiableList(nestedFuncs));
+	private IRFunc result() {
+		return new IRFunc(id, Collections.unmodifiableList(params), insns.build());
 	}
 
 	private Val popVal() {
@@ -383,20 +386,20 @@ public class IRTranslatorTransformer extends Transformer {
 		return e;
 	}
 
-	private IRFunc nestedFunc(FunctionVarInfo fi, int idx, Block b) {
-		IRTranslatorTransformer visitor = new IRTranslatorTransformer(id.child(idx));
+	private FunctionId nestedFunc(FunctionVarInfo fi, int idx, Block b) {
+		IRTranslatorTransformer visitor = new IRTranslatorTransformer(moduleBuilder, id.child(idx));
 		visitor.addParams(fi);
 		visitor.mainBlock(b);
-		return visitor.result();
+		IRFunc result = visitor.result();
+		moduleBuilder.add(result);
+		return result.id();
 	}
 
 	@Override
 	public Expr transform(FunctionDefExpr e) {
 		FunctionVarInfo info = TranslationUtils.funcVarInfo(e);
 
-		int idx = nestedFuncs.size();
-		IRFunc fn = nestedFunc(info, idx, e.block());
-		nestedFuncs.add(fn);
+		FunctionId id = nestedFunc(info, numNestedFns++, e.block());
 
 		Val dest = provider.newVal();
 
@@ -406,7 +409,7 @@ public class IRTranslatorTransformer extends Transformer {
 			uvs.add(var(uv.var()));
 		}
 
-		insns.add(new Closure(dest, fn.id(), Collections.unmodifiableList(uvs)));
+		insns.add(new Closure(dest, id, Collections.unmodifiableList(uvs)));
 
 		vals.push(dest);
 		return e;
@@ -488,6 +491,7 @@ public class IRTranslatorTransformer extends Transformer {
 	public Chunk transform(Chunk chunk) {
 		addParams(TranslationUtils.funcVarInfo(chunk));
 		mainBlock(chunk.block());
+		moduleBuilder.add(result());
 		return chunk;
 	}
 
