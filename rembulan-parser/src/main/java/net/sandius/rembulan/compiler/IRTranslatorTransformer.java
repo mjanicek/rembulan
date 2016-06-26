@@ -39,7 +39,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 	private final List<Var> params;
 
-	private int numNestedFns;
+	private final List<FunctionId> nestedIds;
 
 	private IRTranslatorTransformer(ModuleBuilder moduleBuilder, FunctionId id) {
 		this.moduleBuilder = Check.notNull(moduleBuilder);
@@ -59,7 +59,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 		this.params = new ArrayList<>();
 
-		this.numNestedFns = 0;
+		this.nestedIds = new ArrayList<>();
 	}
 
 	public IRTranslatorTransformer(ModuleBuilder moduleBuilder) {
@@ -67,7 +67,7 @@ public class IRTranslatorTransformer extends Transformer {
 	}
 
 	private IRFunc result() {
-		return new IRFunc(id, Collections.unmodifiableList(params), insns.build());
+		return new IRFunc(id, Collections.unmodifiableList(params), insns.build(), Collections.unmodifiableList(nestedIds));
 	}
 
 	private Val popVal() {
@@ -399,7 +399,8 @@ public class IRTranslatorTransformer extends Transformer {
 	public Expr transform(FunctionDefExpr e) {
 		FunctionVarInfo info = TranslationUtils.funcVarInfo(e);
 
-		FunctionId id = nestedFunc(info, numNestedFns++, e.block());
+		FunctionId id = nestedFunc(info, nestedIds.size(), e.block());
+		nestedIds.add(id);
 
 		Val dest = provider.newVal();
 

@@ -11,11 +11,13 @@ public class IRFunc {
 	private final FunctionId id;
 	private final List<Var> params;
 	private final Blocks blocks;
+	private final List<FunctionId> nested;
 
-	public IRFunc(FunctionId id, List<Var> params, Blocks blocks) {
+	public IRFunc(FunctionId id, List<Var> params, Blocks blocks, List<FunctionId> nested) {
 		this.id = Check.notNull(id);
 		this.params = Check.notNull(params);
 		this.blocks = Check.notNull(blocks);
+		this.nested = Check.notNull(nested);
 	}
 
 	@Override
@@ -25,12 +27,13 @@ public class IRFunc {
 		IRFunc that = (IRFunc) o;
 		return id.equals(that.id)
 				&& params.equals(that.params)
-				&& blocks.equals(that.blocks);
+				&& blocks.equals(that.blocks)
+				&& nested.equals(that.nested);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, params, blocks);
+		return Objects.hash(id, params, blocks, nested);
 	}
 
 	public FunctionId id() {
@@ -45,12 +48,16 @@ public class IRFunc {
 		return blocks;
 	}
 
+	public List<FunctionId> nested() {
+		return nested;
+	}
+
 	public IRFunc update(Blocks blocks) {
 		if (this.blocks.equals(blocks)) {
 			return this;
 		}
 		else {
-			return new IRFunc(id, params, blocks);
+			return new IRFunc(id, params, blocks, nested);
 		}
 	}
 

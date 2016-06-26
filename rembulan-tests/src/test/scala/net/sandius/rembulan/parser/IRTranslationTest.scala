@@ -183,6 +183,16 @@ class IRTranslationTest extends FunSpec with MustMatchers {
               println("Function [" + cfn.fn.id + "]" + (if (cfn.fn.id.isRoot) " (main)" else ""))
               println()
 
+              println("Nested refs:")
+              if (cfn.fn.nested().isEmpty) {
+                println("\t(none)")
+              }
+              else {
+                val ids = cfn.fn.nested().asScala
+                println("\t" + (ids map { id => "[" + id + "]"}).mkString(", "))
+              }
+              println()
+
               println("Blocks:")
               printBlocks(cfn.fn.blocks)
               println()
