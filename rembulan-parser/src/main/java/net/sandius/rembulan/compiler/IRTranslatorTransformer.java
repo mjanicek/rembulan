@@ -38,6 +38,7 @@ public class IRTranslatorTransformer extends Transformer {
 	private final Map<Variable, UpVar> uvs;
 
 	private final List<Var> params;
+	private final List<UpVar> upvals;
 
 	private final List<FunctionId> nestedIds;
 
@@ -58,6 +59,7 @@ public class IRTranslatorTransformer extends Transformer {
 		this.uvs = new HashMap<>();
 
 		this.params = new ArrayList<>();
+		this.upvals = new ArrayList<>();
 
 		this.nestedIds = new ArrayList<>();
 	}
@@ -67,7 +69,11 @@ public class IRTranslatorTransformer extends Transformer {
 	}
 
 	private IRFunc result() {
-		return new IRFunc(id, Collections.unmodifiableList(params), insns.build(), Collections.unmodifiableList(nestedIds));
+		return new IRFunc(id,
+				Collections.unmodifiableList(params),
+				Collections.unmodifiableList(upvals),
+				insns.build(),
+				Collections.unmodifiableList(nestedIds));
 	}
 
 	private Val popVal() {
@@ -388,7 +394,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 	private FunctionId nestedFunc(FunctionVarInfo fi, int idx, Block b) {
 		IRTranslatorTransformer visitor = new IRTranslatorTransformer(moduleBuilder, id.child(idx));
-		visitor.addParams(fi);
+		visitor.addParamsAndUpvals(fi);
 		visitor.mainBlock(b);
 		IRFunc result = visitor.result();
 		moduleBuilder.add(result);
@@ -481,16 +487,20 @@ public class IRTranslatorTransformer extends Transformer {
 		}
 	}
 
-	private void addParams(FunctionVarInfo fi) {
+	private void addParamsAndUpvals(FunctionVarInfo fi) {
 		for (Variable v : fi.params()) {
 			Var w = var(v);
 			params.add(w);
+		}
+		for (Variable.Ref uv : fi.upvalues()) {
+			UpVar u = upVar(uv.var());  // FIXME: is this correct?
+			upvals.add(u);
 		}
 	}
 
 	@Override
 	public Chunk transform(Chunk chunk) {
-		addParams(TranslationUtils.funcVarInfo(chunk));
+		addParamsAndUpvals(TranslationUtils.funcVarInfo(chunk));
 		mainBlock(chunk.block());
 		moduleBuilder.add(result());
 		return chunk;

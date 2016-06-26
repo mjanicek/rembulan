@@ -193,6 +193,10 @@ class IRTranslationTest extends FunSpec with MustMatchers {
               }
               println()
 
+              println("Params: (" + cfn.fn.params.asScala.mkString(", ") + ")")
+              println("Upvals: (" + cfn.fn.upvals.asScala.mkString(", ") + ")")
+              println()
+
               println("Blocks:")
               printBlocks(cfn.fn.blocks)
               println()
