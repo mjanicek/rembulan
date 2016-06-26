@@ -80,8 +80,14 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def printTypes(types: TypeInfo): Unit = {
+    println("Values:")
     for (v <- types.vals().asScala) {
-      println(v + " -> " + types.typeOf(v))
+      println("\t" + v + " -> " + types.typeOf(v))
+    }
+    println("Variables:")
+    for (v <- types.vars().asScala) {
+      val reified = types.isReified(v)
+      println("\t" + v + (if (reified) " (reified)" else ""))
     }
   }
 
@@ -201,7 +207,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
               printBlocks(cfn.fn.blocks)
               println()
 
-              println("Value types:")
+              println("Type information:")
               printTypes(cfn.types)
               println()
             }

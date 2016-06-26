@@ -7,13 +7,16 @@ import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.compiler.ir.*;
+import net.sandius.rembulan.compiler.types.FunctionType;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MAY_BE_INTEGER;
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_FLOAT;
@@ -25,6 +28,9 @@ public class TyperVisitor extends BlocksVisitor {
 	private final Map<PhiVal, Type> phiValTypes;
 	private final Map<Label, VarState> varStates;
 
+	private final Set<Var> allVars;
+	private final Set<Var> reifiedVars;
+
 	private final Queue<Label> open;
 
 	private boolean changed;
@@ -34,11 +40,15 @@ public class TyperVisitor extends BlocksVisitor {
 		this.valTypes = new HashMap<>();
 		this.phiValTypes = new HashMap<>();
 		this.varStates = new HashMap<>();
+
+		this.allVars = new HashSet<>();
+		this.reifiedVars = new HashSet<>();
+
 		this.open = new ArrayDeque<>();
 	}
 
 	public TypeInfo valTypes() {
-		return TypeInfo.of(valTypes, phiValTypes);
+		return TypeInfo.of(valTypes, phiValTypes, allVars, reifiedVars);
 	}
 
 	private static Type joinTypes(Type a, Type b) {
@@ -66,10 +76,14 @@ public class TyperVisitor extends BlocksVisitor {
 		}
 
 		public void store(Var v, Type t) {
-			types.put(Check.notNull(v), Check.notNull(t));
+			Check.notNull(v);
+			allVars.add(v);
+			types.put(v, Check.notNull(t));
 		}
 
 		public Type load(Var v) {
+			Check.notNull(v);
+			allVars.add(v);
 			Type t = types.get(Check.notNull(v));
 			if (t == null) {
 				throw new IllegalStateException(v + " used before stored into");
@@ -415,7 +429,18 @@ public class TyperVisitor extends BlocksVisitor {
 
 	@Override
 	public void visit(Closure node) {
-		assign(node.dest(), LuaTypes.FUNCTION);  // FIXME
+		for (AbstractVar av : node.args()) {
+			if (av instanceof Var) {
+				Var v = (Var) av;
+				currentVarState().load(v);  // ignoring the result, just marking its use
+				reifiedVars.add(v);
+			}
+		}
+
+		// TODO: look up the type for this closure
+		FunctionType t = LuaTypes.FUNCTION;
+
+		assign(node.dest(), t);
 	}
 
 	@Override
