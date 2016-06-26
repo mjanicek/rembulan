@@ -84,11 +84,23 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     for (v <- types.vals().asScala) {
       println("\t" + v + " -> " + types.typeOf(v))
     }
+
     println("Variables:")
     for (v <- types.vars().asScala) {
       val reified = types.isReified(v)
       println("\t" + v + (if (reified) " (reified)" else ""))
     }
+
+    println("Nested refs:")
+    if (types.nestedRefs().isEmpty) {
+      println("\t(none)")
+    }
+    else {
+      val ids = types.nestedRefs().asScala
+      println("\t" + (ids map { id => "[" + id + "]"}).mkString(", "))
+    }
+    println()
+
   }
 
   def printBlocks(blocks: Blocks): Unit = {
@@ -187,16 +199,6 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
             def printCompiledFn(cfn: CompiledFn): Unit = {
               println("Function [" + cfn.fn.id + "]" + (if (cfn.fn.id.isRoot) " (main)" else ""))
-              println()
-
-              println("Nested refs:")
-              if (cfn.fn.nested().isEmpty) {
-                println("\t(none)")
-              }
-              else {
-                val ids = cfn.fn.nested().asScala
-                println("\t" + (ids map { id => "[" + id + "]"}).mkString(", "))
-              }
               println()
 
               println("Params: (" + cfn.fn.params.asScala.mkString(", ") + ")")
