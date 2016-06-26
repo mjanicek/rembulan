@@ -118,7 +118,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
   }
 
-  case class CompileResult(blocks: Blocks, types: TypeInfo, nested: Seq[CompileResult])
+  case class CompileResult(id: FunctionId, blocks: Blocks, types: TypeInfo, nested: Seq[CompileResult])
 
   def translate(chunk: Chunk): IRFunc = {
     val resolved = resolveNames(chunk)
@@ -155,7 +155,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     }
 
     val (bs, types) = loop(withCpu)
-    CompileResult(bs, types, children.toSeq)
+    CompileResult(fn.id, bs, types, children.toSeq)
   }
 
   for (b <- bundles) {
@@ -173,6 +173,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             val cr = compile(ir)
 
             def printCompileResult(cr: CompileResult): Unit = {
+              println("Function [" + cr.id + "]" + (if (cr.id.isRoot) " (main)" else ""))
+              println()
+
               println("Blocks:")
               printBlocks(cr.blocks)
               println()
@@ -182,8 +185,6 @@ class IRTranslationTest extends FunSpec with MustMatchers {
               println()
 
               for ((ncr, i)  <- cr.nested.zipWithIndex) {
-                println("Nested function #" + i)
-                println()
                 printCompileResult(ncr)
               }
             }
