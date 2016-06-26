@@ -60,6 +60,10 @@ public abstract class IRVisitor {
 	}
 
 
+	public void visit(VarInit node) {
+		if (v != null) v.visit(node);
+	}
+
 	public void visit(VarLoad node) {
 		if (v != null) v.visit(node);
 	}

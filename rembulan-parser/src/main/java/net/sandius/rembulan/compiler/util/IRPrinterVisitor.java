@@ -72,6 +72,11 @@ public class IRPrinterVisitor extends BlocksVisitor {
 	}
 
 	@Override
+	public void visit(VarInit node) {
+		ps.println("\tvarinit " + node.var() + " " + node.src());
+	}
+
+	@Override
 	public void visit(VarLoad node) {
 		ps.println("\tvarload " + node.dest() + " " + node.var());
 	}

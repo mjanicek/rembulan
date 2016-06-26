@@ -365,6 +365,11 @@ public class TyperVisitor extends BlocksVisitor {
 	}
 
 	@Override
+	public void visit(VarInit node) {
+		currentVarState().store(node.var(), typeOf(node.src()));
+	}
+
+	@Override
 	public void visit(VarStore node) {
 		currentVarState().store(node.var(), typeOf(node.src()));
 	}

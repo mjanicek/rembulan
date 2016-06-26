@@ -62,6 +62,11 @@ public abstract class DefaultNodeActionVisitor extends IRVisitor {
 	}
 
 	@Override
+	public void visit(VarInit node) {
+		action(node);
+	}
+
+	@Override
 	public void visit(VarLoad node) {
 		action(node);
 	}

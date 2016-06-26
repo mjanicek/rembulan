@@ -601,7 +601,7 @@ public class IRTranslatorTransformer extends Transformer {
 				insns.add(new LoadConst.Nil(src));
 			}
 
-			insns.add(new VarStore(v, src));
+			insns.add(new VarInit(v, src));
 		}
 
 		return node;

@@ -79,6 +79,12 @@ public abstract class AbstractUseDefVisitor extends IRVisitor {
 	}
 
 	@Override
+	public void visit(VarInit node) {
+		use(node.src());
+		def(node.var());
+	}
+
+	@Override
 	public void visit(VarLoad node) {
 		use(node.var());
 		def(node.dest());

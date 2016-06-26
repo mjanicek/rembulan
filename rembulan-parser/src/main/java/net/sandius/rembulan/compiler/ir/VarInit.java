@@ -2,12 +2,12 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class VarStore extends BodyNode {
+public class VarInit extends BodyNode {
 
 	private final Var var;
 	private final Val src;
 
-	public VarStore(Var var, Val src) {
+	public VarInit(Var var, Val src) {
 		this.var = Check.notNull(var);
 		this.src = Check.notNull(src);
 	}
