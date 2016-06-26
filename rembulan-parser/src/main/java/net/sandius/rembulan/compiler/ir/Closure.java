@@ -9,9 +9,9 @@ public class Closure extends BodyNode {
 
 	private final Val dest;
 	private final FunctionId id;
-	private final List<Var> args;
+	private final List<AbstractVar> args;
 
-	public Closure(Val dest, FunctionId id, List<Var> args) {
+	public Closure(Val dest, FunctionId id, List<AbstractVar> args) {
 		this.dest = Check.notNull(dest);
 		this.id = Check.notNull(id);
 		this.args = Check.notNull(args);
@@ -25,7 +25,7 @@ public class Closure extends BodyNode {
 		return id;
 	}
 
-	public List<Var> args() {
+	public List<AbstractVar> args() {
 		return args;
 	}
 

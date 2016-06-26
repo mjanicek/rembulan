@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.ir;
 
-public class Var {
+public class Var extends AbstractVar {
 
 	private final int idx;
 

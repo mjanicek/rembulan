@@ -159,8 +159,16 @@ public abstract class AbstractUseDefVisitor extends IRVisitor {
 
 	@Override
 	public void visit(Closure node) {
-		for (Var v : node.args()) {
-			use(v);
+		for (AbstractVar v : node.args()) {
+			if (v instanceof Var) {
+				use((Var) v);
+			}
+			else if (v instanceof UpVar) {
+				use((UpVar) v);
+			}
+			else {
+				throw new IllegalStateException("Illegal abstract var: " + v);
+			}
 		}
 		def(node.dest());
 	}

@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.ir;
 
-public class UpVar {
+public class UpVar extends AbstractVar {
 
 	private final int idx;
 

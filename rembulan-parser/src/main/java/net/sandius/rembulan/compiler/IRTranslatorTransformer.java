@@ -35,7 +35,7 @@ public class IRTranslatorTransformer extends Transformer {
 	private boolean onStack;
 
 	private final Map<Variable, Var> vars;
-	private final Map<Variable, UpVar> uvs;
+	private final Map<Variable.Ref, UpVar> uvs;
 
 	private final List<Var> params;
 	private final List<UpVar> upvals;
@@ -111,7 +111,7 @@ public class IRTranslatorTransformer extends Transformer {
 		}
 	}
 
-	private UpVar upVar(Variable v) {
+	private UpVar upVar(Variable.Ref v) {
 		UpVar w = uvs.get(v);
 		if (w != null) {
 			return w;
@@ -128,27 +128,29 @@ public class IRTranslatorTransformer extends Transformer {
 		ResolvedVariable rv = TranslationUtils.resolved(e);
 
 		if (rv.isUpvalue()) {
+			Variable.Ref ref = rv.variable().ref();
 			// upvalue
 			if (assigning) {
 				Val src = popVal();
-				insns.add(new UpStore(upVar(rv.variable()), src));
+				insns.add(new UpStore(upVar(ref), src));
 			}
 			else {
 				Val dest = provider.newVal();
 				vals.push(dest);
-				insns.add(new UpLoad(dest, upVar(rv.variable())));
+				insns.add(new UpLoad(dest, upVar(ref)));
 			}
 		}
 		else {
+			Variable var = rv.variable();
 			// local variable
 			if (assigning) {
 				Val src = popVal();
-				insns.add(new VarStore(var(rv.variable()), src));
+				insns.add(new VarStore(var(var), src));
 			}
 			else {
 				Val dest = provider.newVal();
 				vals.push(dest);
-				insns.add(new VarLoad(dest, var(rv.variable())));
+				insns.add(new VarLoad(dest, var(var)));
 			}
 		}
 
@@ -410,13 +412,25 @@ public class IRTranslatorTransformer extends Transformer {
 
 		Val dest = provider.newVal();
 
-		List<Var> uvs = new ArrayList<>();
+		List<AbstractVar> args = new ArrayList<>();
 		for (Variable.Ref uv : info.upvalues()) {
-			// FIXME
-			uvs.add(var(uv.var()));
+//			// FIXME
+//			uvs.add(var(uv.var()));
+
+			if (uvs.containsKey(uv)) {
+				// it's an upvalue
+				args.add(uvs.get(uv));
+			}
+			else if (vars.containsKey(uv.var())) {
+				// it's a variable
+				args.add(vars.get(uv.var()));
+			}
+			else {
+				throw new IllegalStateException("Illegal upvalue: " + uv);
+			}
 		}
 
-		insns.add(new Closure(dest, id, Collections.unmodifiableList(uvs)));
+		insns.add(new Closure(dest, id, Collections.unmodifiableList(args)));
 
 		vals.push(dest);
 		return e;
@@ -493,7 +507,7 @@ public class IRTranslatorTransformer extends Transformer {
 			params.add(w);
 		}
 		for (Variable.Ref uv : fi.upvalues()) {
-			UpVar u = upVar(uv.var());  // FIXME: is this correct?
+			UpVar u = upVar(uv);  // FIXME: is this correct?
 			upvals.add(u);
 		}
 	}
