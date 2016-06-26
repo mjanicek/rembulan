@@ -50,33 +50,33 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     new NameResolutionTransformer().transform(c)
   }
 
-  def verify(blocks: Blocks): Unit = {
+  def verify(fn: IRFunc): Unit = {
     val visitor = new BlocksVisitor(new TempUseVerifierVisitor())
-    visitor.visit(blocks)
+    visitor.visit(fn)
   }
 
-  def insertCpuAccounting(blocks: Blocks): Blocks = {
+  def insertCpuAccounting(fn: IRFunc): IRFunc = {
     val visitor = new CPUAccountingVisitor(CPUAccountingVisitor.INITIALISE)
-    visitor.visit(blocks)
-    visitor.result()
+    visitor.visit(fn.blocks())
+    fn.update(visitor.result())
   }
 
-  def collectCpuAccounting(blocks: Blocks): Blocks = {
+  def collectCpuAccounting(fn: IRFunc): IRFunc = {
     val visitor = new CPUAccountingVisitor(CPUAccountingVisitor.COLLECT)
-    visitor.visit(blocks)
-    visitor.result()
+    visitor.visit(fn.blocks())
+    fn.update(visitor.result())
   }
 
-  def assignTypes(blocks: Blocks): TypeInfo = {
+  def assignTypes(fn: IRFunc): TypeInfo = {
     val visitor = new TyperVisitor()
-    visitor.visit(blocks)
+    visitor.visit(fn)
     visitor.valTypes()
   }
 
-  def inlineBranches(blocks: Blocks, types: TypeInfo): Blocks = {
+  def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = {
     val visitor = new BranchInlinerVisitor(types)
-    visitor.visit(blocks)
-    visitor.result()
+    visitor.visit(fn)
+    fn.update(visitor.result())
   }
 
   def printTypes(types: TypeInfo): Unit = {
@@ -109,7 +109,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
           translator.transform(ck)
           val fn = translator.result()
           printBlocks(fn.blocks)
-          verify(fn.blocks)
+          verify(fn)
         }
 
       }
@@ -118,7 +118,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
   }
 
-  case class CompileResult(id: FunctionId, blocks: Blocks, types: TypeInfo, nested: Seq[CompileResult])
+  case class CompileResult(fn: IRFunc, types: TypeInfo, nested: Seq[CompileResult])
 
   def translate(chunk: Chunk): IRFunc = {
     val resolved = resolveNames(chunk)
@@ -132,21 +132,21 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     // compile children first
     val children = for (f <- fn.nested.asScala) yield compile(f)
 
-    val withCpu = insertCpuAccounting(fn.blocks)
+    val withCpu = insertCpuAccounting(fn)
 
-    def pass(blocks: Blocks, types: TypeInfo): Blocks = {
-      val withCpu = collectCpuAccounting(blocks)
+    def pass(fn: IRFunc, types: TypeInfo): IRFunc = {
+      val withCpu = collectCpuAccounting(fn)
       val inlined = inlineBranches(withCpu, types)
-      val filtered = BlocksSimplifier.filterUnreachableBlocks(inlined)
-      val merged = BlocksSimplifier.mergeBlocks(filtered)
+      val filtered = inlined.update(BlocksSimplifier.filterUnreachableBlocks(inlined.blocks()))
+      val merged = filtered.update(BlocksSimplifier.mergeBlocks(filtered.blocks()))
       merged
     }
 
     @tailrec
-    def loop(blocks: Blocks): (Blocks, TypeInfo) = {
-      val types = assignTypes(blocks)
-      val opt = pass(blocks, types)
-      if (blocks == opt) {
+    def loop(fn: IRFunc): (IRFunc, TypeInfo) = {
+      val types = assignTypes(fn)
+      val opt = pass(fn, types)
+      if (fn == opt) {
         (opt, types)
       }
       else {
@@ -154,8 +154,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
       }
     }
 
-    val (bs, types) = loop(withCpu)
-    CompileResult(fn.id, bs, types, children.toSeq)
+    val (fnl, types) = loop(withCpu)
+    CompileResult(fnl, types, children.toSeq)
   }
 
   for (b <- bundles) {
@@ -173,11 +173,11 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             val cr = compile(ir)
 
             def printCompileResult(cr: CompileResult): Unit = {
-              println("Function [" + cr.id + "]" + (if (cr.id.isRoot) " (main)" else ""))
+              println("Function [" + cr.fn.id + "]" + (if (cr.fn.id.isRoot) " (main)" else ""))
               println()
 
               println("Blocks:")
-              printBlocks(cr.blocks)
+              printBlocks(cr.fn.blocks)
               println()
 
               println("Value types:")

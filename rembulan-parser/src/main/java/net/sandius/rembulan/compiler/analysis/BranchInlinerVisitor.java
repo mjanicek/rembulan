@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.gen.LuaTypes;
-import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.Branch;
 import net.sandius.rembulan.compiler.ir.Jmp;
 import net.sandius.rembulan.compiler.ir.ToNext;
@@ -11,9 +10,7 @@ import net.sandius.rembulan.util.Check;
 public class BranchInlinerVisitor extends BlockTransformerVisitor {
 
 	private final TypeInfo types;
-
 	private Boolean inline;
-	private BlockTermNode result;
 
 	public BranchInlinerVisitor(TypeInfo types) {
 		this.types = Check.notNull(types);

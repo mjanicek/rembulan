@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler.analysis;
 import net.sandius.rembulan.compiler.BasicBlock;
 import net.sandius.rembulan.compiler.Blocks;
 import net.sandius.rembulan.compiler.BlocksVisitor;
+import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.compiler.ir.*;
@@ -174,13 +175,20 @@ public class TyperVisitor extends BlocksVisitor {
 	}
 
 	@Override
-	public void visit(Blocks blocks) {
-		open.add(blocks.entryLabel());
+	public void visit(IRFunc func) {
+		Blocks blocks = func.blocks();
 
 		VarState vs = varState(blocks.entryLabel());
-		for (Var p : blocks.params()) {
+		for (Var p : func.params()) {
 			vs.store(p, LuaTypes.DYNAMIC);
 		}
+
+		visit(blocks);
+	}
+
+	@Override
+	public void visit(Blocks blocks) {
+		open.add(blocks.entryLabel());
 
 		Map<Label, BasicBlock> index = blocks.index();
 

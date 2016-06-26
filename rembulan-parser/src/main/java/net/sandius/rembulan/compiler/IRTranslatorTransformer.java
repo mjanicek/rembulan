@@ -64,7 +64,7 @@ public class IRTranslatorTransformer extends Transformer {
 	}
 
 	public IRFunc result() {
-		return new IRFunc(id, insns.build(params), Collections.unmodifiableList(nestedFuncs));
+		return new IRFunc(id, Collections.unmodifiableList(params), insns.build(), Collections.unmodifiableList(nestedFuncs));
 	}
 
 	private Val popVal() {

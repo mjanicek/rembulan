@@ -7,7 +7,6 @@ import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import java.util.List;
 
 public class BlockTransformerVisitor extends BlocksVisitor {
 
-	private final List<Var> params;
 	private final List<BasicBlock> basicBlocks;
 
 	private Label label;
@@ -25,7 +23,6 @@ public class BlockTransformerVisitor extends BlocksVisitor {
 
 	public BlockTransformerVisitor(IRVisitor visitor) {
 		super(visitor);
-		this.params = new ArrayList<>();
 		this.basicBlocks = new ArrayList<>();
 	}
 
@@ -34,13 +31,11 @@ public class BlockTransformerVisitor extends BlocksVisitor {
 	}
 
 	public Blocks result() {
-		return Blocks.of(params, basicBlocks);
+		return Blocks.of(basicBlocks);
 	}
 
 	@Override
 	public void visit(Blocks blocks) {
-		params.clear();
-		params.addAll(blocks.params());
 		basicBlocks.clear();
 		super.visit(blocks);
 	}

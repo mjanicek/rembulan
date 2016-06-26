@@ -15,6 +15,10 @@ public class BlocksVisitor extends IRVisitor {
 		super();
 	}
 
+	public void visit(IRFunc func) {
+		visit(func.blocks());
+	}
+
 	public void visit(Blocks blocks) {
 		Iterator<BasicBlock> it = blocks.blockIterator();
 		while (it.hasNext()) {
