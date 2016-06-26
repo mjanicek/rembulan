@@ -165,7 +165,7 @@ public class IRPrinterVisitor extends BlocksVisitor {
 
 	@Override
 	public void visit(Closure node) {
-		ps.println("\tclosure " + node.dest() + " " + node.idx() + " [" + Util.listToString(node.args(), " ") + "]");
+		ps.println("\tclosure " + node.dest() + " " + node.id() + " [" + Util.listToString(node.args(), " ") + "]");
 	}
 
 	@Override

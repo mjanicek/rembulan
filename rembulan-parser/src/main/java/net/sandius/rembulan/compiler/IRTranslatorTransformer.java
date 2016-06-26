@@ -406,7 +406,7 @@ public class IRTranslatorTransformer extends Transformer {
 			uvs.add(var(uv.var()));
 		}
 
-		insns.add(new Closure(dest, idx, Collections.unmodifiableList(uvs)));
+		insns.add(new Closure(dest, fn.id(), Collections.unmodifiableList(uvs)));
 
 		vals.push(dest);
 		return e;

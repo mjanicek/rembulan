@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.ir;
 
+import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.util.Check;
 
 import java.util.List;
@@ -7,12 +8,12 @@ import java.util.List;
 public class Closure extends BodyNode {
 
 	private final Val dest;
-	private final int idx;
+	private final FunctionId id;
 	private final List<Var> args;
 
-	public Closure(Val dest, int idx, List<Var> args) {
+	public Closure(Val dest, FunctionId id, List<Var> args) {
 		this.dest = Check.notNull(dest);
-		this.idx = idx;
+		this.id = Check.notNull(id);
 		this.args = Check.notNull(args);
 	}
 
@@ -20,8 +21,8 @@ public class Closure extends BodyNode {
 		return dest;
 	}
 
-	public int idx() {
-		return idx;
+	public FunctionId id() {
+		return id;
 	}
 
 	public List<Var> args() {
