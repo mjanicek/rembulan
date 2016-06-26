@@ -2,6 +2,7 @@ package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.analysis.BranchInlinerVisitor;
 import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
+import net.sandius.rembulan.compiler.analysis.SlotAssignmentVisitor;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.analysis.TyperVisitor;
 import net.sandius.rembulan.compiler.gen.CompiledClass;
@@ -66,7 +67,9 @@ public class Compiler {
 	}
 
 	private SlotAllocInfo assignSlots(IRFunc fn) {
-		throw new UnsupportedOperationException();  // TODO
+		SlotAssignmentVisitor visitor = new SlotAssignmentVisitor();
+		visitor.visit(fn);
+		return visitor.result();
 	}
 
 	private CompiledClass emitBytecode(IRFunc fn, SlotAllocInfo slots, TypeInfo typeInfo) {
