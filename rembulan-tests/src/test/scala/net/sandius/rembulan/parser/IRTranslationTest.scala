@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, PrintWriter}
 
-import net.sandius.rembulan.compiler.analysis.{BranchInlinerVisitor, TypeInfo, TyperVisitor}
+import net.sandius.rembulan.compiler.analysis._
 import net.sandius.rembulan.compiler.ir.Branch
 import net.sandius.rembulan.compiler._
 import net.sandius.rembulan.compiler.util.{BlocksSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
@@ -67,10 +67,16 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     fn.update(visitor.result())
   }
 
-  def assignTypes(fn: IRFunc): TypeInfo = {
+  def typeInfo(fn: IRFunc): TypeInfo = {
     val visitor = new TyperVisitor()
     visitor.visit(fn)
     visitor.valTypes()
+  }
+
+  def dependencyInfo(fn: IRFunc): DependencyInfo = {
+    val visitor = new NestedRefVisitor()
+    visitor.visit(fn)
+    visitor.dependencyInfo()
   }
 
   def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = {
@@ -90,17 +96,17 @@ class IRTranslationTest extends FunSpec with MustMatchers {
       val reified = types.isReified(v)
       println("\t" + v + (if (reified) " (reified)" else ""))
     }
+  }
 
+  def printDeps(depInfo: DependencyInfo): Unit = {
     println("Nested refs:")
-    if (types.nestedRefs().isEmpty) {
+    if (depInfo.nestedRefs().isEmpty) {
       println("\t(none)")
     }
     else {
-      val ids = types.nestedRefs().asScala
+      val ids = depInfo.nestedRefs().asScala
       println("\t" + (ids map { id => "[" + id + "]"}).mkString(", "))
     }
-    println()
-
   }
 
   def printBlocks(blocks: Blocks): Unit = {
@@ -165,7 +171,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
     @tailrec
     def loop(fn: IRFunc): (IRFunc, TypeInfo) = {
-      val types = assignTypes(fn)
+      val types = typeInfo(fn)
       val opt = pass(fn, types)
       if (fn == opt) {
         (opt, types)
@@ -211,6 +217,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
               println("Type information:")
               printTypes(cfn.types)
+              println()
+
+              printDeps(dependencyInfo(cfn.fn))
               println()
             }
 

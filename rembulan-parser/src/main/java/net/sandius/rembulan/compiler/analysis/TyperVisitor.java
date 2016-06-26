@@ -3,7 +3,6 @@ package net.sandius.rembulan.compiler.analysis;
 import net.sandius.rembulan.compiler.BasicBlock;
 import net.sandius.rembulan.compiler.Blocks;
 import net.sandius.rembulan.compiler.BlocksVisitor;
-import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
@@ -32,8 +31,6 @@ public class TyperVisitor extends BlocksVisitor {
 	private final Set<Var> allVars;
 	private final Set<Var> reifiedVars;
 
-	private final Set<FunctionId> closures;
-
 	private final Queue<Label> open;
 
 	private boolean changed;
@@ -47,13 +44,11 @@ public class TyperVisitor extends BlocksVisitor {
 		this.allVars = new HashSet<>();
 		this.reifiedVars = new HashSet<>();
 
-		this.closures = new HashSet<>();
-
 		this.open = new ArrayDeque<>();
 	}
 
 	public TypeInfo valTypes() {
-		return TypeInfo.of(valTypes, phiValTypes, allVars, reifiedVars, closures);
+		return TypeInfo.of(valTypes, phiValTypes, allVars, reifiedVars);
 	}
 
 	private static Type joinTypes(Type a, Type b) {
@@ -439,8 +434,6 @@ public class TyperVisitor extends BlocksVisitor {
 
 	@Override
 	public void visit(Closure node) {
-		closures.add(node.id());
-
 		for (AbstractVar av : node.args()) {
 			if (av instanceof Var) {
 				Var v = (Var) av;
