@@ -18,7 +18,7 @@ public class ChunkClassLoader extends ClassLoader {
 		this(ChunkClassLoader.class.getClassLoader());
 	}
 
-	public String install(Chunk chunk) {
+	public String install(AbstractChunk chunk) {
 		Map<String, ByteVector> classes = chunk.classMap();
 
 		for (String name : classes.keySet()) {

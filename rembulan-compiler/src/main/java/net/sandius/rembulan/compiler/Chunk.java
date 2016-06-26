@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Chunk {
+public class Chunk extends AbstractChunk {
 
 	private final Prototype prototype;
 	private final Map<Prototype, CompilationUnit> units;
@@ -33,18 +33,12 @@ public class Chunk {
 
 	// Returns classes defined in this chunk ordered in such a way that all classes are
 	// preceded by their dependencies (i.e. it's post-order).
+	@Override
 	public Iterable<CompiledClass> classes() {
 		return Collections.unmodifiableList(classes);
 	}
 
-	public Map<String, ByteVector> classMap() {
-		Map<String, ByteVector> m = new HashMap<>();
-		for (CompiledClass cc : classes()) {
-			m.put(cc.name(), cc.bytes());
-		}
-		return Collections.unmodifiableMap(m);
-	}
-
+	@Override
 	public String mainClassName() {
 		// FIXME: this is ugly
 
