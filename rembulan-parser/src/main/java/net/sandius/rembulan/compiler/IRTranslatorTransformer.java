@@ -762,7 +762,7 @@ public class IRTranslatorTransformer extends Transformer {
 				default:
 			}
 
-			insns.add(new VarStore(v_var, t_var0));
+			insns.add(new VarInit(v_var, t_var0));
 		}
 
 		insns.add(l_top);
@@ -779,7 +779,7 @@ public class IRTranslatorTransformer extends Transformer {
 			Var v = var(vm.get(i));
 			Val t = provider.newVal();
 			insns.add(new StackGet(t, i));
-			insns.add(new VarStore(v, t));
+			insns.add(new VarInit(v, t));
 		}
 
 		Val t_v1 = provider.newVal();
