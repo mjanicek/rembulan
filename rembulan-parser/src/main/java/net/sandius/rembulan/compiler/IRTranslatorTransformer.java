@@ -695,7 +695,7 @@ public class IRTranslatorTransformer extends Transformer {
 		insns.add(new BinOp(BinOp.Op.SUB, t_var1, t_var0, t_step));
 
 		Var v_var = var(new Variable());  // FIXME
-		insns.add(new VarStore(v_var, t_var1));
+		insns.add(new VarInit(v_var, t_var1));
 
 		insns.add(l_top);
 
@@ -712,7 +712,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 		VarMapping vm = TranslationUtils.varMapping(node);
 		Var v_v = var(vm.get());
-		insns.add(new VarStore(v_v, t_var3));
+		insns.add(new VarInit(v_v, t_var3));
 
 		breakLabels.push(l_done);
 		nestedBlock(node.block());
