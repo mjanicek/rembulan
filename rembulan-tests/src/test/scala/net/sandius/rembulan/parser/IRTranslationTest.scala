@@ -79,6 +79,10 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     visitor.dependencyInfo()
   }
 
+  def slotInfo(fn: IRFunc): SlotAllocInfo = {
+    new SlotAllocator().process(fn)
+  }
+
   def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = {
     val visitor = new BranchInlinerVisitor(types)
     visitor.visit(fn)
@@ -106,6 +110,18 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     else {
       val ids = depInfo.nestedRefs().asScala
       println("\t" + (ids map { id => "[" + id + "]"}).mkString(", "))
+    }
+  }
+
+  def printSlots(types: TypeInfo, slots: SlotAllocInfo): Unit = {
+    println("Slot info:")
+    println("Variables:")
+    for (v <- types.vars().asScala) {
+      println("\t" + v + " ... " + slots.slotOf(v))
+    }
+    println("Values:")
+    for (v <- types.vals().asScala) {
+      println("\t" + v + " ... " + slots.slotOf(v))
     }
   }
 
@@ -220,6 +236,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
               println()
 
               printDeps(dependencyInfo(cfn.fn))
+              println()
+
+              printSlots(cfn.types, slotInfo(cfn.fn))
               println()
             }
 
