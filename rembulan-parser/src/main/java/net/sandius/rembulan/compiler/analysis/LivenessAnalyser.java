@@ -11,6 +11,7 @@ import net.sandius.rembulan.compiler.ir.UpVar;
 import net.sandius.rembulan.compiler.ir.Val;
 import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.compiler.ir.VarStore;
+import net.sandius.rembulan.compiler.util.BlockUtils;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
@@ -59,73 +60,11 @@ public class LivenessAnalyser {
 		return s;
 	}
 
-	// TODO: move this to an iterator class?
-	private static Iterable<Label> labelsBreadthFirst(Map<Label, BasicBlock> index, Label entryLabel) {
-		Check.notNull(index);
-		Check.notNull(entryLabel);
-
-		ArrayList<Label> result = new ArrayList<>();
-		Set<Label> visited = new HashSet<>();
-		Queue<Label> open = new ArrayDeque<>();
-
-		open.add(entryLabel);
-
-		while (!open.isEmpty()) {
-			Label l = open.poll();
-			BasicBlock bb = index.get(l);
-			if (visited.add(l)) {
-				result.add(l);
-				for (Label nxt : bb.end().nextLabels()) {
-					open.add(nxt);
-				}
-			}
-		}
-
-		result.trimToSize();
-		return result;
-	}
-
-	private static Map<Label, Set<Label>> inLabels(Map<Label, BasicBlock> index, Label entryLabel) {
-		Check.notNull(index);
-		Check.notNull(entryLabel);
-
-		Map<Label, Set<Label>> result = new HashMap<>();
-
-		// initialise
-		for (Label l : index.keySet()) {
-			result.put(l, new HashSet<Label>());
-		}
-
-		Set<Label> visited = new HashSet<>();
-		Stack<Label> open = new Stack<>();
-
-		open.add(entryLabel);
-
-		while (!open.isEmpty()) {
-			Label l = open.pop();
-
-			// have we seen this block?
-			boolean cont = visited.add(l);
-
-			// add all incoming edges (m -> l)
-			for (Label m : index.get(l).end().nextLabels()) {
-				result.get(m).add(l);
-
-				// continue to that block?
-				if (cont) {
-					open.add(m);
-				}
-			}
-		}
-
-		return Collections.unmodifiableMap(result);
-	}
-
 	public LivenessInfo analyse() {
 		Blocks blocks = fn.blocks();
 
 		Map<Label, BasicBlock> index = blocks.index();
-		Map<Label, Set<Label>> in = inLabels(index, blocks.entryLabel());
+		Map<Label, Set<Label>> in = BlockUtils.inLabels(index, blocks.entryLabel());
 
 		// initialise
 		for (Label l : index.keySet()) {
@@ -136,7 +75,7 @@ public class LivenessAnalyser {
 		Stack<Label> open = new Stack<>();
 
 		// make sure we'll visit all labels at least once
-		for (Label l : labelsBreadthFirst(index, blocks.entryLabel())) {
+		for (Label l : BlockUtils.labelsBreadthFirst(index, blocks.entryLabel())) {
 			open.push(l);
 		}
 
