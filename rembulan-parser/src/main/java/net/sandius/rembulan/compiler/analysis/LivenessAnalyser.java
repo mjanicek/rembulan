@@ -3,14 +3,7 @@ package net.sandius.rembulan.compiler.analysis;
 import net.sandius.rembulan.compiler.BasicBlock;
 import net.sandius.rembulan.compiler.Blocks;
 import net.sandius.rembulan.compiler.IRFunc;
-import net.sandius.rembulan.compiler.ir.AbstractVal;
-import net.sandius.rembulan.compiler.ir.IRNode;
-import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.compiler.ir.PhiVal;
-import net.sandius.rembulan.compiler.ir.UpVar;
-import net.sandius.rembulan.compiler.ir.Val;
-import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.compiler.ir.VarStore;
+import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.util.BlockUtils;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
@@ -111,7 +104,60 @@ public class LivenessAnalyser {
 
 		}
 
-		return new LivenessInfo(varLiveIn, valLiveIn);
+		return result();
+	}
+
+	private static void mergeLiveOut(Map<IRNode, LivenessInfo.Entry> entries, IRNode m, IRNode n) {
+		LivenessInfo.Entry e_m = entries.get(m);
+		LivenessInfo.Entry e_n = entries.get(n);
+		e_m.outVar().addAll(e_n.inVar());
+		e_m.outVal().addAll(e_n.inVal());
+	}
+
+	private LivenessInfo result() {
+		Map<Label, BasicBlock> index = fn.blocks().index();
+
+		Map<IRNode, Set<Var>> varLiveOut = new HashMap<>();
+		Map<IRNode, Set<AbstractVal>> valLiveOut = new HashMap<>();
+
+		Map<IRNode, LivenessInfo.Entry> entries = new HashMap<>();
+
+		// initialise
+		Iterator<IRNode> nodeIterator = BlockUtils.nodeIterator(fn.blocks());
+		while (nodeIterator.hasNext()) {
+			IRNode node = nodeIterator.next();
+
+			Set<Var> var_in = varLiveIn.get(node);
+			Set<AbstractVal> val_in = valLiveIn.get(node);
+
+			entries.put(node, new LivenessInfo.Entry(var_in, new HashSet<Var>(), val_in, new HashSet<AbstractVal>()));
+		}
+
+		// compute live-out from live-in
+		Iterator<BasicBlock> blockIterator = fn.blocks().blockIterator();
+		while (blockIterator.hasNext()) {
+			BasicBlock b = blockIterator.next();
+
+			// body
+			for (int i = 0; i < b.body().size(); i++) {
+				BodyNode m = b.body().get(i);
+				IRNode n = i + 1 < b.body().size() ? b.body().get(i + 1) : b.end();
+				mergeLiveOut(entries, m, n);
+			}
+
+			// end
+			BlockTermNode end = b.end();
+			LivenessInfo.Entry e_end = entries.get(end);
+
+			for (Label nxt : end.nextLabels()) {
+				BasicBlock nextBlock = index.get(nxt);
+				IRNode n = !nextBlock.body().isEmpty() ? nextBlock.body().get(0) : nextBlock.end();
+				mergeLiveOut(entries, end, n);
+			}
+
+		}
+
+		return new LivenessInfo(entries);
 	}
 
 	private boolean processBlock(LivenessVisitor visitor, BasicBlock block) {
@@ -130,24 +176,24 @@ public class LivenessAnalyser {
 		Check.notNull(node);
 		System.out.println("In node " + node);
 
-		final Set<AbstractVal> valLive = valLiveIn.get(node);
-		final Set<Var> varLive = varLiveIn.get(node);
+		final Set<Var> varLive_in = varLiveIn.get(node);
+		final Set<AbstractVal> valLive_in = valLiveIn.get(node);
 
 		node.accept(visitor);
 
-		boolean varSame = visitor.currentVarLiveIn().equals(varLive);
-		boolean valSame = visitor.currentValLiveIn().equals(valLive);
+		boolean varSame = visitor.currentVarLiveIn().equals(varLive_in);
+		boolean valSame = visitor.currentValLiveIn().equals(valLive_in);
 
 		if (!varSame) {
-			System.out.println("\t\t(var) {" + Util.iterableToString(varLive, ", ") + "} -> {" + Util.iterableToString(visitor.currentVarLiveIn(), ", ") + "}");
-			varLive.clear();
-			varLive.addAll(visitor.currentVarLiveIn());
+			System.out.println("\t\t(var) {" + Util.iterableToString(varLive_in, ", ") + "} -> {" + Util.iterableToString(visitor.currentVarLiveIn(), ", ") + "}");
+			varLive_in.clear();
+			varLive_in.addAll(visitor.currentVarLiveIn());
 		}
 
 		if (!valSame) {
-			System.out.println("\t\t(val) {" + Util.iterableToString(valLive, ", ") + "} -> {" + Util.iterableToString(visitor.currentValLiveIn(), ", ") + "}");
-			valLive.clear();
-			valLive.addAll(visitor.currentValLiveIn());
+			System.out.println("\t\t(val) {" + Util.iterableToString(valLive_in, ", ") + "} -> {" + Util.iterableToString(visitor.currentValLiveIn(), ", ") + "}");
+			valLive_in.clear();
+			valLive_in.addAll(visitor.currentValLiveIn());
 		}
 
 		return !varSame || !valSame;

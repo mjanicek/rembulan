@@ -5,40 +5,85 @@ import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
 class LivenessInfo {
 
-	private final Map<IRNode, Set<Var>> inVar;
-	private final Map<IRNode, Set<AbstractVal>> inVal;
-
-	LivenessInfo(Map<IRNode, Set<Var>> inVar, Map<IRNode, Set<AbstractVal>> inVal) {
-		this.inVar = Check.notNull(inVar);
-		this.inVal = Check.notNull(inVal);
+	private final Map<IRNode, Entry> entries;
+	
+	public LivenessInfo(Map<IRNode, Entry> entries) {
+		this.entries = Check.notNull(entries);
 	}
 
-	public Iterable<Var> inVar(IRNode node) {
+	static class Entry {
+
+		private final Set<Var> var_in;
+		private final Set<Var> var_out;
+		private final Set<AbstractVal> val_in;
+		private final Set<AbstractVal> val_out;
+
+		Entry(Set<Var> var_in, Set<Var> var_out, Set<AbstractVal> val_in, Set<AbstractVal> val_out) {
+			this.var_in = Check.notNull(var_in);
+			this.var_out = Check.notNull(var_out);
+			this.val_in = Check.notNull(val_in);
+			this.val_out = Check.notNull(val_out);
+		}
+
+		public Entry immutableCopy() {
+			return new Entry(
+					Collections.unmodifiableSet(new HashSet<>(var_in)),
+					Collections.unmodifiableSet(new HashSet<>(var_out)),
+					Collections.unmodifiableSet(new HashSet<>(val_in)),
+					Collections.unmodifiableSet(new HashSet<>(val_out)));
+		}
+
+		public Set<Var> inVar() {
+			return var_in;
+		}
+
+		public Set<Var> outVar() {
+			return var_out;
+		}
+
+		public Set<AbstractVal> inVal() {
+			return val_in;
+		}
+
+		public Set<AbstractVal> outVal() {
+			return val_out;
+		}
+
+	}
+
+	private Entry entry(IRNode node) {
 		Check.notNull(node);
-		Set<Var> s = inVar.get(node);
-		if (s == null) {
-			throw new NoSuchElementException("No live-in information for " + node);
+		Entry e = entries.get(node);
+		if (e == null) {
+			throw new NoSuchElementException("No liveness information for " + node);
 		}
 		else {
-			return s;
+			return e;
 		}
 	}
 
-	public Iterable<AbstractVal> inVal(IRNode node) {
-		Check.notNull(node);
-		Set<AbstractVal> s = inVal.get(node);
-		if (s == null) {
-			throw new NoSuchElementException("No live-in information for " + node);
-		}
-		else {
-			return s;
-		}
+	public Iterable<Var> liveInVars(IRNode node) {
+		return entry(node).inVar();
+	}
+
+	public Iterable<Var> liveOutVars(IRNode node) {
+		return entry(node).outVar();
+	}
+
+	public Iterable<AbstractVal> liveInVals(IRNode node) {
+		return entry(node).inVal();
+	}
+
+	public Iterable<AbstractVal> liveOutVals(IRNode node) {
+		return entry(node).outVal();
 	}
 
 }
