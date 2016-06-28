@@ -15,15 +15,7 @@ import net.sandius.rembulan.compiler.util.BlockUtils;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class LivenessAnalyser {
 
@@ -50,16 +42,6 @@ public class LivenessAnalyser {
 		return analyser.analyse();
 	}
 
-	// TODO: move this to a util class
-	private static <T, U> Set<U> entries(Map<T, Set<U>> m, T k) {
-		Set<U> s = m.get(k);
-		if (s == null) {
-			s = new HashSet<>();
-			m.put(k, s);
-		}
-		return s;
-	}
-
 	public LivenessInfo analyse() {
 		Blocks blocks = fn.blocks();
 
@@ -67,9 +49,18 @@ public class LivenessAnalyser {
 		Map<Label, Set<Label>> in = BlockUtils.inLabels(index, blocks.entryLabel());
 
 		// initialise
-		for (Label l : index.keySet()) {
-			endVarLiveIn.put(l, new HashSet<Var>());
-			endValLiveIn.put(l, new HashSet<AbstractVal>());
+		{
+			for (Label l : index.keySet()) {
+				endVarLiveIn.put(l, new HashSet<Var>());
+				endValLiveIn.put(l, new HashSet<AbstractVal>());
+			}
+
+			Iterator<IRNode> ns = BlockUtils.nodeIterator(blocks);
+			while (ns.hasNext()) {
+				IRNode n = ns.next();
+				varLiveIn.put(n, new HashSet<Var>());
+				valLiveIn.put(n, new HashSet<AbstractVal>());
+			}
 		}
 
 		Stack<Label> open = new Stack<>();
@@ -139,8 +130,8 @@ public class LivenessAnalyser {
 		Check.notNull(node);
 		System.out.println("In node " + node);
 
-		final Set<AbstractVal> valLive = entries(valLiveIn, node);
-		final Set<Var> varLive = entries(varLiveIn, node);
+		final Set<AbstractVal> valLive = valLiveIn.get(node);
+		final Set<Var> varLive = varLiveIn.get(node);
 
 		node.accept(visitor);
 
