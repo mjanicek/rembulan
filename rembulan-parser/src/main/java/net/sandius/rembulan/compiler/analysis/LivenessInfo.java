@@ -59,7 +59,7 @@ class LivenessInfo {
 
 	}
 
-	private Entry entry(IRNode node) {
+	public Entry entry(IRNode node) {
 		Check.notNull(node);
 		Entry e = entries.get(node);
 		if (e == null) {

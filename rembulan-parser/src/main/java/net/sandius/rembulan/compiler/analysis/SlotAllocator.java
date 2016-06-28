@@ -82,19 +82,26 @@ public class SlotAllocator {
 
 	private BitSet occupiedSlots(LivenessInfo liveness, IRNode node) {
 		BitSet occupied = new BitSet();
-		for (Var v : liveness.liveInVars(node)) {
+
+		LivenessInfo.Entry e = liveness.entry(node);
+
+		for (Var v : e.inVar()) {
 			int idx = slotOf(v);
 			if (occupied.get(idx)) {
 				throw new IllegalStateException("Slot " + idx + " already occupied");
 			}
-			occupied.set(slotOf(v));
+			if (e.outVar().contains(v)) {
+				occupied.set(slotOf(v));
+			}
 		}
-		for (AbstractVal v : liveness.liveInVals(node)) {
+		for (AbstractVal v : e.inVal()) {
 			int idx = slotOf(v);
 			if (occupied.get(idx)) {
 				throw new IllegalStateException("Slot " + idx + " already occupied");
 			}
-			occupied.set(slotOf(v));
+			if (e.outVal().contains(v)) {
+				occupied.set(slotOf(v));
+			}
 		}
 		return occupied;
 	}
