@@ -114,14 +114,14 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def printSlots(types: TypeInfo, slots: SlotAllocInfo): Unit = {
-    println("Slot info:")
+    println("Slot info (%d total):".format(slots.numSlots()))
     println("Variables:")
     for (v <- types.vars().asScala) {
-      println("\t" + v + " ... " + slots.slotOf(v))
+      println("\t" + v + " --> " + slots.slotOf(v))
     }
     println("Values:")
     for (v <- types.vals().asScala) {
-      println("\t" + v + " ... " + slots.slotOf(v))
+      println("\t" + v + " --> " + slots.slotOf(v))
     }
   }
 
