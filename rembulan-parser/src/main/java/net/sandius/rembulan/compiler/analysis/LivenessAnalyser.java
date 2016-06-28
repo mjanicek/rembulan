@@ -70,36 +70,20 @@ public class LivenessAnalyser {
 					endVarLiveIn.get(l),
 					endValLiveIn.get(l));
 
-			boolean changed = processBlock(visitor, index.get(l));
+			processBlock(visitor, index.get(l));
 
 			for (Label inl : in.get(l)) {
-				boolean nextChg;
+				boolean changed = false;
 
-				System.out.println("Pushing into label " + inl);
+				changed |= endVarLiveIn.get(inl).addAll(visitor.currentVarLiveIn());
+				changed |= endValLiveIn.get(inl).addAll(visitor.currentValLiveIn());
 
-				System.out.print("\t\t(var) {" + Util.iterableToString(endVarLiveIn.get(inl), ", ") + "}");
-				System.out.print(" -> ");
-
-				nextChg = endVarLiveIn.get(inl).addAll(visitor.currentVarLiveIn());
-
-				System.out.println("{" + Util.iterableToString(endVarLiveIn.get(inl), ", ") + "}");
-
-
-				System.out.print("\t\t(val) {" + Util.iterableToString(endValLiveIn.get(inl), ", ") + "}");
-				System.out.print(" -> ");
-
-				nextChg |= endValLiveIn.get(inl).addAll(visitor.currentValLiveIn());
-
-				System.out.println("{" + Util.iterableToString(endValLiveIn.get(inl), ", ") + "}");
-
-				if (nextChg) {
-					System.out.println("\t\t(change!)");
+				if (changed) {
 					if (open.contains(inl)) {
 						open.remove(inl);
 					}
 					open.push(inl);
 				}
-
 			}
 
 		}
@@ -174,7 +158,6 @@ public class LivenessAnalyser {
 
 	private boolean processNode(LivenessVisitor visitor, IRNode node) {
 		Check.notNull(node);
-		System.out.println("In node " + node);
 
 		final Set<Var> varLive_in = varLiveIn.get(node);
 		final Set<AbstractVal> valLive_in = valLiveIn.get(node);
@@ -185,13 +168,11 @@ public class LivenessAnalyser {
 		boolean valSame = visitor.currentValLiveIn().equals(valLive_in);
 
 		if (!varSame) {
-			System.out.println("\t\t(var) {" + Util.iterableToString(varLive_in, ", ") + "} -> {" + Util.iterableToString(visitor.currentVarLiveIn(), ", ") + "}");
 			varLive_in.clear();
 			varLive_in.addAll(visitor.currentVarLiveIn());
 		}
 
 		if (!valSame) {
-			System.out.println("\t\t(val) {" + Util.iterableToString(valLive_in, ", ") + "} -> {" + Util.iterableToString(visitor.currentValLiveIn(), ", ") + "}");
 			valLive_in.clear();
 			valLive_in.addAll(visitor.currentValLiveIn());
 		}
