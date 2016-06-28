@@ -80,7 +80,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def slotInfo(fn: IRFunc): SlotAllocInfo = {
-    new SlotAllocator().process(fn)
+    SlotAllocator.allocateSlots(fn)
   }
 
   def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = {

@@ -25,14 +25,22 @@ import java.util.Stack;
 
 public class SlotAllocator {
 
+	private final IRFunc fn;
+
 	private final Map<AbstractVal, Integer> valSlots;
 	private final Map<Var, Integer> varSlots;
 
 	private IRNode currentNode;
 
-	public SlotAllocator() {
+	public SlotAllocator(IRFunc fn) {
+		this.fn = Check.notNull(fn);
 		this.valSlots = new HashMap<>();
 		this.varSlots = new HashMap<>();
+	}
+
+	public static SlotAllocInfo allocateSlots(IRFunc fn) {
+		SlotAllocator allocator = new SlotAllocator(fn);
+		return allocator.process();
 	}
 
 	private IRNode node() {
@@ -125,16 +133,10 @@ public class SlotAllocator {
 		valSlots.put(v, findFreeSlot(liveness, node));
 	}
 
-	public SlotAllocInfo result() {
-		return new SlotAllocInfo(
-				Collections.unmodifiableMap(valSlots),
-				Collections.unmodifiableMap(varSlots));
-	}
-
-	public SlotAllocInfo process(IRFunc fn) {
+	public SlotAllocInfo process() {
 		Blocks blocks = fn.blocks();
 
-		LivenessInfo liveness = new LivenessAnalyser(fn).liveness();
+		LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
 
 		Map<Label, BasicBlock> index = blocks.index();
 
@@ -159,7 +161,9 @@ public class SlotAllocator {
 			}
 		}
 
-		return result();
+		return new SlotAllocInfo(
+				Collections.unmodifiableMap(valSlots),
+				Collections.unmodifiableMap(varSlots));
 	}
 
 	private void assignSlots(BasicBlock b, AllocatorVisitor visitor) {

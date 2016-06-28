@@ -34,9 +34,7 @@ public class LivenessAnalyser {
 	private Map<Label, Set<Var>> endVarLiveIn;
 	private Map<Label, Set<AbstractVal>> endValLiveIn;
 
-	private IRNode currentNode;
-
-	public LivenessAnalyser(IRFunc fn) {
+	private LivenessAnalyser(IRFunc fn) {
 		this.fn = Check.notNull(fn);
 
 		this.varLiveIn = new HashMap<>();
@@ -46,12 +44,9 @@ public class LivenessAnalyser {
 		this.endValLiveIn = new HashMap<>();
 	}
 
-	public void reset() {
-		varLiveIn.clear();
-		valLiveIn.clear();
-
-		endVarLiveIn.clear();
-		endValLiveIn.clear();
+	public static LivenessInfo computeLiveness(IRFunc fn) {
+		LivenessAnalyser analyser = new LivenessAnalyser(fn);
+		return analyser.analyse();
 	}
 
 	// TODO: move this to a util class
@@ -90,7 +85,7 @@ public class LivenessAnalyser {
 		return result;
 	}
 
-	private Map<Label, Set<Label>> inLabels(Map<Label, BasicBlock> index, Label entryLabel) {
+	private static Map<Label, Set<Label>> inLabels(Map<Label, BasicBlock> index, Label entryLabel) {
 		Check.notNull(index);
 		Check.notNull(entryLabel);
 
@@ -126,8 +121,7 @@ public class LivenessAnalyser {
 		return Collections.unmodifiableMap(result);
 	}
 
-
-	public LivenessInfo liveness() {
+	public LivenessInfo analyse() {
 		Blocks blocks = fn.blocks();
 
 		Map<Label, BasicBlock> index = blocks.index();
@@ -228,7 +222,6 @@ public class LivenessAnalyser {
 
 		return !varSame || !valSame;
 	}
-
 
 	private class LivenessVisitor extends AbstractUseDefVisitor {
 

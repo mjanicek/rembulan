@@ -67,7 +67,7 @@ public class Compiler {
 	}
 
 	private SlotAllocInfo assignSlots(IRFunc fn) {
-		return new SlotAllocator().process(fn);  // FIXME
+		return SlotAllocator.allocateSlots(fn);
 	}
 
 	private CompiledClass emitBytecode(IRFunc fn, SlotAllocInfo slots, TypeInfo typeInfo) {
