@@ -1,6 +1,5 @@
 package net.sandius.rembulan.compiler.util;
 
-import net.sandius.rembulan.compiler.BlocksVisitor;
 import net.sandius.rembulan.compiler.analysis.AbstractUseDefVisitor;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.util.Check;

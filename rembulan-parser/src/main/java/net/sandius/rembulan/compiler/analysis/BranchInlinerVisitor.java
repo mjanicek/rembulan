@@ -7,7 +7,7 @@ import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
-public class BranchInlinerVisitor extends BlockTransformerVisitor {
+public class BranchInlinerVisitor extends CodeTransformerVisitor {
 
 	private final TypeInfo types;
 	private Boolean inline;

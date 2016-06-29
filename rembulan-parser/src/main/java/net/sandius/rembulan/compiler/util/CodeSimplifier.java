@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Blocks;
+import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.ToNext;
@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-public abstract class BlocksSimplifier {
+public abstract class CodeSimplifier {
 
-	private BlocksSimplifier() {
+	private CodeSimplifier() {
 		// not to be instantiated or extended
 	}
 
@@ -33,12 +33,12 @@ public abstract class BlocksSimplifier {
 		}
 	}
 
-	private static Map<Label, Integer> uses(Blocks blocks) {
-		Map<Label, BasicBlock> index = blocks.index();
+	private static Map<Label, Integer> uses(Code code) {
+		Map<Label, BasicBlock> index = code.index();
 
 		Map<Label, Integer> uses = new HashMap<>();
 		Stack<Label> open = new Stack<>();
-		open.add(blocks.entryLabel());
+		open.add(code.entryLabel());
 
 		while (!open.isEmpty()) {
 			Label l = open.pop();
@@ -53,13 +53,13 @@ public abstract class BlocksSimplifier {
 		return uses;
 	}
 
-	public static Blocks filterUnreachableBlocks(Blocks blocks) {
-		Check.notNull(blocks);
+	public static Code pruneUnreachableCode(Code code) {
+		Check.notNull(code);
 
-		Set<Label> reachable = uses(blocks).keySet();
+		Set<Label> reachable = uses(code).keySet();
 
 		List<BasicBlock> result = new ArrayList<>();
-		Iterator<BasicBlock> it = blocks.blockIterator();
+		Iterator<BasicBlock> it = code.blockIterator();
 		while (it.hasNext()) {
 			BasicBlock b = it.next();
 			if (reachable.contains(b.label())) {
@@ -67,7 +67,7 @@ public abstract class BlocksSimplifier {
 			}
 		}
 
-		return Blocks.of(result);
+		return Code.of(result);
 	}
 
 	private static BasicBlock merge(BasicBlock a, BasicBlock b) {
@@ -89,13 +89,13 @@ public abstract class BlocksSimplifier {
 		return it.hasNext() ? it.next() : null;
 	}
 
-	public static Blocks mergeBlocks(Blocks blocks) {
-		Check.notNull(blocks);
+	public static Code mergeBlocks(Code code) {
+		Check.notNull(code);
 
-		Map<Label, Integer> uses = uses(blocks);
+		Map<Label, Integer> uses = uses(code);
 		List<BasicBlock> result = new ArrayList<>();
 
-		Iterator<BasicBlock> it = blocks.blockIterator();
+		Iterator<BasicBlock> it = code.blockIterator();
 
 		BasicBlock a = it.next();  // must be non-null
 		BasicBlock b = nextOrNull(it);
@@ -123,7 +123,7 @@ public abstract class BlocksSimplifier {
 
 		result.add(a);
 
-		return Blocks.of(result);
+		return Code.of(result);
 	}
 
 }

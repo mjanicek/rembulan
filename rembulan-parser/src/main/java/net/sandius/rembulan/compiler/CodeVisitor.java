@@ -1,17 +1,16 @@
 package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.ir.*;
-import net.sandius.rembulan.util.Check;
 
 import java.util.Iterator;
 
-public class BlocksVisitor extends IRVisitor {
+public class CodeVisitor extends IRVisitor {
 
-	public BlocksVisitor(IRVisitor visitor) {
+	public CodeVisitor(IRVisitor visitor) {
 		super(visitor);
 	}
 
-	public BlocksVisitor() {
+	public CodeVisitor() {
 		super();
 	}
 
@@ -19,8 +18,8 @@ public class BlocksVisitor extends IRVisitor {
 		visit(func.blocks());
 	}
 
-	public void visit(Blocks blocks) {
-		Iterator<BasicBlock> it = blocks.blockIterator();
+	public void visit(Code code) {
+		Iterator<BasicBlock> it = code.blockIterator();
 		while (it.hasNext()) {
 			BasicBlock b = it.next();
 			visit(b);

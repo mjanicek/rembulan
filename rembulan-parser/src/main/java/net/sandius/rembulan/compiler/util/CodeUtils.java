@@ -1,21 +1,21 @@
 package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Blocks;
+import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.util.Check;
 
 import java.util.*;
 
-public abstract class BlockUtils {
+public abstract class CodeUtils {
 
-	private BlockUtils() {
+	private CodeUtils() {
 		// not to be instantiated or extended
 	}
 
-	public static Iterator<IRNode> nodeIterator(Blocks blocks) {
-		return new NodeIterator(blocks.blockIterator());
+	public static Iterator<IRNode> nodeIterator(Code code) {
+		return new NodeIterator(code.blockIterator());
 	}
 
 	private static class NodeIterator implements Iterator<IRNode> {

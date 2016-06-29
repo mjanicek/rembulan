@@ -1,14 +1,14 @@
 package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.compiler.BlocksVisitor;
+import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
 
-public class IRPrinterVisitor extends BlocksVisitor {
+public class IRPrinterVisitor extends CodeVisitor {
 
 	private final PrintWriter ps;
 

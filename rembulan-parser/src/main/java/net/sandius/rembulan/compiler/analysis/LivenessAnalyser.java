@@ -1,11 +1,10 @@
 package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Blocks;
+import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.ir.*;
-import net.sandius.rembulan.compiler.util.BlockUtils;
-import net.sandius.rembulan.parser.util.Util;
+import net.sandius.rembulan.compiler.util.CodeUtils;
 import net.sandius.rembulan.util.Check;
 
 import java.util.*;
@@ -36,10 +35,10 @@ public class LivenessAnalyser {
 	}
 
 	public LivenessInfo analyse() {
-		Blocks blocks = fn.blocks();
+		Code code = fn.blocks();
 
-		Map<Label, BasicBlock> index = blocks.index();
-		Map<Label, Set<Label>> in = BlockUtils.inLabels(index, blocks.entryLabel());
+		Map<Label, BasicBlock> index = code.index();
+		Map<Label, Set<Label>> in = CodeUtils.inLabels(index, code.entryLabel());
 
 		// initialise
 		{
@@ -48,7 +47,7 @@ public class LivenessAnalyser {
 				endValLiveIn.put(l, new HashSet<AbstractVal>());
 			}
 
-			Iterator<IRNode> ns = BlockUtils.nodeIterator(blocks);
+			Iterator<IRNode> ns = CodeUtils.nodeIterator(code);
 			while (ns.hasNext()) {
 				IRNode n = ns.next();
 				varLiveIn.put(n, new HashSet<Var>());
@@ -59,7 +58,7 @@ public class LivenessAnalyser {
 		Stack<Label> open = new Stack<>();
 
 		// make sure we'll visit all labels at least once
-		for (Label l : BlockUtils.labelsBreadthFirst(index, blocks.entryLabel())) {
+		for (Label l : CodeUtils.labelsBreadthFirst(index, code.entryLabel())) {
 			open.push(l);
 		}
 
@@ -107,7 +106,7 @@ public class LivenessAnalyser {
 		Map<IRNode, LivenessInfo.Entry> entries = new HashMap<>();
 
 		// initialise
-		Iterator<IRNode> nodeIterator = BlockUtils.nodeIterator(fn.blocks());
+		Iterator<IRNode> nodeIterator = CodeUtils.nodeIterator(fn.blocks());
 		while (nodeIterator.hasNext()) {
 			IRNode node = nodeIterator.next();
 

@@ -13,17 +13,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class Blocks {
+public class Code {
 
 	private final List<BasicBlock> blocks;
 
-	private Blocks(List<BasicBlock> blocks) {
+	private Code(List<BasicBlock> blocks) {
 		verify(blocks);
 		this.blocks = Check.notNull(blocks);
 	}
 
-	public static Blocks of(List<BasicBlock> blocks) {
-		return new Blocks(
+	public static Code of(List<BasicBlock> blocks) {
+		return new Code(
 				new ArrayList<>(Check.notNull(blocks)));
 	}
 
@@ -31,7 +31,7 @@ public class Blocks {
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
-		Blocks that = (Blocks) o;
+		Code that = (Code) o;
 		return this.blocks.equals(that.blocks);
 	}
 

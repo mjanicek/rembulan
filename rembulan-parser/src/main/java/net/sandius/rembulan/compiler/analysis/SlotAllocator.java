@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Blocks;
+import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.ir.AbstractVal;
 import net.sandius.rembulan.compiler.ir.BodyNode;
@@ -141,15 +141,15 @@ public class SlotAllocator {
 	}
 
 	public SlotAllocInfo process() {
-		Blocks blocks = fn.blocks();
+		Code code = fn.blocks();
 
 		LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
 
-		Map<Label, BasicBlock> index = blocks.index();
+		Map<Label, BasicBlock> index = code.index();
 
 		Set<Label> visited = new HashSet<>();
 		Stack<Label> open = new Stack<>();
-		open.push(blocks.entryLabel());
+		open.push(code.entryLabel());
 
 		AllocatorVisitor visitor = new AllocatorVisitor(liveness);
 

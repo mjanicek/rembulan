@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.compiler.analysis.BlockTransformerVisitor;
+import net.sandius.rembulan.compiler.analysis.CodeTransformerVisitor;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.CPUWithdraw;
 import net.sandius.rembulan.compiler.ir.IRNode;
@@ -9,7 +9,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.Iterator;
 
-public class CPUAccountingVisitor extends BlockTransformerVisitor {
+public class CPUAccountingVisitor extends CodeTransformerVisitor {
 
 	private final Account acc;
 

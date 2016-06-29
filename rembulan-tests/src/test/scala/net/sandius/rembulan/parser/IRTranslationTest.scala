@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 import net.sandius.rembulan.compiler.analysis._
 import net.sandius.rembulan.compiler.ir.Branch
 import net.sandius.rembulan.compiler._
-import net.sandius.rembulan.compiler.util.{BlocksSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
+import net.sandius.rembulan.compiler.util.{CodeSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.test._
@@ -51,7 +51,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def verify(fn: IRFunc): Unit = {
-    val visitor = new BlocksVisitor(new TempUseVerifierVisitor())
+    val visitor = new CodeVisitor(new TempUseVerifierVisitor())
     visitor.visit(fn)
   }
 
@@ -125,7 +125,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     }
   }
 
-  def printBlocks(blocks: Blocks): Unit = {
+  def printBlocks(blocks: Code): Unit = {
     val pw = new PrintWriter(System.out)
     val printer = new IRPrinterVisitor(pw)
     printer.visit(blocks)
@@ -180,8 +180,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     def pass(fn: IRFunc, types: TypeInfo): IRFunc = {
       val withCpu = collectCpuAccounting(fn)
       val inlined = inlineBranches(withCpu, types)
-      val filtered = inlined.update(BlocksSimplifier.filterUnreachableBlocks(inlined.blocks()))
-      val merged = filtered.update(BlocksSimplifier.mergeBlocks(filtered.blocks()))
+      val filtered = inlined.update(CodeSimplifier.pruneUnreachableCode(inlined.blocks()))
+      val merged = filtered.update(CodeSimplifier.mergeBlocks(filtered.blocks()))
       merged
     }
 
@@ -227,7 +227,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
               println("Upvals: (" + cfn.fn.upvals.asScala.mkString(", ") + ")")
               println()
 
-              println("Blocks:")
+              println("Code:")
               printBlocks(cfn.fn.blocks)
               println()
 

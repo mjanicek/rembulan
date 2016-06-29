@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class BlockBuilder {
+public class CodeBuilder {
 
 	private final Map<Label, Integer> uses;
 	private final Set<Label> pending;
@@ -29,7 +29,7 @@ public class BlockBuilder {
 
 	private Block currentBlock;
 
-	public BlockBuilder() {
+	public CodeBuilder() {
 		this.uses = new HashMap<>();
 		this.pending = new HashSet<>();
 		this.visited = new HashSet<>();
@@ -143,7 +143,7 @@ public class BlockBuilder {
 
 	}
 
-	public Blocks build() {
+	public Code build() {
 		if (!pending.isEmpty()) {
 			throw new IllegalStateException("Label(s) not defined: " + Util.iterableToString(pending, ", "));
 		}
@@ -151,7 +151,7 @@ public class BlockBuilder {
 			throw new IllegalStateException("Control reaches end of function");
 		}
 
-		return Blocks.of(basicBlocks);
+		return Code.of(basicBlocks);
 	}
 
 }

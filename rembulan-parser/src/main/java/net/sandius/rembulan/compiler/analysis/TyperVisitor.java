@@ -1,8 +1,8 @@
 package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Blocks;
-import net.sandius.rembulan.compiler.BlocksVisitor;
+import net.sandius.rembulan.compiler.Code;
+import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
@@ -22,7 +22,7 @@ import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.M
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_FLOAT;
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_INTEGER;
 
-public class TyperVisitor extends BlocksVisitor {
+public class TyperVisitor extends CodeVisitor {
 
 	private final Map<Val, Type> valTypes;
 	private final Map<PhiVal, Type> phiValTypes;
@@ -190,21 +190,21 @@ public class TyperVisitor extends BlocksVisitor {
 
 	@Override
 	public void visit(IRFunc func) {
-		Blocks blocks = func.blocks();
+		Code code = func.blocks();
 
-		VarState vs = varState(blocks.entryLabel());
+		VarState vs = varState(code.entryLabel());
 		for (Var p : func.params()) {
 			vs.store(p, LuaTypes.DYNAMIC);
 		}
 
-		visit(blocks);
+		visit(code);
 	}
 
 	@Override
-	public void visit(Blocks blocks) {
-		open.add(blocks.entryLabel());
+	public void visit(Code code) {
+		open.add(code.entryLabel());
 
-		Map<Label, BasicBlock> index = blocks.index();
+		Map<Label, BasicBlock> index = code.index();
 
 		while (!open.isEmpty()) {
 			Label l = open.poll();

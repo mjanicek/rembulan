@@ -24,7 +24,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 	private final FunctionId id;
 
-	private final BlockBuilder insns;
+	private final CodeBuilder insns;
 
 	private final RegProvider provider;
 	private final Stack<AbstractVal> vals;
@@ -48,7 +48,7 @@ public class IRTranslatorTransformer extends Transformer {
 
 		this.provider = new RegProvider();
 
-		this.insns = new BlockBuilder();
+		this.insns = new CodeBuilder();
 
 		this.vals = new Stack<>();
 		this.assigning = false;

@@ -6,7 +6,7 @@ import net.sandius.rembulan.compiler.analysis.SlotAllocator;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.analysis.TyperVisitor;
 import net.sandius.rembulan.compiler.gen.CompiledClass;
-import net.sandius.rembulan.compiler.util.BlocksSimplifier;
+import net.sandius.rembulan.compiler.util.CodeSimplifier;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer;
@@ -83,8 +83,8 @@ public class Compiler {
 			TypeInfo typeInfo = typeInfo(fn);
 			fn = collectCPUAccounting(fn);
 			fn = inlineBranches(fn, typeInfo);
-			fn = fn.update(BlocksSimplifier.filterUnreachableBlocks(fn.blocks()));
-			fn = fn.update(BlocksSimplifier.mergeBlocks(fn.blocks()));
+			fn = fn.update(CodeSimplifier.pruneUnreachableCode(fn.blocks()));
+			fn = fn.update(CodeSimplifier.mergeBlocks(fn.blocks()));
 
 		} while (!oldFn.equals(fn));
 

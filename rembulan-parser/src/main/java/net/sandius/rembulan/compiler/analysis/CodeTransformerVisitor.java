@@ -1,8 +1,8 @@
 package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Blocks;
-import net.sandius.rembulan.compiler.BlocksVisitor;
+import net.sandius.rembulan.compiler.Code;
+import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class BlockTransformerVisitor extends BlocksVisitor {
+public class CodeTransformerVisitor extends CodeVisitor {
 
 	private final List<BasicBlock> basicBlocks;
 
@@ -21,23 +21,23 @@ public class BlockTransformerVisitor extends BlocksVisitor {
 	private List<BodyNode> body;
 	private BlockTermNode end;
 
-	public BlockTransformerVisitor(IRVisitor visitor) {
+	public CodeTransformerVisitor(IRVisitor visitor) {
 		super(visitor);
 		this.basicBlocks = new ArrayList<>();
 	}
 
-	public BlockTransformerVisitor() {
+	public CodeTransformerVisitor() {
 		this(null);
 	}
 
-	public Blocks result() {
-		return Blocks.of(basicBlocks);
+	public Code result() {
+		return Code.of(basicBlocks);
 	}
 
 	@Override
-	public void visit(Blocks blocks) {
+	public void visit(Code code) {
 		basicBlocks.clear();
-		super.visit(blocks);
+		super.visit(code);
 	}
 
 	@Override

@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.analysis;
 
-import net.sandius.rembulan.compiler.BlocksVisitor;
+import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.ir.Closure;
 
@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NestedRefVisitor extends BlocksVisitor {
+public class NestedRefVisitor extends CodeVisitor {
 
 	private final Set<FunctionId> ids;
 

@@ -12,13 +12,13 @@ public class IRFunc {
 	private final FunctionId id;
 	private final List<Var> params;
 	private final List<UpVar> upvals;
-	private final Blocks blocks;
+	private final Code code;
 
-	public IRFunc(FunctionId id, List<Var> params, List<UpVar> upvals, Blocks blocks) {
+	public IRFunc(FunctionId id, List<Var> params, List<UpVar> upvals, Code code) {
 		this.id = Check.notNull(id);
 		this.params = Check.notNull(params);
 		this.upvals = Check.notNull(upvals);
-		this.blocks = Check.notNull(blocks);
+		this.code = Check.notNull(code);
 	}
 
 	@Override
@@ -29,12 +29,12 @@ public class IRFunc {
 		return id.equals(that.id)
 				&& params.equals(that.params)
 				&& upvals.equals(that.upvals)
-				&& blocks.equals(that.blocks);
+				&& code.equals(that.code);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, params, blocks);
+		return Objects.hash(id, params, code);
 	}
 
 	public FunctionId id() {
@@ -49,16 +49,16 @@ public class IRFunc {
 		return upvals;
 	}
 
-	public Blocks blocks() {
-		return blocks;
+	public Code blocks() {
+		return code;
 	}
 
-	public IRFunc update(Blocks blocks) {
-		if (this.blocks.equals(blocks)) {
+	public IRFunc update(Code code) {
+		if (this.code.equals(code)) {
 			return this;
 		}
 		else {
-			return new IRFunc(id, params, upvals, blocks);
+			return new IRFunc(id, params, upvals, code);
 		}
 	}
 
