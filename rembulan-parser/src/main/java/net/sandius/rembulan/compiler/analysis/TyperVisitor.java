@@ -5,6 +5,7 @@ import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
+import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.types.FunctionType;
@@ -126,6 +127,19 @@ public class TyperVisitor extends CodeVisitor {
 		else {
 			return vs;
 		}
+	}
+
+	private void useStack() {
+		// TODO: clear stack state
+	}
+
+	private void impure() {
+		// TODO: clear upvalue states
+	}
+
+	private void mayCallMetamethod() {
+		useStack();
+		impure();
 	}
 
 	private void assign(Val v, Type t) {
@@ -295,18 +309,31 @@ public class TyperVisitor extends CodeVisitor {
 		StaticMathImplementation math = staticMath(node.op());
 
 		if (math != null) {
-			result = math.opType(l, r).toSlotType();
+			LuaInstruction.NumOpType ot = math.opType(l, r);
+			result = ot.toSlotType();
+
+			if (ot == LuaInstruction.NumOpType.Any) {
+				mayCallMetamethod();
+			}
 		}
 		else {
 			switch (node.op()) {
 				case CONCAT:
-					result = stringable(l) && stringable(r) ? LuaTypes.STRING : LuaTypes.ANY;
+					if (stringable(l) && stringable(r)) {
+						result = LuaTypes.STRING;
+					}
+					else {
+						result = LuaTypes.ANY;
+						mayCallMetamethod();
+					}
 					break;
+
 				case EQ:
 				case NEQ:
 				case LT:
 				case LE:
 					result = LuaTypes.BOOLEAN;
+					mayCallMetamethod();  // TODO: may be restricted (see §2.4 of LRM)
 					break;
 				default: throw new UnsupportedOperationException("Illegal binary operation: " + node.op());
 			}
@@ -333,17 +360,19 @@ public class TyperVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(TabNew node) {
+		mayCallMetamethod();
 		assign(node.dest(), LuaTypes.TABLE);
 	}
 
 	@Override
 	public void visit(TabGet node) {
+		mayCallMetamethod();
 		assign(node.dest(), LuaTypes.ANY);
 	}
 
 	@Override
 	public void visit(TabSet node) {
-		// no effect on vals
+		mayCallMetamethod();
 	}
 
 	@Override
@@ -397,6 +426,9 @@ public class TyperVisitor extends CodeVisitor {
 	public void visit(Call node) {
 		// TODO: assign type to the varargs
 		// no effect on vals
+
+		impure();
+		useStack();
 	}
 
 	@Override
