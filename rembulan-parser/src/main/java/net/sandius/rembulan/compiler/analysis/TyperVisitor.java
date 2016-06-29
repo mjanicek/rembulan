@@ -207,41 +207,35 @@ public class TyperVisitor extends CodeVisitor {
 		Map<Label, BasicBlock> index = code.index();
 
 		while (!open.isEmpty()) {
-			Label l = open.poll();
-			BasicBlock b = index.get(l);
-
-			changed = false;
-			visit(b);
-			if (changed) {
-				for (Label nxt : b.end().nextLabels()) {
-					open.add(nxt);
-				}
-			}
+			visit(index.get(open.poll()));
 		}
-
 	}
 
 	@Override
 	public void visit(BasicBlock block) {
 		currentVarState = varState(block.label()).copy();
-
 		changed = false;
-		super.visit(block);
 
-		for (Label nxt : block.end().nextLabels()) {
-			VarState vs = varState(nxt);
-			if (vs.joinWith(currentVarState)) {
-				changed = true;
-			}
-		}
+		try {
+			super.visit(block);
 
-		if (changed) {
 			for (Label nxt : block.end().nextLabels()) {
-				open.add(nxt);
+				VarState vs = varState(nxt);
+				if (vs.joinWith(currentVarState)) {
+					changed = true;
+				}
+			}
+
+			if (changed) {
+				for (Label nxt : block.end().nextLabels()) {
+					open.add(nxt);
+				}
 			}
 		}
-
-		currentVarState = null;
+		finally {
+			changed = false;
+			currentVarState = null;
+		}
 	}
 
 	@Override
@@ -257,7 +251,6 @@ public class TyperVisitor extends CodeVisitor {
 	@Override
 	public void visit(LoadConst.Int node) {
 		assign(node.dest(), LuaTypes.NUMBER_INTEGER);
-
 	}
 
 	@Override
@@ -423,16 +416,6 @@ public class TyperVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(Label node) {
-		// no effect on vals
-	}
-
-	@Override
-	public void visit(Jmp node) {
-		// no effect on vals
-	}
-
-	@Override
 	public void visit(Closure node) {
 		for (AbstractVar av : node.args()) {
 			if (av instanceof Var) {
@@ -451,41 +434,9 @@ public class TyperVisitor extends CodeVisitor {
 	@Override
 	public void visit(ToNumber node) {
 		Type t = typeOf(node.src());
-		final Type result;
-
-		if (t.isSubtypeOf(LuaTypes.NUMBER)) {
-			result = t;
-		}
-		else {
-			result = LuaTypes.NUMBER;
-		}
+		Type result = t.isSubtypeOf(LuaTypes.NUMBER) ? t : LuaTypes.NUMBER;
 
 		assign(node.dest(), result);
-	}
-
-	@Override
-	public void visit(ToNext node) {
-		// no effect on vals
-	}
-
-	@Override
-	public void visit(Branch branch) {
-		// no effect on vals
-	}
-
-	@Override
-	public void visit(Branch.Condition.Nil cond) {
-		// no effect on vals
-	}
-
-	@Override
-	public void visit(Branch.Condition.Bool cond) {
-		// no effect on vals
-	}
-
-	@Override
-	public void visit(Branch.Condition.NumLoopEnd cond) {
-		// no effect on vals
 	}
 
 }
