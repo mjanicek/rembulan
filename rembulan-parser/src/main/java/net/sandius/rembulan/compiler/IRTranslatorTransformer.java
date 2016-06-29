@@ -823,7 +823,23 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(RepeatUntilStatement node) {
-		throw new UnsupportedOperationException("repeat-until loop");  // TODO
+		Label l_body = insns.newLabel();
+		Label l_done = insns.newLabel();
+
+		insns.add(l_body);
+		breakLabels.add(l_done);
+		nestedBlock(node.block());
+		breakLabels.pop();
+
+		node.condition().accept(this);
+		Val c = popVal();
+		insns.addBranch(new Branch.Condition.Bool(c, true), l_done);
+
+		insns.add(new Jmp(l_body));
+
+		insns.add(l_done);
+
+		return node;
 	}
 
 	@Override

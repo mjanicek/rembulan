@@ -1,22 +1,6 @@
 package net.sandius.rembulan.parser.analysis;
 
-import net.sandius.rembulan.parser.ast.Attributes;
-import net.sandius.rembulan.parser.ast.Block;
-import net.sandius.rembulan.parser.ast.BodyStatement;
-import net.sandius.rembulan.parser.ast.Chunk;
-import net.sandius.rembulan.parser.ast.Expr;
-import net.sandius.rembulan.parser.ast.FunctionDefExpr;
-import net.sandius.rembulan.parser.ast.GenericForStatement;
-import net.sandius.rembulan.parser.ast.IndexExpr;
-import net.sandius.rembulan.parser.ast.LValueExpr;
-import net.sandius.rembulan.parser.ast.LiteralExpr;
-import net.sandius.rembulan.parser.ast.LocalDeclStatement;
-import net.sandius.rembulan.parser.ast.Name;
-import net.sandius.rembulan.parser.ast.NumericForStatement;
-import net.sandius.rembulan.parser.ast.StringLiteral;
-import net.sandius.rembulan.parser.ast.Transformer;
-import net.sandius.rembulan.parser.ast.VarExpr;
-import net.sandius.rembulan.parser.ast.VarargsExpr;
+import net.sandius.rembulan.parser.ast.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -151,6 +135,15 @@ public class NameResolutionTransformer extends Transformer {
 	public Expr transform(VarargsExpr e) {
 		fnScope.setVararg();
 		return super.transform(e);
+	}
+
+	@Override
+	public BodyStatement transform(RepeatUntilStatement node) {
+		fnScope.enterBlock();
+		Block b = super.transform(node.block());
+		Expr c = node.condition().accept(this);
+		fnScope.leaveBlock();
+		return node.update(c, b);
 	}
 
 }
