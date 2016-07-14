@@ -24,6 +24,15 @@ public class LabelStatement extends BodyStatement {
 		}
 	}
 
+	public LabelStatement withAttributes(Attributes attr) {
+		if (attributes().equals(attr)) return this;
+		else return new LabelStatement(attr, labelName);
+	}
+
+	public LabelStatement with(Object o) {
+		return this.withAttributes(attributes().with(o));
+	}
+
 	@Override
 	public BodyStatement accept(Transformer tf) {
 		return tf.transform(this);
