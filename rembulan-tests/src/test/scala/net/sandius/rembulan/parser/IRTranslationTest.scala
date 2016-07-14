@@ -6,7 +6,7 @@ import net.sandius.rembulan.compiler.analysis._
 import net.sandius.rembulan.compiler.ir.Branch
 import net.sandius.rembulan.compiler._
 import net.sandius.rembulan.compiler.util.{CodeSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
-import net.sandius.rembulan.parser.analysis.NameResolutionTransformer
+import net.sandius.rembulan.parser.analysis.{LabelResolutionTransformer, NameResolutionTransformer}
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.test._
 import org.junit.runner.RunWith
@@ -47,7 +47,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def resolveNames(c: Chunk): Chunk = {
-    new NameResolutionTransformer().transform(c)
+    val c0 = new NameResolutionTransformer().transform(c)
+    new LabelResolutionTransformer().transform(c0)
   }
 
   def verify(fn: IRFunc): Unit = {

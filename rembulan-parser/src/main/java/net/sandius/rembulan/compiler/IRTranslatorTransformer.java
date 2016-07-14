@@ -2,6 +2,7 @@ package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
+import net.sandius.rembulan.parser.analysis.ResolvedLabel;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.VarMapping;
 import net.sandius.rembulan.parser.analysis.Variable;
@@ -30,6 +31,7 @@ public class IRTranslatorTransformer extends Transformer {
 	private final Stack<AbstractVal> vals;
 
 	private final Stack<Label> breakLabels;
+	private final Map<ResolvedLabel, Label> userLabels;
 
 	private boolean assigning;
 	private boolean onStack;
@@ -54,6 +56,7 @@ public class IRTranslatorTransformer extends Transformer {
 		this.assigning = false;
 		this.onStack = false;
 		this.breakLabels = new Stack<>();
+		this.userLabels = new HashMap<>();
 
 		this.vars = new HashMap<>();
 		this.uvs = new HashMap<>();
@@ -119,6 +122,18 @@ public class IRTranslatorTransformer extends Transformer {
 			w = provider.newUpVar();
 			uvs.put(v, w);
 			return w;
+		}
+	}
+
+	private Label userLabel(ResolvedLabel rl) {
+		Label l = userLabels.get(rl);
+		if (l != null) {
+			return l;
+		}
+		else {
+			l = insns.newLabel();
+			userLabels.put(rl, l);
+			return l;
 		}
 	}
 
@@ -844,12 +859,20 @@ public class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(LabelStatement node) {
-		throw new UnsupportedOperationException("label statement");  // TODO
+		ResolvedLabel rl = TranslationUtils.resolvedLabel(node);
+
+		insns.add(userLabel(rl));
+
+		return node;
 	}
 
 	@Override
 	public BodyStatement transform(GotoStatement node) {
-		throw new UnsupportedOperationException("goto statement");  // TODO
+		ResolvedLabel rl = TranslationUtils.resolvedLabel(node);
+
+		insns.add(new Jmp(userLabel(rl)));
+
+		return node;
 	}
 
 	@Override

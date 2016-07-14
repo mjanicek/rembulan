@@ -98,14 +98,6 @@ class FunctionVarInfoBuilder {
 		}
 	}
 
-	public ResolvedLabel defLabel(Name n, int line) {
-		throw new UnsupportedOperationException();  // TODO
-	}
-
-	public ResolvedLabel useLabel(Name n, int line) {
-		throw new UnsupportedOperationException();  // TODO
-	}
-
 	public FunctionVarInfo toVarInfo() {
 		return new FunctionVarInfo(
 				Collections.unmodifiableList(params),

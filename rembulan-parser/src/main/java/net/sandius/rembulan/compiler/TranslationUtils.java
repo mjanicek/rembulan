@@ -3,9 +3,12 @@ package net.sandius.rembulan.compiler;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.UnOp;
 import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
+import net.sandius.rembulan.parser.analysis.ResolvedLabel;
 import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.VarMapping;
 import net.sandius.rembulan.parser.ast.Chunk;
+import net.sandius.rembulan.parser.ast.GotoStatement;
+import net.sandius.rembulan.parser.ast.LabelStatement;
 import net.sandius.rembulan.parser.ast.Operator;
 import net.sandius.rembulan.parser.ast.SyntaxElement;
 import net.sandius.rembulan.parser.ast.VarExpr;
@@ -61,6 +64,22 @@ abstract class TranslationUtils {
 			throw new IllegalStateException("Unresolved variable '" + e.name().value() + "' at " + AttributeUtils.sourceInfoString(e));
 		}
 		return rv;
+	}
+
+	public static ResolvedLabel resolvedLabel(LabelStatement e) {
+		ResolvedLabel rl = e.attributes().get(ResolvedLabel.class);
+		if (rl == null) {
+			throw new IllegalStateException("Unresolved label '" + e.labelName().value() + "' at " + AttributeUtils.sourceInfoString(e));
+		}
+		return rl;
+	}
+
+	public static ResolvedLabel resolvedLabel(GotoStatement e) {
+		ResolvedLabel rl = e.attributes().get(ResolvedLabel.class);
+		if (rl == null) {
+			throw new IllegalStateException("Unresolved goto '" + e.labelName().value() + "' at " + AttributeUtils.sourceInfoString(e));
+		}
+		return rl;
 	}
 
 	public static FunctionVarInfo funcVarInfo(SyntaxElement e) {

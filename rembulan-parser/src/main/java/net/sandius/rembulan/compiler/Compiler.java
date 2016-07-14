@@ -9,6 +9,7 @@ import net.sandius.rembulan.compiler.gen.CompiledClass;
 import net.sandius.rembulan.compiler.util.CodeSimplifier;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
+import net.sandius.rembulan.parser.analysis.LabelResolutionTransformer;
 import net.sandius.rembulan.parser.analysis.NameResolutionTransformer;
 import net.sandius.rembulan.parser.ast.Chunk;
 import net.sandius.rembulan.util.Check;
@@ -27,13 +28,14 @@ public class Compiler {
 	}
 
 	private static Module translate(Chunk chunk) {
-		// resolve names
-		Chunk resolved = new NameResolutionTransformer().transform(chunk);
+		// resolve variable names and labels
+		chunk = new NameResolutionTransformer().transform(chunk);
+		chunk = new LabelResolutionTransformer().transform(chunk);
 
 		// translate into IR
 		ModuleBuilder moduleBuilder = new ModuleBuilder();
 		IRTranslatorTransformer translator = new IRTranslatorTransformer(moduleBuilder);
-		translator.transform(resolved);
+		translator.transform(chunk);
 		return moduleBuilder.build();
 	}
 
