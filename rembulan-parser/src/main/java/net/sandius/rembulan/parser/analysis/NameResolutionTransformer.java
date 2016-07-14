@@ -146,4 +146,16 @@ public class NameResolutionTransformer extends Transformer {
 		return node.update(c, b);
 	}
 
+	@Override
+	public BodyStatement transform(LabelStatement node) {
+		ResolvedLabel rl = fnScope.defLabel(node.labelName(), node.line());
+		return node.with(rl);
+	}
+
+	@Override
+	public BodyStatement transform(GotoStatement node) {
+		ResolvedLabel rl = fnScope.useLabel(node.labelName(), node.line());
+		return node.with(rl);
+	}
+
 }

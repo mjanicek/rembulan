@@ -14,6 +14,10 @@ public abstract class SyntaxElement {
 		return attr.get(SourceInfo.class);
 	}
 
+	public int line() {
+		return sourceInfo().line();
+	}
+
 	public Attributes attributes() {
 		return attr;
 	}
