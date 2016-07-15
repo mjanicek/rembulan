@@ -7,8 +7,10 @@ import net.sandius.rembulan.compiler.analysis.SlotAllocator;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.analysis.Typer;
 import net.sandius.rembulan.compiler.gen.BytecodeEmitter;
+import net.sandius.rembulan.compiler.gen.ClassNameTranslator;
 import net.sandius.rembulan.compiler.gen.CompiledClass;
-import net.sandius.rembulan.compiler.gen.asm.ASMBytecodeEmitter;
+import net.sandius.rembulan.compiler.gen.SuffixingClassNameTranslator;
+import net.sandius.rembulan.compiler.gen.mk2.ASMBytecodeEmitter;
 import net.sandius.rembulan.compiler.tf.BranchInliner;
 import net.sandius.rembulan.compiler.tf.CPUAccounter;
 import net.sandius.rembulan.compiler.tf.CodeSimplifier;
@@ -20,12 +22,9 @@ import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 
 import java.io.ByteArrayInputStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -122,12 +121,13 @@ public class Compiler {
 		return result;
 	}
 
-	private CompiledClass compileFunction(ProcessedFunc pf) {
-		BytecodeEmitter emitter = new ASMBytecodeEmitter();
-		return emitter.emit(pf.fn, pf.slots, pf.types, pf.deps);
+	private CompiledClass compileFunction(ProcessedFunc pf, String sourceFileName, String rootClassName) {
+		ClassNameTranslator classNameTranslator = new SuffixingClassNameTranslator(rootClassName);
+		BytecodeEmitter emitter = new ASMBytecodeEmitter(pf.fn, pf.slots, pf.types, pf.deps, classNameTranslator, sourceFileName);
+		return emitter.emit();
 	}
 
-	public CompiledModule compile(String sourceText) throws ParseException {
+	public CompiledModule compile(String sourceText, String sourceFileName, String rootClassName) throws ParseException {
 		Check.notNull(sourceText);
 		Chunk ast = parse(sourceText);
 		Module module = translate(ast);
@@ -137,7 +137,7 @@ public class Compiler {
 		Map<String, ByteVector> classMap = new HashMap<>();
 		String mainClass = null;
 		for (ProcessedFunc pf : pfs) {
-			CompiledClass cc = compileFunction(pf);
+			CompiledClass cc = compileFunction(pf, sourceFileName, rootClassName);
 
 			if (pf.fn.id().isRoot()) {
 				assert (mainClass == null);

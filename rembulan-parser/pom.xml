@@ -16,6 +16,10 @@
   <version>${project.parent.version}</version>
   <packaging>jar</packaging>
 
+  <properties>
+    <asm.version>5.0.4</asm.version>
+  </properties>
+
   <dependencies>
 
     <dependency>
@@ -35,6 +39,24 @@
       <groupId>net.sandius.rembulan</groupId>
       <artifactId>rembulan-compiler</artifactId>
       <version>${project.parent.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm</artifactId>
+      <version>${asm.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-analysis</artifactId>
+      <version>${asm.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.ow2.asm</groupId>
+      <artifactId>asm-util</artifactId>
+      <version>${asm.version}</version>
     </dependency>
 
   </dependencies>

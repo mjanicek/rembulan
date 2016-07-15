@@ -11,12 +11,14 @@ public class IRFunc {
 
 	private final FunctionId id;
 	private final List<Var> params;
+	private final boolean vararg;
 	private final List<UpVar> upvals;
 	private final Code code;
 
-	public IRFunc(FunctionId id, List<Var> params, List<UpVar> upvals, Code code) {
+	public IRFunc(FunctionId id, List<Var> params, boolean vararg, List<UpVar> upvals, Code code) {
 		this.id = Check.notNull(id);
 		this.params = Check.notNull(params);
+		this.vararg = vararg;
 		this.upvals = Check.notNull(upvals);
 		this.code = Check.notNull(code);
 	}
@@ -45,6 +47,10 @@ public class IRFunc {
 		return params;
 	}
 
+	public boolean isVararg() {
+		return vararg;
+	}
+
 	public List<UpVar> upvals() {
 		return upvals;
 	}
@@ -58,7 +64,7 @@ public class IRFunc {
 			return this;
 		}
 		else {
-			return new IRFunc(id, params, upvals, code);
+			return new IRFunc(id, params, vararg, upvals, code);
 		}
 	}
 

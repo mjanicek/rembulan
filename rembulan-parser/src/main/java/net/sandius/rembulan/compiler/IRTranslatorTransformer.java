@@ -40,6 +40,7 @@ class IRTranslatorTransformer extends Transformer {
 	private final Map<Variable.Ref, UpVar> uvs;
 
 	private final List<Var> params;
+	private boolean vararg;
 	private final List<UpVar> upvals;
 
 	private int nextNestedFnIdx;
@@ -62,6 +63,7 @@ class IRTranslatorTransformer extends Transformer {
 		this.uvs = new HashMap<>();
 
 		this.params = new ArrayList<>();
+		this.vararg = false;
 		this.upvals = new ArrayList<>();
 
 		this.nextNestedFnIdx = 0;
@@ -74,6 +76,7 @@ class IRTranslatorTransformer extends Transformer {
 	private IRFunc result() {
 		return new IRFunc(id,
 				Collections.unmodifiableList(params),
+				vararg,
 				Collections.unmodifiableList(upvals),
 				insns.build());
 	}
@@ -519,6 +522,9 @@ class IRTranslatorTransformer extends Transformer {
 			Var w = var(v);
 			params.add(w);
 		}
+
+		vararg = fi.isVararg();
+
 		for (Variable.Ref uv : fi.upvalues()) {
 			UpVar u = upVar(uv);  // FIXME: is this correct?
 			upvals.add(u);

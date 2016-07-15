@@ -4,9 +4,32 @@ import net.sandius.rembulan.compiler.gen.ClassNameTranslator;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntVector;
 
+import java.util.Comparator;
+
 public class FunctionId {
 
 	private final IntVector indices;
+
+	public static final Comparator<FunctionId> LEXICOGRAPHIC_COMPARATOR = new Comparator<FunctionId>() {
+		@Override
+		public int compare(FunctionId a, FunctionId b) {
+			int la = a.indices.length();
+			int lb = b.indices.length();
+
+			int len = Math.min(la, lb);
+			for (int i = 0; i < len; i++) {
+				int ai = a.indices.get(i);
+				int bi = b.indices.get(i);
+
+				int diff = ai - bi;
+				if (diff != 0) {
+					return diff;
+				}
+			}
+
+			return la - lb;
+		}
+	};
 
 	private FunctionId(IntVector indices) {
 		this.indices = Check.notNull(indices);
@@ -59,6 +82,17 @@ public class FunctionId {
 		newIndices[indices.length()] = index;
 
 		return new FunctionId(IntVector.wrap(newIndices));
+	}
+
+	public FunctionId parent() {
+		if (isRoot()) {
+			return null;
+		}
+		else {
+			int[] newIndices = new int[indices.length() - 1];
+			indices.copyToArray(newIndices, 0, indices.length() - 1);
+			return new FunctionId(IntVector.wrap(newIndices));
+		}
 	}
 
 	public String toClassName(ClassNameTranslator tr) {

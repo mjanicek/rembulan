@@ -10,15 +10,18 @@ public class CompilerChunkLoader extends ChunkLoader {
 
 	private final ChunkClassLoader chunkClassLoader;
 
+	private int idx;
+
 	public CompilerChunkLoader(ClassLoader classLoader) {
 		this.chunkClassLoader = new ChunkClassLoader(classLoader);
+		this.idx = 0;
 	}
 
 	@Override
 	public Function loadTextChunk(Upvalue env, String chunkName, String sourceText) throws LoaderException {
 		try {
 			Compiler compiler = new Compiler();
-			CompiledModule result = compiler.compile(sourceText);
+			CompiledModule result = compiler.compile(sourceText, "stdin", "f" + (idx++));  // FIXME
 
 			String mainClassName = chunkClassLoader.install(result);
 			Class<?> clazz = chunkClassLoader.loadClass(mainClassName);
