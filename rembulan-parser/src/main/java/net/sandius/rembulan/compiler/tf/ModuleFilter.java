@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.util;
+package net.sandius.rembulan.compiler.tf;
 
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.IRFunc;
