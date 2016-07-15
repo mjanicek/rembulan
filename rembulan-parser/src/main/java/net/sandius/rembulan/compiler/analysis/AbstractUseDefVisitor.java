@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.ir.*;
 
-public abstract class AbstractUseDefVisitor extends IRVisitor {
+abstract class AbstractUseDefVisitor extends IRVisitor {
 
 	protected abstract void def(Val v);
 	protected abstract void use(Val v);

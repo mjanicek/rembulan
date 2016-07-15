@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 import net.sandius.rembulan.compiler._
 import net.sandius.rembulan.compiler.analysis._
 import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter, CodeSimplifier}
-import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
+import net.sandius.rembulan.compiler.util.IRPrinterVisitor
 import net.sandius.rembulan.parser.analysis.NameResolver
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.test._
@@ -47,11 +47,6 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def resolveNames(c: Chunk): Chunk = NameResolver.resolveNames(c)
-
-  def verify(fn: IRFunc): Unit = {
-    val visitor = new CodeVisitor(new TempUseVerifierVisitor())
-    visitor.visit(fn)
-  }
 
   def insertCpuAccounting(fn: IRFunc): IRFunc = CPUAccounter.insertCPUAccounting(fn)
 
@@ -126,7 +121,6 @@ class IRTranslationTest extends FunSpec with MustMatchers {
             println("Function [" + fn.id + "]")
             println()
             printBlocks(fn.blocks)
-            verify(fn)
           }
         }
 
