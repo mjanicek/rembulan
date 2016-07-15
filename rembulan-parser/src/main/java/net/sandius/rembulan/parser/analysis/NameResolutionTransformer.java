@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class NameResolutionTransformer extends Transformer {
+class NameResolutionTransformer extends Transformer {
 
 	private FunctionVarInfoBuilder fnScope;
 

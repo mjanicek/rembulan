@@ -23,7 +23,7 @@ import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.M
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_FLOAT;
 import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_INTEGER;
 
-public class TyperVisitor extends CodeVisitor {
+class TyperVisitor extends CodeVisitor {
 
 	private final Map<Val, Type> valTypes;
 	private final Map<PhiVal, Type> phiValTypes;

@@ -3,7 +3,8 @@ package net.sandius.rembulan.compiler.util;
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.Module;
-import net.sandius.rembulan.compiler.analysis.NestedRefVisitor;
+import net.sandius.rembulan.compiler.analysis.DependencyAnalyser;
+import net.sandius.rembulan.compiler.analysis.DependencyInfo;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
@@ -28,9 +29,8 @@ public abstract class ModuleFilter {
 		while (!open.isEmpty()) {
 			IRFunc fn = open.pop();
 			if (!visited.add(fn.id())) {
-				NestedRefVisitor visitor = new NestedRefVisitor();
-				visitor.visit(fn);
-				for (FunctionId id : visitor.dependencyInfo().nestedRefs()) {
+				DependencyInfo depInfo = DependencyAnalyser.analyse(fn);
+				for (FunctionId id : depInfo.nestedRefs()) {
 					open.add(m.get(id));
 				}
 			}

@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-public class NestedRefVisitor extends CodeVisitor {
+class NestedRefVisitor extends CodeVisitor {
 
 	private final Set<FunctionId> ids;
 

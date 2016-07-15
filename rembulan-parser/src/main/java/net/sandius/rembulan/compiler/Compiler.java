@@ -1,18 +1,18 @@
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.compiler.analysis.BranchInlinerVisitor;
+import net.sandius.rembulan.compiler.tf.BranchInliner;
 import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
 import net.sandius.rembulan.compiler.analysis.SlotAllocator;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
-import net.sandius.rembulan.compiler.analysis.TyperVisitor;
+import net.sandius.rembulan.compiler.analysis.Typer;
 import net.sandius.rembulan.compiler.gen.BytecodeEmitter;
 import net.sandius.rembulan.compiler.gen.CompiledClass;
 import net.sandius.rembulan.compiler.gen.asm.ASMBytecodeEmitter;
+import net.sandius.rembulan.compiler.tf.CPUAccounter;
 import net.sandius.rembulan.compiler.util.CodeSimplifier;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
-import net.sandius.rembulan.parser.analysis.LabelResolutionTransformer;
-import net.sandius.rembulan.parser.analysis.NameResolutionTransformer;
+import net.sandius.rembulan.parser.analysis.NameResolver;
 import net.sandius.rembulan.parser.ast.Chunk;
 import net.sandius.rembulan.util.Check;
 
@@ -30,48 +30,13 @@ public class Compiler {
 	}
 
 	private static Module translate(Chunk chunk) {
-		// resolve variable names and labels
-		chunk = new NameResolutionTransformer().transform(chunk);
-		chunk = new LabelResolutionTransformer().transform(chunk);
-
-		// translate into IR
-		ModuleBuilder moduleBuilder = new ModuleBuilder();
-		IRTranslatorTransformer translator = new IRTranslatorTransformer(moduleBuilder);
-		translator.transform(chunk);
-		return moduleBuilder.build();
+		chunk = NameResolver.resolveNames(chunk);
+		return IRTranslator.translate(chunk);
 	}
 
 	private Iterable<IRFunc> sortTopologically(Module module) {
 		// TODO
 		return module.fns();
-	}
-
-	private IRFunc insertCPUAccounting(IRFunc fn) {
-		CPUAccountingVisitor visitor = new CPUAccountingVisitor(CPUAccountingVisitor.INITIALISE);
-		visitor.visit(fn);
-		return fn.update(visitor.result());
-  	}
-
-	private IRFunc collectCPUAccounting(IRFunc fn) {
-		CPUAccountingVisitor visitor = new CPUAccountingVisitor(CPUAccountingVisitor.COLLECT);
-		visitor.visit(fn);
-		return fn.update(visitor.result());
-  	}
-
-	private IRFunc inlineBranches(IRFunc fn, TypeInfo typeInfo) {
-		BranchInlinerVisitor visitor = new BranchInlinerVisitor(typeInfo);
-		visitor.visit(fn);
-		return fn.update(visitor.result());
-	}
-
-	private TypeInfo typeInfo(IRFunc fn) {
-		TyperVisitor visitor = new TyperVisitor();
-		visitor.visit(fn);
-		return visitor.valTypes();
-	}
-
-	private SlotAllocInfo assignSlots(IRFunc fn) {
-		return SlotAllocator.allocateSlots(fn);
 	}
 
 	private CompiledClass emitBytecode(IRFunc fn, SlotAllocInfo slots, TypeInfo typeInfo) {
@@ -85,9 +50,9 @@ public class Compiler {
 		do {
 			oldFn = fn;
 
-			TypeInfo typeInfo = typeInfo(fn);
-			fn = collectCPUAccounting(fn);
-			fn = inlineBranches(fn, typeInfo);
+			TypeInfo typeInfo = Typer.analyseTypes(fn);
+			fn = CPUAccounter.collectCPUAccounting(fn);
+			fn = BranchInliner.inlineBranches(fn, typeInfo);
 			fn = fn.update(CodeSimplifier.pruneUnreachableCode(fn.blocks()));
 			fn = fn.update(CodeSimplifier.mergeBlocks(fn.blocks()));
 
@@ -97,11 +62,11 @@ public class Compiler {
 	}
 
 	private CompiledClass compile(IRFunc fn) {
-		fn = insertCPUAccounting(fn);
+		fn = CPUAccounter.insertCPUAccounting(fn);
 		fn = optimise(fn);
 
-		SlotAllocInfo slots = assignSlots(fn);
-		TypeInfo typeInfo = typeInfo(fn);
+		SlotAllocInfo slots = SlotAllocator.allocateSlots(fn);
+		TypeInfo typeInfo = Typer.analyseTypes(fn);
 
 		return emitBytecode(fn, slots, typeInfo);
 	}

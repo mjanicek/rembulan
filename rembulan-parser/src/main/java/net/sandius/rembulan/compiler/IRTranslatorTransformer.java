@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-public class IRTranslatorTransformer extends Transformer {
+class IRTranslatorTransformer extends Transformer {
 
 	private final ModuleBuilder moduleBuilder;
 

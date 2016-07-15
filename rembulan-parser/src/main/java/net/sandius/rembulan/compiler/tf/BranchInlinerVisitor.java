@@ -1,5 +1,6 @@
-package net.sandius.rembulan.compiler.analysis;
+package net.sandius.rembulan.compiler.tf;
 
+import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.compiler.ir.Branch;
 import net.sandius.rembulan.compiler.ir.Jmp;
@@ -7,7 +8,7 @@ import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.compiler.types.Type;
 import net.sandius.rembulan.util.Check;
 
-public class BranchInlinerVisitor extends CodeTransformerVisitor {
+class BranchInlinerVisitor extends CodeTransformerVisitor {
 
 	private final TypeInfo types;
 	private Boolean inline;

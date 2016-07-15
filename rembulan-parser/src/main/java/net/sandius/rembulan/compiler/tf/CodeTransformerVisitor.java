@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.analysis;
+package net.sandius.rembulan.compiler.tf;
 
 import net.sandius.rembulan.compiler.BasicBlock;
 import net.sandius.rembulan.compiler.Code;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CodeTransformerVisitor extends CodeVisitor {
+class CodeTransformerVisitor extends CodeVisitor {
 
 	private final List<BasicBlock> basicBlocks;
 

@@ -2,7 +2,7 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintWriter}
 
-import net.sandius.rembulan.parser.analysis.{FunctionVarInfo, NameResolutionTransformer}
+import net.sandius.rembulan.parser.analysis.{FunctionVarInfo, NameResolver}
 import net.sandius.rembulan.parser.ast._
 import net.sandius.rembulan.parser.util.FormattingPrinterVisitor
 import net.sandius.rembulan.test._
@@ -42,9 +42,7 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     new Parser(bais).Chunk()
   }
 
-  def resolveNames(chunk: Chunk): Chunk = {
-    new NameResolutionTransformer().transform(chunk)
-  }
+  def resolveNames(chunk: Chunk): Chunk = NameResolver.resolveNames(chunk)
 
   def extractVarInfo(chunk: Chunk): Map[Object, (FunctionDefExpr.Params, FunctionVarInfo)] = {
     val m = mutable.Map.empty[Object, (FunctionDefExpr.Params, FunctionVarInfo)]

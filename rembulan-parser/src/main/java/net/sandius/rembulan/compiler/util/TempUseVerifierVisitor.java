@@ -9,6 +9,7 @@ import java.util.Set;
 
 // A visitor that checks that each temp is assigned to before used, and that no temp
 // is assigned to more than once.
+@Deprecated
 public class TempUseVerifierVisitor extends AbstractUseDefVisitor {
 
 	private final Set<Val> assignedTo;

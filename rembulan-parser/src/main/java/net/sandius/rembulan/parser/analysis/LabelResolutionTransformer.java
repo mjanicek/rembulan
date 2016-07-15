@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-public class LabelResolutionTransformer extends Transformer {
+class LabelResolutionTransformer extends Transformer {
 
 	private final Stack<Scope> scopes;
 

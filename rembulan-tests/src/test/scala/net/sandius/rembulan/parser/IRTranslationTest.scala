@@ -2,16 +2,16 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, PrintWriter}
 
-import net.sandius.rembulan.compiler.analysis._
-import net.sandius.rembulan.compiler.ir.Branch
 import net.sandius.rembulan.compiler._
+import net.sandius.rembulan.compiler.analysis._
+import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter}
 import net.sandius.rembulan.compiler.util.{CodeSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
-import net.sandius.rembulan.parser.analysis.{LabelResolutionTransformer, NameResolutionTransformer}
+import net.sandius.rembulan.parser.analysis.NameResolver
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.test._
 import org.junit.runner.RunWith
-import org.scalatest.{FunSpec, MustMatchers}
 import org.scalatest.junit.JUnitRunner
+import org.scalatest.{FunSpec, MustMatchers}
 
 import scala.annotation.tailrec
 import scala.collection.JavaConverters._
@@ -46,49 +46,24 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     parser.Chunk()
   }
 
-  def resolveNames(c: Chunk): Chunk = {
-    val c0 = new NameResolutionTransformer().transform(c)
-    new LabelResolutionTransformer().transform(c0)
-  }
+  def resolveNames(c: Chunk): Chunk = NameResolver.resolveNames(c)
 
   def verify(fn: IRFunc): Unit = {
     val visitor = new CodeVisitor(new TempUseVerifierVisitor())
     visitor.visit(fn)
   }
 
-  def insertCpuAccounting(fn: IRFunc): IRFunc = {
-    val visitor = new CPUAccountingVisitor(CPUAccountingVisitor.INITIALISE)
-    visitor.visit(fn.blocks())
-    fn.update(visitor.result())
-  }
+  def insertCpuAccounting(fn: IRFunc): IRFunc = CPUAccounter.insertCPUAccounting(fn)
 
-  def collectCpuAccounting(fn: IRFunc): IRFunc = {
-    val visitor = new CPUAccountingVisitor(CPUAccountingVisitor.COLLECT)
-    visitor.visit(fn.blocks())
-    fn.update(visitor.result())
-  }
+  def collectCpuAccounting(fn: IRFunc): IRFunc = CPUAccounter.collectCPUAccounting(fn)
 
-  def typeInfo(fn: IRFunc): TypeInfo = {
-    val visitor = new TyperVisitor()
-    visitor.visit(fn)
-    visitor.valTypes()
-  }
+  def typeInfo(fn: IRFunc): TypeInfo = Typer.analyseTypes(fn)
 
-  def dependencyInfo(fn: IRFunc): DependencyInfo = {
-    val visitor = new NestedRefVisitor()
-    visitor.visit(fn)
-    visitor.dependencyInfo()
-  }
+  def dependencyInfo(fn: IRFunc): DependencyInfo = DependencyAnalyser.analyse(fn)
 
-  def slotInfo(fn: IRFunc): SlotAllocInfo = {
-    SlotAllocator.allocateSlots(fn)
-  }
+  def slotInfo(fn: IRFunc): SlotAllocInfo = SlotAllocator.allocateSlots(fn)
 
-  def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = {
-    val visitor = new BranchInlinerVisitor(types)
-    visitor.visit(fn)
-    fn.update(visitor.result())
-  }
+  def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = BranchInliner.inlineBranches(fn, types)
 
   def printTypes(types: TypeInfo): Unit = {
     println("Values:")
@@ -146,10 +121,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
         it (ss) {
           val ck = resolveNames(parseChunk(ss))
 
-          val modBuilder = new ModuleBuilder()
-          val translator = new IRTranslatorTransformer(modBuilder)
-          translator.transform(ck)
-          val mod = modBuilder.build()
+          val mod = IRTranslator.translate(ck)
           for (fn <- mod.fns().asScala) {
             println("Function [" + fn.id + "]")
             println()
@@ -170,9 +142,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   def translate(chunk: Chunk): Module = {
     val resolved = resolveNames(chunk)
     val modBuilder = new ModuleBuilder()
-    val translator = new IRTranslatorTransformer(modBuilder)
-    translator.transform(resolved)
-    modBuilder.build()
+    IRTranslator.translate(resolved)
   }
 
   def compile(fn: IRFunc): CompiledFn = {
