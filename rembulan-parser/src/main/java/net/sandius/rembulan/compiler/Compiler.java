@@ -9,7 +9,7 @@ import net.sandius.rembulan.compiler.gen.BytecodeEmitter;
 import net.sandius.rembulan.compiler.gen.CompiledClass;
 import net.sandius.rembulan.compiler.gen.asm.ASMBytecodeEmitter;
 import net.sandius.rembulan.compiler.tf.CPUAccounter;
-import net.sandius.rembulan.compiler.util.CodeSimplifier;
+import net.sandius.rembulan.compiler.tf.CodeSimplifier;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.analysis.NameResolver;
@@ -53,8 +53,8 @@ public class Compiler {
 			TypeInfo typeInfo = Typer.analyseTypes(fn);
 			fn = CPUAccounter.collectCPUAccounting(fn);
 			fn = BranchInliner.inlineBranches(fn, typeInfo);
-			fn = fn.update(CodeSimplifier.pruneUnreachableCode(fn.blocks()));
-			fn = fn.update(CodeSimplifier.mergeBlocks(fn.blocks()));
+			fn = CodeSimplifier.pruneUnreachableCode(fn);
+			fn = CodeSimplifier.mergeBlocks(fn);
 
 		} while (!oldFn.equals(fn));
 

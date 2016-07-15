@@ -1,7 +1,8 @@
-package net.sandius.rembulan.compiler.util;
+package net.sandius.rembulan.compiler.tf;
 
 import net.sandius.rembulan.compiler.BasicBlock;
 import net.sandius.rembulan.compiler.Code;
+import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.ToNext;
@@ -53,7 +54,7 @@ public abstract class CodeSimplifier {
 		return uses;
 	}
 
-	public static Code pruneUnreachableCode(Code code) {
+	static Code pruneUnreachableCode(Code code) {
 		Check.notNull(code);
 
 		Set<Label> reachable = uses(code).keySet();
@@ -68,6 +69,10 @@ public abstract class CodeSimplifier {
 		}
 
 		return Code.of(result);
+	}
+
+	public static IRFunc pruneUnreachableCode(IRFunc fn) {
+		return fn.update(pruneUnreachableCode(fn.blocks()));
 	}
 
 	private static BasicBlock merge(BasicBlock a, BasicBlock b) {
@@ -89,7 +94,7 @@ public abstract class CodeSimplifier {
 		return it.hasNext() ? it.next() : null;
 	}
 
-	public static Code mergeBlocks(Code code) {
+	static Code mergeBlocks(Code code) {
 		Check.notNull(code);
 
 		Map<Label, Integer> uses = uses(code);
@@ -124,6 +129,10 @@ public abstract class CodeSimplifier {
 		result.add(a);
 
 		return Code.of(result);
+	}
+
+	public static IRFunc mergeBlocks(IRFunc fn) {
+		return fn.update(mergeBlocks(fn.blocks()));
 	}
 
 }

@@ -4,8 +4,8 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.compiler._
 import net.sandius.rembulan.compiler.analysis._
-import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter}
-import net.sandius.rembulan.compiler.util.{CodeSimplifier, IRPrinterVisitor, TempUseVerifierVisitor}
+import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter, CodeSimplifier}
+import net.sandius.rembulan.compiler.util.{IRPrinterVisitor, TempUseVerifierVisitor}
 import net.sandius.rembulan.parser.analysis.NameResolver
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.test._
@@ -151,8 +151,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     def pass(fn: IRFunc, types: TypeInfo): IRFunc = {
       val withCpu = collectCpuAccounting(fn)
       val inlined = inlineBranches(withCpu, types)
-      val filtered = inlined.update(CodeSimplifier.pruneUnreachableCode(inlined.blocks()))
-      val merged = filtered.update(CodeSimplifier.mergeBlocks(filtered.blocks()))
+      val filtered = CodeSimplifier.pruneUnreachableCode(inlined)
+      val merged = CodeSimplifier.mergeBlocks(filtered)
       merged
     }
 
