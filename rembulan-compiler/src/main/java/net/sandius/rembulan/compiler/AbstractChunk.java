@@ -9,6 +9,7 @@ import java.util.Map;
 
 public abstract class AbstractChunk {
 
+	@Deprecated
 	public abstract Iterable<CompiledClass> classes();
 
 	public Map<String, ByteVector> classMap() {
