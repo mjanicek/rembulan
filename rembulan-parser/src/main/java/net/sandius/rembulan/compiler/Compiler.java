@@ -5,7 +5,9 @@ import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
 import net.sandius.rembulan.compiler.analysis.SlotAllocator;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.analysis.TyperVisitor;
+import net.sandius.rembulan.compiler.gen.BytecodeEmitter;
 import net.sandius.rembulan.compiler.gen.CompiledClass;
+import net.sandius.rembulan.compiler.gen.asm.ASMBytecodeEmitter;
 import net.sandius.rembulan.compiler.util.CodeSimplifier;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
@@ -73,7 +75,8 @@ public class Compiler {
 	}
 
 	private CompiledClass emitBytecode(IRFunc fn, SlotAllocInfo slots, TypeInfo typeInfo) {
-		throw new UnsupportedOperationException();  // TODO
+		BytecodeEmitter emitter = new ASMBytecodeEmitter();
+		return emitter.emit(fn, slots, typeInfo);
 	}
 
 	private IRFunc optimise(IRFunc fn) {
