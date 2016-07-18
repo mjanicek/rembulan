@@ -28,10 +28,17 @@ import org.objectweb.asm.util.TraceClassVisitor;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ACC_FINAL;
+import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
+import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
+import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.ACC_SUPER;
+import static org.objectweb.asm.Opcodes.V1_7;
 
 public class ASMBytecodeEmitter extends BytecodeEmitter {
 
@@ -46,7 +53,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 
 	private final ClassNode classNode;
 
-	private final ArrayList<String> upvalueFieldNames;
+	private final HashMap<UpVar, String> upvalueFieldNames;
 
 	private boolean verifyAndPrint;
 
@@ -69,7 +76,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 
 		classNode = new ClassNode();
 
-		upvalueFieldNames = new ArrayList<>();
+		upvalueFieldNames = new HashMap<>();
 
 		String s = System.getProperty("net.sandius.rembulan.compiler.VerifyAndPrint");
 		verifyAndPrint = s != null && "true".equals(s.trim().toLowerCase());
@@ -211,7 +218,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		return n;  // TODO
 	}
 
-	private static String ensureUnique(List<String> ss, String s) {
+	private static String ensureUnique(Collection<String> ss, String s) {
 		int idx = 0;
 		String prefix = s;
 
@@ -226,19 +233,11 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		return "uv";  // TODO
 	}
 
-
-	private void setUpvalueFieldNames() {
-		upvalueFieldNames.clear();
-		for (int i = 0; i < fn.upvals().size(); i++) {
-			UpVar uv = fn.upvals().get(i);
-			upvalueFieldNames.add(toFieldName(ensureUnique(upvalueFieldNames, preferredUpvalueName(uv))));
-		}
-	}
-
 	private void addUpvalueFields() {
-		setUpvalueFieldNames();
+		for (UpVar uv : fn.upvals()) {
+			String name = toFieldName(ensureUnique(upvalueFieldNames.values(), preferredUpvalueName(uv)));
+			upvalueFieldNames.put(uv, name);
 
-		for (String name : upvalueFieldNames) {
 			FieldNode fieldNode = new FieldNode(
 					ACC_PROTECTED + ACC_FINAL,
 					name,
@@ -250,10 +249,10 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		}
 	}
 
-	public String getUpvalueFieldName(int idx) {
-		String name = upvalueFieldNames.get(idx);
+	public String getUpvalueFieldName(UpVar uv) {
+		String name = upvalueFieldNames.get(uv);
 		if (name == null) {
-			throw new IllegalArgumentException("upvalue field name is null for index " + idx);
+			throw new IllegalArgumentException("upvalue field name is null for upvalue " + uv);
 		}
 		return name;
 	}

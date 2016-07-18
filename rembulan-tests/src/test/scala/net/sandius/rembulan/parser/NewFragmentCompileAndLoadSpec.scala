@@ -1,6 +1,8 @@
 package net.sandius.rembulan.parser
 
-import net.sandius.rembulan.compiler.Compiler
+import net.sandius.rembulan.compiler.{ChunkClassLoader, Compiler}
+import net.sandius.rembulan.core.Upvalue
+import net.sandius.rembulan.core.impl.DefaultUpvalue
 import net.sandius.rembulan.test.BasicFragments
 import net.sandius.rembulan.{core => lua}
 import org.junit.runner.RunWith
@@ -31,10 +33,13 @@ class NewFragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
           cm must not be null
         }
 
-/*
         it ("can be loaded by the VM") {
           val classLoader = new ChunkClassLoader()
-          val name = classLoader.install(chunk)
+
+          val compiler = new Compiler()
+          val cm = compiler.compile(fragment.code, "stdin", "test")
+
+          val name = classLoader.install(cm)
           val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
           val f = try {
@@ -46,7 +51,7 @@ class NewFragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
 
           f must not be null
         }
-*/
+
       }
     }
   }

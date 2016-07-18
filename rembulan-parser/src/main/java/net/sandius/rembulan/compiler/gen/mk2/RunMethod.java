@@ -32,6 +32,10 @@ import static org.objectweb.asm.Opcodes.RETURN;
 
 class RunMethod {
 
+	public final int LV_CONTEXT = 1;
+	public final int LV_RESUME = 2;
+	public final int LV_VARARGS = 3;  // index of the varargs argument, if present
+
 	private final ASMBytecodeEmitter context;
 
 	public RunMethod(ASMBytecodeEmitter context) {
@@ -40,6 +44,10 @@ class RunMethod {
 
 	public int numOfRegisters() {
 		return context.slots.numSlots();
+	}
+
+	public int slotOffset() {
+		return context.isVararg() ? LV_VARARGS + 1 : LV_VARARGS;
 	}
 
 	public boolean isResumable() {
@@ -189,8 +197,41 @@ class RunMethod {
 				null,
 				throwsExceptions());
 
-		// TODO
-		node.instructions.add(new InsnNode(RETURN));
+		InsnList insns = node.instructions;
+
+		LabelNode l_insns_begin = new LabelNode();
+		LabelNode l_insns_end = new LabelNode();
+
+		BytecodeEmitVisitor visitor = new BytecodeEmitVisitor(context, this, context.slots, context.types);
+		visitor.visit(context.fn.blocks());
+
+		insns.add(l_insns_begin);
+		insns.add(visitor.instructions());
+		insns.add(l_insns_end);
+
+		// local variables
+		{
+			List<LocalVariableNode> locals = node.localVariables;
+
+			locals.add(new LocalVariableNode("this", context.thisClassType().getDescriptor(), null, l_insns_begin, l_insns_end, 0));
+			locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, l_insns_begin, l_insns_end, LV_CONTEXT));
+			locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
+
+			if (context.isVararg()) {
+				locals.add(new LocalVariableNode(
+						"varargs",
+						ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
+						null,
+						l_insns_begin,
+						l_insns_end,
+						LV_VARARGS
+						));
+			}
+
+			for (int i = 0; i < numOfRegisters(); i++) {
+				locals.add(new LocalVariableNode("s_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, slotOffset() + i));
+			}
+		}
 
 		return node;
 	}

@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.mk2;
 
+import net.sandius.rembulan.compiler.ir.UpVar;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
@@ -63,17 +64,20 @@ class ConstructorMethod {
 				false));
 
 		// initialise upvalue fields
-		for (int i = 0; i < context.fn.upvals().size(); i++) {
-			String name = context.getUpvalueFieldName(i);
+		int idx = 0;
+		for (UpVar uv : context.fn.upvals()) {
+			String name = context.getUpvalueFieldName(uv);
 
 			il.add(new VarInsnNode(ALOAD, 0));  // this
-			il.add(new VarInsnNode(ALOAD, 1 + i));  // upvalue #i
+			il.add(new VarInsnNode(ALOAD, 1 + idx));  // upvalue #i
 			il.add(new FieldInsnNode(PUTFIELD,
 					context.thisClassType().getInternalName(),
 					name,
 					Type.getDescriptor(Upvalue.class)));
 
-			node.localVariables.add(new LocalVariableNode(name, Type.getDescriptor(Upvalue.class), null, begin, end, i));
+			node.localVariables.add(new LocalVariableNode(name, Type.getDescriptor(Upvalue.class), null, begin, end, idx));
+
+			idx++;
 		}
 
 		// instantiate closures that have no open upvalues
