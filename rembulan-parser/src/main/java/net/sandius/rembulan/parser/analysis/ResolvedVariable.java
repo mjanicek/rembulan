@@ -29,7 +29,7 @@ public class ResolvedVariable {
 	}
 
 	public boolean isGlobal() {
-		return var.equals(Variable.GLOBAL);
+		return var.equals(Variable.ENV);
 	}
 
 }

@@ -25,6 +25,10 @@ class FunctionVarInfoBuilder {
 		this.locals = new ArrayList<>();
 		this.upvals = new ArrayList<>();
 		this.varargsUsed = false;
+
+		if (parent == null) {
+			upvals.add(Variable.ENV.ref());
+		}
 	}
 
 	public FunctionVarInfoBuilder parent() {
@@ -86,7 +90,7 @@ class FunctionVarInfoBuilder {
 			}
 			else {
 				// no parent -> it's a global name
-				w = Variable.GLOBAL;
+				w = Variable.ENV;
 			}
 
 			// make sure we know about this upvalue

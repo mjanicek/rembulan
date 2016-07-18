@@ -4,7 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 public class Variable {
 
-	public static final Variable GLOBAL = new Variable();
+	public static final Variable ENV = new Variable();
 
 	private final Ref ref;
 
