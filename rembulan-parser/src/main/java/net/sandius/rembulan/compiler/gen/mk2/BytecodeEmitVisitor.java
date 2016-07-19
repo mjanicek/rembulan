@@ -730,7 +730,15 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(CPUWithdraw node) {
-		// TODO
+		ResumptionPoint rp = resumptionPoint();
+		il.add(rp.save());
+
+		il.add(loadExecutionContext());
+		il.add(loadState());
+		il.add(ASMUtils.loadInt(node.cost()));
+		il.add(LuaStateMethods.checkCpu());
+
+		il.add(rp.resume());
 	}
 
 }
