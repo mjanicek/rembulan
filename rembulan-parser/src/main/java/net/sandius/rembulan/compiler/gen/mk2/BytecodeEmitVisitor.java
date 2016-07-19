@@ -11,13 +11,16 @@ import net.sandius.rembulan.compiler.gen.asm.DispatchMethods;
 import net.sandius.rembulan.compiler.gen.asm.InvokeKind;
 import net.sandius.rembulan.compiler.gen.asm.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.ObjectSinkMethods;
+import net.sandius.rembulan.compiler.gen.asm.TableMethods;
 import net.sandius.rembulan.compiler.gen.asm.UpvalueMethods;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.util.Check;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
@@ -406,7 +409,78 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(TabStackAppend node) {
-		throw new UnsupportedOperationException("tabstackappend"); // TODO
+		/*
+		 In Java terms, we're translating this into the following loop:
+
+			Table tab;
+			ObjectSink stack = context.getObjectSink();
+			int i = 0;
+			while (i < stack.size()) {
+				tab.rawset(OFFSET + i, stack.get(i));
+				i++;
+			}
+		*/
+
+		LabelNode begin = new LabelNode();
+		LabelNode end = new LabelNode();
+		LabelNode top = new LabelNode();
+
+		int lv_idx_tab = nextLocalVariableIndex();
+		int lv_idx_stack = nextLocalVariableIndex() + 1;
+		int lv_idx_i = nextLocalVariableIndex() + 2;
+
+		locals.add(new LocalVariableNode("tab", Type.getDescriptor(Table.class), null, begin, end, lv_idx_tab));
+		locals.add(new LocalVariableNode("stack", Type.getDescriptor(ObjectSink.class), null, begin, end, lv_idx_stack));
+		locals.add(new LocalVariableNode("i", Type.INT_TYPE.getDescriptor(), null, begin, end, lv_idx_i));
+
+		il.add(begin);
+
+		il.add(new VarInsnNode(ALOAD, slot(node.obj())));
+		il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Table.class)));
+		il.add(new VarInsnNode(ASTORE, lv_idx_tab));
+
+		il.add(loadExecutionContext());
+		il.add(loadSink());
+		il.add(new VarInsnNode(ASTORE, lv_idx_stack));
+
+		il.add(ASMUtils.loadInt(0));
+		il.add(new VarInsnNode(ISTORE, lv_idx_i));
+
+		il.add(top);
+		il.add(new FrameNode(F_APPEND, 3, new Object[] {
+					Type.getInternalName(Table.class),
+					Type.getInternalName(ObjectSink.class),
+					Opcodes.INTEGER
+				}, 0, null));
+
+		il.add(new VarInsnNode(ILOAD, lv_idx_i));
+		il.add(new VarInsnNode(ALOAD, lv_idx_stack));
+		il.add(ObjectSinkMethods.size());
+		il.add(new JumpInsnNode(IF_ICMPGE, end));
+
+		il.add(new VarInsnNode(ALOAD, lv_idx_tab));
+
+		// OFFSET + i
+		il.add(ASMUtils.loadInt(node.firstIdx()));
+		il.add(new VarInsnNode(ILOAD, lv_idx_i));
+		il.add(new InsnNode(IADD));
+
+		// stack.get(i)
+		il.add(new VarInsnNode(ALOAD, lv_idx_stack));
+		il.add(new VarInsnNode(ILOAD, lv_idx_i));
+		il.add(ObjectSinkMethods.get());
+
+		// tab.rawset(offset + i, stack.get(i))
+		il.add(TableMethods.rawset_int());
+
+		// increment i
+		il.add(new IincInsnNode(lv_idx_i, 1));
+
+		il.add(new JumpInsnNode(GOTO, top));
+
+
+		il.add(end);
+		il.add(new FrameNode(F_CHOP, 3, null, 0, null));
 	}
 
 	@Override
