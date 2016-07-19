@@ -55,6 +55,10 @@ public abstract class IRVisitor {
 		if (v != null) v.visit(node);
 	}
 
+	public void visit(TabRawSet node) {
+		if (v != null) v.visit(node);
+	}
+
 	public void visit(TabRawSetInt node) {
 		if (v != null) v.visit(node);
 	}

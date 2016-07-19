@@ -501,7 +501,7 @@ class IRTranslatorTransformer extends Transformer {
 				fi.value().accept(this);
 				Val v = popVal();
 
-				insns.add(new TabSet(dest, k, v));
+				insns.add(new TabRawSet(dest, k, v));
 			}
 		}
 

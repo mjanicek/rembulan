@@ -74,6 +74,13 @@ abstract class AbstractUseDefVisitor extends IRVisitor {
 	}
 
 	@Override
+	public void visit(TabRawSet node) {
+		use(node.obj());
+		use(node.key());
+		use(node.value());
+	}
+
+	@Override
 	public void visit(TabRawSetInt node) {
 		use(node.obj());
 		use(node.value());

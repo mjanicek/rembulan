@@ -25,4 +25,16 @@ public class TableMethods {
 				false);
 	}
 
+	public static AbstractInsnNode rawset() {
+		return new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(Table.class),
+				"rawset",
+				Type.getMethodDescriptor(
+						Type.VOID_TYPE,
+						Type.getType(Object.class),
+						Type.getType(Object.class)),
+				false);
+	}
+
 }
