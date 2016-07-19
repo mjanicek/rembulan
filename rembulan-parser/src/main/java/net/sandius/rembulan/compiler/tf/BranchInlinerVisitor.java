@@ -24,10 +24,10 @@ class BranchInlinerVisitor extends CodeTransformerVisitor {
 			branch.condition().accept(this);
 			if (inline != null) {
 				if (inline) {
-					setEnd(new ToNext(branch.next()));
+					setEnd(new Jmp(branch.jmpDest()));
 				}
 				else {
-					setEnd(new Jmp(branch.jmpDest()));
+					setEnd(new ToNext(branch.next()));
 				}
 			}
 		}
