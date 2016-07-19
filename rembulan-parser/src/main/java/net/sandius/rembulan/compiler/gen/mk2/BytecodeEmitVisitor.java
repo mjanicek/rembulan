@@ -96,7 +96,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		return new VarInsnNode(ALOAD, runMethod.LV_CONTEXT);
 	}
 
-	private AbstractInsnNode loadState() {
+	static AbstractInsnNode loadState() {
 		return new MethodInsnNode(
 				INVOKEINTERFACE,
 				Type.getInternalName(ExecutionContext.class),
@@ -106,7 +106,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				true);
 	}
 
-	private AbstractInsnNode loadSink() {
+	static AbstractInsnNode loadSink() {
 		return new MethodInsnNode(
 				INVOKEINTERFACE,
 				Type.getInternalName(ExecutionContext.class),

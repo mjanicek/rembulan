@@ -1,7 +1,9 @@
 package net.sandius.rembulan.compiler.gen.mk2;
 
 import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
+import net.sandius.rembulan.compiler.gen.asm.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.UtilMethods;
+import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
@@ -55,12 +57,25 @@ class InvokeMethod {
 			// we have (invokeKind - 1) standalone parameters, mapping them onto #numOfRegisters
 
 			for (int i = 0; i < runMethod.numOfRegisters(); i++) {
+				Var param = i < context.fn.params().size() ? context.fn.params().get(i) : null;
+				boolean reify = param != null && context.types.isReified(param);
+
+				if (reify) {
+					il.add(new VarInsnNode(ALOAD, 1));
+					il.add(BytecodeEmitVisitor.loadState());
+				}
+
 				if (i < invokeKind - 1) {
 					il.add(new VarInsnNode(ALOAD, 2 + i));
 				}
 				else {
 					il.add(new InsnNode(ACONST_NULL));
 				}
+
+				if (reify) {
+					il.add(LuaStateMethods.newUpvalue());
+				}
+
 			}
 		}
 		else {
@@ -74,6 +89,14 @@ class InvokeMethod {
 			// load #numOfParameters, mapping them onto #numOfRegisters
 
 			for (int i = 0; i < runMethod.numOfRegisters(); i++) {
+				Var param = i < context.fn.params().size() ? context.fn.params().get(i) : null;
+				boolean reify = param != null && context.types.isReified(param);
+
+				if (reify) {
+					il.add(new VarInsnNode(ALOAD, 1));
+					il.add(BytecodeEmitVisitor.loadState());
+				}
+
 				if (i < context.numOfParameters()) {
 					il.add(new VarInsnNode(ALOAD, 2));  // TODO: use dup instead?
 					il.add(UtilMethods.getArrayElementOrNull(i));
@@ -81,6 +104,11 @@ class InvokeMethod {
 				else {
 					il.add(new InsnNode(ACONST_NULL));
 				}
+
+				if (reify) {
+					il.add(LuaStateMethods.newUpvalue());
+				}
+
 			}
 
 		}
