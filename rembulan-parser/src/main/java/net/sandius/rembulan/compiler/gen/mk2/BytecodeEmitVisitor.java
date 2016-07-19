@@ -682,7 +682,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	@Override
 	public void visit(ToNumber node) {
 		il.add(new VarInsnNode(ALOAD, slot(node.dest())));
-		il.add(ConversionMethods.toNumericalValue(""));
+		il.add(ConversionMethods.toNumericalValue(node.desc()));
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
 

@@ -686,9 +686,9 @@ class IRTranslatorTransformer extends Transformer {
 		return node;
 	}
 
-	private Val toNumber(Val addr) {
+	private Val toNumber(Val addr, String desc) {
 		Val t = provider.newVal();
-		insns.add(new ToNumber(t, addr));
+		insns.add(new ToNumber(t, addr, desc));
 		return t;
 	}
 
@@ -704,15 +704,15 @@ class IRTranslatorTransformer extends Transformer {
 		Label l_done = insns.newLabel();
 
 		node.init().accept(this);
-		Val t_var0 = toNumber(popVal());
+		Val t_var0 = toNumber(popVal(), "'for' initial value");
 
 		node.limit().accept(this);
-		Val t_limit = toNumber(popVal());
+		Val t_limit = toNumber(popVal(), "'for' limit");
 
 		final Val t_step;
 		if (node.step() != null) {
 			node.step().accept(this);
-			t_step = toNumber(popVal());
+			t_step = toNumber(popVal(), "'for' step");
 		}
 		else {
 			t_step = loadConst(1);

@@ -185,7 +185,7 @@ public class IRPrinterVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(ToNumber node) {
-		ps.println("\ttonumber " + node.dest() + " " + node.src());
+		ps.println("\ttonumber " + node.dest() + " " + node.src() + (node.desc() != null ? " (" + node.desc() + ")" : ""));
 	}
 
 	@Override

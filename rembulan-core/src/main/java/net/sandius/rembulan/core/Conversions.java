@@ -90,7 +90,7 @@ public abstract class Conversions {
 	public static Number toNumericalValue(Object o, String name) {
 		Number n = numericalValueOf(o);
 		if (n == null) {
-			throw new ConversionException(name + " must be a number");
+			throw new ConversionException((name != null ? name : "value") + " must be a number");
 		}
 		else {
 			return n;
