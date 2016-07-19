@@ -231,6 +231,8 @@ class RunMethod {
 			for (int i = 0; i < numOfRegisters(); i++) {
 				locals.add(new LocalVariableNode("s_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, slotOffset() + i));
 			}
+
+			locals.addAll(visitor.locals());
 		}
 
 		return node;
