@@ -483,13 +483,13 @@ class IRTranslatorTransformer extends Transformer {
 
 				if (!it.hasNext() && onStack) {
 					// appending stack contents
-					insns.add(new TabStackAppend(dest, i));
+					insns.add(new TabRawAppendStack(dest, i));
 					onStack = false;  // FIXME: check this
 				}
 				else {
 					// single value
 					Val v = popVal();
-					insns.add(new TabSetInt(dest, i++, v));
+					insns.add(new TabRawSetInt(dest, i++, v));
 				}
 			}
 			else {

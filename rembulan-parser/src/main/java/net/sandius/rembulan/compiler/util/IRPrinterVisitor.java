@@ -67,13 +67,13 @@ public class IRPrinterVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(TabSetInt node) {
-		ps.println("\ttabsetint " + node.obj() + " " + node.idx() + " " + node.value());
+	public void visit(TabRawSetInt node) {
+		ps.println("\ttabrawsetint " + node.obj() + " " + node.idx() + " " + node.value());
 	}
 
 	@Override
-	public void visit(TabStackAppend node) {
-		ps.println("\ttabstackappend " + node.obj() + " " + node.firstIdx());
+	public void visit(TabRawAppendStack node) {
+		ps.println("\ttabrawappendstack " + node.obj() + " " + node.firstIdx());
 	}
 
 	@Override

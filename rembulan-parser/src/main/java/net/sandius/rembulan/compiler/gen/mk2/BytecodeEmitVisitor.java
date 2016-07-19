@@ -391,7 +391,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(TabSetInt node) {
+	public void visit(TabRawSetInt node) {
 		// only used in constructors: using rawset directly instead of boxing a constant
 
 		il.add(new VarInsnNode(ALOAD, slot(node.obj())));
@@ -404,7 +404,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(TabStackAppend node) {
+	public void visit(TabRawAppendStack node) {
 		/*
 		 In Java terms, we're translating this into the following loop:
 

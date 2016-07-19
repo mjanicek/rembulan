@@ -57,7 +57,7 @@ public abstract class DefaultNodeActionVisitor extends IRVisitor {
 	}
 
 	@Override
-	public void visit(TabStackAppend node) {
+	public void visit(TabRawAppendStack node) {
 		action(node);
 	}
 

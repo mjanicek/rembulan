@@ -376,7 +376,7 @@ class TyperVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(TabStackAppend node) {
+	public void visit(TabRawAppendStack node) {
 		// no effect on vals
 	}
 

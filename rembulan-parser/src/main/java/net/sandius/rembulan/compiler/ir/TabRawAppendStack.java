@@ -2,12 +2,12 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
-public class TabStackAppend extends BodyNode {
+public class TabRawAppendStack extends BodyNode {
 
 	private final Val obj;
 	private final int firstIdx;
 
-	public TabStackAppend(Val obj, int firstIdx) {
+	public TabRawAppendStack(Val obj, int firstIdx) {
 		this.obj = Check.notNull(obj);
 		this.firstIdx = Check.positive(firstIdx);
 	}
