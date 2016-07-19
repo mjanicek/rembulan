@@ -392,19 +392,15 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(TabSetInt node) {
-		ResumptionPoint rp = resumptionPoint();
-		il.add(rp.save());
+		// only used in constructors: using rawset directly instead of boxing a constant
 
-		// TODO: only used in constructors: can use rawset directly instead of boxing a constant
-
-		il.add(loadExecutionContext());
 		il.add(new VarInsnNode(ALOAD, slot(node.obj())));
-		il.add(ASMUtils.loadLong(node.idx()));
-		il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
-		il.add(new VarInsnNode(ALOAD, slot(node.value())));
-		il.add(DispatchMethods.newindex());
+		il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Table.class)));
 
-		il.add(rp.resume());
+		il.add(ASMUtils.loadInt(node.idx()));
+		il.add(new VarInsnNode(ALOAD, slot(node.value())));
+
+		il.add(TableMethods.rawset_int());
 	}
 
 	@Override
