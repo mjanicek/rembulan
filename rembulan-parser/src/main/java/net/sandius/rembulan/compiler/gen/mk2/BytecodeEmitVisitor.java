@@ -176,7 +176,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	}
 
 	public boolean isResumable() {
-		return resumptionPoints.size() > 1;
+		return resumptionPoints.size() > 0;
 	}
 
 	public List<LabelNode> resumptionLabels() {

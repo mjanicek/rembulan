@@ -22,9 +22,16 @@ class RunMethod {
 	public final int LV_VARARGS = 3;  // index of the varargs argument, if present
 
 	private final ASMBytecodeEmitter context;
+	private final MethodNode methodNode;
+	private final boolean resumable;
 
 	public RunMethod(ASMBytecodeEmitter context) {
 		this.context = Check.notNull(context);
+
+		BytecodeEmitVisitor visitor = new BytecodeEmitVisitor(context, this, context.slots, context.types);
+
+		this.methodNode = emit(visitor);
+		this.resumable = visitor.isResumable();
 	}
 
 	public int numOfRegisters() {
@@ -36,8 +43,7 @@ class RunMethod {
 	}
 
 	public boolean isResumable() {
-		// FIXME: not always
-		return true;
+		return resumable;
 	}
 
 	public String[] throwsExceptions() {
@@ -243,7 +249,7 @@ class RunMethod {
 		return il;
 	}
 
-	public MethodNode methodNode() {
+	private MethodNode emit(BytecodeEmitVisitor visitor) {
 		MethodNode node = new MethodNode(
 				ACC_PRIVATE,
 				methodName(),
@@ -256,7 +262,6 @@ class RunMethod {
 		LabelNode l_begin = new LabelNode();
 		LabelNode l_end = new LabelNode();
 
-		BytecodeEmitVisitor visitor = new BytecodeEmitVisitor(context, this, context.slots, context.types);
 		visitor.visit(context.fn.blocks());
 
 		InsnList prefix = new InsnList();
@@ -314,6 +319,10 @@ class RunMethod {
 		}
 
 		return node;
+	}
+
+	public MethodNode methodNode() {
+		return methodNode;
 	}
 
 }
