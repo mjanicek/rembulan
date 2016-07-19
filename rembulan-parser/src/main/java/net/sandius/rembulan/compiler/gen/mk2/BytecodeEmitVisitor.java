@@ -492,39 +492,16 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(ObjectSinkMethods.setTo(0));
 	}
 
-	@Override
-	public void visit(Ret node) {
-		// TODO
-		il.add(new InsnNode(RETURN));
-	}
-
-	@Override
-	public void visit(TCall node) {
-		// TODO
-		il.add(new InsnNode(RETURN));
-	}
-
-	@Override
-	public void visit(Call node) {
-		ResumptionPoint rp = resumptionPoint();
-		il.add(rp.save());
-
-		VList args = node.args();
-
-		if (args.isMulti()) {
+	private int loadVList(VList vl, int maxKind) {
+		if (vl.isMulti()) {
 			// variable number of arguments, stored on stack
 
-			if (args.addrs().size() == 0) {
-				// no prefix, simply take the stack contents
-				il.add(loadExecutionContext());
-				il.add(new VarInsnNode(ALOAD, slot(node.fn())));  // call target
-
-				// stack contents as an array
+			if (vl.addrs().size() == 0) {
+				// no prefix, simply take the stack contents as an array
 				il.add(loadExecutionContext());
 				il.add(loadSink());
 				il.add(ObjectSinkMethods.toArray());
-
-				il.add(DispatchMethods.call(0));
+				return 0;
 			}
 			else {
 				// a non-empty prefix followed by the stack contents
@@ -551,7 +528,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				// compute the overall arg list length
 				il.add(new VarInsnNode(ALOAD, lv_idx_stack));
 				il.add(new InsnNode(ARRAYLENGTH));
-				il.add(ASMUtils.loadInt(args.addrs().size()));
+				il.add(ASMUtils.loadInt(vl.addrs().size()));
 				il.add(new InsnNode(IADD));
 
 				// instantiate the actual arg list (length is on stack top)
@@ -560,7 +537,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 				// fill in the prefix
 				int idx = 0;
-				for (Val v : args.addrs()) {
+				for (Val v : vl.addrs()) {
 					il.add(new VarInsnNode(ALOAD, lv_idx_args));
 					il.add(ASMUtils.loadInt(idx++));
 					il.add(new VarInsnNode(ALOAD, slot(v)));
@@ -571,7 +548,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				il.add(new VarInsnNode(ALOAD, lv_idx_stack));
 				il.add(ASMUtils.loadInt(0));
 				il.add(new VarInsnNode(ALOAD, lv_idx_args));
-				il.add(ASMUtils.loadInt(args.addrs().size()));
+				il.add(ASMUtils.loadInt(vl.addrs().size()));
 				il.add(new VarInsnNode(ALOAD, lv_idx_stack));
 				il.add(new InsnNode(ARRAYLENGTH));
 				il.add(new MethodInsnNode(
@@ -583,45 +560,70 @@ class BytecodeEmitVisitor extends CodeVisitor {
 								Type.getType(Object.class), Type.INT_TYPE, Type.getType(Object.class), Type.INT_TYPE, Type.INT_TYPE),
 						false));
 
-				// dispatch the call
-				il.add(loadExecutionContext());
-				il.add(new VarInsnNode(ALOAD, slot(node.fn())));  // target
-				il.add(new VarInsnNode(ALOAD, lv_idx_args));  // arguments
-
-				il.add(DispatchMethods.call(0));
-
+				// push result to stack
+				il.add(new VarInsnNode(ALOAD, lv_idx_args));
 				il.add(end);
+
+				return 0;
 			}
 		}
 		else {
 			// fixed number of arguments
 
-			il.add(loadExecutionContext());
-
-			int k = DispatchMethods.adjustKind_call(InvokeKind.encode(args.addrs().size(), false));
-			if (k > 0) {
+			int k = vl.addrs().size() + 1;
+			if (k <= maxKind) {
 				// pass arguments on the JVM stack
-				il.add(new VarInsnNode(ALOAD, slot(node.fn())));
-				for (Val v : args.addrs()) {
+				for (Val v : vl.addrs()) {
 					il.add(new VarInsnNode(ALOAD, slot(v)));
 				}
+				return k;
 			}
 			else {
 				// pass arguments packed in an array
-				il.add(ASMUtils.loadInt(args.addrs().size()));
+				il.add(ASMUtils.loadInt(vl.addrs().size()));
 				il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
 
 				int idx = 0;
-				for (Val v : args.addrs()) {
+				for (Val v : vl.addrs()) {
 					il.add(new InsnNode(DUP));
 					il.add(ASMUtils.loadInt(idx++));
 					il.add(new VarInsnNode(ALOAD, slot(v)));
 					il.add(new InsnNode(AASTORE));
 				}
-			}
 
-			il.add(DispatchMethods.call(k));
+				return 0;
+			}
 		}
+	}
+
+	@Override
+	public void visit(Ret node) {
+		il.add(loadExecutionContext());
+		il.add(loadSink());
+		int kind = loadVList(node.args(), 6);  // values
+		il.add(ObjectSinkMethods.setTo(kind));
+		il.add(new InsnNode(RETURN));
+	}
+
+	@Override
+	public void visit(TCall node) {
+		il.add(loadExecutionContext());
+		il.add(loadSink());
+		il.add(new VarInsnNode(ALOAD, slot(node.target())));  // call target
+		int kind = loadVList(node.args(), 6);  // call args
+		il.add(ObjectSinkMethods.tailCall(kind));
+		il.add(new InsnNode(RETURN));
+	}
+
+	@Override
+	public void visit(Call node) {
+		ResumptionPoint rp = resumptionPoint();
+		il.add(rp.save());
+
+		il.add(loadExecutionContext());
+		il.add(new VarInsnNode(ALOAD, slot(node.fn())));  // call target
+		int kind = loadVList(node.args(), 6);  // call args
+		il.add(DispatchMethods.call(kind));
 
 		il.add(rp.resume());
 	}
