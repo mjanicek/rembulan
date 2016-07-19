@@ -703,8 +703,8 @@ class IRTranslatorTransformer extends Transformer {
 		Label l_top = insns.newLabel();
 		Label l_done = insns.newLabel();
 
-		node.init().accept(this);
-		Val t_var0 = toNumber(popVal(), "'for' initial value");
+		// Note: we coerce parameters to numbers in the same order as in PUC Lua to get
+		// the same error reporting.
 
 		node.limit().accept(this);
 		Val t_limit = toNumber(popVal(), "'for' limit");
@@ -717,6 +717,9 @@ class IRTranslatorTransformer extends Transformer {
 		else {
 			t_step = loadConst(1);
 		}
+
+		node.init().accept(this);
+		Val t_var0 = toNumber(popVal(), "'for' initial value");
 
 		// var = var - step
 		Val t_var1 = provider.newVal();
