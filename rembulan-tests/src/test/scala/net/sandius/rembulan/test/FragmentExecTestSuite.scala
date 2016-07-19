@@ -2,7 +2,7 @@ package net.sandius.rembulan.test
 
 import java.io.PrintStream
 
-import net.sandius.rembulan.compiler.PrototypeCompilerChunkLoader
+import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, PrototypeCompilerChunkLoader}
 import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
@@ -89,97 +89,113 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
     }
   }
 
-  describe ("fragment") {
+  sealed trait ChkLoader {
+    def name: String
+    def loader(): ChunkLoader
+  }
 
+  case object LuacChkLoader extends ChkLoader {
     val luacName = "luac53"
+    def name = "LuaC"
+    def loader() = new PrototypeCompilerChunkLoader(
+      new LuaCPrototypeReader(luacName),
+      getClass.getClassLoader)
+  }
 
-    for (bundle <- bundles; fragment <- bundle.all) {
+  case object RembulanChkLoader extends ChkLoader {
+    def name = "RemC"
+    def loader() = new CompilerChunkLoader(new ChunkClassLoader())
+  }
 
-      describe (fragment.description) {
+  val ldrs = Seq(LuacChkLoader, RembulanChkLoader)
 
-        for (ctx <- contexts) {
+  for (bundle <- bundles;
+       fragment <- bundle.all;
+       ctx <- contexts) {
 
-          for (s <- steps) {
+    val prefix = ""
 
-            describe ("in " + ctx) {
-              it ("can be executed with " + s + " steps") {
-                val preemptionContext = new CountingPreemptionContext()
+    describe (prefix + fragment.description + " in " + ctx + ":") {
 
-                val exec = Util.timed("Compilation and setup") {
-                  val ldr = new PrototypeCompilerChunkLoader(
-                    new LuaCPrototypeReader(luacName),
-                    getClass.getClassLoader)
+      for (s <- steps; l <- ldrs) {
 
+        val stepDesc = s match {
+          case Int.MaxValue => "max"
+          case i => i.toString
+        }
 
-                  val state = new DefaultLuaState.Builder()
-                      .withPreemptionContext(preemptionContext)
-                      .build()
+        it (l.name + " / " + stepDesc) {
 
-                  val env = envForContext(state, ctx)
-                  val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
+          val preemptionContext = new CountingPreemptionContext()
 
-                  new Exec(state, func)
-                }
+          val exec = Util.timed("Compilation and setup") {
 
-                var steps = 0
+            val ldr = l.loader()
 
-                val before = System.nanoTime()
+            val state = new DefaultLuaState.Builder()
+                .withPreemptionContext(preemptionContext)
+                .build()
 
-                var execState = exec.getExecutionState
-                while (exec.isPaused) {
-                  preemptionContext.deposit(s)
-                  if (preemptionContext.allowed) {
-                    execState = exec.resume()
-                  }
-                  steps += 1
-                }
+            val env = envForContext(state, ctx)
+            val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
 
-                val res = execState match {
-                  case es: ExecutionState.TerminatedAbnormally => Left(es.getError)
-                  case _ => Right(exec.getSink.toArray.toSeq)
-                }
+            new Exec(state, func)
+          }
 
-                val after = System.nanoTime()
+          var steps = 0
 
-                val totalTimeMillis = (after - before) / 1000000.0
-                val totalCPUUnitsSpent = preemptionContext.totalCost
-                val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
-                val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+          val before = System.nanoTime()
 
-                println("Execution took %.1f ms".format(totalTimeMillis))
-                println("Total CPU cost: " + preemptionContext.totalCost + " LI")
-                println("Computation steps: " + steps)
-                println()
-                println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
-                println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
-                println()
-
-                println("Result state: " + execState)
-                res match {
-                  case Right(result) =>
-                    println("Result: success (" + result.size + " values):")
-                    for ((v, i) <- result.zipWithIndex) {
-                      println(i + ":" + "\t" + Conversions.toHumanReadableString(v) + " (" + (if (v != null) v.getClass.getName else "null") + ")")
-                    }
-                  case Left(ex) =>
-                    println("Result: error: " + ex.getMessage)
-                }
-
-                for (expects <- expectations;
-                      ctxExp <- expects.expectationFor(fragment);
-                      exp <- ctxExp.get(ctx)) {
-
-                  exp.tryMatch(res)(this)
-
-                }
-              }
+          var execState = exec.getExecutionState
+          while (exec.isPaused) {
+            preemptionContext.deposit(s)
+            if (preemptionContext.allowed) {
+              execState = exec.resume()
             }
+            steps += 1
+          }
+
+          val res = execState match {
+            case es: ExecutionState.TerminatedAbnormally => Left(es.getError)
+            case _ => Right(exec.getSink.toArray.toSeq)
+          }
+
+          val after = System.nanoTime()
+
+          val totalTimeMillis = (after - before) / 1000000.0
+          val totalCPUUnitsSpent = preemptionContext.totalCost
+          val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
+          val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+
+          println("Execution took %.1f ms".format(totalTimeMillis))
+          println("Total CPU cost: " + preemptionContext.totalCost + " LI")
+          println("Computation steps: " + steps)
+          println()
+          println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+          println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+          println()
+
+          println("Result state: " + execState)
+          res match {
+            case Right(result) =>
+              println("Result: success (" + result.size + " values):")
+              for ((v, i) <- result.zipWithIndex) {
+                println(i + ":" + "\t" + Conversions.toHumanReadableString(v) + " (" + (if (v != null) v.getClass.getName else "null") + ")")
+              }
+            case Left(ex) =>
+              println("Result: error: " + ex.getMessage)
+          }
+
+          for (expects <- expectations;
+                ctxExp <- expects.expectationFor(fragment);
+                exp <- ctxExp.get(ctx)) {
+
+            exp.tryMatch(res)(this)
           }
 
         }
       }
     }
-
   }
 
 }
