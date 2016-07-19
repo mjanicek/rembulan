@@ -267,7 +267,7 @@ class RunMethod {
 		InsnList prefix = new InsnList();
 		InsnList suffix = new InsnList();
 
-		if (isResumable()) {
+		if (visitor.isResumable()) {
 			LabelNode l_entry = new LabelNode();
 			LabelNode l_error_state = new LabelNode();
 			LabelNode l_handler_begin = new LabelNode();

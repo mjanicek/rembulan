@@ -153,7 +153,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 		public InsnList save() {
 			InsnList il = new InsnList();
-			il.add(ASMUtils.loadInt(index));
+			il.add(ASMUtils.loadInt(index + 1));
 			il.add(new VarInsnNode(ISTORE, runMethod.LV_RESUME));
 			return il;
 		}
