@@ -116,13 +116,6 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				true);
 	}
 
-	private InsnList loadLuaState() {
-		InsnList il = new InsnList();
-		il.add(loadExecutionContext());
-		il.add(loadState());
-		return il;
-	}
-
 	public InsnList retrieve_0() {
 		InsnList il = new InsnList();
 
@@ -197,7 +190,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	@Override
 	public void visit(VarInit node) {
 		if (types.isReified(node.var())) {
-			il.add(loadLuaState());
+			il.add(loadExecutionContext());
+			il.add(loadState());
 			il.add(new VarInsnNode(ALOAD, slot(node.var())));
 			il.add(LuaStateMethods.newUpvalue());
 			il.add(new VarInsnNode(ASTORE, slot(node.var())));
@@ -355,7 +349,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(TabNew node) {
-		il.add(loadLuaState());
+		il.add(loadExecutionContext());
+		il.add(loadState());
 		il.add(LuaStateMethods.newTable(node.array(), node.hash()));
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
