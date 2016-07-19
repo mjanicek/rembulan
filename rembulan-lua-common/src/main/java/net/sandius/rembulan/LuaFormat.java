@@ -26,8 +26,47 @@ public class LuaFormat {
 		else return Double.toString(d);  // TODO: check that the format matches that of Lua
 	}
 
+	private static int hexValue(int c) {
+		if (c >= '0' && c <= '9') {
+			return c - (int) '0';
+		}
+		else if (c >= 'a' && c <= 'f') {
+			return 10 + c - (int) 'a';
+		}
+		else if (c >= 'A' && c <= 'F') {
+			return 10 + c - (int) 'A';
+		}
+		else {
+			return -1;
+		}
+	}
+
 	public static long parseInteger(String s) throws NumberFormatException {
-		return Long.parseLong(s);
+		s = s.trim();
+		if (s.startsWith("0x") || s.startsWith("0X")) {
+			long l = 0;
+			int from = Math.max(2, s.length() - 16);
+
+			for (int idx = 2; idx < from; idx++) {
+				if (hexValue(s.charAt(idx)) < 0) {
+					throw new NumberFormatException("Illegal character #" + idx + " in \"" + s + "\"");
+				}
+			}
+
+			// only take the last 16 characters of the string for the value
+			for (int idx = Math.max(2, s.length() - 16); idx < s.length(); idx++) {
+				int hex = hexValue(s.charAt(idx));
+				if (hex < 0) {
+					throw new NumberFormatException("Illegal character #" + idx + " in \"" + s + "\"");
+				}
+				l = l << 4 | hex;
+			}
+
+			return l;
+		}
+		else {
+			return Long.parseLong(s);
+		}
 	}
 
 	public static double parseFloat(String s) throws NumberFormatException {
@@ -98,7 +137,7 @@ public class LuaFormat {
 		}
 	}
 
-	private static char hex(int i) {
+	private static char toHex(int i) {
 		// i must be between 0x0 and 0xf
 		return i < 0xa ? (char) ((int) '0' + i) : (char) ((int) 'a' + i - 0xa);
 	}
@@ -126,8 +165,8 @@ public class LuaFormat {
 				else {
 					if ((int) c <= 0xff) {
 						bld.append('x');
-						bld.append(hex(((int) c >>> 8) & 0xf));
-						bld.append(hex((int) c & 0xf));
+						bld.append(toHex(((int) c >>> 8) & 0xf));
+						bld.append(toHex((int) c & 0xf));
 					}
 					else {
 						bld.append(Integer.toString((int) c));
