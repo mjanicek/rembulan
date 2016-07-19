@@ -358,13 +358,14 @@ class IRTranslatorTransformer extends Transformer {
 			Expr e = it.next();
 			e.accept(this);
 
-			if (it.hasNext() || !onStack) {
-				as.add(popVal());
-			}
-			else {
+			if (e instanceof MultiExpr && !it.hasNext() && onStack) {
 				// multi-value expression in tail position
 				onStack = false;
 				multi = true;
+			}
+			else {
+				// single value
+				as.add(popVal());
 			}
 		}
 
@@ -906,6 +907,10 @@ class IRTranslatorTransformer extends Transformer {
 	@Override
 	public BodyStatement transform(CallStatement node) {
 		node.callExpr().accept(this);
+
+		// discard results
+		onStack = false;
+
 		return node;
 	}
 
