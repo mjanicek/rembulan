@@ -297,6 +297,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 			case CONCAT: return OP_CONCAT;
 
 			case EQ:     return OP_EQ;
+			case NEQ:    return OP_NEQ;
 			case LT:     return OP_LT;
 			case LE:     return OP_LE;
 

@@ -39,6 +39,7 @@ public class DispatchMethods {
 	public static final String OP_LEN = "len";
 
 	public static final String OP_EQ = "eq";
+	public static final String OP_NEQ = "neq";
 	public static final String OP_LT = "lt";
 	public static final String OP_LE = "le";
 

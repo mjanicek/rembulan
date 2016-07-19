@@ -427,7 +427,7 @@ public abstract class Dispatch {
 		result.setTo(Conversions.booleanValueOf(result._0()) == cmpTo);
 	}
 
-	public static void eq(ExecutionContext context, Object a, Object b) throws ControlThrowable {
+	private static void eq(ExecutionContext context, boolean polarity, Object a, Object b) throws ControlThrowable {
 		boolean rawEqual = RawOperators.raweq(a, b);
 
 		if (!rawEqual
@@ -437,14 +437,22 @@ public abstract class Dispatch {
 			Object handler = Metatables.binaryHandlerFor(context.getState(), Metatables.MT_EQ, a, b);
 
 			if (handler != null) {
-				_call_comparison_mt(context, true, handler, a, b);
+				_call_comparison_mt(context, polarity, handler, a, b);
 				return;
 			}
 
 			// else keep the result as false
 		}
 
-		context.getObjectSink().setTo(rawEqual);
+		context.getObjectSink().setTo(rawEqual == polarity);
+	}
+
+	public static void eq(ExecutionContext context, Object a, Object b) throws ControlThrowable {
+		eq(context, true, a, b);
+	}
+
+	public static void neq(ExecutionContext context, Object a, Object b) throws ControlThrowable {
+		eq(context, false, a, b);
 	}
 
 	public static boolean eq(Number a, Number b) {
