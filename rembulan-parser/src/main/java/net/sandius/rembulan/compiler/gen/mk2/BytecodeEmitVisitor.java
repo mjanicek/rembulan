@@ -168,11 +168,19 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		}
 	}
 
-	public ResumptionPoint resumptionPoint() {
+	protected ResumptionPoint newResumptionPoint() {
 		int idx = resumptionPoints.size();
 		ResumptionPoint rp = new ResumptionPoint(idx);
 		resumptionPoints.add(rp.label());
 		return rp;
+	}
+
+	public boolean isResumable() {
+		return resumptionPoints.size() > 1;
+	}
+
+	public List<LabelNode> resumptionLabels() {
+		return resumptionPoints;
 	}
 
 	@Override
@@ -312,7 +320,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(BinOp node) {
-		ResumptionPoint rp = resumptionPoint();
+		ResumptionPoint rp = newResumptionPoint();
 		il.add(rp.save());
 
 		il.add(loadExecutionContext());
@@ -333,7 +341,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 			il.add(BoxedPrimitivesMethods.box(Type.BOOLEAN_TYPE, Type.getType(Boolean.class)));
 		}
 		else {
-			ResumptionPoint rp = resumptionPoint();
+			ResumptionPoint rp = newResumptionPoint();
 			il.add(rp.save());
 
 			il.add(loadExecutionContext());
@@ -357,7 +365,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(TabGet node) {
-		ResumptionPoint rp = resumptionPoint();
+		ResumptionPoint rp = newResumptionPoint();
 		il.add(rp.save());
 
 		il.add(loadExecutionContext());
@@ -372,7 +380,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(TabSet node) {
-		ResumptionPoint rp = resumptionPoint();
+		ResumptionPoint rp = newResumptionPoint();
 		il.add(rp.save());
 
 		il.add(loadExecutionContext());
@@ -611,7 +619,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(Call node) {
-		ResumptionPoint rp = resumptionPoint();
+		ResumptionPoint rp = newResumptionPoint();
 		il.add(rp.save());
 
 		il.add(loadExecutionContext());
@@ -725,7 +733,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(CPUWithdraw node) {
-		ResumptionPoint rp = resumptionPoint();
+		ResumptionPoint rp = newResumptionPoint();
 		il.add(rp.save());
 
 		il.add(loadExecutionContext());

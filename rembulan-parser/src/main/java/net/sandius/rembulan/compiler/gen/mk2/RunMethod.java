@@ -1,34 +1,19 @@
 package net.sandius.rembulan.compiler.gen.mk2;
 
 import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
+import net.sandius.rembulan.compiler.gen.asm.ClassEmitter;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.core.Resumable;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.MethodInsnNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.AASTORE;
-import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.ANEWARRAY;
-import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.ILOAD;
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
-import static org.objectweb.asm.Opcodes.NEW;
-import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.*;
 
 class RunMethod {
 
@@ -189,6 +174,75 @@ class RunMethod {
 				false);
 	}
 
+	private InsnList errorState(LabelNode label) {
+		InsnList il = new InsnList();
+		il.add(label);
+		il.add(ASMUtils.frameSame());
+		il.add(new TypeInsnNode(NEW, Type.getInternalName(IllegalStateException.class)));
+		il.add(new InsnNode(DUP));
+		il.add(ASMUtils.ctor(IllegalStateException.class));
+		il.add(new InsnNode(ATHROW));
+		return il;
+	}
+
+	private InsnList dispatchTable(LabelNode entryLabel, List<LabelNode> resumptionLabels, LabelNode errorStateLabel) {
+		InsnList il = new InsnList();
+
+		LabelNode[] labels = new LabelNode[resumptionLabels.size() + 1];
+		labels[0] = entryLabel;
+		for (int i = 0; i < resumptionLabels.size(); i++) {
+			labels[1 + i] = resumptionLabels.get(i);
+		}
+
+		il.add(new VarInsnNode(ILOAD, LV_RESUME));
+		il.add(new TableSwitchInsnNode(0, labels.length - 1, errorStateLabel, labels));
+		return il;
+	}
+
+	private InsnList createSnapshot() {
+		InsnList il = new InsnList();
+
+		il.add(new VarInsnNode(ALOAD, 0));  // this
+		il.add(new VarInsnNode(ALOAD, 0));
+		il.add(new VarInsnNode(ILOAD, LV_RESUME));
+		if (context.isVararg()) {
+			il.add(new VarInsnNode(ALOAD, LV_VARARGS));
+		}
+		for (int i = 0; i < numOfRegisters(); i++) {
+			il.add(new VarInsnNode(ALOAD, slotOffset() + i));
+		}
+		il.add(snapshotMethodInvokeInsn());
+
+		return il;
+	}
+
+	protected InsnList resumptionHandler(LabelNode label) {
+		InsnList il = new InsnList();
+
+		il.add(label);
+		il.add(ASMUtils.frameSame1(ControlThrowable.class));
+
+		il.add(new InsnNode(DUP));
+
+		il.add(createSnapshot());
+
+		// register snapshot with the control exception
+		il.add(new MethodInsnNode(
+				INVOKEVIRTUAL,
+				Type.getInternalName(ControlThrowable.class),
+				"push",
+				Type.getMethodType(
+						Type.VOID_TYPE,
+						Type.getType(Resumable.class),
+						ClassEmitter.savedStateType()).getDescriptor(),
+				false));
+
+		// rethrow
+		il.add(new InsnNode(ATHROW));
+
+		return il;
+	}
+
 	public MethodNode methodNode() {
 		MethodNode node = new MethodNode(
 				ACC_PRIVATE,
@@ -199,37 +253,61 @@ class RunMethod {
 
 		InsnList insns = node.instructions;
 
-		LabelNode l_insns_begin = new LabelNode();
-		LabelNode l_insns_end = new LabelNode();
+		LabelNode l_begin = new LabelNode();
+		LabelNode l_end = new LabelNode();
 
 		BytecodeEmitVisitor visitor = new BytecodeEmitVisitor(context, this, context.slots, context.types);
 		visitor.visit(context.fn.blocks());
 
-		insns.add(l_insns_begin);
+		InsnList prefix = new InsnList();
+		InsnList suffix = new InsnList();
+
+		if (isResumable()) {
+			LabelNode l_entry = new LabelNode();
+			LabelNode l_error_state = new LabelNode();
+			LabelNode l_handler_begin = new LabelNode();
+
+			List<LabelNode> rls = visitor.resumptionLabels();
+
+			assert (!rls.isEmpty());
+
+			prefix.add(dispatchTable(l_entry, rls, l_error_state));
+			prefix.add(l_entry);
+			prefix.add(ASMUtils.frameSame());
+
+			suffix.add(errorState(l_error_state));
+			suffix.add(resumptionHandler(l_handler_begin));
+
+			node.tryCatchBlocks.add(new TryCatchBlockNode(l_entry, l_error_state, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+		}
+
+		insns.add(l_begin);
+		insns.add(prefix);
 		insns.add(visitor.instructions());
-		insns.add(l_insns_end);
+		insns.add(suffix);
+		insns.add(l_end);
 
 		// local variables
 		{
 			List<LocalVariableNode> locals = node.localVariables;
 
-			locals.add(new LocalVariableNode("this", context.thisClassType().getDescriptor(), null, l_insns_begin, l_insns_end, 0));
-			locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, l_insns_begin, l_insns_end, LV_CONTEXT));
-			locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_insns_begin, l_insns_end, LV_RESUME));
+			locals.add(new LocalVariableNode("this", context.thisClassType().getDescriptor(), null, l_begin, l_end, 0));
+			locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, l_begin, l_end, LV_CONTEXT));
+			locals.add(new LocalVariableNode("rp", Type.INT_TYPE.getDescriptor(), null, l_begin, l_end, LV_RESUME));
 
 			if (context.isVararg()) {
 				locals.add(new LocalVariableNode(
 						"varargs",
 						ASMUtils.arrayTypeFor(Object.class).getDescriptor(),
 						null,
-						l_insns_begin,
-						l_insns_end,
+						l_begin,
+						l_end,
 						LV_VARARGS
 						));
 			}
 
 			for (int i = 0; i < numOfRegisters(); i++) {
-				locals.add(new LocalVariableNode("s_" + i, Type.getDescriptor(Object.class), null, l_insns_begin, l_insns_end, slotOffset() + i));
+				locals.add(new LocalVariableNode("s_" + i, Type.getDescriptor(Object.class), null, l_begin, l_end, slotOffset() + i));
 			}
 
 			locals.addAll(visitor.locals());
