@@ -338,6 +338,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		if (node.op() == UnOp.Op.NOT) {
 			il.add(new VarInsnNode(ALOAD, slot(node.arg())));
 			il.add(ConversionMethods.booleanValueOf());
+			il.add(new InsnNode(ICONST_1));
+			il.add(new InsnNode(IXOR));
 			il.add(BoxedPrimitivesMethods.box(Type.BOOLEAN_TYPE, Type.getType(Boolean.class)));
 		}
 		else {
