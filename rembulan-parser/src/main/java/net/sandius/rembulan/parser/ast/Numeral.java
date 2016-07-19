@@ -28,6 +28,25 @@ public abstract class Numeral extends Literal {
 			this.value = value;
 		}
 
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			IntegerNumeral that = (IntegerNumeral) o;
+			return this.value == that.value;
+
+		}
+
+		@Override
+		public int hashCode() {
+			return (int) (value ^ (value >>> 32));
+		}
+
+		@Override
+		public String toString() {
+			return Long.toString(value);
+		}
+
 		public long value() {
 			return value;
 		}
@@ -44,7 +63,27 @@ public abstract class Numeral extends Literal {
 		private final double value;
 
 		public FloatNumeral(double value) {
+			Check.notNaN(value);
 			this.value = value;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+			FloatNumeral that = (FloatNumeral) o;
+			return Double.compare(this.value, that.value) == 0;
+		}
+
+		@Override
+		public int hashCode() {
+			long temp = Double.doubleToLongBits(value);
+			return (int) (temp ^ (temp >>> 32));
+		}
+
+		@Override
+		public String toString() {
+			return Double.toString(value);
 		}
 
 		public double value() {

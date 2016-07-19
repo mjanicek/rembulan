@@ -92,4 +92,11 @@ public abstract class Check {
 		return gt(n, 0);
 	}
 
+	public static double notNaN(double n) {
+		if (Double.isNaN(n)) {
+			throw new IllegalArgumentException("argument is NaN");
+		}
+		return n;
+	}
+
 }
