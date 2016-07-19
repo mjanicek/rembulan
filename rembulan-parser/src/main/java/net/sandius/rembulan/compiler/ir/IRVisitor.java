@@ -55,6 +55,10 @@ public abstract class IRVisitor {
 		if (v != null) v.visit(node);
 	}
 
+	public void visit(TabSetInt node) {
+		if (v != null) v.visit(node);
+	}
+
 	public void visit(TabStackAppend node) {
 		if (v != null) v.visit(node);
 	}

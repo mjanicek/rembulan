@@ -477,24 +477,31 @@ class IRTranslatorTransformer extends Transformer {
 			TableConstructorExpr.FieldInitialiser fi = it.next();
 
 			if (fi.key() == null) {
-				Val d = provider.newVal();
-				vals.push(d);
-				insns.add(new LoadConst.Int(d, (long) i++));
-			}
-			else {
-				fi.key().accept(this);
-			}
-			Val k = popVal();
+				// appending to sequence
 
-			fi.value().accept(this);
-			if (fi.key() != null || it.hasNext() || !onStack) {
-				Val v = popVal();
-				insns.add(new TabSet(dest, k, v));
+				fi.value().accept(this);
+
+				if (!it.hasNext() && onStack) {
+					// appending stack contents
+					insns.add(new TabStackAppend(dest, i));
+					onStack = false;  // FIXME: check this
+				}
+				else {
+					// single value
+					Val v = popVal();
+					insns.add(new TabSetInt(dest, i++, v));
+				}
 			}
 			else {
-//				// multi-value expression in tail position
-				insns.add(new TabStackAppend(dest));
-				onStack = false;  // FIXME: check this
+				// arbitrary key-value assignment
+
+				fi.key().accept(this);
+				Val k = popVal();
+
+				fi.value().accept(this);
+				Val v = popVal();
+
+				insns.add(new TabSet(dest, k, v));
 			}
 		}
 
