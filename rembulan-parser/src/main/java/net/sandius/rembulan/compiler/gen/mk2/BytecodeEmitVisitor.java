@@ -8,7 +8,6 @@ import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.gen.asm.ConversionMethods;
 import net.sandius.rembulan.compiler.gen.asm.DispatchMethods;
-import net.sandius.rembulan.compiler.gen.asm.InvokeKind;
 import net.sandius.rembulan.compiler.gen.asm.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.ObjectSinkMethods;
 import net.sandius.rembulan.compiler.gen.asm.TableMethods;
@@ -600,7 +599,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	public void visit(Ret node) {
 		il.add(loadExecutionContext());
 		il.add(loadSink());
-		int kind = loadVList(node.args(), 6);  // values
+		int kind = loadVList(node.args(), ObjectSinkMethods.MAX_SETTO_KIND);  // values
 		il.add(ObjectSinkMethods.setTo(kind));
 		il.add(new InsnNode(RETURN));
 	}
@@ -610,7 +609,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(loadExecutionContext());
 		il.add(loadSink());
 		il.add(new VarInsnNode(ALOAD, slot(node.target())));  // call target
-		int kind = loadVList(node.args(), 6);  // call args
+		int kind = loadVList(node.args(), ObjectSinkMethods.MAX_TAILCALL_KIND);  // call args
 		il.add(ObjectSinkMethods.tailCall(kind));
 		il.add(new InsnNode(RETURN));
 	}
@@ -622,7 +621,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 		il.add(loadExecutionContext());
 		il.add(new VarInsnNode(ALOAD, slot(node.fn())));  // call target
-		int kind = loadVList(node.args(), 6);  // call args
+		int kind = loadVList(node.args(), DispatchMethods.MAX_CALL_KIND);  // call args
 		il.add(DispatchMethods.call(kind));
 
 		il.add(rp.resume());

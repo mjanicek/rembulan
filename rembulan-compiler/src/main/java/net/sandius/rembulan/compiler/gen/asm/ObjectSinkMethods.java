@@ -105,6 +105,20 @@ public class ObjectSinkMethods {
 		return kind > 0 ? (tailCall_method(kind).exists() ? kind : 0) : 0;
 	}
 
+	public final static int MAX_SETTO_KIND;
+	static {
+		int k = 1;
+		while (setTo_method(k).exists()) k += 1;
+		MAX_SETTO_KIND = k - 1;
+	}
+
+	public final static int MAX_TAILCALL_KIND;
+	static {
+		int k = 1;
+		while (tailCall_method(k).exists()) k += 1;
+		MAX_TAILCALL_KIND = k - 1;
+	}
+
 	private static ReflectionUtils.Method setTo_method(int kind) {
 		String methodName = kind > 0 ? "setTo" : "setToArray";
 		return ReflectionUtils.virtualArgListMethodFromKind(ObjectSink.class, methodName, null, kind);

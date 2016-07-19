@@ -116,6 +116,13 @@ public class DispatchMethods {
 		return kind > 0 ? (call_method(kind).exists() ? kind : 0) : 0;
 	}
 
+	public final static int MAX_CALL_KIND;
+	static {
+		int k = 1;
+		while (call_method(k).exists()) k += 1;
+		MAX_CALL_KIND = k - 1;
+	}
+
 	private static ReflectionUtils.Method call_method(int kind) {
 		return ReflectionUtils.staticArgListMethodFromKind(
 				Dispatch.class, OP_CALL, new Class[] { ExecutionContext.class, Object.class }, kind);
