@@ -19,7 +19,12 @@ class NewFragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
       body
     }
     finally {
-      System.setProperty(key, oldValue)
+      if (oldValue == null) {
+        System.clearProperty(key)
+      }
+      else {
+        System.setProperty(key, oldValue)
+      }
     }
   }
 
