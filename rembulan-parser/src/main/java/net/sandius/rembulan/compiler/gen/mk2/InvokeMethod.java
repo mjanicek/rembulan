@@ -14,6 +14,7 @@ import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
@@ -53,29 +54,40 @@ class InvokeMethod {
 		il.add(new VarInsnNode(ALOAD, 1));  // context
 		il.add(ASMUtils.loadInt(0));  // resumption point
 
+		// a (slotIdx -> paramIdx) map
+		int[] slotParamMap = new int[context.slots.numSlots()];
+		Arrays.fill(slotParamMap, -1);
+
+		for (int paramIdx = 0; paramIdx < context.fn.params().size(); paramIdx++) {
+			int slotIdx = context.slots.slotOf(context.fn.params().get(paramIdx));
+			assert (slotParamMap[slotIdx] == -1);
+			slotParamMap[slotIdx] = paramIdx;
+		}
+
 		if (invokeKind > 0) {
-			// we have (invokeKind - 1) standalone parameters, mapping them onto #numOfRegisters
+			// we have (invokeKind - 1) standalone parameters, mapping them onto numSlots
 
-			for (int i = 0; i < runMethod.numOfRegisters(); i++) {
-				Var param = i < context.fn.params().size() ? context.fn.params().get(i) : null;
-				boolean reify = param != null && context.types.isReified(param);
-
-				if (reify) {
-					il.add(new VarInsnNode(ALOAD, 1));
-					il.add(BytecodeEmitVisitor.loadState());
-				}
-
-				if (i < invokeKind - 1) {
-					il.add(new VarInsnNode(ALOAD, 2 + i));
-				}
-				else {
+			for (int paramIdx : slotParamMap) {
+				if (paramIdx < 0) {
+					// slot unused
 					il.add(new InsnNode(ACONST_NULL));
 				}
+				else {
+					// used by the parameter #paramIdx
+					Var param = context.fn.params().get(paramIdx);
+					boolean reified = context.types.isReified(param);
 
-				if (reify) {
-					il.add(LuaStateMethods.newUpvalue());
+					if (reified) {
+						il.add(new VarInsnNode(ALOAD, 1));
+						il.add(BytecodeEmitVisitor.loadState());
+					}
+
+					il.add(new VarInsnNode(ALOAD, 2 + paramIdx));
+
+					if (reified) {
+						il.add(LuaStateMethods.newUpvalue());
+					}
 				}
-
 			}
 		}
 		else {
@@ -88,27 +100,28 @@ class InvokeMethod {
 
 			// load #numOfParameters, mapping them onto #numOfRegisters
 
-			for (int i = 0; i < runMethod.numOfRegisters(); i++) {
-				Var param = i < context.fn.params().size() ? context.fn.params().get(i) : null;
-				boolean reify = param != null && context.types.isReified(param);
-
-				if (reify) {
-					il.add(new VarInsnNode(ALOAD, 1));
-					il.add(BytecodeEmitVisitor.loadState());
-				}
-
-				if (i < context.numOfParameters()) {
-					il.add(new VarInsnNode(ALOAD, 2));  // TODO: use dup instead?
-					il.add(UtilMethods.getArrayElementOrNull(i));
-				}
-				else {
+			for (int paramIdx : slotParamMap) {
+				if (paramIdx < 0) {
+					// slot unused
 					il.add(new InsnNode(ACONST_NULL));
 				}
+				else {
+					// used by the parameter #paramIdx
+					Var param = context.fn.params().get(paramIdx);
+					boolean reified = context.types.isReified(param);
 
-				if (reify) {
-					il.add(LuaStateMethods.newUpvalue());
+					if (reified) {
+						il.add(new VarInsnNode(ALOAD, 1));
+						il.add(BytecodeEmitVisitor.loadState());
+					}
+
+					il.add(new VarInsnNode(ALOAD, 2));  // TODO: use dup instead?
+					il.add(UtilMethods.getArrayElementOrNull(paramIdx));
+
+					if (reified) {
+						il.add(LuaStateMethods.newUpvalue());
+					}
 				}
-
 			}
 
 		}
