@@ -805,26 +805,48 @@ class IRTranslatorTransformer extends Transformer {
 		// local f, s, var = explist
 		{
 			int i = 0;
-			for (Expr e : node.exprs()) {
+			Iterator<Expr> eit = node.exprs().iterator();
+			while (eit.hasNext()) {
+				Expr e = eit.next();
 				e.accept(this);
 
-				switch (i) {
-					case 0: t_f = popVal(); break;
-					case 1: t_s = popVal(); break;
-					case 2: t_var0 = popVal(); break;
-					default: popVal(); break;  // discard result
+				if (e instanceof MultiExpr && !eit.hasNext() && onStack) {
+					// multiple values at tail position
+					// -> ignore, will be dealt with below
+				}
+				else {
+					// single value
+					switch (i) {
+						case 0: t_f = popVal(); break;
+						case 1: t_s = popVal(); break;
+						case 2: t_var0 = popVal(); break;
+						default: popVal(); break;  // discard result
+					}
+					i += 1;
 				}
 
-				i += 1;
 			}
 
-			// pad with nils if necessary; note that the cases fall through!
-			switch (i) {
-				case 0: insns.add(new LoadConst.Nil(t_f));
-				case 1: insns.add(new LoadConst.Nil(t_s));
-				case 2: insns.add(new LoadConst.Nil(t_var0));
-				default:
+			if (onStack) {
+				// fill in the rest from the stack; note that the cases fall through
+				switch (i) {
+					case 0: insns.add(new StackGet(t_f, 0));
+					case 1: insns.add(new StackGet(t_s, 1));
+					case 2: insns.add(new StackGet(t_var0, 2));
+					default:
+				}
 			}
+			else {
+				// pad with nils if necessary; note that the cases fall through
+				switch (i) {
+					case 0: insns.add(new LoadConst.Nil(t_f));
+					case 1: insns.add(new LoadConst.Nil(t_s));
+					case 2: insns.add(new LoadConst.Nil(t_var0));
+					default:
+				}
+			}
+
+			onStack = false;
 
 			insns.add(new VarInit(v_var, t_var0));
 		}
