@@ -623,13 +623,23 @@ class IRTranslatorTransformer extends Transformer {
 	public BodyStatement transform(LocalDeclStatement node) {
 		List<Val> ts = new ArrayList<>();
 
-		for (Expr e : node.initialisers()) {
+		Iterator<Expr> eit = node.initialisers().iterator();
+		while (eit.hasNext()) {
+			Expr e = eit.next();
 			e.accept(this);
-			ts.add(popVal());
+
+			if (e instanceof MultiExpr && !eit.hasNext() && onStack) {
+				// multiple values at tail position
+				// -> ignore for now, will be handled below
+			}
+			else {
+				ts.add(popVal());
+			}
 		}
 
 		Iterator<Val> it = ts.iterator();
 
+		int i = 0;
 		for (Variable w : TranslationUtils.varMapping(node).vars()) {
 			Var v = var(w);
 
@@ -638,12 +648,20 @@ class IRTranslatorTransformer extends Transformer {
 				src = it.next();
 			}
 			else {
-				src = provider.newVal();
-				insns.add(new LoadConst.Nil(src));
+				if (onStack) {
+					src = provider.newVal();
+					insns.add(new StackGet(src, i++));
+				}
+				else {
+					src = provider.newVal();
+					insns.add(new LoadConst.Nil(src));
+				}
 			}
 
 			insns.add(new VarInit(v, src));
 		}
+
+		onStack = false;
 
 		return node;
 	}
