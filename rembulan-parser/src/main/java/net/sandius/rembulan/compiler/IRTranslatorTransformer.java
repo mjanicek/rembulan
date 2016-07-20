@@ -472,37 +472,51 @@ class IRTranslatorTransformer extends Transformer {
 		vals.push(dest);
 		insns.add(new TabNew(dest, array, hash));
 
-		int i = 1;
-		Iterator<TableConstructorExpr.FieldInitialiser> it = e.fields().iterator();
-		while (it.hasNext()) {
-			TableConstructorExpr.FieldInitialiser fi = it.next();
+		// According to the Lua 5.3 Reference Manual, the order of assignment is
+		// undefined. PUC-Lua appears to first enter all hash entries (with explicit keys)
+		// before array fields (with implicit integer fields).
 
-			if (fi.key() == null) {
-				// appending to sequence
+		// We do the same here.
 
-				fi.value().accept(this);
+		{
+			// hash part
+			Iterator<TableConstructorExpr.FieldInitialiser> it = e.fields().iterator();
+			while (it.hasNext()) {
+				TableConstructorExpr.FieldInitialiser fi = it.next();
 
-				if (!it.hasNext() && onStack) {
-					// appending stack contents
-					insns.add(new TabRawAppendStack(dest, i));
-					onStack = false;  // FIXME: check this
-				}
-				else {
-					// single value
+				if (fi.key() != null) {
+					fi.key().accept(this);
+					Val k = popVal();
+
+					fi.value().accept(this);
 					Val v = popVal();
-					insns.add(new TabRawSetInt(dest, i++, v));
+
+					insns.add(new TabRawSet(dest, k, v));
 				}
 			}
-			else {
-				// arbitrary key-value assignment
+		}
 
-				fi.key().accept(this);
-				Val k = popVal();
+		{
+			// array part
+			int i = 1;
+			Iterator<TableConstructorExpr.FieldInitialiser> it = e.fields().iterator();
+			while (it.hasNext()) {
+				TableConstructorExpr.FieldInitialiser fi = it.next();
 
-				fi.value().accept(this);
-				Val v = popVal();
+				if (fi.key() == null) {
+					fi.value().accept(this);
 
-				insns.add(new TabRawSet(dest, k, v));
+					if (!it.hasNext() && onStack) {
+						// appending stack contents
+						insns.add(new TabRawAppendStack(dest, i));
+						onStack = false;  // FIXME: check this
+					}
+					else {
+						// single value
+						Val v = popVal();
+						insns.add(new TabRawSetInt(dest, i++, v));
+					}
+				}
 			}
 		}
 
