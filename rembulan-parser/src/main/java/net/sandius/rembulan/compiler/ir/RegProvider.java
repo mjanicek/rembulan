@@ -1,5 +1,7 @@
 package net.sandius.rembulan.compiler.ir;
 
+import net.sandius.rembulan.parser.ast.Name;
+
 public class RegProvider {
 
 	private int valIdx;
@@ -26,8 +28,8 @@ public class RegProvider {
 		return new Var(varIdx++);
 	}
 
-	public UpVar newUpVar() {
-		return new UpVar(uvIdx++);
+	public UpVar newUpVar(Name name) {
+		return new UpVar(name);
 	}
 
 }

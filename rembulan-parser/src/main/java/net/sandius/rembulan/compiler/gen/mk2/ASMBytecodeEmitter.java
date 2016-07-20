@@ -222,7 +222,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 	}
 
 	private static String preferredUpvalueName(UpVar uv) {
-		return "uv";  // TODO
+		return uv.name().value();
 	}
 
 	private void addUpvalueFields() {

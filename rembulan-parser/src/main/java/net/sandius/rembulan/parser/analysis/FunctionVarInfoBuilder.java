@@ -118,7 +118,7 @@ class FunctionVarInfoBuilder {
 		}
 
 		public Variable addLocal(Name n) {
-			Variable v = new Variable();
+			Variable v = new Variable(n);
 			locals.push(new Local(n, v));
 			return v;
 		}

@@ -122,7 +122,7 @@ class IRTranslatorTransformer extends Transformer {
 			return w;
 		}
 		else {
-			w = provider.newUpVar();
+			w = provider.newUpVar(v.var().name());
 			uvs.put(v, w);
 			return w;
 		}
@@ -758,7 +758,7 @@ class IRTranslatorTransformer extends Transformer {
 		Val t_var1 = provider.newVal();
 		insns.add(new BinOp(BinOp.Op.SUB, t_var1, t_var0, t_step));
 
-		Var v_var = var(new Variable());  // FIXME
+		Var v_var = var(new Variable(node.name()));  // FIXME
 		insns.add(new VarInit(v_var, t_var1));
 
 		insns.add(l_top);
