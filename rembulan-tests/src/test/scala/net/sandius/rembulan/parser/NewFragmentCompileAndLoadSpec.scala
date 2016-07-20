@@ -12,7 +12,16 @@ import org.scalatest.{FunSpec, MustMatchers}
 @RunWith(classOf[JUnitRunner])
 class NewFragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
 
-  System.setProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true")
+  def withProperty[A](key: String, value: String)(body: => A): A = {
+    val oldValue = System.getProperty(key)
+    try {
+      System.setProperty(key, value)
+      body
+    }
+    finally {
+      System.setProperty(key, oldValue)
+    }
+  }
 
   describe ("fragment") {
 
@@ -28,16 +37,20 @@ class NewFragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
           println("--- CODE END ---")
           println()
 
-          val compiler = new Compiler()
-          val cm = compiler.compile(fragment.code, "stdin", "test")
-          cm must not be null
+          withProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true") {
+            val compiler = new Compiler()
+            val cm = compiler.compile(fragment.code, "stdin", "test")
+            cm must not be null
+          }
         }
 
         it ("can be loaded by the VM") {
           val classLoader = new ChunkClassLoader()
 
-          val compiler = new Compiler()
-          val cm = compiler.compile(fragment.code, "stdin", "test")
+          val cm = withProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true") {
+            val compiler = new Compiler()
+            compiler.compile(fragment.code, "stdin", "test")
+          }
 
           val name = classLoader.install(cm)
           val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
