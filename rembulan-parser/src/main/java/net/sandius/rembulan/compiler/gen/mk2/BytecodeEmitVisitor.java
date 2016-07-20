@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen.mk2;
 
 import net.sandius.rembulan.compiler.CodeVisitor;
+import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.gen.ClassNameTranslator;
@@ -46,6 +47,9 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	private final InsnList il;
 	private final List<LocalVariableNode> locals;
 
+	private int closureIdx;
+	private final List<RunMethod.ClosureFieldInstance> instanceLevelClosures;
+
 	public BytecodeEmitVisitor(ASMBytecodeEmitter context, RunMethod runMethod, SlotAllocInfo slots, TypeInfo types) {
 		this.context = Check.notNull(context);
 		this.runMethod = Check.notNull(runMethod);
@@ -57,6 +61,9 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 		this.il = new InsnList();
 		this.locals = new ArrayList<>();
+
+		this.closureIdx = 0;
+		this.instanceLevelClosures = new ArrayList<>();
 	}
 
 	public InsnList instructions() {
@@ -65,6 +72,10 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	public List<LocalVariableNode> locals() {
 		return locals;
+	}
+
+	public List<RunMethod.ClosureFieldInstance> instanceLevelClosures() {
+		return instanceLevelClosures;
 	}
 
 	protected int slot(AbstractVal v) {
@@ -651,31 +662,139 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(new JumpInsnNode(GOTO, l(node.jmpDest())));
 	}
 
-	@Override
-	public void visit(Closure node) {
-		ClassNameTranslator tr = context.classNameTranslator;
+	private class ClosureUse {
 
-		Type fnType = Type.getType(node.id().toClassName(tr));
+		private final FunctionId id;
+		private final List<AbstractVar> upvals;
 
-		il.add(new TypeInsnNode(NEW, fnType.getInternalName()));
-		il.add(new InsnNode(DUP));
-		for (AbstractVar var : node.args()) {
-			if (var instanceof UpVar) {
-				il.add(loadUpvalueRef((UpVar) var));
+		private final String fieldName;  // may be null
+
+		private ClosureUse(FunctionId id, List<AbstractVar> upvals) {
+			this.id = Check.notNull(id);
+			this.upvals = Check.notNull(upvals);
+
+			if (isClosed() && !isPure()) {
+				this.fieldName = context.addFieldName("c_" + (closureIdx++));
 			}
 			else {
-				Var v = (Var) var;
-				assert (types.isReified(v));
-				il.add(new VarInsnNode(ALOAD, slot(v)));
-				il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Upvalue.class)));
+				this.fieldName = null;
 			}
 		}
 
-		Type[] ctorArgTypes = new Type[node.args().size()];
-		Arrays.fill(ctorArgTypes, Type.getType(Upvalue.class));
+		public boolean isClosed() {
+			for (AbstractVar uv : upvals) {
+				if (uv instanceof Var) {
+					return false;
+				}
+			}
+			return true;
+		}
 
-		il.add(ASMUtils.ctor(fnType, ctorArgTypes));
+		public boolean isPure() {
+			return upvals.isEmpty();
+		}
 
+		public RunMethod.ClosureFieldInstance toClosureFieldInstance() {
+			assert (this.isClosed());
+
+			FieldNode fieldNode = instanceFieldNode();
+
+			InsnList il = new InsnList();
+			il.add(new VarInsnNode(ALOAD, 0));
+			il.add(instantiationInsns());
+			il.add(new FieldInsnNode(
+					PUTFIELD,
+					context.thisClassType().getInternalName(),
+					instanceFieldName(),
+					instanceType().getDescriptor()));
+
+			return new RunMethod.ClosureFieldInstance(instanceFieldNode(), il);
+		}
+
+		private InsnList instantiationInsns() {
+			InsnList il = new InsnList();
+
+			ClassNameTranslator tr = context.classNameTranslator;
+
+			Type fnType = ASMUtils.typeForClassName(id.toClassName(tr));
+
+			il.add(new TypeInsnNode(NEW, fnType.getInternalName()));
+			il.add(new InsnNode(DUP));
+			for (AbstractVar var : upvals) {
+				if (var instanceof UpVar) {
+					il.add(loadUpvalueRef((UpVar) var));
+				}
+				else {
+					Var v = (Var) var;
+					assert (context.types.isReified(v));
+					il.add(new VarInsnNode(ALOAD, slot(v)));
+					il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Upvalue.class)));
+				}
+			}
+
+			Type[] ctorArgTypes = new Type[upvals.size()];
+			Arrays.fill(ctorArgTypes, Type.getType(Upvalue.class));
+
+			il.add(ASMUtils.ctor(fnType, ctorArgTypes));
+
+			return il;
+		}
+
+		private String instanceFieldName() {
+			return fieldName;
+		}
+
+		private Type instanceType() {
+			return ASMUtils.typeForClassName(id.toClassName(context.classNameTranslator));
+		}
+
+		private FieldNode instanceFieldNode() {
+			return new FieldNode(
+					ACC_PRIVATE + ACC_FINAL,
+					instanceFieldName(),
+					instanceType().getDescriptor(),
+					null,
+					null);
+		}
+
+		private InsnList fetchInstanceInsns() {
+			InsnList il = new InsnList();
+
+			if (this.isClosed()) {
+				if (this.isPure()) {
+					il.add(new FieldInsnNode(
+							GETSTATIC,
+							instanceType().getInternalName(),
+							ASMBytecodeEmitter.instanceFieldName(),
+							instanceType().getDescriptor()));
+				}
+				else {
+					il.add(new VarInsnNode(ALOAD, 0));
+					il.add(new FieldInsnNode(
+							GETFIELD,
+							context.thisClassType().getInternalName(),
+							instanceFieldName(),
+							instanceType().getDescriptor()));
+				}
+			}
+			else {
+				il.add(instantiationInsns());
+			}
+
+			return il;
+		}
+
+	}
+
+	@Override
+	public void visit(Closure node) {
+		ClosureUse cu = new ClosureUse(node.id(), node.args());
+
+		if (cu.isClosed() && !cu.isPure()) {
+			instanceLevelClosures.add(cu.toClosureFieldInstance());
+		}
+
+		il.add(cu.fetchInstanceInsns());
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
 

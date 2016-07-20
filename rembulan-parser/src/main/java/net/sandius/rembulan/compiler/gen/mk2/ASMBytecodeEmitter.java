@@ -11,7 +11,9 @@ import net.sandius.rembulan.compiler.gen.CompiledClass;
 import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.InvokableMethods;
 import net.sandius.rembulan.compiler.gen.asm.InvokeKind;
+import net.sandius.rembulan.compiler.ir.AbstractVar;
 import net.sandius.rembulan.compiler.ir.UpVar;
+import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
@@ -22,7 +24,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 import org.objectweb.asm.tree.InnerClassNode;
-import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
@@ -55,8 +56,9 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 
 	private final HashMap<UpVar, String> upvalueFieldNames;
 
-	private boolean verifyAndPrint;
+	private final List<FieldNode> fields;
 
+	private boolean verifyAndPrint;
 
 	public ASMBytecodeEmitter(
 			IRFunc fn,
@@ -75,6 +77,8 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		this.sourceFile = Check.notNull(sourceFile);
 
 		classNode = new ClassNode();
+
+		this.fields = new ArrayList<>();
 
 		upvalueFieldNames = new HashMap<>();
 
@@ -125,6 +129,10 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		return fn.isVararg();
 	}
 
+	public List<FieldNode> fields() {
+		return fields;
+	}
+
 	private void addInnerClassLinks() {
 		String ownInternalName = thisClassType().getInternalName();
 
@@ -160,8 +168,27 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		}
 	}
 
+	enum NestedInstanceKind {
+		Pure,
+		Closed,
+		Open
+	}
 
-	public String instanceFieldName() {
+	protected static NestedInstanceKind functionKind(IRFunc fn) {
+		if (fn.upvals().isEmpty()) {
+			return NestedInstanceKind.Pure;
+		}
+		else {
+			for (AbstractVar uv : fn.upvals()) {
+				if (uv instanceof Var) {
+					return NestedInstanceKind.Open;
+				}
+			}
+			return NestedInstanceKind.Closed;
+		}
+	}
+
+	public static String instanceFieldName() {
 		return "INSTANCE";
 	}
 
@@ -174,44 +201,9 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 				null);
 	}
 
-	InsnList instantiateNestedInstanceFields() {
-		InsnList il = new InsnList();
-
+	String addFieldName(String n) {
 		// TODO
-
-		/*
-		ReadOnlyArray<Prototype> nps = context().prototype().getNestedPrototypes();
-		for (int i = 0; i < nps.size(); i++) {
-			if (nestedInstanceKind(i) == ClassEmitter.NestedInstanceKind.Closed) {
-				ReadOnlyArray<Prototype.UpvalueDesc> uvds = nps.get(i).getUpValueDescriptions();
-
-				il.add(new VarInsnNode(ALOAD, 0));
-				il.add(new TypeInsnNode(NEW, nestedInstanceFieldType(i).getInternalName()));
-				il.add(new InsnNode(DUP));
-				for (Prototype.UpvalueDesc uvd : uvds) {
-					Check.isFalse(uvd.inStack);
-
-					il.add(new VarInsnNode(ALOAD, 0));  // this
-					il.add(new FieldInsnNode(
-							GETFIELD,
-							thisClassType().getInternalName(),
-							getUpvalueFieldName(uvd.index),
-							Type.getDescriptor(Upvalue.class)));
-				}
-				il.add(new MethodInsnNode(
-						INVOKESPECIAL,
-						nestedInstanceFieldType(i).getInternalName(),
-						"<init>",
-						Type.getMethodDescriptor(
-								Type.VOID_TYPE,
-								ASMUtils.fillTypes(Type.getType(Upvalue.class), uvds.size())),
-						false));
-				il.add(setNestedInstance(i));
-			}
-		}
-		*/
-
-		return il;
+		return n;
 	}
 
 	private static String toFieldName(String n) {
@@ -269,12 +261,11 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		if (!hasUpvalues()) {
 			classNode.fields.add(instanceField());
 		}
-//		addNestedInstanceFields();
 
 		addUpvalueFields();
 
-		ConstructorMethod ctor = new ConstructorMethod(this);
 		RunMethod runMethod = new RunMethod(this);
+		ConstructorMethod ctor = new ConstructorMethod(this, runMethod);
 
 		classNode.methods.add(ctor.methodNode());
 		classNode.methods.add(new InvokeMethod(this, runMethod).methodNode());
@@ -289,6 +280,8 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		if (!staticCtor.isEmpty()) {
 			classNode.methods.add(staticCtor.methodNode());
 		}
+
+		classNode.fields.addAll(fields);
 
 		return classNode;
 	}

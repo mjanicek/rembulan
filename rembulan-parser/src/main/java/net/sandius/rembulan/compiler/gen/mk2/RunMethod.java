@@ -25,6 +25,8 @@ class RunMethod {
 	private final MethodNode methodNode;
 	private final boolean resumable;
 
+	private final List<ClosureFieldInstance> closureFields;
+
 	public RunMethod(ASMBytecodeEmitter context) {
 		this.context = Check.notNull(context);
 
@@ -32,6 +34,8 @@ class RunMethod {
 
 		this.methodNode = emit(visitor);
 		this.resumable = visitor.isResumable();
+
+		this.closureFields = visitor.instanceLevelClosures();
 	}
 
 	public int numOfRegisters() {
@@ -247,6 +251,30 @@ class RunMethod {
 		il.add(new InsnNode(ATHROW));
 
 		return il;
+	}
+
+	static class ClosureFieldInstance {
+
+		private final FieldNode fieldNode;
+		private final InsnList instantiateInsns;
+
+		public ClosureFieldInstance(FieldNode fieldNode, InsnList instantiateInsns) {
+			this.fieldNode = Check.notNull(fieldNode);
+			this.instantiateInsns = Check.notNull(instantiateInsns);
+		}
+
+		public FieldNode fieldNode() {
+			return fieldNode;
+		}
+
+		public InsnList instantiateInsns() {
+			return instantiateInsns;
+		}
+
+	}
+
+	public List<ClosureFieldInstance> closureFields() {
+		return closureFields;
 	}
 
 	private MethodNode emit(BytecodeEmitVisitor visitor) {

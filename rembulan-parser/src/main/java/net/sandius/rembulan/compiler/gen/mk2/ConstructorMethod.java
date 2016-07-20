@@ -24,9 +24,11 @@ import static org.objectweb.asm.Opcodes.RETURN;
 class ConstructorMethod {
 
 	private final ASMBytecodeEmitter context;
+	private final RunMethod runMethod;
 
-	public ConstructorMethod(ASMBytecodeEmitter context) {
+	public ConstructorMethod(ASMBytecodeEmitter context, RunMethod runMethod) {
 		this.context = Check.notNull(context);
+		this.runMethod = Check.notNull(runMethod);
 	}
 
 	public Type methodType() {
@@ -80,8 +82,11 @@ class ConstructorMethod {
 			idx++;
 		}
 
-		// instantiate closures that have no open upvalues
-		il.add(context.instantiateNestedInstanceFields());
+		// instantiate fields for closures that have no open upvalues
+		for (RunMethod.ClosureFieldInstance cfi : runMethod.closureFields()) {
+			context.fields().add(cfi.fieldNode());
+			il.add(cfi.instantiateInsns());
+		}
 
 		il.add(new InsnNode(RETURN));
 
