@@ -462,11 +462,14 @@ LValueExpr LValue() :
 {
 	SourceElement<Name> sn;
 	Expr e;
-	PostfixOp.FieldAccess fa;
+//	PostfixOp.FieldAccess fa;
 }
 {
-	LOOKAHEAD(2) sn=SrcName()  { return Exprs.var(sn.sourceInfo(), sn.element()); }
-|	e=PrefixExpr() fa=__FieldAccessOp()  { return fa.on(e); }
+//	LOOKAHEAD(2) sn=SrcName()  { return Exprs.var(sn.sourceInfo(), sn.element()); }
+//|	e=PrefixExpr() fa=__FieldAccessOp()  { return fa.on(e); }
+
+	// FIXME: restrict this using syntactic rule instead
+	e=PrefixExpr()  { if (e instanceof LValueExpr) return (LValueExpr) e; else throw new ParseException("lvalue expected"); }
 }
 
 SourceElement<List<Expr>> Args() :
