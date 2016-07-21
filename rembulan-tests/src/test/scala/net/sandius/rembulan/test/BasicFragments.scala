@@ -365,6 +365,14 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   SeqTableLength in EmptyContext succeedsWith (2)
 
+  val SeqTableLength2 = fragment ("SeqTableLength2") {
+    """local t = {}
+      |t[1], t[2] = #t, #t
+      |return #t, t[1], t[2]
+    """
+  }
+  SeqTableLength2 in EmptyContext succeedsWith (2, 0, 0)
+
   val NilTableLength = fragment ("NilTableLength") {
     """return #t
     """
