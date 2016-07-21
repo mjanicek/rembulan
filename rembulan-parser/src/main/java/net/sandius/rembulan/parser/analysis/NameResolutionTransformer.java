@@ -65,11 +65,13 @@ class NameResolutionTransformer extends Transformer {
 		Expr limit = node.limit().accept(this);
 		Expr step = node.step() != null ? node.step().accept(this) : null;
 
+		fnScope.enterBlock();
 		Variable v = fnScope.addLocal(n);
+		node = node.update(n, init, limit, step, transform(node.block()));
+		node = node.with(new VarMapping(v));
+		fnScope.leaveBlock();
 
-		return node
-				.update(n, init, limit, step, transform(node.block()))
-				.with(new VarMapping(v));
+		return node;
 	}
 
 	@Override
@@ -78,15 +80,30 @@ class NameResolutionTransformer extends Transformer {
 		List<Expr> es = transformExprList(node.exprs());
 
 		List<Variable> vs = new ArrayList<>();
+
+		fnScope.enterBlock();
 		for (Name n : ns) {
 			Variable v = fnScope.addLocal(n);
 			vs.add(v);
 		}
+		node = node.update(ns, es, transform(node.block()));
+		node = node.with(new VarMapping(Collections.unmodifiableList(vs)));
+		fnScope.leaveBlock();
 
-		return node
-				.update(ns, es, transform(node.block()))
-				.with(new VarMapping(Collections.unmodifiableList(vs)));
+		return node;
 	}
+
+	@Override
+	public BodyStatement transform(RepeatUntilStatement node) {
+		fnScope.enterBlock();
+		Block b = super.transform(node.block());
+		Expr c = node.condition().accept(this);
+		node = node.update(c, b);
+		fnScope.leaveBlock();
+
+		return node;
+	}
+
 
 	@Override
 	public FunctionDefExpr transform(FunctionDefExpr e) {
@@ -135,15 +152,6 @@ class NameResolutionTransformer extends Transformer {
 	public Expr transform(VarargsExpr e) {
 		fnScope.setVararg();
 		return super.transform(e);
-	}
-
-	@Override
-	public BodyStatement transform(RepeatUntilStatement node) {
-		fnScope.enterBlock();
-		Block b = super.transform(node.block());
-		Expr c = node.condition().accept(this);
-		fnScope.leaveBlock();
-		return node.update(c, b);
 	}
 
 }

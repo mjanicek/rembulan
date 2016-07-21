@@ -244,6 +244,16 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   ForLoopMtAttempt in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
   ForLoopMtAttempt in BasicContext failsWith (classOf[ConversionException], "'for' initial value must be a number")
 
+  val ForLoopVarNameResolution = fragment ("ForLoopVarNameResolution") {
+    """local count = 0
+      |local i = 2
+      |for i = 1, 10 do count = count + 1 end
+      |for j = 1, 5 do count = count + i end
+      |return count
+    """
+  }
+  ForLoopVarNameResolution in EmptyContext succeedsWith (20)
+
   val RepeatUntil = fragment ("RepeatUntil") {
     """local sum = 0
       |repeat
