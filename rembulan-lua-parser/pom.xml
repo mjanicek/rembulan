@@ -12,7 +12,7 @@
     <relativePath>../rembulan-parent</relativePath>
   </parent>
 
-  <artifactId>rembulan-parser</artifactId>
+  <artifactId>rembulan-lua-parser</artifactId>
   <version>${project.parent.version}</version>
   <packaging>jar</packaging>
 

@@ -24,7 +24,7 @@
 
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-parser</artifactId>
+      <artifactId>rembulan-lua-parser</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
 
