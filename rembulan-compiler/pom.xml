@@ -24,13 +24,13 @@
 
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-core</artifactId>
+      <artifactId>rembulan-parser</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
 
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-lbc</artifactId>
+      <artifactId>rembulan-core</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
 
