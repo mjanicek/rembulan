@@ -3,13 +3,11 @@ package net.sandius.rembulan.test
 import java.io.PrintStream
 import java.util.Scanner
 
-import net.sandius.rembulan.compiler.PrototypeCompilerChunkLoader
-import net.sandius.rembulan.compiler.gen.ChunkCompiler
+import net.sandius.rembulan.compiler.{ChunkClassLoader, Compiler, CompilerChunkLoader}
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.{Exec, LuaState, PreemptionContext, Table}
 import net.sandius.rembulan.lib.LibUtils
 import net.sandius.rembulan.lib.impl._
-import net.sandius.rembulan.parser.LuaCPrototypeReader
 import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
 
 import scala.util.Try
@@ -68,15 +66,14 @@ object BenchmarkRunner {
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
     require (sourceContents != null, "source contents must not be null")
 
-    val luacName = "luac53"
     val preemptionContext = pc
 
     val cpuMode = noCPUAccounting match {
-      case true => ChunkCompiler.CPUAccountingCompilationMode.NO_CPU_ACCOUNTING
-      case _ => ChunkCompiler.DEFAULT_MODE
+      case true => Compiler.CPUAccountingMode.NO_CPU_ACCOUNTING
+      case _ => Compiler.DEFAULT_CPU_ACCOUNTING_MODE
     }
 
-    val ldr = new PrototypeCompilerChunkLoader(new LuaCPrototypeReader(luacName), getClass.getClassLoader, cpuMode)
+    val ldr = new CompilerChunkLoader(new ChunkClassLoader(), cpuMode)
 
     val state = new DefaultLuaState.Builder()
         .withPreemptionContext(preemptionContext)
