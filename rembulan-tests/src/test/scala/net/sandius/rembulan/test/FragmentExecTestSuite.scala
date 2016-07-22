@@ -6,9 +6,9 @@ import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, Pro
 import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
+import net.sandius.rembulan.lbc.LuaCPrototypeReader
 import net.sandius.rembulan.lib.{Lib, LibUtils}
 import net.sandius.rembulan.lib.impl._
-import net.sandius.rembulan.parser.LuaCPrototypeReader
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{core => lua}
 import org.scalatest.{FunSpec, MustMatchers}

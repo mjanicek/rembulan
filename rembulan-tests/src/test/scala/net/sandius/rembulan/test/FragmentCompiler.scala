@@ -1,7 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.lbc.Prototype
-import net.sandius.rembulan.parser.LuaCPrototypeReader
+import net.sandius.rembulan.lbc.{LuaCPrototypeReader, Prototype}
 
 trait FragmentCompiler {
 

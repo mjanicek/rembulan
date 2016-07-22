@@ -1,13 +1,7 @@
-package net.sandius.rembulan.parser;
+package net.sandius.rembulan.lbc;
 
-import net.sandius.rembulan.lbc.Prototype;
-import net.sandius.rembulan.lbc.PrototypeBuilderVisitor;
-import net.sandius.rembulan.lbc.PrototypeLoader;
-import net.sandius.rembulan.lbc.PrototypeReader;
-import net.sandius.rembulan.lbc.PrototypeReaderException;
-import net.sandius.rembulan.lbc.PrototypeVisitor;
-import net.sandius.rembulan.util.ProcessCall;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.ProcessCall;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;

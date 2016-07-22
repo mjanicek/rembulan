@@ -7,8 +7,7 @@ import com.github.mdr.ascii.layout._
 import net.sandius.rembulan.compiler.Chunk
 import net.sandius.rembulan.compiler.gen._
 import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
-import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter, PrototypePrinterVisitor}
-import net.sandius.rembulan.parser.LuaCPrototypeReader
+import net.sandius.rembulan.lbc.{LuaCPrototypeReader, Prototype, PrototypePrinter, PrototypePrinterVisitor}
 
 import scala.collection.JavaConversions._
 
