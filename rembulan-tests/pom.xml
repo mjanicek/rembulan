@@ -39,6 +39,12 @@
 
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
+      <artifactId>rembulan-lbc-recompiler</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>net.sandius.rembulan</groupId>
       <artifactId>rembulan-parser</artifactId>
       <version>${project.parent.version}</version>
     </dependency>

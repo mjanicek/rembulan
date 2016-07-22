@@ -5,7 +5,7 @@ import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.gen.LuaTypes;
-import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
+import net.sandius.rembulan.compiler.gen.block.NumOpType;
 import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.types.FunctionType;
@@ -309,10 +309,10 @@ class TyperVisitor extends CodeVisitor {
 		StaticMathImplementation math = staticMath(node.op());
 
 		if (math != null) {
-			LuaInstruction.NumOpType ot = math.opType(l, r);
+			NumOpType ot = math.opType(l, r);
 			result = ot.toSlotType();
 
-			if (ot == LuaInstruction.NumOpType.Any) {
+			if (ot == NumOpType.Any) {
 				mayCallMetamethod();
 			}
 		}

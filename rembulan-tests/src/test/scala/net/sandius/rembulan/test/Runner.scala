@@ -1,9 +1,9 @@
 package net.sandius.rembulan.test
 
 import net.sandius.rembulan.compiler.ChunkClassLoader
-import net.sandius.rembulan.compiler.gen.ChunkCompiler
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
+import net.sandius.rembulan.lbc.recompiler.gen.ChunkCompiler
 import net.sandius.rembulan.{core => lua}
 
 object Runner {

@@ -2,11 +2,12 @@ package net.sandius.rembulan.test
 
 import java.io.PrintStream
 
-import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, PrototypeCompilerChunkLoader}
+import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader}
 import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.lbc.LuaCPrototypeReader
+import net.sandius.rembulan.lbc.recompiler.PrototypeCompilerChunkLoader
 import net.sandius.rembulan.lib.{Lib, LibUtils}
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.test.FragmentExpectations.Env

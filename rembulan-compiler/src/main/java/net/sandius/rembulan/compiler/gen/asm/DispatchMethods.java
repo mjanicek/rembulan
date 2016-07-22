@@ -1,7 +1,5 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.compiler.gen.block.LuaBinaryOperation;
-import net.sandius.rembulan.compiler.gen.block.LuaInstruction;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import org.objectweb.asm.Type;
@@ -48,33 +46,6 @@ public class DispatchMethods {
 
 	public static final String OP_CALL = "call";
 
-	public static String binaryOperationMethodName(LuaBinaryOperation.Op op) {
-		switch (op) {
-			case ADD:  return OP_ADD;
-			case SUB:  return OP_SUB;
-			case MUL:  return OP_MUL;
-			case MOD:  return OP_MOD;
-			case POW:  return OP_POW;
-			case DIV:  return OP_DIV;
-			case IDIV: return OP_IDIV;
-			case BAND: return OP_BAND;
-			case BOR:  return OP_BOR;
-			case BXOR: return OP_BXOR;
-			case SHL:  return OP_SHL;
-			case SHR:  return OP_SHR;
-			default: throw new IllegalArgumentException("Illegal binary operation: " + op);
-		}
-	}
-
-	public static String comparisonMethodName(LuaInstruction.Comparison op) {
-		switch (op) {
-			case EQ: return OP_EQ;
-			case LT: return OP_LT;
-			case LE: return OP_LE;
-			default: throw new IllegalArgumentException("Illegal comparison operation: " + op);
-		}
-	}
-	
 	public static AbstractInsnNode dynamic(String methodName, int numArgs) {
 		ArrayList<Type> args = new ArrayList<>();
 		args.add(Type.getType(ExecutionContext.class));

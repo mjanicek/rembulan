@@ -2,9 +2,11 @@ package net.sandius.rembulan.compiler.gen
 
 import java.io.PrintWriter
 
-import net.sandius.rembulan.compiler.{Chunk, ChunkClassLoader}
+import net.sandius.rembulan.compiler.ChunkClassLoader
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultUpvalue
+import net.sandius.rembulan.lbc.recompiler.Chunk
+import net.sandius.rembulan.lbc.recompiler.gen.ChunkCompiler
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter}
 import net.sandius.rembulan.test.{BasicFragments, LuaCFragmentCompiler}
 import net.sandius.rembulan.{core => lua}

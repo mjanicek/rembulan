@@ -4,9 +4,10 @@ import java.io.{BufferedOutputStream, FileOutputStream, PrintWriter}
 
 import com.github.mdr.ascii.graph.Graph
 import com.github.mdr.ascii.layout._
-import net.sandius.rembulan.compiler.Chunk
 import net.sandius.rembulan.compiler.gen._
-import net.sandius.rembulan.compiler.gen.block.{Entry, Exit, Node}
+import net.sandius.rembulan.lbc.recompiler.gen.block.{Entry, Exit, Node}
+import net.sandius.rembulan.lbc.recompiler.Chunk
+import net.sandius.rembulan.lbc.recompiler.gen.{ChunkCompiler, CompilationUnit, SlotState}
 import net.sandius.rembulan.lbc.{LuaCPrototypeReader, Prototype, PrototypePrinter, PrototypePrinterVisitor}
 
 import scala.collection.JavaConversions._

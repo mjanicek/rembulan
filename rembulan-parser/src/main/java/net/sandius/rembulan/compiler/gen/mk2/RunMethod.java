@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.gen.mk2;
 
 import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
-import net.sandius.rembulan.compiler.gen.asm.ClassEmitter;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Resumable;
@@ -244,7 +243,7 @@ class RunMethod {
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						Type.getType(Resumable.class),
-						ClassEmitter.savedStateType()).getDescriptor(),
+						context.savedStateClassType()).getDescriptor(),
 				false));
 
 		// rethrow

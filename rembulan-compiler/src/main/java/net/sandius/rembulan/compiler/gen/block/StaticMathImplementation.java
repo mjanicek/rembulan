@@ -5,7 +5,6 @@ import net.sandius.rembulan.compiler.types.Type;
 import static net.sandius.rembulan.compiler.gen.LuaTypes.NUMBER;
 import static net.sandius.rembulan.compiler.gen.LuaTypes.NUMBER_FLOAT;
 import static net.sandius.rembulan.compiler.gen.LuaTypes.NUMBER_INTEGER;
-import static net.sandius.rembulan.compiler.gen.block.LuaInstruction.NumOpType;
 
 public abstract class StaticMathImplementation {
 
