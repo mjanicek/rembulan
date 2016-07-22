@@ -854,15 +854,27 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(CPUWithdraw node) {
-		ResumptionPoint rp = newResumptionPoint();
-		il.add(rp.save());
+		switch (context.cpuAccountingMode) {
+			case NO_CPU_ACCOUNTING: {
+				// no-op
+				break;
+			}
 
-		il.add(loadExecutionContext());
-		il.add(loadState());
-		il.add(ASMUtils.loadInt(node.cost()));
-		il.add(LuaStateMethods.checkCpu());
+			case IN_EVERY_BASIC_BLOCK: {
+				ResumptionPoint rp = newResumptionPoint();
+				il.add(rp.save());
 
-		il.add(rp.resume());
+				il.add(loadExecutionContext());
+				il.add(loadState());
+				il.add(ASMUtils.loadInt(node.cost()));
+				il.add(LuaStateMethods.checkCpu());
+
+				il.add(rp.resume());
+				break;
+			}
+
+			default: throw new IllegalStateException("Illegal CPU accounting mode: " + context.cpuAccountingMode);
+		}
 	}
 
 }

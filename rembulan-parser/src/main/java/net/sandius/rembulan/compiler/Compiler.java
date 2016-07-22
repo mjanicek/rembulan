@@ -31,6 +31,31 @@ import java.util.Stack;
 
 public class Compiler {
 
+	public enum CPUAccountingMode {
+		NO_CPU_ACCOUNTING,
+		IN_EVERY_BASIC_BLOCK
+	}
+
+	public static final CPUAccountingMode DEFAULT_CPU_ACCOUNTING_MODE = CPUAccountingMode.NO_CPU_ACCOUNTING;
+
+	private CPUAccountingMode cpuAccountingMode;
+
+	public Compiler(CPUAccountingMode cpuAccountingMode) {
+		this.cpuAccountingMode = Check.notNull(cpuAccountingMode);
+	}
+
+	public Compiler() {
+		this(DEFAULT_CPU_ACCOUNTING_MODE);
+	}
+
+	public void setCPUAccountingMode(CPUAccountingMode mode) {
+		cpuAccountingMode = Check.notNull(mode);
+	}
+
+	public CPUAccountingMode getCPUAccountingMode() {
+		return cpuAccountingMode;
+	}
+
 	private static Chunk parse(String sourceText) throws ParseException {
 		ByteArrayInputStream bais = new ByteArrayInputStream(sourceText.getBytes());
 		Parser parser = new Parser(bais);
@@ -123,7 +148,10 @@ public class Compiler {
 
 	private CompiledClass compileFunction(ProcessedFunc pf, String sourceFileName, String rootClassName) {
 		ClassNameTranslator classNameTranslator = new SuffixingClassNameTranslator(rootClassName);
-		BytecodeEmitter emitter = new ASMBytecodeEmitter(pf.fn, pf.slots, pf.types, pf.deps, classNameTranslator, sourceFileName);
+		BytecodeEmitter emitter = new ASMBytecodeEmitter(
+				pf.fn, pf.slots, pf.types, pf.deps,
+				cpuAccountingMode, classNameTranslator,
+				sourceFileName);
 		return emitter.emit();
 	}
 

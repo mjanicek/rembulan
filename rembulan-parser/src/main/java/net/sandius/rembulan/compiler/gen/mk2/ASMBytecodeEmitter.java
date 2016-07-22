@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler.gen.mk2;
 
+import net.sandius.rembulan.compiler.Compiler;
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.analysis.DependencyInfo;
@@ -48,6 +49,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 	public final TypeInfo types;
 	public final DependencyInfo deps;
 
+	public final Compiler.CPUAccountingMode cpuAccountingMode;
 	public final ClassNameTranslator classNameTranslator;
 
 	private final String sourceFile;
@@ -65,6 +67,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 			SlotAllocInfo slots,
 			TypeInfo types,
 			DependencyInfo deps,
+			Compiler.CPUAccountingMode cpuAccountingMode,
 			ClassNameTranslator classNameTranslator,
 			String sourceFile) {
 
@@ -73,6 +76,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		this.types = Check.notNull(types);
 		this.deps = Check.notNull(deps);
 
+		this.cpuAccountingMode = Check.notNull(cpuAccountingMode);
 		this.classNameTranslator = Check.notNull(classNameTranslator);
 		this.sourceFile = Check.notNull(sourceFile);
 
