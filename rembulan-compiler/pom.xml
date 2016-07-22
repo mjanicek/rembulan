@@ -30,7 +30,7 @@
 
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-lua-bytecode</artifactId>
+      <artifactId>rembulan-lbc</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
 

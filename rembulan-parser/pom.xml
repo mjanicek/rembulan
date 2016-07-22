@@ -31,7 +31,7 @@
     <!-- FIXME: don't depend on lua-bytecode, lua-common should be enough -->
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-lua-bytecode</artifactId>
+      <artifactId>rembulan-lbc</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
 
