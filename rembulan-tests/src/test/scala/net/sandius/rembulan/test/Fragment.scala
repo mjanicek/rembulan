@@ -1,5 +1,6 @@
 package net.sandius.rembulan.test
 
+import net.sandius.rembulan.LuaFormat
 import net.sandius.rembulan.core.LuaRuntimeException
 import org.scalatest.FunSpec
 
@@ -352,7 +353,7 @@ trait OneLiners { this: FragmentBundle with FragmentExpectations =>
   protected def thisContext: FragmentExpectations.Env = context
 
   def program(body: String): RichFragment.InContext = {
-    val name = (body :: prefixes).reverse.mkString(": ")
+    val name = (LuaFormat.escape(body) :: prefixes).reverse.mkString(": ")
     fragment(name)(body) in context
   }
 
