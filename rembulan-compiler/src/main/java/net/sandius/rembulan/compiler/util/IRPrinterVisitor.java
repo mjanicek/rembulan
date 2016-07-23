@@ -76,8 +76,8 @@ public class IRPrinterVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(TabRawAppendStack node) {
-		ps.println("\ttabrawappendstack " + node.obj() + " " + node.firstIdx());
+	public void visit(TabRawAppendMulti node) {
+		ps.println("\ttabrawappendstack " + node.obj() + " " + node.src() + " " + node.firstIdx());
 	}
 
 	@Override
@@ -107,11 +107,13 @@ public class IRPrinterVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(Vararg node) {
-		ps.println("\tvararg");
+		ps.println("\tvararg " + node.dest());
 	}
 
 	private static String vlistToString(VList vl) {
-		return "(" + (vl.isMulti() ? "multi" : "fixed") + " [" + Util.listToString(vl.addrs(), " ") + "])";
+		return "(" + (vl.isMulti() ? "multi" : "fixed")
+				+ " [" + Util.listToString(vl.addrs(), " ") + "]"
+				+ (vl.suffix() != null ? " " + vl.suffix() : "") + ")";
 	}
 
 	@Override
@@ -121,7 +123,7 @@ public class IRPrinterVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(Call node) {
-		ps.println("\tcall " + node.fn() + " " + vlistToString(node.args()));
+		ps.println("\tcall " + node.dest() + " " + node.fn() + " " + vlistToString(node.args()));
 	}
 
 	@Override
@@ -130,8 +132,8 @@ public class IRPrinterVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(StackGet node) {
-		ps.println("\tstackget " + node.dest() + " " + node.idx());
+	public void visit(MultiGet node) {
+		ps.println("\tstackget " + node.dest() + " " + node.src() + " " + node.idx());
 	}
 
 	@Override

@@ -1,15 +1,7 @@
 package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.IRFunc;
-import net.sandius.rembulan.compiler.ir.AbstractVal;
-import net.sandius.rembulan.compiler.ir.BasicBlock;
-import net.sandius.rembulan.compiler.ir.BodyNode;
-import net.sandius.rembulan.compiler.ir.IRNode;
-import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.compiler.ir.PhiVal;
-import net.sandius.rembulan.compiler.ir.UpVar;
-import net.sandius.rembulan.compiler.ir.Val;
-import net.sandius.rembulan.compiler.ir.Var;
+import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.util.Check;
 
 import java.util.BitSet;
@@ -217,6 +209,16 @@ public class SlotAllocator {
 			if (!hasSlot(pv)) {
 				throw new IllegalStateException("Value " + pv + " not assigned to a slot");
 			}
+		}
+
+		@Override
+		protected void def(MultiVal mv) {
+			// TODO
+		}
+
+		@Override
+		protected void use(MultiVal mv) {
+			// TODO
 		}
 
 		@Override

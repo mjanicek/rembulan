@@ -7,7 +7,6 @@ import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.VarMapping;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
-import net.sandius.rembulan.parser.ast.Chunk;
 import net.sandius.rembulan.parser.ast.util.AttributeUtils;
 import net.sandius.rembulan.util.Check;
 
@@ -29,12 +28,13 @@ class IRTranslatorTransformer extends Transformer {
 
 	private final RegProvider provider;
 	private final Stack<AbstractVal> vals;
+	private final Stack<MultiVal> multis;
 
 	private final Stack<Label> breakLabels;
 	private final Map<ResolvedLabel, Label> userLabels;
 
 	private boolean assigning;
-	private boolean onStack;
+//	private boolean onStack;
 
 	private final Map<Variable, Var> vars;
 	private final Map<Variable.Ref, UpVar> uvs;
@@ -54,8 +54,10 @@ class IRTranslatorTransformer extends Transformer {
 		this.insns = new CodeBuilder();
 
 		this.vals = new Stack<>();
+		this.multis = new Stack<>();
+
 		this.assigning = false;
-		this.onStack = false;
+//		this.onStack = false;
 		this.breakLabels = new Stack<>();
 		this.userLabels = new HashMap<>();
 
@@ -81,11 +83,15 @@ class IRTranslatorTransformer extends Transformer {
 				insns.build());
 	}
 
+	private boolean onStack() {
+		return !multis.empty();
+	}
+
 	private Val popVal() {
-		if (onStack) {
-			onStack = false;
+		if (!multis.empty()) {
 			Val v = provider.newVal();
-			insns.add(new StackGet(v, 0));
+			MultiVal mv = multis.pop();
+			insns.add(new MultiGet(v, mv, 0));
 			return v;
 		}
 		else {
@@ -331,8 +337,9 @@ class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public Expr transform(VarargsExpr e) {
-		insns.add(new Vararg());
-		onStack = true;
+		MultiVal mv = provider.newMultiVal();
+		insns.add(new Vararg(mv));
+		multis.push(mv);
 		return e;
 	}
 
@@ -352,16 +359,17 @@ class IRTranslatorTransformer extends Transformer {
 			as.add(prefix);
 		}
 
-		boolean multi = false;
+		MultiVal multi = null;
 		Iterator<Expr> it = exprs.iterator();
 		while (it.hasNext()) {
 			Expr e = it.next();
 			e.accept(this);
 
-			if (e instanceof MultiExpr && !it.hasNext() && onStack) {
+			if (e instanceof MultiExpr && !it.hasNext() && onStack()) {
 				// multi-value expression in tail position
-				onStack = false;
-				multi = true;
+				MultiVal mv = multis.pop();
+				multis.clear();  // FIXME
+				multi = mv;
 			}
 			else {
 				// single value
@@ -380,7 +388,9 @@ class IRTranslatorTransformer extends Transformer {
 		e.fn().accept(this);
 		Val fn = popVal();
 		VList vl = vlist(e.args());
-		return new Call(fn, vl);
+
+		MultiVal result = provider.newMultiVal();
+		return new Call(result, fn, vl);
 	}
 
 	private Call call(CallExpr.MethodCallExpr e) {
@@ -395,20 +405,23 @@ class IRTranslatorTransformer extends Transformer {
 
 		VList vl = vlist(obj, e.args());
 
-		return new Call(fn, vl);
+		MultiVal result = provider.newMultiVal();
+		return new Call(result, fn, vl);
 	}
 
 	@Override
 	public Expr transform(CallExpr.FunctionCallExpr e) {
-		insns.add(call(e));
-		onStack = true;
+		Call c = call(e);
+		insns.add(c);
+		multis.push(c.dest());
 		return e;
 	}
 
 	@Override
 	public Expr transform(CallExpr.MethodCallExpr e) {
-		insns.add(call(e));
-		onStack = true;
+		Call c = call(e);
+		insns.add(c);
+		multis.push(c.dest());
 		return e;
 	}
 
@@ -506,10 +519,11 @@ class IRTranslatorTransformer extends Transformer {
 				if (fi.key() == null) {
 					fi.value().accept(this);
 
-					if (!it.hasNext() && onStack) {
+					if (!it.hasNext() && onStack()) {
 						// appending stack contents
-						insns.add(new TabRawAppendStack(dest, i));
-						onStack = false;  // FIXME: check this
+						MultiVal mv = multis.pop();
+						insns.add(new TabRawAppendMulti(dest, i, mv));
+//						onStack = false;  // FIXME: check this
 					}
 					else {
 						// single value
@@ -628,7 +642,7 @@ class IRTranslatorTransformer extends Transformer {
 			Expr e = eit.next();
 			e.accept(this);
 
-			if (e instanceof MultiExpr && !eit.hasNext() && onStack) {
+			if (e instanceof MultiExpr && !eit.hasNext() && onStack()) {
 				// multiple values at tail position
 				// -> ignore for now, will be handled below
 			}
@@ -648,12 +662,11 @@ class IRTranslatorTransformer extends Transformer {
 				src = it.next();
 			}
 			else {
-				if (onStack) {
-					src = provider.newVal();
-					insns.add(new StackGet(src, i++));
+				src = provider.newVal();
+				if (onStack()) {
+					insns.add(new MultiGet(src, multis.peek(), i++));
 				}
 				else {
-					src = provider.newVal();
 					insns.add(new LoadConst.Nil(src));
 				}
 			}
@@ -661,7 +674,8 @@ class IRTranslatorTransformer extends Transformer {
 			insns.add(new VarInit(v, src));
 		}
 
-		onStack = false;
+		multis.clear();  // FIXME
+//		onStack = false;
 
 		return node;
 	}
@@ -810,7 +824,7 @@ class IRTranslatorTransformer extends Transformer {
 				Expr e = eit.next();
 				e.accept(this);
 
-				if (e instanceof MultiExpr && !eit.hasNext() && onStack) {
+				if (e instanceof MultiExpr && !eit.hasNext() && onStack()) {
 					// multiple values at tail position
 					// -> ignore, will be dealt with below
 				}
@@ -827,12 +841,13 @@ class IRTranslatorTransformer extends Transformer {
 
 			}
 
-			if (onStack) {
+			if (onStack()) {
 				// fill in the rest from the stack; note that the cases fall through
+				MultiVal mv = multis.pop();
 				switch (i) {
-					case 0: insns.add(new StackGet(t_f, 0));
-					case 1: insns.add(new StackGet(t_s, 1));
-					case 2: insns.add(new StackGet(t_var0, 2));
+					case 0: insns.add(new MultiGet(t_f, mv, 0));
+					case 1: insns.add(new MultiGet(t_s, mv, 1));
+					case 2: insns.add(new MultiGet(t_var0, mv, 2));
 					default:
 				}
 			}
@@ -846,7 +861,8 @@ class IRTranslatorTransformer extends Transformer {
 				}
 			}
 
-			onStack = false;
+			multis.clear();  // FIXME
+//			onStack = false;
 
 			insns.add(new VarInit(v_var, t_var0));
 		}
@@ -859,12 +875,13 @@ class IRTranslatorTransformer extends Transformer {
 		List<Val> ts = new ArrayList<>();
 		ts.add(t_s);
 		ts.add(t_var1);
-		insns.add(new Call(t_f, new VList(Collections.unmodifiableList(ts), false)));
+		MultiVal mv = provider.newMultiVal();
+		insns.add(new Call(mv, t_f, new VList(Collections.unmodifiableList(ts), null)));
 
 		for (int i = 0; i < node.names().size(); i++) {
 			Var v = var(vm.get(i));
 			Val t = provider.newVal();
-			insns.add(new StackGet(t, i));
+			insns.add(new MultiGet(t, mv, i));
 			insns.add(new VarInit(v, t));
 		}
 
@@ -963,7 +980,8 @@ class IRTranslatorTransformer extends Transformer {
 		node.callExpr().accept(this);
 
 		// discard results
-		onStack = false;
+		multis.clear();  // FIXME
+//		onStack = false;
 
 		return node;
 	}

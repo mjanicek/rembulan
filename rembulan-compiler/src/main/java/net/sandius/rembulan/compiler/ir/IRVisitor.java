@@ -63,7 +63,7 @@ public abstract class IRVisitor {
 		if (v != null) v.visit(node);
 	}
 
-	public void visit(TabRawAppendStack node) {
+	public void visit(TabRawAppendMulti node) {
 		if (v != null) v.visit(node);
 	}
 
@@ -107,7 +107,7 @@ public abstract class IRVisitor {
 	}
 
 
-	public void visit(StackGet node) {
+	public void visit(MultiGet node) {
 		if (v != null) v.visit(node);
 	}
 

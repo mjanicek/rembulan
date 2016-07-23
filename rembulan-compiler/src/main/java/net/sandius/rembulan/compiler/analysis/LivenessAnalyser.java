@@ -215,6 +215,16 @@ public class LivenessAnalyser {
 		}
 
 		@Override
+		protected void def(MultiVal mv) {
+			// TODO
+		}
+
+		@Override
+		protected void use(MultiVal mv) {
+			// TODO
+		}
+
+		@Override
 		protected void def(Var v) {
 			currentVarLiveIn.remove(v);
 		}

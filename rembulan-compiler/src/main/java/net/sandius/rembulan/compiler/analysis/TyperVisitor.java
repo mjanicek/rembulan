@@ -369,7 +369,7 @@ class TyperVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(TabRawAppendStack node) {
+	public void visit(TabRawAppendMulti node) {
 		// no effect on vals
 	}
 
@@ -425,7 +425,7 @@ class TyperVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(StackGet node) {
+	public void visit(MultiGet node) {
 		// TODO
 		assign(node.dest(), LuaTypes.ANY);
 	}

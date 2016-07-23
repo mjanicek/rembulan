@@ -423,7 +423,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(TabRawAppendStack node) {
+	public void visit(TabRawAppendMulti node) {
 		/*
 		 In Java terms, we're translating this into the following loop:
 
@@ -643,7 +643,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	}
 
 	@Override
-	public void visit(StackGet node) {
+	public void visit(MultiGet node) {
 		il.add(loadExecutionContext());
 		il.add(loadSink());
 		il.add(ObjectSinkMethods.get(node.idx()));

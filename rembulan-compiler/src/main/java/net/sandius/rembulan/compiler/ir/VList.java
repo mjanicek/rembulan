@@ -7,11 +7,11 @@ import java.util.List;
 public class VList {
 
 	private final List<Val> addrs;
-	private final boolean multi;
+	private final MultiVal suffix;  // may be null
 
-	public VList(List<Val> addrs, boolean multi) {
+	public VList(List<Val> addrs, MultiVal suffix) {
 		this.addrs = Check.notNull(addrs);
-		this.multi = multi;
+		this.suffix = suffix;
 	}
 
 	public List<Val> addrs() {
@@ -19,7 +19,11 @@ public class VList {
 	}
 
 	public boolean isMulti() {
-		return multi;
+		return suffix != null;
+	}
+
+	public MultiVal suffix() {
+		return suffix;
 	}
 
 }

@@ -6,14 +6,15 @@ public class RegProvider {
 
 	private int valIdx;
 	private int phiValIdx;
+	private int multiValIdx;
+
 	private int varIdx;
-	private int uvIdx;
 
 	public RegProvider() {
 		this.valIdx = 0;
 		this.phiValIdx = 0;
 		this.varIdx = 0;
-		this.uvIdx = 0;
+		this.multiValIdx = 0;
 	}
 
 	public Val newVal() {
@@ -22,6 +23,10 @@ public class RegProvider {
 
 	public PhiVal newPhiVal() {
 		return new PhiVal(phiValIdx++);
+	}
+
+	public MultiVal newMultiVal() {
+		return new MultiVal(multiValIdx++);
 	}
 
 	public Var newVar() {

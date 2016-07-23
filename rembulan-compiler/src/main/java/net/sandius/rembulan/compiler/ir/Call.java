@@ -4,12 +4,18 @@ import net.sandius.rembulan.util.Check;
 
 public class Call extends BodyNode {
 
+	private final MultiVal dest;
 	private final Val fn;
 	private final VList args;
 
-	public Call(Val fn, VList args) {
+	public Call(MultiVal dest, Val fn, VList args) {
+		this.dest = Check.notNull(dest);
 		this.fn = Check.notNull(fn);
 		this.args = Check.notNull(args);
+	}
+
+	public MultiVal dest() {
+		return dest;
 	}
 
 	public Val fn() {

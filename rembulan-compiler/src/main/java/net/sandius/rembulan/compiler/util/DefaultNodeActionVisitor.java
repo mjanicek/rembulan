@@ -57,7 +57,7 @@ public abstract class DefaultNodeActionVisitor extends IRVisitor {
 	}
 
 	@Override
-	public void visit(TabRawAppendStack node) {
+	public void visit(TabRawAppendMulti node) {
 		action(node);
 	}
 
@@ -107,7 +107,7 @@ public abstract class DefaultNodeActionVisitor extends IRVisitor {
 	}
 
 	@Override
-	public void visit(StackGet node) {
+	public void visit(MultiGet node) {
 		action(node);
 	}
 

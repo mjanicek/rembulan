@@ -1,8 +1,17 @@
 package net.sandius.rembulan.compiler.ir;
 
+import net.sandius.rembulan.util.Check;
+
 public class Vararg extends BodyNode {
 
-	public Vararg() {
+	private final MultiVal dest;
+
+	public Vararg(MultiVal dest) {
+		this.dest = Check.notNull(dest);
+	}
+
+	public MultiVal dest() {
+		return dest;
 	}
 
 	@Override

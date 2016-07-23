@@ -9,7 +9,10 @@ abstract class AbstractUseDefVisitor extends IRVisitor {
 		
 	protected abstract void def(PhiVal pv);
 	protected abstract void use(PhiVal pv);
-		
+
+	protected abstract void def(MultiVal mv);
+	protected abstract void use(MultiVal mv);
+
 	protected abstract void def(Var v);
 	protected abstract void use(Var v);
 
@@ -87,8 +90,9 @@ abstract class AbstractUseDefVisitor extends IRVisitor {
 	}
 
 	@Override
-	public void visit(TabRawAppendStack node) {
+	public void visit(TabRawAppendMulti node) {
 		use(node.obj());
+		use(node.src());
 	}
 
 	@Override
@@ -123,34 +127,39 @@ abstract class AbstractUseDefVisitor extends IRVisitor {
 
 	@Override
 	public void visit(Vararg node) {
-		// no effect
+		def(node.dest());
+	}
+
+	protected void use(VList vlist) {
+		for (Val v : vlist.addrs()) {
+			use(v);
+		}
+		if (vlist.suffix() != null) {
+			use(vlist.suffix());
+		}
 	}
 
 	@Override
 	public void visit(Ret node) {
-		for (Val v : node.args().addrs()) {
-			use(v);
-		}
+		use(node.args());
 	}
 
 	@Override
 	public void visit(TCall node) {
 		use(node.target());
-		for (Val v : node.args().addrs()) {
-			use(v);
-		}
+		use(node.args());
 	}
 
 	@Override
 	public void visit(Call node) {
 		use(node.fn());
-		for (Val v : node.args().addrs()) {
-			use(v);
-		}
+		use(node.args());
+		def(node.dest());
 	}
 
 	@Override
-	public void visit(StackGet node) {
+	public void visit(MultiGet node) {
+		use(node.src());
 		def(node.dest());
 	}
 
