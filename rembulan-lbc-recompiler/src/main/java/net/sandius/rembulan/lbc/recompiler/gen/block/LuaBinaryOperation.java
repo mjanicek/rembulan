@@ -1,7 +1,7 @@
 package net.sandius.rembulan.lbc.recompiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.block.NumOpType;
-import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
+import net.sandius.rembulan.compiler.analysis.NumOpType;
+import net.sandius.rembulan.compiler.analysis.StaticMathImplementation;
 import net.sandius.rembulan.lbc.recompiler.gen.CodeVisitor;
 import net.sandius.rembulan.lbc.recompiler.gen.Origin;
 import net.sandius.rembulan.lbc.recompiler.gen.PrototypeContext;
@@ -9,9 +9,9 @@ import net.sandius.rembulan.lbc.recompiler.gen.Slot;
 import net.sandius.rembulan.lbc.recompiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;
 
-import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MAY_BE_INTEGER;
-import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_FLOAT;
-import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_INTEGER;
+import static net.sandius.rembulan.compiler.analysis.StaticMathImplementation.MAY_BE_INTEGER;
+import static net.sandius.rembulan.compiler.analysis.StaticMathImplementation.MUST_BE_FLOAT;
+import static net.sandius.rembulan.compiler.analysis.StaticMathImplementation.MUST_BE_INTEGER;
 
 public class LuaBinaryOperation extends Linear implements LuaInstruction {
 

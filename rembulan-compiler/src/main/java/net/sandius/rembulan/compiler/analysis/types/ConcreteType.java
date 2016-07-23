@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.types;
+package net.sandius.rembulan.compiler.analysis.types;
 
 import net.sandius.rembulan.util.Check;
 

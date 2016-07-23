@@ -4,12 +4,10 @@ import net.sandius.rembulan.compiler.BasicBlock;
 import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.IRFunc;
-import net.sandius.rembulan.compiler.gen.LuaTypes;
-import net.sandius.rembulan.compiler.gen.block.NumOpType;
-import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
+import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.ir.*;
-import net.sandius.rembulan.compiler.types.FunctionType;
-import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.analysis.types.FunctionType;
+import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
@@ -19,9 +17,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MAY_BE_INTEGER;
-import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_FLOAT;
-import static net.sandius.rembulan.compiler.gen.block.StaticMathImplementation.MUST_BE_INTEGER;
+import static net.sandius.rembulan.compiler.analysis.StaticMathImplementation.MAY_BE_INTEGER;
+import static net.sandius.rembulan.compiler.analysis.StaticMathImplementation.MUST_BE_FLOAT;
+import static net.sandius.rembulan.compiler.analysis.StaticMathImplementation.MUST_BE_INTEGER;
 
 class TyperVisitor extends CodeVisitor {
 

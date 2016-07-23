@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lbc.recompiler.asm;
 
-import net.sandius.rembulan.compiler.gen.LuaTypes;
+import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.gen.asm.ConversionMethods;
@@ -10,8 +10,8 @@ import net.sandius.rembulan.compiler.gen.asm.ObjectSinkMethods;
 import net.sandius.rembulan.compiler.gen.asm.OperatorMethods;
 import net.sandius.rembulan.compiler.gen.asm.UpvalueMethods;
 import net.sandius.rembulan.compiler.gen.asm.UtilMethods;
-import net.sandius.rembulan.compiler.gen.block.NumOpType;
-import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
+import net.sandius.rembulan.compiler.analysis.NumOpType;
+import net.sandius.rembulan.compiler.analysis.StaticMathImplementation;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
@@ -546,7 +546,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 			add(ASMUtils.ctor(StringBuilder.class));
 
 			for (int i = r + 1; i <= r_end; i++) {
-				net.sandius.rembulan.compiler.types.Type t = st.typeAt(i);
+				net.sandius.rembulan.compiler.analysis.types.Type t = st.typeAt(i);
 
 				// register #i is stringable: a string or a number
 
@@ -817,9 +817,9 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		LabelNode continueBranch = e._l(trueBranch);
 		LabelNode breakBranch = e._l(falseBranch);
 		
-		net.sandius.rembulan.compiler.types.Type a0 = st.typeAt(r_index);  // index
-		net.sandius.rembulan.compiler.types.Type a1 = st.typeAt(r_limit);  // limit
-		net.sandius.rembulan.compiler.types.Type a2 = st.typeAt(r_step);  // step
+		net.sandius.rembulan.compiler.analysis.types.Type a0 = st.typeAt(r_index);  // index
+		net.sandius.rembulan.compiler.analysis.types.Type a1 = st.typeAt(r_limit);  // limit
+		net.sandius.rembulan.compiler.analysis.types.Type a2 = st.typeAt(r_step);  // step
 
 		NumOpType loopType = LuaUtils.loopType(a0, a1, a2);
 

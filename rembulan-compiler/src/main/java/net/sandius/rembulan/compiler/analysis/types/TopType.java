@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.types;
+package net.sandius.rembulan.compiler.analysis.types;
 
 public final class TopType extends Type {
 

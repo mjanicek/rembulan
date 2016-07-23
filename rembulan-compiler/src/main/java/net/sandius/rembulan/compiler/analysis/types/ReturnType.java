@@ -1,7 +1,5 @@
-package net.sandius.rembulan.compiler.gen;
+package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.compiler.types.Type;
-import net.sandius.rembulan.compiler.types.TypeSeq;
 import net.sandius.rembulan.util.Check;
 
 public abstract class ReturnType {

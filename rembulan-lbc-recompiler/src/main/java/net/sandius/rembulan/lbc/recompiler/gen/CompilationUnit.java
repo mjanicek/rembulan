@@ -1,7 +1,7 @@
 package net.sandius.rembulan.lbc.recompiler.gen;
 
 import net.sandius.rembulan.compiler.gen.CompiledClass;
-import net.sandius.rembulan.compiler.types.TypeSeq;
+import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.recompiler.asm.ClassEmitter;
 import net.sandius.rembulan.lbc.recompiler.asm.RunMethodEmitter;

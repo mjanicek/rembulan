@@ -4,7 +4,7 @@ import net.sandius.rembulan.compiler.ir.AbstractVal;
 import net.sandius.rembulan.compiler.ir.PhiVal;
 import net.sandius.rembulan.compiler.ir.Val;
 import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.util.Check;
 
 import java.util.HashMap;

@@ -1,31 +1,31 @@
-package net.sandius.rembulan.compiler.types;
+package net.sandius.rembulan.compiler.analysis.types;
 
-public final class BottomType extends Type {
+public final class DynamicType extends Type {
 
-	public static final BottomType INSTANCE = new BottomType();
+	public static final DynamicType INSTANCE = new DynamicType();
 
-	private BottomType() {
+	private DynamicType() {
 		// not to be instantiated by the outside world
 	}
 
 	@Override
 	public String toString() {
-		return "⊥";
+		return "?";
 	}
 
 	@Override
 	public boolean isSubtypeOf(Type that) {
-		return true;
+		return this.equals(that);
 	}
 
 	@Override
 	public Type restrict(Type that) {
-		return that instanceof DynamicType ? that : this;
+		return this;
 	}
 
 	@Override
 	public Type join(Type that) {
-		return that;
+		return this;
 	}
 
 	@Override
@@ -35,7 +35,7 @@ public final class BottomType extends Type {
 
 //	@Override
 //	public Type unionWith(Type that) {
-//		return that;
+//		return this;
 //	}
 
 }

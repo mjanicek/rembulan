@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lbc.recompiler.asm;
 
-import net.sandius.rembulan.compiler.gen.LuaTypes;
+import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.gen.asm.ConversionMethods;

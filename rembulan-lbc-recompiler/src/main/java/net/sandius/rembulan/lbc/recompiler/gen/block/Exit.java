@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lbc.recompiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.ReturnType;
+import net.sandius.rembulan.compiler.analysis.types.ReturnType;
 import net.sandius.rembulan.lbc.recompiler.gen.CodeVisitor;
 import net.sandius.rembulan.lbc.recompiler.gen.SlotState;
 import net.sandius.rembulan.util.Check;

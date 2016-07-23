@@ -1,10 +1,10 @@
 package net.sandius.rembulan.compiler.gen
 
-import net.sandius.rembulan.compiler.types.{FunctionType, GradualTypeLike, TypeSeq, Type}
+import net.sandius.rembulan.compiler.analysis.types._
 import net.sandius.rembulan.util.ReadOnlyArray
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
-import org.scalatest.{MustMatchers, FunSpec}
+import org.scalatest.{FunSpec, MustMatchers}
 
 @RunWith(classOf[JUnitRunner])
 class TypeSpec extends FunSpec with MustMatchers {

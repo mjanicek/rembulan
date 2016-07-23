@@ -1,7 +1,7 @@
 package net.sandius.rembulan.lbc.recompiler.gen;
 
-import net.sandius.rembulan.compiler.gen.LuaTypes;
-import net.sandius.rembulan.compiler.types.FunctionType;
+import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
+import net.sandius.rembulan.compiler.analysis.types.FunctionType;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 

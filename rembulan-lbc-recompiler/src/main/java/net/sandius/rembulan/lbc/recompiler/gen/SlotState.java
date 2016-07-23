@@ -1,8 +1,8 @@
 package net.sandius.rembulan.lbc.recompiler.gen;
 
-import net.sandius.rembulan.compiler.gen.LuaTypes;
-import net.sandius.rembulan.compiler.types.Type;
-import net.sandius.rembulan.compiler.types.TypeSeq;
+import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
+import net.sandius.rembulan.compiler.analysis.types.Type;
+import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.IntSet;
 import net.sandius.rembulan.util.ReadOnlyArray;

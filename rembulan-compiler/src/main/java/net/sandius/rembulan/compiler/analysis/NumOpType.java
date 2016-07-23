@@ -1,7 +1,7 @@
-package net.sandius.rembulan.compiler.gen.block;
+package net.sandius.rembulan.compiler.analysis;
 
-import net.sandius.rembulan.compiler.gen.LuaTypes;
-import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
+import net.sandius.rembulan.compiler.analysis.types.Type;
 
 public enum NumOpType {
 

@@ -1,10 +1,10 @@
-package net.sandius.rembulan.compiler.gen.block;
+package net.sandius.rembulan.compiler.analysis;
 
-import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.analysis.types.Type;
 
-import static net.sandius.rembulan.compiler.gen.LuaTypes.NUMBER;
-import static net.sandius.rembulan.compiler.gen.LuaTypes.NUMBER_FLOAT;
-import static net.sandius.rembulan.compiler.gen.LuaTypes.NUMBER_INTEGER;
+import static net.sandius.rembulan.compiler.analysis.types.LuaTypes.NUMBER;
+import static net.sandius.rembulan.compiler.analysis.types.LuaTypes.NUMBER_FLOAT;
+import static net.sandius.rembulan.compiler.analysis.types.LuaTypes.NUMBER_INTEGER;
 
 public abstract class StaticMathImplementation {
 

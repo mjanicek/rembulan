@@ -1,6 +1,5 @@
-package net.sandius.rembulan.compiler.types;
+package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.compiler.gen.LuaTypes;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.PartialOrderComparisonResult;
 import net.sandius.rembulan.util.ReadOnlyArray;

@@ -1,13 +1,10 @@
-package net.sandius.rembulan.compiler.gen;
+package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.compiler.types.BaseType;
-import net.sandius.rembulan.compiler.types.DynamicType;
-import net.sandius.rembulan.compiler.types.FunctionType;
-import net.sandius.rembulan.compiler.types.TopType;
-import net.sandius.rembulan.compiler.types.Type;
-import net.sandius.rembulan.compiler.types.TypeSeq;
+public abstract class LuaTypes {
 
-public class LuaTypes {
+	private LuaTypes() {
+		// not to be instantiated
+	}
 
 	public static final TopType ANY = TopType.INSTANCE;
 

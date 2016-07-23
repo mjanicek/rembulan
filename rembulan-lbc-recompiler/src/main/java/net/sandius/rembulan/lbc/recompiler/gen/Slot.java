@@ -1,7 +1,7 @@
 package net.sandius.rembulan.lbc.recompiler.gen;
 
-import net.sandius.rembulan.compiler.gen.LuaTypes;
-import net.sandius.rembulan.compiler.types.Type;
+import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
+import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.util.Check;
 
 public class Slot {

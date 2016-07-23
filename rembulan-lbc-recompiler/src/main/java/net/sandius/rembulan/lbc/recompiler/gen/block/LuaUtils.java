@@ -1,9 +1,9 @@
 package net.sandius.rembulan.lbc.recompiler.gen.block;
 
-import net.sandius.rembulan.compiler.gen.block.NumOpType;
-import net.sandius.rembulan.compiler.gen.block.StaticMathImplementation;
-import net.sandius.rembulan.compiler.types.Type;
-import net.sandius.rembulan.compiler.types.TypeSeq;
+import net.sandius.rembulan.compiler.analysis.NumOpType;
+import net.sandius.rembulan.compiler.analysis.StaticMathImplementation;
+import net.sandius.rembulan.compiler.analysis.types.Type;
+import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
 import net.sandius.rembulan.lbc.OpCode;
 import net.sandius.rembulan.lbc.recompiler.gen.PrototypeContext;
 import net.sandius.rembulan.lbc.recompiler.gen.SlotState;
