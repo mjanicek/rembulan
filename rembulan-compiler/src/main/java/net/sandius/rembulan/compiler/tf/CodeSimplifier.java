@@ -70,7 +70,7 @@ public abstract class CodeSimplifier {
 	}
 
 	public static IRFunc pruneUnreachableCode(IRFunc fn) {
-		return fn.update(pruneUnreachableCode(fn.blocks()));
+		return fn.update(pruneUnreachableCode(fn.code()));
 	}
 
 	private static BasicBlock merge(BasicBlock a, BasicBlock b) {
@@ -130,7 +130,7 @@ public abstract class CodeSimplifier {
 	}
 
 	public static IRFunc mergeBlocks(IRFunc fn) {
-		return fn.update(mergeBlocks(fn.blocks()));
+		return fn.update(mergeBlocks(fn.code()));
 	}
 
 }

@@ -199,7 +199,7 @@ class TyperVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(IRFunc func) {
-		Code code = func.blocks();
+		Code code = func.code();
 
 		VarState vs = varState(code.entryLabel());
 		for (Var p : func.params()) {

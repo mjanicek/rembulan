@@ -144,7 +144,7 @@ public class SlotAllocator {
 
 		Set<Label> visited = new HashSet<>();
 		Stack<Label> open = new Stack<>();
-		open.push(fn.blocks().entryLabel());
+		open.push(fn.code().entryLabel());
 
 		AllocatorVisitor visitor = new AllocatorVisitor(liveness);
 
@@ -153,7 +153,7 @@ public class SlotAllocator {
 		while (!open.isEmpty()) {
 			Label l = open.pop();
 			if (visited.add(l)) {
-				BasicBlock b = fn.blocks().block(l);
+				BasicBlock b = fn.code().block(l);
 
 				assignSlots(b, visitor);
 

@@ -121,7 +121,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
           for (fn <- mod.fns().asScala) {
             println("Function [" + fn.id + "]")
             println()
-            printBlocks(fn.blocks)
+            printBlocks(fn.code)
           }
         }
 
@@ -194,7 +194,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
               println()
 
               println("Code:")
-              printBlocks(cfn.fn.blocks)
+              printBlocks(cfn.fn.code)
               println()
 
               println("Type information:")

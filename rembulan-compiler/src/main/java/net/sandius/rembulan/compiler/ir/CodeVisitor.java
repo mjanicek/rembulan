@@ -15,7 +15,7 @@ public class CodeVisitor extends IRVisitor {
 	}
 
 	public void visit(IRFunc func) {
-		visit(func.blocks());
+		visit(func.code());
 	}
 
 	public void visit(Code code) {

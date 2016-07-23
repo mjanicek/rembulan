@@ -38,7 +38,7 @@ public class LivenessAnalyser {
 	}
 
 	public LivenessInfo analyse() {
-		Code code = fn.blocks();
+		Code code = fn.code();
 
 		Map<Label, Set<Label>> in = CodeUtils.inLabels(code);
 
@@ -106,7 +106,7 @@ public class LivenessAnalyser {
 		Map<IRNode, LivenessInfo.Entry> entries = new HashMap<>();
 
 		// initialise
-		Iterator<IRNode> nodeIterator = CodeUtils.nodeIterator(fn.blocks());
+		Iterator<IRNode> nodeIterator = CodeUtils.nodeIterator(fn.code());
 		while (nodeIterator.hasNext()) {
 			IRNode node = nodeIterator.next();
 
@@ -117,7 +117,7 @@ public class LivenessAnalyser {
 		}
 
 		// compute live-out from live-in
-		Iterator<BasicBlock> blockIterator = fn.blocks().blockIterator();
+		Iterator<BasicBlock> blockIterator = fn.code().blockIterator();
 		while (blockIterator.hasNext()) {
 			BasicBlock b = blockIterator.next();
 
@@ -133,7 +133,7 @@ public class LivenessAnalyser {
 			LivenessInfo.Entry e_end = entries.get(end);
 
 			for (Label nxt : end.nextLabels()) {
-				BasicBlock nextBlock = fn.blocks().block(nxt);
+				BasicBlock nextBlock = fn.code().block(nxt);
 				IRNode n = !nextBlock.body().isEmpty() ? nextBlock.body().get(0) : nextBlock.end();
 				mergeLiveOut(entries, end, n);
 			}

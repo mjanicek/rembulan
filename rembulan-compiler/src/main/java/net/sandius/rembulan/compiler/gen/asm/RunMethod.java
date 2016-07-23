@@ -289,7 +289,7 @@ class RunMethod {
 		LabelNode l_begin = new LabelNode();
 		LabelNode l_end = new LabelNode();
 
-		visitor.visit(context.fn.blocks());
+		visitor.visit(context.fn.code());
 
 		InsnList prefix = new InsnList();
 		InsnList suffix = new InsnList();

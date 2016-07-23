@@ -56,7 +56,7 @@ public class IRFunc {
 		return upvals;
 	}
 
-	public Code blocks() {
+	public Code code() {
 		return code;
 	}
 
