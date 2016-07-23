@@ -67,6 +67,11 @@ class IRTranslationTest extends FunSpec with MustMatchers {
       println("\t" + v + " -> " + types.typeOf(v))
     }
 
+    println("Multi-values:")
+    for (mv <- types.multiVals().asScala) {
+      println("\t" + mv + " -> " + types.typeOf(mv))
+    }
+
     println("Variables:")
     for (v <- types.vars().asScala) {
       val reified = types.isReified(v)

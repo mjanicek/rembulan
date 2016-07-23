@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.analysis.types.FunctionType;
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.analysis.types.Type;
+import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.util.Check;
 
@@ -22,6 +23,7 @@ class TyperVisitor extends CodeVisitor {
 
 	private final Map<Val, Type> valTypes;
 	private final Map<PhiVal, Type> phiValTypes;
+	private final Map<MultiVal, TypeSeq> multiValTypes;
 	private final Map<Label, VarState> varStates;
 
 	private final Set<Var> allVars;
@@ -35,6 +37,7 @@ class TyperVisitor extends CodeVisitor {
 	public TyperVisitor() {
 		this.valTypes = new HashMap<>();
 		this.phiValTypes = new HashMap<>();
+		this.multiValTypes = new HashMap<>();
 		this.varStates = new HashMap<>();
 
 		this.allVars = new HashSet<>();
@@ -44,7 +47,7 @@ class TyperVisitor extends CodeVisitor {
 	}
 
 	public TypeInfo valTypes() {
-		return TypeInfo.of(valTypes, phiValTypes, allVars, reifiedVars);
+		return TypeInfo.of(valTypes, phiValTypes, multiValTypes, allVars, reifiedVars);
 	}
 
 	private static Type joinTypes(Type a, Type b) {
@@ -177,6 +180,24 @@ class TyperVisitor extends CodeVisitor {
 		}
 	}
 
+	private void assign(MultiVal mv, TypeSeq ts) {
+		Check.notNull(mv);
+		Check.notNull(ts);
+
+		TypeSeq ots = multiValTypes.put(mv, ts);
+		if (ts.equals(ots)) {
+			// no change
+		}
+		else if (ots == null) {
+			// initial assign
+			changed = true;
+		}
+		else {
+			changed = true;
+//			throw new IllegalStateException(mv + " assigned to more than once");
+		}
+	}
+
 	private Type typeOf(Val v) {
 		Type t = valTypes.get(v);
 		if (t == null) {
@@ -194,6 +215,16 @@ class TyperVisitor extends CodeVisitor {
 		}
 		else {
 			return t;
+		}
+	}
+
+	private TypeSeq typeOf(MultiVal mv) {
+		TypeSeq tseq = multiValTypes.get(mv);
+		if (tseq == null) {
+			throw new IllegalStateException(mv + " not assigned to yet");
+		}
+		else {
+			return tseq;
 		}
 	}
 
@@ -402,7 +433,8 @@ class TyperVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(Vararg node) {
-		// no effect on vals
+		TypeSeq varargType = TypeSeq.empty().withVararg();  // TODO
+		assign(node.dest(), varargType);
 	}
 
 	@Override
@@ -417,17 +449,15 @@ class TyperVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(Call node) {
-		// TODO: assign type to the varargs
-		// no effect on vals
-
+		TypeSeq returnType = TypeSeq.empty().withVararg();  // TODO
+		assign(node.dest(), returnType);
 		impure();
 		useStack();
 	}
 
 	@Override
 	public void visit(MultiGet node) {
-		// TODO
-		assign(node.dest(), LuaTypes.ANY);
+		assign(node.dest(), typeOf(node.src()).get(node.idx()));
 	}
 
 	@Override
