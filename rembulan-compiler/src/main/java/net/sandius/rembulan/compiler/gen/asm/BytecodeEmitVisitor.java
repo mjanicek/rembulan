@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.gen.mk2;
+package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.FunctionId;

@@ -10,7 +10,7 @@ import net.sandius.rembulan.compiler.gen.BytecodeEmitter;
 import net.sandius.rembulan.compiler.gen.ClassNameTranslator;
 import net.sandius.rembulan.compiler.gen.CompiledClass;
 import net.sandius.rembulan.compiler.gen.SuffixingClassNameTranslator;
-import net.sandius.rembulan.compiler.gen.mk2.ASMBytecodeEmitter;
+import net.sandius.rembulan.compiler.gen.asm.ASMBytecodeEmitter;
 import net.sandius.rembulan.compiler.tf.BranchInliner;
 import net.sandius.rembulan.compiler.tf.CPUAccounter;
 import net.sandius.rembulan.compiler.tf.CodeSimplifier;
