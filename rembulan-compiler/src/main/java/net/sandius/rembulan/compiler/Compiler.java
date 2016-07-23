@@ -36,7 +36,7 @@ public class Compiler {
 		IN_EVERY_BASIC_BLOCK
 	}
 
-	public static final CPUAccountingMode DEFAULT_CPU_ACCOUNTING_MODE = CPUAccountingMode.NO_CPU_ACCOUNTING;
+	public static final CPUAccountingMode DEFAULT_CPU_ACCOUNTING_MODE = CPUAccountingMode.IN_EVERY_BASIC_BLOCK;
 
 	private CPUAccountingMode cpuAccountingMode;
 
