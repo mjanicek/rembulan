@@ -213,10 +213,8 @@ class TyperVisitor extends CodeVisitor {
 	public void visit(Code code) {
 		open.add(code.entryLabel());
 
-		Map<Label, BasicBlock> index = code.index();
-
 		while (!open.isEmpty()) {
-			visit(index.get(open.poll()));
+			visit(code.block(open.poll()));
 		}
 	}
 

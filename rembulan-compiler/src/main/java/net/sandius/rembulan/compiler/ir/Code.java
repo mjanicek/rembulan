@@ -5,20 +5,25 @@ import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.UnmodifiableIterator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class Code {
 
 	private final List<BasicBlock> blocks;
 
+	private final Map<Label, BasicBlock> index;
+
 	private Code(List<BasicBlock> blocks) {
 		verify(blocks);
 		this.blocks = Check.notNull(blocks);
+		this.index = index(blocks);
 	}
 
 	public static Code of(List<BasicBlock> blocks) {
@@ -69,17 +74,35 @@ public class Code {
 		return blocks;
 	}
 
-	// index for hashmap-based lookup
-	public Map<Label, BasicBlock> index() {
+	private static Map<Label, BasicBlock> index(Iterable<BasicBlock> blocks) {
 		Map<Label, BasicBlock> result = new HashMap<>();
 		for (BasicBlock b : blocks) {
 			result.put(b.label(), b);
 		}
-		return result;
+		return Collections.unmodifiableMap(result);
+	}
+
+	public BasicBlock entryBlock() {
+		return blocks.get(0);
 	}
 
 	public Label entryLabel() {
-		return blocks.get(0).label();
+		return entryBlock().label();
+	}
+
+	public BasicBlock block(Label label) {
+		Check.notNull(label);
+		BasicBlock result = index.get(label);
+		if (result != null) {
+			return result;
+		}
+		else {
+			throw new NoSuchElementException("Label not found: " + label);
+		}
+	}
+
+	public Iterable<Label> labels() {
+		return index.keySet();
 	}
 
 	public Iterator<BasicBlock> blockIterator() {

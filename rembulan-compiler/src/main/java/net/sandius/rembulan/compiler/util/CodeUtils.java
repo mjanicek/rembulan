@@ -98,19 +98,18 @@ public abstract class CodeUtils {
 
 	}
 
-	public static Iterable<Label> labelsBreadthFirst(Map<Label, BasicBlock> index, Label entryLabel) {
-		Check.notNull(index);
-		Check.notNull(entryLabel);
+	public static Iterable<Label> labelsBreadthFirst(Code code) {
+		Check.notNull(code);
 
 		ArrayList<Label> result = new ArrayList<>();
 		Set<Label> visited = new HashSet<>();
 		Queue<Label> open = new ArrayDeque<>();
 
-		open.add(entryLabel);
+		open.add(code.entryLabel());
 
 		while (!open.isEmpty()) {
 			Label l = open.poll();
-			BasicBlock bb = index.get(l);
+			BasicBlock bb = code.block(l);
 			if (visited.add(l)) {
 				result.add(l);
 				for (Label nxt : bb.end().nextLabels()) {
@@ -123,21 +122,20 @@ public abstract class CodeUtils {
 		return result;
 	}
 
-	public static Map<Label, Set<Label>> inLabels(Map<Label, BasicBlock> index, Label entryLabel) {
-		Check.notNull(index);
-		Check.notNull(entryLabel);
+	public static Map<Label, Set<Label>> inLabels(Code code) {
+		Check.notNull(code);
 
 		Map<Label, Set<Label>> result = new HashMap<>();
 
 		// initialise
-		for (Label l : index.keySet()) {
+		for (Label l : code.labels()) {
 			result.put(l, new HashSet<Label>());
 		}
 
 		Set<Label> visited = new HashSet<>();
 		Stack<Label> open = new Stack<>();
 
-		open.add(entryLabel);
+		open.add(code.entryLabel());
 
 		while (!open.isEmpty()) {
 			Label l = open.pop();
@@ -146,7 +144,7 @@ public abstract class CodeUtils {
 			boolean cont = visited.add(l);
 
 			// add all incoming edges (m -> l)
-			for (Label m : index.get(l).end().nextLabels()) {
+			for (Label m : code.block(l).end().nextLabels()) {
 				result.get(m).add(l);
 
 				// continue to that block?

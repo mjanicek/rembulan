@@ -40,12 +40,11 @@ public class LivenessAnalyser {
 	public LivenessInfo analyse() {
 		Code code = fn.blocks();
 
-		Map<Label, BasicBlock> index = code.index();
-		Map<Label, Set<Label>> in = CodeUtils.inLabels(index, code.entryLabel());
+		Map<Label, Set<Label>> in = CodeUtils.inLabels(code);
 
 		// initialise
 		{
-			for (Label l : index.keySet()) {
+			for (Label l : code.labels()) {
 				endVarLiveIn.put(l, new HashSet<Var>());
 				endValLiveIn.put(l, new HashSet<AbstractVal>());
 			}
@@ -61,7 +60,7 @@ public class LivenessAnalyser {
 		Stack<Label> open = new Stack<>();
 
 		// make sure we'll visit all labels at least once
-		for (Label l : CodeUtils.labelsBreadthFirst(index, code.entryLabel())) {
+		for (Label l : CodeUtils.labelsBreadthFirst(code)) {
 			open.push(l);
 		}
 
@@ -72,7 +71,7 @@ public class LivenessAnalyser {
 					endVarLiveIn.get(l),
 					endValLiveIn.get(l));
 
-			processBlock(visitor, index.get(l));
+			processBlock(visitor, code.block(l));
 
 			for (Label inl : in.get(l)) {
 				boolean changed = false;
@@ -101,8 +100,6 @@ public class LivenessAnalyser {
 	}
 
 	private LivenessInfo result() {
-		Map<Label, BasicBlock> index = fn.blocks().index();
-
 		Map<IRNode, Set<Var>> varLiveOut = new HashMap<>();
 		Map<IRNode, Set<AbstractVal>> valLiveOut = new HashMap<>();
 
@@ -136,7 +133,7 @@ public class LivenessAnalyser {
 			LivenessInfo.Entry e_end = entries.get(end);
 
 			for (Label nxt : end.nextLabels()) {
-				BasicBlock nextBlock = index.get(nxt);
+				BasicBlock nextBlock = fn.blocks().block(nxt);
 				IRNode n = !nextBlock.body().isEmpty() ? nextBlock.body().get(0) : nextBlock.end();
 				mergeLiveOut(entries, end, n);
 			}

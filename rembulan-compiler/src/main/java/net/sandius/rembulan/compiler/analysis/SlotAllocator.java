@@ -1,7 +1,15 @@
 package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.IRFunc;
-import net.sandius.rembulan.compiler.ir.*;
+import net.sandius.rembulan.compiler.ir.AbstractVal;
+import net.sandius.rembulan.compiler.ir.BasicBlock;
+import net.sandius.rembulan.compiler.ir.BodyNode;
+import net.sandius.rembulan.compiler.ir.IRNode;
+import net.sandius.rembulan.compiler.ir.Label;
+import net.sandius.rembulan.compiler.ir.PhiVal;
+import net.sandius.rembulan.compiler.ir.UpVar;
+import net.sandius.rembulan.compiler.ir.Val;
+import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.util.Check;
 
 import java.util.BitSet;
@@ -132,15 +140,11 @@ public class SlotAllocator {
 	}
 
 	public SlotAllocInfo process() {
-		Code code = fn.blocks();
-
 		LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
-
-		Map<Label, BasicBlock> index = code.index();
 
 		Set<Label> visited = new HashSet<>();
 		Stack<Label> open = new Stack<>();
-		open.push(code.entryLabel());
+		open.push(fn.blocks().entryLabel());
 
 		AllocatorVisitor visitor = new AllocatorVisitor(liveness);
 
@@ -149,7 +153,7 @@ public class SlotAllocator {
 		while (!open.isEmpty()) {
 			Label l = open.pop();
 			if (visited.add(l)) {
-				BasicBlock b = index.get(l);
+				BasicBlock b = fn.blocks().block(l);
 
 				assignSlots(b, visitor);
 

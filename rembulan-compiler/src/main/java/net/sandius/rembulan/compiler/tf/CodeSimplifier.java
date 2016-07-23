@@ -35,8 +35,6 @@ public abstract class CodeSimplifier {
 	}
 
 	private static Map<Label, Integer> uses(Code code) {
-		Map<Label, BasicBlock> index = code.index();
-
 		Map<Label, Integer> uses = new HashMap<>();
 		Stack<Label> open = new Stack<>();
 		open.add(code.entryLabel());
@@ -44,7 +42,7 @@ public abstract class CodeSimplifier {
 		while (!open.isEmpty()) {
 			Label l = open.pop();
 			if (visit(uses, l)) {
-				BasicBlock b = index.get(l);
+				BasicBlock b = code.block(l);
 				for (Label n : b.end().nextLabels()) {
 					open.add(n);
 				}
