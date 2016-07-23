@@ -1,6 +1,6 @@
-package net.sandius.rembulan.compiler;
+package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.compiler.ir.*;
+import net.sandius.rembulan.compiler.IRFunc;
 
 import java.util.Iterator;
 

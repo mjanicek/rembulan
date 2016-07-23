@@ -4,6 +4,7 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.compiler._
 import net.sandius.rembulan.compiler.analysis._
+import net.sandius.rembulan.compiler.ir.Code
 import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter, CodeSimplifier}
 import net.sandius.rembulan.compiler.util.IRPrinterVisitor
 import net.sandius.rembulan.parser.analysis.NameResolver

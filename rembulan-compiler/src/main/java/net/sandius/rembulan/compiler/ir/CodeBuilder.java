@@ -1,11 +1,5 @@
-package net.sandius.rembulan.compiler;
+package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.compiler.ir.BlockTermNode;
-import net.sandius.rembulan.compiler.ir.BodyNode;
-import net.sandius.rembulan.compiler.ir.Branch;
-import net.sandius.rembulan.compiler.ir.JmpNode;
-import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 

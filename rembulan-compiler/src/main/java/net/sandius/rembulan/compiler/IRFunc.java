@@ -1,5 +1,6 @@
 package net.sandius.rembulan.compiler;
 
+import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.UpVar;
 import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.util.Check;

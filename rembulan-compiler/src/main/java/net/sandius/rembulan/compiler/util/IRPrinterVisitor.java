@@ -1,7 +1,6 @@
 package net.sandius.rembulan.compiler.util;
 
 import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;

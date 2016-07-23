@@ -1,8 +1,8 @@
 package net.sandius.rembulan.compiler.analysis;
 
-import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.ir.Closure;
+import net.sandius.rembulan.compiler.ir.CodeVisitor;
 
 import java.util.Collections;
 import java.util.HashSet;

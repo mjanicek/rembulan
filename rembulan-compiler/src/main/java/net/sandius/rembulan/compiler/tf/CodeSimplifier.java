@@ -1,9 +1,9 @@
 package net.sandius.rembulan.compiler.tf;
 
-import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.IRFunc;
+import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.BodyNode;
+import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.util.Check;

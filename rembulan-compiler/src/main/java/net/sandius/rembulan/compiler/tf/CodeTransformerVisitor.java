@@ -1,10 +1,10 @@
 package net.sandius.rembulan.compiler.tf;
 
-import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Code;
-import net.sandius.rembulan.compiler.CodeVisitor;
+import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.BlockTermNode;
 import net.sandius.rembulan.compiler.ir.BodyNode;
+import net.sandius.rembulan.compiler.ir.Code;
+import net.sandius.rembulan.compiler.ir.CodeVisitor;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.util.Check;

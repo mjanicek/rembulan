@@ -1,13 +1,16 @@
 package net.sandius.rembulan.compiler.analysis;
 
-import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Code;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.util.CodeUtils;
 import net.sandius.rembulan.util.Check;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 public class LivenessAnalyser {
 

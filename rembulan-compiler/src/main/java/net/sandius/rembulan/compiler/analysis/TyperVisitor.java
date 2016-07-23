@@ -1,13 +1,10 @@
 package net.sandius.rembulan.compiler.analysis;
 
-import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Code;
-import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.IRFunc;
-import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
-import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.analysis.types.FunctionType;
+import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.analysis.types.Type;
+import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;

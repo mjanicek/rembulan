@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.util;
 
-import net.sandius.rembulan.compiler.BasicBlock;
-import net.sandius.rembulan.compiler.Code;
+import net.sandius.rembulan.compiler.ir.BasicBlock;
+import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.util.Check;

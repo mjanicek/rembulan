@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.tf;
 
-import net.sandius.rembulan.compiler.BasicBlock;
+import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.CPUWithdraw;
 import net.sandius.rembulan.compiler.ir.IRNode;

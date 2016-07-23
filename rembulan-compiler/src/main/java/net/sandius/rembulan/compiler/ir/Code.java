@@ -1,6 +1,5 @@
-package net.sandius.rembulan.compiler;
+package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.UnmodifiableIterator;

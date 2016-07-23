@@ -1,6 +1,5 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.compiler.CodeVisitor;
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
