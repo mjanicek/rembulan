@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lbc.recompiler.asm;
 
-import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;

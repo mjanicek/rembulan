@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.gen.asm;
+package net.sandius.rembulan.compiler.gen.asm.helpers;
 
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.util.Check;
@@ -6,8 +6,6 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
-
-import java.util.Arrays;
 
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 

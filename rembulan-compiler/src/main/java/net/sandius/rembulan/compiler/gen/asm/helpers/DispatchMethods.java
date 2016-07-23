@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.gen.asm;
+package net.sandius.rembulan.compiler.gen.asm.helpers;
 
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;

@@ -1,38 +1,35 @@
-package net.sandius.rembulan.compiler.gen.asm;
+package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.Upvalue;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
-public class TableMethods {
+public class UpvalueMethods {
 
-	private TableMethods() {
+	private UpvalueMethods() {
 		// not to be instantiated
 	}
 
-	public static AbstractInsnNode rawset_int() {
+	public static AbstractInsnNode get() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
-				Type.getInternalName(Table.class),
-				"rawset",
+				Type.getInternalName(Upvalue.class),
+				"get",
 				Type.getMethodDescriptor(
-						Type.VOID_TYPE,
-						Type.INT_TYPE,
 						Type.getType(Object.class)),
 				false);
 	}
 
-	public static AbstractInsnNode rawset() {
+	public static AbstractInsnNode set() {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
-				Type.getInternalName(Table.class),
-				"rawset",
+				Type.getInternalName(Upvalue.class),
+				"set",
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE,
-						Type.getType(Object.class),
 						Type.getType(Object.class)),
 				false);
 	}

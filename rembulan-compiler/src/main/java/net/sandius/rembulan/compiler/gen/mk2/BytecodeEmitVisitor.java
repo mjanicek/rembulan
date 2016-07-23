@@ -5,14 +5,14 @@ import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.gen.ClassNameTranslator;
-import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
-import net.sandius.rembulan.compiler.gen.asm.BoxedPrimitivesMethods;
-import net.sandius.rembulan.compiler.gen.asm.ConversionMethods;
-import net.sandius.rembulan.compiler.gen.asm.DispatchMethods;
-import net.sandius.rembulan.compiler.gen.asm.LuaStateMethods;
-import net.sandius.rembulan.compiler.gen.asm.ObjectSinkMethods;
-import net.sandius.rembulan.compiler.gen.asm.TableMethods;
-import net.sandius.rembulan.compiler.gen.asm.UpvalueMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
+import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ConversionMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.DispatchMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ObjectSinkMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.TableMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.UpvalueMethods;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;
@@ -30,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static net.sandius.rembulan.compiler.gen.asm.DispatchMethods.*;
+import static net.sandius.rembulan.compiler.gen.asm.helpers.DispatchMethods.*;
 import static org.objectweb.asm.Opcodes.*;
 
 class BytecodeEmitVisitor extends CodeVisitor {

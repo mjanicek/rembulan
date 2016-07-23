@@ -1,6 +1,6 @@
 package net.sandius.rembulan.compiler.gen.mk2;
 
-import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Resumable;

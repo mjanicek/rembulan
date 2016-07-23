@@ -1,4 +1,4 @@
-package net.sandius.rembulan.compiler.gen.asm;
+package net.sandius.rembulan.compiler.gen.asm.helpers;
 
 import net.sandius.rembulan.core.RawOperators;
 import net.sandius.rembulan.core.Table;

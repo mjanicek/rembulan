@@ -1,13 +1,13 @@
 package net.sandius.rembulan.lbc.recompiler.asm;
 
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
-import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
-import net.sandius.rembulan.compiler.gen.asm.BoxedPrimitivesMethods;
-import net.sandius.rembulan.compiler.gen.asm.ConversionMethods;
-import net.sandius.rembulan.compiler.gen.asm.LuaStateMethods;
-import net.sandius.rembulan.compiler.gen.asm.ObjectSinkMethods;
-import net.sandius.rembulan.compiler.gen.asm.UpvalueMethods;
-import net.sandius.rembulan.compiler.gen.asm.UtilMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
+import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ConversionMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ObjectSinkMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.UpvalueMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.UtilMethods;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;

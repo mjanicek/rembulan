@@ -1,8 +1,8 @@
 package net.sandius.rembulan.lbc.recompiler.asm;
 
-import net.sandius.rembulan.compiler.gen.asm.ASMUtils;
-import net.sandius.rembulan.compiler.gen.asm.InvokableMethods;
-import net.sandius.rembulan.compiler.gen.asm.InvokeKind;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
+import net.sandius.rembulan.compiler.gen.asm.helpers.InvokableMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.InvokeKind;
 import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.recompiler.gen.PrototypeContext;
