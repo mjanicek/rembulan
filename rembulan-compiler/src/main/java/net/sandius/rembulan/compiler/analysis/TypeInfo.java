@@ -19,18 +19,26 @@ public class TypeInfo {
 	private final Map<AbstractVal, Type> types;
 	private final Map<MultiVal, TypeSeq> multiTypes;
 	private final Map<Var, Boolean> vars;
+	private final TypeSeq returnType;
 
-	protected TypeInfo(Map<AbstractVal, Type> types, Map<MultiVal, TypeSeq> multiTypes, Map<Var, Boolean> vars) {
+	protected TypeInfo(
+			Map<AbstractVal, Type> types,
+			Map<MultiVal, TypeSeq> multiTypes,
+			Map<Var, Boolean> vars,
+			TypeSeq returnType) {
+
 		this.types = Check.notNull(types);
 		this.multiTypes = Check.notNull(multiTypes);
 		this.vars = Check.notNull(vars);
+		this.returnType = Check.notNull(returnType);
 	}
 
 	public static TypeInfo of(
 			Map<Val, Type> valTypes,
 			Map<PhiVal, Type> phiValTypes,
 			Map<MultiVal, TypeSeq> multiValTypes,
-			Set<Var> vars, Set<Var> reifiedVars) {
+			Set<Var> vars, Set<Var> reifiedVars,
+			TypeSeq returnType) {
 
 		Map<AbstractVal, Type> types = new HashMap<>();
 		Map<MultiVal, TypeSeq> multiTypes = new HashMap<>();
@@ -57,7 +65,7 @@ public class TypeInfo {
 			}
 		}
 
-		return new TypeInfo(types, multiTypes, vs);
+		return new TypeInfo(types, multiTypes, vs, returnType);
 	}
 
 	public Iterable<AbstractVal> vals() {
@@ -106,6 +114,10 @@ public class TypeInfo {
 		else {
 			throw new NoSuchElementException("Variable not found: " + v);
 		}
+	}
+
+	public TypeSeq returnType() {
+		return returnType;
 	}
 
 }

@@ -3,6 +3,7 @@ package net.sandius.rembulan.compiler.analysis;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.analysis.types.FunctionType;
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
+import net.sandius.rembulan.compiler.analysis.types.ReturnType;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
 import net.sandius.rembulan.compiler.ir.*;
@@ -31,6 +32,8 @@ class TyperVisitor extends CodeVisitor {
 
 	private final Queue<Label> open;
 
+	private final Set<ReturnType> returnTypes;
+
 	private boolean changed;
 	private VarState currentVarState;
 
@@ -44,10 +47,42 @@ class TyperVisitor extends CodeVisitor {
 		this.reifiedVars = new HashSet<>();
 
 		this.open = new ArrayDeque<>();
+
+		this.returnTypes = new HashSet<>();
 	}
 
 	public TypeInfo valTypes() {
-		return TypeInfo.of(valTypes, phiValTypes, multiValTypes, allVars, reifiedVars);
+		return TypeInfo.of(valTypes, phiValTypes, multiValTypes, allVars, reifiedVars, returnType());
+	}
+
+	private static TypeSeq returnTypeToTypeSeq(ReturnType rt) {
+		if (rt instanceof ReturnType.ConcreteReturnType) {
+			return ((ReturnType.ConcreteReturnType) rt).typeSeq;
+		}
+		else if (rt instanceof ReturnType.TailCallReturnType) {
+			Type targetType = ((ReturnType.TailCallReturnType) rt).target;
+			if (targetType instanceof FunctionType) {
+				FunctionType ft = (FunctionType) targetType;
+				return ft.returnTypes();
+			}
+			else {
+				return TypeSeq.vararg();
+			}
+		}
+		else {
+			throw new IllegalStateException("unknown return type: " + rt.toString());
+		}
+	}
+
+	private TypeSeq returnType() {
+		TypeSeq ret = null;
+
+		for (ReturnType rt : returnTypes) {
+			TypeSeq ts = returnTypeToTypeSeq(rt);
+			ret = ret != null ? ret.join(ts) : ts;
+		}
+
+		return ret != null ? ret : TypeSeq.vararg();
 	}
 
 	private static Type joinTypes(Type a, Type b) {
@@ -437,19 +472,35 @@ class TyperVisitor extends CodeVisitor {
 		assign(node.dest(), varargType);
 	}
 
+	protected TypeSeq vlistType(VList vlist) {
+		Type[] fixed = new Type[vlist.addrs().size()];
+		for (int i = 0; i < vlist.addrs().size(); i++) {
+			fixed[i] = typeOf(vlist.addrs().get(i));
+		}
+
+		return vlist.suffix() != null
+				? typeOf(vlist.suffix()).prefixedBy(fixed)
+				: TypeSeq.of(fixed);
+	}
+
 	@Override
 	public void visit(Ret node) {
-		// no effect on vals
+		returnTypes.add(new ReturnType.ConcreteReturnType(vlistType(node.args())));
 	}
 
 	@Override
 	public void visit(TCall node) {
-		// no effect on vals
+		returnTypes.add(new ReturnType.TailCallReturnType(typeOf(node.target()), vlistType(node.args())));
+	}
+
+	protected TypeSeq callReturnType(Val target, VList args) {
+		TypeSeq argTypes = vlistType(args);
+		return TypeSeq.empty().withVararg();  // TODO
 	}
 
 	@Override
 	public void visit(Call node) {
-		TypeSeq returnType = TypeSeq.empty().withVararg();  // TODO
+		TypeSeq returnType = callReturnType(node.fn(), node.args());
 		assign(node.dest(), returnType);
 		impure();
 		useStack();

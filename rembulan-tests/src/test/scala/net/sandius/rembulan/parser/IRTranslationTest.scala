@@ -62,6 +62,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = BranchInliner.inlineBranches(fn, types)
 
   def printTypes(types: TypeInfo): Unit = {
+    println("Return type:")
+    println("\t" + types.returnType())
+
     println("Values:")
     for (v <- types.vals().asScala) {
       println("\t" + v + " -> " + types.typeOf(v))

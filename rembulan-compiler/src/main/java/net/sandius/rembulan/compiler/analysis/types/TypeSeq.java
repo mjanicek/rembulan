@@ -90,6 +90,15 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		return idx < fixed().size() ? fixed().get(idx) : tailType;
 	}
 
+	public TypeSeq prefixedBy(Type[] types) {
+		Check.notNull(types);
+
+		Type[] newFixed = new Type[types.length + fixed.size()];
+		System.arraycopy(types, 0, newFixed, 0, types.length);
+		System.arraycopy(fixed.copyToNewArray(), 0, newFixed, types.length, fixed.size());
+		return new TypeSeq(ReadOnlyArray.wrap(newFixed), this.tailType);
+	}
+
 	public boolean isSubsumedBy(TypeSeq that) {
 		Check.notNull(that);
 
