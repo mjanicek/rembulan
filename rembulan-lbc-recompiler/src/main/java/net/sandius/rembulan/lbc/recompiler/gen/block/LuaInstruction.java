@@ -1,9 +1,9 @@
 package net.sandius.rembulan.lbc.recompiler.gen.block;
 
+import net.sandius.rembulan.compiler.analysis.NumericOperationType;
+import net.sandius.rembulan.compiler.analysis.types.FunctionType;
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.analysis.types.ReturnType;
-import net.sandius.rembulan.compiler.analysis.NumOpType;
-import net.sandius.rembulan.compiler.analysis.types.FunctionType;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
@@ -801,10 +801,10 @@ public interface LuaInstruction {
 
 		@Override
 		public String toString() {
-			return "FORPREP" + loopType(inSlots()).toSuffix() + "(" + r_base + ")";
+			return "FORPREP" + LuaUtils.numOpTypeToSuffix(loopType(inSlots())) + "(" + r_base + ")";
 		}
 
-		private NumOpType loopType(SlotState s) {
+		private NumericOperationType loopType(SlotState s) {
 			return LuaUtils.loopType(
 					s.typeAt(r_base + 0),
 					s.typeAt(r_base + 1),
@@ -813,7 +813,7 @@ public interface LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			Type tpe = loopType(s).toSlotType();
+			Type tpe = loopType(s).toType();
 
 			Origin o = Origin.Computed.in(this);
 

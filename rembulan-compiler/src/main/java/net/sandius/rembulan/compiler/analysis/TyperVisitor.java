@@ -307,10 +307,10 @@ class TyperVisitor extends CodeVisitor {
 		StaticMathImplementation math = staticMath(node.op());
 
 		if (math != null) {
-			NumOpType ot = math.opType(l, r);
-			result = ot.toSlotType();
+			NumericOperationType ot = math.opType(l, r);
+			result = ot.toType();
 
-			if (ot == NumOpType.Any) {
+			if (ot == NumericOperationType.Any) {
 				mayCallMetamethod();
 			}
 		}
@@ -346,8 +346,8 @@ class TyperVisitor extends CodeVisitor {
 
 		final Type result;
 		switch (node.op()) {
-			case UNM:  result = MAY_BE_INTEGER.opType(a).toSlotType(); break;
-			case BNOT: result = MUST_BE_INTEGER.opType(a).toSlotType(); break;
+			case UNM:  result = MAY_BE_INTEGER.opType(a).toType(); break;
+			case BNOT: result = MUST_BE_INTEGER.opType(a).toType(); break;
 			case NOT:  result = LuaTypes.BOOLEAN; break;
 			case LEN:  result = a.isSubtypeOf(LuaTypes.STRING) ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY; break;
 			default: throw new UnsupportedOperationException("Illegal unary operation: " + node.op());

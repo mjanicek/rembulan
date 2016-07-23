@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lbc.recompiler.gen.block;
 
-import net.sandius.rembulan.compiler.analysis.NumOpType;
+import net.sandius.rembulan.compiler.analysis.NumericOperationType;
 import net.sandius.rembulan.compiler.analysis.StaticMathImplementation;
 import net.sandius.rembulan.lbc.recompiler.gen.CodeVisitor;
 import net.sandius.rembulan.lbc.recompiler.gen.Origin;
@@ -55,16 +55,16 @@ public class LuaBinaryOperation extends Linear implements LuaInstruction {
 	
 	@Override
 	public String toString() {
-		return op.name() + opType(inSlots()).toSuffix() + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
+		return op.name() + LuaUtils.numOpTypeToSuffix(opType(inSlots())) + "(" + r_dest + "," + rk_left + "," + rk_right + ")";
 	}
 
-	protected NumOpType opType(SlotState s) {
+	protected NumericOperationType opType(SlotState s) {
 		return mathForOp(op).opType(LuaUtils.slotType(context, s, rk_left), LuaUtils.slotType(context, s, rk_right));
 	}
 
 	@Override
 	protected SlotState effect(SlotState s) {
-		return s.update(r_dest, Slot.of(Origin.Computed.in(this), opType(s).toSlotType()));
+		return s.update(r_dest, Slot.of(Origin.Computed.in(this), opType(s).toType()));
 	}
 
 	@Override

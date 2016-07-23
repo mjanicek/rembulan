@@ -10,7 +10,7 @@ import net.sandius.rembulan.compiler.gen.asm.ObjectSinkMethods;
 import net.sandius.rembulan.compiler.gen.asm.OperatorMethods;
 import net.sandius.rembulan.compiler.gen.asm.UpvalueMethods;
 import net.sandius.rembulan.compiler.gen.asm.UtilMethods;
-import net.sandius.rembulan.compiler.analysis.NumOpType;
+import net.sandius.rembulan.compiler.analysis.NumericOperationType;
 import net.sandius.rembulan.compiler.analysis.StaticMathImplementation;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Upvalue;
@@ -344,7 +344,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		InsnList il = new InsnList();
 
 		StaticMathImplementation staticMath = LuaBinaryOperation.mathForOp(op);
-		NumOpType ot = staticMath.opType(
+		NumericOperationType ot = staticMath.opType(
 				LuaUtils.slotType(e.context(), s, rk_left),
 				LuaUtils.slotType(e.context(), s, rk_right));
 
@@ -821,7 +821,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		net.sandius.rembulan.compiler.analysis.types.Type a1 = st.typeAt(r_limit);  // limit
 		net.sandius.rembulan.compiler.analysis.types.Type a2 = st.typeAt(r_step);  // step
 
-		NumOpType loopType = LuaUtils.loopType(a0, a1, a2);
+		NumericOperationType loopType = LuaUtils.loopType(a0, a1, a2);
 
 		// increment index
 		switch (loopType) {
@@ -850,7 +850,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 		int r_limit = r_base + 1;
 		int r_step = r_base + 2;
 		
-		NumOpType loopType = StaticMathImplementation.MAY_BE_INTEGER.opType(
+		NumericOperationType loopType = StaticMathImplementation.MAY_BE_INTEGER.opType(
 				st.typeAt(r_index),
 				st.typeAt(r_step));
 

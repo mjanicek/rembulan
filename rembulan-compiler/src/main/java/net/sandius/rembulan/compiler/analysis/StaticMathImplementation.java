@@ -14,9 +14,9 @@ public abstract class StaticMathImplementation {
 
 	public static StaticMathImplementation MUST_BE_INTEGER = new MustBeInteger();
 
-	public abstract NumOpType opType(Type left, Type right);
+	public abstract NumericOperationType opType(Type left, Type right);
 
-	public abstract NumOpType opType(Type arg);
+	public abstract NumericOperationType opType(Type arg);
 
 	public static class MayBeInteger extends StaticMathImplementation {
 
@@ -25,26 +25,26 @@ public abstract class StaticMathImplementation {
 		}
 
 		@Override
-		public NumOpType opType(Type l, Type r) {
+		public NumericOperationType opType(Type l, Type r) {
 			if (l.isSubtypeOf(NUMBER) && r.isSubtypeOf(NUMBER)) {
-				if (l.isSubtypeOf(NUMBER_INTEGER) && r.isSubtypeOf(NUMBER_INTEGER)) return NumOpType.Integer;
-				else if (l.isSubtypeOf(NUMBER_FLOAT) || r.isSubtypeOf(NUMBER_FLOAT)) return NumOpType.Float;
-				else return NumOpType.Number;
+				if (l.isSubtypeOf(NUMBER_INTEGER) && r.isSubtypeOf(NUMBER_INTEGER)) return NumericOperationType.Integer;
+				else if (l.isSubtypeOf(NUMBER_FLOAT) || r.isSubtypeOf(NUMBER_FLOAT)) return NumericOperationType.Float;
+				else return NumericOperationType.Number;
 			}
 			else {
-				return NumOpType.Any;
+				return NumericOperationType.Any;
 			}
 		}
 
 		@Override
-		public NumOpType opType(Type arg) {
+		public NumericOperationType opType(Type arg) {
 			if (arg.isSubtypeOf(NUMBER)) {
-				if (arg.isSubtypeOf(NUMBER_INTEGER)) return NumOpType.Integer;
-				else if (arg.isSubtypeOf(NUMBER_FLOAT)) return NumOpType.Float;
-				else return NumOpType.Number;
+				if (arg.isSubtypeOf(NUMBER_INTEGER)) return NumericOperationType.Integer;
+				else if (arg.isSubtypeOf(NUMBER_FLOAT)) return NumericOperationType.Float;
+				else return NumericOperationType.Number;
 			}
 			else {
-				return NumOpType.Any;
+				return NumericOperationType.Any;
 			}
 		}
 
@@ -57,15 +57,15 @@ public abstract class StaticMathImplementation {
 		}
 
 		@Override
-		public NumOpType opType(Type l, Type r) {
-			if (l.isSubtypeOf(NUMBER) && r.isSubtypeOf(NUMBER)) return NumOpType.Float;
-			else return NumOpType.Any;
+		public NumericOperationType opType(Type l, Type r) {
+			if (l.isSubtypeOf(NUMBER) && r.isSubtypeOf(NUMBER)) return NumericOperationType.Float;
+			else return NumericOperationType.Any;
 		}
 
 		@Override
-		public NumOpType opType(Type arg) {
-			if (arg.isSubtypeOf(NUMBER)) return NumOpType.Float;
-			else return NumOpType.Any;
+		public NumericOperationType opType(Type arg) {
+			if (arg.isSubtypeOf(NUMBER)) return NumericOperationType.Float;
+			else return NumericOperationType.Any;
 		}
 
 	}
@@ -77,15 +77,15 @@ public abstract class StaticMathImplementation {
 		}
 
 		@Override
-		public NumOpType opType(Type l, Type r) {
-			if (l.isSubtypeOf(NUMBER) && r.isSubtypeOf(NUMBER)) return NumOpType.Integer;
-			else return NumOpType.Any;
+		public NumericOperationType opType(Type l, Type r) {
+			if (l.isSubtypeOf(NUMBER) && r.isSubtypeOf(NUMBER)) return NumericOperationType.Integer;
+			else return NumericOperationType.Any;
 		}
 
 		@Override
-		public NumOpType opType(Type arg) {
-			if (arg.isSubtypeOf(NUMBER)) return NumOpType.Integer;
-			else return NumOpType.Any;
+		public NumericOperationType opType(Type arg) {
+			if (arg.isSubtypeOf(NUMBER)) return NumericOperationType.Integer;
+			else return NumericOperationType.Any;
 		}
 
 	}

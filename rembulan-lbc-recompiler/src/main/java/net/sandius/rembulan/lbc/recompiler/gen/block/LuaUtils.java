@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lbc.recompiler.gen.block;
 
-import net.sandius.rembulan.compiler.analysis.NumOpType;
+import net.sandius.rembulan.compiler.analysis.NumericOperationType;
 import net.sandius.rembulan.compiler.analysis.StaticMathImplementation;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
@@ -36,15 +36,25 @@ public abstract class LuaUtils {
 	}
 
 	@Deprecated
-	public static NumOpType loopType(Type index, Type limit, Type step) {
-		NumOpType ot = StaticMathImplementation.MAY_BE_INTEGER.opType(index, step);
+	public static NumericOperationType loopType(Type index, Type limit, Type step) {
+		NumericOperationType ot = StaticMathImplementation.MAY_BE_INTEGER.opType(index, step);
 
-		if (ot == NumOpType.Any) {
+		if (ot == NumericOperationType.Any) {
 			// unknown types: will however be converted to numbers at execution time
-			ot = NumOpType.Number;
+			ot = NumericOperationType.Number;
 		}
 
 		return ot;
+	}
+
+	public static String numOpTypeToSuffix(NumericOperationType t) {
+		switch (t) {
+			case Integer: return "_i";
+			case Float:   return "_f";
+			case Number:  return "_N";
+			case Any:
+			default:      return "";
+		}
 	}
 
 }
