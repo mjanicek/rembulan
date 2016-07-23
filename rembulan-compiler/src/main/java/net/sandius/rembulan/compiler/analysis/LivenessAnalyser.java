@@ -100,9 +100,6 @@ public class LivenessAnalyser {
 	}
 
 	private LivenessInfo result() {
-		Map<IRNode, Set<Var>> varLiveOut = new HashMap<>();
-		Map<IRNode, Set<AbstractVal>> valLiveOut = new HashMap<>();
-
 		Map<IRNode, LivenessInfo.Entry> entries = new HashMap<>();
 
 		// initialise
