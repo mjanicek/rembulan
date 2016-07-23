@@ -70,7 +70,7 @@ class TyperVisitor extends CodeVisitor {
 			}
 		}
 		else {
-			throw new IllegalStateException("unknown return type: " + rt.toString());
+			throw new IllegalArgumentException("Illegal return type: " + rt);
 		}
 	}
 
