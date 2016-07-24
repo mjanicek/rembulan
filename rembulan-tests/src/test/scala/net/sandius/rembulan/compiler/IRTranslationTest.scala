@@ -4,7 +4,6 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 
 import net.sandius.rembulan.compiler.analysis._
 import net.sandius.rembulan.compiler.ir.Code
-import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter, ConstFolder}
 import net.sandius.rembulan.compiler.util.IRPrinterVisitor
 import net.sandius.rembulan.parser.analysis.NameResolver
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
@@ -48,19 +47,11 @@ class IRTranslationTest extends FunSpec with MustMatchers {
 
   def resolveNames(c: Chunk): Chunk = NameResolver.resolveNames(c)
 
-  def insertCpuAccounting(fn: IRFunc): IRFunc = CPUAccounter.insertCPUAccounting(fn)
-
-  def collectCpuAccounting(fn: IRFunc): IRFunc = CPUAccounter.collectCPUAccounting(fn)
-
   def typeInfo(fn: IRFunc): TypeInfo = Typer.analyseTypes(fn)
 
   def dependencyInfo(fn: IRFunc): DependencyInfo = DependencyAnalyser.analyse(fn)
 
   def slotInfo(fn: IRFunc): SlotAllocInfo = SlotAllocator.allocateSlots(fn)
-
-  def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = BranchInliner.inlineBranches(fn, types)
-
-  def foldConsts(fn: IRFunc, types: TypeInfo): IRFunc = ConstFolder.replaceConstOperations(fn, types)
 
   def printTypes(types: TypeInfo): Unit = {
     println("Return type:")
