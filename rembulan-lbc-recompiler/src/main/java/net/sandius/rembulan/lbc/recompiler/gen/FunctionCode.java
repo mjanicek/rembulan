@@ -1,8 +1,8 @@
 package net.sandius.rembulan.lbc.recompiler.gen;
 
+import net.sandius.rembulan.compiler.analysis.types.FunctionType;
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.analysis.types.ReturnType;
-import net.sandius.rembulan.compiler.analysis.types.FunctionType;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
 import net.sandius.rembulan.lbc.Prototype;
@@ -54,7 +54,7 @@ public class FunctionCode {
 	}
 
 	public FunctionType functionType() {
-		return FunctionType.of(parameterTypes(), returnTypes());
+		return LuaTypes.functionType(parameterTypes(), returnTypes());
 	}
 
 	public int numOfFixedParameters() {

@@ -5,6 +5,7 @@ import net.sandius.rembulan.util.PartialOrderComparisonResult;
 import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
@@ -61,19 +62,26 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	@Override
 	public String toString() {
 		StringBuilder bld = new StringBuilder();
-		for (int i = 0; i < fixed.size(); i++) {
-			bld.append(fixed.get(i).toString());
+
+		bld.append('(');
+
+		final String tail = tailType.equals(LuaTypes.NIL) ? "" : tailType.toString() + "*";
+
+		Iterator<Type> it = fixed.iterator();
+		while (it.hasNext()) {
+			Type t = it.next();
+			bld.append(t.toString());
+			if (it.hasNext() || !tail.isEmpty()) {
+				bld.append(',');
+			}
 		}
 
-		if (tailType.equals(LuaTypes.ANY)) {
-			bld.append("+");
+		if (!tail.isEmpty()) {
+			bld.append(tail);
 		}
-		else if (tailType.equals(LuaTypes.NIL)) {
-			// do nothing
-		}
-		else {
-			bld.append(tailType.toString()).append("*");
-		}
+
+		bld.append(')');
+
 		return bld.toString();
 	}
 

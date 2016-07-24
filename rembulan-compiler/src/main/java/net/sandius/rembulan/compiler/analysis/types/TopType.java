@@ -1,20 +1,22 @@
 package net.sandius.rembulan.compiler.analysis.types;
 
+import net.sandius.rembulan.util.Check;
+
 public final class TopType extends Type {
 
-	public static final TopType INSTANCE = new TopType();
+	private final String name;
 
-	private TopType() {
-		// not to be instantiated by the outside world
+	public TopType(String name) {
+		this.name = Check.notNull(name);
 	}
 
-	public BaseType newSubtype(String name, String tag) {
-		return new BaseType(null, name, tag);
+	public ConcreteType newSubtype(String name) {
+		return new ConcreteType(this, name);
 	}
 
 	@Override
 	public String toString() {
-		return "⊤";
+		return name;
 	}
 
 	@Override
@@ -24,7 +26,7 @@ public final class TopType extends Type {
 
 	@Override
 	public Type restrict(Type that) {
-		return that.equals(DynamicType.INSTANCE) ? that : this;
+		return that instanceof DynamicType ? that : this;
 	}
 
 	@Override

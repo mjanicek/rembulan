@@ -1,7 +1,7 @@
 package net.sandius.rembulan.lbc.recompiler.gen;
 
+import net.sandius.rembulan.compiler.analysis.types.ConcreteType;
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
-import net.sandius.rembulan.compiler.analysis.types.FunctionType;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -46,7 +46,7 @@ public class PrototypeContext {
 		return constantType(prototype.getConstants().get(index));
 	}
 
-	public FunctionType nestedPrototypeType(int index) {
+	public ConcreteType nestedPrototypeType(int index) {
 		return compilationContext().typeOf(nestedPrototype(index));
 	}
 

@@ -945,7 +945,7 @@ public interface LuaInstruction {
 
 		@Override
 		protected SlotState effect(SlotState s) {
-			FunctionType tpe = context.nestedPrototypeType(index);
+			Type tpe = context.nestedPrototypeType(index);
 
 			s = s.update(r_dest, new Origin.Closure(index), tpe);
 

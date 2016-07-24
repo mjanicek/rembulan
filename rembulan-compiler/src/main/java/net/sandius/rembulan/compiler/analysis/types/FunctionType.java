@@ -4,11 +4,15 @@ import net.sandius.rembulan.util.Check;
 
 public class FunctionType extends ConcreteType {
 
+	// FIXME: masking the field in the superclass!
+	protected final ConcreteType supertype;
+
 	protected final TypeSeq typeSeq;
 	protected final TypeSeq returnTypes;
 
-	private FunctionType(TypeSeq arg, TypeSeq ret) {
-		super();
+	FunctionType(ConcreteType supertype, TypeSeq arg, TypeSeq ret) {
+		super(supertype, supertype.name);
+		this.supertype = Check.notNull(supertype);
 		this.typeSeq = Check.notNull(arg);
 		this.returnTypes = Check.notNull(ret);
 	}
@@ -30,15 +34,12 @@ public class FunctionType extends ConcreteType {
 		return result;
 	}
 
-	public static FunctionType of(TypeSeq arg, TypeSeq ret) {
-		return new FunctionType(arg, ret);
-	}
-
 	@Override
 	public String toString() {
-		return "F(" + argumentTypes().toString() + ";" + returnTypes().toString() + ")";
+		return name + argumentTypes().toString() + "->" + returnTypes().toString();
 	}
 
+	@Deprecated
 	public String toExplicitString() {
 		return "(" + argumentTypes().toString() + ") -> (" + returnTypes().toString() + ")";
 	}
@@ -82,7 +83,7 @@ public class FunctionType extends ConcreteType {
 			TypeSeq arg = this.argumentTypes().meet(ft.argumentTypes());
 			TypeSeq ret = this.returnTypes().join(ft.returnTypes());
 
-			return arg != null && ret != null ? new FunctionType(arg, ret) : null;
+			return arg != null && ret != null ? new FunctionType(supertype, arg, ret) : null;
 		}
 		else {
 			return this.supertype().join(that);
@@ -105,7 +106,7 @@ public class FunctionType extends ConcreteType {
 			TypeSeq arg = this.argumentTypes().join(ft.argumentTypes());
 			TypeSeq ret = this.returnTypes().meet(ft.returnTypes());
 
-			return arg != null && ret != null ? new FunctionType(arg, ret) : null;
+			return arg != null && ret != null ? new FunctionType(supertype, arg, ret) : null;
 		}
 		else {
 			return null;
@@ -116,7 +117,8 @@ public class FunctionType extends ConcreteType {
 	public Type restrict(Type that) {
 		if (that instanceof FunctionType) {
 			FunctionType thatFt = (FunctionType) that;
-			return FunctionType.of(this.argumentTypes().restrict(thatFt.argumentTypes()),
+			return new FunctionType(supertype,
+					this.argumentTypes().restrict(thatFt.argumentTypes()),
 					this.returnTypes().restrict(thatFt.returnTypes()));
 		}
 		else {

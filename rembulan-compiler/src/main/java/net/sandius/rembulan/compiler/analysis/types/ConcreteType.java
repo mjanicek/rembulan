@@ -2,20 +2,27 @@ package net.sandius.rembulan.compiler.analysis.types;
 
 import net.sandius.rembulan.util.Check;
 
-public abstract class ConcreteType extends Type {
+public class ConcreteType extends Type {
 
-	protected final ConcreteType supertype;
+	protected final Type supertype;
+	protected final String name;
 
-	protected ConcreteType(ConcreteType supertype) {
-		this.supertype = supertype;
+	protected ConcreteType(Type supertype, String name) {
+		this.supertype = Check.notNull(supertype);
+		this.name = Check.notNull(name);
 	}
 
-	protected ConcreteType() {
-		this(null);
+	@Override
+	public String toString() {
+		return name;
 	}
 
 	public Type supertype() {
-		return supertype != null ? supertype : TopType.INSTANCE;
+		return supertype;
+	}
+
+	public BaseType newSubtype(String name) {
+		return new BaseType(this, name);
 	}
 
 	@Override

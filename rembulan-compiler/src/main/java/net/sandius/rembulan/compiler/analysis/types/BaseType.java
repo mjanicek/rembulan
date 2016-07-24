@@ -1,29 +1,13 @@
 package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.util.Check;
-
 public class BaseType extends ConcreteType {
 
-	private final String name;
-	private final String shortName;
-
-	protected BaseType(ConcreteType supertype, String name, String shortName) {
-		super(supertype);
-		this.name = Check.notNull(name);
-		this.shortName = Check.notNull(shortName);
+	protected BaseType(ConcreteType supertype, String name) {
+		super(supertype, name);
 	}
 
-	protected BaseType(String name, String shortName) {
-		this(null, name, shortName);
-	}
-
-	public BaseType newSubtype(String name, String tag) {
-		return new BaseType(this, name, tag);
-	}
-
-	@Override
-	public String toString() {
-		return shortName;
+	public BaseType newSubtype(String name) {
+		return new BaseType(this, name);
 	}
 
 //	@Override

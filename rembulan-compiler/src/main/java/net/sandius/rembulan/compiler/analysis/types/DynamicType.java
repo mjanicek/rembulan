@@ -1,16 +1,18 @@
 package net.sandius.rembulan.compiler.analysis.types;
 
+import net.sandius.rembulan.util.Check;
+
 public final class DynamicType extends Type {
 
-	public static final DynamicType INSTANCE = new DynamicType();
+	private final String name;
 
-	private DynamicType() {
-		// not to be instantiated by the outside world
+	public DynamicType(String name) {
+		this.name = Check.notNull(name);
 	}
 
 	@Override
 	public String toString() {
-		return "?";
+		return name;
 	}
 
 	@Override

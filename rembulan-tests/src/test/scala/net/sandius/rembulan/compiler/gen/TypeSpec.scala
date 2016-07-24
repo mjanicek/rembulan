@@ -65,7 +65,7 @@ class TypeSpec extends FunSpec with MustMatchers {
 
   implicit class RichTypeSeq(val self: TypeSeq) extends Gradual[TypeSeq] {
     def + = self.withVararg()
-    def ->(that: TypeSeq) = FunctionType.of(self, that)
+    def ->(that: TypeSeq) = LuaTypes.functionType(self, that)
   }
 
   object T {

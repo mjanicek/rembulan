@@ -532,7 +532,7 @@ class TyperVisitor extends CodeVisitor {
 		}
 
 		// TODO: look up the type for this closure
-		FunctionType t = LuaTypes.FUNCTION;
+		Type t = LuaTypes.FUNCTION;
 
 		assign(node.dest(), t);
 	}
