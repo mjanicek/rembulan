@@ -365,36 +365,42 @@ class TyperVisitor extends CodeVisitor {
 
 		final Type result;
 
-		StaticMathImplementation math = staticMath(node.op());
-
-		if (math != null) {
-			NumericOperationType ot = math.opType(l, r);
-			result = ot.toType();
-
-			if (ot == NumericOperationType.Any) {
-				mayCallMetamethod();
-			}
+		Type emulatedResult = Typer.emulateOp(node.op(), l, r);
+		if (emulatedResult != null) {
+			result = emulatedResult;
 		}
 		else {
-			switch (node.op()) {
-				case CONCAT:
-					if (stringable(l) && stringable(r)) {
-						result = LuaTypes.STRING;
-					}
-					else {
-						result = LuaTypes.ANY;
-						mayCallMetamethod();
-					}
-					break;
+			StaticMathImplementation math = staticMath(node.op());
 
-				case EQ:
-				case NEQ:
-				case LT:
-				case LE:
-					result = LuaTypes.BOOLEAN;
-					mayCallMetamethod();  // TODO: may be restricted (see §2.4 of LRM)
-					break;
-				default: throw new UnsupportedOperationException("Illegal binary operation: " + node.op());
+			if (math != null) {
+				NumericOperationType ot = math.opType(l, r);
+				result = ot.toType();
+
+				if (ot == NumericOperationType.Any) {
+					mayCallMetamethod();
+				}
+			}
+			else {
+				switch (node.op()) {
+					case CONCAT:
+						if (stringable(l) && stringable(r)) {
+							result = LuaTypes.STRING;
+						}
+						else {
+							result = LuaTypes.ANY;
+							mayCallMetamethod();
+						}
+						break;
+
+					case EQ:
+					case NEQ:
+					case LT:
+					case LE:
+						result = LuaTypes.BOOLEAN;
+						mayCallMetamethod();  // TODO: may be restricted (see §2.4 of LRM)
+						break;
+					default: throw new UnsupportedOperationException("Illegal binary operation: " + node.op());
+				}
 			}
 		}
 
@@ -406,12 +412,19 @@ class TyperVisitor extends CodeVisitor {
 		Type a = typeOf(node.arg());
 
 		final Type result;
-		switch (node.op()) {
-			case UNM:  result = MAY_BE_INTEGER.opType(a).toType(); break;
-			case BNOT: result = MUST_BE_INTEGER.opType(a).toType(); break;
-			case NOT:  result = LuaTypes.BOOLEAN; break;
-			case LEN:  result = a.isSubtypeOf(LuaTypes.STRING) ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY; break;
-			default: throw new UnsupportedOperationException("Illegal unary operation: " + node.op());
+
+		Type emulatedResult = Typer.emulateOp(node.op(), a);
+		if (emulatedResult != null) {
+			result = emulatedResult;
+		}
+		else {
+			switch (node.op()) {
+				case UNM:  result = MAY_BE_INTEGER.opType(a).toType(); break;
+				case BNOT: result = MUST_BE_INTEGER.opType(a).toType(); break;
+				case NOT:  result = LuaTypes.BOOLEAN; break;
+				case LEN:  result = a.isSubtypeOf(LuaTypes.STRING) ? LuaTypes.NUMBER_INTEGER : LuaTypes.ANY; break;
+				default: throw new UnsupportedOperationException("Illegal unary operation: " + node.op());
+			}
 		}
 
 		assign(node.dest(), result);
