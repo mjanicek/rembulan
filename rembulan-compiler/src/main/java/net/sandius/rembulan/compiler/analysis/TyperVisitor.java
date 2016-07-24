@@ -318,22 +318,22 @@ class TyperVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(LoadConst.Bool node) {
-		assign(node.dest(), LuaTypes.BOOLEAN);
+		assign(node.dest(), LuaTypes.BOOLEAN.newLiteralType(node.value()));
 	}
 
 	@Override
 	public void visit(LoadConst.Int node) {
-		assign(node.dest(), LuaTypes.NUMBER_INTEGER);
+		assign(node.dest(), LuaTypes.NUMBER_INTEGER.newLiteralType(node.value()));
 	}
 
 	@Override
 	public void visit(LoadConst.Flt node) {
-		assign(node.dest(), LuaTypes.NUMBER_FLOAT);
+		assign(node.dest(), LuaTypes.NUMBER_FLOAT.newLiteralType(node.value()));
 	}
 
 	@Override
 	public void visit(LoadConst.Str node) {
-		assign(node.dest(), LuaTypes.STRING);
+		assign(node.dest(), LuaTypes.STRING.newLiteralType(node.value()));
 	}
 
 	private static StaticMathImplementation staticMath(BinOp.Op op) {
