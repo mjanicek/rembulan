@@ -55,6 +55,48 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   IfThenElse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare number with nil")
 
+  val Or1 = fragment ("Or1") {
+    """local assert = assert or function() return end
+      |return assert
+    """
+  }
+  Or1 in EmptyContext succeedsWith (classOf[lua.Function])
+  Or1 in BasicContext succeedsWith (classOf[lua.Function])
+
+  val Or2 = fragment ("Or2") {
+    """local assert = assert or function() return end
+      |return not not assert
+    """
+  }
+  Or2 in EmptyContext succeedsWith (true)
+  Or2 in BasicContext succeedsWith (true)
+
+  val Or3 = fragment ("Or3") {
+    """local x = true or false
+      |return x or 10
+    """
+  }
+  Or3 in EmptyContext succeedsWith (true)
+  Or3 in BasicContext succeedsWith (true)
+
+  val IfOr1 = fragment ("IfOr1") {
+    """local x
+      |if assert then x = assert else x = function() return end end
+      |return x
+    """
+  }
+  IfOr1 in EmptyContext succeedsWith (classOf[lua.Function])
+  IfOr1 in BasicContext succeedsWith (classOf[lua.Function])
+
+  val IfOr2 = fragment ("IfOr2") {
+    """local x
+      |if assert then x = assert else x = function() return end end
+      |return not not x
+    """
+  }
+  IfOr2 in EmptyContext succeedsWith (true)
+  IfOr2 in BasicContext succeedsWith (true)
+
   val IntegerCmp = fragment ("IntegerCmp") {
     """local min = 0x8000000000000000
       |local max = 0x7fffffffffffffff
