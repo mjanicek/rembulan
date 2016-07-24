@@ -2,15 +2,15 @@ package net.sandius.rembulan.compiler.analysis.types;
 
 import net.sandius.rembulan.util.Check;
 
-public class FunctionType extends ConcreteType {
+public class FunctionType extends AbstractType {
 
 	// FIXME: masking the field in the superclass!
-	protected final ConcreteType supertype;
+	protected final AbstractType supertype;
 
 	protected final TypeSeq typeSeq;
 	protected final TypeSeq returnTypes;
 
-	FunctionType(ConcreteType supertype, TypeSeq arg, TypeSeq ret) {
+	FunctionType(AbstractType supertype, TypeSeq arg, TypeSeq ret) {
 		super(supertype, supertype.name);
 		this.supertype = Check.notNull(supertype);
 		this.typeSeq = Check.notNull(arg);

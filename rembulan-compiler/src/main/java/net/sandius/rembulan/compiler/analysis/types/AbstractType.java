@@ -2,12 +2,12 @@ package net.sandius.rembulan.compiler.analysis.types;
 
 import net.sandius.rembulan.util.Check;
 
-public class ConcreteType extends Type {
+public class AbstractType extends Type {
 
 	protected final Type supertype;
 	protected final String name;
 
-	protected ConcreteType(Type supertype, String name) {
+	protected AbstractType(Type supertype, String name) {
 		this.supertype = Check.notNull(supertype);
 		this.name = Check.notNull(name);
 	}

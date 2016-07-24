@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lbc.recompiler.gen;
 
-import net.sandius.rembulan.compiler.analysis.types.ConcreteType;
+import net.sandius.rembulan.compiler.analysis.types.AbstractType;
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
@@ -15,7 +15,7 @@ public class CompilationContext {
 		this.units = Check.notNull(units);
 	}
 
-	public ConcreteType typeOf(Prototype prototype) {
+	public AbstractType typeOf(Prototype prototype) {
 		return units.containsKey(prototype) ? units.get(prototype).generic().functionType() : LuaTypes.FUNCTION;
 	}
 
