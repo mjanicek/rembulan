@@ -2,6 +2,8 @@ package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.analysis.DependencyAnalyser;
 import net.sandius.rembulan.compiler.analysis.DependencyInfo;
+import net.sandius.rembulan.compiler.analysis.LivenessAnalyser;
+import net.sandius.rembulan.compiler.analysis.LivenessInfo;
 import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
 import net.sandius.rembulan.compiler.analysis.SlotAllocator;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
@@ -15,6 +17,7 @@ import net.sandius.rembulan.compiler.tf.BranchInliner;
 import net.sandius.rembulan.compiler.tf.CPUAccounter;
 import net.sandius.rembulan.compiler.tf.CodeSimplifier;
 import net.sandius.rembulan.compiler.tf.ConstFolder;
+import net.sandius.rembulan.compiler.tf.LivenessPruner;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.analysis.NameResolver;
@@ -84,6 +87,10 @@ public class Compiler {
 			fn = CPUAccounter.collectCPUAccounting(fn);
 			fn = BranchInliner.inlineBranches(fn, typeInfo);
 			fn = ConstFolder.replaceConstOperations(fn, typeInfo);
+
+			LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
+
+			fn = LivenessPruner.pruneDeadCode(fn, typeInfo, liveness);
 			fn = CodeSimplifier.pruneUnreachableCode(fn);
 			fn = CodeSimplifier.mergeBlocks(fn);
 
@@ -108,7 +115,7 @@ public class Compiler {
 
 	}
 
-	private ProcessedFunc processFunction(IRFunc fn) {
+	ProcessedFunc processFunction(IRFunc fn) {
 		fn = CPUAccounter.insertCPUAccounting(fn);
 		fn = optimise(fn);
 

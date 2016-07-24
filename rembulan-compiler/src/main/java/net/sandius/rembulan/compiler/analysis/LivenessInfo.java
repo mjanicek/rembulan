@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-class LivenessInfo {
+public class LivenessInfo {
 
 	private final Map<IRNode, Entry> entries;
 	
@@ -19,7 +19,7 @@ class LivenessInfo {
 		this.entries = Check.notNull(entries);
 	}
 
-	static class Entry {
+	public static class Entry {
 
 		private final Set<Var> var_in;
 		private final Set<Var> var_out;

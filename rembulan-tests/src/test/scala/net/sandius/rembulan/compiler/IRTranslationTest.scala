@@ -1,20 +1,19 @@
-package net.sandius.rembulan.parser
+package net.sandius.rembulan.compiler
 
 import java.io.{ByteArrayInputStream, PrintWriter}
 
-import net.sandius.rembulan.compiler._
 import net.sandius.rembulan.compiler.analysis._
 import net.sandius.rembulan.compiler.ir.Code
-import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter, CodeSimplifier, ConstFolder}
+import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter, ConstFolder}
 import net.sandius.rembulan.compiler.util.IRPrinterVisitor
 import net.sandius.rembulan.parser.analysis.NameResolver
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
+import net.sandius.rembulan.parser.{Expressions, Parser}
 import net.sandius.rembulan.test._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
 
-import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
@@ -151,31 +150,9 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def compile(fn: IRFunc): CompiledFn = {
-    val withCpu = insertCpuAccounting(fn)
-
-    def pass(fn: IRFunc, types: TypeInfo): IRFunc = {
-      val withCpu = collectCpuAccounting(fn)
-      val inlined = inlineBranches(withCpu, types)
-      val constFolded = foldConsts(inlined, types)
-      val filtered = CodeSimplifier.pruneUnreachableCode(constFolded)
-      val merged = CodeSimplifier.mergeBlocks(filtered)
-      merged
-    }
-
-    @tailrec
-    def loop(fn: IRFunc): (IRFunc, TypeInfo) = {
-      val types = typeInfo(fn)
-      val opt = pass(fn, types)
-      if (fn == opt) {
-        (opt, types)
-      }
-      else {
-        loop(opt)
-      }
-    }
-
-    val (fnl, types) = loop(withCpu)
-    CompiledFn(fnl, types)
+    val compiler = new Compiler()
+    val pfn = compiler.processFunction(fn)
+    CompiledFn(pfn.fn, pfn.types)
   }
 
   def compile(mod: Module): CompiledModule = {
