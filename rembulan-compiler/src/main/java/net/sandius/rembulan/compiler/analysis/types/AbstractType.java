@@ -21,7 +21,11 @@ public class AbstractType extends Type {
 		return supertype;
 	}
 
-	public ConcreteType newSubtype(String name) {
+	public AbstractType newAbstractSubtype(String name) {
+		return new AbstractType(this, name);
+	}
+
+	public ConcreteType newConcreteSubtype(String name) {
 		return new ConcreteType(this, name);
 	}
 
