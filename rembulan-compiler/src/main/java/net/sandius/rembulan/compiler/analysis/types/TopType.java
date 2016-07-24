@@ -10,10 +10,6 @@ public final class TopType extends Type {
 		this.name = Check.notNull(name);
 	}
 
-	public AbstractType newSubtype(String name) {
-		return new AbstractType(this, name);
-	}
-
 	@Override
 	public String toString() {
 		return name;

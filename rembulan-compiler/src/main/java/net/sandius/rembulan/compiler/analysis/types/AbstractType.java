@@ -21,14 +21,6 @@ public class AbstractType extends Type {
 		return supertype;
 	}
 
-	public AbstractType newAbstractSubtype(String name) {
-		return new AbstractType(this, name);
-	}
-
-	public ConcreteType newConcreteSubtype(String name) {
-		return new ConcreteType(this, name);
-	}
-
 	@Override
 	public boolean isSubtypeOf(Type that) {
 		return this.equals(that) || this.supertype().isSubtypeOf(that);
