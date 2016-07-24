@@ -13,12 +13,12 @@ public abstract class LuaTypes {
 	public static final Type NIL = ANY.newSubtype("nil");
 	public static final AbstractType NON_NIL = ANY.newSubtype("nonnil");
 
-	public static final BaseType BOOLEAN = NON_NIL.newSubtype("boolean");
+	public static final ConcreteType BOOLEAN = NON_NIL.newSubtype("boolean");
 	public static final AbstractType NUMBER = NON_NIL.newSubtype("number");
-	public static final BaseType NUMBER_INTEGER = NUMBER.newSubtype("integer");
-	public static final BaseType NUMBER_FLOAT = NUMBER.newSubtype("float");
-	public static final BaseType STRING = NON_NIL.newSubtype("string");
-	public static final BaseType TABLE = NON_NIL.newSubtype("table");
+	public static final ConcreteType NUMBER_INTEGER = NUMBER.newSubtype("integer");
+	public static final ConcreteType NUMBER_FLOAT = NUMBER.newSubtype("float");
+	public static final ConcreteType STRING = NON_NIL.newSubtype("string");
+	public static final ConcreteType TABLE = NON_NIL.newSubtype("table");
 
 	public static final AbstractType FUNCTION = NON_NIL.newSubtype("function");
 

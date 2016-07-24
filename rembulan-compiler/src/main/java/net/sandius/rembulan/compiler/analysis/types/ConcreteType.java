@@ -1,13 +1,13 @@
 package net.sandius.rembulan.compiler.analysis.types;
 
-public class BaseType extends AbstractType {
+public class ConcreteType extends AbstractType {
 
-	protected BaseType(AbstractType supertype, String name) {
+	protected ConcreteType(AbstractType supertype, String name) {
 		super(supertype, name);
 	}
 
-	public BaseType newSubtype(String name) {
-		return new BaseType(this, name);
+	public ConcreteType newSubtype(String name) {
+		return new ConcreteType(this, name);
 	}
 
 //	@Override
