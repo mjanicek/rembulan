@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, PrintWriter}
 import net.sandius.rembulan.compiler._
 import net.sandius.rembulan.compiler.analysis._
 import net.sandius.rembulan.compiler.ir.Code
-import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter, CodeSimplifier}
+import net.sandius.rembulan.compiler.tf.{BranchInliner, CPUAccounter, CodeSimplifier, ConstFolder}
 import net.sandius.rembulan.compiler.util.IRPrinterVisitor
 import net.sandius.rembulan.parser.analysis.NameResolver
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
@@ -60,6 +60,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   def slotInfo(fn: IRFunc): SlotAllocInfo = SlotAllocator.allocateSlots(fn)
 
   def inlineBranches(fn: IRFunc, types: TypeInfo): IRFunc = BranchInliner.inlineBranches(fn, types)
+
+  def foldConsts(fn: IRFunc, types: TypeInfo): IRFunc = ConstFolder.replaceConstOperations(fn, types)
 
   def printTypes(types: TypeInfo): Unit = {
     println("Return type:")
@@ -154,7 +156,8 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     def pass(fn: IRFunc, types: TypeInfo): IRFunc = {
       val withCpu = collectCpuAccounting(fn)
       val inlined = inlineBranches(withCpu, types)
-      val filtered = CodeSimplifier.pruneUnreachableCode(inlined)
+      val constFolded = foldConsts(inlined, types)
+      val filtered = CodeSimplifier.pruneUnreachableCode(constFolded)
       val merged = CodeSimplifier.mergeBlocks(filtered)
       merged
     }

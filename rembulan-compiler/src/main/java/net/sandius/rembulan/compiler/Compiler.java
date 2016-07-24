@@ -14,6 +14,7 @@ import net.sandius.rembulan.compiler.gen.asm.ASMBytecodeEmitter;
 import net.sandius.rembulan.compiler.tf.BranchInliner;
 import net.sandius.rembulan.compiler.tf.CPUAccounter;
 import net.sandius.rembulan.compiler.tf.CodeSimplifier;
+import net.sandius.rembulan.compiler.tf.ConstFolder;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.analysis.NameResolver;
@@ -82,6 +83,7 @@ public class Compiler {
 
 			fn = CPUAccounter.collectCPUAccounting(fn);
 			fn = BranchInliner.inlineBranches(fn, typeInfo);
+			fn = ConstFolder.replaceConstOperations(fn, typeInfo);
 			fn = CodeSimplifier.pruneUnreachableCode(fn);
 			fn = CodeSimplifier.mergeBlocks(fn);
 
