@@ -46,6 +46,8 @@ class NameResolutionTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(LocalDeclStatement node) {
+		List<Expr> resolvedInitialisers = transformExprList(node.initialisers());
+
 		List<Name> ns = transformNameList(node.names());
 		List<Variable> vs = new ArrayList<>();
 		for (Name n : ns) {
@@ -53,7 +55,7 @@ class NameResolutionTransformer extends Transformer {
 			vs.add(v);
 		}
 		return node
-				.update(ns, transformExprList(node.initialisers()))
+				.update(ns, resolvedInitialisers)
 				.with(new VarMapping(Collections.unmodifiableList(vs)));
 	}
 
