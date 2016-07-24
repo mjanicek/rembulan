@@ -2,7 +2,7 @@ package net.sandius.rembulan.compiler.analysis.types;
 
 import net.sandius.rembulan.util.Check;
 
-public class FunctionType extends AbstractType {
+public class FunctionType extends ConcreteType {
 
 	// FIXME: masking the field in the superclass!
 	protected final AbstractType supertype;
