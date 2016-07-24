@@ -83,7 +83,9 @@ public abstract class ASMUtils {
 	}
 
 	public static AbstractInsnNode loadDouble(double d) {
-		if (d == 0.0) return new InsnNode(DCONST_0);
+		// We want to distinguish -0.0 from 0.0, but -0.0 == 0.0;
+		// luckily, Double.equals() distinguishes these two cases.
+		if (Double.valueOf(d).equals(0.0)) return new InsnNode(DCONST_0);
 		else if (d == 1.0) return new InsnNode(DCONST_1);
 		else return new LdcInsnNode(d);
 	}
