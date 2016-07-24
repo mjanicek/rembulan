@@ -6,7 +6,7 @@ public abstract class LuaTypes {
 		// not to be instantiated
 	}
 
-	static AbstractType abstractSubtype(Type parent, String name) {
+	static AbstractType abstractSubtype(AbstractType parent, String name) {
 		return new AbstractType(parent, name);
 	}
 
@@ -18,7 +18,7 @@ public abstract class LuaTypes {
 
 	public static final DynamicType DYNAMIC = new DynamicType("dynamic");
 
-	public static final Type NIL = abstractSubtype(ANY, "nil");  // FIXME: concrete
+	public static final ConcreteType NIL = concreteSubtype(ANY, "nil");
 	public static final AbstractType NON_NIL = abstractSubtype(ANY, "nonnil");
 
 	public static final ConcreteType BOOLEAN = concreteSubtype(NON_NIL, "boolean");

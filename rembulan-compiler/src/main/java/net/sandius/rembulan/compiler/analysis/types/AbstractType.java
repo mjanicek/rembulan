@@ -4,11 +4,11 @@ import net.sandius.rembulan.util.Check;
 
 public class AbstractType extends Type {
 
-	protected final Type supertype;
+	protected final AbstractType supertype;  // may be null
 	protected final String name;
 
-	protected AbstractType(Type supertype, String name) {
-		this.supertype = Check.notNull(supertype);
+	protected AbstractType(AbstractType supertype, String name) {
+		this.supertype = supertype;
 		this.name = Check.notNull(name);
 	}
 
@@ -17,13 +17,13 @@ public class AbstractType extends Type {
 		return name;
 	}
 
-	public Type supertype() {
+	public AbstractType supertype() {
 		return supertype;
 	}
 
 	@Override
 	public boolean isSubtypeOf(Type that) {
-		return this.equals(that) || this.supertype().isSubtypeOf(that);
+		return this.equals(that) || (this.supertype() != null && this.supertype().isSubtypeOf(that));
 	}
 
 	@Override
@@ -36,7 +36,8 @@ public class AbstractType extends Type {
 		Check.notNull(that);
 
 		if (that.isSubtypeOf(this)) return this;
-		else return this.supertype().join(that);
+		else if (this.supertype() != null) return this.supertype().join(that);
+		else return null;
 	}
 
 	@Override

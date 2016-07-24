@@ -1,18 +1,9 @@
 package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.util.Check;
-
-public final class TopType extends Type {
-
-	private final String name;
+public final class TopType extends AbstractType {
 
 	public TopType(String name) {
-		this.name = Check.notNull(name);
-	}
-
-	@Override
-	public String toString() {
-		return name;
+		super(null, name);
 	}
 
 	@Override
