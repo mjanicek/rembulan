@@ -166,7 +166,7 @@ public class Typer {
 			}
 
 			case NOT:
-				return true;
+				return arg.equals(Boolean.FALSE);
 
 			case LEN:
 				return arg instanceof String
