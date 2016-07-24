@@ -1,6 +1,8 @@
 package net.sandius.rembulan.core;
 
-import static net.sandius.rembulan.core.RawOperators.*;
+import static net.sandius.rembulan.core.RawOperators.rawidiv;
+import static net.sandius.rembulan.core.RawOperators.rawmod;
+import static net.sandius.rembulan.core.RawOperators.rawpow;
 
 public abstract class MathImplementation {
 
@@ -59,7 +61,7 @@ public abstract class MathImplementation {
 		}
 
 		@Override
-		public Number do_unm(Number n) {
+		public Long do_unm(Number n) {
 			return -n.longValue();
 		}
 
@@ -93,7 +95,7 @@ public abstract class MathImplementation {
 		}
 
 		@Override
-		public Number do_mul(Number a, Number b) {
+		public Double do_mul(Number a, Number b) {
 			return a.doubleValue() * b.doubleValue();
 		}
 
@@ -118,7 +120,7 @@ public abstract class MathImplementation {
 		}
 
 		@Override
-		public Number do_unm(Number n) {
+		public Double do_unm(Number n) {
 			return -n.doubleValue();
 		}
 
