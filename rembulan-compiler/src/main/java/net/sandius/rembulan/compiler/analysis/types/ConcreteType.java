@@ -12,6 +12,11 @@ public class ConcreteType extends Type {
 		this.name = Check.notNull(name);
 	}
 
+	@Override
+	public String toString() {
+		return name;
+	}
+
 	public AbstractType supertype() {
 		return supertype;
 	}
