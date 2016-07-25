@@ -20,8 +20,11 @@ public class CompilerChunkLoader extends ChunkLoader {
 		this.idx = 0;
 	}
 
-	public CompilerChunkLoader(ClassLoader classLoader, Compiler.CPUAccountingMode cpuAccountingMode) {
-		this(classLoader, new Compiler(cpuAccountingMode));
+	public CompilerChunkLoader(
+			ClassLoader classLoader,
+			Compiler.CPUAccountingMode cpuAccountingMode,
+			boolean constFolding) {
+		this(classLoader, new Compiler(cpuAccountingMode, constFolding));
 	}
 
 	public CompilerChunkLoader(ClassLoader classLoader) {
@@ -31,7 +34,6 @@ public class CompilerChunkLoader extends ChunkLoader {
 	@Override
 	public Function loadTextChunk(Upvalue env, String chunkName, String sourceText) throws LoaderException {
 		try {
-			Compiler compiler = new Compiler();
 			CompiledModule result = compiler.compile(sourceText, "stdin", "f" + (idx++));  // FIXME
 
 			String mainClassName = chunkClassLoader.install(result);

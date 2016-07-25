@@ -41,15 +41,18 @@ public class Compiler {
 	}
 
 	public static final CPUAccountingMode DEFAULT_CPU_ACCOUNTING_MODE = CPUAccountingMode.IN_EVERY_BASIC_BLOCK;
+	public static final boolean DEFAULT_CONST_FOLDING_MODE = true;
 
 	private CPUAccountingMode cpuAccountingMode;
+	private boolean constFolding;
 
-	public Compiler(CPUAccountingMode cpuAccountingMode) {
+	public Compiler(CPUAccountingMode cpuAccountingMode, boolean constFolding) {
 		this.cpuAccountingMode = Check.notNull(cpuAccountingMode);
+		this.constFolding = constFolding;
 	}
 
 	public Compiler() {
-		this(DEFAULT_CPU_ACCOUNTING_MODE);
+		this(DEFAULT_CPU_ACCOUNTING_MODE, DEFAULT_CONST_FOLDING_MODE);
 	}
 
 	public void setCPUAccountingMode(CPUAccountingMode mode) {
@@ -86,11 +89,13 @@ public class Compiler {
 
 			fn = CPUAccounter.collectCPUAccounting(fn);
 			fn = BranchInliner.inlineBranches(fn, typeInfo);
-			fn = ConstFolder.replaceConstOperations(fn, typeInfo);
 
-			LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
+			if (constFolding) {
+				fn = ConstFolder.replaceConstOperations(fn, typeInfo);
+				LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
+				fn = LivenessPruner.pruneDeadCode(fn, typeInfo, liveness);
+			}
 
-			fn = LivenessPruner.pruneDeadCode(fn, typeInfo, liveness);
 			fn = CodeSimplifier.pruneUnreachableCode(fn);
 			fn = CodeSimplifier.mergeBlocks(fn);
 

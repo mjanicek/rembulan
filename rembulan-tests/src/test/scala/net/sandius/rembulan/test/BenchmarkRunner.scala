@@ -15,8 +15,8 @@ import scala.util.Try
 object BenchmarkRunner {
 
   case class Benchmark(fileName: String) {
-    def go(prefix: String, stepSize: Int, noCPUAccounting: Boolean, args: String*): Unit = {
-      doFile(prefix, stepSize, noCPUAccounting, fileName, args:_*)
+    def go(prefix: String, stepSize: Int, noCPUAccounting: Boolean, constFolding: Option[Boolean], args: String*): Unit = {
+      doFile(prefix, stepSize, noCPUAccounting, constFolding, fileName, args:_*)
     }
   }
 
@@ -32,6 +32,14 @@ object BenchmarkRunner {
     Option(System.getProperty(key)) match {
       case Some("true") => true
       case _ => false
+    }
+  }
+
+  protected def optBooleanProperty(key: String): Option[Boolean] = {
+    Option(System.getProperty(key)) match {
+      case Some("true") => Some(true)
+      case Some("false") => Some(false)
+      case _ => None
     }
   }
 
@@ -60,7 +68,7 @@ object BenchmarkRunner {
     env
   }
 
-  def init(pc: PreemptionContext, noCPUAccounting: Boolean, filename: String, args: String*): Exec = {
+  def init(pc: PreemptionContext, noCPUAccounting: Boolean, constFolding: Option[Boolean], filename: String, args: String*): Exec = {
     val resourceStream = getClass.getResourceAsStream(filename)
     require (resourceStream != null, "resource must exist, is null")
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
@@ -73,7 +81,10 @@ object BenchmarkRunner {
       case _ => Compiler.DEFAULT_CPU_ACCOUNTING_MODE
     }
 
-    val ldr = new CompilerChunkLoader(new ChunkClassLoader(), cpuMode)
+    val ldr = new CompilerChunkLoader(
+      new ChunkClassLoader(),
+      cpuMode,
+      constFolding.getOrElse(Compiler.DEFAULT_CONST_FOLDING_MODE))
 
     val state = new DefaultLuaState.Builder()
         .withPreemptionContext(preemptionContext)
@@ -96,11 +107,11 @@ object BenchmarkRunner {
     result
   }
 
-  def doFile(prefix: String, stepSize: Int, noCPUAccounting: Boolean, filename: String, args: String*): Unit = {
+  def doFile(prefix: String, stepSize: Int, noCPUAccounting: Boolean, constFolding: Option[Boolean], filename: String, args: String*): Unit = {
     val pc = new CountingPreemptionContext()
 
     val exec = timed (prefix + "init") {
-      init(pc, noCPUAccounting, filename, args:_*)
+      init(pc, noCPUAccounting, constFolding, filename, args:_*)
     }
 
     var steps = 0
@@ -158,6 +169,8 @@ object BenchmarkRunner {
   val NoCPUAccountingPropertyName = "noCPUAccounting"
   val DefaultNoCPUAccounting = false
 
+  val ConstFoldingPropertyName = "constFolding"
+
   def main(args: Array[String]): Unit = {
 
     getSetup(args) match {
@@ -165,6 +178,7 @@ object BenchmarkRunner {
         val numRuns = intProperty(NumOfRunsPropertyName, DefaultNumOfRuns)
         val stepSize = intProperty(StepSizePropertyName, DefaultStepSize)
         val noCPUAccounting = booleanProperty(NoCPUAccountingPropertyName, DefaultNoCPUAccounting)
+        val constFolding = optBooleanProperty(ConstFoldingPropertyName)
 
         val bm = Benchmark(dirPrefix + setup.benchmarkFile)
 
@@ -176,6 +190,7 @@ object BenchmarkRunner {
         println("}")
         println(NumOfRunsPropertyName + " = " + numRuns)
         println(NoCPUAccountingPropertyName + " = " + noCPUAccounting)
+        println(ConstFoldingPropertyName + " = " + constFolding)
         if (!noCPUAccounting) {
           println(StepSizePropertyName + " = " + stepSize)
         }
@@ -183,7 +198,7 @@ object BenchmarkRunner {
 
         for (i <- 1 to numRuns) {
           val prefix = s"#$i\t"
-          bm.go(prefix, stepSize, noCPUAccounting, setup.args:_*)
+          bm.go(prefix, stepSize, noCPUAccounting, constFolding, setup.args:_*)
         }
 
 
