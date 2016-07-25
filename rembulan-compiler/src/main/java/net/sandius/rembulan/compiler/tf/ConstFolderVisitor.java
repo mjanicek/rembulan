@@ -6,6 +6,7 @@ import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.LoadConst;
+import net.sandius.rembulan.compiler.ir.ToNumber;
 import net.sandius.rembulan.compiler.ir.UnOp;
 import net.sandius.rembulan.compiler.ir.Val;
 import net.sandius.rembulan.util.Check;
@@ -54,29 +55,30 @@ public class ConstFolderVisitor extends CodeTransformerVisitor {
 		}
 	}
 
-	@Override
-	public void visit(BinOp node) {
-		Type resultType = typeInfo.typeOf(node.dest());
+	private void replaceIfLiteral(BodyNode node, Val v) {
+		Type resultType = typeInfo.typeOf(v);
 		if (resultType instanceof LiteralType) {
 			LiteralType<?> lt = (LiteralType<?>) resultType;
-			LoadConst loadNode = objectToLoadConstNode(node.dest(), lt.value());
+			LoadConst loadNode = objectToLoadConstNode(v, lt.value());
 			if (loadNode != null) {
 				replace(node, loadNode);
 			}
 		}
+	}
+
+	@Override
+	public void visit(BinOp node) {
+		replaceIfLiteral(node, node.dest());
 	}
 
 	@Override
 	public void visit(UnOp node) {
-		Type resultType = typeInfo.typeOf(node.dest());
-		if (resultType instanceof LiteralType) {
-			LiteralType<?> lt = (LiteralType<?>) resultType;
-			LoadConst loadNode = objectToLoadConstNode(node.dest(), lt.value());
-			if (loadNode != null) {
-				replace(node, loadNode);
-			}
-		}
+		replaceIfLiteral(node, node.dest());
 	}
 
+	@Override
+	public void visit(ToNumber node) {
+		replaceIfLiteral(node, node.dest());
+	}
 
 }
