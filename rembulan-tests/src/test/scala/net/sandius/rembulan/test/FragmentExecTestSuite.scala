@@ -2,14 +2,15 @@ package net.sandius.rembulan.test
 
 import java.io.PrintStream
 
-import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader}
+import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
+import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.lbc.LuaCPrototypeReader
 import net.sandius.rembulan.lbc.recompiler.PrototypeCompilerChunkLoader
-import net.sandius.rembulan.lib.{Lib, LibUtils}
 import net.sandius.rembulan.lib.impl._
+import net.sandius.rembulan.lib.{Lib, LibUtils}
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{core => lua}
 import org.scalatest.{FunSpec, MustMatchers}
@@ -103,12 +104,39 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
       getClass.getClassLoader)
   }
 
-  case object RembulanChkLoader extends ChkLoader {
-    def name = "RemC"
-    def loader() = new CompilerChunkLoader(new ChunkClassLoader())
+  def compilerSettingsToString(settings: CompilerSettings): String = {
+    val cpu = settings.cpuAccountingMode() match {
+      case CPUAccountingMode.NO_CPU_ACCOUNTING => "n"
+      case CPUAccountingMode.IN_EVERY_BASIC_BLOCK => "a"
+    }
+    val cfold = settings.constFolding() match {
+      case true => "t"
+      case false => "f"
+    }
+    val ccache = settings.constCaching() match {
+      case true => "t"
+      case false => "f"
+    }
+    cpu + cfold + ccache
   }
 
-  val ldrs = Seq(LuacChkLoader, RembulanChkLoader)
+  case class RembulanChkLoader(settings: CompilerSettings) extends ChkLoader {
+    def name = "RemC" + "_" + compilerSettingsToString(settings)
+    def loader() = new CompilerChunkLoader(new ChunkClassLoader(), settings)
+  }
+
+  val bools = Seq(true, false)
+
+  val rembulanLoaders = for (
+    cpu <- CPUAccountingMode.values();
+    cfold <- bools;
+    ccache <- bools
+  ) yield CompilerSettings.defaultSettings()
+      .withCPUAccountingMode(cpu)
+      .withConstFolding(cfold)
+      .withConstCaching(ccache)
+
+  val ldrs = LuacChkLoader :: (rembulanLoaders.distinct map RembulanChkLoader).toList
 
   for (bundle <- bundles;
        fragment <- bundle.all;
