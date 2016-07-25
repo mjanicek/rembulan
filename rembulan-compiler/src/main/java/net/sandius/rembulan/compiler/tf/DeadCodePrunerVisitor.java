@@ -12,12 +12,12 @@ import net.sandius.rembulan.compiler.ir.VarLoad;
 import net.sandius.rembulan.compiler.ir.VarStore;
 import net.sandius.rembulan.util.Check;
 
-public class LivenessPrunerVisitor extends CodeTransformerVisitor {
+public class DeadCodePrunerVisitor extends CodeTransformerVisitor {
 
 	private final TypeInfo types;
 	private final LivenessInfo liveness;
 
-	public LivenessPrunerVisitor(TypeInfo types, LivenessInfo liveness) {
+	public DeadCodePrunerVisitor(TypeInfo types, LivenessInfo liveness) {
 		this.types = Check.notNull(types);
 		this.liveness = Check.notNull(liveness);
 	}

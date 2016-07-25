@@ -17,7 +17,7 @@ import net.sandius.rembulan.compiler.tf.BranchInliner;
 import net.sandius.rembulan.compiler.tf.CPUAccounter;
 import net.sandius.rembulan.compiler.tf.CodeSimplifier;
 import net.sandius.rembulan.compiler.tf.ConstFolder;
-import net.sandius.rembulan.compiler.tf.LivenessPruner;
+import net.sandius.rembulan.compiler.tf.DeadCodePruner;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.analysis.NameResolver;
@@ -96,7 +96,7 @@ public class Compiler {
 			if (constFolding) {
 				fn = ConstFolder.replaceConstOperations(fn, typeInfo);
 				LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
-				fn = LivenessPruner.pruneDeadCode(fn, typeInfo, liveness);
+				fn = DeadCodePruner.pruneDeadCode(fn, typeInfo, liveness);
 			}
 
 			fn = CodeSimplifier.pruneUnreachableCode(fn);
