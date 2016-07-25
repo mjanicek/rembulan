@@ -25,6 +25,8 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
   def steps: Seq[Int]
 
+  def compilerConfigs: CompilerConfigs = CompilerConfigs.DefaultOnly
+
   protected val Empty = FragmentExpectations.Env.Empty
   protected val Basic = FragmentExpectations.Env.Basic
   protected val Coro = FragmentExpectations.Env.Coro
@@ -125,18 +127,26 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
     def loader() = new CompilerChunkLoader(new ChunkClassLoader(), settings)
   }
 
-  val bools = Seq(true, false)
+  class CompilerConfigs private (configs: Seq[CompilerSettings]) {
+    def loaders: Seq[RembulanChkLoader] = configs.distinct map RembulanChkLoader
+  }
+  object CompilerConfigs {
+    val bools = Seq(true, false)
 
-  val rembulanLoaders = for (
-    cpu <- CPUAccountingMode.values();
-    cfold <- bools;
-    ccache <- bools
-  ) yield CompilerSettings.defaultSettings()
-      .withCPUAccountingMode(cpu)
-      .withConstFolding(cfold)
-      .withConstCaching(ccache)
+    val allConfigs = for (
+      cpu <- CPUAccountingMode.values();
+      cfold <- bools;
+      ccache <- bools
+    ) yield CompilerSettings.defaultSettings()
+        .withCPUAccountingMode(cpu)
+        .withConstFolding(cfold)
+        .withConstCaching(ccache)
 
-  val ldrs = LuacChkLoader :: (rembulanLoaders.distinct map RembulanChkLoader).toList
+    case object DefaultOnly extends CompilerConfigs(Seq(CompilerSettings.defaultSettings()))
+    case object All extends CompilerConfigs(allConfigs)
+  }
+
+  val ldrs = LuacChkLoader :: compilerConfigs.loaders.toList
 
   for (bundle <- bundles;
        fragment <- bundle.all;

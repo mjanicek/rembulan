@@ -13,4 +13,6 @@ class BasicFragmentsRunSpec extends FragmentExecTestSuite {
 
   override def steps = Seq(1, Int.MaxValue)
 
+  override def compilerConfigs = CompilerConfigs.All
+
 }
