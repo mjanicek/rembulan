@@ -1,6 +1,7 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
+import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Resumable;
@@ -25,6 +26,7 @@ class RunMethod {
 	private final boolean resumable;
 
 	private final List<ClosureFieldInstance> closureFields;
+	private final List<ConstFieldInstance> constFields;
 
 	public RunMethod(ASMBytecodeEmitter context) {
 		this.context = Check.notNull(context);
@@ -35,6 +37,7 @@ class RunMethod {
 		this.resumable = visitor.isResumable();
 
 		this.closureFields = visitor.instanceLevelClosures();
+		this.constFields = visitor.constFields();
 	}
 
 	public int numOfRegisters() {
@@ -274,6 +277,60 @@ class RunMethod {
 
 	public List<ClosureFieldInstance> closureFields() {
 		return closureFields;
+	}
+
+	static class ConstFieldInstance {
+
+		private final Object value;
+		private final String fieldName;
+		private final Type ownerClassType;
+		private final Type fieldType;
+
+		public ConstFieldInstance(Object value, String fieldName, Type ownerClassType, Type fieldType) {
+			this.value = Check.notNull(value);
+			this.fieldName = Check.notNull(fieldName);
+			this.ownerClassType = Check.notNull(ownerClassType);
+			this.fieldType = Check.notNull(fieldType);
+		}
+
+		public Object value() {
+			return value;
+		}
+
+		public FieldNode fieldNode() {
+			return new FieldNode(
+					ACC_PRIVATE + ACC_STATIC + ACC_FINAL,
+					fieldName,
+					fieldType.getDescriptor(),
+					null,
+					null);
+		}
+
+		public InsnList instantiateInsns() {
+			InsnList il = new InsnList();
+			il.add(BoxedPrimitivesMethods.loadBoxedConstant(value));
+			il.add(new FieldInsnNode(
+					PUTSTATIC,
+					ownerClassType.getInternalName(),
+					fieldName,
+					fieldType.getDescriptor()));
+	        return il;
+		}
+
+		public InsnList accessInsns() {
+			InsnList il = new InsnList();
+			il.add(new FieldInsnNode(
+					GETSTATIC,
+					ownerClassType.getInternalName(),
+					fieldName,
+					fieldType.getDescriptor()));
+			return il;
+		}
+
+	}
+
+	public List<ConstFieldInstance> constFields() {
+		return constFields;
 	}
 
 	private MethodNode emit(BytecodeEmitVisitor visitor) {

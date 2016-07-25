@@ -14,9 +14,15 @@ import scala.util.Try
 
 object BenchmarkRunner {
 
+  case class CompilerSettings(
+      noCPUAccounting: Boolean,
+      constFolding: Option[Boolean],
+      constCaching: Option[Boolean]
+  )
+
   case class Benchmark(fileName: String) {
-    def go(prefix: String, stepSize: Int, noCPUAccounting: Boolean, constFolding: Option[Boolean], args: String*): Unit = {
-      doFile(prefix, stepSize, noCPUAccounting, constFolding, fileName, args:_*)
+    def go(prefix: String, stepSize: Int, settings: CompilerSettings, args: String*): Unit = {
+      doFile(prefix, stepSize, settings, fileName, args:_*)
     }
   }
 
@@ -68,7 +74,7 @@ object BenchmarkRunner {
     env
   }
 
-  def init(pc: PreemptionContext, noCPUAccounting: Boolean, constFolding: Option[Boolean], filename: String, args: String*): Exec = {
+  def init(pc: PreemptionContext, settings: CompilerSettings, filename: String, args: String*): Exec = {
     val resourceStream = getClass.getResourceAsStream(filename)
     require (resourceStream != null, "resource must exist, is null")
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
@@ -76,7 +82,7 @@ object BenchmarkRunner {
 
     val preemptionContext = pc
 
-    val cpuMode = noCPUAccounting match {
+    val cpuMode = settings.noCPUAccounting match {
       case true => Compiler.CPUAccountingMode.NO_CPU_ACCOUNTING
       case _ => Compiler.DEFAULT_CPU_ACCOUNTING_MODE
     }
@@ -84,7 +90,8 @@ object BenchmarkRunner {
     val ldr = new CompilerChunkLoader(
       new ChunkClassLoader(),
       cpuMode,
-      constFolding.getOrElse(Compiler.DEFAULT_CONST_FOLDING_MODE))
+      settings.constFolding.getOrElse(Compiler.DEFAULT_CONST_FOLDING_MODE),
+      settings.constCaching.getOrElse(Compiler.DEFAULT_CONST_CACHING_MODE))
 
     val state = new DefaultLuaState.Builder()
         .withPreemptionContext(preemptionContext)
@@ -107,11 +114,11 @@ object BenchmarkRunner {
     result
   }
 
-  def doFile(prefix: String, stepSize: Int, noCPUAccounting: Boolean, constFolding: Option[Boolean], filename: String, args: String*): Unit = {
+  def doFile(prefix: String, stepSize: Int, settings: CompilerSettings, filename: String, args: String*): Unit = {
     val pc = new CountingPreemptionContext()
 
     val exec = timed (prefix + "init") {
-      init(pc, noCPUAccounting, constFolding, filename, args:_*)
+      init(pc, settings, filename, args:_*)
     }
 
     var steps = 0
@@ -134,7 +141,7 @@ object BenchmarkRunner {
     val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
 
     println(prefix + "Execution took %.1f ms".format(totalTimeMillis))
-    if (!noCPUAccounting) {
+    if (!settings.noCPUAccounting) {
       println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
       println(prefix)
       println(prefix + "Step size: " + stepSize + " LI")
@@ -170,6 +177,7 @@ object BenchmarkRunner {
   val DefaultNoCPUAccounting = false
 
   val ConstFoldingPropertyName = "constFolding"
+  val ConstCachingPropertyName = "constCaching"
 
   def main(args: Array[String]): Unit = {
 
@@ -179,6 +187,7 @@ object BenchmarkRunner {
         val stepSize = intProperty(StepSizePropertyName, DefaultStepSize)
         val noCPUAccounting = booleanProperty(NoCPUAccountingPropertyName, DefaultNoCPUAccounting)
         val constFolding = optBooleanProperty(ConstFoldingPropertyName)
+        val constCaching = optBooleanProperty(ConstCachingPropertyName)
 
         val bm = Benchmark(dirPrefix + setup.benchmarkFile)
 
@@ -191,14 +200,17 @@ object BenchmarkRunner {
         println(NumOfRunsPropertyName + " = " + numRuns)
         println(NoCPUAccountingPropertyName + " = " + noCPUAccounting)
         println(ConstFoldingPropertyName + " = " + constFolding)
+        println(ConstCachingPropertyName + " = " + constCaching)
         if (!noCPUAccounting) {
           println(StepSizePropertyName + " = " + stepSize)
         }
         println()
 
+        val settings = CompilerSettings(noCPUAccounting, constFolding, constCaching)
+
         for (i <- 1 to numRuns) {
           val prefix = s"#$i\t"
-          bm.go(prefix, stepSize, noCPUAccounting, constFolding, setup.args:_*)
+          bm.go(prefix, stepSize, settings, setup.args:_*)
         }
 
 

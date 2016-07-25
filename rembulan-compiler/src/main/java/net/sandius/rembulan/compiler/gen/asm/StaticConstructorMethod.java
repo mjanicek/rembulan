@@ -20,14 +20,16 @@ class StaticConstructorMethod {
 
 	private final ASMBytecodeEmitter context;
 	private final ConstructorMethod ctorMethod;
+	private final RunMethod runMethod;
 
-	public StaticConstructorMethod(ASMBytecodeEmitter context, ConstructorMethod ctorMethod) {
+	public StaticConstructorMethod(ASMBytecodeEmitter context, ConstructorMethod ctorMethod, RunMethod runMethod) {
 		this.context = Check.notNull(context);
 		this.ctorMethod = Check.notNull(ctorMethod);
+		this.runMethod = Check.notNull(runMethod);
 	}
 
 	public boolean isEmpty() {
-		return context.hasUpvalues();
+		return context.hasUpvalues() && runMethod.constFields().isEmpty();
 	}
 
 	public MethodNode methodNode() {
@@ -57,10 +59,15 @@ class StaticConstructorMethod {
 					context.thisClassType().getInternalName(),
 					context.instanceFieldName(),
 					context.thisClassType().getDescriptor()));
-
-			il.add(new InsnNode(RETURN));
 		}
 
+		if (!runMethod.constFields().isEmpty()) {
+			for (RunMethod.ConstFieldInstance cfi : runMethod.constFields()) {
+				il.add(cfi.instantiateInsns());
+			}
+		}
+
+		il.add(new InsnNode(RETURN));
 		il.add(end);
 
 		return node;

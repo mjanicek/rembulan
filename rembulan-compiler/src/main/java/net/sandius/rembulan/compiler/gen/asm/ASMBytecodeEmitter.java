@@ -50,6 +50,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 	public final DependencyInfo deps;
 
 	public final Compiler.CPUAccountingMode cpuAccountingMode;
+	public final boolean constCaching;
 	public final ClassNameTranslator classNameTranslator;
 
 	private final String sourceFile;
@@ -68,6 +69,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 			TypeInfo types,
 			DependencyInfo deps,
 			Compiler.CPUAccountingMode cpuAccountingMode,
+			boolean constCaching,
 			ClassNameTranslator classNameTranslator,
 			String sourceFile) {
 
@@ -77,6 +79,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		this.deps = Check.notNull(deps);
 
 		this.cpuAccountingMode = Check.notNull(cpuAccountingMode);
+		this.constCaching = constCaching;
 		this.classNameTranslator = Check.notNull(classNameTranslator);
 		this.sourceFile = Check.notNull(sourceFile);
 
@@ -269,6 +272,11 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		addUpvalueFields();
 
 		RunMethod runMethod = new RunMethod(this);
+
+		for (RunMethod.ConstFieldInstance cfi : runMethod.constFields()) {
+			classNode.fields.add(cfi.fieldNode());
+		}
+
 		ConstructorMethod ctor = new ConstructorMethod(this, runMethod);
 
 		classNode.methods.add(ctor.methodNode());
@@ -280,7 +288,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 			classNode.methods.add(runMethod.snapshotMethodNode());
 		}
 
-		StaticConstructorMethod staticCtor = new StaticConstructorMethod(this, ctor);
+		StaticConstructorMethod staticCtor = new StaticConstructorMethod(this, ctor, runMethod);
 		if (!staticCtor.isEmpty()) {
 			classNode.methods.add(staticCtor.methodNode());
 		}

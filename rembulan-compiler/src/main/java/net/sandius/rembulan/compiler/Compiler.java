@@ -42,17 +42,20 @@ public class Compiler {
 
 	public static final CPUAccountingMode DEFAULT_CPU_ACCOUNTING_MODE = CPUAccountingMode.IN_EVERY_BASIC_BLOCK;
 	public static final boolean DEFAULT_CONST_FOLDING_MODE = true;
+	public static final boolean DEFAULT_CONST_CACHING_MODE = true;
 
 	private CPUAccountingMode cpuAccountingMode;
 	private boolean constFolding;
+	private boolean constCaching;
 
-	public Compiler(CPUAccountingMode cpuAccountingMode, boolean constFolding) {
+	public Compiler(CPUAccountingMode cpuAccountingMode, boolean constFolding, boolean constCaching) {
 		this.cpuAccountingMode = Check.notNull(cpuAccountingMode);
 		this.constFolding = constFolding;
+		this.constCaching = constCaching;
 	}
 
 	public Compiler() {
-		this(DEFAULT_CPU_ACCOUNTING_MODE, DEFAULT_CONST_FOLDING_MODE);
+		this(DEFAULT_CPU_ACCOUNTING_MODE, DEFAULT_CONST_FOLDING_MODE, DEFAULT_CONST_CACHING_MODE);
 	}
 
 	public void setCPUAccountingMode(CPUAccountingMode mode) {
@@ -164,7 +167,7 @@ public class Compiler {
 		ClassNameTranslator classNameTranslator = new SuffixingClassNameTranslator(rootClassName);
 		BytecodeEmitter emitter = new ASMBytecodeEmitter(
 				pf.fn, pf.slots, pf.types, pf.deps,
-				cpuAccountingMode, classNameTranslator,
+				cpuAccountingMode, constCaching, classNameTranslator,
 				sourceFileName);
 		return emitter.emit();
 	}

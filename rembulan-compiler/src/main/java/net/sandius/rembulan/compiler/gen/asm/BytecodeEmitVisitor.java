@@ -49,6 +49,9 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	private int closureIdx;
 	private final List<RunMethod.ClosureFieldInstance> instanceLevelClosures;
 
+	private int constIdx;
+	private final List<RunMethod.ConstFieldInstance> constFields;
+
 	public BytecodeEmitVisitor(ASMBytecodeEmitter context, RunMethod runMethod, SlotAllocInfo slots, TypeInfo types) {
 		this.context = Check.notNull(context);
 		this.runMethod = Check.notNull(runMethod);
@@ -63,6 +66,9 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 		this.closureIdx = 0;
 		this.instanceLevelClosures = new ArrayList<>();
+
+		this.constIdx = 0;
+		this.constFields = new ArrayList<>();
 	}
 
 	public InsnList instructions() {
@@ -75,6 +81,10 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	public List<RunMethod.ClosureFieldInstance> instanceLevelClosures() {
 		return instanceLevelClosures;
+	}
+
+	public List<RunMethod.ConstFieldInstance> constFields() {
+		return constFields;
 	}
 
 	protected int slot(AbstractVal v) {
@@ -100,6 +110,37 @@ class BytecodeEmitVisitor extends CodeVisitor {
 			labels.put(o, nl);
 			return nl;
 		}
+	}
+
+	private RunMethod.ConstFieldInstance newConstFieldInstance(Object constValue) {
+		Check.notNull(constValue);
+
+		String fieldName = "_k_" + (constIdx++);
+
+		final Type t;
+		if (constValue instanceof Double) {
+			t = Type.getType(Double.class);
+		}
+		else if (constValue instanceof Long) {
+			t = Type.getType(Long.class);
+		}
+		else {
+			throw new UnsupportedOperationException("Illegal constant: " + constValue);
+		}
+
+		return new RunMethod.ConstFieldInstance(constValue, fieldName, context.thisClassType(), t);
+	}
+
+	private InsnList loadCachedConst(Object constValue) {
+		for (RunMethod.ConstFieldInstance cfi : constFields) {
+			if (cfi.value().equals(constValue)) {
+				return cfi.accessInsns();
+			}
+		}
+
+		RunMethod.ConstFieldInstance cfi = newConstFieldInstance(constValue);
+		constFields.add(cfi);
+		return cfi.accessInsns();
 	}
 
 	public AbstractInsnNode loadExecutionContext() {
@@ -210,7 +251,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		if (types.isReified(node.var())) {
 			il.add(loadExecutionContext());
 			il.add(loadState());
-			il.add(new VarInsnNode(ALOAD, slot(node.var())));
+			il.add(new VarInsnNode(ALOAD, slot(node.src())));
 			il.add(LuaStateMethods.newUpvalue());
 			il.add(new VarInsnNode(ASTORE, slot(node.var())));
 		}
@@ -275,15 +316,25 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(LoadConst.Int node) {
-		il.add(ASMUtils.loadLong(node.value()));
-		il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
+		if (context.constCaching) {
+			il.add(loadCachedConst(node.value()));
+		}
+		else {
+			il.add(ASMUtils.loadLong(node.value()));
+			il.add(BoxedPrimitivesMethods.box(Type.LONG_TYPE, Type.getType(Long.class)));
+		}
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
 
 	@Override
 	public void visit(LoadConst.Flt node) {
-		il.add(ASMUtils.loadDouble(node.value()));
-		il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		if (context.constCaching) {
+			il.add(loadCachedConst(node.value()));
+		}
+		else {
+			il.add(ASMUtils.loadDouble(node.value()));
+			il.add(BoxedPrimitivesMethods.box(Type.DOUBLE_TYPE, Type.getType(Double.class)));
+		}
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
 
@@ -799,7 +850,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(ToNumber node) {
-		il.add(new VarInsnNode(ALOAD, slot(node.dest())));
+		il.add(new VarInsnNode(ALOAD, slot(node.src())));
 		il.add(ConversionMethods.toNumericalValue(node.desc()));
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
