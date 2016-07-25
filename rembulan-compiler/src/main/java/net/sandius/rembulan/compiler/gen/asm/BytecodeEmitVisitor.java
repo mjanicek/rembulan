@@ -316,7 +316,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(LoadConst.Int node) {
-		if (context.constCaching) {
+		if (context.compilerSettings.constCaching()) {
 			il.add(loadCachedConst(node.value()));
 		}
 		else {
@@ -328,7 +328,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(LoadConst.Flt node) {
-		if (context.constCaching) {
+		if (context.compilerSettings.constCaching()) {
 			il.add(loadCachedConst(node.value()));
 		}
 		else {
@@ -904,7 +904,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(CPUWithdraw node) {
-		switch (context.cpuAccountingMode) {
+		switch (context.compilerSettings.cpuAccountingMode()) {
 			case NO_CPU_ACCOUNTING: {
 				// no-op
 				break;
@@ -923,7 +923,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				break;
 			}
 
-			default: throw new IllegalStateException("Illegal CPU accounting mode: " + context.cpuAccountingMode);
+			default: throw new UnsupportedOperationException("Unsupported CPU accounting mode: " + context.compilerSettings.cpuAccountingMode());
 		}
 	}
 

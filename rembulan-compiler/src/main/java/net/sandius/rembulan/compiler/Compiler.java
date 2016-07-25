@@ -35,35 +35,19 @@ import java.util.Stack;
 
 public class Compiler {
 
-	public enum CPUAccountingMode {
-		NO_CPU_ACCOUNTING,
-		IN_EVERY_BASIC_BLOCK
+	private final CompilerSettings settings;
+
+	public Compiler(CompilerSettings settings) {
+		this.settings = Check.notNull(settings);
 	}
 
-	public static final CPUAccountingMode DEFAULT_CPU_ACCOUNTING_MODE = CPUAccountingMode.IN_EVERY_BASIC_BLOCK;
-	public static final boolean DEFAULT_CONST_FOLDING_MODE = true;
-	public static final boolean DEFAULT_CONST_CACHING_MODE = true;
-
-	private CPUAccountingMode cpuAccountingMode;
-	private boolean constFolding;
-	private boolean constCaching;
-
-	public Compiler(CPUAccountingMode cpuAccountingMode, boolean constFolding, boolean constCaching) {
-		this.cpuAccountingMode = Check.notNull(cpuAccountingMode);
-		this.constFolding = constFolding;
-		this.constCaching = constCaching;
-	}
-
+	@Deprecated
 	public Compiler() {
-		this(DEFAULT_CPU_ACCOUNTING_MODE, DEFAULT_CONST_FOLDING_MODE, DEFAULT_CONST_CACHING_MODE);
+		this(CompilerSettings.defaultSettings());
 	}
 
-	public void setCPUAccountingMode(CPUAccountingMode mode) {
-		cpuAccountingMode = Check.notNull(mode);
-	}
-
-	public CPUAccountingMode getCPUAccountingMode() {
-		return cpuAccountingMode;
+	public CompilerSettings settings() {
+		return settings;
 	}
 
 	private static Chunk parse(String sourceText) throws ParseException {
@@ -93,7 +77,7 @@ public class Compiler {
 			fn = CPUAccounter.collectCPUAccounting(fn);
 			fn = BranchInliner.inlineBranches(fn, typeInfo);
 
-			if (constFolding) {
+			if (settings.constFolding()) {
 				fn = ConstFolder.replaceConstOperations(fn, typeInfo);
 				LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
 				fn = DeadCodePruner.pruneDeadCode(fn, typeInfo, liveness);
@@ -167,7 +151,7 @@ public class Compiler {
 		ClassNameTranslator classNameTranslator = new SuffixingClassNameTranslator(rootClassName);
 		BytecodeEmitter emitter = new ASMBytecodeEmitter(
 				pf.fn, pf.slots, pf.types, pf.deps,
-				cpuAccountingMode, constCaching, classNameTranslator,
+				settings, classNameTranslator,
 				sourceFileName);
 		return emitter.emit();
 	}

@@ -22,15 +22,12 @@ public class CompilerChunkLoader extends ChunkLoader {
 
 	public CompilerChunkLoader(
 			ClassLoader classLoader,
-			Compiler.CPUAccountingMode cpuAccountingMode,
-			boolean constFolding,
-			boolean constCaching) {
-
-		this(classLoader, new Compiler(cpuAccountingMode, constFolding, constCaching));
+			CompilerSettings compilerSettings) {
+		this(classLoader, new Compiler(compilerSettings));
 	}
 
 	public CompilerChunkLoader(ClassLoader classLoader) {
-		this(classLoader, new Compiler());
+		this(classLoader, CompilerSettings.defaultSettings());
 	}
 
 	@Override

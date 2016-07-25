@@ -3,7 +3,8 @@ package net.sandius.rembulan.test
 import java.io.PrintStream
 import java.util.Scanner
 
-import net.sandius.rembulan.compiler.{ChunkClassLoader, Compiler, CompilerChunkLoader}
+import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
+import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.{Exec, LuaState, PreemptionContext, Table}
 import net.sandius.rembulan.lib.LibUtils
@@ -14,11 +15,31 @@ import scala.util.Try
 
 object BenchmarkRunner {
 
-  case class CompilerSettings(
+  case class RequestedCompilerSettings(
       noCPUAccounting: Boolean,
       constFolding: Option[Boolean],
       constCaching: Option[Boolean]
-  )
+  ) {
+
+    def toCompilerSettings: CompilerSettings = {
+      val s0 = CompilerSettings.defaultSettings()
+
+      val s1 = if (noCPUAccounting) s0.withCPUAccountingMode(CompilerSettings.CPUAccountingMode.NO_CPU_ACCOUNTING) else s0
+
+      val s2 = constFolding match {
+        case Some(v) => s1.withConstFolding(v)
+        case _ => s1
+      }
+
+      val s3 = constCaching match {
+        case Some(v) => s2.withConstCaching(v)
+        case _ => s2
+      }
+
+      s3
+    }
+
+  }
 
   case class Benchmark(fileName: String) {
     def go(prefix: String, stepSize: Int, settings: CompilerSettings, args: String*): Unit = {
@@ -82,16 +103,7 @@ object BenchmarkRunner {
 
     val preemptionContext = pc
 
-    val cpuMode = settings.noCPUAccounting match {
-      case true => Compiler.CPUAccountingMode.NO_CPU_ACCOUNTING
-      case _ => Compiler.DEFAULT_CPU_ACCOUNTING_MODE
-    }
-
-    val ldr = new CompilerChunkLoader(
-      new ChunkClassLoader(),
-      cpuMode,
-      settings.constFolding.getOrElse(Compiler.DEFAULT_CONST_FOLDING_MODE),
-      settings.constCaching.getOrElse(Compiler.DEFAULT_CONST_CACHING_MODE))
+    val ldr = new CompilerChunkLoader(new ChunkClassLoader(), settings)
 
     val state = new DefaultLuaState.Builder()
         .withPreemptionContext(preemptionContext)
@@ -141,7 +153,7 @@ object BenchmarkRunner {
     val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
 
     println(prefix + "Execution took %.1f ms".format(totalTimeMillis))
-    if (!settings.noCPUAccounting) {
+    if (settings.cpuAccountingMode() != CPUAccountingMode.NO_CPU_ACCOUNTING) {
       println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
       println(prefix)
       println(prefix + "Step size: " + stepSize + " LI")
@@ -189,6 +201,9 @@ object BenchmarkRunner {
         val constFolding = optBooleanProperty(ConstFoldingPropertyName)
         val constCaching = optBooleanProperty(ConstCachingPropertyName)
 
+        val requestedSettings = RequestedCompilerSettings(noCPUAccounting, constFolding, constCaching)
+        val actualSettings = requestedSettings.toCompilerSettings
+
         val bm = Benchmark(dirPrefix + setup.benchmarkFile)
 
         println("file = \"" + bm.fileName + "\"")
@@ -198,19 +213,20 @@ object BenchmarkRunner {
         }
         println("}")
         println(NumOfRunsPropertyName + " = " + numRuns)
-        println(NoCPUAccountingPropertyName + " = " + noCPUAccounting)
-        println(ConstFoldingPropertyName + " = " + constFolding)
-        println(ConstCachingPropertyName + " = " + constCaching)
+
+        println(NoCPUAccountingPropertyName + " = " + requestedSettings.noCPUAccounting + " (" + actualSettings.cpuAccountingMode() + ")")
+        println(ConstFoldingPropertyName + " = " + requestedSettings.constFolding + " (" + actualSettings.constFolding() + ")")
+        println(ConstCachingPropertyName + " = " + requestedSettings.constCaching + " (" + actualSettings.constCaching() + ")")
+
         if (!noCPUAccounting) {
           println(StepSizePropertyName + " = " + stepSize)
         }
         println()
 
-        val settings = CompilerSettings(noCPUAccounting, constFolding, constCaching)
 
         for (i <- 1 to numRuns) {
           val prefix = s"#$i\t"
-          bm.go(prefix, stepSize, settings, setup.args:_*)
+          bm.go(prefix, stepSize, actualSettings, setup.args:_*)
         }
 
 
