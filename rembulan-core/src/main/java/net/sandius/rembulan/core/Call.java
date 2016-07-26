@@ -24,10 +24,12 @@ public class Call {
 	private Coroutine currentCoroutine;
 
 	private final Random versionSource;
+	private final int startingVersion;
 	private final AtomicInteger currentVersion;
 
 	private static final int VERSION_RUNNING = 0;
 	private static final int VERSION_TERMINATED = 1;
+	private static final int VERSION_CANCELLED = 2;
 
 	private Call(LuaState state, ObjectSink objectSink, Coroutine mainCoroutine) {
 		this.state = Check.notNull(state);
@@ -37,7 +39,8 @@ public class Call {
 		this.context = new Context();
 
 		this.versionSource = new Random();
-		this.currentVersion = new AtomicInteger(newVersion(0));
+		this.startingVersion = newPausedVersion(0);
+		this.currentVersion = new AtomicInteger(startingVersion);
 	}
 
 	public static Call init(LuaState state, Object fn, Object... args) {
@@ -50,14 +53,18 @@ public class Call {
 	public enum State {
 		PAUSED,
 		RUNNING,
-		TERMINATED
+		TERMINATED,
+		CANCELLED
 	}
 
-	private int newVersion(int oldVersion) {
+	private int newPausedVersion(int oldVersion) {
 		int v;
 		do {
 			v = versionSource.nextInt();
-		} while (v == VERSION_RUNNING || v == VERSION_TERMINATED || v == oldVersion);
+		} while (v == VERSION_RUNNING
+				|| v == VERSION_TERMINATED
+				|| v == VERSION_CANCELLED
+				|| v == oldVersion);
 		return v;
 	}
 
@@ -66,11 +73,30 @@ public class Call {
 		switch (currentVersion.get()) {
 			case VERSION_RUNNING:    return State.RUNNING;
 			case VERSION_TERMINATED: return State.TERMINATED;
+			case VERSION_CANCELLED:  return State.CANCELLED;
 			default:                 return State.PAUSED;
 		}
 	}
 
-	private static class ResultFuture implements Future<Object[]> {
+	// cancel this call if it hasn't started yet
+	// return true if successful, false if the call has already been started,
+	// or the call is already cancelled  -- FIXME: that's not very intuitive
+	private boolean cancelIfNotStarted() {
+		if (currentVersion.compareAndSet(startingVersion, VERSION_CANCELLED)) {
+			// not started yet
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+
+	private boolean interruptIfRunning() {
+		// TODO
+		return false;
+	}
+
+	private class ResultFuture implements Future<Object[]> {
 
 		private Object[] result;
 		private Throwable error;
@@ -89,9 +115,8 @@ public class Call {
 		@Override
 		public boolean cancel(boolean mayInterruptIfRunning) {
 			if (completed.compareAndSet(false, true)) {
-				if (mayInterruptIfRunning) {
-					// TODO: do interrupt
-				}
+				boolean result = cancelIfNotStarted()
+						|| (mayInterruptIfRunning && interruptIfRunning());
 				latch.countDown();
 				return false;
 			}
@@ -240,6 +265,7 @@ public class Call {
 		switch (version) {
 			case VERSION_RUNNING:    throw new IllegalStateException("Cannot get continuation of a running call");
 			case VERSION_TERMINATED: throw new IllegalStateException("Cannot get continuation of a terminated call");
+			case VERSION_CANCELLED:  throw new IllegalStateException("Cannot get continuation of a cancelled call");
 		}
 
 		return new ContinuationCallable(handler, version);
@@ -271,19 +297,19 @@ public class Call {
 	private Object[] resume(EventHandler handler, int version) {
 		Check.notNull(handler);
 
-		if (version == VERSION_RUNNING || version == VERSION_TERMINATED) {
+		if (version == VERSION_RUNNING || version == VERSION_TERMINATED || version == VERSION_CANCELLED) {
 			throw new IllegalArgumentException("Illegal version: " + version);
 		}
 
 		if (!currentVersion.compareAndSet(version, VERSION_RUNNING)) {
-			throw new IllegalStateException("Cannot resume a coroutine the current continuation");
+			throw new IllegalStateException("Cannot resume call: not in the expected state");
 		}
 
 		int newVersion = VERSION_TERMINATED;
 		try {
 			Object[] result = doResume(handler);
 			if (result == null) {
-				newVersion = newVersion(version);
+				newVersion = newPausedVersion(version);
 			}
 			return result;
 		}
