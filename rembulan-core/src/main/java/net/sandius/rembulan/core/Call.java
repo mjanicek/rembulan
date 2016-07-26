@@ -236,7 +236,7 @@ public class Call {
 
 		boolean paused();
 
-		boolean waiting(AsyncTask<?> asyncTask);
+		boolean waiting(Runnable task);
 
 		void returned(Object[] result);
 
@@ -254,7 +254,8 @@ public class Call {
 		}
 
 		@Override
-		public boolean waiting(AsyncTask<?> asyncTask) {
+		public boolean waiting(Runnable task) {
+			task.run();
 			return false;
 		}
 
@@ -355,8 +356,8 @@ public class Call {
 					return null;
 				}
 			}
-			if (result instanceof ResumeResult.WaitForAsync<?>) {
-				ResumeResult.WaitForAsync<?> wait = (ResumeResult.WaitForAsync<?>) result;
+			if (result instanceof ResumeResult.WaitForAsync) {
+				ResumeResult.WaitForAsync wait = (ResumeResult.WaitForAsync) result;
 				if (!handler.waiting(wait.task)) {
 					return null;
 				}

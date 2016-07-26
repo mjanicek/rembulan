@@ -40,9 +40,9 @@ public abstract class ResumeResult {
 
 	public static class WaitForAsync extends ResumeResult {
 
-		public final AsyncTask task;
+		public final Runnable task;
 
-		public WaitForAsync(AsyncTask task) {
+		public WaitForAsync(Runnable task) {
 			this.task = task;
 		}
 

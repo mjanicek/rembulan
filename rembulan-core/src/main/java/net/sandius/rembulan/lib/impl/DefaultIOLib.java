@@ -1,13 +1,6 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Dispatch;
-import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.Metatables;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
-import net.sandius.rembulan.core.Userdata;
+import net.sandius.rembulan.core.*;
 import net.sandius.rembulan.core.impl.DefaultUserdata;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
@@ -20,6 +13,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 public class DefaultIOLib extends IOLib {
 
@@ -224,22 +221,67 @@ public class DefaultIOLib extends IOLib {
 				return "write";
 			}
 
+			private static class SavedState {
+
+				public final IOFile file;
+				public final ArgumentIterator args;
+				public final Future<Object> currentTask;
+
+				private SavedState(IOFile file, ArgumentIterator args, Future<Object> currentTask) {
+					this.file = file;
+					this.args = args;
+					this.currentTask = currentTask;
+				}
+
+			}
+
 			@Override
 			protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-				IOFile f = args.nextUserdata(typeName(), IOFile.class);
+				final IOFile f = args.nextUserdata(typeName(), IOFile.class);
+				run(context, f, args, null);
+			}
 
-				while (args.hasNext()) {
-					String s = args.nextString();
+			@Override
+			public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+				SavedState ss = (SavedState) suspendedState;
+				run(context, ss.file, ss.args, ss.currentTask);
+			}
+
+			private void run(ExecutionContext context, final IOFile file, ArgumentIterator args, Future<Object> currentTask) throws ControlThrowable {
+				if (currentTask != null) {
 					try {
-						f.write(s);
-						context.getObjectSink().setTo(f);
+						currentTask.get();
 					}
-					catch (IOException ex) {
-						context.getObjectSink().setTo(null, ex.getMessage());
-						throw new RuntimeException(ex);
+					catch (InterruptedException ex) {
+						throw new LuaRuntimeException(ex);
+					}
+					catch (ExecutionException ex) {
+						Throwable cause = ex.getCause();
+						context.getObjectSink().setTo(null, cause != null ? cause.getMessage() : null);
+						return;
 					}
 				}
 
+				if (args.hasNext()) {
+					final String s = args.nextString();
+
+					Callable<Object> body = new Callable<Object>() {
+						@Override
+						public Object call() throws Exception {
+							file.write(s);
+							return null;
+						}
+					};
+
+					FutureTask<Object> task = new FutureTask<>(body);
+
+					ControlThrowable ct = new WaitForAsync(task);
+					ct.push(this, new SavedState(file, args, task));
+					throw ct;
+				}
+				else {
+					context.getObjectSink().setTo(file);
+				}
 			}
 
 		}

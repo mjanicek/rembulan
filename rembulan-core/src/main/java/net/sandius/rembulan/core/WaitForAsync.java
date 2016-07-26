@@ -4,13 +4,13 @@ import net.sandius.rembulan.util.Check;
 
 public class WaitForAsync extends ControlThrowable {
 
-	private final AsyncTask<?> task;
+	private final Runnable task;
 
-	public WaitForAsync(AsyncTask<?> task) {
+	public WaitForAsync(Runnable task) {
 		this.task = Check.notNull(task);
 	}
 
-	public AsyncTask<?> task() {
+	public Runnable task() {
 		return task;
 	}
 
