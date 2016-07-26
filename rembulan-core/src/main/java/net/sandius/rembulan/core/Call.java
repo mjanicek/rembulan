@@ -51,7 +51,8 @@ public class Call {
 		return new Call(state, handler, objectSink, c);
 	}
 
-	public static Call init(LuaState state, Object fn, Object... args) {
+	@Deprecated
+	public static Call initDefault(LuaState state, Object fn, Object... args) {
 		return init(state, DefaultEventHandler.INSTANCE, fn, args);
 	}
 
@@ -235,6 +236,10 @@ public class Call {
 
 		boolean paused();
 
+		void returned(Object[] result);
+
+		void failed(Throwable error);
+
 	}
 
 	public static class DefaultEventHandler implements EventHandler {
@@ -244,6 +249,16 @@ public class Call {
 		@Override
 		public boolean paused() {
 			return false;
+		}
+
+		@Override
+		public void returned(Object[] result) {
+			// no-op
+		}
+
+		@Override
+		public void failed(Throwable error) {
+			// no-op
 		}
 
 	}
@@ -357,10 +372,14 @@ public class Call {
 
 		if (error == null) {
 			// main coroutine returned
-			return objectSink.toArray();
+			Object[] result = objectSink.toArray();
+			handler.returned(result);
+			return result;
 		}
 		else {
 			// exception in the main coroutine
+			handler.failed(error);
+
 			// FIXME
 			throw error instanceof RuntimeException ? (RuntimeException) error : new RuntimeException(error);
 		}

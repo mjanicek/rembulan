@@ -113,7 +113,7 @@ object BenchmarkRunner {
 
     val func = ldr.loadTextChunk(state.newUpvalue(env), "benchmarkMain", sourceContents)
 
-    Call.init(state, func)
+    Call.initDefault(state, func)
   }
 
   def timed[A](name: String)(body: => A): A = {

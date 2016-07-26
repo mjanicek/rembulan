@@ -4,6 +4,7 @@ import java.io.PrintStream
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
+import net.sandius.rembulan.core.Call.EventHandler
 import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
@@ -15,8 +16,8 @@ import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{core => lua}
 import org.scalatest.{FunSpec, MustMatchers}
 
-import scala.concurrent.ExecutionException
-import scala.util.{Failure, Success, Try}
+import scala.concurrent.Promise
+import scala.util.{Failure, Success}
 
 trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
@@ -170,6 +171,8 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
           val preemptionContext = new CountingPreemptionContext()
 
+          val resultPromise = Promise[Array[AnyRef]]()
+
           val exec = Util.timed("Compilation and setup") {
 
             val ldr = l.loader()
@@ -181,7 +184,13 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             val env = envForContext(state, ctx)
             val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
 
-            Call.init(state, func)
+            val handler = new EventHandler {
+              override def paused() = false
+              override def returned(result: Array[AnyRef]) = resultPromise.success(result)
+              override def failed(error: Throwable) = resultPromise.failure(error)
+            }
+
+            Call.init(state, handler, func)
           }
 
           var steps = 0
@@ -196,10 +205,10 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             steps += 1
           }
 
-          val res = Try(exec.result().get()) match {
-            case Success(vs) => Success(vs.toSeq)
-            case Failure(ex: ExecutionException) => Failure(ex.getCause)
-            case Failure(ex) => Failure(ex);
+          val res = resultPromise.future.value match {
+            case Some(Success(vs)) => Success(vs.toSeq)
+            case Some(Failure(ex)) => Failure(ex);
+            case None => Failure(null)
           }
 
           val after = System.nanoTime()
