@@ -31,7 +31,7 @@ public final class Coroutine {
 	private Coroutine yieldingTo;
 	private Coroutine resuming;
 
-	public Coroutine(Function function) {
+	public Coroutine(Object function) {
 		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, Check.notNull(function)));
 		this.yieldingTo = null;
 		this.resuming = null;
@@ -63,8 +63,7 @@ public final class Coroutine {
 		static final BootstrapResumable INSTANCE = new BootstrapResumable();
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			Function target = (Function) suspendedState;
+		public void resume(ExecutionContext context, Object target) throws ControlThrowable {
 			Dispatch.call(context, target, context.getObjectSink().toArray());
 		}
 

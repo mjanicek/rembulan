@@ -5,8 +5,8 @@ import java.util.Scanner
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
+import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
-import net.sandius.rembulan.core.{Exec, LuaState, PreemptionContext, Table}
 import net.sandius.rembulan.lib.LibUtils
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
@@ -113,7 +113,7 @@ object BenchmarkRunner {
 
     val func = ldr.loadTextChunk(state.newUpvalue(env), "benchmarkMain", sourceContents)
 
-    new Exec(state, func)
+    Exec.init(state, func)
   }
 
   def timed[A](name: String)(body: => A): A = {
@@ -138,7 +138,7 @@ object BenchmarkRunner {
     val before = System.nanoTime()
     var execState = exec.getExecutionState
 
-    while (exec.isPaused) {
+    while (exec.state() == Exec.State.PAUSED) {
       pc.deposit(stepSize)
       if (pc.allowed) {
         execState = exec.resume()

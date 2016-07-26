@@ -178,7 +178,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             val env = envForContext(state, ctx)
             val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
 
-            new Exec(state, func)
+            Exec.init(state, func)
           }
 
           var steps = 0
@@ -186,7 +186,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           val before = System.nanoTime()
 
           var execState = exec.getExecutionState
-          while (exec.isPaused) {
+          while (exec.state() == Exec.State.PAUSED) {
             preemptionContext.deposit(s)
             if (preemptionContext.allowed) {
               execState = exec.resume()
