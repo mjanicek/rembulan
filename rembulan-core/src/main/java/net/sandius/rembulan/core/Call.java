@@ -17,8 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Call {
 
 	private final LuaState state;
+	private final EventHandler handler;
 	private final ObjectSink objectSink;
-
 	private final Context context;
 
 	private Coroutine currentCoroutine;
@@ -31,23 +31,28 @@ public class Call {
 	private static final int VERSION_TERMINATED = 1;
 	private static final int VERSION_CANCELLED = 2;
 
-	private Call(LuaState state, ObjectSink objectSink, Coroutine mainCoroutine) {
+	private Call(LuaState state, EventHandler handler, ObjectSink objectSink, Coroutine mainCoroutine) {
 		this.state = Check.notNull(state);
+		this.handler = Check.notNull(handler);
 		this.objectSink = Check.notNull(objectSink);
-		this.currentCoroutine = Check.notNull(mainCoroutine);
-
 		this.context = new Context();
+
+		this.currentCoroutine = Check.notNull(mainCoroutine);
 
 		this.versionSource = new Random();
 		this.startingVersion = newPausedVersion(0);
 		this.currentVersion = new AtomicInteger(startingVersion);
 	}
 
-	public static Call init(LuaState state, Object fn, Object... args) {
+	public static Call init(LuaState state, EventHandler handler, Object fn, Object... args) {
 		ObjectSink objectSink = state.newObjectSink();
 		Coroutine c = new Coroutine(fn);
 		objectSink.setToArray(args);
-		return new Call(state, objectSink, c);
+		return new Call(state, handler, objectSink, c);
+	}
+
+	public static Call init(LuaState state, Object fn, Object... args) {
+		return init(state, DefaultEventHandler.INSTANCE, fn, args);
 	}
 
 	public enum State {
@@ -245,22 +250,20 @@ public class Call {
 
 	private class ContinuationCallable implements Callable<Object[]> {
 
-		private final EventHandler handler;
 		private final int version;
 
-		ContinuationCallable(EventHandler handler, int version) {
-			this.handler = Check.notNull(handler);
+		ContinuationCallable(int version) {
 			this.version = version;
 		}
 
 		@Override
 		public Object[] call() throws Exception {
-			return resume(handler, version);
+			return resume(version);
 		}
 
 	}
 
-	public Callable<Object[]> continuationCallable(EventHandler handler) {
+	public Callable<Object[]> currentContinuationCallable() {
 		int version = currentVersion.get();
 		switch (version) {
 			case VERSION_RUNNING:    throw new IllegalStateException("Cannot get continuation of a running call");
@@ -268,22 +271,23 @@ public class Call {
 			case VERSION_CANCELLED:  throw new IllegalStateException("Cannot get continuation of a cancelled call");
 		}
 
-		return new ContinuationCallable(handler, version);
+		return new ContinuationCallable(version);
 	}
 
-	public FutureTask<Object[]> continuationTask(EventHandler handler) {
-		return new FutureTask<>(continuationCallable(handler));
+	@Deprecated
+	public FutureTask<Object[]> currentContinuationTask() {
+		return new FutureTask<>(currentContinuationCallable());
 	}
 
-	private Object[] resume(EventHandler handler) throws Exception {
-		return continuationCallable(handler).call();
+	private Object[] resumeCurrentContinuation() throws Exception {
+		return currentContinuationCallable().call();
 	}
 
 	@Deprecated
 	public void resume() {
 		Object[] r = null;
 		try {
-			r = resume(DefaultEventHandler.INSTANCE);
+			r = resumeCurrentContinuation();
 		}
 		catch (Exception e) {
 			result.fail(e);
@@ -294,9 +298,7 @@ public class Call {
 		}
 	}
 
-	private Object[] resume(EventHandler handler, int version) {
-		Check.notNull(handler);
-
+	private Object[] resume(int version) {
 		if (version == VERSION_RUNNING || version == VERSION_TERMINATED || version == VERSION_CANCELLED) {
 			throw new IllegalArgumentException("Illegal version: " + version);
 		}
@@ -307,7 +309,7 @@ public class Call {
 
 		int newVersion = VERSION_TERMINATED;
 		try {
-			Object[] result = doResume(handler);
+			Object[] result = doResume();
 			if (result == null) {
 				newVersion = newPausedVersion(version);
 			}
@@ -320,7 +322,7 @@ public class Call {
 	}
 
 	// returns null iff the execution is paused (i.e. when it can be resumed)
-	private Object[] doResume(EventHandler handler) throws RuntimeException {
+	private Object[] doResume() throws RuntimeException {
 		Throwable error = null;
 
 		while (currentCoroutine != null) {
