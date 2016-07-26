@@ -2,6 +2,7 @@ package net.sandius.rembulan.test
 
 import java.io.PrintStream
 import java.util.Scanner
+import java.util.concurrent.Executors
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
@@ -10,6 +11,7 @@ import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.lib.LibUtils
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
+import net.sandius.rembulan.{core => lua}
 
 import scala.util.Try
 
@@ -95,7 +97,7 @@ object BenchmarkRunner {
     env
   }
 
-  def init(pc: PreemptionContext, settings: CompilerSettings, filename: String, args: String*): Call = {
+  def init(pc: PreemptionContext, settings: CompilerSettings, filename: String, args: String*): (LuaState, lua.Function) = {
     val resourceStream = getClass.getResourceAsStream(filename)
     require (resourceStream != null, "resource must exist, is null")
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
@@ -113,7 +115,7 @@ object BenchmarkRunner {
 
     val func = ldr.loadTextChunk(state.newUpvalue(env), "benchmarkMain", sourceContents)
 
-    Call.initDefault(state, func)
+    (state, func)
   }
 
   def timed[A](name: String)(body: => A): A = {
@@ -129,21 +131,34 @@ object BenchmarkRunner {
   def doFile(prefix: String, stepSize: Int, settings: CompilerSettings, filename: String, args: String*): Unit = {
     val pc = new CountingPreemptionContext()
 
-    val exec = timed (prefix + "init") {
+    def initCall() = timed (prefix + "init") {
       init(pc, settings, filename, args:_*)
     }
 
+    val numParallel = 1
+
+    val calls = for (i <- 1 to numParallel) yield initCall()
+
     var steps = 0
+
+    val multiplexer = new CallMultiplexer(Executors.newSingleThreadExecutor())
 
     val before = System.nanoTime()
 
-    while (exec.state() == Call.State.PAUSED) {
-      pc.deposit(stepSize)
-      if (pc.allowed) {
-        exec.resume()
-      }
-      steps += 1
+    for (c <- calls) {
+      multiplexer.submitCall(c._1, c._2)
     }
+
+    multiplexer.awaitAll()
+    multiplexer.shutdown()
+
+//    while (exec.state() == Call.State.PAUSED) {
+//      pc.deposit(stepSize)
+//      if (pc.allowed) {
+//        exec.resume()
+//      }
+//      steps += 1
+//    }
     val after = System.nanoTime()
 
     val totalTimeMillis = (after - before) / 1000000.0

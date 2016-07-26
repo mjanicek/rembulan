@@ -234,13 +234,13 @@ public class Call {
 		// when true is returned, the events are ignored by the executor
 		// (i.e. an implicit resume happens immediately after)
 
-		boolean paused();
+		void paused(Call c);
 
-		boolean waiting(Runnable task);
+		void waiting(Call c, Runnable task);
 
-		void returned(Object[] result);
+		void returned(Call c, Object[] result);
 
-		void failed(Throwable error);
+		void failed(Call c, Throwable error);
 
 	}
 
@@ -249,23 +249,24 @@ public class Call {
 		private static final DefaultEventHandler INSTANCE = new DefaultEventHandler();
 
 		@Override
-		public boolean paused() {
-			return false;
+		public void paused(Call c) {
+			// no-op
+			// FIXME
 		}
 
 		@Override
-		public boolean waiting(Runnable task) {
+		public void waiting(Call c, Runnable task) {
+			// FIXME
 			task.run();
-			return false;
 		}
 
 		@Override
-		public void returned(Object[] result) {
+		public void returned(Call c, Object[] result) {
 			// no-op
 		}
 
 		@Override
-		public void failed(Throwable error) {
+		public void failed(Call c, Throwable error) {
 			// no-op
 		}
 
@@ -281,7 +282,20 @@ public class Call {
 
 		@Override
 		public Object[] call() throws Exception {
-			return resume(version);
+			Object[] r = null;
+			try {
+				r = resume(version);
+			}
+			catch (Exception e) {
+				result.fail(e);
+				throw e;
+			}
+
+			if (r != null) {
+				result.complete(r);
+			}
+
+			return r;
 		}
 
 	}
@@ -308,16 +322,11 @@ public class Call {
 
 	@Deprecated
 	public void resume() {
-		Object[] r = null;
 		try {
-			r = resumeCurrentContinuation();
+			resumeCurrentContinuation();
 		}
 		catch (Exception e) {
-			result.fail(e);
-		}
-
-		if (r != null) {
-			result.complete(r);
+			// no-op
 		}
 	}
 
@@ -331,36 +340,66 @@ public class Call {
 		}
 
 		int newVersion = VERSION_TERMINATED;
+		Hook hook = null;
 		try {
-			Object[] result = doResume();
-			if (result == null) {
+			hook = doResume();
+			if (hook.result == null) {
 				newVersion = newPausedVersion(version);
 			}
-			return result;
+			return hook.result;
+		}
+		catch (final RuntimeException ex) {
+			hook = new Hook(null, new Runnable() {
+				@Override
+				public void run() {
+					handler.failed(Call.this, ex);
+				}
+			});
+			throw ex;
 		}
 		finally {
 			int old = currentVersion.getAndSet(newVersion);
 			assert (old == VERSION_RUNNING);
+
+			if (hook != null && hook.body != null) {
+				hook.body.run();
+			}
+		}
+	}
+
+	private static class Hook {
+		public final Object[] result;
+		public final Runnable body;
+		private Hook(Object[] result, Runnable body) {
+			this.result = result;
+			this.body = body;
 		}
 	}
 
 	// returns null iff the execution is paused (i.e. when it can be resumed)
-	private Object[] doResume() throws RuntimeException {
+	private Hook doResume() throws RuntimeException {
 		Throwable error = null;
 
 		while (currentCoroutine != null) {
 			ResumeResult result = currentCoroutine.resume(context, error);
 
 			if (result instanceof ResumeResult.Pause) {
-				if (!handler.paused()) {
-					return null;
-				}
+				return new Hook(null, new Runnable() {
+					@Override
+					public void run() {
+						handler.paused(Call.this);
+					}
+				});
 			}
 			if (result instanceof ResumeResult.WaitForAsync) {
 				ResumeResult.WaitForAsync wait = (ResumeResult.WaitForAsync) result;
-				if (!handler.waiting(wait.task)) {
-					return null;
-				}
+				final Runnable task = wait.task;
+				return new Hook(null, new Runnable() {
+					@Override
+					public void run() {
+						handler.waiting(Call.this, task);
+					}
+				});
 			}
 			else if (result instanceof ResumeResult.Switch) {
 				currentCoroutine = ((ResumeResult.Switch) result).target;
@@ -386,13 +425,17 @@ public class Call {
 
 		if (error == null) {
 			// main coroutine returned
-			Object[] result = objectSink.toArray();
-			handler.returned(result);
-			return result;
+			final Object[] result = objectSink.toArray();
+			return new Hook(result, new Runnable() {
+				@Override
+				public void run() {
+					handler.returned(Call.this, result);
+				}
+			});
 		}
 		else {
 			// exception in the main coroutine
-			handler.failed(error);
+//			handler.failed(error);
 
 			// FIXME
 			throw error instanceof RuntimeException ? (RuntimeException) error : new RuntimeException(error);

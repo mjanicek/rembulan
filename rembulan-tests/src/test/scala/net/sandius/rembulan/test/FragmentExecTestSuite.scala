@@ -185,13 +185,12 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
 
             val handler = new EventHandler {
-              override def paused() = false
-              override def waiting(task: Runnable) = {
+              override def paused(c: Call) { }
+              override def waiting(c: Call, task: Runnable) = {
                 task.run()
-                true
               }
-              override def returned(result: Array[AnyRef]) = resultPromise.success(result)
-              override def failed(error: Throwable) = resultPromise.failure(error)
+              override def returned(c: Call, result: Array[AnyRef]) = resultPromise.success(result)
+              override def failed(c: Call, error: Throwable) = resultPromise.failure(error)
             }
 
             Call.init(state, handler, func)
