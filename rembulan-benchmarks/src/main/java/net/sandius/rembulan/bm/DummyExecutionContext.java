@@ -5,6 +5,7 @@ import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.util.Check;
 
 public class DummyExecutionContext implements ExecutionContext {
@@ -39,6 +40,11 @@ public class DummyExecutionContext implements ExecutionContext {
 
 	@Override
 	public boolean canYield() {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public PreemptionContext preemptionContext() {
 		throw new UnsupportedOperationException();
 	}
 

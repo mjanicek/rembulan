@@ -4,6 +4,7 @@ import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ConversionMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ExecutionContextMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ObjectSinkMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.UpvalueMethods;
@@ -666,9 +667,8 @@ public class RunMethodEmitter {
 
 		ResumptionPoint rp = resumptionPoint();
 		il.add(rp.save());
-		il.add(loadLuaState());
-		il.add(ASMUtils.loadInt(cost));
-		il.add(LuaStateMethods.checkCpu());
+		il.add(loadExecutionContext());
+		il.add(ExecutionContextMethods.checkCpu(cost));
 		il.add(rp.resume());
 
 		return il;

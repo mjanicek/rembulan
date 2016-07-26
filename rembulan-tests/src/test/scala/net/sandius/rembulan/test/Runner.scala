@@ -54,6 +54,7 @@ object Runner {
         override def getCurrentCoroutine = ???
         override def newCoroutine(function: Function) = ???
         override def canYield = false
+        override def preemptionContext = PreemptionContext.Always.INSTANCE
       }
 
       section("Call") {

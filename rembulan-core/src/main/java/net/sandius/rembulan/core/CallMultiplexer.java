@@ -36,8 +36,8 @@ public class CallMultiplexer {
 		return c.result();
 	}
 
-	public Future<Object[]> submitCall(LuaState state, Object fn, Object... args) {
-		return submitCall(Call.init(state, handler, fn, args));
+	public Future<Object[]> submitCall(LuaState state, PreemptionContext preemptionContext, Object fn, Object... args) {
+		return submitCall(Call.init(state, preemptionContext, handler, fn, args));
 	}
 
 	private void done(Call c) {

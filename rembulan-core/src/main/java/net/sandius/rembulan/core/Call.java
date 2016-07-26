@@ -19,6 +19,7 @@ public class Call {
 	private final LuaState state;
 	private final EventHandler handler;
 	private final ObjectSink objectSink;
+	private final PreemptionContext preemptionContext;
 	private final Context context;
 
 	private Coroutine currentCoroutine;
@@ -31,8 +32,15 @@ public class Call {
 	private static final int VERSION_TERMINATED = 1;
 	private static final int VERSION_CANCELLED = 2;
 
-	private Call(LuaState state, EventHandler handler, ObjectSink objectSink, Coroutine mainCoroutine) {
+	private Call(
+			LuaState state,
+			PreemptionContext preemptionContext,
+			EventHandler handler,
+			ObjectSink objectSink,
+			Coroutine mainCoroutine) {
+
 		this.state = Check.notNull(state);
+		this.preemptionContext = Check.notNull(preemptionContext);
 		this.handler = Check.notNull(handler);
 		this.objectSink = Check.notNull(objectSink);
 		this.context = new Context();
@@ -44,16 +52,17 @@ public class Call {
 		this.currentVersion = new AtomicInteger(startingVersion);
 	}
 
-	public static Call init(LuaState state, EventHandler handler, Object fn, Object... args) {
+	public static Call init(
+			LuaState state,
+			PreemptionContext preemptionContext,
+			EventHandler handler,
+			Object fn,
+			Object... args) {
+
 		ObjectSink objectSink = state.newObjectSink();
 		Coroutine c = new Coroutine(fn);
 		objectSink.setToArray(args);
-		return new Call(state, handler, objectSink, c);
-	}
-
-	@Deprecated
-	public static Call initDefault(LuaState state, Object fn, Object... args) {
-		return init(state, DefaultEventHandler.INSTANCE, fn, args);
+		return new Call(state, preemptionContext, handler, objectSink, c);
 	}
 
 	public enum State {
@@ -225,6 +234,11 @@ public class Call {
 		@Override
 		public boolean canYield() {
 			return currentCoroutine.canYield();
+		}
+
+		@Override
+		public PreemptionContext preemptionContext() {
+			return preemptionContext;
 		}
 
 	}

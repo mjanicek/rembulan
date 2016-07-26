@@ -177,9 +177,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
             val ldr = l.loader()
 
-            val state = new DefaultLuaState.Builder()
-                .withPreemptionContext(preemptionContext)
-                .build()
+            val state = new DefaultLuaState()
 
             val env = envForContext(state, ctx)
             val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
@@ -193,7 +191,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
               override def failed(c: Call, error: Throwable) = resultPromise.failure(error)
             }
 
-            Call.init(state, handler, func)
+            Call.init(state, preemptionContext, handler, func)
           }
 
           var steps = 0

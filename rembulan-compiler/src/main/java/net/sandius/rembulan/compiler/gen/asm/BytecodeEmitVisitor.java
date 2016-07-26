@@ -8,6 +8,7 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ConversionMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.DispatchMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ExecutionContextMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ObjectSinkMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.TableMethods;
@@ -915,9 +916,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				il.add(rp.save());
 
 				il.add(loadExecutionContext());
-				il.add(loadState());
-				il.add(ASMUtils.loadInt(node.cost()));
-				il.add(LuaStateMethods.checkCpu());
+				il.add(ExecutionContextMethods.checkCpu(node.cost()));
 
 				il.add(rp.resume());
 				break;

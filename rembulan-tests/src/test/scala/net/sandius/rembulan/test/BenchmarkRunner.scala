@@ -97,7 +97,9 @@ object BenchmarkRunner {
     env
   }
 
-  def init(pc: PreemptionContext, settings: CompilerSettings, filename: String, args: String*): (LuaState, lua.Function) = {
+  case class EnvWithMainChunk(state: LuaState, fn: lua.Function)
+
+  def init(pc: PreemptionContext, settings: CompilerSettings, filename: String, args: String*) = {
     val resourceStream = getClass.getResourceAsStream(filename)
     require (resourceStream != null, "resource must exist, is null")
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
@@ -107,15 +109,13 @@ object BenchmarkRunner {
 
     val ldr = new CompilerChunkLoader(new ChunkClassLoader(), settings)
 
-    val state = new DefaultLuaState.Builder()
-        .withPreemptionContext(preemptionContext)
-        .build()
+    val state = new DefaultLuaState()
 
     val env = initEnv(state, args)
 
     val func = ldr.loadTextChunk(state.newUpvalue(env), "benchmarkMain", sourceContents)
 
-    (state, func)
+    EnvWithMainChunk(state, func)
   }
 
   def timed[A](name: String)(body: => A): A = {
@@ -135,6 +135,8 @@ object BenchmarkRunner {
       init(pc, settings, filename, args:_*)
     }
 
+    def newPc() = new CountingPreemptionContext()
+
     val numParallel = 1
 
     val calls = for (i <- 1 to numParallel) yield initCall()
@@ -146,7 +148,7 @@ object BenchmarkRunner {
     val before = System.nanoTime()
 
     for (c <- calls) {
-      multiplexer.submitCall(c._1, c._2)
+      multiplexer.submitCall(c.state, newPc(), c.fn)
     }
 
     multiplexer.awaitAll()
