@@ -15,6 +15,9 @@ import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{core => lua}
 import org.scalatest.{FunSpec, MustMatchers}
 
+import scala.concurrent.ExecutionException
+import scala.util.{Failure, Success, Try}
+
 trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
   import FragmentExecTestSuite._
@@ -194,9 +197,10 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             steps += 1
           }
 
-          val res = execState match {
-            case es: ExecutionState.TerminatedAbnormally => Left(es.getError)
-            case _ => Right(exec.getSink.toArray.toSeq)
+          val res = Try(exec.result().get()) match {
+            case Success(vs) => Success(vs.toSeq)
+            case Failure(ex: ExecutionException) => Failure(ex.getCause)
+            case Failure(ex) => Failure(ex);
           }
 
           val after = System.nanoTime()
@@ -214,20 +218,19 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
           println()
 
-          println("Result state: " + execState)
           res match {
-            case Right(result) =>
+            case Success(result) =>
               println("Result: success (" + result.size + " values):")
               for ((v, i) <- result.zipWithIndex) {
                 println(i + ":" + "\t" + Conversions.toHumanReadableString(v) + " (" + (if (v != null) v.getClass.getName else "null") + ")")
               }
-            case Left(ex) =>
+            case Failure(ex) =>
               println("Result: error: " + ex.getMessage)
           }
 
           for (expects <- expectations;
-                ctxExp <- expects.expectationFor(fragment);
-                exp <- ctxExp.get(ctx)) {
+               ctxExp <- expects.expectationFor(fragment);
+               exp <- ctxExp.get(ctx)) {
 
             exp.tryMatch(res)(this)
           }

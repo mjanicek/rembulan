@@ -7,6 +7,7 @@ import org.scalatest.FunSpec
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.implicitConversions
+import scala.util.Try
 
 trait Fragment {
 
@@ -143,14 +144,14 @@ object FragmentExpectations {
   }
 
   sealed trait Expect {
-    def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec): Unit
+    def tryMatch(actual: Try[Seq[AnyRef]])(spec: FunSpec): Unit
   }
 
   object Expect {
     case class Success(vms: Seq[ValueMatch]) extends Expect {
-      override def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec) = {
+      override def tryMatch(actual: Try[Seq[AnyRef]])(spec: FunSpec) = {
         actual match {
-          case Right(vs) =>
+          case scala.util.Success(vs) =>
             if (vs.size != vms.size) {
               spec.fail("result list size does not match: expected " + vms.size + ", got " + vs.size)
             }
@@ -162,7 +163,7 @@ object FragmentExpectations {
               }
             }
 
-          case Left(ex) =>
+          case scala.util.Failure(ex) =>
             spec.fail("Expected success, got an exception: " + ex.getMessage, ex)
         }
       }
@@ -172,10 +173,10 @@ object FragmentExpectations {
 
       protected def matchError(ex: Throwable)(spec: FunSpec): Unit
 
-      override def tryMatch(actual: Either[Throwable, Seq[AnyRef]])(spec: FunSpec) = {
+      override def tryMatch(actual: Try[Seq[AnyRef]])(spec: FunSpec) = {
         actual match {
-          case Right(vs) => spec.fail("Expected failure, got success")
-          case Left(ex) => matchError(ex)(spec)
+          case scala.util.Success(vs) => spec.fail("Expected failure, got success")
+          case scala.util.Failure(ex) => matchError(ex)(spec)
         }
       }
 

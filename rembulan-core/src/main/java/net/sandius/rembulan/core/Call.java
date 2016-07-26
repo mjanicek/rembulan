@@ -4,7 +4,14 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.Random;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class Call {
@@ -61,6 +68,105 @@ public class Call {
 			case VERSION_TERMINATED: return State.TERMINATED;
 			default:                 return State.PAUSED;
 		}
+	}
+
+	private static class ResultFuture implements Future<Object[]> {
+
+		private Object[] result;
+		private Throwable error;
+		private final CountDownLatch latch;
+
+		private final AtomicBoolean completed;
+
+		public ResultFuture() {
+			this.result = null;
+			this.error = null;
+
+			this.latch = new CountDownLatch(1);
+			this.completed = new AtomicBoolean(false);
+		}
+
+		@Override
+		public boolean cancel(boolean mayInterruptIfRunning) {
+			if (completed.compareAndSet(false, true)) {
+				if (mayInterruptIfRunning) {
+					// TODO: do interrupt
+				}
+				latch.countDown();
+				return false;
+			}
+			else {
+				return true;
+			}
+		}
+
+		public void complete(Object[] result) {
+			Check.notNull(result);
+			if (completed.compareAndSet(false, true)) {
+				this.result = result;
+				latch.countDown();
+			}
+			else {
+				throw new IllegalStateException("Future already completed");
+			}
+		}
+
+		public void fail(Throwable error) {
+			Check.notNull(error);
+			if (completed.compareAndSet(false, true)) {
+				this.error = error;
+				latch.countDown();
+			}
+			else {
+				throw new IllegalStateException("Future already completed");
+			}
+		}
+
+
+		@Override
+		public boolean isCancelled() {
+			return isDone() && result == null && error == null;
+		}
+
+		@Override
+		public boolean isDone() {
+			return latch.getCount() == 0;
+		}
+
+		private Object[] getResult() throws ExecutionException {
+			if (result != null) {
+				return result;
+			}
+			else if (error != null) {
+				throw new ExecutionException(error);
+			}
+			else {
+				throw new CancellationException();
+			}
+		}
+
+		@Override
+		public Object[] get() throws InterruptedException, ExecutionException {
+			latch.await();
+			return getResult();
+		}
+
+		@Override
+		public Object[] get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+			if (latch.await(timeout, unit)) {
+				return getResult();
+			}
+			else {
+				throw new TimeoutException();
+			}
+		}
+
+	};
+
+	private final ResultFuture result = new ResultFuture();
+
+	public Future<Object[]> result() {
+		return result;
 	}
 
 	@Deprecated
@@ -183,15 +289,22 @@ public class Call {
 
 	@Deprecated
 	public ExecutionState resume() {
-		Object[] result;
+		Object[] r;
 		try {
-			result = resume(DefaultEventHandler.INSTANCE);
+			r = resume(DefaultEventHandler.INSTANCE);
 		}
 		catch (Exception e) {
+			result.fail(e);
 			return new ExecutionState.TerminatedAbnormally(e);
 		}
 
-		return result == null ? ExecutionState.PAUSED : ExecutionState.TERMINATED_NORMALLY;
+		if (r == null) {
+			return ExecutionState.PAUSED;
+		}
+		else {
+			result.complete(r);
+			return ExecutionState.TERMINATED_NORMALLY;
+		}
 	}
 
 	private Object[] resume(EventHandler handler, int version) {
