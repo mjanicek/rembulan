@@ -7,7 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Exec {
+public class Call {
 
 	private final LuaState state;
 	private final ObjectSink objectSink;
@@ -22,7 +22,7 @@ public class Exec {
 	private static final int VERSION_RUNNING = 0;
 	private static final int VERSION_TERMINATED = 1;
 
-	private Exec(LuaState state, ObjectSink objectSink, Coroutine mainCoroutine) {
+	private Call(LuaState state, ObjectSink objectSink, Coroutine mainCoroutine) {
 		this.state = Check.notNull(state);
 		this.objectSink = Check.notNull(objectSink);
 		this.currentCoroutine = Check.notNull(mainCoroutine);
@@ -33,11 +33,11 @@ public class Exec {
 		this.currentVersion = new AtomicInteger(newVersion(0));
 	}
 
-	public static Exec init(LuaState state, Object fn, Object... args) {
+	public static Call init(LuaState state, Object fn, Object... args) {
 		ObjectSink objectSink = state.newObjectSink();
 		Coroutine c = new Coroutine(fn);
 		objectSink.setToArray(args);
-		return new Exec(state, objectSink, c);
+		return new Call(state, objectSink, c);
 	}
 
 	public enum State {

@@ -95,7 +95,7 @@ object BenchmarkRunner {
     env
   }
 
-  def init(pc: PreemptionContext, settings: CompilerSettings, filename: String, args: String*): Exec = {
+  def init(pc: PreemptionContext, settings: CompilerSettings, filename: String, args: String*): Call = {
     val resourceStream = getClass.getResourceAsStream(filename)
     require (resourceStream != null, "resource must exist, is null")
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
@@ -113,7 +113,7 @@ object BenchmarkRunner {
 
     val func = ldr.loadTextChunk(state.newUpvalue(env), "benchmarkMain", sourceContents)
 
-    Exec.init(state, func)
+    Call.init(state, func)
   }
 
   def timed[A](name: String)(body: => A): A = {
@@ -138,7 +138,7 @@ object BenchmarkRunner {
     val before = System.nanoTime()
     var execState = exec.getExecutionState
 
-    while (exec.state() == Exec.State.PAUSED) {
+    while (exec.state() == Call.State.PAUSED) {
       pc.deposit(stepSize)
       if (pc.allowed) {
         execState = exec.resume()
