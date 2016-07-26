@@ -169,31 +169,6 @@ public class Call {
 		return result;
 	}
 
-	@Deprecated
-	public LuaState getState() {
-		return state;
-	}
-
-	@Deprecated
-	public ObjectSink getSink() {
-		return objectSink;
-	}
-
-	@Deprecated
-	public boolean isPaused() {
-		return currentCoroutine != null && currentCoroutine.isPaused();
-	}
-
-	@Deprecated
-	protected Coroutine getCurrentCoroutine() {
-		return currentCoroutine;
-	}
-
-	@Deprecated
-	public ExecutionContext getContext() {
-		return context;
-	}
-
 	protected class Context implements ExecutionContext {
 
 		@Override
