@@ -136,12 +136,11 @@ object BenchmarkRunner {
     var steps = 0
 
     val before = System.nanoTime()
-    var execState = exec.getExecutionState
 
     while (exec.state() == Call.State.PAUSED) {
       pc.deposit(stepSize)
       if (pc.allowed) {
-        execState = exec.resume()
+        exec.resume()
       }
       steps += 1
     }

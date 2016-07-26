@@ -188,11 +188,10 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
           val before = System.nanoTime()
 
-          var execState = exec.getExecutionState
           while (exec.state() == Call.State.PAUSED) {
             preemptionContext.deposit(s)
             if (preemptionContext.allowed) {
-              execState = exec.resume()
+              exec.resume()
             }
             steps += 1
           }

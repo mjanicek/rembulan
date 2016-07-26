@@ -170,15 +170,6 @@ public class Call {
 	}
 
 	@Deprecated
-	public ExecutionState getExecutionState() {
-		switch (state()) {
-			case PAUSED:     return ExecutionState.PAUSED;
-			case RUNNING:    return ExecutionState.RUNNING;
-			default:  throw new IllegalStateException();  // FIXME
-		}
-	}
-
-	@Deprecated
 	public LuaState getState() {
 		return state;
 	}
@@ -288,22 +279,17 @@ public class Call {
 	}
 
 	@Deprecated
-	public ExecutionState resume() {
-		Object[] r;
+	public void resume() {
+		Object[] r = null;
 		try {
 			r = resume(DefaultEventHandler.INSTANCE);
 		}
 		catch (Exception e) {
 			result.fail(e);
-			return new ExecutionState.TerminatedAbnormally(e);
 		}
 
-		if (r == null) {
-			return ExecutionState.PAUSED;
-		}
-		else {
+		if (r != null) {
 			result.complete(r);
-			return ExecutionState.TERMINATED_NORMALLY;
 		}
 	}
 
