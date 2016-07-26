@@ -38,6 +38,16 @@ public abstract class ResumeResult {
 
 	}
 
+	public static class WaitForAsync extends ResumeResult {
+
+		public final AsyncTask task;
+
+		public WaitForAsync(AsyncTask task) {
+			this.task = task;
+		}
+
+	}
+
 	public static class Switch extends ResumeResult {
 
 		public final Coroutine target;

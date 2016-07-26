@@ -186,6 +186,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
             val handler = new EventHandler {
               override def paused() = false
+              override def waiting(task: AsyncTask[_]) = false
               override def returned(result: Array[AnyRef]) = resultPromise.success(result)
               override def failed(error: Throwable) = resultPromise.failure(error)
             }

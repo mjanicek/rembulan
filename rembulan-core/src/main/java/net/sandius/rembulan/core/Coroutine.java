@@ -182,6 +182,11 @@ public final class Coroutine {
 				assert (callStack != null);
 				return ResumeResult.Pause.INSTANCE;
 			}
+			catch (WaitForAsync waitForAsync) {
+				saveFrames(waitForAsync);
+				assert (callStack != null);
+				return new ResumeResult.WaitForAsync(waitForAsync.task());
+			}
 			catch (ControlThrowable ct) {
 				throw new UnsupportedOperationException(ct);
 			}

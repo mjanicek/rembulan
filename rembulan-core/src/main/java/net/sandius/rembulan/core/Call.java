@@ -236,6 +236,8 @@ public class Call {
 
 		boolean paused();
 
+		boolean waiting(AsyncTask<?> asyncTask);
+
 		void returned(Object[] result);
 
 		void failed(Throwable error);
@@ -248,6 +250,11 @@ public class Call {
 
 		@Override
 		public boolean paused() {
+			return false;
+		}
+
+		@Override
+		public boolean waiting(AsyncTask<?> asyncTask) {
 			return false;
 		}
 
@@ -345,6 +352,12 @@ public class Call {
 
 			if (result instanceof ResumeResult.Pause) {
 				if (!handler.paused()) {
+					return null;
+				}
+			}
+			if (result instanceof ResumeResult.WaitForAsync<?>) {
+				ResumeResult.WaitForAsync<?> wait = (ResumeResult.WaitForAsync<?>) result;
+				if (!handler.waiting(wait.task)) {
 					return null;
 				}
 			}
