@@ -180,7 +180,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             val state = new DefaultLuaState()
 
             val env = envForContext(state, ctx)
-            val func = ldr.loadTextChunk(state.newUpvalue(env), "test", fragment.code)
+            val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)
 
             val handler = new EventHandler {
               override def paused(c: Call) { }

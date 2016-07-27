@@ -3,15 +3,15 @@ package net.sandius.rembulan.test;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
 import net.sandius.rembulan.core.impl.Function0;
 
 public class java_Upvalues3 extends Function0 {
 
-	protected final Upvalue _ENV;
+	protected final Variable _ENV;
 
-	public java_Upvalues3(Upvalue _ENV) {
+	public java_Upvalues3(Variable _ENV) {
 		super();
 		this._ENV = _ENV;
 	}
@@ -27,22 +27,22 @@ public class java_Upvalues3 extends Function0 {
 				case 1:
 					r_2 = context.getObjectSink()._0();
 					if (r_2 == null) {
-						r_0 = context.getState().newUpvalue(r_0);
-						r_2 = new f1((Upvalue) r_0);
+						r_0 = new Variable(r_0);
+						r_2 = new f1((Variable) r_0);
 						r_1 = r_2;
-						r_1 = context.getState().newUpvalue(r_1);
+						r_1 = new Variable(r_1);
 					}
 					else {
-						r_1 = context.getState().newUpvalue(r_1);
-						r_2 = new f2((Upvalue) r_1);
+						r_1 = new Variable(r_1);
+						r_2 = new f2((Variable) r_1);
 						r_0 = r_2;
-						r_0 = context.getState().newUpvalue(r_0);
+						r_0 = new Variable(r_0);
 					}
-					if (((Upvalue) r_0).get() != null) {
-						r_2 = ((Upvalue) r_1).get();
+					if (((Variable) r_0).get() != null) {
+						r_2 = ((Variable) r_1).get();
 					}
 					else {
-						r_2 = ((Upvalue) r_0).get();
+						r_2 = ((Variable) r_0).get();
 					}
 					context.getObjectSink().setTo(r_2);
 					return;
@@ -75,9 +75,9 @@ public class java_Upvalues3 extends Function0 {
 
 	public static class f1 extends Function0 {
 
-		protected final Upvalue x;
+		protected final Variable x;
 
-		public f1(Upvalue x) {
+		public f1(Variable x) {
 			super();
 			this.x = x;
 		}
@@ -101,9 +101,9 @@ public class java_Upvalues3 extends Function0 {
 
 	public static class f2 extends Function0 {
 
-		protected final Upvalue y;
+		protected final Variable y;
 
-		public f2(Upvalue y) {
+		public f2(Variable y) {
 			super();
 			this.y = y;
 		}

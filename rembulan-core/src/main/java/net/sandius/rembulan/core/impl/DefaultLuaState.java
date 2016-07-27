@@ -4,14 +4,12 @@ import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSinkFactory;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
-import net.sandius.rembulan.core.UpvalueFactory;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.GenericBuilder;
 
 public class DefaultLuaState extends LuaState {
 
 	private final ObjectSinkFactory objectSinkFactory;
-	private final UpvalueFactory upvalueFactory;
 	private final TableFactory tableFactory;
 
 	protected Table nilMetatable;
@@ -23,17 +21,14 @@ public class DefaultLuaState extends LuaState {
 	protected Table lightuserdataMetatable;
 
 	public DefaultLuaState(ObjectSinkFactory objectSinkFactory,
-						   UpvalueFactory upvalueFactory,
 						   TableFactory tableFactory) {
 
 		this.objectSinkFactory = Check.notNull(objectSinkFactory);
-		this.upvalueFactory = Check.notNull(upvalueFactory);
 		this.tableFactory = Check.notNull(tableFactory);
 	}
 
 	public DefaultLuaState() {
 		this(CachingObjectSinkFactory.DEFAULT_INSTANCE,
-				DefaultUpvalue.FACTORY_INSTANCE,
 				DefaultTable.FACTORY_INSTANCE);
 	}
 
@@ -127,11 +122,6 @@ public class DefaultLuaState extends LuaState {
 	}
 
 	@Override
-	public UpvalueFactory upvalueFactory() {
-		return upvalueFactory;
-	}
-
-	@Override
 	public TableFactory tableFactory() {
 		return tableFactory;
 	}
@@ -139,32 +129,23 @@ public class DefaultLuaState extends LuaState {
 	public static class Builder implements GenericBuilder<DefaultLuaState> {
 
 		private ObjectSinkFactory objectSinkFactory;
-		private UpvalueFactory upvalueFactory;
 		private TableFactory tableFactory;
 
 		protected Builder(ObjectSinkFactory objectSinkFactory,
-							   UpvalueFactory upvalueFactory,
 							   TableFactory tableFactory) {
 
 			this.objectSinkFactory = Check.notNull(objectSinkFactory);
-			this.upvalueFactory = Check.notNull(upvalueFactory);
 			this.tableFactory = Check.notNull(tableFactory);
 		}
 
 		public Builder() {
 			// defaults
 			this(CachingObjectSinkFactory.DEFAULT_INSTANCE,
-					DefaultUpvalue.FACTORY_INSTANCE,
 					DefaultTable.FACTORY_INSTANCE);
 		}
 
 		public Builder withObjectSinkFactory(ObjectSinkFactory factory) {
 			this.objectSinkFactory = Check.notNull(factory);
-			return this;
-		}
-
-		public Builder withUpvalueFactory(UpvalueFactory factory) {
-			this.upvalueFactory = Check.notNull(factory);
 			return this;
 		}
 
@@ -177,7 +158,6 @@ public class DefaultLuaState extends LuaState {
 		public DefaultLuaState build() {
 			return new DefaultLuaState(
 					objectSinkFactory,
-					upvalueFactory,
 					tableFactory);
 		}
 		

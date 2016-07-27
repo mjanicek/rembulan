@@ -5,8 +5,8 @@ import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Upvalue;
 import net.sandius.rembulan.core.Userdata;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;
 import net.sandius.rembulan.util.Check;
@@ -116,7 +116,7 @@ public class DefaultDebugLib extends DebugLib {
 			int idx = 0;
 			for (Field fld : f.getClass().getDeclaredFields()) {
 				Class<?> fldType = fld.getType();
-				if (Upvalue.class.isAssignableFrom(fldType)) {
+				if (Variable.class.isAssignableFrom(fldType)) {
 					if (idx == index) {
 						// found it
 						fld.setAccessible(true);
@@ -139,11 +139,11 @@ public class DefaultDebugLib extends DebugLib {
 			return index;
 		}
 
-		public Upvalue get() throws IllegalAccessException {
-			return (Upvalue) field.get(function);
+		public Variable get() throws IllegalAccessException {
+			return (Variable) field.get(function);
 		}
 
-		public void set(Upvalue ref) throws IllegalAccessException {
+		public void set(Variable ref) throws IllegalAccessException {
 			Check.notNull(ref);
 			field.set(function, ref);
 		}
@@ -216,7 +216,7 @@ public class DefaultDebugLib extends DebugLib {
 
 				try {
 					name = uvRef.name();
-					Upvalue uv = uvRef.get();
+					Variable uv = uvRef.get();
 					value = uv.get();
 				}
 				catch (IllegalAccessException ex) {
@@ -262,7 +262,7 @@ public class DefaultDebugLib extends DebugLib {
 			if (uvRef != null) {
 				try {
 					name = uvRef.name();
-					Upvalue uv = uvRef.get();
+					Variable uv = uvRef.get();
 					uv.set(newValue);
 				}
 				catch (IllegalAccessException ex) {
@@ -299,7 +299,7 @@ public class DefaultDebugLib extends DebugLib {
 				throw new BadArgumentException(2, name(), "invalid upvalue index");
 			}
 			else {
-				final Upvalue uv;
+				final Variable uv;
 				try {
 					uv = uvRef.get();
 				}

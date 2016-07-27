@@ -1,6 +1,6 @@
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.core.{Table, Upvalue, Userdata}
+import net.sandius.rembulan.core.{Table, Userdata, Variable}
 import net.sandius.rembulan.{core => lua}
 
 object DebugLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
@@ -101,7 +101,7 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
           |return id, type(id)
         """
       }
-      ReturnsLightUserdata in thisContext succeedsWith (classOf[Upvalue], "userdata")
+      ReturnsLightUserdata in thisContext succeedsWith (classOf[Variable], "userdata")
 
       val ClosuresShareUpvalue = fragment ("closures referring to the same local variable share upvalues") {
         """local x = 42

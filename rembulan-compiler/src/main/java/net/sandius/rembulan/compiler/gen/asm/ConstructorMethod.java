@@ -1,7 +1,7 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.ir.UpVar;
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -33,7 +33,7 @@ class ConstructorMethod {
 
 	public Type methodType() {
 		Type[] args = new Type[context.fn.upvals().size()];
-		Arrays.fill(args, Type.getType(Upvalue.class));
+		Arrays.fill(args, Type.getType(Variable.class));
 		return Type.getMethodType(Type.VOID_TYPE, args);
 	}
 
@@ -75,9 +75,9 @@ class ConstructorMethod {
 			il.add(new FieldInsnNode(PUTFIELD,
 					context.thisClassType().getInternalName(),
 					name,
-					Type.getDescriptor(Upvalue.class)));
+					Type.getDescriptor(Variable.class)));
 
-			node.localVariables.add(new LocalVariableNode(name, Type.getDescriptor(Upvalue.class), null, begin, end, idx));
+			node.localVariables.add(new LocalVariableNode(name, Type.getDescriptor(Variable.class), null, begin, end, idx));
 
 			idx++;
 		}

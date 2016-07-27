@@ -1,5 +1,7 @@
 package net.sandius.rembulan.lbc.recompiler.asm;
 
+import net.sandius.rembulan.compiler.analysis.NumericOperationType;
+import net.sandius.rembulan.compiler.analysis.StaticMathImplementation;
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
@@ -8,12 +10,10 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.DispatchMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ObjectSinkMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.OperatorMethods;
-import net.sandius.rembulan.compiler.gen.asm.helpers.UpvalueMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.UtilMethods;
-import net.sandius.rembulan.compiler.analysis.NumericOperationType;
-import net.sandius.rembulan.compiler.analysis.StaticMathImplementation;
+import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.recompiler.gen.CodeVisitor;
 import net.sandius.rembulan.lbc.recompiler.gen.SlotState;
@@ -107,7 +107,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	@Override
 	public void visitGetUpVal(Object id, SlotState st, int r_dest, int upvalueIndex) {
 		add(e.getUpvalueReference(upvalueIndex));
-		add(UpvalueMethods.get());
+		add(VariableMethods.get());
 		add(e.storeToRegister(r_dest, st));
 	}
 
@@ -118,7 +118,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		add(e.loadDispatchPreamble());
 		add(e.getUpvalueReference(upvalueIndex));
-		add(UpvalueMethods.get());
+		add(VariableMethods.get());
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(DispatchMethods.index());
 
@@ -149,7 +149,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 
 		add(e.loadDispatchPreamble());
 		add(e.getUpvalueReference(upvalueIndex));
-		add(UpvalueMethods.get());
+		add(VariableMethods.get());
 		add(e.loadRegisterOrConstant(rk_key, st));
 		add(e.loadRegisterOrConstant(rk_value, st));
 		add(DispatchMethods.newindex());
@@ -161,7 +161,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 	public void visitSetUpVal(Object id, SlotState st, int r_src, int upvalueIndex) {
 		add(e.getUpvalueReference(upvalueIndex));
 		add(e.loadRegister(r_src, st));
-		add(UpvalueMethods.set());
+		add(VariableMethods.set());
 	}
 
 	@Override
@@ -1053,7 +1053,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 							capture.add(e.captureRegister(uvd.index));
 							st = st.capture(uvd.index);  // just marking it so that we can store properly
 						}
-						load.add(e.loadRegisterValue(uvd.index, Upvalue.class));
+						load.add(e.loadRegisterValue(uvd.index, Variable.class));
 					}
 					else {
 						load.add(e.getUpvalueReference(uvd.index));
@@ -1067,7 +1067,7 @@ public class JavaBytecodeCodeVisitor extends CodeVisitor {
 				add(new TypeInsnNode(NEW, closureType.getInternalName()));
 				add(new InsnNode(DUP));
 				add(load);
-				add(ASMUtils.ctor(closureType, ASMUtils.fillTypes(Type.getType(Upvalue.class), argCount)));
+				add(ASMUtils.ctor(closureType, ASMUtils.fillTypes(Type.getType(Variable.class), argCount)));
 				break;
 
 			default:

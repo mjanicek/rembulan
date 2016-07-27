@@ -15,7 +15,7 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.InvokeKind;
 import net.sandius.rembulan.compiler.ir.AbstractVar;
 import net.sandius.rembulan.compiler.ir.UpVar;
 import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.ClassReader;
@@ -237,7 +237,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 			FieldNode fieldNode = new FieldNode(
 					ACC_PROTECTED + ACC_FINAL,
 					name,
-					Type.getDescriptor(Upvalue.class),
+					Type.getDescriptor(Variable.class),
 					null,
 					null);
 

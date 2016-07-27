@@ -1,6 +1,6 @@
 package net.sandius.rembulan.lbc.recompiler.asm;
 
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.ReadOnlyArray;
@@ -45,7 +45,7 @@ public class ConstructorEmitter {
 
 	public Type methodType() {
 		Type[] args = new Type[upvalues().size()];
-		Arrays.fill(args, Type.getType(Upvalue.class));
+		Arrays.fill(args, Type.getType(Variable.class));
 		return Type.getMethodType(Type.VOID_TYPE, args);
 	}
 
@@ -85,9 +85,9 @@ public class ConstructorEmitter {
 			il.add(new FieldInsnNode(PUTFIELD,
 					parent.thisClassType().getInternalName(),
 					name,
-					Type.getDescriptor(Upvalue.class)));
+					Type.getDescriptor(Variable.class)));
 
-			node.localVariables.add(new LocalVariableNode(name, Type.getDescriptor(Upvalue.class), null, begin, end, i));
+			node.localVariables.add(new LocalVariableNode(name, Type.getDescriptor(Variable.class), null, begin, end, i));
 		}
 
 		// instantiate closures that have no open upvalues

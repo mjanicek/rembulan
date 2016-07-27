@@ -1,8 +1,7 @@
 package net.sandius.rembulan.parser
 
 import net.sandius.rembulan.compiler.{ChunkClassLoader, Compiler}
-import net.sandius.rembulan.core.Upvalue
-import net.sandius.rembulan.core.impl.DefaultUpvalue
+import net.sandius.rembulan.core.Variable
 import net.sandius.rembulan.test.BasicFragments
 import net.sandius.rembulan.{core => lua}
 import org.junit.runner.RunWith
@@ -61,7 +60,7 @@ class NewFragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
           val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
           val f = try {
-            clazz.getConstructor(classOf[Upvalue]).newInstance(new DefaultUpvalue(null))
+            clazz.getConstructor(classOf[Variable]).newInstance(new Variable(null))
           }
           catch {
             case ex: VerifyError => throw new IllegalStateException(ex)

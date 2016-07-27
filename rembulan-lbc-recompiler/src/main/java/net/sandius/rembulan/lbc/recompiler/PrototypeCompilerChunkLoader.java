@@ -4,7 +4,7 @@ import net.sandius.rembulan.compiler.ChunkClassLoader;
 import net.sandius.rembulan.core.ChunkLoader;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LoaderException;
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.PrototypeReader;
 import net.sandius.rembulan.lbc.PrototypeReaderException;
@@ -28,7 +28,7 @@ public class PrototypeCompilerChunkLoader extends ChunkLoader {
 	}
 
 	@Override
-	public Function loadTextChunk(Upvalue env, String chunkName, String chunk) throws LoaderException {
+	public Function loadTextChunk(Variable env, String chunkName, String chunk) throws LoaderException {
 		Check.notNull(env);
 		try {
 			Prototype proto = reader.load(chunk);
@@ -42,7 +42,7 @@ public class PrototypeCompilerChunkLoader extends ChunkLoader {
 			String mainClassName = chunkClassLoader.install(chk);
 			Class<?> clazz = chunkClassLoader.loadClass(mainClassName);
 
-     		return (Function) clazz.getConstructor(Upvalue.class).newInstance(env);
+     		return (Function) clazz.getConstructor(Variable.class).newInstance(env);
 		}
 		catch (PrototypeReaderException
 				| RuntimeException | LinkageError | ReflectiveOperationException ex) {
@@ -51,7 +51,7 @@ public class PrototypeCompilerChunkLoader extends ChunkLoader {
 	}
 
 	@Override
-	public Function loadBinaryChunk(Upvalue env, String chunkName, byte[] chunk, int offset, int len) throws LoaderException {
+	public Function loadBinaryChunk(Variable env, String chunkName, byte[] chunk, int offset, int len) throws LoaderException {
 		throw new UnsupportedOperationException();  // TODO
 	}
 

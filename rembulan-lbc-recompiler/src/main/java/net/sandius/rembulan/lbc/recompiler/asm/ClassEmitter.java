@@ -3,7 +3,7 @@ package net.sandius.rembulan.lbc.recompiler.asm;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.InvokableMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.InvokeKind;
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.lbc.Prototype;
 import net.sandius.rembulan.lbc.recompiler.gen.PrototypeContext;
 import net.sandius.rembulan.util.Check;
@@ -221,7 +221,7 @@ public class ClassEmitter {
 			FieldNode fieldNode = new FieldNode(
 					ACC_PROTECTED + ACC_FINAL,
 					name,
-					Type.getDescriptor(Upvalue.class),
+					Type.getDescriptor(Variable.class),
 					null,
 					null);
 
@@ -315,7 +315,7 @@ public class ClassEmitter {
 							GETFIELD,
 							thisClassType().getInternalName(),
 							getUpvalueFieldName(uvd.index),
-							Type.getDescriptor(Upvalue.class)));
+							Type.getDescriptor(Variable.class)));
 				}
 				il.add(new MethodInsnNode(
 						INVOKESPECIAL,
@@ -323,7 +323,7 @@ public class ClassEmitter {
 						"<init>",
 						Type.getMethodDescriptor(
 								Type.VOID_TYPE,
-								ASMUtils.fillTypes(Type.getType(Upvalue.class), uvds.size())),
+								ASMUtils.fillTypes(Type.getType(Variable.class), uvds.size())),
 						false));
 				il.add(setNestedInstance(i));
 			}

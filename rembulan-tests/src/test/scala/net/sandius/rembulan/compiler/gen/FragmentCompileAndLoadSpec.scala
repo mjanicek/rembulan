@@ -4,7 +4,6 @@ import java.io.PrintWriter
 
 import net.sandius.rembulan.compiler.ChunkClassLoader
 import net.sandius.rembulan.core._
-import net.sandius.rembulan.core.impl.DefaultUpvalue
 import net.sandius.rembulan.lbc.recompiler.Chunk
 import net.sandius.rembulan.lbc.recompiler.gen.ChunkCompiler
 import net.sandius.rembulan.lbc.{Prototype, PrototypePrinter}
@@ -49,7 +48,7 @@ class FragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
           val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
 
           val f = try {
-            clazz.getConstructor(classOf[Upvalue]).newInstance(new DefaultUpvalue(null))
+            clazz.getConstructor(classOf[Variable]).newInstance(new Variable(null))
           }
           catch {
             case ex: VerifyError => throw new IllegalStateException(ex)

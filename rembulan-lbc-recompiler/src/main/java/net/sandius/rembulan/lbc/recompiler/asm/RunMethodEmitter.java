@@ -5,16 +5,15 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ConversionMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ExecutionContextMethods;
-import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ObjectSinkMethods;
-import net.sandius.rembulan.compiler.gen.asm.helpers.UpvalueMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.UtilMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Resumable;
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.lbc.recompiler.gen.CodeVisitor;
 import net.sandius.rembulan.lbc.recompiler.gen.PrototypeContext;
 import net.sandius.rembulan.lbc.recompiler.gen.SlotState;
@@ -350,8 +349,8 @@ public class RunMethodEmitter {
 		InsnList il = new InsnList();
 
 		if (slots.isCaptured(registerIndex)) {
-			il.add(loadRegisterValue(registerIndex, Upvalue.class));
-			il.add(UpvalueMethods.get());
+			il.add(loadRegisterValue(registerIndex, Variable.class));
+			il.add(VariableMethods.get());
 		}
 		else {
 			il.add(loadRegisterValue(registerIndex));
@@ -506,9 +505,9 @@ public class RunMethodEmitter {
 		InsnList il = new InsnList();
 
 		if (slots.isCaptured(registerIndex)) {
-			il.add(loadRegisterValue(registerIndex, Upvalue.class));
+			il.add(loadRegisterValue(registerIndex, Variable.class));
 			il.add(new InsnNode(SWAP));
-			il.add(UpvalueMethods.set());
+			il.add(VariableMethods.set());
 		}
 		else {
 			il.add(storeRegisterValue(registerIndex));
@@ -629,16 +628,17 @@ public class RunMethodEmitter {
 				GETFIELD,
 				parent.thisClassType().getInternalName(),
 				parent.getUpvalueFieldName(idx),
-				Type.getDescriptor(Upvalue.class)));
+				Type.getDescriptor(Variable.class)));
 		return il;
 	}
 
 	public InsnList captureRegister(int registerIndex) {
 		InsnList il = new InsnList();
 
-		il.add(loadLuaState());
+		il.add(new TypeInsnNode(NEW, Type.getInternalName(Variable.class)));
+		il.add(new InsnNode(DUP));
 		il.add(loadRegisterValue(registerIndex));
-		il.add(LuaStateMethods.newUpvalue());
+		il.add(VariableMethods.constructor());
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;
@@ -647,8 +647,8 @@ public class RunMethodEmitter {
 	public InsnList uncaptureRegister(int registerIndex) {
 		InsnList il = new InsnList();
 
-		il.add(loadRegisterValue(registerIndex, Upvalue.class));
-		il.add(UpvalueMethods.get());
+		il.add(loadRegisterValue(registerIndex, Variable.class));
+		il.add(VariableMethods.get());
 		il.add(storeRegisterValue(registerIndex));
 
 		return il;

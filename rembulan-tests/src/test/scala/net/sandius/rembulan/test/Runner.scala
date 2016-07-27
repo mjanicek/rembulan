@@ -44,9 +44,9 @@ object Runner {
       val state = new DefaultLuaState.Builder().build()
       val os = state.newObjectSink()
       val env = state.newTable()
-      val upEnv = state.newUpvalue(env)
+      val upEnv = new Variable(env)
 
-      val f = clazz.getConstructor(classOf[Upvalue]).newInstance(upEnv)
+      val f = clazz.getConstructor(classOf[Variable]).newInstance(upEnv)
 
       val context = new ExecutionContext {
         override def getState = state

@@ -113,7 +113,7 @@ object BenchmarkRunner {
 
     val env = initEnv(state, args)
 
-    val func = ldr.loadTextChunk(state.newUpvalue(env), "benchmarkMain", sourceContents)
+    val func = ldr.loadTextChunk(new Variable(env), "benchmarkMain", sourceContents)
 
     EnvWithMainChunk(state, func)
   }

@@ -2,9 +2,7 @@ package net.sandius.rembulan.compiler.gen.asm.helpers;
 
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Upvalue;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 
@@ -37,17 +35,6 @@ public class LuaStateMethods {
 				false));
 
 		return il;
-	}
-
-	public static AbstractInsnNode newUpvalue() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"newUpvalue",
-				Type.getMethodType(
-						Type.getType(Upvalue.class),
-						Type.getType(Object.class)).getDescriptor(),
-				false);
 	}
 
 }

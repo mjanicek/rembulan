@@ -1,10 +1,11 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
-import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.UtilMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
@@ -12,6 +13,7 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.LocalVariableNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.Arrays;
@@ -20,6 +22,8 @@ import java.util.List;
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.RETURN;
 
 class InvokeMethod {
@@ -78,14 +82,14 @@ class InvokeMethod {
 					boolean reified = context.types.isReified(param);
 
 					if (reified) {
-						il.add(new VarInsnNode(ALOAD, 1));
-						il.add(BytecodeEmitVisitor.loadState());
+						il.add(new TypeInsnNode(NEW, Type.getInternalName(Variable.class)));
+						il.add(new InsnNode(DUP));
 					}
 
 					il.add(new VarInsnNode(ALOAD, 2 + paramIdx));
 
 					if (reified) {
-						il.add(LuaStateMethods.newUpvalue());
+						il.add(VariableMethods.constructor());
 					}
 				}
 			}
@@ -111,15 +115,15 @@ class InvokeMethod {
 					boolean reified = context.types.isReified(param);
 
 					if (reified) {
-						il.add(new VarInsnNode(ALOAD, 1));
-						il.add(BytecodeEmitVisitor.loadState());
+						il.add(new TypeInsnNode(NEW, Type.getInternalName(Variable.class)));
+						il.add(new InsnNode(DUP));
 					}
 
 					il.add(new VarInsnNode(ALOAD, 2));  // TODO: use dup instead?
 					il.add(UtilMethods.getArrayElementOrNull(paramIdx));
 
 					if (reified) {
-						il.add(LuaStateMethods.newUpvalue());
+						il.add(VariableMethods.constructor());
 					}
 				}
 			}

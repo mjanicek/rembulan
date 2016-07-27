@@ -12,13 +12,13 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.ExecutionContextMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ObjectSinkMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.TableMethods;
-import net.sandius.rembulan.compiler.gen.asm.helpers.UpvalueMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Upvalue;
+import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
@@ -186,7 +186,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				GETFIELD,
 				context.thisClassType().getInternalName(),
 				context.getUpvalueFieldName(uv),
-				Type.getDescriptor(Upvalue.class)));
+				Type.getDescriptor(Variable.class)));
 
 		return il;
 	}
@@ -250,10 +250,10 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	@Override
 	public void visit(VarInit node) {
 		if (types.isReified(node.var())) {
-			il.add(loadExecutionContext());
-			il.add(loadState());
+			il.add(new TypeInsnNode(NEW, Type.getInternalName(Variable.class)));
+			il.add(new InsnNode(DUP));
 			il.add(new VarInsnNode(ALOAD, slot(node.src())));
-			il.add(LuaStateMethods.newUpvalue());
+			il.add(VariableMethods.constructor());
 			il.add(new VarInsnNode(ASTORE, slot(node.var())));
 		}
 		else {
@@ -266,9 +266,9 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	public void visit(VarStore node) {
 		if (types.isReified(node.var())) {
 			il.add(new VarInsnNode(ALOAD, slot(node.var())));
-			il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Upvalue.class)));
+			il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Variable.class)));
 			il.add(new VarInsnNode(ALOAD, slot(node.src())));
-			il.add(UpvalueMethods.set());
+			il.add(VariableMethods.set());
 		}
 		else {
 			il.add(new VarInsnNode(ALOAD, slot(node.src())));
@@ -280,8 +280,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	public void visit(VarLoad node) {
 		if (types.isReified(node.var())) {
 			il.add(new VarInsnNode(ALOAD, slot(node.var())));
-			il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Upvalue.class)));
-			il.add(UpvalueMethods.get());
+			il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Variable.class)));
+			il.add(VariableMethods.get());
 		}
 		else {
 			il.add(new VarInsnNode(ALOAD, slot(node.var())));
@@ -292,7 +292,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	@Override
 	public void visit(UpLoad node) {
 		il.add(loadUpvalueRef(node.upval()));
-		il.add(UpvalueMethods.get());
+		il.add(VariableMethods.get());
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
 
@@ -300,7 +300,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	public void visit(UpStore node) {
 		il.add(loadUpvalueRef(node.upval()));
 		il.add(new VarInsnNode(ALOAD, slot(node.src())));
-		il.add(UpvalueMethods.set());
+		il.add(VariableMethods.set());
 	}
 
 	@Override
@@ -779,12 +779,12 @@ class BytecodeEmitVisitor extends CodeVisitor {
 					Var v = (Var) var;
 					assert (context.types.isReified(v));
 					il.add(new VarInsnNode(ALOAD, slot(v)));
-					il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Upvalue.class)));
+					il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Variable.class)));
 				}
 			}
 
 			Type[] ctorArgTypes = new Type[upvals.size()];
-			Arrays.fill(ctorArgTypes, Type.getType(Upvalue.class));
+			Arrays.fill(ctorArgTypes, Type.getType(Variable.class));
 
 			il.add(ASMUtils.ctor(fnType, ctorArgTypes));
 
