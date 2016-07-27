@@ -67,12 +67,12 @@ public class CallMultiplexer {
 	private class MultiplexCallEventHandler implements Call.EventHandler {
 
 		@Override
-		public void paused(Call c) {
+		public void paused(Call c, Call.Continuation cont) {
 			// ignore pauses
 		}
 
 		@Override
-		public void waiting(final Call c, final Runnable task) {
+		public void waiting(final Call c, final Runnable task, final Call.Continuation cont) {
 			executorService.submit(new Runnable() {
 				@Override
 				public void run() {
@@ -80,7 +80,7 @@ public class CallMultiplexer {
 						task.run();
 					}
 					finally {
-						executorService.submit(c.currentContinuationCallable());
+						executorService.submit(cont);
 					}
 				}
 			});

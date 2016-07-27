@@ -76,13 +76,15 @@ public class Call {
 		int v;
 		do {
 			v = versionSource.nextInt();
-		} while (v == VERSION_RUNNING
-				|| v == VERSION_TERMINATED
-				|| v == VERSION_CANCELLED
-				|| v == oldVersion);
+		} while (!isPaused(v) || v == oldVersion);
 		return v;
 	}
 
+	private static boolean isPaused(int version) {
+		return version != VERSION_RUNNING
+				&& version != VERSION_TERMINATED
+				&& version != VERSION_CANCELLED;
+	}
 
 	public State state() {
 		switch (currentVersion.get()) {
@@ -263,9 +265,9 @@ public class Call {
 		// when true is returned, the events are ignored by the executor
 		// (i.e. an implicit resume happens immediately after)
 
-		void paused(Call c);
+		void paused(Call c, Continuation cont);
 
-		void waiting(Call c, Runnable task);
+		void waiting(Call c, Runnable task, Continuation cont);
 
 		void returned(Call c, Object[] result);
 
@@ -278,13 +280,13 @@ public class Call {
 		private static final DefaultEventHandler INSTANCE = new DefaultEventHandler();
 
 		@Override
-		public void paused(Call c) {
+		public void paused(Call c, Continuation cont) {
 			// no-op
 			// FIXME
 		}
 
 		@Override
-		public void waiting(Call c, Runnable task) {
+		public void waiting(Call c, Runnable task, Continuation cont) {
 			// FIXME
 			task.run();
 		}
@@ -348,6 +350,12 @@ public class Call {
 
 	}
 
+	private Continuation currentContinuation() {
+		// FIXME: code duplication
+		int version = currentVersion.get();
+		return isPaused(version) ? new Continuation(this, version) : null;
+	}
+
 	public Callable<Object[]> currentContinuationCallable() {
 		int version = currentVersion.get();
 		switch (version) {
@@ -397,31 +405,39 @@ public class Call {
 			return hook.result;
 		}
 		catch (final RuntimeException ex) {
-			hook = new Hook(null, new Runnable() {
+			hook = new Hook(null) {
 				@Override
-				public void run() {
-					handler.failed(Call.this, ex);
+				public Runnable body(Continuation cont) {
+					return new Runnable() {
+						@Override
+						public void run() {
+							handler.failed(Call.this, ex);
+						}
+					};
 				}
-			});
+			};
 			throw ex;
 		}
 		finally {
 			int old = currentVersion.getAndSet(newVersion);
 			assert (old == VERSION_RUNNING);
 
-			if (hook != null && hook.body != null) {
-				hook.body.run();
+			if (hook != null) {
+				Runnable hookBody = hook.body(currentContinuation());
+				hookBody.run();
 			}
 		}
 	}
 
-	private static class Hook {
+	private abstract static class Hook {
 		public final Object[] result;
-		public final Runnable body;
-		private Hook(Object[] result, Runnable body) {
+
+		private Hook(Object[] result) {
 			this.result = result;
-			this.body = body;
 		}
+
+		public abstract Runnable body(Continuation cont);
+
 	}
 
 	// returns null iff the execution is paused (i.e. when it can be resumed)
@@ -432,22 +448,32 @@ public class Call {
 			ResumeResult result = currentCoroutine.resume(context, error);
 
 			if (result instanceof ResumeResult.Pause) {
-				return new Hook(null, new Runnable() {
+				return new Hook(null) {
 					@Override
-					public void run() {
-						handler.paused(Call.this);
+					public Runnable body(final Continuation cont) {
+						return new Runnable() {
+							@Override
+							public void run() {
+								handler.paused(Call.this, cont);
+							}
+						};
 					}
-				});
+				};
 			}
 			if (result instanceof ResumeResult.WaitForAsync) {
 				ResumeResult.WaitForAsync wait = (ResumeResult.WaitForAsync) result;
 				final Runnable task = wait.task;
-				return new Hook(null, new Runnable() {
+				return new Hook(null) {
 					@Override
-					public void run() {
-						handler.waiting(Call.this, task);
+					public Runnable body(final Continuation cont) {
+						return new Runnable() {
+							@Override
+							public void run() {
+								handler.waiting(Call.this, task, cont);
+							}
+						};
 					}
-				});
+				};
 			}
 			else if (result instanceof ResumeResult.Switch) {
 				currentCoroutine = ((ResumeResult.Switch) result).target;
@@ -474,12 +500,17 @@ public class Call {
 		if (error == null) {
 			// main coroutine returned
 			final Object[] result = objectSink.toArray();
-			return new Hook(result, new Runnable() {
+			return new Hook(result) {
 				@Override
-				public void run() {
-					handler.returned(Call.this, result);
+				public Runnable body(Continuation cont) {
+					return new Runnable() {
+						@Override
+						public void run() {
+							handler.returned(Call.this, result);
+						}
+					};
 				}
-			});
+			};
 		}
 		else {
 			// exception in the main coroutine
