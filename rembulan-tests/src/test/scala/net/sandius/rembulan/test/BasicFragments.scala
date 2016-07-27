@@ -142,6 +142,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   MixedCmpReverse in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to compare string with number")
 
+  val MultiReturn = fragment ("MultiReturn") {
+    """local function f() end
+      |return f(), f(), f()
+    """
+  }
+  MultiReturn in EmptyContext succeedsWith (null, null)
+
   val SimpleForLoop = fragment("SimpleForLoop") {
     """local sum = 0
       |for i = 1, 10 do
