@@ -8,7 +8,6 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -365,11 +364,6 @@ public class Call {
 		}
 
 		return new Continuation(this, version);
-	}
-
-	@Deprecated
-	public FutureTask<Object[]> currentContinuationTask() {
-		return new FutureTask<>(currentContinuationCallable());
 	}
 
 	private Object[] resumeCurrentContinuation() throws Exception {
