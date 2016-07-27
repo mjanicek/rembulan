@@ -44,6 +44,16 @@ public class DummyExecutionContext implements ExecutionContext {
 	}
 
 	@Override
+	public void resume(Coroutine coroutine, Object[] args) throws ControlThrowable {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void yield(Object[] args) throws ControlThrowable {
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void checkPreempt(int cost) throws ControlThrowable {
 		throw new UnsupportedOperationException();
 	}

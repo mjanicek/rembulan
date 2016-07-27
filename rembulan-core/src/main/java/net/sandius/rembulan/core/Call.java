@@ -237,6 +237,16 @@ public class Call {
 		}
 
 		@Override
+		public void resume(Coroutine coroutine, Object[] args) throws ControlThrowable {
+			throw new CoroutineSwitch.Resume(coroutine, args);
+		}
+
+		@Override
+		public void yield(Object[] args) throws ControlThrowable {
+			throw new CoroutineSwitch.Yield(args);
+		}
+
+		@Override
 		public void checkPreempt(int cost) throws ControlThrowable {
 			preemptionContext.withdraw(cost);
 		}

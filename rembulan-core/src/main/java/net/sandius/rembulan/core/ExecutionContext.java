@@ -12,6 +12,10 @@ public interface ExecutionContext {
 
 	boolean canYield();
 
+	void resume(Coroutine coroutine, Object[] args) throws ControlThrowable;
+
+	void yield(Object[] args) throws ControlThrowable;
+
 	void checkPreempt(int cost) throws ControlThrowable;
 
 }

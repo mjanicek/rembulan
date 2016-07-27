@@ -56,6 +56,8 @@ object Runner {
         override def getCurrentCoroutine = ???
         override def newCoroutine(function: Function) = ???
         override def canYield = false
+        override def resume(coroutine: Coroutine, args: Array[AnyRef]) = ???
+        override def `yield`(args: Array[AnyRef]) = ???
         override def checkPreempt(cost: Int) = pc.withdraw(cost)
       }
 

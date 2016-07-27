@@ -2,7 +2,6 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
-import net.sandius.rembulan.core.CoroutineSwitch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.ProtectedResumable;
@@ -81,10 +80,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 			context.getObjectSink().reset();
 
-			CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, resumeArgs);
-			ct.push(this, null);
-
-			throw ct;
+			try {
+				context.resume(coroutine, resumeArgs);
+			}
+			catch (ControlThrowable ct) {
+				ct.push(this, null);
+				throw ct;
+			}
 		}
 
 		@Override
@@ -110,9 +112,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			CoroutineSwitch.Yield ct = new CoroutineSwitch.Yield(args.getAll());
-			ct.push(this, null);
-			throw ct;
+			try {
+				context.yield(args.getAll());
+			}
+			catch (ControlThrowable ct) {
+				ct.push(this, null);
+				throw ct;
+			}
 		}
 
 		@Override
@@ -206,10 +212,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			@Override
 			public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
 				context.getObjectSink().reset();
-
-				CoroutineSwitch.Resume ct = new CoroutineSwitch.Resume(coroutine, args);
-				ct.push(this, null);
-				throw ct;
+				try {
+					context.resume(coroutine, args);
+				}
+				catch (ControlThrowable ct) {
+					ct.push(this, null);
+					throw ct;
+				}
 			}
 
 			@Override
