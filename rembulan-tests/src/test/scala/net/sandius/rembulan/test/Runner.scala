@@ -48,13 +48,15 @@ object Runner {
 
       val f = clazz.getConstructor(classOf[Variable]).newInstance(upEnv)
 
+      val pc = PreemptionContext.Always.INSTANCE
+
       val context = new ExecutionContext {
         override def getState = state
         override def getObjectSink = os
         override def getCurrentCoroutine = ???
         override def newCoroutine(function: Function) = ???
         override def canYield = false
-        override def preemptionContext = PreemptionContext.Always.INSTANCE
+        override def checkPreempt(cost: Int) = pc.withdraw(cost)
       }
 
       section("Call") {

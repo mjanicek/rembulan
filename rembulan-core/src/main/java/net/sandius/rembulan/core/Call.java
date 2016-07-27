@@ -237,8 +237,8 @@ public class Call {
 		}
 
 		@Override
-		public PreemptionContext preemptionContext() {
-			return preemptionContext;
+		public void checkPreempt(int cost) throws ControlThrowable {
+			preemptionContext.withdraw(cost);
 		}
 
 	}

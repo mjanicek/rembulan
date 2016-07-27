@@ -1,11 +1,11 @@
 package net.sandius.rembulan.bm;
 
+import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.util.Check;
 
 public class DummyExecutionContext implements ExecutionContext {
@@ -44,7 +44,7 @@ public class DummyExecutionContext implements ExecutionContext {
 	}
 
 	@Override
-	public PreemptionContext preemptionContext() {
+	public void checkPreempt(int cost) throws ControlThrowable {
 		throw new UnsupportedOperationException();
 	}
 

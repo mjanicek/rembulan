@@ -12,6 +12,6 @@ public interface ExecutionContext {
 
 	boolean canYield();
 
-	PreemptionContext preemptionContext();
+	void checkPreempt(int cost) throws ControlThrowable;
 
 }
