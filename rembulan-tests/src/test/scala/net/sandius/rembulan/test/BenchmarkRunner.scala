@@ -6,6 +6,8 @@ import java.util.concurrent.Executors
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
+import net.sandius.rembulan.core.Call.Continuation
+import net.sandius.rembulan.core.CallMultiplexer.PreemptionHandler
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.lib.LibUtils
@@ -143,7 +145,20 @@ object BenchmarkRunner {
 
     var steps = 0
 
-    val multiplexer = new CallMultiplexer(Executors.newSingleThreadExecutor())
+    val preemptionHandler = new PreemptionHandler {
+      override def preempted(c: Continuation, context: PreemptionContext) = {
+        context match {
+          case pc: CountingPreemptionContext =>
+            pc.deposit(stepSize)
+            steps += 1
+            true
+          case _ =>
+            false
+        }
+      }
+    }
+
+    val multiplexer = new CallMultiplexer(Executors.newSingleThreadExecutor(), preemptionHandler)
 
     val before = System.nanoTime()
 

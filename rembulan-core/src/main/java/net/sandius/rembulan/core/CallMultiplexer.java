@@ -14,13 +14,15 @@ public class CallMultiplexer {
 
 	private final ExecutorService executorService;
 	private final MultiplexCallEventHandler handler;
+	private final PreemptionHandler preemptionHandler;
 
 	private final LinkedBlockingQueue<CountDownLatch> latches;
 	private final Map<Call, CountDownLatch> calls;
 
-	public CallMultiplexer(ExecutorService executorService) {
+	public CallMultiplexer(ExecutorService executorService, PreemptionHandler preemptionHandler) {
 		this.executorService = Check.notNull(executorService);
 		this.handler = new MultiplexCallEventHandler();
+		this.preemptionHandler = Check.notNull(preemptionHandler);
 
 		this.latches = new LinkedBlockingQueue<>();
 		this.calls = new HashMap<>();
@@ -66,11 +68,20 @@ public class CallMultiplexer {
 		executorService.shutdown();
 	}
 
+	public interface PreemptionHandler {
+
+		boolean preempted(Call.Continuation c, PreemptionContext preemptionContext);
+
+	}
+
 	private class MultiplexCallEventHandler implements Call.EventHandler {
 
 		@Override
-		public void paused(Call c, Call.Continuation cont) {
-			// ignore pauses
+		public void paused(Call c, Call.Continuation cont, PreemptionContext preemptionContext) {
+			if (preemptionHandler.preempted(cont, preemptionContext)) {
+				final Callable<Object[]> cc = cont.toCallable(handler, preemptionContext);
+				executorService.submit(cc);
+			}
 		}
 
 		@Override

@@ -268,7 +268,7 @@ public class Call {
 		// when true is returned, the events are ignored by the executor
 		// (i.e. an implicit resume happens immediately after)
 
-		void paused(Call c, Continuation cont);
+		void paused(Call c, Continuation cont, PreemptionContext preemptionContext);
 
 		void waiting(Call c, Runnable task, Continuation cont, PreemptionContext preemptionContext);
 
@@ -283,7 +283,7 @@ public class Call {
 		private static final DefaultEventHandler INSTANCE = new DefaultEventHandler();
 
 		@Override
-		public void paused(Call c, Continuation cont) {
+		public void paused(Call c, Continuation cont, PreemptionContext preemptionContext) {
 			// no-op
 			// FIXME
 		}
@@ -459,7 +459,7 @@ public class Call {
 						return new Runnable() {
 							@Override
 							public void run() {
-								handler.paused(Call.this, cont);
+								handler.paused(Call.this, cont, context.preemptionContext);
 							}
 						};
 					}

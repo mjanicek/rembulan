@@ -173,7 +173,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           val resultPromise = Promise[Array[AnyRef]]()
 
           val handler = new EventHandler {
-            override def paused(c: Call, cont: Call.Continuation) { }
+            override def paused(c: Call, cont: Call.Continuation, pc: PreemptionContext) { }
             override def waiting(c: Call, task: Runnable, cont: Call.Continuation, pc: PreemptionContext) = {
               task.run()
             }
