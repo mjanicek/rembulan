@@ -18,8 +18,6 @@ public class Call {
 
 	private final LuaState state;
 	private final ObjectSink objectSink;
-	private final PreemptionContext preemptionContext;
-	private final Context context;
 
 	private Coroutine currentCoroutine;
 
@@ -32,14 +30,11 @@ public class Call {
 
 	private Call(
 			LuaState state,
-			PreemptionContext preemptionContext,
 			ObjectSink objectSink,
 			Coroutine mainCoroutine) {
 
 		this.state = Check.notNull(state);
-		this.preemptionContext = Check.notNull(preemptionContext);
 		this.objectSink = Check.notNull(objectSink);
-		this.context = new Context();
 
 		this.currentCoroutine = Check.notNull(mainCoroutine);
 
@@ -49,14 +44,13 @@ public class Call {
 
 	public static Call init(
 			LuaState state,
-			PreemptionContext preemptionContext,
 			Object fn,
 			Object... args) {
 
 		ObjectSink objectSink = state.newObjectSink();
 		Coroutine c = new Coroutine(fn);
 		objectSink.setToArray(args);
-		return new Call(state, preemptionContext, objectSink, c);
+		return new Call(state, objectSink, c);
 	}
 
 	public enum State {
@@ -210,21 +204,29 @@ public class Call {
 		return result;
 	}
 
-	protected class Context implements ExecutionContext {
+	protected static class Context implements ExecutionContext {
+
+		private final Call call;
+		private final PreemptionContext preemptionContext;
+
+		public Context(Call call, PreemptionContext preemptionContext) {
+			this.call = call;
+			this.preemptionContext = preemptionContext;
+		}
 
 		@Override
 		public LuaState getState() {
-			return state;
+			return call.state;
 		}
 
 		@Override
 		public ObjectSink getObjectSink() {
-			return objectSink;
+			return call.objectSink;
 		}
 
 		@Override
 		public Coroutine getCurrentCoroutine() {
-			return currentCoroutine;
+			return call.currentCoroutine;
 		}
 
 		@Override
@@ -234,7 +236,7 @@ public class Call {
 
 		@Override
 		public boolean canYield() {
-			return currentCoroutine.canYield();
+			return call.currentCoroutine.canYield();
 		}
 
 		@Override
@@ -266,7 +268,7 @@ public class Call {
 
 		void paused(Call c, Continuation cont);
 
-		void waiting(Call c, Runnable task, Continuation cont);
+		void waiting(Call c, Runnable task, Continuation cont, PreemptionContext preemptionContext);
 
 		void returned(Call c, Object[] result);
 
@@ -285,7 +287,7 @@ public class Call {
 		}
 
 		@Override
-		public void waiting(Call c, Runnable task, Continuation cont) {
+		public void waiting(Call c, Runnable task, Continuation cont, PreemptionContext preemptionContext) {
 			// FIXME
 			task.run();
 		}
@@ -329,13 +331,13 @@ public class Call {
 			return result;
 		}
 
-		public Callable<Object[]> toCallable(final EventHandler handler) {
+		public Callable<Object[]> toCallable(final EventHandler handler, final PreemptionContext preemptionContext) {
 			return new Callable<Object[]>() {
 				@Override
 				public Object[] call() throws Exception {
 					Object[] r = null;
 					try {
-						r = call.resume(version, handler);
+						r = call.resume(new Context(call, preemptionContext), version, handler);
 					}
 					catch (Exception e) {
 						call.result.fail(e);
@@ -373,21 +375,21 @@ public class Call {
 		}
 	}
 
-	private Object[] resumeCurrentContinuation(EventHandler handler) throws Exception {
-		return currentContinuation().toCallable(handler).call();
+	private Object[] resumeCurrentContinuation(EventHandler handler, PreemptionContext preemptionContext) throws Exception {
+		return currentContinuation().toCallable(handler, preemptionContext).call();
 	}
 
 	@Deprecated
-	public void resume(EventHandler handler) {
+	public void resume(EventHandler handler, PreemptionContext preemptionContext) {
 		try {
-			resumeCurrentContinuation(handler);
+			resumeCurrentContinuation(handler, preemptionContext);
 		}
 		catch (Exception e) {
 			// no-op
 		}
 	}
 
-	private Object[] resume(int version, final EventHandler handler) {
+	private Object[] resume(Context context, int version, final EventHandler handler) {
 		if (version == VERSION_RUNNING || version == VERSION_TERMINATED || version == VERSION_CANCELLED) {
 			throw new IllegalArgumentException("Illegal version: " + version);
 		}
@@ -399,7 +401,7 @@ public class Call {
 		int newVersion = VERSION_TERMINATED;
 		Hook hook = null;
 		try {
-			hook = doResume(handler);
+			hook = doResume(context, handler);
 			if (hook.result == null) {
 				newVersion = newPausedVersion(version);
 			}
@@ -442,7 +444,7 @@ public class Call {
 	}
 
 	// returns null iff the execution is paused (i.e. when it can be resumed)
-	private Hook doResume(final EventHandler handler) throws RuntimeException {
+	private Hook doResume(final Context context, final EventHandler handler) throws RuntimeException {
 		Throwable error = null;
 
 		while (currentCoroutine != null) {
@@ -470,7 +472,7 @@ public class Call {
 						return new Runnable() {
 							@Override
 							public void run() {
-								handler.waiting(Call.this, task, cont);
+								handler.waiting(Call.this, task, cont, context.preemptionContext);
 							}
 						};
 					}

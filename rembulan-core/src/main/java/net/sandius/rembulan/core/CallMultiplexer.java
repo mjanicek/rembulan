@@ -26,19 +26,20 @@ public class CallMultiplexer {
 		this.calls = new HashMap<>();
 	}
 
-	public Future<Object[]> submitCall(Call c) {
+	public Future<Object[]> submitCall(Call c, PreemptionContext preemptionContext) {
 		CountDownLatch latch = new CountDownLatch(1);
 		latches.add(latch);
 		synchronized (calls) {
 			calls.put(c, latch);
 		}
 
-		executorService.submit(c.currentContinuation().toCallable(handler));
+		executorService.submit(c.currentContinuation().toCallable(handler, preemptionContext));
 		return c.result();
 	}
 
+	@Deprecated
 	public Future<Object[]> submitCall(LuaState state, PreemptionContext preemptionContext, Object fn, Object... args) {
-		return submitCall(Call.init(state, preemptionContext, fn, args));
+		return submitCall(Call.init(state, fn, args), preemptionContext);
 	}
 
 	private void done(Call c) {
@@ -73,8 +74,8 @@ public class CallMultiplexer {
 		}
 
 		@Override
-		public void waiting(final Call c, final Runnable task, final Call.Continuation cont) {
-			final Callable<Object[]> cc = cont.toCallable(handler);
+		public void waiting(final Call c, final Runnable task, Call.Continuation cont, PreemptionContext preemptionContext) {
+			final Callable<Object[]> cc = cont.toCallable(handler, preemptionContext);
 			executorService.submit(new Runnable() {
 				@Override
 				public void run() {

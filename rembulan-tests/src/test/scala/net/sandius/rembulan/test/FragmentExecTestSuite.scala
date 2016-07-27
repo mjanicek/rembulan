@@ -175,7 +175,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
           val handler = new EventHandler {
             override def paused(c: Call, cont: Call.Continuation) { }
-            override def waiting(c: Call, task: Runnable, cont: Call.Continuation) = {
+            override def waiting(c: Call, task: Runnable, cont: Call.Continuation, pc: PreemptionContext) = {
               task.run()
             }
             override def returned(c: Call, result: Array[AnyRef]) = resultPromise.success(result)
@@ -191,7 +191,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             val env = envForContext(state, ctx)
             val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)
 
-            Call.init(state, preemptionContext, func)
+            Call.init(state, func)
           }
 
           var steps = 0
@@ -201,7 +201,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           while (exec.state() == Call.State.PAUSED) {
             preemptionContext.deposit(s)
             if (preemptionContext.allowed) {
-              exec.resume(handler)
+              exec.resume(handler, preemptionContext)
             }
             steps += 1
           }
