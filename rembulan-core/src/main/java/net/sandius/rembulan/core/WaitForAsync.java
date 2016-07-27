@@ -2,7 +2,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
-public class WaitForAsync extends ControlThrowable {
+class WaitForAsync extends ControlThrowable {
 
 	private final Runnable task;
 

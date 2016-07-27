@@ -2,9 +2,9 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.util.Check;
 
-public abstract class CoroutineSwitch extends ControlThrowable {
+abstract class CoroutineSwitch extends ControlThrowable {
 
-	public static final class Yield extends CoroutineSwitch {
+	static final class Yield extends CoroutineSwitch {
 
 		public final Object[] args;
 
@@ -14,7 +14,7 @@ public abstract class CoroutineSwitch extends ControlThrowable {
 
 	}
 
-	public static final class Resume extends CoroutineSwitch {
+	static final class Resume extends CoroutineSwitch {
 
 		public final Coroutine coroutine;
 		public final Object[] args;
