@@ -4,6 +4,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -32,12 +33,12 @@ public class CallMultiplexer {
 			calls.put(c, latch);
 		}
 
-		executorService.submit(c.currentContinuationCallable());
+		executorService.submit(c.currentContinuation().toCallable(handler));
 		return c.result();
 	}
 
 	public Future<Object[]> submitCall(LuaState state, PreemptionContext preemptionContext, Object fn, Object... args) {
-		return submitCall(Call.init(state, preemptionContext, handler, fn, args));
+		return submitCall(Call.init(state, preemptionContext, fn, args));
 	}
 
 	private void done(Call c) {
@@ -73,6 +74,7 @@ public class CallMultiplexer {
 
 		@Override
 		public void waiting(final Call c, final Runnable task, final Call.Continuation cont) {
+			final Callable<Object[]> cc = cont.toCallable(handler);
 			executorService.submit(new Runnable() {
 				@Override
 				public void run() {
@@ -80,7 +82,7 @@ public class CallMultiplexer {
 						task.run();
 					}
 					finally {
-						executorService.submit(cont);
+						executorService.submit(cc);
 					}
 				}
 			});

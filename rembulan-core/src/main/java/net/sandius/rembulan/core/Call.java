@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Call {
 
 	private final LuaState state;
-	private final EventHandler handler;
 	private final ObjectSink objectSink;
 	private final PreemptionContext preemptionContext;
 	private final Context context;
@@ -34,13 +33,11 @@ public class Call {
 	private Call(
 			LuaState state,
 			PreemptionContext preemptionContext,
-			EventHandler handler,
 			ObjectSink objectSink,
 			Coroutine mainCoroutine) {
 
 		this.state = Check.notNull(state);
 		this.preemptionContext = Check.notNull(preemptionContext);
-		this.handler = Check.notNull(handler);
 		this.objectSink = Check.notNull(objectSink);
 		this.context = new Context();
 
@@ -53,14 +50,13 @@ public class Call {
 	public static Call init(
 			LuaState state,
 			PreemptionContext preemptionContext,
-			EventHandler handler,
 			Object fn,
 			Object... args) {
 
 		ObjectSink objectSink = state.newObjectSink();
 		Coroutine c = new Coroutine(fn);
 		objectSink.setToArray(args);
-		return new Call(state, preemptionContext, handler, objectSink, c);
+		return new Call(state, preemptionContext, objectSink, c);
 	}
 
 	public enum State {
@@ -85,13 +81,17 @@ public class Call {
 				&& version != VERSION_CANCELLED;
 	}
 
-	public State state() {
-		switch (currentVersion.get()) {
+	private static State versionToState(int version) {
+		switch (version) {
 			case VERSION_RUNNING:    return State.RUNNING;
 			case VERSION_TERMINATED: return State.TERMINATED;
 			case VERSION_CANCELLED:  return State.CANCELLED;
 			default:                 return State.PAUSED;
 		}
+	}
+
+	public State state() {
+		return versionToState(currentVersion.get());
 	}
 
 	// cancel this call if it hasn't started yet
@@ -302,7 +302,7 @@ public class Call {
 
 	}
 
-	public static class Continuation implements Callable<Object[]> {
+	public static class Continuation {
 
 		private final Call call;
 		private final int version;
@@ -329,58 +329,65 @@ public class Call {
 			return result;
 		}
 
-		@Override
-		public Object[] call() throws Exception {
-			Object[] r = null;
-			try {
-				r = call.resume(version);
-			}
-			catch (Exception e) {
-				call.result.fail(e);
-				throw e;
-			}
+		public Callable<Object[]> toCallable(final EventHandler handler) {
+			return new Callable<Object[]>() {
+				@Override
+				public Object[] call() throws Exception {
+					Object[] r = null;
+					try {
+						r = call.resume(version, handler);
+					}
+					catch (Exception e) {
+						call.result.fail(e);
+						throw e;
+					}
 
-			if (r != null) {
-				call.result.complete(r);
-			}
+					if (r != null) {
+						call.result.complete(r);
+					}
 
-			return r;
+					return r;
+				}
+			};
 		}
 
 	}
 
-	private Continuation currentContinuation() {
-		// FIXME: code duplication
-		int version = currentVersion.get();
+	private Continuation continuation(int version) {
 		return isPaused(version) ? new Continuation(this, version) : null;
 	}
 
-	public Callable<Object[]> currentContinuationCallable() {
-		int version = currentVersion.get();
-		switch (version) {
-			case VERSION_RUNNING:    throw new IllegalStateException("Cannot get continuation of a running call");
-			case VERSION_TERMINATED: throw new IllegalStateException("Cannot get continuation of a terminated call");
-			case VERSION_CANCELLED:  throw new IllegalStateException("Cannot get continuation of a cancelled call");
-		}
-
-		return new Continuation(this, version);
+	private Continuation currentContinuationOrNull() {
+		return continuation(currentVersion.get());
 	}
 
-	private Object[] resumeCurrentContinuation() throws Exception {
-		return currentContinuationCallable().call();
+	public Continuation currentContinuation() {
+		int version = currentVersion.get();
+
+		if (!isPaused(version)) {
+			State s = versionToState(version);
+			throw new IllegalStateException("Cannot get continuation of a " + s + " call");
+		}
+		else {
+			return continuation(version);
+		}
+	}
+
+	private Object[] resumeCurrentContinuation(EventHandler handler) throws Exception {
+		return currentContinuation().toCallable(handler).call();
 	}
 
 	@Deprecated
-	public void resume() {
+	public void resume(EventHandler handler) {
 		try {
-			resumeCurrentContinuation();
+			resumeCurrentContinuation(handler);
 		}
 		catch (Exception e) {
 			// no-op
 		}
 	}
 
-	private Object[] resume(int version) {
+	private Object[] resume(int version, final EventHandler handler) {
 		if (version == VERSION_RUNNING || version == VERSION_TERMINATED || version == VERSION_CANCELLED) {
 			throw new IllegalArgumentException("Illegal version: " + version);
 		}
@@ -392,7 +399,7 @@ public class Call {
 		int newVersion = VERSION_TERMINATED;
 		Hook hook = null;
 		try {
-			hook = doResume();
+			hook = doResume(handler);
 			if (hook.result == null) {
 				newVersion = newPausedVersion(version);
 			}
@@ -417,7 +424,7 @@ public class Call {
 			assert (old == VERSION_RUNNING);
 
 			if (hook != null) {
-				Runnable hookBody = hook.body(currentContinuation());
+				Runnable hookBody = hook.body(currentContinuationOrNull());
 				hookBody.run();
 			}
 		}
@@ -435,7 +442,7 @@ public class Call {
 	}
 
 	// returns null iff the execution is paused (i.e. when it can be resumed)
-	private Hook doResume() throws RuntimeException {
+	private Hook doResume(final EventHandler handler) throws RuntimeException {
 		Throwable error = null;
 
 		while (currentCoroutine != null) {

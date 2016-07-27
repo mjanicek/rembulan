@@ -173,6 +173,15 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
           val resultPromise = Promise[Array[AnyRef]]()
 
+          val handler = new EventHandler {
+            override def paused(c: Call, cont: Call.Continuation) { }
+            override def waiting(c: Call, task: Runnable, cont: Call.Continuation) = {
+              task.run()
+            }
+            override def returned(c: Call, result: Array[AnyRef]) = resultPromise.success(result)
+            override def failed(c: Call, error: Throwable) = resultPromise.failure(error)
+          }
+
           val exec = Util.timed("Compilation and setup") {
 
             val ldr = l.loader()
@@ -182,16 +191,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             val env = envForContext(state, ctx)
             val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)
 
-            val handler = new EventHandler {
-              override def paused(c: Call, cont: Call.Continuation) { }
-              override def waiting(c: Call, task: Runnable, cont: Call.Continuation) = {
-                task.run()
-              }
-              override def returned(c: Call, result: Array[AnyRef]) = resultPromise.success(result)
-              override def failed(c: Call, error: Throwable) = resultPromise.failure(error)
-            }
-
-            Call.init(state, preemptionContext, handler, func)
+            Call.init(state, preemptionContext, func)
           }
 
           var steps = 0
@@ -201,7 +201,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           while (exec.state() == Call.State.PAUSED) {
             preemptionContext.deposit(s)
             if (preemptionContext.allowed) {
-              exec.resume()
+              exec.resume(handler)
             }
             steps += 1
           }
