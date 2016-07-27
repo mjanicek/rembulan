@@ -199,8 +199,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (ControlThrowable ct) {
-				ct.push(this, new SuspendedState(state, obj, i, j, k, result));
-				throw ct;
+				throw ct.push(this, new SuspendedState(state, obj, i, j, k, result));
 			}
 		}
 

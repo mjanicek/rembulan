@@ -13,8 +13,9 @@ public abstract class ControlThrowable extends Throwable {
 		this.resumeStack = null;
 	}
 
-	public void push(Resumable resumable, Object suspendedState) {
+	public ControlThrowable push(Resumable resumable, Object suspendedState) {
 		resumeStack = new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack);
+		return this;
 	}
 
 	// LIFO iterator

@@ -449,8 +449,7 @@ public class DefaultMathLib extends MathLib {
 					}
 				}
 				catch (ControlThrowable ct) {
-					ct.push(this, new State(args, idx, best));
-					throw ct;
+					throw ct.push(this, new State(args, idx, best));
 				}
 
 				if (Conversions.booleanValueOf(context.getObjectSink()._0())) {

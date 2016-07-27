@@ -234,8 +234,6 @@ class RunMethod {
 		il.add(label);
 		il.add(ASMUtils.frameSame1(ControlThrowable.class));
 
-		il.add(new InsnNode(DUP));
-
 		il.add(createSnapshot());
 
 		// register snapshot with the control exception
@@ -244,9 +242,9 @@ class RunMethod {
 				Type.getInternalName(ControlThrowable.class),
 				"push",
 				Type.getMethodType(
-						Type.VOID_TYPE,
+						Type.getType(ControlThrowable.class),
 						Type.getType(Resumable.class),
-						context.savedStateClassType()).getDescriptor(),
+						Type.getType(Object.class)).getDescriptor(),
 				false));
 
 		// rethrow

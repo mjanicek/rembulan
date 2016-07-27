@@ -1,20 +1,8 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.lib.AssertionFailedException;
-import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Conversions;
-import net.sandius.rembulan.core.Dispatch;
-import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.IllegalOperationAttemptException;
-import net.sandius.rembulan.core.LuaRuntimeException;
-import net.sandius.rembulan.core.Metatables;
-import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.PlainValueTypeNamer;
-import net.sandius.rembulan.core.ProtectedResumable;
-import net.sandius.rembulan.core.RawOperators;
-import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.*;
 import net.sandius.rembulan.core.impl.Varargs;
+import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.util.Check;
@@ -165,8 +153,7 @@ public class DefaultBasicLib extends BasicLib {
 					Dispatch.call(context, ToString.INSTANCE, a);
 				}
 				catch (ControlThrowable ct) {
-					ct.push(this, Varargs.from(args, i + 1));
-					throw ct;
+					throw ct.push(this, Varargs.from(args, i + 1));
 				}
 
 				Object s = context.getObjectSink()._0();
@@ -297,8 +284,7 @@ public class DefaultBasicLib extends BasicLib {
 					Dispatch.call(context, metamethod, t);
 				}
 				catch (ControlThrowable ct) {
-					ct.push(this, null);
-					throw ct;
+					throw ct.push(this, null);
 				}
 
 				ObjectSink os = context.getObjectSink();
@@ -354,8 +340,7 @@ public class DefaultBasicLib extends BasicLib {
 					Dispatch.call(context, meta, arg);
 				}
 				catch (ControlThrowable ct) {
-					ct.push(this, null);
-					throw ct;
+					throw ct.push(this, null);
 				}
 
 				// resume
@@ -545,8 +530,7 @@ public class DefaultBasicLib extends BasicLib {
 				Dispatch.call(context, callTarget, callArgs);
 			}
 			catch (ControlThrowable ct) {
-				ct.push(this, null);
-				throw ct;
+				throw ct.push(this, null);
 			}
 			catch (Exception ex) {
 				context.getObjectSink().setTo(Boolean.FALSE, Conversions.toErrorObject(ex));  // failure
@@ -612,8 +596,7 @@ public class DefaultBasicLib extends BasicLib {
 					isError = false;
 				}
 				catch (ControlThrowable ct) {
-					ct.push(this, new SavedState(handler, depth));
-					throw ct;
+					throw ct.push(this, new SavedState(handler, depth));
 				}
 				catch (Exception e) {
 					errorObject = Conversions.toErrorObject(e);

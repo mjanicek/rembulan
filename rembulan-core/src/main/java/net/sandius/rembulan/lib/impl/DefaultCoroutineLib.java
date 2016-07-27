@@ -84,8 +84,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 				context.resume(coroutine, resumeArgs);
 			}
 			catch (ControlThrowable ct) {
-				ct.push(this, null);
-				throw ct;
+				throw ct.push(this, null);
 			}
 		}
 
@@ -116,8 +115,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 				context.yield(args.getAll());
 			}
 			catch (ControlThrowable ct) {
-				ct.push(this, null);
-				throw ct;
+				throw ct.push(this, null);
 			}
 		}
 
@@ -216,8 +214,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 					context.resume(coroutine, args);
 				}
 				catch (ControlThrowable ct) {
-					ct.push(this, null);
-					throw ct;
+					throw ct.push(this, null);
 				}
 			}
 

@@ -276,8 +276,7 @@ public class DefaultIOLib extends IOLib {
 					FutureTask<Object> task = new FutureTask<>(body);
 
 					ControlThrowable ct = new WaitForAsync(task);
-					ct.push(this, new SavedState(file, args, task));
-					throw ct;
+					throw ct.push(this, new SavedState(file, args, task));
 				}
 				else {
 					context.getObjectSink().setTo(file);
@@ -348,8 +347,7 @@ public class DefaultIOLib extends IOLib {
 				Dispatch.call(context, IOFile.Write.INSTANCE, writeCallArgs);
 			}
 			catch (ControlThrowable ct) {
-				ct.push(this, outFile);
-				throw ct;
+				throw ct.push(this, outFile);
 			}
 
 			resume(context, outFile);
