@@ -301,27 +301,46 @@ public class Call {
 
 	}
 
-	private class ContinuationCallable implements Callable<Object[]> {
+	public static class Continuation implements Callable<Object[]> {
 
+		private final Call call;
 		private final int version;
 
-		ContinuationCallable(int version) {
+		private Continuation(Call call, int version) {
+			this.call = call;
 			this.version = version;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			Continuation that = (Continuation) o;
+
+			return this.version == that.version && this.call.equals(that.call);
+		}
+
+		@Override
+		public int hashCode() {
+			int result = call.hashCode();
+			result = 31 * result + version;
+			return result;
 		}
 
 		@Override
 		public Object[] call() throws Exception {
 			Object[] r = null;
 			try {
-				r = resume(version);
+				r = call.resume(version);
 			}
 			catch (Exception e) {
-				result.fail(e);
+				call.result.fail(e);
 				throw e;
 			}
 
 			if (r != null) {
-				result.complete(r);
+				call.result.complete(r);
 			}
 
 			return r;
@@ -337,7 +356,7 @@ public class Call {
 			case VERSION_CANCELLED:  throw new IllegalStateException("Cannot get continuation of a cancelled call");
 		}
 
-		return new ContinuationCallable(version);
+		return new Continuation(this, version);
 	}
 
 	@Deprecated
