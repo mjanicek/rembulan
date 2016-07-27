@@ -9,6 +9,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,7 +25,6 @@ public class Call {
 
 	private Coroutine currentCoroutine;
 
-	private final Random versionSource;
 	private final int startingVersion;
 	private final AtomicInteger currentVersion;
 
@@ -47,7 +47,6 @@ public class Call {
 
 		this.currentCoroutine = Check.notNull(mainCoroutine);
 
-		this.versionSource = new Random();
 		this.startingVersion = newPausedVersion(0);
 		this.currentVersion = new AtomicInteger(startingVersion);
 	}
@@ -74,6 +73,7 @@ public class Call {
 
 	private int newPausedVersion(int oldVersion) {
 		int v;
+		Random versionSource = ThreadLocalRandom.current();
 		do {
 			v = versionSource.nextInt();
 		} while (!isPaused(v) || v == oldVersion);
