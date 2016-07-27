@@ -1,6 +1,14 @@
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.*;
+import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.Dispatch;
+import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LuaRuntimeException;
+import net.sandius.rembulan.core.Metatables;
+import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
+import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.impl.DefaultUserdata;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
@@ -265,18 +273,20 @@ public class DefaultIOLib extends IOLib {
 				if (args.hasNext()) {
 					final String s = args.nextString();
 
-					Callable<Object> body = new Callable<Object>() {
+					FutureTask<Object> task = new FutureTask<>(new Callable<Object>() {
 						@Override
 						public Object call() throws Exception {
 							file.write(s);
 							return null;
 						}
-					};
+					});
 
-					FutureTask<Object> task = new FutureTask<>(body);
-
-					ControlThrowable ct = new WaitForAsync(task);
-					throw ct.push(this, new SavedState(file, args, task));
+					try {
+						context.resumeAfter(task);
+					}
+					catch (ControlThrowable ct) {
+						throw ct.push(this, new SavedState(file, args, task));
+					}
 				}
 				else {
 					context.getObjectSink().setTo(file);

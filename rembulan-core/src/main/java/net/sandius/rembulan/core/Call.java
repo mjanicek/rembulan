@@ -251,6 +251,11 @@ public class Call {
 			preemptionContext.withdraw(cost);
 		}
 
+		@Override
+		public void resumeAfter(Runnable task) throws ControlThrowable {
+			throw new WaitForAsync(task);
+		}
+
 	}
 
 	public interface EventHandler {

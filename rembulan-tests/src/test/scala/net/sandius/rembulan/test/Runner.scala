@@ -59,6 +59,7 @@ object Runner {
         override def resume(coroutine: Coroutine, args: Array[AnyRef]) = ???
         override def `yield`(args: Array[AnyRef]) = ???
         override def checkPreempt(cost: Int) = pc.withdraw(cost)
+        override def resumeAfter(task: Runnable) = ???
       }
 
       section("Call") {

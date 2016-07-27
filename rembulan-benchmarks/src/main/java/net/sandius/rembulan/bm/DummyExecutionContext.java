@@ -58,4 +58,9 @@ public class DummyExecutionContext implements ExecutionContext {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void resumeAfter(Runnable task) throws ControlThrowable {
+		throw new UnsupportedOperationException();
+	}
+
 }

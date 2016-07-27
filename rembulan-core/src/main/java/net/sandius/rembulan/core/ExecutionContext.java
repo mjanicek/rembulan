@@ -18,4 +18,6 @@ public interface ExecutionContext {
 
 	void checkPreempt(int cost) throws ControlThrowable;
 
+	void resumeAfter(Runnable task) throws ControlThrowable;
+
 }
