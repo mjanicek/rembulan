@@ -251,7 +251,9 @@ public class Call {
 
 		@Override
 		public void checkPreempt(int cost) throws ControlThrowable {
-			preemptionContext.withdraw(cost);
+			if (preemptionContext.withdraw(cost)) {
+				throw new Preempted();
+			}
 		}
 
 		@Override

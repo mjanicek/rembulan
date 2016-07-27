@@ -5,7 +5,6 @@ import java.io.PrintStream
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.core.Call.EventHandler
-import net.sandius.rembulan.core.PreemptionContext.AbstractPreemptionContext
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.lbc.LuaCPrototypeReader
@@ -253,17 +252,17 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
 object FragmentExecTestSuite {
 
-  class CountingPreemptionContext extends AbstractPreemptionContext {
+  class CountingPreemptionContext extends PreemptionContext {
     var totalCost = 0L
     private var allowance = 0L
 
-    override def withdraw(cost: Int): Unit = {
+    override def withdraw(cost: Int) = {
       totalCost += cost
       allowance -= cost
-      if (!allowed) {
-        preempt()
-      }
+      isPreempted
     }
+
+    override def isPreempted = allowance <= 0
 
     def deposit(n: Int): Unit = {
       allowance += n

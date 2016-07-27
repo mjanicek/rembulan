@@ -2,31 +2,38 @@ package net.sandius.rembulan.core;
 
 public interface PreemptionContext {
 
-	void withdraw(int cost) throws ControlThrowable;
+	boolean withdraw(int cost);
 
-	abstract class AbstractPreemptionContext implements PreemptionContext {
-		protected final void preempt() throws ControlThrowable {
-			throw new Preempted();
-		}
-	}
+	boolean isPreempted();
 
-	class Always extends AbstractPreemptionContext {
+	class Always implements PreemptionContext {
 
 		public static final Always INSTANCE = new Always();
 
 		@Override
-		public void withdraw(int cost) throws ControlThrowable {
-			preempt();
+		public boolean withdraw(int cost) {
+			return true;
 		}
+
+		@Override
+		public boolean isPreempted() {
+			return true;
+		}
+
 	}
 
-	class Never extends AbstractPreemptionContext {
+	class Never implements PreemptionContext {
 
 		public static final Never INSTANCE = new Never();
 
 		@Override
-		public void withdraw(int cost) throws ControlThrowable {
-			// no-op
+		public boolean withdraw(int cost) {
+			return false;
+		}
+
+		@Override
+		public boolean isPreempted() {
+			return false;
 		}
 
 	}
