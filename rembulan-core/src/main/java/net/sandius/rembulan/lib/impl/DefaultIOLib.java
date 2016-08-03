@@ -4,27 +4,23 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Userdata;
-import net.sandius.rembulan.core.impl.DefaultUserdata;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IOLib;
 import net.sandius.rembulan.lib.LibUtils;
+import net.sandius.rembulan.lib.impl.io.InputStreamIOFile;
+import net.sandius.rembulan.lib.impl.io.OutputStreamIOFile;
 import net.sandius.rembulan.util.Check;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
+import java.nio.file.Path;
 
 public class DefaultIOLib extends IOLib {
 
@@ -32,10 +28,20 @@ public class DefaultIOLib extends IOLib {
 
 	private final FileSystem fileSystem;
 
+	private final IOFile stdIn;
+	private final IOFile stdOut;
+	private final IOFile stdErr;
+
 	private IOFile defaultInput;
 	private IOFile defaultOutput;
 
-	public DefaultIOLib(TableFactory tableFactory, FileSystem fileSystem, InputStream in, OutputStream out) {
+	public DefaultIOLib(
+			TableFactory tableFactory,
+			FileSystem fileSystem,
+			InputStream in,
+			OutputStream out,
+			OutputStream err) {
+
 		Check.notNull(tableFactory);
 		Check.notNull(fileSystem);
 
@@ -58,27 +64,31 @@ public class DefaultIOLib extends IOLib {
 
 		this.fileSystem = fileSystem;
 
-		defaultInput = in != null ? newFile(in, null) : null;
-		defaultOutput = out != null ? newFile(null, out) : null;
+		stdIn = in != null ? new InputStreamIOFile(in, fileMetatable, null) : null;
+		stdOut = out != null ? new OutputStreamIOFile(out, fileMetatable, null) : null;
+		stdErr = err != null ? new OutputStreamIOFile(err, fileMetatable, null) : null;
+
+		defaultInput = stdIn;
+		defaultOutput = stdOut;
 	}
 
 	public DefaultIOLib(TableFactory tableFactory) {
-		this(tableFactory, FileSystems.getDefault(), System.in, System.out);
+		this(tableFactory, FileSystems.getDefault(), System.in, System.out, System.err);
 	}
 
 	@Override
 	public Function _close() {
-		return null;  // TODO
+		return new Close(this);
 	}
 
 	@Override
 	public Function _flush() {
-		return null;  // TODO
+		return new Flush(this);
 	}
 
 	@Override
 	public Function _input() {
-		return null;  // TODO
+		return new Input(this);
 	}
 
 	@Override
@@ -88,7 +98,7 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Function _open() {
-		return null;  // TODO
+		return new Open(this);
 	}
 
 	@Override
@@ -103,7 +113,7 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Function _read() {
-		return null;  // TODO
+		return new Read(this);
 	}
 
 	@Override
@@ -113,7 +123,7 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Function _type() {
-		return null;  // TODO
+		return Type.INSTANCE;
 	}
 
 	@Override
@@ -123,178 +133,74 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Userdata _stdin() {
-		return null;  // TODO
+		return stdIn;
 	}
 
 	@Override
 	public Userdata _stdout() {
-		return null;  // TODO
+		return stdOut;
 	}
 
 	@Override
 	public Userdata _stderr() {
-		return null;  // TODO
+		return stdErr;
 	}
 
 	@Override
 	public Function _file_close() {
-		return null;  // TODO
+		return IOFile.Close.INSTANCE;
 	}
 
 	@Override
 	public Function _file_flush() {
-		return null;  // TODO
+		return IOFile.Flush.INSTANCE;
 	}
 
 	@Override
 	public Function _file_lines() {
-		return null;  // TODO
+		return IOFile.Lines.INSTANCE;
 	}
 
 	@Override
 	public Function _file_read() {
-		return null;  // TODO
+		return IOFile.Read.INSTANCE;
 	}
 
 	@Override
 	public Function _file_seek() {
-		return null;  // TODO
+		return IOFile.Seek.INSTANCE;
 	}
 
 	@Override
 	public Function _file_setvbuf() {
-		return null;  // TODO
+		return IOFile.SetVBuf.INSTANCE;
 	}
 
 	@Override
 	public Function _file_write() {
-		return null;  // TODO
+		return IOFile.Write.INSTANCE;
 	}
 
 	public Function _file_tostring() {
 		return IOFile.ToString.INSTANCE;
 	}
 
-	protected IOFile newFile(InputStream in, OutputStream out) {
-		return new IOFile(in, out, fileMetatable, null);
+	private IOFile openFile(String filename, Open.Mode mode) {
+		Check.notNull(filename);
+		Check.notNull(mode);
+
+		Path path = fileSystem.getPath(filename);
+
+		throw new UnsupportedOperationException();  // TODO
 	}
 
-	public static class IOFile extends DefaultUserdata {
+	public IOFile setDefaultInputFile(IOFile f) {
+		defaultInput = Check.notNull(f);
+		return f;
+	}
 
-		private final InputStream in;
-		private final OutputStream out;
-
-		public IOFile(InputStream in, OutputStream out, Table metatable, Object userValue) {
-			super(metatable, userValue);
-			this.in = in;
-			this.out = out;
-		}
-
-		public static String typeName() {
-			return "FILE*";
-		}
-
-		@Override
-		public String toString() {
-			return "file (0x" + Integer.toHexString(hashCode()) + ")";
-		}
-
-		public void write(String s) throws IOException {
-			out.write(s.getBytes());
-		}
-
-		public static class ToString extends LibFunction {
-
-			public static final ToString INSTANCE = new ToString();
-
-			@Override
-			protected String name() {
-				return "tostring";
-			}
-
-			@Override
-			protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-				IOFile f = args.nextUserdata(typeName(), IOFile.class);
-				context.getObjectSink().setTo(f.toString());
-			}
-
-		}
-
-		public static class Write extends LibFunction {
-
-			public static final Write INSTANCE = new Write();
-
-			@Override
-			protected String name() {
-				return "write";
-			}
-
-			private static class SavedState {
-
-				public final IOFile file;
-				public final ArgumentIterator args;
-				public final Future<Object> currentTask;
-
-				private SavedState(IOFile file, ArgumentIterator args, Future<Object> currentTask) {
-					this.file = file;
-					this.args = args;
-					this.currentTask = currentTask;
-				}
-
-			}
-
-			@Override
-			protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-				final IOFile f = args.nextUserdata(typeName(), IOFile.class);
-				run(context, f, args, null);
-			}
-
-			@Override
-			public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-				SavedState ss = (SavedState) suspendedState;
-				run(context, ss.file, ss.args, ss.currentTask);
-			}
-
-			private void run(ExecutionContext context, final IOFile file, ArgumentIterator args, Future<Object> currentTask) throws ControlThrowable {
-				if (currentTask != null) {
-					try {
-						currentTask.get();
-					}
-					catch (InterruptedException ex) {
-						throw new LuaRuntimeException(ex);
-					}
-					catch (ExecutionException ex) {
-						Throwable cause = ex.getCause();
-						context.getObjectSink().setTo(null, cause != null ? cause.getMessage() : null);
-						return;
-					}
-				}
-
-				if (args.hasNext()) {
-					final String s = args.nextString();
-
-					FutureTask<Object> task = new FutureTask<>(new Callable<Object>() {
-						@Override
-						public Object call() throws Exception {
-							file.write(s);
-							return null;
-						}
-					});
-
-					try {
-						context.resumeAfter(task);
-					}
-					catch (ControlThrowable ct) {
-						throw ct.push(this, new SavedState(file, args, task));
-					}
-				}
-				else {
-					context.getObjectSink().setTo(file);
-				}
-			}
-
-		}
-
+	public IOFile getDefaultInputFile() {
+		return defaultInput;
 	}
 
 	public IOFile setDefaultOutputFile(IOFile f) {
@@ -304,6 +210,189 @@ public class DefaultIOLib extends IOLib {
 
 	public IOFile getDefaultOutputFile() {
 		return defaultOutput;
+	}
+
+	public static class Close extends LibFunction {
+
+		private final DefaultIOLib lib;
+
+		public Close(DefaultIOLib lib) {
+			this.lib = Check.notNull(lib);
+		}
+
+		@Override
+		protected String name() {
+			return "close";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			final IOFile file = args.hasNext()
+					? args.nextUserdata(IOFile.typeName(), IOFile.class)
+					: lib.getDefaultOutputFile();
+
+			try {
+				Dispatch.call(context, IOFile.Close.INSTANCE, file);
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, null);
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			// results already on stack, this is a no-op
+		}
+
+	}
+
+	public static class Flush extends LibFunction {
+
+		private final DefaultIOLib lib;
+
+		public Flush(DefaultIOLib lib) {
+			this.lib = Check.notNull(lib);
+		}
+
+		@Override
+		protected String name() {
+			return "flush";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			IOFile outFile = lib.getDefaultOutputFile();
+
+			try {
+				Dispatch.call(context, IOFile.Flush.INSTANCE);
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, outFile);
+			}
+
+			resume(context, outFile);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			// results are already on the stack, this is a no-op
+		}
+
+	}
+
+	public static class Input extends LibFunction {
+
+		private final DefaultIOLib lib;
+
+		public Input(DefaultIOLib lib) {
+			this.lib = Check.notNull(lib);
+		}
+
+		@Override
+		protected String name() {
+			return "input";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			if (args.hasNext()) {
+				// open the argument for reading and set it as the default input file
+				String filename = args.nextString();
+				IOFile f = lib.openFile(filename, Open.Mode.READ);
+				assert (f != null);
+				lib.setDefaultInputFile(f);
+				context.getObjectSink().setTo(f);
+			}
+			else {
+				// return the default input file
+				IOFile inFile = lib.getDefaultInputFile();
+				context.getObjectSink().setTo(inFile);
+			}
+		}
+
+	}
+
+	public static class Open extends LibFunction {
+
+		private final DefaultIOLib lib;
+
+		public Open(DefaultIOLib lib) {
+			this.lib = Check.notNull(lib);
+		}
+
+		enum Mode {
+			READ,
+			WRITE,
+			APPEND,
+			UPDATE_READ,
+			UPDATE_WRITE,
+			UPDATE_APPEND
+		}
+
+		private static final Mode DEFAULT_MODE = Mode.READ;
+
+		private static Mode mode(String modeString) {
+			switch (modeString) {
+				case "r": return Mode.READ;
+				case "w": return Mode.WRITE;
+				case "a": return Mode.APPEND;
+				case "r+": return Mode.UPDATE_READ;
+				case "w+": return Mode.UPDATE_WRITE;
+				case "a+": return Mode.UPDATE_APPEND;
+				default: return null;
+			}
+		}
+
+		@Override
+		protected String name() {
+			return "open";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			String filename = args.nextString();
+
+			final boolean binary;
+			final Mode mode;
+
+			String modeString = args.hasNext() ? args.nextString() : null;
+			if (modeString != null) {
+				if (modeString.endsWith("b")) {
+					binary = true;
+					modeString = modeString.substring(0, modeString.length() - 1);
+				}
+				else {
+					binary = false;
+				}
+
+				mode = mode(modeString);
+			}
+			else {
+				mode = DEFAULT_MODE;
+				binary = false;
+			}
+
+			if (mode == null) {
+				// FIXME: ugly hack just to get to the index #2
+				args.rewind();
+				args.skip();
+				throw args.badArgument("invalid mode");
+			}
+
+			IOFile file = null;
+			try {
+				file = lib.openFile(filename, mode);
+			}
+			catch (Exception ex) {
+				context.getObjectSink().setTo(null, ex.getMessage());
+				return;
+			}
+
+			assert (file != null);
+
+			context.getObjectSink().setTo(file);
+		}
+
 	}
 
 	public static class Output extends LibFunction {
@@ -323,7 +412,11 @@ public class DefaultIOLib extends IOLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			if (args.hasNext()) {
 				// open the argument for writing and set it as the default output file
-				throw new UnsupportedOperationException();  // TODO
+				String filename = args.nextString();
+				IOFile f = lib.openFile(filename, Open.Mode.WRITE);
+				assert (f != null);
+				lib.setDefaultOutputFile(f);
+				context.getObjectSink().setTo(f);
 			}
 			else {
 				// return the default output file
@@ -333,6 +426,70 @@ public class DefaultIOLib extends IOLib {
 		}
 
 	}
+
+	public static class Read extends LibFunction {
+
+		private final DefaultIOLib lib;
+
+		public Read(DefaultIOLib lib) {
+			this.lib = Check.notNull(lib);
+		}
+
+		@Override
+		protected String name() {
+			return "read";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			IOFile file = lib.getDefaultInputFile();
+			Object[] callArgs = Varargs.concat(new Object[] { file }, args.getAll());
+
+			try {
+				Dispatch.call(context, IOFile.Read.INSTANCE, callArgs);
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, null);
+			}
+
+			resume(context, file);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			// results are already on the stack, this is a no-op
+		}
+
+	}
+
+	public static class Type extends LibFunction {
+
+		public static final Type INSTANCE = new Type();
+
+		@Override
+		protected String name() {
+			return "type";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Object o = args.nextAny();
+
+			final String result;
+
+			if (o instanceof IOFile) {
+				IOFile f = (IOFile) o;
+				result = f.isClosed() ? "closed file" : "file";
+			}
+			else {
+				result = null;
+			}
+
+			context.getObjectSink().setTo(result);
+		}
+
+	}
+
 
 	public static class Write extends LibFunction {
 
@@ -349,18 +506,17 @@ public class DefaultIOLib extends IOLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			IOFile outFile = lib.getDefaultOutputFile();
-
-			Object[] writeCallArgs = Varargs.concat(new Object[] { outFile }, args.getAll());
+			IOFile file = lib.getDefaultOutputFile();
+			Object[] callArgs = Varargs.concat(new Object[] { file }, args.getAll());
 
 			try {
-				Dispatch.call(context, IOFile.Write.INSTANCE, writeCallArgs);
+				Dispatch.call(context, IOFile.Write.INSTANCE, callArgs);
 			}
 			catch (ControlThrowable ct) {
-				throw ct.push(this, outFile);
+				throw ct.push(this, null);
 			}
 
-			resume(context, outFile);
+			resume(context, file);
 		}
 
 		@Override

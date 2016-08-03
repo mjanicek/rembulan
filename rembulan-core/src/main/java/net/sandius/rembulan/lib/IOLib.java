@@ -193,7 +193,7 @@ public abstract class IOLib implements Lib {
 	 * As an example, the construction
 	 * <pre>
 	 *   for c in file:lines(1) do body end
-	 * <pre>
+	 * </pre>
 	 * will iterate over all characters of the file, starting at the current position.
 	 * Unlike {@link #_lines() <code>io.lines</code>}, this function does not close the file
 	 * when the loop ends.</p>
