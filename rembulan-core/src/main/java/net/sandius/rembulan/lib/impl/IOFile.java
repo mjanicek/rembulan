@@ -2,15 +2,10 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.impl.DefaultUserdata;
 
 import java.io.IOException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 
 public abstract class IOFile extends DefaultUserdata {
 
@@ -56,36 +51,11 @@ public abstract class IOFile extends DefaultUserdata {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			final IOFile f = args.nextUserdata(typeName(), IOFile.class);
 
-			FutureTask<Object> task = new FutureTask<>(new Callable<Object>() {
-				@Override
-				public Object call() throws Exception {
-					f.close();
-					return null;
-				}
-			});
-
 			try {
-				context.resumeAfter(task);
+				f.close();
 			}
-			catch (ControlThrowable ct) {
-				throw ct.push(this, task);
-			}
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			Future<?> future = (Future<?>) suspendedState;
-
-			try {
-				future.get();
-			}
-			catch (InterruptedException ex) {
-				throw new LuaRuntimeException(ex);
-			}
-			// TODO: CancelledException ?
-			catch (ExecutionException ex) {
-				Throwable cause = ex.getCause();
-				context.getObjectSink().setTo(null, cause != null ? cause.getMessage() : null);
+			catch (Exception ex) {
+				context.getObjectSink().setTo(null, ex.getMessage());
 				return;
 			}
 
@@ -106,37 +76,11 @@ public abstract class IOFile extends DefaultUserdata {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			final IOFile f = args.nextUserdata(typeName(), IOFile.class);
-
-			FutureTask<Object> task = new FutureTask<>(new Callable<Object>() {
-				@Override
-				public Object call() throws Exception {
-					f.flush();
-					return null;
-				}
-			});
-
 			try {
-				context.resumeAfter(task);
+				f.flush();
 			}
-			catch (ControlThrowable ct) {
-				throw ct.push(this, task);
-			}
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			Future<?> future = (Future<?>) suspendedState;
-
-			try {
-				future.get();
-			}
-			catch (InterruptedException ex) {
-				throw new LuaRuntimeException(ex);
-			}
-			// TODO: CancelledException ?
-			catch (ExecutionException ex) {
-				Throwable cause = ex.getCause();
-				context.getObjectSink().setTo(null, cause != null ? cause.getMessage() : null);
+			catch (Exception ex) {
+				context.getObjectSink().setTo(null, ex.getMessage());
 				return;
 			}
 
@@ -170,33 +114,9 @@ public abstract class IOFile extends DefaultUserdata {
 			return "read";
 		}
 
-		private static class SavedState {
-
-			public final IOFile file;
-			public final ArgumentIterator args;
-			public final Future<Object> currentTask;
-
-			private SavedState(IOFile file, ArgumentIterator args, Future<Object> currentTask) {
-				this.file = file;
-				this.args = args;
-				this.currentTask = currentTask;
-			}
-
-		}
-
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			final IOFile f = args.nextUserdata(typeName(), IOFile.class);
-			run(context, f, args, null);
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			SavedState ss = (SavedState) suspendedState;
-			run(context, ss.file, ss.args, ss.currentTask);
-		}
-
-		private void run(ExecutionContext context, final IOFile file, ArgumentIterator args, Future<Object> currentTask) throws ControlThrowable {
 			throw new UnsupportedOperationException();  // TODO
 		}
 
@@ -211,6 +131,15 @@ public abstract class IOFile extends DefaultUserdata {
 			return "seek";
 		}
 
+		private static Whence stringToWhence(String s) {
+			switch (s) {
+				case "set": return Whence.BEGINNING;
+				case "cur": return Whence.CURRENT_POSITION;
+				case "end": return Whence.END;
+				default: return null;
+			}
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			IOFile file = args.nextUserdata(typeName(), IOFile.class);
@@ -219,34 +148,22 @@ public abstract class IOFile extends DefaultUserdata {
 			final long offset;
 
 			if (args.hasNext()) {
-				String w = args.nextString();
-				if ("set".equals(w)) {
-					whence = Whence.BEGINNING;
-				}
-				else if ("cur".equals(w)) {
-					whence = Whence.CURRENT_POSITION;
-				}
-				else if ("end".equals(w)) {
-					whence = Whence.END;
-				}
-				else {
+				String s = args.nextString();
+				Whence w = stringToWhence(s);
+				if (w == null) {
 					args.goTo(1);
-					throw args.badArgument("invalid option '" + w + "'");
+					throw args.badArgument("invalid option '" + s + "'");
 				}
 
-				if (args.hasNext()) {
-					offset = args.nextInteger();
-				}
-				else {
-					offset = 0L;
-				}
+				whence = w;
+				offset = args.hasNext() ? args.nextInteger() : 0L;
 			}
 			else {
 				whence = Whence.CURRENT_POSITION;
 				offset = 0L;
 			}
 
-			long position = -1L;
+			final long position;
 			try {
 				position = file.seek(whence, offset);
 			}
@@ -285,69 +202,21 @@ public abstract class IOFile extends DefaultUserdata {
 			return "write";
 		}
 
-		private static class SavedState {
-
-			public final IOFile file;
-			public final ArgumentIterator args;
-			public final Future<Object> currentTask;
-
-			private SavedState(IOFile file, ArgumentIterator args, Future<Object> currentTask) {
-				this.file = file;
-				this.args = args;
-				this.currentTask = currentTask;
-			}
-
-		}
-
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			final IOFile f = args.nextUserdata(typeName(), IOFile.class);
-			run(context, f, args, null);
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			SavedState ss = (SavedState) suspendedState;
-			run(context, ss.file, ss.args, ss.currentTask);
-		}
-
-		private void run(ExecutionContext context, final IOFile file, ArgumentIterator args, Future<Object> currentTask) throws ControlThrowable {
-			if (currentTask != null) {
+			while (args.hasNext()) {
+				final String s = args.nextString();
 				try {
-					currentTask.get();
+					f.write(s);
 				}
-				catch (InterruptedException ex) {
-					throw new LuaRuntimeException(ex);
-				}
-				// TODO: CancelledException ?
-				catch (ExecutionException ex) {
-					Throwable cause = ex.getCause();
-					context.getObjectSink().setTo(null, cause != null ? cause.getMessage() : null);
+				catch (Exception ex) {
+					context.getObjectSink().setTo(null, ex.getMessage());
 					return;
 				}
 			}
 
-			if (args.hasNext()) {
-				final String s = args.nextString();
-
-				FutureTask<Object> task = new FutureTask<>(new Callable<Object>() {
-					@Override
-					public Object call() throws Exception {
-						file.write(s);
-						return null;
-					}
-				});
-
-				try {
-					context.resumeAfter(task);
-				}
-				catch (ControlThrowable ct) {
-					throw ct.push(this, new SavedState(file, args, task));
-				}
-			}
-			else {
-				context.getObjectSink().setTo(file);
-			}
+			context.getObjectSink().setTo(f);
 		}
 
 	}
