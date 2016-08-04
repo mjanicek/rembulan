@@ -10,26 +10,20 @@ import java.io.InputStream;
 public class InputStreamIOFile extends IOFile {
 
 	private final InputStream in;
-	private boolean closed;
 
 	public InputStreamIOFile(InputStream in, Table metatable, Object userValue) {
 		super(metatable, userValue);
-
 		this.in = Check.notNull(in);
-		this.closed = false;
 	}
 
 	@Override
 	public boolean isClosed() {
-		return closed;
+		return false;
 	}
 
 	@Override
 	public void close() throws IOException {
-		if (!closed) {
-			in.close();
-			closed = true;
-		}
+		throw new UnsupportedOperationException("cannot close standard file");
 	}
 
 	@Override

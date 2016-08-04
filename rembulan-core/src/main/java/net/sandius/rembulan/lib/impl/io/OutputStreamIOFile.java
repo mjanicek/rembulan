@@ -10,13 +10,10 @@ import java.io.OutputStream;
 public class OutputStreamIOFile extends IOFile {
 
 	private final OutputStream out;
-	private boolean closed;
 
 	public OutputStreamIOFile(OutputStream out, Table metatable, Object userValue) {
 		super(metatable, userValue);
-
 		this.out = Check.notNull(out);
-		this.closed = false;
 	}
 
 	@Override
@@ -25,10 +22,7 @@ public class OutputStreamIOFile extends IOFile {
 	}
 
 	public void close() throws IOException {
-		if (!closed) {
-			out.close();
-			closed = true;
-		}
+		throw new UnsupportedOperationException("cannot close standard file");
 	}
 
 	public void flush() throws IOException {
