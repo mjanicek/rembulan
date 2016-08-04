@@ -374,8 +374,7 @@ public class DefaultIOLib extends IOLib {
 
 			if (mode == null) {
 				// FIXME: ugly hack just to get to the index #2
-				args.rewind();
-				args.skip();
+				args.goTo(1);
 				throw args.badArgument("invalid mode");
 			}
 

@@ -35,6 +35,14 @@ public abstract class IOFile extends DefaultUserdata {
 
 	public abstract void write(String s) throws IOException;
 
+	public enum Whence {
+		BEGINNING,
+		CURRENT_POSITION,
+		END
+	}
+
+	public abstract long seek(Whence whence, long position) throws IOException;
+
 	public static class Close extends LibFunction {
 
 		public static final Close INSTANCE = new Close();
@@ -205,7 +213,49 @@ public abstract class IOFile extends DefaultUserdata {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			throw new UnsupportedOperationException();  // TODO
+			IOFile file = args.nextUserdata(typeName(), IOFile.class);
+
+			final Whence whence;
+			final long offset;
+
+			if (args.hasNext()) {
+				String w = args.nextString();
+				if ("set".equals(w)) {
+					whence = Whence.BEGINNING;
+				}
+				else if ("cur".equals(w)) {
+					whence = Whence.CURRENT_POSITION;
+				}
+				else if ("end".equals(w)) {
+					whence = Whence.END;
+				}
+				else {
+					args.goTo(1);
+					throw args.badArgument("invalid option '" + w + "'");
+				}
+
+				if (args.hasNext()) {
+					offset = args.nextInteger();
+				}
+				else {
+					offset = 0L;
+				}
+			}
+			else {
+				whence = Whence.CURRENT_POSITION;
+				offset = 0L;
+			}
+
+			long position = -1L;
+			try {
+				position = file.seek(whence, offset);
+			}
+			catch (Exception ex) {
+				context.getObjectSink().setTo(null, ex.getMessage());
+				return;
+			}
+
+			context.getObjectSink().setTo(position);
 		}
 
 	}

@@ -9,11 +9,11 @@ import java.io.InputStream;
 
 public class InputStreamIOFile extends IOFile {
 
-	private final InputStream in;
+	private final SeekableInputStream in;
 
 	public InputStreamIOFile(InputStream in, Table metatable, Object userValue) {
 		super(metatable, userValue);
-		this.in = Check.notNull(in);
+		this.in = new SeekableInputStream(Check.notNull(in));
 	}
 
 	@Override
@@ -34,6 +34,20 @@ public class InputStreamIOFile extends IOFile {
 	@Override
 	public void write(String s) throws IOException {
 		throw new UnsupportedOperationException("Bad file descriptor");
+	}
+
+	@Override
+	public long seek(IOFile.Whence whence, long offset) throws IOException {
+		switch (whence) {
+			case BEGINNING:
+			case END:
+				return in.setPosition(offset);
+
+			case CURRENT_POSITION:
+				return in.addPosition(offset);
+
+			default: throw new IllegalArgumentException("Illegal whence: " + whence);
+		}
 	}
 
 }

@@ -9,11 +9,11 @@ import java.io.OutputStream;
 
 public class OutputStreamIOFile extends IOFile {
 
-	private final OutputStream out;
+	private final SeekableOutputStream out;
 
 	public OutputStreamIOFile(OutputStream out, Table metatable, Object userValue) {
 		super(metatable, userValue);
-		this.out = Check.notNull(out);
+		this.out = new SeekableOutputStream(Check.notNull(out));
 	}
 
 	@Override
@@ -31,6 +31,20 @@ public class OutputStreamIOFile extends IOFile {
 
 	public void write(String s) throws IOException {
 		out.write(s.getBytes());
+	}
+
+	@Override
+	public long seek(IOFile.Whence whence, long offset) throws IOException {
+		switch (whence) {
+			case BEGINNING:
+			case END:
+				return out.setPosition(offset);
+
+			case CURRENT_POSITION:
+				return out.addPosition(offset);
+
+			default: throw new IllegalArgumentException("Illegal whence: " + whence);
+		}
 	}
 
 }
