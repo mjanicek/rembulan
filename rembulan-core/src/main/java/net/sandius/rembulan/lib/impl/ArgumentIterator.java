@@ -5,8 +5,8 @@ import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Userdata;
-import net.sandius.rembulan.core.Values;
 import net.sandius.rembulan.core.ValueTypeNamer;
+import net.sandius.rembulan.core.Values;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.LibUtils;
@@ -93,6 +93,10 @@ public class ArgumentIterator implements Iterator<Object> {
 
 	protected BadArgumentException badArgument(Throwable cause) {
 		return new BadArgumentException(index + 1, name, cause);
+	}
+
+	protected BadArgumentException badArgument(int argIndex, String message) {
+		return new BadArgumentException(argIndex, name, message);
 	}
 
 	protected BadArgumentException badArgument(String message) {

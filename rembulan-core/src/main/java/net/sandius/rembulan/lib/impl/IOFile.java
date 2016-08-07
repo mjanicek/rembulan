@@ -151,8 +151,7 @@ public abstract class IOFile extends DefaultUserdata {
 				String s = args.nextString();
 				Whence w = stringToWhence(s);
 				if (w == null) {
-					args.goTo(1);
-					throw args.badArgument("invalid option '" + s + "'");
+					throw args.badArgument(1, "invalid option '" + s + "'");
 				}
 
 				whence = w;
