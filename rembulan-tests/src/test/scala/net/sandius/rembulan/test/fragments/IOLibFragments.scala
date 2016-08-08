@@ -1,6 +1,7 @@
-package net.sandius.rembulan.test
+package net.sandius.rembulan.test.fragments
 
 import net.sandius.rembulan.core.Userdata
+import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
 
 object IOLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 

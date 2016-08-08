@@ -1,10 +1,11 @@
-package net.sandius.rembulan.test
+package net.sandius.rembulan.test.fragments
 
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.lib.AssertionFailedException
+import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations}
 import net.sandius.rembulan.{core => lua}
 
-object CoroutineFragments extends FragmentBundle with FragmentExpectations  {
+object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
 
   val CreateReturnsAThread = fragment ("CreateReturnsAThread") {
     """f = function(...)

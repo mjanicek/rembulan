@@ -1,6 +1,6 @@
-package net.sandius.rembulan.compiler.gen
+package net.sandius.rembulan.test.fragments
 
-import net.sandius.rembulan.test.{FragmentExecTestSuite, MetatableFragments}
+import net.sandius.rembulan.test.FragmentExecTestSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 

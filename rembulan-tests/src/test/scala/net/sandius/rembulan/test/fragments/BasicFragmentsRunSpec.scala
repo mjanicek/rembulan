@@ -1,14 +1,14 @@
-package net.sandius.rembulan.compiler.gen
+package net.sandius.rembulan.test.fragments
 
-import net.sandius.rembulan.test.{BasicFragments, BasicLibFragments, FragmentExecTestSuite}
+import net.sandius.rembulan.test.FragmentExecTestSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
 class BasicFragmentsRunSpec extends FragmentExecTestSuite {
 
-  override def bundles = Seq(BasicFragments, BasicLibFragments)
-  override def expectations = Seq(BasicFragments, BasicLibFragments)
+  override def bundles = Seq(BasicFragments)
+  override def expectations = Seq(BasicFragments)
   override def contexts = Seq(Empty, Basic)
 
   override def steps = Seq(1, Int.MaxValue)

@@ -1,9 +1,10 @@
-package net.sandius.rembulan.test
+package net.sandius.rembulan.test.fragments
 
 import net.sandius.rembulan.core._
+import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
 import net.sandius.rembulan.{core => lua}
 
-object StringFragments extends FragmentBundle with FragmentExpectations with OneLiners {
+object StringLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
   val StringSetsMetatable = fragment ("StringSetsMetatable") {
     """return getmetatable("hello")

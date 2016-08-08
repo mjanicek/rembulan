@@ -8,7 +8,7 @@ import net.sandius.rembulan.compiler.util.IRPrinterVisitor
 import net.sandius.rembulan.parser.analysis.NameResolver
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.parser.{Expressions, Parser}
-import net.sandius.rembulan.test._
+import net.sandius.rembulan.test.fragments._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
@@ -21,13 +21,13 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   val bundles = Seq(
     BasicFragments,
     BasicLibFragments,
-    CoroutineFragments,
+    CoroutineLibFragments,
     DebugLibFragments,
     IOLibFragments,
-    MathFragments,
+    MathLibFragments,
     MetatableFragments,
     OperatorFragments,
-    StringFragments,
+    StringLibFragments,
     TableLibFragments
   )
 

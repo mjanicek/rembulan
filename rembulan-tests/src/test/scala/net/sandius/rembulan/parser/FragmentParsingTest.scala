@@ -5,7 +5,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintWriter}
 import net.sandius.rembulan.parser.analysis.{FunctionVarInfo, NameResolver}
 import net.sandius.rembulan.parser.ast._
 import net.sandius.rembulan.parser.util.FormattingPrinterVisitor
-import net.sandius.rembulan.test._
+import net.sandius.rembulan.test.fragments._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
@@ -18,13 +18,13 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
   val bundles = Seq(
     BasicFragments,
     BasicLibFragments,
-    CoroutineFragments,
+    CoroutineLibFragments,
     DebugLibFragments,
     IOLibFragments,
-    MathFragments,
+    MathLibFragments,
     MetatableFragments,
     OperatorFragments,
-    StringFragments,
+    StringLibFragments,
     TableLibFragments
   )
 

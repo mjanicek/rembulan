@@ -1,6 +1,5 @@
-package net.sandius.rembulan.compiler.gen
+package net.sandius.rembulan.compiler.analysis.types
 
-import net.sandius.rembulan.compiler.analysis.types._
 import net.sandius.rembulan.util.ReadOnlyArray
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner

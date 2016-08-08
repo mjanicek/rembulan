@@ -1,11 +1,11 @@
-package net.sandius.rembulan.compiler.gen
+package net.sandius.rembulan.test.fragments
 
-import net.sandius.rembulan.test.{FragmentExecTestSuite, TableLibFragments}
+import net.sandius.rembulan.test.FragmentExecTestSuite
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 
 @RunWith(classOf[JUnitRunner])
-class TableFragmentsRunSpec extends FragmentExecTestSuite {
+class TableLibFragmentsRunSpec extends FragmentExecTestSuite {
 
   override def bundles = Seq(TableLibFragments)
   override def expectations = Seq(TableLibFragments)

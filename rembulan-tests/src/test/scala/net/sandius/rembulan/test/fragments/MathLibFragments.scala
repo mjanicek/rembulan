@@ -1,6 +1,8 @@
-package net.sandius.rembulan.test
+package net.sandius.rembulan.test.fragments
 
-object MathFragments extends FragmentBundle with FragmentExpectations with OneLiners {
+import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
+
+object MathLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
   in (MathContext) {
 
