@@ -1,6 +1,5 @@
-package net.sandius.rembulan.parser
+package net.sandius.rembulan.compiler
 
-import net.sandius.rembulan.compiler.{ChunkClassLoader, Compiler}
 import net.sandius.rembulan.core.Variable
 import net.sandius.rembulan.test.BasicFragments
 import net.sandius.rembulan.{core => lua}
@@ -9,7 +8,7 @@ import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
 
 @RunWith(classOf[JUnitRunner])
-class NewFragmentCompileAndLoadSpec extends FunSpec with MustMatchers {
+class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
 
   def withProperty[A](key: String, value: String)(body: => A): A = {
     val oldValue = System.getProperty(key)

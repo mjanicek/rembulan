@@ -7,8 +7,6 @@ import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, Com
 import net.sandius.rembulan.core.Call.EventHandler
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
-import net.sandius.rembulan.lbc.LuaCPrototypeReader
-import net.sandius.rembulan.lbc.recompiler.PrototypeCompilerChunkLoader
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.lib.{Lib, LibUtils}
 import net.sandius.rembulan.test.FragmentExpectations.Env
@@ -101,14 +99,6 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
     def loader(): ChunkLoader
   }
 
-  case object LuacChkLoader extends ChkLoader {
-    val luacName = "luac53"
-    def name = "LuaC"
-    def loader() = new PrototypeCompilerChunkLoader(
-      new LuaCPrototypeReader(luacName),
-      getClass.getClassLoader)
-  }
-
   def compilerSettingsToString(settings: CompilerSettings): String = {
     val cpu = settings.cpuAccountingMode() match {
       case CPUAccountingMode.NO_CPU_ACCOUNTING => "n"
@@ -149,7 +139,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
     case object All extends CompilerConfigs(allConfigs)
   }
 
-  val ldrs = LuacChkLoader :: compilerConfigs.loaders.toList
+  val ldrs = compilerConfigs.loaders
 
   for (bundle <- bundles;
        fragment <- bundle.all;

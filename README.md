@@ -38,7 +38,4 @@ This is a multi-module Maven project, containing the following modules:
  * `rembulan-core` ... the runtime and the standard library
  * `rembulan-parser` ... parser for Lua 5.3, producing a (de-sugared) AST
  * `rembulan-compiler` ... Lua-to-Java bytecode compiler
- * `rembulan-lbc` ... PUC-Lua bytecode utilities
- * `rembulan-lbc-recompiler` ... recompiler from PUC-Lua bytecode to Java bytecode (obsolete)
  * `rembulan-tests` ... the project test suite, including benchmarks from the Benchmarks Game
- * `rembulan-benchmarks` ... micro-benchmarks used for selecting the implementation strategy (obsolete)

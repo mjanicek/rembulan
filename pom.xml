@@ -15,12 +15,9 @@
     <module>rembulan-util</module>
     <module>rembulan-lua-common</module>
     <module>rembulan-core</module>
-    <module>rembulan-lbc</module>
-    <module>rembulan-lbc-recompiler</module>
     <module>rembulan-lua-parser</module>
     <module>rembulan-compiler</module>
     <module>rembulan-tests</module>
-    <module>rembulan-benchmarks</module>
   </modules>
 
 </project>
