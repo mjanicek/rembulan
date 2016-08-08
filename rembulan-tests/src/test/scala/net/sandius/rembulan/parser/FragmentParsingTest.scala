@@ -28,15 +28,6 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     TableLibFragments
   )
 
-  def exprToString(expr: Expr): String = {
-    val baos = new ByteArrayOutputStream()
-    val pw = new PrintWriter(baos)
-    val visitor = new FormattingPrinterVisitor(pw)
-    expr.accept(visitor)
-    pw.flush()
-    String.valueOf(baos.toByteArray map { _.toChar })
-  }
-
   def tryParseChunk(code: String): Chunk = {
     val bais = new ByteArrayInputStream(code.getBytes)
     new Parser(bais).Chunk()
@@ -75,47 +66,6 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     visitor.visit(chunk.block())
     pw.flush()
     String.valueOf(bais.toByteArray map { _.toChar })
-  }
-
-  def tryParseExpr(s: String): Unit = {
-    println("\"" + s + "\"")
-
-    val bais = new ByteArrayInputStream(s.getBytes)
-    val parser = new Parser(bais)
-    val result = parser.Expr()
-    parser.Eof()
-
-    println("--> " + exprToString(result))
-    println()
-  }
-
-  describe ("expr") {
-
-    def ok(s: String): Unit = {
-      it ("ok: " + s) {
-        tryParseExpr(s)
-      }
-    }
-
-    def nok(s: String): Unit = {
-      it ("not-ok: " + s) {
-        try {
-          tryParseExpr(s)
-        }
-        catch {
-          case ex: ParseException =>
-            println("--> (error:) " + ex.getMessage)
-        }
-      }
-    }
-
-    for ((s, good) <- Expressions.get) {
-      good match {
-        case true => ok(s)
-        case false => nok(s)
-      }
-    }
-
   }
 
   for (b <- bundles) {
