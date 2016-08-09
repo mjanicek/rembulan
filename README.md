@@ -4,7 +4,7 @@
 
 (*Rembulan* is Javanese/Indonesian for *Moon*.)
 
-An implementation of Lua 5.3 for the Java Virtual Machine (JVM).
+Rembulan is an implementation of Lua 5.3 for the Java Virtual Machine (JVM).
 Implements coroutines using continuations rather than mapping them onto
 Java threads.
 
@@ -41,3 +41,8 @@ This is a multi-module Maven project, containing the following modules:
  * `rembulan-parser` ... parser for Lua 5.3, producing a (de-sugared) AST
  * `rembulan-compiler` ... Lua-to-Java bytecode compiler
  * `rembulan-tests` ... the project test suite, including benchmarks from the Benchmarks Game
+
+## License
+
+Rembulan is licensed under the Apache License Version 2.0. See the file
+[LICENSE.txt](LICENSE.txt) for details.
