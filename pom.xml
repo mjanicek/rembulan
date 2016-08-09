@@ -18,6 +18,7 @@
     <module>rembulan-lua-parser</module>
     <module>rembulan-compiler</module>
     <module>rembulan-tests</module>
+    <module>rembulan-standalone</module>
   </modules>
 
 </project>
