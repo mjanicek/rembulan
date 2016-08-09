@@ -52,6 +52,13 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   EnvResolution in EmptyContext succeedsWith (classOf[Table])
 
+  val LocalEnvResolution = fragment ("LocalEnvResolution") {
+    """local _ENV
+      |return x
+    """
+  }
+  LocalEnvResolution in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to index a nil value")
+
   val JustAdd = fragment ("JustAdd") {
     """return x + 1
     """

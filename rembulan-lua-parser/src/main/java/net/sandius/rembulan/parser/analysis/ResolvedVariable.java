@@ -44,8 +44,4 @@ public class ResolvedVariable {
 		return var;
 	}
 
-	public boolean isGlobal() {
-		return var.equals(Variable.ENV);
-	}
-
 }

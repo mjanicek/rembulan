@@ -152,17 +152,20 @@ class NameResolutionTransformer extends Transformer {
 			throw new IllegalStateException("variable already resolved: " + e.name() + " -> " + e.attributes().get(ResolvedVariable.class));
 		}
 
-		ResolvedVariable rv = fnScope.resolve(e.name());
-
-		if (rv.isGlobal() && !e.name().equals(Variable.ENV_NAME)) {
-			Attributes attr = e.sourceInfo() != null ? Attributes.of(e.sourceInfo()) : Attributes.empty();
-
-			return new IndexExpr(attr,
-					new VarExpr(attr.with(rv), Name.fromString("_ENV")),
-					new LiteralExpr(attr, StringLiteral.fromName(e.name())));
+		ResolvedVariable bound = fnScope.resolve(e.name());
+		if (bound != null) {
+			return e.with(bound);
 		}
 		else {
-			return e.with(rv);
+			// not resolved: translate to _ENV[name]
+			ResolvedVariable env = fnScope.resolve(Variable.ENV_NAME);
+
+			assert (env != null);
+
+			Attributes attr = e.attributes();
+			return new IndexExpr(attr,
+					new VarExpr(attr.with(env), Variable.ENV_NAME),
+					new LiteralExpr(attr, StringLiteral.fromName(e.name())));
 		}
 	}
 

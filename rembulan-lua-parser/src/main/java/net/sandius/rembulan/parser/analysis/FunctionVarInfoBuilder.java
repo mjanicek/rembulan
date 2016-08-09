@@ -91,30 +91,40 @@ class FunctionVarInfoBuilder {
 		return null;
 	}
 
+	// returns null if n is a not bound to a declaration and is not _ENV
 	public ResolvedVariable resolve(Name n) {
 		Variable v = findLocal(n);
 		if (v != null) {
 			return ResolvedVariable.local(v);
 		}
 		else {
-			// it will be an upvalue, the question is from where?
-			final Variable w;
+			// an upvalue -- but from where?
+
+			ResolvedVariable result = null;
 
 			if (parent != null) {
-				// ask the parent
-				w = parent.resolve(n).variable();
-			}
-			else {
-				// no parent -> it's a global name
-				w = Variable.ENV;
+				ResolvedVariable p = parent.resolve(n);
+				if (p != null) {
+					result = ResolvedVariable.upvalue(p.variable());
+				}
 			}
 
-			// make sure we know about this upvalue
-			if (!upvals.contains(w.ref())) {
-				upvals.add(w.ref());
+			if (result == null && n.equals(Variable.ENV_NAME)) {
+				result = ResolvedVariable.upvalue(Variable.ENV);
 			}
 
-			return ResolvedVariable.upvalue(w);
+			if (result != null) {
+				registerUpvalue(result);
+			}
+
+			return result;
+		}
+	}
+
+	private void registerUpvalue(ResolvedVariable rv) {
+		Variable.Ref ref = rv.variable().ref();
+		if (rv.isUpvalue() && !upvals.contains(ref)) {
+			upvals.add(ref);
 		}
 	}
 
