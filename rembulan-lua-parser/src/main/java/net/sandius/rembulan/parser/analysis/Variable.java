@@ -21,7 +21,8 @@ import net.sandius.rembulan.util.Check;
 
 public class Variable {
 
-	public static final Variable ENV = new Variable(Name.fromString("_ENV"));
+	public static final Name ENV_NAME = Name.fromString("_ENV");
+	public static final Variable ENV = new Variable(ENV_NAME);
 
 	private final Name name;
 	private final Ref ref;

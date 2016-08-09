@@ -154,7 +154,7 @@ class NameResolutionTransformer extends Transformer {
 
 		ResolvedVariable rv = fnScope.resolve(e.name());
 
-		if (rv.isGlobal()) {
+		if (rv.isGlobal() && !e.name().equals(Variable.ENV_NAME)) {
 			Attributes attr = e.sourceInfo() != null ? Attributes.of(e.sourceInfo()) : Attributes.empty();
 
 			return new IndexExpr(attr,

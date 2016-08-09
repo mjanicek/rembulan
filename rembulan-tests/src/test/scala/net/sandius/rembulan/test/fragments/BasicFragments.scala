@@ -46,6 +46,12 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   NotNotX in EmptyContext succeedsWith (false)
 
+  val EnvResolution = fragment ("EnvResolution") {
+    """return _ENV
+    """
+  }
+  EnvResolution in EmptyContext succeedsWith (classOf[Table])
+
   val JustAdd = fragment ("JustAdd") {
     """return x + 1
     """
