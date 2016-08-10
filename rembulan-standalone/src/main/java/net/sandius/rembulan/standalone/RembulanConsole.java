@@ -162,8 +162,7 @@ public class RembulanConsole {
 		ConsoleReader reader = new ConsoleReader(in, out);
 		RembulanConsole repl = new RembulanConsole(in, out, err, args);
 
-		out.println("Rembulan version " + VERSION + " (Lua 5.3 compatible, " + System.getProperty("java.vm.name") + ", Java " + System.getProperty("java.version") + ")");
-		out.println();
+		out.println("Rembulan version " + VERSION + " (" + System.getProperty("java.vm.name") + ", Java " + System.getProperty("java.version") + ")");
 
 		reader.setExpandEvents(false);
 		reader.setPrompt("> ");
