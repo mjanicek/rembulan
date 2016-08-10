@@ -174,11 +174,23 @@ public class RembulanConsole {
 			out.print("");
 
 			Function fn = null;
+
 			try {
-				fn = repl.processLine(line);
-			}
-			catch (ParseException ex) {
-				out.println(ex.getMessage());
+				try {
+					fn = repl.processLine("return " + line);
+				}
+				catch (ParseException ex) {
+					// ignore
+				}
+
+				if (fn == null) {
+					try {
+						fn = repl.processLine(line);
+					}
+					catch (ParseException ex) {
+						out.println(ex.getMessage());
+					}
+				}
 			}
 			catch (ReflectiveOperationException ex) {
 				// this is a fatal error
