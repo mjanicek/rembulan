@@ -36,11 +36,14 @@ and interrupts, Rembulan stores the call stack, and recreates it on resume.
 
 This is a multi-module Maven project, containing the following modules:
 
- * `rembulan-lua-common` ... common Lua utilities and constants
- * `rembulan-core` ... the runtime and the standard library
- * `rembulan-parser` ... parser for Lua 5.3, producing a (de-sugared) AST
- * `rembulan-compiler` ... Lua-to-Java bytecode compiler
- * `rembulan-tests` ... the project test suite, including benchmarks from the Benchmarks Game
+ * `rembulan-lua-common` ... common Lua utilities and constants;
+ * `rembulan-core` ... the runtime and the standard library;
+ * `rembulan-parser` ... parser for Lua 5.3, producing a (de-sugared) AST;
+ * `rembulan-compiler` ... Lua-to-Java bytecode compiler;
+ * `rembulan-tests` ... project test suite, including benchmarks from
+                        the Benchmarks Game;
+ * `rembulan-standalone` ... standalone REPL, a (mostly) drop-in replacement
+                             for the `lua` command from PUC-Lua.
 
 ## License
 
