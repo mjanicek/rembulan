@@ -37,6 +37,7 @@ import net.sandius.rembulan.lib.impl.DefaultMathLib;
 import net.sandius.rembulan.lib.impl.DefaultStringLib;
 import net.sandius.rembulan.lib.impl.DefaultTableLib;
 import net.sandius.rembulan.parser.ParseException;
+import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
@@ -50,6 +51,9 @@ import java.util.concurrent.ExecutionException;
 public class RembulanConsole {
 
 	private static final String VERSION = "0.1-SNAPSHOT";
+
+	private static final String PROMPT_1 = "> ";
+	private static final String PROMPT_2 = ">> ";
 
 	private final PrintStream out;
 
@@ -165,9 +169,11 @@ public class RembulanConsole {
 		out.println("Rembulan version " + VERSION + " (" + System.getProperty("java.vm.name") + ", Java " + System.getProperty("java.version") + ")");
 
 		reader.setExpandEvents(false);
-		reader.setPrompt("> ");
 
 		String line;
+		StringBuilder codeBuffer = new StringBuilder();
+		boolean multiline = false;
+		reader.setPrompt(PROMPT_1);
 
 		while ((line = reader.readLine()) != null) {
 			out.print("");
@@ -175,19 +181,38 @@ public class RembulanConsole {
 			Function fn = null;
 
 			try {
-				try {
-					fn = repl.processLine("return " + line);
-				}
-				catch (ParseException ex) {
-					// ignore
+				if (!multiline) {
+					try {
+						fn = repl.processLine("return " + line);
+					}
+					catch (ParseException ex) {
+						// ignore
+					}
 				}
 
 				if (fn == null) {
+					codeBuffer.append(line).append('\n');
 					try {
-						fn = repl.processLine(line);
+						fn = repl.processLine(codeBuffer.toString());
 					}
 					catch (ParseException ex) {
-						out.println(ex.getMessage());
+						if (ex.currentToken != null
+								&& ex.currentToken.next != null
+								&& ex.currentToken.next.kind == Parser.EOF) {
+
+							// partial input
+							reader.setPrompt(PROMPT_2);
+							multiline = true;
+						}
+						else {
+							// faulty input
+							out.println(ex.getMessage());
+
+							// reset back to initial state
+							codeBuffer.setLength(0);
+							multiline = false;
+							reader.setPrompt(PROMPT_1);
+						}
 					}
 				}
 			}
@@ -197,6 +222,11 @@ public class RembulanConsole {
 			}
 
 			if (fn != null) {
+				// reset back to initial state
+				codeBuffer.setLength(0);
+				multiline = false;
+				reader.setPrompt(PROMPT_1);
+
 				try {
 					repl.execute(fn);
 				}
