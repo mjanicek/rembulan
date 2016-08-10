@@ -22,7 +22,6 @@ import net.sandius.rembulan.compiler.CompiledModule;
 import net.sandius.rembulan.compiler.Compiler;
 import net.sandius.rembulan.compiler.CompilerSettings;
 import net.sandius.rembulan.core.Call;
-import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.PreemptionContext;
@@ -133,8 +132,8 @@ public class RembulanConsole {
 		return (Function) instance;
 	}
 
-	private void execute(Function fn) throws ExecutionException, InterruptedException {
-		Call call = Call.init(state, fn);
+	private Object[] callFunction(Function fn, Object... args) throws ExecutionException, InterruptedException {
+		Call call = Call.init(state, fn, args);
 		Call.EventHandler handler = new Call.DefaultEventHandler();
 		PreemptionContext preemptionContext = new PreemptionContext.Never();
 
@@ -142,20 +141,14 @@ public class RembulanConsole {
 			call.resume(handler, preemptionContext);
 		}
 
-		Object[] results = call.result().get();
-		if (results.length > 0) {
-			printResults(results);
-		}
+		return call.result().get();
 	}
 
-	private void printResults(Object[] results) {
-		for (int i = 0; i < results.length; i++) {
-			out.print(Conversions.toHumanReadableString(results[i]));
-			if (i + 1 < results.length) {
-				out.print('\t');
-			}
+	private void execute(Function fn) throws ExecutionException, InterruptedException {
+		Object[] results = callFunction(fn);
+		if (results.length > 0) {
+			callFunction(new DefaultBasicLib.Print(out), results);
 		}
-		out.println();
 	}
 
 	public static void main(String[] args) throws IOException {
