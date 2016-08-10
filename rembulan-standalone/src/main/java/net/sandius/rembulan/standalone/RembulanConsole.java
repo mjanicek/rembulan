@@ -61,7 +61,7 @@ public class RembulanConsole {
 
 	private int chunkIndex;
 
-	public RembulanConsole(InputStream in, PrintStream out, PrintStream err) {
+	public RembulanConsole(InputStream in, PrintStream out, PrintStream err, String[] args) {
 		this.out = Check.notNull(out);
 
 		this.state = new DefaultLuaState();
@@ -73,6 +73,7 @@ public class RembulanConsole {
 		this.chunkIndex = 0;
 
 		installLibraries(in, out, err);
+		env.rawset("arg", argsTable(args));
 	}
 
 	private void installLibraries(InputStream in, OutputStream out, OutputStream err) {
@@ -104,6 +105,13 @@ public class RembulanConsole {
 		env.rawset("debug", debugLibTable);
 	}
 
+	private Table argsTable(String[] args) {
+		Table t = state.newTable();
+		for (int i = 0; i < args.length; i++) {
+			t.rawset(i + 1, args[i]);
+		}
+		return t;
+	}
 
 	private CompiledModule parseProgram(String source) throws ParseException {
 		return compiler.compile(source, "stdin", "stdin_" + chunkIndex++);
@@ -150,7 +158,7 @@ public class RembulanConsole {
 		PrintStream err = System.err;
 
 		ConsoleReader reader = new ConsoleReader(in, out);
-		RembulanConsole repl = new RembulanConsole(in, out, err);
+		RembulanConsole repl = new RembulanConsole(in, out, err, args);
 
 		out.println("Rembulan version " + VERSION + " (Lua 5.3 compatible, " + System.getProperty("java.vm.name") + ", Java " + System.getProperty("java.version") + ")");
 		out.println();
