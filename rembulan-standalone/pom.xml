@@ -38,4 +38,44 @@
 
   </dependencies>
 
+  <build>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>appassembler-maven-plugin</artifactId>
+          <version>1.10</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>appassembler-maven-plugin</artifactId>
+        <configuration>
+          <programs>
+            <program>
+              <mainClass>net.sandius.rembulan.standalone.RembulanConsole</mainClass>
+              <id>rembulan</id>
+            </program>
+          </programs>
+          <repositoryName>lib</repositoryName>
+          <useWildcardClassPath>true</useWildcardClassPath>
+          <repositoryLayout>flat</repositoryLayout>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>assemble</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+
+  </build>
+
 </project>
