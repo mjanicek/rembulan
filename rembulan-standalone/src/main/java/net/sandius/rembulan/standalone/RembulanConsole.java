@@ -139,7 +139,9 @@ public class RembulanConsole {
 		}
 
 		Object[] results = call.result().get();
-		printResults(results);
+		if (results.length > 0) {
+			printResults(results);
+		}
 	}
 
 	private void printResults(Object[] results) {
