@@ -22,12 +22,14 @@ import net.sandius.rembulan.compiler.CompiledModule;
 import net.sandius.rembulan.compiler.Compiler;
 import net.sandius.rembulan.compiler.CompilerSettings;
 import net.sandius.rembulan.core.Call;
+import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.impl.DefaultLuaState;
+import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
@@ -35,7 +37,6 @@ import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
 import java.nio.file.FileSystems;
@@ -45,10 +46,14 @@ public class RembulanConsole {
 
 	private static final String VERSION = "0.1-SNAPSHOT";
 
-	private static final String PROMPT_1 = "> ";
-	private static final String PROMPT_2 = ">> ";
+	private static final String DEFAULT_PROMPT_1 = "> ";
+	private static final String DEFAULT_PROMPT_2 = ">> ";
 
+	private final CommandLineArguments config;
+
+	private final InputStream in;
 	private final PrintStream out;
+	private final PrintStream err;
 
 	private final LuaState state;
 	private final Table env;
@@ -58,8 +63,15 @@ public class RembulanConsole {
 
 	private int chunkIndex;
 
-	public RembulanConsole(InputStream in, PrintStream out, PrintStream err, String[] args) {
+	private final Function requireFunction;
+
+	public RembulanConsole(CommandLineArguments cmdLineArgs, InputStream in, PrintStream out, PrintStream err) {
+
+		this.config = Check.notNull(cmdLineArgs);
+
+		this.in = Check.notNull(in);
 		this.out = Check.notNull(out);
+		this.err = Check.notNull(err);
 
 		this.state = new DefaultLuaState();
 		this.env = state.newTable();
@@ -69,13 +81,10 @@ public class RembulanConsole {
 
 		this.chunkIndex = 0;
 
-		installLibraries(in, out, err);
-		env.rawset("arg", argsTable(args));
-	}
-
-	private void installLibraries(InputStream in, OutputStream out, OutputStream err) {
+		// install libraries
 		new DefaultBasicLib(new PrintStream(out)).installInto(state, env);
-		new DefaultModuleLib().installInto(state, env);
+		ModuleLib moduleLib = new DefaultModuleLib();
+		moduleLib.installInto(state, env);
 		new DefaultCoroutineLib().installInto(state, env);
 		new DefaultStringLib().installInto(state, env);
 		new DefaultMathLib().installInto(state, env);
@@ -85,14 +94,29 @@ public class RembulanConsole {
 		new DefaultOsLib().installInto(state, env);
 		new DefaultUtf8Lib().installInto(state, env);
 		new DefaultDebugLib().installInto(state, env);
+
+		// command-line arguments
+		env.rawset("arg", cmdLineArgs.toArgTable(state.tableFactory()));
+
+		requireFunction = moduleLib._require();
 	}
 
-	private Table argsTable(String[] args) {
-		Table t = state.newTable();
-		for (int i = 0; i < args.length; i++) {
-			t.rawset(i + 1, args[i]);
-		}
-		return t;
+	private void printVersion() {
+		out.println("Rembulan version " + VERSION + " (" + System.getProperty("java.vm.name") + ", Java " + System.getProperty("java.version") + ")");
+	}
+
+	private static void printUsage(PrintStream out) {
+		String programName = "rembulan";
+
+		out.println("usage: " + programName + " [options] [script [args]]");
+		out.println("Available options are:");
+		out.println("  -e stat  execute string 'stat'");
+		out.println("  -i       enter interactive mode after executing 'script'");
+		out.println("  -l name  require library 'name'");
+		out.println("  -v       show version information");
+		out.println("  -E       ignore environment variables");
+		out.println("  --       stop handling options");
+		out.println("  -        stop handling options and execute stdin");
 	}
 
 	private CompiledModule parseProgram(String sourceText, String sourceFileName) throws ParseException {
@@ -103,8 +127,8 @@ public class RembulanConsole {
 				rootClassName);
 	}
 
-	private Function processLine(String line) throws ParseException, ReflectiveOperationException {
-		CompiledModule cm = parseProgram(line, null);
+	private Function compileAndLoadProgram(String sourceText, String sourceFileName) throws ParseException, ReflectiveOperationException {
+		CompiledModule cm = parseProgram(sourceText, sourceFileName);
 
 		assert (cm != null);
 
@@ -127,6 +151,35 @@ public class RembulanConsole {
 		return call.result().get();
 	}
 
+	private void executeProgram(String sourceText, String sourceFileName, String[] args)
+			throws ParseException, ReflectiveOperationException, ExecutionException, InterruptedException {
+
+		Check.notNull(sourceText);
+		Check.notNull(sourceFileName);
+		Check.notNull(args);
+
+		Function fn = compileAndLoadProgram(sourceText, sourceFileName);
+
+		Object[] callArgs = new Object[args.length];
+		System.arraycopy(args, 0, callArgs, 0, args.length);
+
+		callFunction(fn, callArgs);
+	}
+
+	private void executeFile(String fileName, String[] args)
+			throws IOException, InterruptedException, ReflectiveOperationException, ExecutionException, ParseException {
+		Check.notNull(fileName);
+		executeProgram(Utils.readFile(fileName), fileName, Check.notNull(args));
+	}
+
+	private void executeStdin(String[] args) throws InterruptedException, ReflectiveOperationException, ExecutionException, ParseException, IOException {
+		executeProgram(Utils.readInputStream(in), "stdin", Check.notNull(args));
+	}
+
+	private void requireModule(String moduleName) throws ExecutionException, InterruptedException {
+		callFunction(requireFunction, Check.notNull(moduleName));
+	}
+
 	private void execute(Function fn) throws ExecutionException, InterruptedException {
 		Object[] results = callFunction(fn);
 		if (results.length > 0) {
@@ -134,22 +187,65 @@ public class RembulanConsole {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		InputStream in = System.in;
-		PrintStream out = System.out;
-		PrintStream err = System.err;
+	public void start() throws Exception {
+		for (CommandLineArguments.Step step : config.steps()) {
+			executeStep(step);
+		}
 
+		if (config.interactive()) {
+			startInteractive();
+		}
+	}
+
+	private void executeStep(CommandLineArguments.Step s)
+			throws InterruptedException, ReflectiveOperationException, ExecutionException, ParseException, IOException {
+
+		Check.notNull(s);
+
+		switch (s.what()) {
+
+			case PRINT_VERSION:
+				printVersion();
+				break;
+
+			case EXECUTE_STRING:
+				executeProgram(s.arg0(), s.arg1(), new String[0]);
+				break;
+
+			case EXECUTE_FILE:
+				executeFile(s.arg0(), s.argArray());
+				break;
+
+			case EXECUTE_STDIN:
+				executeStdin(s.argArray());
+				break;
+
+			case REQUIRE_MODULE:
+				requireModule(s.arg0());
+				break;
+
+		}
+	}
+
+	private String prompt1() {
+		String s = Conversions.stringValueOf(env.rawget("_PROMPT"));
+		return s != null ? s : DEFAULT_PROMPT_1;
+	}
+
+	private String prompt2() {
+		String s = Conversions.stringValueOf(env.rawget("_PROMPT2"));
+		return s != null ? s : DEFAULT_PROMPT_2;
+	}
+
+	private void startInteractive() throws IOException {
 		ConsoleReader reader = new ConsoleReader(in, out);
-		RembulanConsole repl = new RembulanConsole(in, out, err, args);
-
-		out.println("Rembulan version " + VERSION + " (" + System.getProperty("java.vm.name") + ", Java " + System.getProperty("java.version") + ")");
 
 		reader.setExpandEvents(false);
 
 		String line;
 		StringBuilder codeBuffer = new StringBuilder();
 		boolean multiline = false;
-		reader.setPrompt(PROMPT_1);
+		reader.setPrompt(prompt1());
 
 		while ((line = reader.readLine()) != null) {
 			out.print("");
@@ -159,7 +255,7 @@ public class RembulanConsole {
 			try {
 				if (!multiline) {
 					try {
-						fn = repl.processLine("return " + line);
+						fn = compileAndLoadProgram("return " + line, "stdin");
 					}
 					catch (ParseException ex) {
 						// ignore
@@ -169,7 +265,7 @@ public class RembulanConsole {
 				if (fn == null) {
 					codeBuffer.append(line).append('\n');
 					try {
-						fn = repl.processLine(codeBuffer.toString());
+						fn = compileAndLoadProgram(codeBuffer.toString(), "stdin");
 					}
 					catch (ParseException ex) {
 						if (ex.currentToken != null
@@ -177,7 +273,7 @@ public class RembulanConsole {
 								&& ex.currentToken.next.kind == Parser.EOF) {
 
 							// partial input
-							reader.setPrompt(PROMPT_2);
+							reader.setPrompt(prompt2());
 							multiline = true;
 						}
 						else {
@@ -187,7 +283,7 @@ public class RembulanConsole {
 							// reset back to initial state
 							codeBuffer.setLength(0);
 							multiline = false;
-							reader.setPrompt(PROMPT_1);
+							reader.setPrompt(prompt1());
 						}
 					}
 				}
@@ -201,20 +297,51 @@ public class RembulanConsole {
 				// reset back to initial state
 				codeBuffer.setLength(0);
 				multiline = false;
-				reader.setPrompt(PROMPT_1);
 
 				try {
-					repl.execute(fn);
+					execute(fn);
 				}
 				catch (ExecutionException ex) {
+					// TODO: print a Lua stacktrace
 					ex.printStackTrace(out);
 				}
 				catch (InterruptedException ex) {
-					out.println("Interrupted");
+					err.println("Interrupted");
 				}
-			}
 
+				reader.setPrompt(prompt1());
+			}
 		}
+	}
+
+	public static void main(String[] args) {
+		// Caveat: inTty == true iff stdin *and* stdout are tty; however we only care about stdin
+		boolean inTty = System.console() != null;
+
+		CommandLineArguments cmdLineArgs = null;
+		try {
+			cmdLineArgs = CommandLineArguments.parseArguments(args, inTty);
+		}
+		catch (IllegalArgumentException ex) {
+			System.err.println(ex.getMessage());
+			printUsage(System.err);
+			System.exit(1);
+		}
+
+		assert (cmdLineArgs != null);
+
+		RembulanConsole console = new RembulanConsole(cmdLineArgs, System.in, System.out, System.err);
+
+		try {
+			console.start();
+		}
+		catch (Exception ex) {
+			// TODO: print a Lua stacktrace
+			ex.printStackTrace(System.err);
+			System.exit(1);
+		}
+
+		System.exit(0);
 	}
 
 }
