@@ -61,7 +61,8 @@ abstract class Utils {
 	public static String skipLeadingShebang(String s) {
 		if (s.startsWith("#")) {
 			int endOfFirstLine = s.indexOf('\n');
-			return endOfFirstLine >= 0 ? s.substring(endOfFirstLine + 1) : "";
+			// don't skip the newline at the end of the shebang
+			return endOfFirstLine >= 0 ? s.substring(endOfFirstLine) : "";
 		}
 		else {
 			return s;
