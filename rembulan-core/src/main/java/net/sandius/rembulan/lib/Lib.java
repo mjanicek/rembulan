@@ -21,6 +21,9 @@ import net.sandius.rembulan.core.Table;
 
 public abstract class Lib {
 
+	public static final String MT_NAME = "__name";
+	public static final String TYPENAME_LIGHT_USERDATA = "light userdata";
+
 	public abstract void installInto(LuaState state, Table env);
 
 }

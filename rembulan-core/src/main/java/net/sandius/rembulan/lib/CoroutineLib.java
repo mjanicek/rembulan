@@ -27,13 +27,13 @@ public abstract class CoroutineLib extends Lib {
 		Table t = state.newTable();
 		env.rawset("coroutine", t);
 
-		LibUtils.setIfNonNull(t, "create", _create());
-		LibUtils.setIfNonNull(t, "resume", _resume());
-		LibUtils.setIfNonNull(t, "yield", _yield());
-		LibUtils.setIfNonNull(t, "isyieldable", _isyieldable());
-		LibUtils.setIfNonNull(t, "status", _status());
-		LibUtils.setIfNonNull(t, "running", _running());
-		LibUtils.setIfNonNull(t, "wrap", _wrap());
+		t.rawset("create", _create());
+		t.rawset("resume", _resume());
+		t.rawset("yield", _yield());
+		t.rawset("isyieldable", _isyieldable());
+		t.rawset("status", _status());
+		t.rawset("running", _running());
+		t.rawset("wrap", _wrap());
 	}
 
 	/**

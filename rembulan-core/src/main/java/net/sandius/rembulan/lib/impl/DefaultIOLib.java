@@ -27,7 +27,7 @@ import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IOLib;
-import net.sandius.rembulan.lib.LibUtils;
+import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.io.InputStreamIOFile;
 import net.sandius.rembulan.lib.impl.io.OutputStreamIOFile;
 import net.sandius.rembulan.util.Check;
@@ -63,20 +63,19 @@ public class DefaultIOLib extends IOLib {
 
 		// set up metatable for files
 		Table mt = tableFactory.newTable();
-		mt.rawset(Metatables.MT_INDEX, mt);
-		mt.rawset(LibUtils.MT_NAME, IOFile.typeName());
-		LibUtils.setIfNonNull(mt, BasicLib.MT_TOSTRING, _file_tostring());
 		this.fileMetatable = mt;
 
+		mt.rawset(Metatables.MT_INDEX, mt);
+		mt.rawset(Lib.MT_NAME, IOFile.typeName());
+		mt.rawset(BasicLib.MT_TOSTRING, _file_tostring());
 		// TODO: set the __gc metamethod
-
-		LibUtils.setIfNonNull(mt, "close", _file_close());
-		LibUtils.setIfNonNull(mt, "flush", _file_flush());
-		LibUtils.setIfNonNull(mt, "lines", _file_lines());
-		LibUtils.setIfNonNull(mt, "read", _file_read());
-		LibUtils.setIfNonNull(mt, "seek", _file_seek());
-		LibUtils.setIfNonNull(mt, "setvbuf", _file_setvbuf());
-		LibUtils.setIfNonNull(mt, "write", _file_write());
+		mt.rawset("close", _file_close());
+		mt.rawset("flush", _file_flush());
+		mt.rawset("lines", _file_lines());
+		mt.rawset("read", _file_read());
+		mt.rawset("seek", _file_seek());
+		mt.rawset("setvbuf", _file_setvbuf());
+		mt.rawset("write", _file_write());
 
 		this.fileSystem = fileSystem;
 

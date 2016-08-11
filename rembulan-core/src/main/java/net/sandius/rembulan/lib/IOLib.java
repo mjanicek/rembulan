@@ -48,21 +48,21 @@ public abstract class IOLib extends Lib {
 		Table t = state.newTable();
 		env.rawset("io", t);
 		
-		LibUtils.setIfNonNull(t, "close", _close());
-		LibUtils.setIfNonNull(t, "flush", _flush());
-		LibUtils.setIfNonNull(t, "input", _input());
-		LibUtils.setIfNonNull(t, "lines", _lines());
-		LibUtils.setIfNonNull(t, "open", _open());
-		LibUtils.setIfNonNull(t, "output", _output());
-		LibUtils.setIfNonNull(t, "popen", _popen());
-		LibUtils.setIfNonNull(t, "read", _read());
-		LibUtils.setIfNonNull(t, "tmpfile", _tmpfile());
-		LibUtils.setIfNonNull(t, "type", _type());
-		LibUtils.setIfNonNull(t, "write", _write());
+		t.rawset("close", _close());
+		t.rawset("flush", _flush());
+		t.rawset("input", _input());
+		t.rawset("lines", _lines());
+		t.rawset("open", _open());
+		t.rawset("output", _output());
+		t.rawset("popen", _popen());
+		t.rawset("read", _read());
+		t.rawset("tmpfile", _tmpfile());
+		t.rawset("type", _type());
+		t.rawset("write", _write());
 
-		LibUtils.setIfNonNull(t, "stdin", _stdin());
-		LibUtils.setIfNonNull(t, "stdout", _stdout());
-		LibUtils.setIfNonNull(t, "stderr", _stderr());
+		t.rawset("stdin", _stdin());
+		t.rawset("stdout", _stdout());
+		t.rawset("stderr", _stderr());
 	}
 
 	/**

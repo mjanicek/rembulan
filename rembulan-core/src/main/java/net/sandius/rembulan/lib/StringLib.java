@@ -42,23 +42,23 @@ public abstract class StringLib extends Lib {
 		Table t = state.newTable();
 		env.rawset("string", t);
 		
-		LibUtils.setIfNonNull(t, "byte", _byte());
-		LibUtils.setIfNonNull(t, "char", _char());
-		LibUtils.setIfNonNull(t, "dump", _dump());
-		LibUtils.setIfNonNull(t, "find", _find());
-		LibUtils.setIfNonNull(t, "format", _format());
-		LibUtils.setIfNonNull(t, "gmatch", _gmatch());
-		LibUtils.setIfNonNull(t, "gsub", _gsub());
-		LibUtils.setIfNonNull(t, "len", _len());
-		LibUtils.setIfNonNull(t, "lower", _lower());
-		LibUtils.setIfNonNull(t, "match", _match());
-		LibUtils.setIfNonNull(t, "pack", _pack());
-		LibUtils.setIfNonNull(t, "packsize", _packsize());
-		LibUtils.setIfNonNull(t, "rep", _rep());
-		LibUtils.setIfNonNull(t, "reverse", _reverse());
-		LibUtils.setIfNonNull(t, "sub", _sub());
-		LibUtils.setIfNonNull(t, "unpack", _unpack());
-		LibUtils.setIfNonNull(t, "upper", _upper());
+		t.rawset("byte", _byte());
+		t.rawset("char", _char());
+		t.rawset("dump", _dump());
+		t.rawset("find", _find());
+		t.rawset("format", _format());
+		t.rawset("gmatch", _gmatch());
+		t.rawset("gsub", _gsub());
+		t.rawset("len", _len());
+		t.rawset("lower", _lower());
+		t.rawset("match", _match());
+		t.rawset("pack", _pack());
+		t.rawset("packsize", _packsize());
+		t.rawset("rep", _rep());
+		t.rawset("reverse", _reverse());
+		t.rawset("sub", _sub());
+		t.rawset("unpack", _unpack());
+		t.rawset("upper", _upper());
 
 		// set metatable for the string type
 		Table mt = state.newTable();

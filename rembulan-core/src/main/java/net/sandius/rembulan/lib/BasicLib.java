@@ -28,39 +28,39 @@ public abstract class BasicLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		LibUtils.setIfNonNull(env, "_G", env);
-		LibUtils.setIfNonNull(env, "_VERSION", __VERSION());
+		env.rawset("_G", env);
+		env.rawset("_VERSION", __VERSION());
 		
-		LibUtils.setIfNonNull(env, "print", _print());
-		LibUtils.setIfNonNull(env, "type", _type());
+		env.rawset("print", _print());
+		env.rawset("type", _type());
 
-		LibUtils.setIfNonNull(env, "next", _next());
-		LibUtils.setIfNonNull(env, "pairs", _pairs());
-		LibUtils.setIfNonNull(env, "ipairs", _ipairs());
+		env.rawset("next", _next());
+		env.rawset("pairs", _pairs());
+		env.rawset("ipairs", _ipairs());
 
-		LibUtils.setIfNonNull(env, "tostring", _tostring());
-		LibUtils.setIfNonNull(env, "tonumber", _tonumber());
+		env.rawset("tostring", _tostring());
+		env.rawset("tonumber", _tonumber());
 
-		LibUtils.setIfNonNull(env, "error", _error());
-		LibUtils.setIfNonNull(env, "assert", _assert());
+		env.rawset("error", _error());
+		env.rawset("assert", _assert());
 
-		LibUtils.setIfNonNull(env, "getmetatable", _getmetatable());
-		LibUtils.setIfNonNull(env, "setmetatable", _setmetatable());
+		env.rawset("getmetatable", _getmetatable());
+		env.rawset("setmetatable", _setmetatable());
 
-		LibUtils.setIfNonNull(env, "pcall", _pcall());
-		LibUtils.setIfNonNull(env, "xpcall", _xpcall());
+		env.rawset("pcall", _pcall());
+		env.rawset("xpcall", _xpcall());
 
-		LibUtils.setIfNonNull(env, "rawequal", _rawequal());
-		LibUtils.setIfNonNull(env, "rawget", _rawget());
-		LibUtils.setIfNonNull(env, "rawset", _rawset());
-		LibUtils.setIfNonNull(env, "rawlen", _rawlen());
+		env.rawset("rawequal", _rawequal());
+		env.rawset("rawget", _rawget());
+		env.rawset("rawset", _rawset());
+		env.rawset("rawlen", _rawlen());
 
-		LibUtils.setIfNonNull(env, "select", _select());
+		env.rawset("select", _select());
 
-		LibUtils.setIfNonNull(env, "collectgarbage", _collectgarbage());
-		LibUtils.setIfNonNull(env, "dofile", _dofile());
-		LibUtils.setIfNonNull(env, "load", _load());
-		LibUtils.setIfNonNull(env, "loadfile", _loadfile());
+		env.rawset("collectgarbage", _collectgarbage());
+		env.rawset("dofile", _dofile());
+		env.rawset("load", _load());
+		env.rawset("loadfile", _loadfile());
 	}
 
 	/**

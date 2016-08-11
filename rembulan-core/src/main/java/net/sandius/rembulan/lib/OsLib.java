@@ -30,17 +30,17 @@ public abstract class OsLib extends Lib {
 		Table t = state.newTable();
 		env.rawset("os", t);
 
-		LibUtils.setIfNonNull(t, "clock", _clock());
-		LibUtils.setIfNonNull(t, "date", _date());
-		LibUtils.setIfNonNull(t, "difftime", _difftime());
-		LibUtils.setIfNonNull(t, "execute", _execute());
-		LibUtils.setIfNonNull(t, "exit", _exit());
-		LibUtils.setIfNonNull(t, "getenv", _getenv());
-		LibUtils.setIfNonNull(t, "remove", _remove());
-		LibUtils.setIfNonNull(t, "rename", _rename());
-		LibUtils.setIfNonNull(t, "setlocale", _setlocale());
-		LibUtils.setIfNonNull(t, "time", _time());
-		LibUtils.setIfNonNull(t, "tmpname", _tmpname());
+		t.rawset("clock", _clock());
+		t.rawset("date", _date());
+		t.rawset("difftime", _difftime());
+		t.rawset("execute", _execute());
+		t.rawset("exit", _exit());
+		t.rawset("getenv", _getenv());
+		t.rawset("remove", _remove());
+		t.rawset("rename", _rename());
+		t.rawset("setlocale", _setlocale());
+		t.rawset("time", _time());
+		t.rawset("tmpname", _tmpname());
 	}
 	
 	/**

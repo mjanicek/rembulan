@@ -39,22 +39,22 @@ public abstract class DebugLib extends Lib {
 		Table t = state.newTable();
 		env.rawset("debug", t);
 		
-		LibUtils.setIfNonNull(t, "debug", _debug());
-		LibUtils.setIfNonNull(t, "gethook", _gethook());
-		LibUtils.setIfNonNull(t, "getinfo", _getinfo());
-		LibUtils.setIfNonNull(t, "getlocal", _getlocal());
-		LibUtils.setIfNonNull(t, "getmetatable", _getmetatable());
-		LibUtils.setIfNonNull(t, "getregistry", _getregistry());
-		LibUtils.setIfNonNull(t, "getupvalue", _getupvalue());
-		LibUtils.setIfNonNull(t, "getuservalue", _getuservalue());
-		LibUtils.setIfNonNull(t, "sethook", _sethook());
-		LibUtils.setIfNonNull(t, "setlocal", _setlocal());
-		LibUtils.setIfNonNull(t, "setmetatable", _setmetatable());
-		LibUtils.setIfNonNull(t, "setupvalue", _setupvalue());
-		LibUtils.setIfNonNull(t, "setuservalue", _setuservalue());
-		LibUtils.setIfNonNull(t, "traceback", _traceback());
-		LibUtils.setIfNonNull(t, "upvalueid", _upvalueid());
-		LibUtils.setIfNonNull(t, "upvaluejoin", _upvaluejoin());
+		t.rawset("debug", _debug());
+		t.rawset("gethook", _gethook());
+		t.rawset("getinfo", _getinfo());
+		t.rawset("getlocal", _getlocal());
+		t.rawset("getmetatable", _getmetatable());
+		t.rawset("getregistry", _getregistry());
+		t.rawset("getupvalue", _getupvalue());
+		t.rawset("getuservalue", _getuservalue());
+		t.rawset("sethook", _sethook());
+		t.rawset("setlocal", _setlocal());
+		t.rawset("setmetatable", _setmetatable());
+		t.rawset("setupvalue", _setupvalue());
+		t.rawset("setuservalue", _setuservalue());
+		t.rawset("traceback", _traceback());
+		t.rawset("upvalueid", _upvalueid());
+		t.rawset("upvaluejoin", _upvaluejoin());
 	}
 
 	/**

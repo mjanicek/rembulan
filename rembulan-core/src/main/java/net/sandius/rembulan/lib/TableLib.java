@@ -35,13 +35,13 @@ public abstract class TableLib extends Lib {
 		Table t = state.newTable();
 		env.rawset("table", t);
 		
-		LibUtils.setIfNonNull(t, "concat", _concat());
-		LibUtils.setIfNonNull(t, "insert", _insert());
-		LibUtils.setIfNonNull(t, "move", _move());
-		LibUtils.setIfNonNull(t, "pack", _pack());
-		LibUtils.setIfNonNull(t, "remove", _remove());
-		LibUtils.setIfNonNull(t, "sort", _sort());
-		LibUtils.setIfNonNull(t, "unpack", _unpack());
+		t.rawset("concat", _concat());
+		t.rawset("insert", _insert());
+		t.rawset("move", _move());
+		t.rawset("pack", _pack());
+		t.rawset("remove", _remove());
+		t.rawset("sort", _sort());
+		t.rawset("unpack", _unpack());
 	}
 
 	/**

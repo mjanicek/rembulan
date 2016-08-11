@@ -38,12 +38,12 @@ public abstract class Utf8Lib extends Lib {
 		Table t = state.newTable();
 		env.rawset("utf8", t);
 		
-		LibUtils.setIfNonNull(t, "char", _char());
-		LibUtils.setIfNonNull(t, "charpattern", _charpattern());
-		LibUtils.setIfNonNull(t, "codes", _codes());
-		LibUtils.setIfNonNull(t, "codepoint", _codepoint());
-		LibUtils.setIfNonNull(t, "len", _len());
-		LibUtils.setIfNonNull(t, "offset", _offset());
+		t.rawset("char", _char());
+		t.rawset("charpattern", _charpattern());
+		t.rawset("codes", _codes());
+		t.rawset("codepoint", _codepoint());
+		t.rawset("len", _len());
+		t.rawset("offset", _offset());
 	}
 
 	/**

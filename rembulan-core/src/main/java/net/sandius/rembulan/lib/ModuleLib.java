@@ -29,19 +29,19 @@ public abstract class ModuleLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		LibUtils.setIfNonNull(env, "require", _require());
+		env.rawset("require", _require());
 		
 		Table t = state.newTable();
 		env.rawset("package", t);
 
-		LibUtils.setIfNonNull(t, "config", _config());
-		LibUtils.setIfNonNull(t, "cpath", _cpath());
-		LibUtils.setIfNonNull(t, "loaded", _loaded());
-		LibUtils.setIfNonNull(t, "loadlib", _loadlib());
-		LibUtils.setIfNonNull(t, "path", _path());
-		LibUtils.setIfNonNull(t, "preload", _preload());
-		LibUtils.setIfNonNull(t, "searchers", _searchers());
-		LibUtils.setIfNonNull(t, "searchpath", _searchpath());
+		t.rawset("config", _config());
+		t.rawset("cpath", _cpath());
+		t.rawset("loaded", _loaded());
+		t.rawset("loadlib", _loadlib());
+		t.rawset("path", _path());
+		t.rawset("preload", _preload());
+		t.rawset("searchers", _searchers());
+		t.rawset("searchpath", _searchpath());
 	}
 
 	/**

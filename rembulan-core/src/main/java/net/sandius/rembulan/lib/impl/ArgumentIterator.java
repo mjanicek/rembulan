@@ -25,7 +25,7 @@ import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.core.Values;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.LibUtils;
+import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.util.Check;
 
@@ -354,12 +354,12 @@ public class ArgumentIterator implements Iterator<Object> {
 	public Object nextLightUserdata() {
 		final Object result;
 		try {
-			Object o = peek(LibUtils.TYPENAME_LIGHT_USERDATA);
+			Object o = peek(Lib.TYPENAME_LIGHT_USERDATA);
 			if (Values.isLightUserdata(o)) {
 				result = o;
 			}
 			else {
-				throw new UnexpectedArgumentException(LibUtils.TYPENAME_LIGHT_USERDATA, namer.typeNameOf(o));
+				throw new UnexpectedArgumentException(Lib.TYPENAME_LIGHT_USERDATA, namer.typeNameOf(o));
 			}
 		}
 		catch (RuntimeException ex) {
