@@ -222,7 +222,7 @@ public abstract class OsLib extends Lib {
 	 * getting the name and creating the file.) You still have to open the file to use it
 	 * and to remove it (even if you do not use it).</p>
 	 *
-	 * <p>When possible, you may prefer to use {@link IOLib#_tmpfile() {@code io.tmpfile}},
+	 * <p>When possible, you may prefer to use {@link IoLib#_tmpfile() {@code io.tmpfile}},
 	 * which automatically removes the file when the program ends.</p>
 	 *
 	 * @return the {@code os.tmpname} function
