@@ -98,6 +98,7 @@ object BenchmarkRunner {
     new DefaultMathLib().installInto(state, env)
     new DefaultStringLib().installInto(state, env)
     new DefaultIoLib(state).installInto(state, env)
+    new DefaultOsLib().installInto(state, env)
 
     // command-line arguments
     val argTable = state.newTable()

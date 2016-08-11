@@ -34,6 +34,7 @@ import net.sandius.rembulan.lib.impl.DefaultDebugLib;
 import net.sandius.rembulan.lib.impl.DefaultIoLib;
 import net.sandius.rembulan.lib.impl.DefaultMathLib;
 import net.sandius.rembulan.lib.impl.DefaultModuleLib;
+import net.sandius.rembulan.lib.impl.DefaultOsLib;
 import net.sandius.rembulan.lib.impl.DefaultStringLib;
 import net.sandius.rembulan.lib.impl.DefaultTableLib;
 import net.sandius.rembulan.parser.ParseException;
@@ -89,6 +90,7 @@ public class RembulanConsole {
 		new DefaultTableLib().installInto(state, env);
 		new DefaultIoLib(state.tableFactory(), FileSystems.getDefault(), in, out, err)
 				.installInto(state, env);
+		new DefaultOsLib().installInto(state, env);
 		new DefaultDebugLib().installInto(state, env);
 	}
 

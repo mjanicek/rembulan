@@ -98,6 +98,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
         new DefaultMathLib().installInto(state, env)
         new DefaultStringLib().installInto(state, env)
         new DefaultIoLib(state).installInto(state, env)
+        new DefaultOsLib().installInto(state, env)
         new DefaultTableLib().installInto(state, env)
         new DefaultDebugLib().installInto(state, env)
     }
