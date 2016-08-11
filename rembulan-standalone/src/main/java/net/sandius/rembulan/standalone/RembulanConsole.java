@@ -95,12 +95,16 @@ public class RembulanConsole {
 		return t;
 	}
 
-	private CompiledModule parseProgram(String source) throws ParseException {
-		return compiler.compile(source, "stdin", "stdin_" + chunkIndex++);
+	private CompiledModule parseProgram(String sourceText, String sourceFileName) throws ParseException {
+		String rootClassName = "rembulan_repl_" + (chunkIndex++);
+		return compiler.compile(
+				sourceText,
+				sourceFileName != null ? sourceFileName : "stdin",
+				rootClassName);
 	}
 
 	private Function processLine(String line) throws ParseException, ReflectiveOperationException {
-		CompiledModule cm = parseProgram(line);
+		CompiledModule cm = parseProgram(line, null);
 
 		assert (cm != null);
 
