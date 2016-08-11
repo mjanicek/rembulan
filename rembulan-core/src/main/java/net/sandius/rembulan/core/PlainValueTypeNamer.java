@@ -18,16 +18,16 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.LuaType;
 
-public class PlainValueTypeNamer implements ValueTypeNamer {
+import static net.sandius.rembulan.LuaFormat.TYPENAME_BOOLEAN;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_FUNCTION;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_NIL;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_NUMBER;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_STRING;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_TABLE;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_THREAD;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_USERDATA;
 
-	public static final String TYPENAME_NIL = "nil";
-	public static final String TYPENAME_BOOLEAN = "boolean";
-	public static final String TYPENAME_NUMBER = "number";
-	public static final String TYPENAME_STRING = "string";
-	public static final String TYPENAME_TABLE = "table";
-	public static final String TYPENAME_FUNCTION = "function";
-	public static final String TYPENAME_USERDATA = "userdata";
-	public static final String TYPENAME_THREAD = "thread";
+public class PlainValueTypeNamer implements ValueTypeNamer {
 
 	public static final PlainValueTypeNamer INSTANCE = new PlainValueTypeNamer();
 

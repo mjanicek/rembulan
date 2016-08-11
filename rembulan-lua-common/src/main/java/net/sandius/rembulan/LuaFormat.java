@@ -28,6 +28,15 @@ public class LuaFormat {
 	public static final String NEG_INF = "-inf";
 	public static final String NAN = "nan";
 
+	public static final String TYPENAME_NIL = NIL;
+	public static final String TYPENAME_BOOLEAN = "boolean";
+	public static final String TYPENAME_NUMBER = "number";
+	public static final String TYPENAME_STRING = "string";
+	public static final String TYPENAME_TABLE = "table";
+	public static final String TYPENAME_FUNCTION = "function";
+	public static final String TYPENAME_USERDATA = "userdata";
+	public static final String TYPENAME_THREAD = "thread";
+
 	public static String toString(boolean b) {
 		return b ? TRUE : FALSE;
 	}

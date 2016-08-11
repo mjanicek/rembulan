@@ -30,12 +30,12 @@ import net.sandius.rembulan.util.Check;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_FUNCTION;
-import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_NUMBER;
-import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_STRING;
-import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_TABLE;
-import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_THREAD;
-import static net.sandius.rembulan.core.PlainValueTypeNamer.TYPENAME_USERDATA;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_FUNCTION;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_NUMBER;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_STRING;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_TABLE;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_THREAD;
+import static net.sandius.rembulan.LuaFormat.TYPENAME_USERDATA;
 
 public class ArgumentIterator implements Iterator<Object> {
 
