@@ -24,8 +24,8 @@ import net.sandius.rembulan.core.Table;
  * This library provides basic mathematical functions. It provides all its functions and constants
  * inside the table {@code math}. Functions with the annotation "integer/float" give integer
  * results for integer arguments and float results for float (or mixed) arguments. Rounding
- * functions ({@link #_ceil() <code>math.ceil</code>}, {@link #_floor() <code>math.floor</code>},
- * and {@link #_modf() <code>math.modf</code>}) return an integer when the result fits
+ * functions ({@link #_ceil() {@code math.ceil}}, {@link #_floor() {@code math.floor}},
+ * and {@link #_modf() {@code math.modf}}) return an integer when the result fits
  * in the range of an integer, or a float otherwise.
  */
 public abstract class MathLib implements Lib {
@@ -65,6 +65,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.abs (x)}
 	 *
 	 * <p>Returns the absolute value of {@code x}. (integer/float)</p>
+	 *
+	 * @return the {@code math.abs} function
 	 */
 	public abstract Function _abs();
 
@@ -72,6 +74,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.acos (x)}
 	 *
 	 * <p>Returns the arc cosine of {@code x} (in radians).</p>
+	 *
+	 * @return the {@code math.acos} function
 	 */
 	public abstract Function _acos();
 
@@ -79,6 +83,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.asin (x)}
 	 *
 	 * <p>Returns the arc sine of {@code x} (in radians).</p>
+	 *
+	 * @return the {@code math.asin} function
 	 */
 	public abstract Function _asin();
 
@@ -91,6 +97,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>The default value for {@code x} is 1, so that the call {@code math.atan(y)} returns
 	 * the arc tangent of {@code y}.</p>
+	 *
+	 * @return the {@code math.atan} function
 	 */
 	public abstract Function _atan();
 
@@ -98,6 +106,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.ceil (x)}
 	 *
 	 * <p>Returns the smallest integer larger than or equal to {@code x}.</p>
+	 *
+	 * @return the {@code math.ceil} function
 	 */
 	public abstract Function _ceil();
 
@@ -105,6 +115,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.cos (x)}
 	 *
 	 * <p>Returns the cosine of {@code x} (assumed to be in radians).</p>
+	 *
+	 * @return the {@code math.cos} function
 	 */
 	public abstract Function _cos();
 
@@ -112,6 +124,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.deg (x)}
 	 *
 	 * <p>Returns the angle {@code x} (given in radians) in degrees.</p>
+	 *
+	 * @return the {@code math.deg} function
 	 */
 	public abstract Function _deg();
 
@@ -120,6 +134,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns the value <i>e</i><sup>{@code x}</sup> (where <i>e</i> is the base
 	 * of natural logarithms).</p>
+	 *
+	 * @return the {@code math.exp} function
 	 */
 	public abstract Function _exp();
 
@@ -127,6 +143,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.floor (x)}
 	 *
 	 * <p>Returns the largest integral value smaller than or equal to {@code x}.</p>
+	 *
+	 * @return the {@code math.floor} function
 	 */
 	public abstract Function _floor();
 
@@ -135,6 +153,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns the remainder of the division of {@code x} by {@code y} that rounds
 	 * the quotient towards zero. (integer/float)</p>
+	 *
+	 * @return the {@code math.fmod} function
 	 */
 	public abstract Function _fmod();
 
@@ -143,6 +163,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>The value {@code HUGE_VAL}, a value larger than or equal to any other numerical
 	 * value.</p>
+	 *
+	 * @return the {@code math.huge} number
 	 */
 	public abstract Double _huge();
 
@@ -151,6 +173,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns the logarithm of {@code x} in the given base. The default for {@code base}
 	 * is <i>e</i> (so that the function returns the natural logarithm of {@code x}).</p>
+	 *
+	 * @return the {@code math.log} function
 	 */
 	public abstract Function _log();
 
@@ -159,11 +183,15 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns the argument with the maximum value, according to the Lua operator &lt;.
 	 * (integer/float)</p>
+	 *
+	 * @return the {@code math.max} function
 	 */
 	public abstract Function _max();
 
 	/**
 	 * An integer with the maximum value for an integer.
+	 *
+	 * @return the {@code math.maxinteger} number
 	 */
 	public abstract Long _maxinteger();
 
@@ -172,11 +200,15 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns the argument with the minimum value, according to the Lua operator &lt;.
 	 * (integer/float)</p>
+	 *
+	 * @return the {@code math.min} function
 	 */
 	public abstract Function _min();
 
 	/**
 	 * An integer with the minimum value for an integer.
+	 *
+	 * @return the {@code math.mininteger} number
 	 */
 	public abstract Long _mininteger();
 
@@ -185,6 +217,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns the integral part of {@code x} and the fractional part of {@code x}.
 	 * Its second result is always a float.</p>
+	 *
+	 * @return the {@code math.modf} function
 	 */
 	public abstract Function _modf();
 
@@ -192,6 +226,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.pi}
 	 *
 	 * <p>The value of &pi;.</p>
+	 *
+	 * @return the {@code math.pi} number
 	 */
 	public abstract Double _pi();
 
@@ -199,6 +235,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.rad (x)}
 	 *
 	 * <p>Returns the angle {@code x} (given in degrees) in radians.</p>
+	 *
+	 * @return the {@code math.rad} function
 	 */
 	public abstract Function _rad();
 
@@ -215,6 +253,8 @@ public abstract class MathLib implements Lib {
 	 * <p>This function is an interface to the simple pseudo-random generator function
 	 * {@code rand} provided by Standard C. (No guarantees can be given for its statistical
 	 * properties.)</p>
+	 *
+	 * @return the {@code math.random} function
 	 */
 	public abstract Function _random();
 
@@ -223,6 +263,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Sets {@code x} as the "seed" for the pseudo-random generator: equal seeds produce
 	 * equal sequences of numbers.</p>
+	 *
+	 * @return the {@code math.randomseed} function
 	 */
 	public abstract Function _randomseed();
 
@@ -230,6 +272,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.sin (x)}
 	 *
 	 * <p>Returns the sine of {@code x} (assumed to be in radians).</p>
+	 *
+	 * @return the {@code math.sin} function
 	 */
 	public abstract Function _sin();
 
@@ -238,6 +282,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns the square root of {@code x}. (You can also use the expression {@code x^0.5}
 	 * to compute this value.)</p>
+	 *
+	 * @return the {@code math.sqrt} function
 	 */
 	public abstract Function _sqrt();
 
@@ -245,6 +291,8 @@ public abstract class MathLib implements Lib {
 	 * {@code math.tan (x)}
 	 *
 	 * <p>Returns the tangent of {@code x} (assumed to be in radians).</p>
+	 *
+	 * @return the {@code math.tan} function
 	 */
 	public abstract Function _tan();
 
@@ -253,6 +301,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>If the value {@code x} is convertible to an integer, returns that integer.
 	 * Otherwise, returns <b>nil</b>.</p>
+	 *
+	 * @return the {@code math.tointeger} function
 	*/
 	public abstract Function _tointeger();
 
@@ -261,6 +311,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns {@code "integer"} if {@code x} is an integer, {@code "float"} if it is a float,
 	 * or <b>nil</b> if {@code x} is not a number.</p>
+	 *
+	 * @return the {@code math.type} function
 	 */
 	public abstract Function _type();
 
@@ -269,6 +321,8 @@ public abstract class MathLib implements Lib {
 	 *
 	 * <p>Returns a boolean, <b>true</b> if integer {@code m} is below integer {@code n} when
 	 * they are compared as unsigned integers.</p>
+	 *
+	 * @return the {@code math.ult} function
 	 */
 	public abstract Function _ult();
 

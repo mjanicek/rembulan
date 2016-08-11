@@ -44,6 +44,8 @@ public abstract class OsLib implements Lib {
 	 * {@code os.clock ()}
 	 *
 	 * <p>Returns an approximation of the amount in seconds of CPU time used by the program.</p>
+	 *
+	 * @return the {@code os.clock} function
 	 */
 	public abstract Function _clock();
 
@@ -54,7 +56,7 @@ public abstract class OsLib implements Lib {
 	 * string format.</p>
 	 *
 	 * <p>If the time argument is present, this is the time to be formatted (see the
-	 * {@link #_time() <code>os.time</code>} function for a description of this value).
+	 * {@link #_time() {@code os.time}} function for a description of this value).
 	 * Otherwise, {@code date} formats the current time.</p>
 	 *
 	 * <p>If format starts with '{@code !}', then the date is formatted in Coordinated Universal
@@ -74,6 +76,8 @@ public abstract class OsLib implements Lib {
 	 *
 	 * <p>On non-POSIX systems, this function may be not thread safe because of its reliance
 	 * on C function {@code gmtime} and C function {@code localtime}.</p>
+	 *
+	 * @return the {@code os.date} function
 	 */
 	public abstract Function _date();
 
@@ -83,6 +87,8 @@ public abstract class OsLib implements Lib {
 	 * <p>Returns the difference, in seconds, from time {@code t1} to time {@code t2} (where
 	 * the times are values returned by {@code os.time}). In POSIX, Windows, and some other
 	 * systems, this value is exactly {@code t2}-{@code t1}.</p>
+	 *
+	 * @return the {@code os.difftime} function
 	 */
 	public abstract Function _difftime();
 
@@ -92,16 +98,17 @@ public abstract class OsLib implements Lib {
 	 * <p>This function is equivalent to the ISO C function {@code system}.
 	 * It passes {@code command} to be executed by an operating system shell. Its first result
 	 * is <b>true</b> if the command terminated successfully, or <b>nil</b> otherwise.
-	 * After this first result the function returns a string plus a number, as follows:
+	 * After this first result the function returns a string plus a number, as follows:</p>
 	 * <ul>
 	 * <li><b>{@code "exit"}</b>: the command terminated normally; the following number
 	 * is the exit status of the command.</li>
 	 * <li><b>{@code "signal"}</b>: the command was terminated by a signal; the following number
 	 * is the signal that terminated the command.</li>
 	 * </ul>
-	 * </p>
 	 * <p>When called without a {@code command}, {@code os.execute} returns a boolean that
 	 * is <b>true</b> if a shell is available.</p>
+	 *
+	 * @return the {@code os.execute} function
 	 */
 	public abstract Function _execute();
 
@@ -115,6 +122,8 @@ public abstract class OsLib implements Lib {
 	 *
 	 * <p>If the optional second argument {@code close} is <b>true</b>, closes the Lua state
 	 * before exiting.</p>
+	 *
+	 * @return the {@code os.exit} function
 	 */
 	public abstract Function _exit();
 
@@ -123,6 +132,8 @@ public abstract class OsLib implements Lib {
 	 *
 	 * <p>Returns the value of the process environment variable {@code varname}, or <b>nil</b>
 	 * if the variable is not defined.</p>
+	 *
+	 * @return the {@code os.getenv} function
 	 */
 	public abstract Function _getenv();
 
@@ -132,6 +143,8 @@ public abstract class OsLib implements Lib {
 	 * <p>Deletes the file (or empty directory, on POSIX systems) with the given name.
 	 * If this function fails, it returns <b>nil</b>, plus a string describing the error
 	 * and the error code.</p>
+	 *
+	 * @return the {@code os.remove} function
 	 */
 	public abstract Function _remove();
 
@@ -140,6 +153,8 @@ public abstract class OsLib implements Lib {
 	 *
 	 * <p>Renames file or directory named {@code oldname} to {@code newname}. If this function
 	 * fails, it returns <b>nil</b>, plus a string describing the error and the error code.</p>
+	 *
+	 * @return the {@code os.rename} function
 	 */
 	public abstract Function _rename();
 
@@ -162,6 +177,8 @@ public abstract class OsLib implements Lib {
 	 *
 	 * <p>This function may be not thread safe because of its reliance on C function
 	 * {@code setlocale}.</p>
+	 *
+	 * @return the {@code os.setlocale} function
 	 */
 	public abstract Function _setlocale();
 
@@ -173,7 +190,7 @@ public abstract class OsLib implements Lib {
 	 * {@code year}, {@code month}, and {@code day}, and may have fields {@code hour}
 	 * (default is 12), {@code min} (default is 0), {@code sec} (default is 0), and {@code isdst}
 	 * (default is <b>nil</b>). Other fields are ignored. For a description of these fields,
-	 * see the {@link #_date() <code>os.date</code>} function.</p>
+	 * see the {@link #_date() {@code os.date}} function.</p>
 	 *
 	 * <p>The values in these fields do not need to be inside their valid ranges. For instance,
 	 * if {@code sec} is -10, it means -10 seconds from the time specified by the other fields;
@@ -183,8 +200,10 @@ public abstract class OsLib implements Lib {
 	 * <p>The returned value is a number, whose meaning depends on your system. In POSIX, Windows,
 	 * and some other systems, this number counts the number of seconds since some given start
 	 * time (the "epoch"). In other systems, the meaning is not specified, and the number returned
-	 * by {@code time} can be used only as an argument to {@link #_date() <code>os.date</code>}
-	 * and {@link #_difftime() <code>os.difftime</code>}.</p>
+	 * by {@code time} can be used only as an argument to {@link #_date() {@code os.date}}
+	 * and {@link #_difftime() {@code os.difftime}}.</p>
+	 *
+	 * @return the {@code os.time} function
 	 */
 	public abstract Function _time();
 
@@ -200,8 +219,10 @@ public abstract class OsLib implements Lib {
 	 * getting the name and creating the file.) You still have to open the file to use it
 	 * and to remove it (even if you do not use it).</p>
 	 *
-	 * <p>When possible, you may prefer to use {@link IoLib#_tmpfile() <code>io.tmpfile</code>},
+	 * <p>When possible, you may prefer to use {@link IOLib#_tmpfile() {@code io.tmpfile}},
 	 * which automatically removes the file when the program ends.</p>
+	 *
+	 * @return the {@code os.tmpname} function
 	 */
 	public abstract Function _tmpname();
 

@@ -48,6 +48,8 @@ public abstract class TableLib implements Lib {
 	 * {@code list[i]..sep..list[i+1] ··· sep..list[j]}. The default value for {@code sep}
 	 * is the empty string, the default for {@code i} is 1, and the default for {@code j}
 	 * is {@code #list}. If {@code i} is greater than {@code j}, returns the empty string.</p>
+	 *
+	 * @return the {@code table.concat} function
 	 */
 	public abstract Function _concat();
 
@@ -58,6 +60,8 @@ public abstract class TableLib implements Lib {
 	 * {@code list[pos], list[pos+1], ···, list[#list]}. The default value for {@code pos}
 	 * is {@code #list+1}, so that a call {@code table.insert(t,x)} inserts {@code x}
 	 * at the end of list {@code t}.</p>
+	 *
+	 * @return the {@code table.insert} function
 	 */
 	public abstract Function _insert();
 
@@ -69,6 +73,8 @@ public abstract class TableLib implements Lib {
 	 * {@code a2[t],··· = a1[f],···,a1[e]}. The default for {@code a2} is {@code a1}.
 	 * The destination range can overlap with the source range. The number of elements
 	 * to be moved must fit in a Lua integer.</p>
+	 *
+	 * @return the {@code table.move} function
 	 */
 	public abstract Function _move();
 
@@ -78,6 +84,8 @@ public abstract class TableLib implements Lib {
 	 * <p>Returns a new table with all parameters stored into keys 1, 2, etc. and with
 	 * a field {@code "n"} with the total number of parameters. Note that the resulting table
 	 * may not be a sequence.</p>
+	 *
+	 * @return the {@code table.pack} function
 	 */
 	public abstract Function _pack();
 
@@ -93,6 +101,8 @@ public abstract class TableLib implements Lib {
 	 *
 	 * <p>The default value for {@code pos} is {@code #list}, so that a call
 	 * {@code table.remove(l)} removes the last element of list {@code l}.</p>
+	 *
+	 * @return the {@code table.remove} function
 	 */
 	public abstract Function _remove();
 
@@ -112,17 +122,23 @@ public abstract class TableLib implements Lib {
 	 *
 	 * <p>The sort algorithm is not stable; that is, elements not comparable by the given order
 	 * (e.g., equal elements) may have their relative positions changed by the sort.</p>
+	 *
+	 * @return the {@code table.sort} function
 	 */
 	public abstract Function _sort();
 
 	/**
 	 * {@code table.unpack (list [, i [, j]])}
 	 *
-	 * <p>Returns the elements from the given list. This function is equivalent to
+	 * <p>Returns the elements from the given list. This function is equivalent to</p>
+	 *
 	 * <blockquote>
 	 *  {@code return list[i], list[i+1], ···, list[j] }
 	 * </blockquote>
-	 * By default, {@code i} is 1 and {@code j} is {@code #list}.</p>
+	 *
+	 * <p>By default, {@code i} is 1 and {@code j} is {@code #list}.</p>
+	 *
+	 * @return the {@code table.unpack} function
 	 */
 	public abstract Function _unpack();
 

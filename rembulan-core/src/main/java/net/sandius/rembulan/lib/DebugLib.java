@@ -68,6 +68,8 @@ public abstract class DebugLib implements Lib {
 	 *
 	 * <p>Note that commands for {@code debug.debug} are not lexically nested within any
 	 * function and so have no direct access to local variables.</p>
+	 *
+	 * @return the {@code debug.debug} function
 	 */
 	public abstract Function _debug();
 
@@ -76,7 +78,9 @@ public abstract class DebugLib implements Lib {
 	 *
 	 * <p>Returns the current hook settings of the thread, as three values: the current hook
 	 * function, the current hook mask, and the current hook count (as set by
-	 * the {@link #_sethook() <code>debug.sethook</code>} function).</p>
+	 * the {@link #_sethook() {@code debug.sethook}} function).</p>
+	 *
+	 * @return the {@code debug.gethook} function
 	 */
 	public abstract Function _gethook();
 
@@ -102,6 +106,8 @@ public abstract class DebugLib implements Lib {
 	 * the current function, if a reasonable name can be found, and the expression
 	 * {@code debug.getinfo(print)} returns a table with all available information about
 	 * the {@code print} function.</p>
+	 *
+	 * @return the {@code debug.getinfo} function
 	 */
 	public abstract Function _getinfo();
 
@@ -117,7 +123,7 @@ public abstract class DebugLib implements Lib {
 	 * the current scope of the function. Negative indices refer to vararg parameters;
 	 * -1 is the first vararg parameter. The function returns <b>nil</b> if there is no variable
 	 * with the given index, and raises an error when called with a level out of range.
-	 * (You can call {@link #_getinfo() <code>debug.getinfo</code>} to check whether the level
+	 * (You can call {@link #_getinfo() {@code debug.getinfo}} to check whether the level
 	 * is valid.)</p>
 	 *
 	 * <p>Variable names starting with {@code '('} (open parenthesis) represent variables with
@@ -126,6 +132,8 @@ public abstract class DebugLib implements Lib {
 	 *
 	 * <p>The parameter {@code f} may also be a function. In that case, {@code getlocal}
 	 * returns only the name of function parameters.</p>
+	 *
+	 * @return the {@code debug.getlocal} function
 	 */
 	public abstract Function _getlocal();
 
@@ -134,6 +142,8 @@ public abstract class DebugLib implements Lib {
 	 *
 	 * <p>Returns the metatable of the given {@code value} or <b>nil</b> if it does not have
 	 * a metatable.</p>
+	 *
+	 * @return the {@code debug.getmetatable} function
 	 */
 	public abstract Function _getmetatable();
 
@@ -141,6 +151,8 @@ public abstract class DebugLib implements Lib {
 	 * {@code debug.getregistry ()}
 	 *
 	 * <p>Returns the registry table (see §4.5 of the Lua Reference Manual).</p>
+	 *
+	 * @return the {@code debug.getregistry} function
 	 */
 	public abstract Function _getregistry();
 
@@ -153,6 +165,8 @@ public abstract class DebugLib implements Lib {
 	 *
 	 * <p>Variable names starting with {@code '('} (open parenthesis) represent variables with
 	 * no known names (variables from chunks saved without debug information).</p>
+	 *
+	 * @return the {@code debug.getupvalue} function
 	 */
 	public abstract Function _getupvalue();
 
@@ -161,6 +175,8 @@ public abstract class DebugLib implements Lib {
 	 *
 	 * <p>Returns the Lua value associated to {@code u}. If {@code u} is not a userdata,
 	 * returns <b>nil</b>.</p>
+	 *
+	 * @return the {@code debug.getuservalue} function
 	 */
 	public abstract Function _getuservalue();
 
@@ -188,6 +204,8 @@ public abstract class DebugLib implements Lib {
 	 * number as its second parameter. Inside a hook, you can call {@code getinfo} with level 2
 	 * to get more information about the running function (level 0 is the {@code getinfo}
 	 * function, and level 1 is the hook function).</p>
+	 *
+	 * @return the {@code debug.sethook} function
 	 */
 	public abstract Function _sethook();
 
@@ -197,12 +215,14 @@ public abstract class DebugLib implements Lib {
 	 * <p>This function assigns the value {@code value} to the local variable with index
 	 * {@code local} of the function at {@code level} level of the stack. The function returns
 	 * <b>nil</b> if there is no local variable with the given index, and raises an error when
-	 * called with a level out of range. (You can call {@link #_getinfo() <code>getinfo</code>}
+	 * called with a level out of range. (You can call {@link #_getinfo() {@code getinfo}}
 	 * to check whether the level is valid.) Otherwise, it returns the name of the local
 	 * variable.</p>
 	 *
-	 * <p>See {@link #_getlocal() <code>debug.getlocal</code>} for more information about variable
+	 * <p>See {@link #_getlocal() {@code debug.getlocal}} for more information about variable
 	 * indices and names.</p>
+	 *
+	 * @return the {@code debug.setlocal} function
 	 */
 	public abstract Function _setlocal();
 
@@ -211,6 +231,8 @@ public abstract class DebugLib implements Lib {
 	 *
 	 * <p>Sets the metatable for the given {@code value} to the given {@code table} (which can
 	 * be <b>nil</b>). Returns {@code value}.</p>
+	 *
+	 * @return the {@code debug.setmetatable} function
 	 */
 	public abstract Function _setmetatable();
 
@@ -220,6 +242,8 @@ public abstract class DebugLib implements Lib {
 	 * <p>This function assigns the value {@code value} to the upvalue with index {@code up}
 	 * of the function f. The function returns <b>nil</b> if there is no upvalue with the given
 	 * index. Otherwise, it returns the name of the upvalue.</p>
+	 *
+	 * @return the {@code debug.setupvalue} function
 	 */
 	public abstract Function _setupvalue();
 
@@ -230,6 +254,8 @@ public abstract class DebugLib implements Lib {
 	 * udata must be a full userdata.</p>
 	 *
 	 * <p>Returns {@code udata}.</p>
+	 *
+	 * @return the {@code debug.setuservalue} function
 	 */
 	public abstract Function _setuservalue();
 
@@ -241,6 +267,8 @@ public abstract class DebugLib implements Lib {
 	 * a traceback of the call stack. The optional {@code message} string is appended at
 	 * the beginning of the traceback. An optional {@code level} number tells at which level
 	 * to start the traceback (default is 1, the function calling {@code traceback}).</p>
+	 *
+	 * @return the {@code debug.traceback} function
 	 */
 	public abstract Function _traceback();
 
@@ -253,6 +281,8 @@ public abstract class DebugLib implements Lib {
 	 * <p>These unique identifiers allow a program to check whether different closures share
 	 * upvalues. Lua closures that share an upvalue (that is, that access a same external
 	 * local variable) will return identical ids for those upvalue indices.</p>
+	 *
+	 * @return the {@code debug.upvalueid} function
 	 */
 	public abstract Function _upvalueid();
 
@@ -261,6 +291,8 @@ public abstract class DebugLib implements Lib {
 	 *
 	 * <p>Make the {@code n1}-th upvalue of the Lua closure {@code f1} refer to
 	 * the {@code n2}-th upvalue of the Lua closure {@code f2}.</p>
+	 *
+	 * @return the {@code debug.upvaluejoin} function
 	 */
 	public abstract Function _upvaluejoin();
 

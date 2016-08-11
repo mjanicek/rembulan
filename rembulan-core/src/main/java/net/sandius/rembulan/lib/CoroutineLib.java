@@ -41,6 +41,8 @@ public abstract class CoroutineLib implements Lib {
 	 *
 	 * <p>Creates a new coroutine, with body {@code f}. {@code f} must be a function.
 	 * Returns this new coroutine, an object with type {@code "thread"}.</p>
+	 *
+	 * @return the {@code coroutine.create} function
 	 */
 	protected abstract Function _create();
 
@@ -56,6 +58,8 @@ public abstract class CoroutineLib implements Lib {
 	 * any values passed to {@code yield} (when the coroutine yields) or any values returned
 	 * by the body function (when the coroutine terminates). If there is any error, {@code resume}
 	 * returns <b>false</b> plus the error message.</p>
+	 *
+	 * @return the {@code coroutine.resume} function
 	 */
 	protected abstract Function _resume();
 
@@ -64,6 +68,8 @@ public abstract class CoroutineLib implements Lib {
 	 *
 	 * <p>Suspends the execution of the calling coroutine. Any arguments to {@code yield}
 	 * are passed as extra results to {@code resume}.</p>
+	 *
+	 * @return the {@code coroutine.yield} function
 	 */
 	protected abstract Function _yield();
 
@@ -74,6 +80,8 @@ public abstract class CoroutineLib implements Lib {
 	 *
 	 * <p>A running coroutine is yieldable if it is not the main thread and it is not inside
 	 * a non-yieldable C function.</p>
+	 *
+	 * @return the {@code coroutine.isyieldable} function
 	 */
 	protected abstract Function _isyieldable();
 
@@ -86,6 +94,8 @@ public abstract class CoroutineLib implements Lib {
 	 * running yet; {@code "normal"} if the coroutine is active but not running (that is,
 	 * it has resumed another coroutine); and {@code "dead"} if the coroutine has finished
 	 * its body function, or if it has stopped with an error.</p>
+	 *
+	 * @return the {@code coroutine.status} function
 	 */
 	protected abstract Function _status();
 
@@ -94,6 +104,8 @@ public abstract class CoroutineLib implements Lib {
 	 *
 	 * <p>Returns the running coroutine plus a boolean, <b>true</b> when the running coroutine
 	 * is the main one.</p>
+	 *
+	 * @return the {@code coroutine.running} function
 	 */
 	protected abstract Function _running();
 
@@ -105,6 +117,8 @@ public abstract class CoroutineLib implements Lib {
 	 * passed to the function behave as the extra arguments to {@code resume}.
 	 * Returns the same values returned by {@code resume}, except the first boolean. In case
 	 * of error, propagates the error.</p>
+	 *
+	 * @return the {@code coroutine.wrap} function
 	 */
 	protected abstract Function _wrap();
 

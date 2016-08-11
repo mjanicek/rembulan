@@ -28,7 +28,7 @@ import net.sandius.rembulan.core.Userdata;
  * The second style uses explicit file handles.</p>
  *
  * <p>When using implicit file handles, all operations are supplied by table {@code io}.
- * When using explicit file handles, the operation {@link #_open() <code>io.open</code>}
+ * When using explicit file handles, the operation {@link #_open() {@code io.open}}
  * returns a file handle and then all operations are supplied as methods of the file handle.</p>
  *
  * <p>The table {@code io} also provides three predefined file handles with their usual
@@ -67,6 +67,8 @@ public abstract class IOLib implements Lib {
 	 *
 	 * <p>Equivalent to {@code file:close()}. Without a {@code file}, closes the default
 	 * output file.</p>
+	 *
+	 * @return the {@code io.close} function
 	 */
 	public abstract Function _close();
 
@@ -74,6 +76,8 @@ public abstract class IOLib implements Lib {
 	 * {@code io.flush ()}
 	 *
 	 * <p>Equivalent to {@code io.output():flush()}.</p>
+	 *
+	 * @return the {@code io.flush} function
 	 */
 	public abstract Function _flush();
 
@@ -86,6 +90,8 @@ public abstract class IOLib implements Lib {
 	 * the current default input file.</p>
 	 *
 	 * <p>In case of errors this function raises the error, instead of returning an error code.</p>
+	 *
+	 * @return the {@code io.input} function
 	 */
 	public abstract Function _input();
 
@@ -102,6 +108,8 @@ public abstract class IOLib implements Lib {
 	 * input file. In this case it does not close the file when the loop ends.</p>
 	 *
 	 * <p>In case of errors this function raises the error, instead of returning an error code.</p>
+	 *
+	 * @return the {@code io.lines} function
 	 */
 	public abstract Function _lines();
 
@@ -111,7 +119,7 @@ public abstract class IOLib implements Lib {
 	 * <p>This function opens a file, in the mode specified in the string {@code mode}.
 	 * It returns a new file handle, or, in case of errors, <b>nil</b> plus an error message.</p>
 	 *
-	 * <p>The mode string can be any of the following:
+	 * <p>The mode string can be any of the following:</p>
 	 * <ul>
 	 * <li><b>"{@code r}"</b>: read mode (the default);</li>
 	 * <li><b>"{@code w}"</b>: write mode;</li>
@@ -121,10 +129,11 @@ public abstract class IOLib implements Lib {
 	 * <li><b>"{@code a+}"</b>: append update mode, previous data is preserved, writing is only allowed
 	 * at the end of file.</li>
 	 * </ul>
-	 * </p>
 	 *
 	 * <p>The mode string can also have a '{@code b}' at the end, which is needed in some systems
 	 * to open the file in binary mode.</p>
+	 *
+	 * @return the {@code io.open} function
 	 */
 	public abstract Function _open();
 
@@ -132,6 +141,8 @@ public abstract class IOLib implements Lib {
 	 * {@code io.output ([file])}
 	 *
 	 * <p>Similar to {@code io.input}, but operates over the default output file.</p>
+	 *
+	 * @return the {@code io.output} function
 	 */
 	public abstract Function _output();
 
@@ -143,6 +154,8 @@ public abstract class IOLib implements Lib {
 	 * <p>Starts program {@code prog} in a separated process and returns a file handle
 	 * that you can use to read data from this program (if {@code mode} is "{@code r}",
 	 * the default) or to write data to this program (if {@code mode} is "{@code w}").</p>
+	 *
+	 * @return the {@code io.popen} function
 	 */
 	public abstract Function _popen();
 
@@ -150,6 +163,8 @@ public abstract class IOLib implements Lib {
 	 * {@code io.read (···)}
 	 *
 	 * <p>Equivalent to {@code io.input():read(···)}.</p>
+	 *
+	 * @return the {@code io.read} function
 	 */
 	public abstract Function _read();
 
@@ -158,6 +173,8 @@ public abstract class IOLib implements Lib {
 	 *
 	 * <p>Returns a handle for a temporary file. This file is opened in update mode
 	 * and it is automatically removed when the program ends.</p>
+	 *
+	 * @return the {@code io.tmpfile} function
 	 */
 	public abstract Function _tmpfile();
 
@@ -167,20 +184,45 @@ public abstract class IOLib implements Lib {
 	 * <p>Checks whether {@code obj} is a valid file handle. Returns the string {@code "file"}
 	 * if {@code obj} is an open file handle, {@code "closed file"} if {@code obj} is
 	 * a closed file handle, or <b>nil</b> if {@code obj} is not a file handle.</p>
+	 *
+	 * @return the {@code io.type} function
 	 */
 	public abstract Function _type();
 
 	/**
 	 * {@code io.write (···)}
 	 *
-	 * <p>Equivalent to {@link #_file_write() <code>io.output():write(···)</code>}.</p>
+	 * <p>Equivalent to {@link #_file_write() {@code io.output():write(···)}}.</p>
+	 *
+	 * @return the {@code io.write} function
 	 */
 	public abstract Function _write();
 
+	/**
+	 * {@code io.stdin}
+	 *
+	 * <p>The standard input file.</p>
+	 *
+	 * @return the standard input file
+	 */
 	public abstract Userdata _stdin();
 
+	/**
+	 * {@code io.stdout}
+	 *
+	 * <p>The standard output file.</p>
+	 *
+	 * @return the standard output file
+	 */
 	public abstract Userdata _stdout();
 
+	/**
+	 * {@code io.stderr}
+	 *
+	 * <p>The standard error file.</p>
+	 *
+	 * @return the standard error file
+	 */
 	public abstract Userdata _stderr();
 
 	/**
@@ -189,8 +231,10 @@ public abstract class IOLib implements Lib {
 	 * <p>Closes {@code file}. Note that files are automatically closed when their handles
 	 * are garbage collected, but that takes an unpredictable amount of time to happen.</p>
 	 *
-	 * <p>When closing a file handle created with {@link #_popen() <code>io.popen</code>},
+	 * <p>When closing a file handle created with {@link #_popen() {@code io.popen}},
 	 * {@code file:close} returns the same values returned by {@code os.execute}.</p>
+	 *
+	 * @return the {@code file:close} function
 	 */
 	public abstract Function _file_close();
 
@@ -198,6 +242,8 @@ public abstract class IOLib implements Lib {
 	 * {@code file:flush ()}
 	 *
 	 * <p>Saves any written data to {@code file}.</p>
+	 *
+	 * @return the {@code file:flush} function
 	 */
 	public abstract Function _file_flush();
 
@@ -206,15 +252,21 @@ public abstract class IOLib implements Lib {
 	 *
 	 * <p>Returns an iterator function that, each time it is called, reads the file according
 	 * to the given formats. When no format is given, uses "{@code l}" as a default.
-	 * As an example, the construction
+	 * As an example, the construction</p>
+	 *
 	 * <pre>
-	 *   for c in file:lines(1) do body end
+	 * {@code
+	 * for c in file:lines(1) do body end
+	 * }
 	 * </pre>
-	 * will iterate over all characters of the file, starting at the current position.
-	 * Unlike {@link #_lines() <code>io.lines</code>}, this function does not close the file
+	 *
+	 * <p>will iterate over all characters of the file, starting at the current position.
+	 * Unlike {@link #_lines() {@code io.lines}}, this function does not close the file
 	 * when the loop ends.</p>
 	 *
 	 * <p>In case of errors this function raises the error, instead of returning an error code.</p>
+	 *
+	 * @return the {@code file:lines} function
 	 */
 	public abstract Function _file_lines();
 
@@ -227,7 +279,7 @@ public abstract class IOLib implements Lib {
 	 * the function does not read subsequent formats.) When called without formats, it uses
 	 * a default format that reads the next line (see below).</p>
 	 *
-	 * <p>The available formats are
+	 * <p>The available formats are</p>
 	 * <ul>
 	 * <li><b>"{@code n}"</b>: reads a numeral and returns it as a float or an integer,
 	 * following the lexical conventions of Lua. (The numeral may have leading spaces and a sign.)
@@ -244,9 +296,10 @@ public abstract class IOLib implements Lib {
 	 * returning <b>nil</b> on end of file. If <i>number</i> is zero, it reads nothing
 	 * and returns an empty string, or <b>nil</b> on end of file.</li>
 	 * </ul>
-	 * </p>
 	 *
 	 * <p>The formats "{@code l}" and "{@code L}" should be used only for text files.</p>
+	 *
+	 * @return the {@code file:read} function
 	 */
 	public abstract Function _file_read();
 
@@ -255,13 +308,12 @@ public abstract class IOLib implements Lib {
 	 *
 	 * <p>Sets and gets the file position, measured from the beginning of the file,
 	 * to the position given by offset plus a base specified by the string {@code whence},
-	 * as follows:
+	 * as follows:</p>
 	 * <ul>
 	 * <li><b>{@code "set"}</b>: base is position 0 (beginning of the file);</li>
 	 * <li><b>{@code "cur"}</b>: base is current position;</li>
 	 * <li><b>{@code "end"}</b>: base is end of file;</li>
 	 * </ul>
-	 * </p>
 	 *
 	 * <p>In case of success, {@code seek} returns the final file position, measured in bytes from
 	 * the beginning of the file. If {@code seek} fails, it returns <b>nil</b>, plus a string
@@ -272,25 +324,28 @@ public abstract class IOLib implements Lib {
 	 * the call {@code file:seek("set")} sets the position to the beginning of the file
 	 * (and returns 0); and the call {@code file:seek("end")} sets the position to the end
 	 * of the file, and returns its size.</p>
+	 *
+	 * @return the {@code file:seek} function
 	 */
 	public abstract Function _file_seek();
 
 	/**
 	 * {@code file:setvbuf (mode [, size])}
 	 *
-	 * <p>Sets the buffering mode for an output file. There are three available modes:
+	 * <p>Sets the buffering mode for an output file. There are three available modes:</p>
 	 * <ul>
 	 * <li><b>{@code "no"}</b>: no buffering; the result of any output operation appears
 	 * immediately.</li>
 	 * <li><b>{@code "full"}</b>: full buffering; output operation is performed only when
 	 * the buffer is full or when you explicitly flush the file
-	 * (see {@link #_flush() <code>io.flush</code>}).</li>
+	 * (see {@link #_flush() {@code io.flush}}).</li>
 	 * <li><b>{@code "line"}</b>: line buffering; output is buffered until a newline is output
 	 * or there is any input from some special files (such as a terminal device).</li>
 	 * </ul>
-	 * </p>
 	 * <p>For the last two cases, {@code size} specifies the size of the buffer, in bytes.
 	 * The default is an appropriate size.</p>
+	 *
+	 * @return the {@code file:setvbuf} function
 	 */
 	public abstract Function _file_setvbuf();
 
@@ -302,6 +357,8 @@ public abstract class IOLib implements Lib {
 	 *
 	 * <p>In case of success, this function returns {@code file}. Otherwise it returns <b>nil</b>
 	 * plus a string describing the error.</p>
+	 *
+	 * @return the {@code file:write} function
 	 */
 	public abstract Function _file_write();
 

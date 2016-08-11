@@ -48,6 +48,8 @@ public abstract class Utf8Lib implements Lib {
 	 *
 	 * <p>Receives zero or more integers, converts each one to its corresponding UTF-8
 	 * byte sequence and returns a string with the concatenation of all these sequences.</p>
+	 *
+	 * @return the {@code utf8.char} function
 	 */
 	public abstract Function _char();
 
@@ -57,19 +59,25 @@ public abstract class Utf8Lib implements Lib {
 	 * <p>The pattern (a string, not a function) "{@code [\0-\x7F\xC2-\xF4][\x80-\xBF]*}"
 	 * (see §6.4.1), which matches exactly one UTF-8 byte sequence, assuming that the subject is
 	 * a valid UTF-8 string.</p>
+	 *
+	 * @return the {@code utf8.charpattern} function
 	 */
 	public abstract String _charpattern();
 
 	/**
 	 * {@code utf8.codes (s)}
 	 *
-	 * <p>Returns values so that the construction
+	 * <p>Returns values so that the construction</p>
 	 * <pre>
-	 *   for p, c in utf8.codes(s) do body end
+	 * {@code
+	 * for p, c in utf8.codes(s) do body end
+	 * }
 	 * </pre>
-	 * will iterate over all characters in string {@code s}, with {@code p} being the position
+	 * <p>will iterate over all characters in string {@code s}, with {@code p} being the position
 	 * (in bytes) and {@code c} the code point of each character. It raises an error if it meets
 	 * any invalid byte sequence.</p>
+	 *
+	 * @return the {@code utf8.codes} function
 	 */
 	public abstract Function _codes();
 
@@ -80,6 +88,8 @@ public abstract class Utf8Lib implements Lib {
 	 * byte position {@code i} and {@code j} (both included). The default for {@code i} is 1
 	 * and for {@code j} is {@code i}. It raises an error if it meets any invalid byte
 	 * sequence.</p>
+	 *
+	 * @return the {@code utf8.codepoint} function
 	 */
 	public abstract Function _codepoint();
 
@@ -90,6 +100,8 @@ public abstract class Utf8Lib implements Lib {
 	 * {@code i} and {@code j} (both inclusive). The default for {@code i} is 1
 	 * and for {@code j} is -1. If it finds any invalid byte sequence, returns a <b>false</b>
 	 * value plus the position of the first invalid byte.</p>
+	 *
+	 * @return the {@code utf8.len} function
 	 */
 	public abstract Function _len();
 
@@ -108,6 +120,8 @@ public abstract class Utf8Lib implements Lib {
 	 * of the character that contains the {@code i}-th byte of {@code s}.</p>
 	 *
 	 * <p>This function assumes that {@code s} is a valid UTF-8 string.</p>
+	 *
+	 * @return the {@code utf8.offset} function
 	 */
 	public abstract Function _offset();
 

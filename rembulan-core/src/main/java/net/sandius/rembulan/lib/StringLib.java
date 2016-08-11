@@ -69,9 +69,11 @@ public abstract class StringLib implements Lib {
 	 * <p>Returns the internal numeric codes of the characters
 	 * {@code s[i]}, {@code s[i+1]}, ..., {@code s[j]}. The default value for {@code i} is 1;
 	 * the default value for {@code j} is {@code i}. These indices are corrected following
-	 * the same rules of function {@link #_sub <code>string.sub</code>}.</p>
+	 * the same rules of function {@link #_sub {@code string.sub}}.</p>
 	 *
 	 * <p>Numeric codes are not necessarily portable across platforms.</p>
+	 *
+	 * @return the {@code string.byte} function
 	 */
 	public abstract Function _byte();
 
@@ -83,6 +85,8 @@ public abstract class StringLib implements Lib {
 	 * to its corresponding argument.</p>
 	 *
 	 * <p>Numeric codes are not necessarily portable across platforms.</p>
+	 *
+	 * @return the {@code string.char} function
 	 */
 	public abstract Function _char();
 
@@ -90,7 +94,7 @@ public abstract class StringLib implements Lib {
 	 * {@code string.dump (function [, strip])}
 	 *
 	 * <p>Returns a string containing a binary representation (a binary chunk) of the given
-	 * function, so that a later {@link BasicLib#_load() <code>load</code>} on this string
+	 * function, so that a later {@link BasicLib#_load() {@code load}} on this string
 	 * returns a copy of the function (but with new upvalues). If {@code strip} is a true value,
 	 * the binary representation may not include all debug information about the function,
 	 * to save space.</p>
@@ -99,6 +103,8 @@ public abstract class StringLib implements Lib {
 	 * those upvalues receive fresh instances containing <b>nil</b>. (You can use the debug
 	 * library to serialize and reload the upvalues of a function in a way adequate
 	 * to your needs.)</p>
+	 *
+	 * @return the {@code string.dump} function
 	 */
 	public abstract Function _dump();
 
@@ -116,6 +122,8 @@ public abstract class StringLib implements Lib {
 	 *
 	 * <p>If the {@code pattern} has captures, then in a successful match the captured values
 	 * are also returned, after the two indices.</p>
+	 *
+	 * @return the {@code string.find} function
 	 */
 	public abstract Function _find();
 
@@ -129,29 +137,34 @@ public abstract class StringLib implements Lib {
 	 * and {@code p} are not supported and that there is an extra option, {@code q}.
 	 * The {@code q} option formats a string between double quotes, using escape sequences
 	 * when necessary to ensure that it can safely be read back by the Lua interpreter.
-	 * For instance, the call
+	 * For instance, the call</p>
 	 *
 	 * <pre>
+	 * {@code
 	 * string.format('%q', 'a string with "quotes" and \n new line')
+	 * }
 	 * </pre>
 	 *
-	 * may produce the string:
+	 * <p>may produce the string:</p>
 	 *
 	 * <pre>
+	 * {@code
 	 * "a string with \"quotes\" and \
 	 * new line"}
+	 * }
 	 * </pre>
-	 * </p>
 	 *
-	 * Options {@code A}, {@code a}, {@code E}, {@code e}, {@code f}, {@code G}, and {@code g}
+	 * <p>Options {@code A}, {@code a}, {@code E}, {@code e}, {@code f}, {@code G}, and {@code g}
 	 * all expect a number as argument. Options {@code c}, {@code d}, {@code i}, {@code o},
 	 * {@code u}, {@code X}, and {@code x} expect an integer. Option {@code q} expects a string.
 	 * Option {@code s} expects a string; if its argument is not a string, it is converted
-	 * to one following the same rules of {@link BasicLib#_tostring() <code>tostring</code>}.
+	 * to one following the same rules of {@link BasicLib#_tostring() {@code tostring}}.
 	 * If the option has any modifier (flags, width, length), the string argument should
 	 * not contain embedded zeros. When Lua is compiled with a non-C99 compiler, options
 	 * {@code A} and {@code a} (hexadecimal floats) do not support any modifier (flags, width,
-	 * length).
+	 * length).</p>
+	 *
+	 * @return the {@code string.format} function
 	 */
 	public abstract Function _format();
 
@@ -166,27 +179,31 @@ public abstract class StringLib implements Lib {
 	 * printing one per line:
 	 *
 	 * <pre>
+	 * {@code
 	 * s = "hello world from Lua"
 	 * for w in string.gmatch(s, "%a+") do
 	 *   print(w)
 	 * end
+	 * }
 	 * </pre>
-	 * </p>
 	 *
 	 * <p>The next example collects all pairs {@code key=value} from the given string into
 	 * a table:</p>
 	 *
 	 * <pre>
+	 * {@code
 	 * t = {}
 	 * s = "from=world, to=Lua"
 	 * for k, v in string.gmatch(s, "(%w+)=(%w+)") do
 	 *   t[k] = v
 	 * end
+	 * }
 	 * </pre>
-	 * </p>
 	 *
 	 * <p>For this function, a caret '{@code ^}' at the start of a pattern does not work as
 	 * an anchor, as this would prevent the iteration.</p>
+	 *
+	 * @return the {@code string.gmatch} function
 	 */
 	public abstract Function _gmatch();
 
@@ -197,7 +214,7 @@ public abstract class StringLib implements Lib {
 	 * of the pattern (see §6.4.1) have been replaced by a replacement string specified
 	 * by {@code repl}, which can be a string, a table, or a function. {@code gsub} also returns,
 	 * as its second value, the total number of matches that occurred. The name {@code gsub} comes
-	 * from <i>Global SUBstitution<i></i>.</p>
+	 * from <i>Global SUBstitution</i>.</p>
 	 *
 	 * <p>If {@code repl} is a string, then its value is used for replacement.
 	 * The character {@code %} works as an escape character: any sequence in {@code repl}
@@ -219,41 +236,54 @@ public abstract class StringLib implements Lib {
 	 * or <b>nil</b>, then there is no replacement (that is, the original match is kept
 	 * in the string).</p>
 	 *
-	 * <p>Here are some examples:
+	 * <p>Here are some examples:</p>
 	 *
 	 * <pre>
+	 * {@code
 	 * x = string.gsub("hello world", "(%w+)", "%1 %1")
 	 * --> x="hello hello world world"
+	 * }
 	 * </pre>
 	 *
 	 * <pre>
+	 * {@code
 	 * x = string.gsub("hello world", "%w+", "%0 %0", 1)
 	 * --> x="hello hello world"
+	 * }
 	 * </pre>
 	 *
 	 * <pre>
+	 * {@code
 	 * x = string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1")
 	 * --> x="world hello Lua from"
+	 * }
 	 * </pre>
 	 *
 	 * <pre>
+	 * {@code
 	 * x = string.gsub("home = $HOME, user = $USER", "%$(%w+)", os.getenv)
 	 * --> x="home = /home/roberto, user = roberto"
+	 * }
 	 * </pre>
 	 *
 	 * <pre>
+	 * {@code
 	 * x = string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s)
 	 *       return load(s)()
 	 *     end)
 	 * --> x="4+5 = 9"
+	 * }
 	 * </pre>
 	 *
 	 * <pre>
+	 * {@code
 	 * local t = {name="lua", version="5.3"}
 	 * x = string.gsub("$name-$version.tar.gz", "%$(%w+)", t)
 	 * --> x="lua-5.3.tar.gz"
+	 * }
 	 * </pre>
-	 * </p>
+	 *
+	 * @return the {@code string.gsub} function
 	 */
 	public abstract Function _gsub();
 
@@ -262,6 +292,8 @@ public abstract class StringLib implements Lib {
 	 *
 	 * <p>Receives a string and returns its length. The empty string {@code ""} has length 0.
 	 * Embedded zeros are counted, so {@code "a\000bc\000"} has length 5.</p>
+	 *
+	 * @return the {@code string.len} function
 	 */
 	public abstract Function _len();
 
@@ -271,6 +303,8 @@ public abstract class StringLib implements Lib {
 	 * <p>Receives a string and returns a copy of this string with all uppercase letters changed
 	 * to lowercase. All other characters are left unchanged. The definition of what an uppercase
 	 * letter is depends on the current locale.</p>
+	 *
+	 * @return the {@code string.lower} function
 	 */
 	public abstract Function _lower();
 
@@ -282,6 +316,8 @@ public abstract class StringLib implements Lib {
 	 * it returns <b>nil</b>. If {@code pattern} specifies no captures, then the whole match
 	 * is returned. A third, optional numeric argument {@code init} specifies where to start
 	 * the search; its default value is 1 and can be negative.</p>
+	 *
+	 * @return the {@code string.match} function
 	 */
 	public abstract Function _match();
 
@@ -291,15 +327,19 @@ public abstract class StringLib implements Lib {
 	 * <p>Returns a binary string containing the values {@code v1}, {@code v2}, etc. packed
 	 * (that is, serialized in binary form) according to the format string {@code fmt}
 	 * (see §6.4.2).</p>
+	 *
+	 * @return the {@code string.pack} function
 	 */
 	public abstract Function _pack();
 
 	/**
 	 * {@code string.packsize (fmt)}
 	 *
-	 * <p>Returns the size of a string resulting from {@link #_pack() <code>string.pack</code>}
+	 * <p>Returns the size of a string resulting from {@link #_pack() {@code string.pack}}
 	 * with the given format. The format string cannot have the variable-length options
 	 * '{@code s}' or '{@code z}' (see §6.4.2).</p>
+	 *
+	 * @return the {@code string.packsize} function
 	 */
 	public abstract Function _packsize();
 
@@ -312,6 +352,8 @@ public abstract class StringLib implements Lib {
 	 *
 	 * <p>(Note that it is very easy to exhaust the memory of your machine with a single call
 	 * to this function.)</p>
+	 *
+	 * @return the {@code string.rep} function
 	 */
 	public abstract Function _rep();
 
@@ -319,6 +361,8 @@ public abstract class StringLib implements Lib {
 	 * {@code string.reverse (s)}
 	 *
 	 * <p>Returns a string that is the string {@code s} reversed.</p>
+	 *
+	 * @return the {@code string.reverse} function
 	 */
 	public abstract Function _reverse();
 
@@ -335,6 +379,8 @@ public abstract class StringLib implements Lib {
 	 * it is corrected to 1. If {@code j} is greater than the string length, it is corrected
 	 * to that length. If, after these corrections, {@code i} is greater than {@code j},
 	 * the function returns the empty string.</p>
+	 *
+	 * @return the {@code string.sub} function
 	 */
 	public abstract Function _sub();
 
@@ -342,10 +388,12 @@ public abstract class StringLib implements Lib {
 	 * {@code string.unpack (fmt, s [, pos])}
 	 *
 	 * <p>Returns the values packed in string {@code s} (see
-	 * {@link #_pack() <code>string.pack</code>}) according to the format string {@code fmt}
+	 * {@link #_pack() {@code string.pack}}) according to the format string {@code fmt}
 	 * (see §6.4.2). An optional {@code pos} marks where to start reading in {@code s}
 	 * (default is 1). After the read values, this function also returns the index of the first
 	 * unread byte in {@code s}.</p>
+	 *
+	 * @return the {@code string.unpack} function
 	 */
 	public abstract Function _unpack();
 
@@ -355,6 +403,8 @@ public abstract class StringLib implements Lib {
 	 * <p>Receives a string and returns a copy of this string with all lowercase letters changed
 	 * to uppercase. All other characters are left unchanged. The definition of what a lowercase
 	 * letter is depends on the current locale.</p>
+	 *
+	 * @return the {@code string.upper} function
 	 */
 	public abstract Function _upper();
 
