@@ -31,7 +31,7 @@ import net.sandius.rembulan.core.impl.DefaultLuaState;
 import net.sandius.rembulan.lib.impl.DefaultBasicLib;
 import net.sandius.rembulan.lib.impl.DefaultCoroutineLib;
 import net.sandius.rembulan.lib.impl.DefaultDebugLib;
-import net.sandius.rembulan.lib.impl.DefaultIOLib;
+import net.sandius.rembulan.lib.impl.DefaultIoLib;
 import net.sandius.rembulan.lib.impl.DefaultMathLib;
 import net.sandius.rembulan.lib.impl.DefaultModuleLib;
 import net.sandius.rembulan.lib.impl.DefaultStringLib;
@@ -87,7 +87,7 @@ public class RembulanConsole {
 		new DefaultStringLib().installInto(state, env);
 		new DefaultMathLib().installInto(state, env);
 		new DefaultTableLib().installInto(state, env);
-		new DefaultIOLib(state.tableFactory(), FileSystems.getDefault(), in, out, err)
+		new DefaultIoLib(state.tableFactory(), FileSystems.getDefault(), in, out, err)
 				.installInto(state, env);
 		new DefaultDebugLib().installInto(state, env);
 	}

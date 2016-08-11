@@ -17,19 +17,19 @@
 package net.sandius.rembulan.lib.impl.io;
 
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.lib.impl.IOFile;
+import net.sandius.rembulan.lib.impl.IoFile;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 
-public class OutputStreamIOFile extends IOFile {
+public class InputStreamIoFile extends IoFile {
 
-	private final SeekableOutputStream out;
+	private final SeekableInputStream in;
 
-	public OutputStreamIOFile(OutputStream out, Table metatable, Object userValue) {
+	public InputStreamIoFile(InputStream in, Table metatable, Object userValue) {
 		super(metatable, userValue);
-		this.out = new SeekableOutputStream(Check.notNull(out));
+		this.in = new SeekableInputStream(Check.notNull(in));
 	}
 
 	@Override
@@ -37,27 +37,30 @@ public class OutputStreamIOFile extends IOFile {
 		return false;
 	}
 
+	@Override
 	public void close() throws IOException {
 		throw new UnsupportedOperationException("cannot close standard file");
 	}
 
+	@Override
 	public void flush() throws IOException {
-		out.flush();
-	}
-
-	public void write(String s) throws IOException {
-		out.write(s.getBytes());
+		// no-op
 	}
 
 	@Override
-	public long seek(IOFile.Whence whence, long offset) throws IOException {
+	public void write(String s) throws IOException {
+		throw new UnsupportedOperationException("Bad file descriptor");
+	}
+
+	@Override
+	public long seek(IoFile.Whence whence, long offset) throws IOException {
 		switch (whence) {
 			case BEGINNING:
 			case END:
-				return out.setPosition(offset);
+				return in.setPosition(offset);
 
 			case CURRENT_POSITION:
-				return out.addPosition(offset);
+				return in.addPosition(offset);
 
 			default: throw new IllegalArgumentException("Illegal whence: " + whence);
 		}

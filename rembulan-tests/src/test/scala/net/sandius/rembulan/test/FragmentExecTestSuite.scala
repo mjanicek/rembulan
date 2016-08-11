@@ -81,7 +81,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
       case IO =>
         new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
-        new DefaultIOLib(state).installInto(state, env)
+        new DefaultIoLib(state).installInto(state, env)
 
       case Tab =>
         new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
@@ -97,7 +97,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
         new DefaultCoroutineLib().installInto(state, env)
         new DefaultMathLib().installInto(state, env)
         new DefaultStringLib().installInto(state, env)
-        new DefaultIOLib(state).installInto(state, env)
+        new DefaultIoLib(state).installInto(state, env)
         new DefaultTableLib().installInto(state, env)
         new DefaultDebugLib().installInto(state, env)
     }

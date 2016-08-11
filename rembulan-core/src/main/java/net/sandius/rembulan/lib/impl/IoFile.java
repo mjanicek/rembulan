@@ -23,9 +23,9 @@ import net.sandius.rembulan.core.impl.DefaultUserdata;
 
 import java.io.IOException;
 
-public abstract class IOFile extends DefaultUserdata {
+public abstract class IoFile extends DefaultUserdata {
 
-	protected IOFile(Table metatable, Object userValue) {
+	protected IoFile(Table metatable, Object userValue) {
 		super(metatable, userValue);
 	}
 
@@ -65,7 +65,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			final IOFile f = args.nextUserdata(typeName(), IOFile.class);
+			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 
 			try {
 				f.close();
@@ -91,7 +91,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			final IOFile f = args.nextUserdata(typeName(), IOFile.class);
+			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			try {
 				f.flush();
 			}
@@ -132,7 +132,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			final IOFile f = args.nextUserdata(typeName(), IOFile.class);
+			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			throw new UnsupportedOperationException();  // TODO
 		}
 
@@ -158,7 +158,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			IOFile file = args.nextUserdata(typeName(), IOFile.class);
+			IoFile file = args.nextUserdata(typeName(), IoFile.class);
 
 			final Whence whence;
 			final long offset;
@@ -219,7 +219,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			final IOFile f = args.nextUserdata(typeName(), IOFile.class);
+			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			while (args.hasNext()) {
 				final String s = args.nextString();
 				try {
@@ -247,7 +247,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			IOFile f = args.nextUserdata(typeName(), IOFile.class);
+			IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			context.getObjectSink().setTo(f.toString());
 		}
 

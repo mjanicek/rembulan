@@ -27,10 +27,10 @@ import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
-import net.sandius.rembulan.lib.IOLib;
+import net.sandius.rembulan.lib.IoLib;
 import net.sandius.rembulan.lib.Lib;
-import net.sandius.rembulan.lib.impl.io.InputStreamIOFile;
-import net.sandius.rembulan.lib.impl.io.OutputStreamIOFile;
+import net.sandius.rembulan.lib.impl.io.InputStreamIoFile;
+import net.sandius.rembulan.lib.impl.io.OutputStreamIoFile;
 import net.sandius.rembulan.util.Check;
 
 import java.io.InputStream;
@@ -39,7 +39,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
-public class DefaultIOLib extends IOLib {
+public class DefaultIoLib extends IoLib {
 
 	private final Function _close;
 	private final Function _flush;
@@ -56,14 +56,14 @@ public class DefaultIOLib extends IOLib {
 
 	private final FileSystem fileSystem;
 
-	private final IOFile stdIn;
-	private final IOFile stdOut;
-	private final IOFile stdErr;
+	private final IoFile stdIn;
+	private final IoFile stdOut;
+	private final IoFile stdErr;
 
-	private IOFile defaultInput;
-	private IOFile defaultOutput;
+	private IoFile defaultInput;
+	private IoFile defaultOutput;
 
-	public DefaultIOLib(
+	public DefaultIoLib(
 			TableFactory tableFactory,
 			FileSystem fileSystem,
 			InputStream in,
@@ -89,7 +89,7 @@ public class DefaultIOLib extends IOLib {
 		this.fileMetatable = mt;
 
 		mt.rawset(Metatables.MT_INDEX, mt);
-		mt.rawset(Lib.MT_NAME, IOFile.typeName());
+		mt.rawset(Lib.MT_NAME, IoFile.typeName());
 		mt.rawset(BasicLib.MT_TOSTRING, _file_tostring());
 		// TODO: set the __gc metamethod
 		mt.rawset("close", _file_close());
@@ -102,15 +102,15 @@ public class DefaultIOLib extends IOLib {
 
 		this.fileSystem = fileSystem;
 
-		stdIn = in != null ? new InputStreamIOFile(in, fileMetatable, null) : null;
-		stdOut = out != null ? new OutputStreamIOFile(out, fileMetatable, null) : null;
-		stdErr = err != null ? new OutputStreamIOFile(err, fileMetatable, null) : null;
+		stdIn = in != null ? new InputStreamIoFile(in, fileMetatable, null) : null;
+		stdOut = out != null ? new OutputStreamIoFile(out, fileMetatable, null) : null;
+		stdErr = err != null ? new OutputStreamIoFile(err, fileMetatable, null) : null;
 
 		defaultInput = stdIn;
 		defaultOutput = stdOut;
 	}
 
-	public DefaultIOLib(TableFactory tableFactory) {
+	public DefaultIoLib(TableFactory tableFactory) {
 		this(tableFactory, FileSystems.getDefault(), System.in, System.out, System.err);
 	}
 
@@ -186,44 +186,44 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Function _file_close() {
-		return IOFile.Close.INSTANCE;
+		return IoFile.Close.INSTANCE;
 	}
 
 	@Override
 	public Function _file_flush() {
-		return IOFile.Flush.INSTANCE;
+		return IoFile.Flush.INSTANCE;
 	}
 
 	@Override
 	public Function _file_lines() {
-		return IOFile.Lines.INSTANCE;
+		return IoFile.Lines.INSTANCE;
 	}
 
 	@Override
 	public Function _file_read() {
-		return IOFile.Read.INSTANCE;
+		return IoFile.Read.INSTANCE;
 	}
 
 	@Override
 	public Function _file_seek() {
-		return IOFile.Seek.INSTANCE;
+		return IoFile.Seek.INSTANCE;
 	}
 
 	@Override
 	public Function _file_setvbuf() {
-		return IOFile.SetVBuf.INSTANCE;
+		return IoFile.SetVBuf.INSTANCE;
 	}
 
 	@Override
 	public Function _file_write() {
-		return IOFile.Write.INSTANCE;
+		return IoFile.Write.INSTANCE;
 	}
 
 	public Function _file_tostring() {
-		return IOFile.ToString.INSTANCE;
+		return IoFile.ToString.INSTANCE;
 	}
 
-	private IOFile openFile(String filename, Open.Mode mode) {
+	private IoFile openFile(String filename, Open.Mode mode) {
 		Check.notNull(filename);
 		Check.notNull(mode);
 
@@ -232,29 +232,29 @@ public class DefaultIOLib extends IOLib {
 		throw new UnsupportedOperationException();  // TODO
 	}
 
-	public IOFile setDefaultInputFile(IOFile f) {
+	public IoFile setDefaultInputFile(IoFile f) {
 		defaultInput = Check.notNull(f);
 		return f;
 	}
 
-	public IOFile getDefaultInputFile() {
+	public IoFile getDefaultInputFile() {
 		return defaultInput;
 	}
 
-	public IOFile setDefaultOutputFile(IOFile f) {
+	public IoFile setDefaultOutputFile(IoFile f) {
 		defaultOutput = Check.notNull(f);
 		return f;
 	}
 
-	public IOFile getDefaultOutputFile() {
+	public IoFile getDefaultOutputFile() {
 		return defaultOutput;
 	}
 
 	public static class Close extends AbstractLibFunction {
 
-		private final DefaultIOLib lib;
+		private final DefaultIoLib lib;
 
-		public Close(DefaultIOLib lib) {
+		public Close(DefaultIoLib lib) {
 			this.lib = Check.notNull(lib);
 		}
 
@@ -265,12 +265,12 @@ public class DefaultIOLib extends IOLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			final IOFile file = args.hasNext()
-					? args.nextUserdata(IOFile.typeName(), IOFile.class)
+			final IoFile file = args.hasNext()
+					? args.nextUserdata(IoFile.typeName(), IoFile.class)
 					: lib.getDefaultOutputFile();
 
 			try {
-				Dispatch.call(context, IOFile.Close.INSTANCE, file);
+				Dispatch.call(context, IoFile.Close.INSTANCE, file);
 			}
 			catch (ControlThrowable ct) {
 				throw ct.push(this, null);
@@ -286,9 +286,9 @@ public class DefaultIOLib extends IOLib {
 
 	public static class Flush extends AbstractLibFunction {
 
-		private final DefaultIOLib lib;
+		private final DefaultIoLib lib;
 
-		public Flush(DefaultIOLib lib) {
+		public Flush(DefaultIoLib lib) {
 			this.lib = Check.notNull(lib);
 		}
 
@@ -299,10 +299,10 @@ public class DefaultIOLib extends IOLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			IOFile outFile = lib.getDefaultOutputFile();
+			IoFile outFile = lib.getDefaultOutputFile();
 
 			try {
-				Dispatch.call(context, IOFile.Flush.INSTANCE);
+				Dispatch.call(context, IoFile.Flush.INSTANCE);
 			}
 			catch (ControlThrowable ct) {
 				throw ct.push(this, outFile);
@@ -320,9 +320,9 @@ public class DefaultIOLib extends IOLib {
 
 	public static class Input extends AbstractLibFunction {
 
-		private final DefaultIOLib lib;
+		private final DefaultIoLib lib;
 
-		public Input(DefaultIOLib lib) {
+		public Input(DefaultIoLib lib) {
 			this.lib = Check.notNull(lib);
 		}
 
@@ -336,14 +336,14 @@ public class DefaultIOLib extends IOLib {
 			if (args.hasNext()) {
 				// open the argument for reading and set it as the default input file
 				String filename = args.nextString();
-				IOFile f = lib.openFile(filename, Open.Mode.READ);
+				IoFile f = lib.openFile(filename, Open.Mode.READ);
 				assert (f != null);
 				lib.setDefaultInputFile(f);
 				context.getObjectSink().setTo(f);
 			}
 			else {
 				// return the default input file
-				IOFile inFile = lib.getDefaultInputFile();
+				IoFile inFile = lib.getDefaultInputFile();
 				context.getObjectSink().setTo(inFile);
 			}
 		}
@@ -352,9 +352,9 @@ public class DefaultIOLib extends IOLib {
 
 	public static class Open extends AbstractLibFunction {
 
-		private final DefaultIOLib lib;
+		private final DefaultIoLib lib;
 
-		public Open(DefaultIOLib lib) {
+		public Open(DefaultIoLib lib) {
 			this.lib = Check.notNull(lib);
 		}
 
@@ -414,7 +414,7 @@ public class DefaultIOLib extends IOLib {
 				throw args.badArgument(1, "invalid mode");
 			}
 
-			IOFile file = null;
+			IoFile file = null;
 			try {
 				file = lib.openFile(filename, mode);
 			}
@@ -432,9 +432,9 @@ public class DefaultIOLib extends IOLib {
 
 	public static class Output extends AbstractLibFunction {
 
-		private final DefaultIOLib lib;
+		private final DefaultIoLib lib;
 
-		public Output(DefaultIOLib lib) {
+		public Output(DefaultIoLib lib) {
 			this.lib = Check.notNull(lib);
 		}
 
@@ -448,14 +448,14 @@ public class DefaultIOLib extends IOLib {
 			if (args.hasNext()) {
 				// open the argument for writing and set it as the default output file
 				String filename = args.nextString();
-				IOFile f = lib.openFile(filename, Open.Mode.WRITE);
+				IoFile f = lib.openFile(filename, Open.Mode.WRITE);
 				assert (f != null);
 				lib.setDefaultOutputFile(f);
 				context.getObjectSink().setTo(f);
 			}
 			else {
 				// return the default output file
-				IOFile outFile = lib.getDefaultOutputFile();
+				IoFile outFile = lib.getDefaultOutputFile();
 				context.getObjectSink().setTo(outFile);
 			}
 		}
@@ -464,9 +464,9 @@ public class DefaultIOLib extends IOLib {
 
 	public static class Read extends AbstractLibFunction {
 
-		private final DefaultIOLib lib;
+		private final DefaultIoLib lib;
 
-		public Read(DefaultIOLib lib) {
+		public Read(DefaultIoLib lib) {
 			this.lib = Check.notNull(lib);
 		}
 
@@ -477,11 +477,11 @@ public class DefaultIOLib extends IOLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			IOFile file = lib.getDefaultInputFile();
+			IoFile file = lib.getDefaultInputFile();
 			Object[] callArgs = Varargs.concat(new Object[] { file }, args.getAll());
 
 			try {
-				Dispatch.call(context, IOFile.Read.INSTANCE, callArgs);
+				Dispatch.call(context, IoFile.Read.INSTANCE, callArgs);
 			}
 			catch (ControlThrowable ct) {
 				throw ct.push(this, null);
@@ -512,8 +512,8 @@ public class DefaultIOLib extends IOLib {
 
 			final String result;
 
-			if (o instanceof IOFile) {
-				IOFile f = (IOFile) o;
+			if (o instanceof IoFile) {
+				IoFile f = (IoFile) o;
 				result = f.isClosed() ? "closed file" : "file";
 			}
 			else {
@@ -528,9 +528,9 @@ public class DefaultIOLib extends IOLib {
 
 	public static class Write extends AbstractLibFunction {
 
-		private final DefaultIOLib lib;
+		private final DefaultIoLib lib;
 
-		public Write(DefaultIOLib lib) {
+		public Write(DefaultIoLib lib) {
 			this.lib = Check.notNull(lib);
 		}
 
@@ -541,11 +541,11 @@ public class DefaultIOLib extends IOLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			IOFile file = lib.getDefaultOutputFile();
+			IoFile file = lib.getDefaultOutputFile();
 			Object[] callArgs = Varargs.concat(new Object[] { file }, args.getAll());
 
 			try {
-				Dispatch.call(context, IOFile.Write.INSTANCE, callArgs);
+				Dispatch.call(context, IoFile.Write.INSTANCE, callArgs);
 			}
 			catch (ControlThrowable ct) {
 				throw ct.push(this, null);
