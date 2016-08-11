@@ -48,7 +48,7 @@ public class LuaFormat {
 	public static String toString(double d) {
 		if (Double.isNaN(d)) return NAN;
 		else if (Double.isInfinite(d)) return d > 0 ? POS_INF : NEG_INF;
-		else return Double.toString(d);  // TODO: check that the format matches that of Lua
+		else return Double.toString(d).toLowerCase();  // TODO: check precision used in Lua
 	}
 
 	private static int hexValue(int c) {
