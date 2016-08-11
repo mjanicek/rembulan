@@ -22,10 +22,8 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.ValueTypeNamer;
-import net.sandius.rembulan.core.Values;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.util.Check;
 
@@ -349,24 +347,6 @@ public class ArgumentIterator implements Iterator<Object> {
 
 	public Userdata nextUserdata() {
 		return nextUserdata(TYPENAME_USERDATA, Userdata.class);
-	}
-
-	public Object nextLightUserdata() {
-		final Object result;
-		try {
-			Object o = peek(Lib.TYPENAME_LIGHT_USERDATA);
-			if (Values.isLightUserdata(o)) {
-				result = o;
-			}
-			else {
-				throw new UnexpectedArgumentException(Lib.TYPENAME_LIGHT_USERDATA, namer.typeNameOf(o));
-			}
-		}
-		catch (RuntimeException ex) {
-			throw badArgument(ex);
-		}
-		skip();
-		return result;
 	}
 
 }
