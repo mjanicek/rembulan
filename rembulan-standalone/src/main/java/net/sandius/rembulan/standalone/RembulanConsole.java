@@ -28,15 +28,7 @@ import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.impl.DefaultLuaState;
-import net.sandius.rembulan.lib.impl.DefaultBasicLib;
-import net.sandius.rembulan.lib.impl.DefaultCoroutineLib;
-import net.sandius.rembulan.lib.impl.DefaultDebugLib;
-import net.sandius.rembulan.lib.impl.DefaultIoLib;
-import net.sandius.rembulan.lib.impl.DefaultMathLib;
-import net.sandius.rembulan.lib.impl.DefaultModuleLib;
-import net.sandius.rembulan.lib.impl.DefaultOsLib;
-import net.sandius.rembulan.lib.impl.DefaultStringLib;
-import net.sandius.rembulan.lib.impl.DefaultTableLib;
+import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.util.Check;
@@ -91,6 +83,7 @@ public class RembulanConsole {
 		new DefaultIoLib(state.tableFactory(), FileSystems.getDefault(), in, out, err)
 				.installInto(state, env);
 		new DefaultOsLib().installInto(state, env);
+		new DefaultUtf8Lib().installInto(state, env);
 		new DefaultDebugLib().installInto(state, env);
 	}
 

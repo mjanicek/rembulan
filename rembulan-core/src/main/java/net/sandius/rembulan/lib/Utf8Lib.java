@@ -63,7 +63,7 @@ public abstract class Utf8Lib extends Lib {
 	 * (see §6.4.1), which matches exactly one UTF-8 byte sequence, assuming that the subject is
 	 * a valid UTF-8 string.</p>
 	 *
-	 * @return the {@code utf8.charpattern} function
+	 * @return the {@code utf8.charpattern} string
 	 */
 	public abstract String _charpattern();
 

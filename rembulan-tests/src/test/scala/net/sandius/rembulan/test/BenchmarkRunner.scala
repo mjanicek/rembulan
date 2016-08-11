@@ -99,6 +99,7 @@ object BenchmarkRunner {
     new DefaultStringLib().installInto(state, env)
     new DefaultIoLib(state).installInto(state, env)
     new DefaultOsLib().installInto(state, env)
+    new DefaultUtf8Lib().installInto(state, env)
 
     // command-line arguments
     val argTable = state.newTable()
