@@ -23,8 +23,8 @@ import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, Com
 import net.sandius.rembulan.core.Call.EventHandler
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
+import net.sandius.rembulan.lib.Lib
 import net.sandius.rembulan.lib.impl._
-import net.sandius.rembulan.lib.{Lib, LibUtils}
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{core => lua}
 import org.scalatest.{FunSpec, MustMatchers}
@@ -55,59 +55,54 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   protected val Full = FragmentExpectations.Env.Full
 
   def installLib(state: LuaState, env: Table, name: String, impl: Lib): Unit = {
-    val lib = state.newTable()
-    impl.installInto(state, lib)
-    env.rawset(name, lib)
+    impl.installInto(state, env)
   }
 
   protected def envForContext(state: LuaState, ctx: Env): Table = {
+    val env = state.newTable()
     ctx match {
-      case Empty => state.newTable()
+      case Empty =>
+        // no-op
 
-      case Basic => LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
+      case Basic =>
+        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
 
       case Coro =>
-        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        installLib(state, env, "coroutine", new DefaultCoroutineLib())
-        env
+        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultCoroutineLib().installInto(state, env)
 
       case Math =>
-        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        installLib(state, env, "math", new DefaultMathLib())
-        env
+        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultMathLib().installInto(state, env)
 
       case Str =>
-        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        installLib(state, env, "string", new DefaultStringLib())
-        env
+        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultStringLib().installInto(state, env)
 
       case IO =>
-        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        installLib(state, env, "io", new DefaultIOLib(state))
-        env
+        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultIOLib(state).installInto(state, env)
 
       case Tab =>
-        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        installLib(state, env, "table", new DefaultTableLib())
-        env
+        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultTableLib().installInto(state, env)
 
       case Debug =>
-        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-        installLib(state, env, "debug", new DefaultDebugLib())
-        env
+        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultDebugLib().installInto(state, env)
 
       case Full =>
-        val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
+        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
         // TODO: module lib!
-        installLib(state, env, "coroutine", new DefaultCoroutineLib())
-        installLib(state, env, "math", new DefaultMathLib())
-        installLib(state, env, "string", new DefaultStringLib())
-        installLib(state, env, "io", new DefaultIOLib(state))
-        installLib(state, env, "table", new DefaultTableLib())
-        installLib(state, env, "debug", new DefaultDebugLib())
-        env
-
+        new DefaultCoroutineLib().installInto(state, env)
+        new DefaultMathLib().installInto(state, env)
+        new DefaultStringLib().installInto(state, env)
+        new DefaultIOLib(state).installInto(state, env)
+        new DefaultTableLib().installInto(state, env)
+        new DefaultDebugLib().installInto(state, env)
     }
+
+    env
   }
 
   sealed trait ChkLoader {

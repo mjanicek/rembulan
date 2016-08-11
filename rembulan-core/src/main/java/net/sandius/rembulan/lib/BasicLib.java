@@ -19,9 +19,8 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.util.Check;
 
-public abstract class BasicLib implements Lib {
+public abstract class BasicLib extends Lib {
 
 	public static final String MT_TOSTRING = "__tostring";
 	public static final String MT_METATABLE = "__metatable";
@@ -29,8 +28,6 @@ public abstract class BasicLib implements Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		Check.notNull(env);
-
 		LibUtils.setIfNonNull(env, "_G", env);
 		LibUtils.setIfNonNull(env, "_VERSION", __VERSION());
 		

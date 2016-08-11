@@ -26,7 +26,6 @@ import net.sandius.rembulan.core.Call.Continuation
 import net.sandius.rembulan.core.CallMultiplexer.PreemptionHandler
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
-import net.sandius.rembulan.lib.LibUtils
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
 import net.sandius.rembulan.{core => lua}
@@ -91,19 +90,13 @@ object BenchmarkRunner {
   }
 
   def initEnv(state: LuaState, args: Seq[String]): Table = {
-    val env = LibUtils.init(state, new DefaultBasicLib(new PrintStream(System.out)))
-    val coroutineLib = state.newTable()
-    new DefaultCoroutineLib().installInto(state, coroutineLib)
-    env.rawset("coroutine", coroutineLib)
-    val mathLib = state.newTable()
-    new DefaultMathLib().installInto(state, mathLib)
-    env.rawset("math", mathLib)
-    val stringLib = state.newTable()
-    new DefaultStringLib().installInto(state, stringLib)
-    env.rawset("string", stringLib)
-    val ioLib = state.newTable()
-    new DefaultIOLib(state).installInto(state, ioLib)
-    env.rawset("io", ioLib)
+    val env = state.newTable()
+
+    new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+    new DefaultCoroutineLib().installInto(state, env)
+    new DefaultMathLib().installInto(state, env)
+    new DefaultStringLib().installInto(state, env)
+    new DefaultIOLib(state).installInto(state, env)
 
     // command-line arguments
     val argTable = state.newTable()

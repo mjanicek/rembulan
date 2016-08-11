@@ -81,31 +81,13 @@ public class RembulanConsole {
 
 	private void installLibraries(InputStream in, OutputStream out, OutputStream err) {
 		new DefaultBasicLib(new PrintStream(out)).installInto(state, env);
-
-		Table coroutineLibTable = state.newTable();
-		new DefaultCoroutineLib().installInto(state, coroutineLibTable);
-		env.rawset("coroutine", coroutineLibTable);
-
-		Table stringLibTable = state.newTable();
-		new DefaultStringLib().installInto(state, stringLibTable);
-		env.rawset("string", stringLibTable);
-
-		Table mathLibTable = state.newTable();
-		new DefaultMathLib().installInto(state, mathLibTable);
-		env.rawset("math", mathLibTable);
-
-		Table tableLibTable = state.newTable();
-		new DefaultTableLib().installInto(state, tableLibTable);
-		env.rawset("table", tableLibTable);
-
-		Table ioLibTable = state.newTable();
+		new DefaultCoroutineLib().installInto(state, env);
+		new DefaultStringLib().installInto(state, env);
+		new DefaultMathLib().installInto(state, env);
+		new DefaultTableLib().installInto(state, env);
 		new DefaultIOLib(state.tableFactory(), FileSystems.getDefault(), in, out, err)
-				.installInto(state, ioLibTable);
-		env.rawset("io", ioLibTable);
-
-		Table debugLibTable = state.newTable();
-		new DefaultDebugLib().installInto(state, debugLibTable);
-		env.rawset("debug", debugLibTable);
+				.installInto(state, env);
+		new DefaultDebugLib().installInto(state, env);
 	}
 
 	private Table argsTable(String[] args) {

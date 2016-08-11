@@ -25,20 +25,23 @@ import net.sandius.rembulan.core.Table;
  * one function directly in the global environment: {@link #_require() {@code require}}.
  * Everything else is exported in a {@code table} package.
  */
-public abstract class ModuleLib implements Lib {
+public abstract class ModuleLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		// TODO: require goes to the global env
+		LibUtils.setIfNonNull(env, "require", _require());
+		
+		Table t = state.newTable();
+		env.rawset("package", t);
 
-		LibUtils.setIfNonNull(env, "config", _config());
-		LibUtils.setIfNonNull(env, "cpath", _cpath());
-		LibUtils.setIfNonNull(env, "loaded", _loaded());
-		LibUtils.setIfNonNull(env, "loadlib", _loadlib());
-		LibUtils.setIfNonNull(env, "path", _path());
-		LibUtils.setIfNonNull(env, "preload", _preload());
-		LibUtils.setIfNonNull(env, "searchers", _searchers());
-		LibUtils.setIfNonNull(env, "searchpath", _searchpath());
+		LibUtils.setIfNonNull(t, "config", _config());
+		LibUtils.setIfNonNull(t, "cpath", _cpath());
+		LibUtils.setIfNonNull(t, "loaded", _loaded());
+		LibUtils.setIfNonNull(t, "loadlib", _loadlib());
+		LibUtils.setIfNonNull(t, "path", _path());
+		LibUtils.setIfNonNull(t, "preload", _preload());
+		LibUtils.setIfNonNull(t, "searchers", _searchers());
+		LibUtils.setIfNonNull(t, "searchpath", _searchpath());
 	}
 
 	/**

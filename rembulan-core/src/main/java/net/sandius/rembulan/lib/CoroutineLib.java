@@ -19,21 +19,21 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.util.Check;
 
-public abstract class CoroutineLib implements Lib {
+public abstract class CoroutineLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		Check.notNull(env);
+		Table t = state.newTable();
+		env.rawset("coroutine", t);
 
-		LibUtils.setIfNonNull(env, "create", _create());
-		LibUtils.setIfNonNull(env, "resume", _resume());
-		LibUtils.setIfNonNull(env, "yield", _yield());
-		LibUtils.setIfNonNull(env, "isyieldable", _isyieldable());
-		LibUtils.setIfNonNull(env, "status", _status());
-		LibUtils.setIfNonNull(env, "running", _running());
-		LibUtils.setIfNonNull(env, "wrap", _wrap());
+		LibUtils.setIfNonNull(t, "create", _create());
+		LibUtils.setIfNonNull(t, "resume", _resume());
+		LibUtils.setIfNonNull(t, "yield", _yield());
+		LibUtils.setIfNonNull(t, "isyieldable", _isyieldable());
+		LibUtils.setIfNonNull(t, "status", _status());
+		LibUtils.setIfNonNull(t, "running", _running());
+		LibUtils.setIfNonNull(t, "wrap", _wrap());
 	}
 
 	/**

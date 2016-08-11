@@ -25,6 +25,7 @@ public class LibUtils {
 	public static final String MT_NAME = "__name";
 	public static final String TYPENAME_LIGHT_USERDATA = "light userdata";
 
+	@Deprecated
 	public static Table init(LuaState state, Lib lib) {
 		Check.notNull(state);
 		Table env = state.newTable();

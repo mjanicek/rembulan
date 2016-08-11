@@ -23,21 +23,24 @@ import net.sandius.rembulan.core.Table;
 /**
  * This library is implemented through table {@code os}.
  */
-public abstract class OsLib implements Lib {
+public abstract class OsLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		LibUtils.setIfNonNull(env, "clock", _clock());
-		LibUtils.setIfNonNull(env, "date", _date());
-		LibUtils.setIfNonNull(env, "difftime", _difftime());
-		LibUtils.setIfNonNull(env, "execute", _execute());
-		LibUtils.setIfNonNull(env, "exit", _exit());
-		LibUtils.setIfNonNull(env, "getenv", _getenv());
-		LibUtils.setIfNonNull(env, "remove", _remove());
-		LibUtils.setIfNonNull(env, "rename", _rename());
-		LibUtils.setIfNonNull(env, "setlocale", _setlocale());
-		LibUtils.setIfNonNull(env, "time", _time());
-		LibUtils.setIfNonNull(env, "tmpname", _tmpname());
+		Table t = state.newTable();
+		env.rawset("os", t);
+
+		LibUtils.setIfNonNull(t, "clock", _clock());
+		LibUtils.setIfNonNull(t, "date", _date());
+		LibUtils.setIfNonNull(t, "difftime", _difftime());
+		LibUtils.setIfNonNull(t, "execute", _execute());
+		LibUtils.setIfNonNull(t, "exit", _exit());
+		LibUtils.setIfNonNull(t, "getenv", _getenv());
+		LibUtils.setIfNonNull(t, "remove", _remove());
+		LibUtils.setIfNonNull(t, "rename", _rename());
+		LibUtils.setIfNonNull(t, "setlocale", _setlocale());
+		LibUtils.setIfNonNull(t, "time", _time());
+		LibUtils.setIfNonNull(t, "tmpname", _tmpname());
 	}
 	
 	/**

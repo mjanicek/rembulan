@@ -31,16 +31,19 @@ import net.sandius.rembulan.core.Table;
  * subject string. As in the string library, negative indices count from the end
  * of the string.</p>
  */
-public abstract class Utf8Lib implements Lib {
+public abstract class Utf8Lib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		LibUtils.setIfNonNull(env, "char", _char());
-		LibUtils.setIfNonNull(env, "charpattern", _charpattern());
-		LibUtils.setIfNonNull(env, "codes", _codes());
-		LibUtils.setIfNonNull(env, "codepoint", _codepoint());
-		LibUtils.setIfNonNull(env, "len", _len());
-		LibUtils.setIfNonNull(env, "offset", _offset());
+		Table t = state.newTable();
+		env.rawset("utf8", t);
+		
+		LibUtils.setIfNonNull(t, "char", _char());
+		LibUtils.setIfNonNull(t, "charpattern", _charpattern());
+		LibUtils.setIfNonNull(t, "codes", _codes());
+		LibUtils.setIfNonNull(t, "codepoint", _codepoint());
+		LibUtils.setIfNonNull(t, "len", _len());
+		LibUtils.setIfNonNull(t, "offset", _offset());
 	}
 
 	/**

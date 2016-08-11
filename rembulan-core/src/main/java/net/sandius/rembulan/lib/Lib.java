@@ -19,8 +19,8 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
 
-public interface Lib {
+public abstract class Lib {
 
-	void installInto(LuaState state, Table env);
+	public abstract void installInto(LuaState state, Table env);
 
 }

@@ -28,37 +28,40 @@ import net.sandius.rembulan.core.Table;
  * and {@link #_modf() {@code math.modf}}) return an integer when the result fits
  * in the range of an integer, or a float otherwise.
  */
-public abstract class MathLib implements Lib {
+public abstract class MathLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		LibUtils.setIfNonNull(env, "abs", _abs());
-		LibUtils.setIfNonNull(env, "acos", _acos());
-		LibUtils.setIfNonNull(env, "asin", _asin());
-		LibUtils.setIfNonNull(env, "atan", _atan());
-		LibUtils.setIfNonNull(env, "ceil", _ceil());
-		LibUtils.setIfNonNull(env, "cos", _cos());
-		LibUtils.setIfNonNull(env, "deg", _deg());
-		LibUtils.setIfNonNull(env, "exp", _exp());
-		LibUtils.setIfNonNull(env, "floor", _floor());
-		LibUtils.setIfNonNull(env, "fmod", _fmod());
-		LibUtils.setIfNonNull(env, "huge", _huge());
-		LibUtils.setIfNonNull(env, "log", _log());
-		LibUtils.setIfNonNull(env, "max", _max());
-		LibUtils.setIfNonNull(env, "maxinteger", _maxinteger());
-		LibUtils.setIfNonNull(env, "min", _min());
-		LibUtils.setIfNonNull(env, "mininteger", _mininteger());
-		LibUtils.setIfNonNull(env, "modf", _modf());
-		LibUtils.setIfNonNull(env, "pi", _pi());
-		LibUtils.setIfNonNull(env, "rad", _rad());
-		LibUtils.setIfNonNull(env, "random", _random());
-		LibUtils.setIfNonNull(env, "randomseed", _randomseed());
-		LibUtils.setIfNonNull(env, "sin", _sin());
-		LibUtils.setIfNonNull(env, "sqrt", _sqrt());
-		LibUtils.setIfNonNull(env, "tan", _tan());
-		LibUtils.setIfNonNull(env, "tointeger", _tointeger());
-		LibUtils.setIfNonNull(env, "type", _type());
-		LibUtils.setIfNonNull(env, "ult", _ult());
+		Table t = state.newTable();
+		env.rawset("math", t);
+		
+		LibUtils.setIfNonNull(t, "abs", _abs());
+		LibUtils.setIfNonNull(t, "acos", _acos());
+		LibUtils.setIfNonNull(t, "asin", _asin());
+		LibUtils.setIfNonNull(t, "atan", _atan());
+		LibUtils.setIfNonNull(t, "ceil", _ceil());
+		LibUtils.setIfNonNull(t, "cos", _cos());
+		LibUtils.setIfNonNull(t, "deg", _deg());
+		LibUtils.setIfNonNull(t, "exp", _exp());
+		LibUtils.setIfNonNull(t, "floor", _floor());
+		LibUtils.setIfNonNull(t, "fmod", _fmod());
+		LibUtils.setIfNonNull(t, "huge", _huge());
+		LibUtils.setIfNonNull(t, "log", _log());
+		LibUtils.setIfNonNull(t, "max", _max());
+		LibUtils.setIfNonNull(t, "maxinteger", _maxinteger());
+		LibUtils.setIfNonNull(t, "min", _min());
+		LibUtils.setIfNonNull(t, "mininteger", _mininteger());
+		LibUtils.setIfNonNull(t, "modf", _modf());
+		LibUtils.setIfNonNull(t, "pi", _pi());
+		LibUtils.setIfNonNull(t, "rad", _rad());
+		LibUtils.setIfNonNull(t, "random", _random());
+		LibUtils.setIfNonNull(t, "randomseed", _randomseed());
+		LibUtils.setIfNonNull(t, "sin", _sin());
+		LibUtils.setIfNonNull(t, "sqrt", _sqrt());
+		LibUtils.setIfNonNull(t, "tan", _tan());
+		LibUtils.setIfNonNull(t, "tointeger", _tointeger());
+		LibUtils.setIfNonNull(t, "type", _type());
+		LibUtils.setIfNonNull(t, "ult", _ult());
 	}
 
 	/**

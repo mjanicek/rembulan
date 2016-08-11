@@ -35,31 +35,34 @@ import net.sandius.rembulan.core.Table;
  *
  * <p>The string library assumes one-byte character encodings.</p>
  */
-public abstract class StringLib implements Lib {
+public abstract class StringLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		LibUtils.setIfNonNull(env, "byte", _byte());
-		LibUtils.setIfNonNull(env, "char", _char());
-		LibUtils.setIfNonNull(env, "dump", _dump());
-		LibUtils.setIfNonNull(env, "find", _find());
-		LibUtils.setIfNonNull(env, "format", _format());
-		LibUtils.setIfNonNull(env, "gmatch", _gmatch());
-		LibUtils.setIfNonNull(env, "gsub", _gsub());
-		LibUtils.setIfNonNull(env, "len", _len());
-		LibUtils.setIfNonNull(env, "lower", _lower());
-		LibUtils.setIfNonNull(env, "match", _match());
-		LibUtils.setIfNonNull(env, "pack", _pack());
-		LibUtils.setIfNonNull(env, "packsize", _packsize());
-		LibUtils.setIfNonNull(env, "rep", _rep());
-		LibUtils.setIfNonNull(env, "reverse", _reverse());
-		LibUtils.setIfNonNull(env, "sub", _sub());
-		LibUtils.setIfNonNull(env, "unpack", _unpack());
-		LibUtils.setIfNonNull(env, "upper", _upper());
+		Table t = state.newTable();
+		env.rawset("string", t);
+		
+		LibUtils.setIfNonNull(t, "byte", _byte());
+		LibUtils.setIfNonNull(t, "char", _char());
+		LibUtils.setIfNonNull(t, "dump", _dump());
+		LibUtils.setIfNonNull(t, "find", _find());
+		LibUtils.setIfNonNull(t, "format", _format());
+		LibUtils.setIfNonNull(t, "gmatch", _gmatch());
+		LibUtils.setIfNonNull(t, "gsub", _gsub());
+		LibUtils.setIfNonNull(t, "len", _len());
+		LibUtils.setIfNonNull(t, "lower", _lower());
+		LibUtils.setIfNonNull(t, "match", _match());
+		LibUtils.setIfNonNull(t, "pack", _pack());
+		LibUtils.setIfNonNull(t, "packsize", _packsize());
+		LibUtils.setIfNonNull(t, "rep", _rep());
+		LibUtils.setIfNonNull(t, "reverse", _reverse());
+		LibUtils.setIfNonNull(t, "sub", _sub());
+		LibUtils.setIfNonNull(t, "unpack", _unpack());
+		LibUtils.setIfNonNull(t, "upper", _upper());
 
 		// set metatable for the string type
 		Table mt = state.newTable();
-		mt.rawset(Metatables.MT_INDEX, env);
+		mt.rawset(Metatables.MT_INDEX, t);
 		state.setStringMetatable(mt);
 	}
 

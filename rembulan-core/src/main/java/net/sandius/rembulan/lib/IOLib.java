@@ -41,25 +41,28 @@ import net.sandius.rembulan.core.Userdata;
  * of the error message and error code in case of errors may be not thread safe, because they
  * rely on the global C variable {@code errno}.
  */
-public abstract class IOLib implements Lib {
+public abstract class IOLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		LibUtils.setIfNonNull(env, "close", _close());
-		LibUtils.setIfNonNull(env, "flush", _flush());
-		LibUtils.setIfNonNull(env, "input", _input());
-		LibUtils.setIfNonNull(env, "lines", _lines());
-		LibUtils.setIfNonNull(env, "open", _open());
-		LibUtils.setIfNonNull(env, "output", _output());
-		LibUtils.setIfNonNull(env, "popen", _popen());
-		LibUtils.setIfNonNull(env, "read", _read());
-		LibUtils.setIfNonNull(env, "tmpfile", _tmpfile());
-		LibUtils.setIfNonNull(env, "type", _type());
-		LibUtils.setIfNonNull(env, "write", _write());
+		Table t = state.newTable();
+		env.rawset("io", t);
+		
+		LibUtils.setIfNonNull(t, "close", _close());
+		LibUtils.setIfNonNull(t, "flush", _flush());
+		LibUtils.setIfNonNull(t, "input", _input());
+		LibUtils.setIfNonNull(t, "lines", _lines());
+		LibUtils.setIfNonNull(t, "open", _open());
+		LibUtils.setIfNonNull(t, "output", _output());
+		LibUtils.setIfNonNull(t, "popen", _popen());
+		LibUtils.setIfNonNull(t, "read", _read());
+		LibUtils.setIfNonNull(t, "tmpfile", _tmpfile());
+		LibUtils.setIfNonNull(t, "type", _type());
+		LibUtils.setIfNonNull(t, "write", _write());
 
-		LibUtils.setIfNonNull(env, "stdin", _stdin());
-		LibUtils.setIfNonNull(env, "stdout", _stdout());
-		LibUtils.setIfNonNull(env, "stderr", _stderr());
+		LibUtils.setIfNonNull(t, "stdin", _stdin());
+		LibUtils.setIfNonNull(t, "stdout", _stdout());
+		LibUtils.setIfNonNull(t, "stderr", _stderr());
 	}
 
 	/**

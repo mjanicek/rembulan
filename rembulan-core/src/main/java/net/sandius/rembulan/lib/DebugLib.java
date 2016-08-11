@@ -19,7 +19,6 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.util.Check;
 
 /**
  * This library provides the functionality of the debug interface (see §4.9 of the Lua
@@ -33,28 +32,29 @@ import net.sandius.rembulan.util.Check;
  * that operate over a thread have an optional first argument which is the thread to operate
  * over. The default is always the current thread.
  */
-public abstract class DebugLib implements Lib {
+public abstract class DebugLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		Check.notNull(env);
-
-		LibUtils.setIfNonNull(env, "debug", _debug());
-		LibUtils.setIfNonNull(env, "gethook", _gethook());
-		LibUtils.setIfNonNull(env, "getinfo", _getinfo());
-		LibUtils.setIfNonNull(env, "getlocal", _getlocal());
-		LibUtils.setIfNonNull(env, "getmetatable", _getmetatable());
-		LibUtils.setIfNonNull(env, "getregistry", _getregistry());
-		LibUtils.setIfNonNull(env, "getupvalue", _getupvalue());
-		LibUtils.setIfNonNull(env, "getuservalue", _getuservalue());
-		LibUtils.setIfNonNull(env, "sethook", _sethook());
-		LibUtils.setIfNonNull(env, "setlocal", _setlocal());
-		LibUtils.setIfNonNull(env, "setmetatable", _setmetatable());
-		LibUtils.setIfNonNull(env, "setupvalue", _setupvalue());
-		LibUtils.setIfNonNull(env, "setuservalue", _setuservalue());
-		LibUtils.setIfNonNull(env, "traceback", _traceback());
-		LibUtils.setIfNonNull(env, "upvalueid", _upvalueid());
-		LibUtils.setIfNonNull(env, "upvaluejoin", _upvaluejoin());
+		Table t = state.newTable();
+		env.rawset("debug", t);
+		
+		LibUtils.setIfNonNull(t, "debug", _debug());
+		LibUtils.setIfNonNull(t, "gethook", _gethook());
+		LibUtils.setIfNonNull(t, "getinfo", _getinfo());
+		LibUtils.setIfNonNull(t, "getlocal", _getlocal());
+		LibUtils.setIfNonNull(t, "getmetatable", _getmetatable());
+		LibUtils.setIfNonNull(t, "getregistry", _getregistry());
+		LibUtils.setIfNonNull(t, "getupvalue", _getupvalue());
+		LibUtils.setIfNonNull(t, "getuservalue", _getuservalue());
+		LibUtils.setIfNonNull(t, "sethook", _sethook());
+		LibUtils.setIfNonNull(t, "setlocal", _setlocal());
+		LibUtils.setIfNonNull(t, "setmetatable", _setmetatable());
+		LibUtils.setIfNonNull(t, "setupvalue", _setupvalue());
+		LibUtils.setIfNonNull(t, "setuservalue", _setuservalue());
+		LibUtils.setIfNonNull(t, "traceback", _traceback());
+		LibUtils.setIfNonNull(t, "upvalueid", _upvalueid());
+		LibUtils.setIfNonNull(t, "upvaluejoin", _upvaluejoin());
 	}
 
 	/**

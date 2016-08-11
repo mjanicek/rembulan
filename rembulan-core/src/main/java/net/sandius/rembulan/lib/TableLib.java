@@ -28,17 +28,20 @@ import net.sandius.rembulan.core.Table;
  * sequence or have a {@code __len} metamethod (see §3.4.7 of the Lua Reference Manual).
  * All functions ignore non-numeric keys in the tables given as arguments.
  */
-public abstract class TableLib implements Lib {
+public abstract class TableLib extends Lib {
 
 	@Override
 	public void installInto(LuaState state, Table env) {
-		LibUtils.setIfNonNull(env, "concat", _concat());
-		LibUtils.setIfNonNull(env, "insert", _insert());
-		LibUtils.setIfNonNull(env, "move", _move());
-		LibUtils.setIfNonNull(env, "pack", _pack());
-		LibUtils.setIfNonNull(env, "remove", _remove());
-		LibUtils.setIfNonNull(env, "sort", _sort());
-		LibUtils.setIfNonNull(env, "unpack", _unpack());
+		Table t = state.newTable();
+		env.rawset("table", t);
+		
+		LibUtils.setIfNonNull(t, "concat", _concat());
+		LibUtils.setIfNonNull(t, "insert", _insert());
+		LibUtils.setIfNonNull(t, "move", _move());
+		LibUtils.setIfNonNull(t, "pack", _pack());
+		LibUtils.setIfNonNull(t, "remove", _remove());
+		LibUtils.setIfNonNull(t, "sort", _sort());
+		LibUtils.setIfNonNull(t, "unpack", _unpack());
 	}
 
 	/**
