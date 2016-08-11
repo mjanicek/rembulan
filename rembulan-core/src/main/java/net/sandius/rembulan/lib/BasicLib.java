@@ -102,7 +102,7 @@ public abstract class BasicLib extends Lib {
 	public abstract String __VERSION();
 
 	/**
-	 * print (···)
+	 * {@code print (···)}
 	 *
 	 * <p>Receives any number of arguments and prints their values to {@code stdout},
 	 * using the {@link #_tostring() {@code tostring}} function to convert each argument
