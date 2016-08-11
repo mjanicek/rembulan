@@ -58,4 +58,14 @@ abstract class Utils {
 		return bytesToString(baos.toByteArray());
 	}
 
+	public static String skipLeadingShebang(String s) {
+		if (s.startsWith("#")) {
+			int endOfFirstLine = s.indexOf('\n');
+			return endOfFirstLine >= 0 ? s.substring(endOfFirstLine + 1) : "";
+		}
+		else {
+			return s;
+		}
+	}
+
 }

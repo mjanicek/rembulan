@@ -169,11 +169,13 @@ public class RembulanConsole {
 	private void executeFile(String fileName, String[] args)
 			throws IOException, InterruptedException, ReflectiveOperationException, ExecutionException, ParseException {
 		Check.notNull(fileName);
-		executeProgram(Utils.readFile(fileName), fileName, Check.notNull(args));
+		// XXX: skipping the leading shebang messes up line numbering
+		executeProgram(Utils.skipLeadingShebang(Utils.readFile(fileName)), fileName, Check.notNull(args));
 	}
 
 	private void executeStdin(String[] args) throws InterruptedException, ReflectiveOperationException, ExecutionException, ParseException, IOException {
-		executeProgram(Utils.readInputStream(in), "stdin", Check.notNull(args));
+		// XXX: skipping the leading shebang messes up line numbering
+		executeProgram(Utils.skipLeadingShebang(Utils.readInputStream(in)), "stdin", Check.notNull(args));
 	}
 
 	private void requireModule(String moduleName) throws ExecutionException, InterruptedException {
