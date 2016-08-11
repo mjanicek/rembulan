@@ -66,7 +66,7 @@ public class DefaultTableLib extends TableLib {
 	}
 
 
-	public static class Pack extends LibFunction {
+	public static class Pack extends AbstractLibFunction {
 
 		public static final Pack INSTANCE = new Pack();
 
@@ -91,7 +91,7 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
-	public static class Unpack extends LibFunction {
+	public static class Unpack extends AbstractLibFunction {
 
 		public static final Unpack INSTANCE = new Unpack();
 

@@ -20,7 +20,7 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 
-public abstract class Function4 extends Function {
+public abstract class AbstractFunction4 extends Function {
 
 	@Override
 	public void invoke(ExecutionContext context) throws ControlThrowable {

@@ -24,7 +24,7 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.impl.Function0;
+import net.sandius.rembulan.core.impl.AbstractFunction0;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
@@ -156,7 +156,7 @@ public class DefaultStringLib extends StringLib {
 		return j > len ? len : j;
 	}
 
-	public static class Byte extends LibFunction {
+	public static class Byte extends AbstractLibFunction {
 
 		public static final Byte INSTANCE = new Byte();
 
@@ -187,7 +187,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Char extends LibFunction {
+	public static class Char extends AbstractLibFunction {
 
 		public static final Char INSTANCE = new Char();
 
@@ -210,7 +210,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Dump extends LibFunction {
+	public static class Dump extends AbstractLibFunction {
 
 		public static final Dump INSTANCE = new Dump();
 
@@ -229,7 +229,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Find extends LibFunction {
+	public static class Find extends AbstractLibFunction {
 
 		public static final Find INSTANCE = new Find();
 
@@ -298,7 +298,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Format extends LibFunction {
+	public static class Format extends AbstractLibFunction {
 
 		public static final Format INSTANCE = new Format();
 
@@ -715,11 +715,11 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class GMatch extends LibFunction {
+	public static class GMatch extends AbstractLibFunction {
 
 		public static final GMatch INSTANCE = new GMatch();
 
-		public static class IteratorFunction extends Function0 {
+		public static class IteratorFunction extends AbstractFunction0 {
 
 			public final String string;
 			public final Pattern pattern;
@@ -802,7 +802,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Len extends LibFunction {
+	public static class Len extends AbstractLibFunction {
 
 		public static final Len INSTANCE = new Len();
 
@@ -819,7 +819,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Lower extends LibFunction {
+	public static class Lower extends AbstractLibFunction {
 
 		public static final Lower INSTANCE = new Lower();
 
@@ -836,7 +836,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Match extends LibFunction {
+	public static class Match extends AbstractLibFunction {
 
 		public static final Match INSTANCE = new Match();
 
@@ -891,7 +891,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Rep extends LibFunction {
+	public static class Rep extends AbstractLibFunction {
 
 		public static final Rep INSTANCE = new Rep();
 
@@ -928,7 +928,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Reverse extends LibFunction {
+	public static class Reverse extends AbstractLibFunction {
 
 		public static final Reverse INSTANCE = new Reverse();
 
@@ -955,7 +955,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Sub extends LibFunction {
+	public static class Sub extends AbstractLibFunction {
 
 		public static final Sub INSTANCE = new Sub();
 
@@ -981,7 +981,7 @@ public class DefaultStringLib extends StringLib {
 
 	}
 
-	public static class Upper extends LibFunction {
+	public static class Upper extends AbstractLibFunction {
 
 		public static final Upper INSTANCE = new Upper();
 

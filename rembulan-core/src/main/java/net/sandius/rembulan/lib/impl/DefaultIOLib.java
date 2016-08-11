@@ -227,7 +227,7 @@ public class DefaultIOLib extends IOLib {
 		return defaultOutput;
 	}
 
-	public static class Close extends LibFunction {
+	public static class Close extends AbstractLibFunction {
 
 		private final DefaultIOLib lib;
 
@@ -261,7 +261,7 @@ public class DefaultIOLib extends IOLib {
 
 	}
 
-	public static class Flush extends LibFunction {
+	public static class Flush extends AbstractLibFunction {
 
 		private final DefaultIOLib lib;
 
@@ -295,7 +295,7 @@ public class DefaultIOLib extends IOLib {
 
 	}
 
-	public static class Input extends LibFunction {
+	public static class Input extends AbstractLibFunction {
 
 		private final DefaultIOLib lib;
 
@@ -327,7 +327,7 @@ public class DefaultIOLib extends IOLib {
 
 	}
 
-	public static class Open extends LibFunction {
+	public static class Open extends AbstractLibFunction {
 
 		private final DefaultIOLib lib;
 
@@ -407,7 +407,7 @@ public class DefaultIOLib extends IOLib {
 
 	}
 
-	public static class Output extends LibFunction {
+	public static class Output extends AbstractLibFunction {
 
 		private final DefaultIOLib lib;
 
@@ -439,7 +439,7 @@ public class DefaultIOLib extends IOLib {
 
 	}
 
-	public static class Read extends LibFunction {
+	public static class Read extends AbstractLibFunction {
 
 		private final DefaultIOLib lib;
 
@@ -474,7 +474,7 @@ public class DefaultIOLib extends IOLib {
 
 	}
 
-	public static class Type extends LibFunction {
+	public static class Type extends AbstractLibFunction {
 
 		public static final Type INSTANCE = new Type();
 
@@ -503,7 +503,7 @@ public class DefaultIOLib extends IOLib {
 	}
 
 
-	public static class Write extends LibFunction {
+	public static class Write extends AbstractLibFunction {
 
 		private final DefaultIOLib lib;
 

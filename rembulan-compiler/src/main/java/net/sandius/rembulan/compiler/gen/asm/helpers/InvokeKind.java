@@ -17,19 +17,13 @@
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.impl.Function0;
-import net.sandius.rembulan.core.impl.Function1;
-import net.sandius.rembulan.core.impl.Function2;
-import net.sandius.rembulan.core.impl.Function3;
-import net.sandius.rembulan.core.impl.Function4;
-import net.sandius.rembulan.core.impl.Function5;
-import net.sandius.rembulan.core.impl.FunctionAnyarg;
-import net.sandius.rembulan.util.Check;
-import org.objectweb.asm.Type;
-
-import java.util.ArrayList;
+import net.sandius.rembulan.core.impl.AbstractFunction0;
+import net.sandius.rembulan.core.impl.AbstractFunction1;
+import net.sandius.rembulan.core.impl.AbstractFunction2;
+import net.sandius.rembulan.core.impl.AbstractFunction3;
+import net.sandius.rembulan.core.impl.AbstractFunction4;
+import net.sandius.rembulan.core.impl.AbstractFunction5;
+import net.sandius.rembulan.core.impl.AbstractFunctionAnyArg;
 
 public abstract class InvokeKind {
 
@@ -49,13 +43,13 @@ public abstract class InvokeKind {
 
 	public static Class<? extends Function> nativeClassForKind(int kind) {
 		switch (kind) {
-			case 0:  return FunctionAnyarg.class;
-			case 1:  return Function0.class;
-			case 2:  return Function1.class;
-			case 3:  return Function2.class;
-			case 4:  return Function3.class;
-			case 5:  return Function4.class;
-			case 6:  return Function5.class;
+			case 0:  return AbstractFunctionAnyArg.class;
+			case 1:  return AbstractFunction0.class;
+			case 2:  return AbstractFunction1.class;
+			case 3:  return AbstractFunction2.class;
+			case 4:  return AbstractFunction3.class;
+			case 5:  return AbstractFunction4.class;
+			case 6:  return AbstractFunction5.class;
 			default: return null;
 		}
 	}

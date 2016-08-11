@@ -174,7 +174,7 @@ public class DefaultMathLib extends MathLib {
 		return ULt.INSTANCE;
 	}
 
-	public static abstract class MathFunction1 extends LibFunction {
+	public static abstract class AbstractMathFunction1 extends AbstractLibFunction {
 
 		protected abstract Number op(double x);
 
@@ -191,7 +191,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Abs extends MathFunction1 {
+	public static class Abs extends AbstractMathFunction1 {
 
 		public static final Abs INSTANCE = new Abs();
 
@@ -212,7 +212,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ACos extends MathFunction1 {
+	public static class ACos extends AbstractMathFunction1 {
 
 		public static final ACos INSTANCE = new ACos();
 
@@ -228,7 +228,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ASin extends MathFunction1 {
+	public static class ASin extends AbstractMathFunction1 {
 
 		public static final ASin INSTANCE = new ASin();
 
@@ -244,7 +244,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ATan extends MathFunction1 {
+	public static class ATan extends AbstractMathFunction1 {
 
 		public static final ATan INSTANCE = new ATan();
 
@@ -260,7 +260,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Ceil extends MathFunction1 {
+	public static class Ceil extends AbstractMathFunction1 {
 
 		public static final Ceil INSTANCE = new Ceil();
 
@@ -283,7 +283,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Cos extends MathFunction1 {
+	public static class Cos extends AbstractMathFunction1 {
 
 		public static final Cos INSTANCE = new Cos();
 
@@ -299,7 +299,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Deg extends MathFunction1 {
+	public static class Deg extends AbstractMathFunction1 {
 
 		public static final Deg INSTANCE = new Deg();
 
@@ -315,7 +315,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Exp extends MathFunction1 {
+	public static class Exp extends AbstractMathFunction1 {
 
 		public static final Exp INSTANCE = new Exp();
 
@@ -331,7 +331,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Floor extends MathFunction1 {
+	public static class Floor extends AbstractMathFunction1 {
 
 		public static final Floor INSTANCE = new Floor();
 
@@ -354,7 +354,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class FMod extends LibFunction {
+	public static class FMod extends AbstractLibFunction {
 
 		public static final FMod INSTANCE = new FMod();
 
@@ -392,7 +392,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Log extends LibFunction {
+	public static class Log extends AbstractLibFunction {
 
 		public static final Log INSTANCE = new Log();
 
@@ -422,7 +422,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class MaxMin extends LibFunction {
+	public static class MaxMin extends AbstractLibFunction {
 
 		private final boolean isMax;
 
@@ -501,7 +501,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ModF extends LibFunction {
+	public static class ModF extends AbstractLibFunction {
 
 		public static final ModF INSTANCE = new ModF();
 
@@ -522,7 +522,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Rad extends MathFunction1 {
+	public static class Rad extends AbstractMathFunction1 {
 
 		public static final Rad INSTANCE = new Rad();
 
@@ -538,7 +538,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Rand extends LibFunction {
+	public static class Rand extends AbstractLibFunction {
 
 		protected final Random random;
 
@@ -609,7 +609,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class RandSeed extends LibFunction {
+	public static class RandSeed extends AbstractLibFunction {
 
 		protected final Random random;
 
@@ -637,7 +637,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Sin extends MathFunction1 {
+	public static class Sin extends AbstractMathFunction1 {
 
 		public static final Sin INSTANCE = new Sin();
 
@@ -653,7 +653,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Sqrt extends MathFunction1 {
+	public static class Sqrt extends AbstractMathFunction1 {
 
 		public static final Sqrt INSTANCE = new Sqrt();
 
@@ -669,7 +669,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Tan extends MathFunction1 {
+	public static class Tan extends AbstractMathFunction1 {
 
 		public static final Tan INSTANCE = new Tan();
 
@@ -685,7 +685,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ToInteger extends LibFunction {
+	public static class ToInteger extends AbstractLibFunction {
 
 		public static final ToInteger INSTANCE = new ToInteger();
 
@@ -702,7 +702,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Type extends LibFunction {
+	public static class Type extends AbstractLibFunction {
 
 		public static final Type INSTANCE = new Type();
 
@@ -726,7 +726,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ULt extends LibFunction {
+	public static class ULt extends AbstractLibFunction {
 
 		public static final ULt INSTANCE = new ULt();
 

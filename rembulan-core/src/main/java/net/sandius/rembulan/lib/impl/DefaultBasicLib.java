@@ -149,7 +149,7 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 
-	public static class Print extends LibFunction {
+	public static class Print extends AbstractLibFunction {
 
 		private final PrintStream out;
 
@@ -202,7 +202,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Type extends LibFunction {
+	public static class Type extends AbstractLibFunction {
 
 		public static final Type INSTANCE = new Type();
 
@@ -219,7 +219,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Next extends LibFunction {
+	public static class Next extends AbstractLibFunction {
 
 		public static final Next INSTANCE = new Next();
 
@@ -254,7 +254,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class INext extends LibFunction {
+	public static class INext extends AbstractLibFunction {
 
 		public static final INext INSTANCE = new INext();
 
@@ -281,7 +281,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Pairs extends LibFunction {
+	public static class Pairs extends AbstractLibFunction {
 
 		public static final Pairs INSTANCE = new Pairs();
 
@@ -320,7 +320,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class IPairs extends LibFunction {
+	public static class IPairs extends AbstractLibFunction {
 
 		public static final IPairs INSTANCE = new IPairs();
 
@@ -337,7 +337,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class ToString extends LibFunction {
+	public static class ToString extends AbstractLibFunction {
 
 		public static final ToString INSTANCE = new ToString();
 
@@ -378,7 +378,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class ToNumber extends LibFunction {
+	public static class ToNumber extends AbstractLibFunction {
 
 		public static final ToNumber INSTANCE = new ToNumber();
 
@@ -423,7 +423,7 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 
-	public static class GetMetatable extends LibFunction {
+	public static class GetMetatable extends AbstractLibFunction {
 
 		public static final GetMetatable INSTANCE = new GetMetatable();
 
@@ -446,7 +446,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class SetMetatable extends LibFunction {
+	public static class SetMetatable extends AbstractLibFunction {
 
 		public static final SetMetatable INSTANCE = new SetMetatable();
 
@@ -471,7 +471,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Error extends LibFunction {
+	public static class Error extends AbstractLibFunction {
 
 		public static final Error INSTANCE = new Error();
 
@@ -489,7 +489,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Assert extends LibFunction {
+	public static class Assert extends AbstractLibFunction {
 
 		public static final Assert INSTANCE = new Assert();
 
@@ -528,7 +528,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class PCall extends LibFunction implements ProtectedResumable {
+	public static class PCall extends AbstractLibFunction implements ProtectedResumable {
 
 		public static final PCall INSTANCE = new PCall();
 
@@ -569,7 +569,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class XPCall extends LibFunction implements ProtectedResumable {
+	public static class XPCall extends AbstractLibFunction implements ProtectedResumable {
 
 		public static final int MAX_DEPTH = 220;  // 220 in PUC-Lua 5.3
 
@@ -677,7 +677,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawEqual extends LibFunction {
+	public static class RawEqual extends AbstractLibFunction {
 
 		public static final RawEqual INSTANCE = new RawEqual();
 
@@ -695,7 +695,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawGet extends LibFunction {
+	public static class RawGet extends AbstractLibFunction {
 
 		public static final RawGet INSTANCE = new RawGet();
 
@@ -713,7 +713,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawSet extends LibFunction {
+	public static class RawSet extends AbstractLibFunction {
 
 		public static final RawSet INSTANCE = new RawSet();
 
@@ -734,7 +734,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawLen extends LibFunction {
+	public static class RawLen extends AbstractLibFunction {
 
 		public static final RawLen INSTANCE = new RawLen();
 
@@ -767,7 +767,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Select extends LibFunction {
+	public static class Select extends AbstractLibFunction {
 
 		public static final Select INSTANCE = new Select();
 

@@ -166,7 +166,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
-	public static class GetMetatable extends LibFunction {
+	public static class GetMetatable extends AbstractLibFunction {
 
 		public static final GetMetatable INSTANCE = new GetMetatable();
 
@@ -184,7 +184,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
-	public static class SetMetatable extends LibFunction {
+	public static class SetMetatable extends AbstractLibFunction {
 
 		public static final SetMetatable INSTANCE = new SetMetatable();
 
@@ -208,7 +208,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
-	public static class GetUpvalue extends LibFunction {
+	public static class GetUpvalue extends AbstractLibFunction {
 
 		public static final GetUpvalue INSTANCE = new GetUpvalue();
 
@@ -251,7 +251,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
-	public static class SetUpvalue extends LibFunction {
+	public static class SetUpvalue extends AbstractLibFunction {
 
 		public static final SetUpvalue INSTANCE = new SetUpvalue();
 
@@ -294,7 +294,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
-	public static class UpvalueId extends LibFunction {
+	public static class UpvalueId extends AbstractLibFunction {
 
 		public static final UpvalueId INSTANCE = new UpvalueId();
 
@@ -329,7 +329,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
-	public static class UpvalueJoin extends LibFunction {
+	public static class UpvalueJoin extends AbstractLibFunction {
 
 		public static final UpvalueJoin INSTANCE = new UpvalueJoin();
 
@@ -374,7 +374,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
-	public static class GetUserValue extends LibFunction {
+	public static class GetUserValue extends AbstractLibFunction {
 
 		public static final GetUserValue INSTANCE = new GetUserValue();
 
@@ -393,7 +393,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	}
 
-	public static class SetUserValue extends LibFunction {
+	public static class SetUserValue extends AbstractLibFunction {
 
 		public static final SetUserValue INSTANCE = new SetUserValue();
 

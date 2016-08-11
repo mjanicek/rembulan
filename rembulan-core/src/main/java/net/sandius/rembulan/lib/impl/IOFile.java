@@ -54,7 +54,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 	public abstract long seek(Whence whence, long position) throws IOException;
 
-	public static class Close extends LibFunction {
+	public static class Close extends AbstractLibFunction {
 
 		public static final Close INSTANCE = new Close();
 
@@ -80,7 +80,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 	}
 
-	public static class Flush extends LibFunction {
+	public static class Flush extends AbstractLibFunction {
 
 		public static final Flush INSTANCE = new Flush();
 
@@ -105,7 +105,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 	}
 
-	public static class Lines extends LibFunction {
+	public static class Lines extends AbstractLibFunction {
 
 		public static final Lines INSTANCE = new Lines();
 
@@ -121,7 +121,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 	}
 
-	public static class Read extends LibFunction {
+	public static class Read extends AbstractLibFunction {
 
 		public static final Read INSTANCE = new Read();
 
@@ -138,7 +138,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 	}
 
-	public static class Seek extends LibFunction {
+	public static class Seek extends AbstractLibFunction {
 
 		public static final Seek INSTANCE = new Seek();
 
@@ -192,7 +192,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 	}
 
-	public static class SetVBuf extends LibFunction {
+	public static class SetVBuf extends AbstractLibFunction {
 
 		public static final SetVBuf INSTANCE = new SetVBuf();
 
@@ -208,7 +208,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 	}
 
-	public static class Write extends LibFunction {
+	public static class Write extends AbstractLibFunction {
 
 		public static final Write INSTANCE = new Write();
 
@@ -236,7 +236,7 @@ public abstract class IOFile extends DefaultUserdata {
 
 	}
 
-	public static class ToString extends LibFunction {
+	public static class ToString extends AbstractLibFunction {
 
 		public static final ToString INSTANCE = new ToString();
 

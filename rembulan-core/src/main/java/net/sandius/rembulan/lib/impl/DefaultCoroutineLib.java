@@ -21,7 +21,7 @@ import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.ProtectedResumable;
-import net.sandius.rembulan.core.impl.FunctionAnyarg;
+import net.sandius.rembulan.core.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.util.Check;
 
@@ -62,7 +62,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		return Wrap.INSTANCE;
 	}
 
-	public static class Create extends LibFunction {
+	public static class Create extends AbstractLibFunction {
 
 		public static final Create INSTANCE = new Create();
 
@@ -80,7 +80,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 	}
 
-	public static class Resume extends LibFunction implements ProtectedResumable {
+	public static class Resume extends AbstractLibFunction implements ProtectedResumable {
 
 		public static final Resume INSTANCE = new Resume();
 
@@ -116,7 +116,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 	}
 
-	public static class Yield extends LibFunction {
+	public static class Yield extends AbstractLibFunction {
 
 		public static final Yield INSTANCE = new Yield();
 
@@ -142,7 +142,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 	}
 
-	public static class IsYieldable extends LibFunction {
+	public static class IsYieldable extends AbstractLibFunction {
 
 		public static final IsYieldable INSTANCE = new IsYieldable();
 
@@ -158,7 +158,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 	}
 
-	public static class Status extends LibFunction {
+	public static class Status extends AbstractLibFunction {
 
 		public static final Status INSTANCE = new Status();
 
@@ -192,7 +192,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 	}
 
-	public static class Running extends LibFunction {
+	public static class Running extends AbstractLibFunction {
 
 		public static final Running INSTANCE = new Running();
 
@@ -209,11 +209,11 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 	}
 
-	public static class Wrap extends LibFunction {
+	public static class Wrap extends AbstractLibFunction {
 
 		public static final Wrap INSTANCE = new Wrap();
 
-		static class WrappedCoroutine extends FunctionAnyarg {
+		static class WrappedCoroutine extends AbstractFunctionAnyArg {
 
 			private final Coroutine coroutine;
 
