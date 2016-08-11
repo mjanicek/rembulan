@@ -33,6 +33,7 @@ import net.sandius.rembulan.lib.impl.DefaultCoroutineLib;
 import net.sandius.rembulan.lib.impl.DefaultDebugLib;
 import net.sandius.rembulan.lib.impl.DefaultIOLib;
 import net.sandius.rembulan.lib.impl.DefaultMathLib;
+import net.sandius.rembulan.lib.impl.DefaultModuleLib;
 import net.sandius.rembulan.lib.impl.DefaultStringLib;
 import net.sandius.rembulan.lib.impl.DefaultTableLib;
 import net.sandius.rembulan.parser.ParseException;
@@ -81,6 +82,7 @@ public class RembulanConsole {
 
 	private void installLibraries(InputStream in, OutputStream out, OutputStream err) {
 		new DefaultBasicLib(new PrintStream(out)).installInto(state, env);
+		new DefaultModuleLib().installInto(state, env);
 		new DefaultCoroutineLib().installInto(state, env);
 		new DefaultStringLib().installInto(state, env);
 		new DefaultMathLib().installInto(state, env);
