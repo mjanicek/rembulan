@@ -24,25 +24,40 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.TableLib;
 
 import java.util.ArrayList;
 
 public class DefaultTableLib extends TableLib {
 
+	private final Function _concat;
+	private final Function _insert;
+	private final Function _move;
+	private final Function _remove;
+	private final Function _sort;
+
+	public DefaultTableLib() {
+		this._concat = new UnimplementedFunction("table.concat");  // TODO
+		this._insert = new UnimplementedFunction("table.insert");  // TODO
+		this._move = new UnimplementedFunction("table.move");  // TODO
+		this._remove = new UnimplementedFunction("table.remove");  // TODO
+		this._sort = new UnimplementedFunction("table.sort");  // TODO
+	}
+
 	@Override
 	public Function _concat() {
-		return null;  // TODO
+		return _concat;
 	}
 
 	@Override
 	public Function _insert() {
-		return null;  // TODO
+		return _insert;
 	}
 
 	@Override
 	public Function _move() {
-		return null;  // TODO
+		return _move;
 	}
 
 	@Override
@@ -52,12 +67,12 @@ public class DefaultTableLib extends TableLib {
 
 	@Override
 	public Function _remove() {
-		return null;  // TODO
+		return _remove;
 	}
 
 	@Override
 	public Function _sort() {
-		return null;  // TODO
+		return _sort;
 	}
 
 	@Override

@@ -17,6 +17,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.*;
+import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -27,10 +28,18 @@ import java.io.PrintStream;
 
 public class DefaultBasicLib extends BasicLib {
 
-	private final Print print;
+	private final Function _print;
+	private final Function _collectgarbage;
+	private final Function _dofile;
+	private final Function _load;
+	private final Function _loadfile;
 
 	public DefaultBasicLib(PrintStream out) {
-		this.print = new Print(out);
+		this._print = new Print(out);
+		this._collectgarbage = new UnimplementedFunction("collectgarbage");  // TODO
+		this._dofile = new UnimplementedFunction("dofile");  // TODO
+		this._load = new UnimplementedFunction("load");  // TODO
+		this._loadfile = new UnimplementedFunction("loadfile");  // TODO
 	}
 
 	@Override
@@ -40,7 +49,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _print() {
-		return print;
+		return _print;
 	}
 
 	@Override
@@ -130,22 +139,22 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _collectgarbage() {
-		return null;  // TODO
+		return _collectgarbage;
 	}
 
 	@Override
 	public Function _dofile() {
-		return null;  // TODO
+		return _dofile;
 	}
 
 	@Override
 	public Function _load() {
-		return null;  // TODO
+		return _load;
 	}
 
 	@Override
 	public Function _loadfile() {
-		return null;  // TODO
+		return _loadfile;
 	}
 
 

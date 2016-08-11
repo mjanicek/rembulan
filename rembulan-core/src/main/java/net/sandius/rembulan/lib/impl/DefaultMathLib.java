@@ -29,10 +29,13 @@ import java.util.Random;
 
 public class DefaultMathLib extends MathLib {
 
-	protected final Random random;
+	private final Function _random;
+	private final Function _randomseed;
 
 	public DefaultMathLib(Random random) {
-		this.random = Check.notNull(random);
+		Check.notNull(random);
+		this._random = new Rand(random);
+		this._randomseed = new RandSeed(random);
 	}
 
 	public DefaultMathLib() {
@@ -136,12 +139,12 @@ public class DefaultMathLib extends MathLib {
 
 	@Override
 	public Function _random() {
-		return new Rand(random);
+		return _random;
 	}
 
 	@Override
 	public Function _randomseed() {
-		return new RandSeed(random);
+		return _randomseed;
 	}
 
 	@Override

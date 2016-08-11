@@ -25,6 +25,7 @@ import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.impl.AbstractFunction0;
+import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
@@ -33,6 +34,18 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultStringLib extends StringLib {
+
+	private final Function _gsub;
+	private final Function _pack;
+	private final Function _packsize;
+	private final Function _unpack;
+
+	public DefaultStringLib() {
+		this._gsub = new UnimplementedFunction("string.gsub");  // TODO
+		this._pack = new UnimplementedFunction("string.pack");  // TODO
+		this._packsize = new UnimplementedFunction("string.packsize");  // TODO
+		this._unpack = new UnimplementedFunction("string.unpack");  // TODO
+	}
 
 	@Override
 	public Function _byte() {
@@ -66,7 +79,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _gsub() {
-		return null;  // TODO
+		return _gsub;
 	}
 
 	@Override
@@ -86,12 +99,12 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _pack() {
-		return null;  // TODO
+		return _pack;
 	}
 
 	@Override
 	public Function _packsize() {
-		return null;  // TODO
+		return _packsize;
 	}
 
 	@Override
@@ -111,7 +124,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _unpack() {
-		return null;  // TODO
+		return _unpack;
 	}
 
 	@Override

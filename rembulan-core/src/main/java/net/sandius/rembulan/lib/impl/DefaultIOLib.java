@@ -24,6 +24,7 @@ import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Userdata;
+import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IOLib;
@@ -39,6 +40,17 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
 public class DefaultIOLib extends IOLib {
+
+	private final Function _close;
+	private final Function _flush;
+	private final Function _input;
+	private final Function _lines;
+	private final Function _open;
+	private final Function _output;
+	private final Function _popen;
+	private final Function _read;
+	private final Function _tmpfile;
+	private final Function _write;
 
 	private final Table fileMetatable;
 
@@ -60,6 +72,17 @@ public class DefaultIOLib extends IOLib {
 
 		Check.notNull(tableFactory);
 		Check.notNull(fileSystem);
+
+		this._close = new Close(this);
+		this._flush = new Flush(this);
+		this._input = new Input(this);
+		this._lines = new UnimplementedFunction("io.lines");  // TODO
+		this._open = new Open(this);
+		this._output = new Output(this);
+		this._popen = new UnimplementedFunction("io.popen");  // TODO
+		this._read = new Read(this);
+		this._tmpfile = new UnimplementedFunction("io.tmpfile");  // TODO
+		this._write = new Write(this);
 
 		// set up metatable for files
 		Table mt = tableFactory.newTable();
@@ -93,47 +116,47 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Function _close() {
-		return new Close(this);
+		return _close;
 	}
 
 	@Override
 	public Function _flush() {
-		return new Flush(this);
+		return _flush;
 	}
 
 	@Override
 	public Function _input() {
-		return new Input(this);
+		return _input;
 	}
 
 	@Override
 	public Function _lines() {
-		return null;  // TODO
+		return _lines;
 	}
 
 	@Override
 	public Function _open() {
-		return new Open(this);
+		return _open;
 	}
 
 	@Override
 	public Function _output() {
-		return new Output(this);
+		return _output;
 	}
 
 	@Override
 	public Function _popen() {
-		return null;  // TODO
+		return _popen;
 	}
 
 	@Override
 	public Function _read() {
-		return new Read(this);
+		return _read;
 	}
 
 	@Override
 	public Function _tmpfile() {
-		return null;  // TODO
+		return _tmpfile;
 	}
 
 	@Override
@@ -143,7 +166,7 @@ public class DefaultIOLib extends IOLib {
 
 	@Override
 	public Function _write() {
-		return new Write(this);
+		return _write;
 	}
 
 	@Override

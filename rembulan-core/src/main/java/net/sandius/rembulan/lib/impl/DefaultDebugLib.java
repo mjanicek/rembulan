@@ -23,6 +23,7 @@ import net.sandius.rembulan.core.LuaRuntimeException;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.Variable;
+import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;
 import net.sandius.rembulan.util.Check;
@@ -31,24 +32,44 @@ import java.lang.reflect.Field;
 
 public class DefaultDebugLib extends DebugLib {
 
+	private final Function _debug;
+	private final Function _gethook;
+	private final Function _getinfo;
+	private final Function _getlocal;
+	private final Function _getregistry;
+	private final Function _sethook;
+	private final Function _setlocal;
+	private final Function _traceback;
+
+	public DefaultDebugLib() {
+		this._debug = new UnimplementedFunction("debug.debug");  // TODO
+		this._gethook = new UnimplementedFunction("debug.gethook");  // TODO
+		this._getinfo = new UnimplementedFunction("debug.getinfo");  // TODO
+		this._getlocal = new UnimplementedFunction("debug.getlocal");  // TODO
+		this._getregistry = new UnimplementedFunction("debug.getregistry");  // TODO
+		this._sethook = new UnimplementedFunction("debug.sethook");  // TODO
+		this._setlocal = new UnimplementedFunction("debug.setlocal");  // TODO
+		this._traceback = new UnimplementedFunction("debug.traceback");  // TODO
+	}
+
 	@Override
 	public Function _debug() {
-		return null;  // TODO
+		return _debug;
 	}
 
 	@Override
 	public Function _gethook() {
-		return null;  // TODO
+		return _gethook;
 	}
 
 	@Override
 	public Function _getinfo() {
-		return null;  // TODO
+		return _getinfo;
 	}
 
 	@Override
 	public Function _getlocal() {
-		return null;  // TODO
+		return _getlocal;
 	}
 
 	@Override
@@ -58,7 +79,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _getregistry() {
-		return null;  // TODO
+		return _getregistry;
 	}
 
 	@Override
@@ -73,12 +94,12 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _sethook() {
-		return null;  // TODO
+		return _sethook;
 	}
 
 	@Override
 	public Function _setlocal() {
-		return null;  // TODO
+		return _setlocal;
 	}
 
 	@Override
@@ -98,7 +119,7 @@ public class DefaultDebugLib extends DebugLib {
 
 	@Override
 	public Function _traceback() {
-		return null;  // TODO
+		return _traceback;
 	}
 
 	@Override
