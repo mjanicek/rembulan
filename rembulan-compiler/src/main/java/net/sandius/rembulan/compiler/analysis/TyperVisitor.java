@@ -46,6 +46,7 @@ class TyperVisitor extends CodeVisitor {
 	private final Set<Var> allVars;
 	private final Set<Var> reifiedVars;
 
+	private final Set<Label> seen;
 	private final Queue<Label> open;
 
 	private final Set<ReturnType> returnTypes;
@@ -62,6 +63,7 @@ class TyperVisitor extends CodeVisitor {
 		this.allVars = new HashSet<>();
 		this.reifiedVars = new HashSet<>();
 
+		this.seen = new HashSet<>();
 		this.open = new ArrayDeque<>();
 
 		this.returnTypes = new HashSet<>();
@@ -302,6 +304,8 @@ class TyperVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(BasicBlock block) {
+		boolean firstTimeVisit = seen.add(block.label());
+
 		currentVarState = varState(block.label()).copy();
 		changed = false;
 
@@ -315,7 +319,7 @@ class TyperVisitor extends CodeVisitor {
 				}
 			}
 
-			if (changed) {
+			if (firstTimeVisit || changed) {
 				for (Label nxt : block.end().nextLabels()) {
 					open.add(nxt);
 				}

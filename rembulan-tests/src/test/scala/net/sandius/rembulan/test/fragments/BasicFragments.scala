@@ -344,6 +344,24 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   RepeatUntil in EmptyContext succeedsWith (6)
 
+  val InfiniteWhileLoop1 = fragment ("InfiniteWhileLoop1") {
+    """return function() while true do local a = -1 end end
+    """
+  }
+  InfiniteWhileLoop1 in EmptyContext succeedsWith (classOf[lua.Function])
+
+  val InfiniteWhileLoop2 = fragment ("InfiniteWhileLoop2") {
+    """return function() while 1 do local a = -1 end end
+    """
+  }
+  InfiniteWhileLoop2 in EmptyContext succeedsWith (classOf[lua.Function])
+
+  val InfiniteWhileLoop3 = fragment ("InfiniteWhileLoop3") {
+    """return function () repeat local x = 1 until true end
+    """
+  }
+  InfiniteWhileLoop3 in EmptyContext succeedsWith (classOf[lua.Function])
+
   val BitwiseOps = fragment ("BitwiseOps") {
     """local x = 3
       |local y = 10
