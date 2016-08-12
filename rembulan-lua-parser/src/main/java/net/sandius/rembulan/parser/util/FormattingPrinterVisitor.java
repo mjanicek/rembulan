@@ -216,8 +216,10 @@ public class FormattingPrinterVisitor extends Visitor {
 		doIndent();
 		out.println("repeat");
 		subVisitor().visit(node.block());
+		doIndent();
 		out.print("until ");
 		printExpr(node.condition());
+		out.println();
 	}
 
 	@Override
