@@ -225,14 +225,14 @@ TOKEN :
 
 	// String literals
 |	<LITERAL_STRING: <DOUBLE_QUOTED_STRING> | <SINGLE_QUOTED_STRING>>
-|	<#DOUBLE_QUOTED_STRING: "\"" (<ESCAPED> | ~["\"", "\n", "\r"])* "\"">
-|	<#SINGLE_QUOTED_STRING: "'" (<ESCAPED> | ~["'", "\n", "\r"])* "'">
+|	<#DOUBLE_QUOTED_STRING: "\"" (<ESCAPED> | ~["\"", "\\", "\n", "\r"])* "\"">
+|	<#SINGLE_QUOTED_STRING: "'" (<ESCAPED> | ~["'", "\\", "\n", "\r"])* "'">
 
 |	<#ESCAPED: <HEXCHAR> | <DECCHAR> | <UNICODE> | <CHAR> | <NEWLINE>>
 |	<#HEXCHAR: "\\" "x" (<HEXDIGIT>){2}>
 |	<#DECCHAR: "\\" (<DECDIGIT>){1,3}>
 |	<#UNICODE: "\\" "u" "{" (<HEXDIGIT>)+ "}">
-|	<#CHAR: "\\" ("'" | "\"" | "a" | "b" | "f" | "n" | "r" | "t" | "v" | "z")>
+|	<#CHAR: "\\" ("'" | "\"" | "\\" | "a" | "b" | "f" | "n" | "r" | "t" | "v" | "z")>
 |	<#NEWLINE: "\\" ("\n" | "\r\n")>
 
 }

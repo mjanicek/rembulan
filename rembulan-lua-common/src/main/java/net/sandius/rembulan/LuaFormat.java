@@ -175,7 +175,7 @@ public class LuaFormat {
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
 
-			if (isASCIIPrintable(c)) {
+			if (c != '\\' && isASCIIPrintable(c)) {
 				bld.append(c);
 			}
 			else {

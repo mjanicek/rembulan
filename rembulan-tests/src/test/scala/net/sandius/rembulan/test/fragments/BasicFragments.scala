@@ -52,6 +52,24 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   EnvResolution in EmptyContext succeedsWith (classOf[Table])
 
+  val StringParsing1 = fragment ("StringParsing1") {
+    """return "\\","\\"
+    """
+  }
+  StringParsing1 in EmptyContext succeedsWith ("\\", "\\")
+
+  val StringParsing2 = fragment ("StringParsing2") {
+    """return '\\','\\'
+    """
+  }
+  StringParsing2 in EmptyContext succeedsWith ("\\", "\\")
+
+  val StringParsing3 = fragment ("StringParsing3") {
+    """return '\\',"\\",'\\',"\\"
+    """
+  }
+  StringParsing3 in EmptyContext succeedsWith ("\\", "\\")
+
   val LocalEnvResolution = fragment ("LocalEnvResolution") {
     """local _ENV
       |return x
