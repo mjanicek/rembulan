@@ -129,6 +129,22 @@ public class StringLiteral extends Literal {
 
 					bld.append((char) value);
 				}
+				else if (c == 'z') {
+					// skip subsequent whitespace
+					while (Character.isWhitespace(s.charAt(++i))) {
+						// do nothing
+					}
+				}
+				else if (c == '\n' || c == '\r') {
+					if (c == '\r') {
+						// this must be a \r\n
+						if (s.charAt(++i) != '\n') {
+							throw new IllegalArgumentException("\\n expected at index " + i);
+						}
+					}
+					i += 1;
+					bld.append('\n');
+				}
 				else {
 					final char d;
 					i += 1;

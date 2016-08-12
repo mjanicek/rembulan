@@ -225,18 +225,15 @@ TOKEN :
 
 	// String literals
 |	<LITERAL_STRING: <DOUBLE_QUOTED_STRING> | <SINGLE_QUOTED_STRING>>
-|	<#DOUBLE_QUOTED_STRING: "\"" (<ESCAPED> | ~["\\","\""] | "\\\"")* "\"">
-|	<#SINGLE_QUOTED_STRING: "'" (<ESCAPED> | ~["\\","'"] | "\\'")* "'">
+|	<#DOUBLE_QUOTED_STRING: "\"" (<ESCAPED> | ~["\"", "\n", "\r"])* "\"">
+|	<#SINGLE_QUOTED_STRING: "'" (<ESCAPED> | ~["'", "\n", "\r"])* "'">
 
-|	<#ESCAPED: <HEXCHAR> | <DECCHAR> | <UNICODE> | <CHAR>>
+|	<#ESCAPED: <HEXCHAR> | <DECCHAR> | <UNICODE> | <CHAR> | <NEWLINE>>
 |	<#HEXCHAR: "\\" "x" (<HEXDIGIT>){2}>
 |	<#DECCHAR: "\\" (<DECDIGIT>){1,3}>
 |	<#UNICODE: "\\" "u" "{" (<HEXDIGIT>)+ "}">
-|	<#CHAR: "\\" ("a" | "b" | "f" | "n" | "r" | "t" | "v") >
-|	<#LF: ("\n" | "\r" | "\r\n") >
-
-// TODO: the \z escape sequence
-// TODO: long brackets
+|	<#CHAR: "\\" ("'" | "\"" | "a" | "b" | "f" | "n" | "r" | "t" | "v" | "z")>
+|	<#NEWLINE: "\\" ("\n" | "\r\n")>
 
 }
 
