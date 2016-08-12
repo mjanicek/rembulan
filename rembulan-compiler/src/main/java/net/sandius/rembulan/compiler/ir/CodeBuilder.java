@@ -62,18 +62,24 @@ public class CodeBuilder {
 	}
 
 	private void closeCurrentBlock(BlockTermNode end) {
-		if (currentBlock == null) {
-			throw new IllegalStateException("No current block is open");
+		if (currentBlock != null) {
+			basicBlocks.add(currentBlock.toBasicBlock(end));
 		}
-		basicBlocks.add(currentBlock.toBasicBlock(end));
+		else {
+			// No block is currently open: attempting to close unreachable code, may be ignored.
+		}
 		currentBlock = null;
 	}
 
 	private void appendToCurrentBlock(BodyNode node) {
-		if (currentBlock == null) {
-			throw new IllegalStateException("Adding a node outside a block");
+		if (currentBlock != null) {
+			currentBlock.add(node);
 		}
-		currentBlock.add(node);
+		else {
+			// Adding a node outside a block: this is unreachable code, don't add it.
+			// This happens when an unconditional jump is not immediately followed
+			// by a label.
+		}
 	}
 
 	public void add(Label label) {

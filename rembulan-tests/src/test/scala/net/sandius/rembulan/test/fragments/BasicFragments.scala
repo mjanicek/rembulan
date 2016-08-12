@@ -923,6 +923,14 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   GotoLocalSlot_withoutX in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
 
+  val GotoLastStatementWithLocals = fragment ("GotoLastStatementWithLocals") {
+    """goto l
+      |local x
+      |::l::
+    """
+  }
+  GotoLastStatementWithLocals in EmptyContext succeedsWith ()
+
   val PureFunctionsAreReused = fragment ("PureFunctionsAreReused") {
     """function pure(x)
       |  return function()

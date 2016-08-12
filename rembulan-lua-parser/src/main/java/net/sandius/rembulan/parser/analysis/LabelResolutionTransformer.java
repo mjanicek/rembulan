@@ -20,9 +20,13 @@ import net.sandius.rembulan.parser.ast.*;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.Stack;
 
 class LabelResolutionTransformer extends Transformer {
@@ -38,8 +42,16 @@ class LabelResolutionTransformer extends Transformer {
 		this.uses = new HashMap<>();
 	}
 
+	private static boolean isVoidStatement(Statement stat) {
+		return stat instanceof LabelStatement || stat instanceof GotoStatement;
+	}
+
 	private void enterBlock() {
 		scopes.push(new Scope());
+	}
+
+	private void endBlockScopes() {
+		scopes.peek().clearLocals();
 	}
 
 	private void leaveBlock() {
@@ -112,12 +124,42 @@ class LabelResolutionTransformer extends Transformer {
 		return e.update(e.params(), child.transformTopBlock(e.block()));
 	}
 
+	private static Statement lastNonVoidStatement(Block block) {
+		Statement result = null;
+		for (BodyStatement bs : block.statements()) {
+			if (!isVoidStatement(bs)) {
+				result = bs;
+			}
+		}
+		if (block.returnStatement() != null) {
+			result = block.returnStatement();
+		}
+
+		return result;
+	}
+
 	@Override
 	public Block transform(Block block) {
 		enterBlock();
-		Block b = super.transform(block);
+
+		Statement localScopeEnd = lastNonVoidStatement(block);
+
+		List<BodyStatement> stats = new ArrayList<>();
+		for (BodyStatement bs : block.statements()) {
+			stats.add(bs.accept(this));
+
+			if (Objects.equals(localScopeEnd, bs)) {
+				endBlockScopes();
+			}
+		}
+
+		ReturnStatement ret = block.returnStatement() != null
+				? block.returnStatement().accept(this)
+				: null;
+
 		leaveBlock();
-		return b;
+
+		return block.update(Collections.unmodifiableList(stats), ret);
 	}
 
 	@Override
@@ -170,10 +212,12 @@ class LabelResolutionTransformer extends Transformer {
 
 		private final Map<Name, LabelDef> definedHere;
 		private final List<PendingGoto> pending;
+		private final Set<Name> locals;
 
 		public Scope() {
 			this.definedHere = new HashMap<>();
 			this.pending = new ArrayList<>();
+			this.locals = new HashSet<>();
 		}
 
 		public void defLabel(LabelStatement node) {
@@ -204,6 +248,10 @@ class LabelResolutionTransformer extends Transformer {
 					else {
 						ResolvedLabel old = uses.put(gotoStat, rl);
 						assert (old == null);
+
+						// found the goto
+						pending.remove(pg);
+						break;
 					}
 				}
 			}
@@ -228,9 +276,19 @@ class LabelResolutionTransformer extends Transformer {
 		}
 
 		public void defLocal(Name name) {
+			locals.add(name);
 			for (PendingGoto pg : pending) {
 				pg.addLocal(name);
 			}
+		}
+
+		public void clearLocals() {
+			for (Name n : locals) {
+				for (PendingGoto pg : pending) {
+					pg.localsSince.remove(n);
+				}
+			}
+			locals.clear();
 		}
 
 	}
