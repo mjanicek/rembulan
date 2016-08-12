@@ -44,8 +44,8 @@
 package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 /**
  * <p>This library provides generic functions for table manipulation. It provides all its functions
@@ -58,10 +58,13 @@ import net.sandius.rembulan.core.Table;
 public abstract class TableLib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		Table t = state.newTable();
-		env.rawset("table", t);
-		
+	public String name() {
+		return "table";
+	}
+
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("concat", _concat());
 		t.rawset("insert", _insert());
 		t.rawset("move", _move());
@@ -69,6 +72,7 @@ public abstract class TableLib extends Lib {
 		t.rawset("remove", _remove());
 		t.rawset("sort", _sort());
 		t.rawset("unpack", _unpack());
+		return t;
 	}
 
 	/**

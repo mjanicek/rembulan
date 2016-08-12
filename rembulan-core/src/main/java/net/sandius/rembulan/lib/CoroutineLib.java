@@ -44,16 +44,19 @@
 package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 public abstract class CoroutineLib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		Table t = state.newTable();
-		env.rawset("coroutine", t);
+	public String name() {
+		return "coroutine";
+	}
 
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("create", _create());
 		t.rawset("resume", _resume());
 		t.rawset("yield", _yield());
@@ -61,6 +64,7 @@ public abstract class CoroutineLib extends Lib {
 		t.rawset("status", _status());
 		t.rawset("running", _running());
 		t.rawset("wrap", _wrap());
+		return t;
 	}
 
 	/**

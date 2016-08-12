@@ -46,6 +46,7 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 /**
  * The package library provides basic facilities for loading modules in Lua. It exports
@@ -55,12 +56,13 @@ import net.sandius.rembulan.core.Table;
 public abstract class ModuleLib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		env.rawset("require", _require());
-		
-		Table t = state.newTable();
-		env.rawset("package", t);
+	public String name() {
+		return "package";
+	}
 
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("config", _config());
 		t.rawset("cpath", _cpath());
 		t.rawset("loaded", _loaded());
@@ -69,7 +71,15 @@ public abstract class ModuleLib extends Lib {
 		t.rawset("preload", _preload());
 		t.rawset("searchers", _searchers());
 		t.rawset("searchpath", _searchpath());
+		return t;
 	}
+
+	@Override
+	public void preInstall(LuaState state, Table env) {
+		env.rawset("require", _require());
+	}
+
+	public abstract void install(Lib lib);
 
 	/**
 	 * {@code require (modname)}

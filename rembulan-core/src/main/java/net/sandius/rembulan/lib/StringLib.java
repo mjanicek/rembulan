@@ -47,6 +47,7 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 /**
  * <p>This library provides generic functions for string manipulation, such as finding
@@ -65,10 +66,13 @@ import net.sandius.rembulan.core.Table;
 public abstract class StringLib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		Table t = state.newTable();
-		env.rawset("string", t);
-		
+	public String name() {
+		return "string";
+	}
+
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("byte", _byte());
 		t.rawset("char", _char());
 		t.rawset("dump", _dump());
@@ -86,10 +90,14 @@ public abstract class StringLib extends Lib {
 		t.rawset("sub", _sub());
 		t.rawset("unpack", _unpack());
 		t.rawset("upper", _upper());
+		return t;
+	}
 
+	@Override
+	public void postInstall(LuaState state, Table env, Table libTable) {
 		// set metatable for the string type
 		Table mt = state.newTable();
-		mt.rawset(Metatables.MT_INDEX, t);
+		mt.rawset(Metatables.MT_INDEX, libTable);
 		state.setStringMetatable(mt);
 	}
 

@@ -44,8 +44,8 @@
 package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 /**
  * This library is implemented through table {@code os}.
@@ -53,10 +53,13 @@ import net.sandius.rembulan.core.Table;
 public abstract class OsLib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		Table t = state.newTable();
-		env.rawset("os", t);
+	public String name() {
+		return "os";
+	}
 
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("clock", _clock());
 		t.rawset("date", _date());
 		t.rawset("difftime", _difftime());
@@ -68,6 +71,7 @@ public abstract class OsLib extends Lib {
 		t.rawset("setlocale", _setlocale());
 		t.rawset("time", _time());
 		t.rawset("tmpname", _tmpname());
+		return t;
 	}
 	
 	/**

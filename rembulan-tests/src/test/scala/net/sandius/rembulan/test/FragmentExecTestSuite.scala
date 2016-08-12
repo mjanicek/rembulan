@@ -93,7 +93,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
       case Full =>
         new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
-        new DefaultModuleLib().installInto(state, env)
+        new DefaultModuleLib(state, env).installInto(state, env)
         new DefaultCoroutineLib().installInto(state, env)
         new DefaultMathLib().installInto(state, env)
         new DefaultStringLib().installInto(state, env)

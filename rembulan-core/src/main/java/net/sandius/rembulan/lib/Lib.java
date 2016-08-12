@@ -18,12 +18,35 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 public abstract class Lib {
 
 	public static final String MT_NAME = "__name";
 	public static final String TYPENAME_LIGHT_USERDATA = "light userdata";
 
-	public abstract void installInto(LuaState state, Table env);
+	public abstract String name();
+
+	public abstract Table toTable(TableFactory tableFactory);
+
+	public void preInstall(LuaState state, Table env) {
+		// no-op by default
+	}
+
+	@Deprecated
+	public void installInto(LuaState state, Table env) {
+		preInstall(state, env);
+
+		Table t = toTable(state.tableFactory());
+		if (t != null) {
+			env.rawset(name(), t);
+		}
+
+		postInstall(state, env, t);
+	}
+
+	public void postInstall(LuaState state, Table env, Table libTable) {
+		// no-op by default
+	}
 
 }

@@ -46,6 +46,7 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 public abstract class BasicLib extends Lib {
 
@@ -54,7 +55,17 @@ public abstract class BasicLib extends Lib {
 	public static final String MT_PAIRS = "__pairs";
 
 	@Override
-	public void installInto(LuaState state, Table env) {
+	public String name() {
+		return "basic";
+	}
+
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		return null;
+	}
+
+	@Override
+	public void preInstall(LuaState state, Table env) {
 		env.rawset("_G", env);
 		env.rawset("_VERSION", __VERSION());
 		

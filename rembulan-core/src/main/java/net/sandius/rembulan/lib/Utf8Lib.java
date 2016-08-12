@@ -44,8 +44,8 @@
 package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 /**
  * <p>This library provides basic support for UTF-8 encoding. It provides all its functions
@@ -61,16 +61,20 @@ import net.sandius.rembulan.core.Table;
 public abstract class Utf8Lib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		Table t = state.newTable();
-		env.rawset("utf8", t);
-		
+	public String name() {
+		return "utf8";
+	}
+
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("char", _char());
 		t.rawset("charpattern", _charpattern());
 		t.rawset("codes", _codes());
 		t.rawset("codepoint", _codepoint());
 		t.rawset("len", _len());
 		t.rawset("offset", _offset());
+		return t;
 	}
 
 	/**

@@ -44,8 +44,8 @@
 package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 /**
  * This library provides the functionality of the debug interface (see §4.9 of the Lua
@@ -62,10 +62,13 @@ import net.sandius.rembulan.core.Table;
 public abstract class DebugLib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		Table t = state.newTable();
-		env.rawset("debug", t);
-		
+	public String name() {
+		return "debug";
+	}
+
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("debug", _debug());
 		t.rawset("gethook", _gethook());
 		t.rawset("getinfo", _getinfo());
@@ -82,6 +85,7 @@ public abstract class DebugLib extends Lib {
 		t.rawset("traceback", _traceback());
 		t.rawset("upvalueid", _upvalueid());
 		t.rawset("upvaluejoin", _upvaluejoin());
+		return t;
 	}
 
 	/**

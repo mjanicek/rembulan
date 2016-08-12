@@ -84,17 +84,16 @@ public class RembulanConsole {
 
 		// install libraries
 		new DefaultBasicLib(new PrintStream(out)).installInto(state, env);
-		ModuleLib moduleLib = new DefaultModuleLib();
+		ModuleLib moduleLib = new DefaultModuleLib(state, env);
 		moduleLib.installInto(state, env);
-		new DefaultCoroutineLib().installInto(state, env);
-		new DefaultStringLib().installInto(state, env);
-		new DefaultMathLib().installInto(state, env);
-		new DefaultTableLib().installInto(state, env);
-		new DefaultIoLib(state.tableFactory(), FileSystems.getDefault(), in, out, err)
-				.installInto(state, env);
-		new DefaultOsLib().installInto(state, env);
-		new DefaultUtf8Lib().installInto(state, env);
-		new DefaultDebugLib().installInto(state, env);
+		moduleLib.install(new DefaultCoroutineLib());
+		moduleLib.install(new DefaultStringLib());
+		moduleLib.install(new DefaultMathLib());
+		moduleLib.install(new DefaultTableLib());
+		moduleLib.install(new DefaultIoLib(state.tableFactory(), FileSystems.getDefault(), in, out, err));
+		moduleLib.install(new DefaultOsLib());
+		moduleLib.install(new DefaultUtf8Lib());
+		moduleLib.install(new DefaultDebugLib());
 
 		// command-line arguments
 		env.rawset("arg", cmdLineArgs.toArgTable(state.tableFactory()));

@@ -44,8 +44,8 @@
 package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Userdata;
 
 /**
@@ -71,10 +71,13 @@ import net.sandius.rembulan.core.Userdata;
 public abstract class IoLib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		Table t = state.newTable();
-		env.rawset("io", t);
-		
+	public String name() {
+		return "io";
+	}
+
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("close", _close());
 		t.rawset("flush", _flush());
 		t.rawset("input", _input());
@@ -90,6 +93,7 @@ public abstract class IoLib extends Lib {
 		t.rawset("stdin", _stdin());
 		t.rawset("stdout", _stdout());
 		t.rawset("stderr", _stderr());
+		return t;
 	}
 
 	/**

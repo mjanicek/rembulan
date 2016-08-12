@@ -44,8 +44,8 @@
 package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.TableFactory;
 
 /**
  * This library provides basic mathematical functions. It provides all its functions and constants
@@ -58,10 +58,13 @@ import net.sandius.rembulan.core.Table;
 public abstract class MathLib extends Lib {
 
 	@Override
-	public void installInto(LuaState state, Table env) {
-		Table t = state.newTable();
-		env.rawset("math", t);
-		
+	public String name() {
+		return "math";
+	}
+
+	@Override
+	public Table toTable(TableFactory tableFactory) {
+		Table t = tableFactory.newTable();
 		t.rawset("abs", _abs());
 		t.rawset("acos", _acos());
 		t.rawset("asin", _asin());
@@ -89,6 +92,7 @@ public abstract class MathLib extends Lib {
 		t.rawset("tointeger", _tointeger());
 		t.rawset("type", _type());
 		t.rawset("ult", _ult());
+		return t;
 	}
 
 	/**
