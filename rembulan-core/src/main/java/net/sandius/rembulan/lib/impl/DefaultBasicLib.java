@@ -29,14 +29,12 @@ import java.io.PrintStream;
 public class DefaultBasicLib extends BasicLib {
 
 	private final Function _print;
-	private final Function _collectgarbage;
 	private final Function _dofile;
 	private final Function _load;
 	private final Function _loadfile;
 
 	public DefaultBasicLib(PrintStream out) {
 		this._print = new Print(out);
-		this._collectgarbage = new UnimplementedFunction("collectgarbage");  // TODO
 		this._dofile = new UnimplementedFunction("dofile");  // TODO
 		this._load = new UnimplementedFunction("load");  // TODO
 		this._loadfile = new UnimplementedFunction("loadfile");  // TODO
@@ -139,7 +137,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	@Override
 	public Function _collectgarbage() {
-		return _collectgarbage;
+		return CollectGarbage.INSTANCE;
 	}
 
 	@Override
@@ -807,6 +805,25 @@ public class DefaultBasicLib extends BasicLib {
 
 				context.getObjectSink().setToArray(Varargs.from(args.getAll(), from));
 			}
+		}
+
+	}
+
+	public static class CollectGarbage extends AbstractLibFunction {
+
+		public static final CollectGarbage INSTANCE = new CollectGarbage();
+
+		@Override
+		protected String name() {
+			return "collectgarbage";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			if (args.hasNext()) {
+				throw new UnsupportedOperationException();  // TODO
+			}
+			// TODO
 		}
 
 	}
