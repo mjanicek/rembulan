@@ -125,12 +125,56 @@ MORE :
 
 /* Comments */
 
-SPECIAL_TOKEN :
+MORE :
 {
-	<LINE_COMMENT: "--" (~["\n","\r"])* ("\n"|"\r"|"\r\n")? >
+	<LONG_COMMENT: "--[" ("=")* "["> { longLiteralLevel = lengthOfMatch - 4; } : IN_LC_BODY
+|	"--" : IN_LINE_COMMENT
 }
 
+<IN_LINE_COMMENT>
+SPECIAL_TOKEN :
+{
+	<LINE_COMMENT: (~["\n","\r"])* ("\n"|"\r"|"\r\n")?> : DEFAULT
+}
+
+// Long comment states once a long opening bracket has been found:
+//   IN_LC_BODY ... no ']' has been encountered, looking for the first one
+//   IN_LC_END  ... a single ']' has been encountered, i.e. looking for the second one
+
+<IN_LC_BODY>
+MORE :
+{
+	<LC_BODY_BODY: (~["]"])+>
+|	"]" : IN_LC_END
+}
+
+<IN_LC_END>
+MORE :
+{
+	<LC_END_BODY: (~["]","="])+> : IN_LC_BODY
+}
+
+<IN_LC_END>
+SPECIAL_TOKEN :
+{
+	<LC_END_TAIL: ("=")* "]">
+		{
+			if (longLiteralLevel == lengthOfMatch - 1) {
+				longLiteralLevel = -1;
+				SwitchTo(DEFAULT);
+			}
+		}
+}
+
+<IN_LC_END>
+MORE :
+{
+	<LC_END_NOTAIL: ("=")+> : IN_LC_BODY
+}
+
+
 /* Keywords */
+
 TOKEN :
 {
 	<AND: "and">
@@ -482,7 +526,7 @@ BodyStatement AssignOrCall() :
 				return ar.prepend((LValueExpr) e);
 			}
 			else {
-				throw new ParseException("lvalue expected");
+				throw new ParseException("lvalue expected at line " + e.line());
 			}
 		}
 	)?
@@ -493,7 +537,7 @@ BodyStatement AssignOrCall() :
 			return Statements.callStatement(ce.sourceInfo(), ce);
 		}
 		else {
-			throw new ParseException("function call expected");
+			throw new ParseException("function call expected at line " + e.line());
 		}
 	}
 }
