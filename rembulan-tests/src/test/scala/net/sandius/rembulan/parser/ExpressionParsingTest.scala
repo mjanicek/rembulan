@@ -32,11 +32,17 @@ class ExpressionParsingTest extends FunSpec with MustMatchers {
 
     val bais = new ByteArrayInputStream(s.getBytes)
     val parser = new Parser(bais)
-    val result = parser.Expr()
-    parser.Eof()
 
-    println("--> " + exprToString(result))
-    println()
+    try {
+      val result = parser.Expr()
+      parser.Eof()
+
+      println("--> " + exprToString(result))
+      println()
+    }
+    catch {
+      case ex: TokenMgrError => throw new ParseException(ex.getMessage)
+    }
   }
 
   def exprToString(expr: Expr): String = {
@@ -58,12 +64,8 @@ class ExpressionParsingTest extends FunSpec with MustMatchers {
 
     def nok(s: String): Unit = {
       it ("not-ok: " + s) {
-        try {
+        intercept[ParseException] {
           tryParseExpr(s)
-        }
-        catch {
-          case ex: ParseException =>
-            println("--> (error:) " + ex.getMessage)
         }
       }
     }

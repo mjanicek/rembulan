@@ -67,21 +67,63 @@ public class Parser {
 
 PARSER_END(Parser)
 
+TOKEN_MGR_DECLS: {
+
+	int longLiteralLevel;
+
+}
+
 /* Whitespace */
+
 SKIP :
 {
 	" " | "\t" | "\n" | "\r" | "\f"
 }
 
+/* Long literals */
+
+// States once a long opening bracket has been found:
+//   IN_LL_BODY ... no ']' has been encountered, looking for the first one
+//   IN_LL_END  ... a single ']' has been encountered, i.e. looking for the second one
+
+TOKEN :
+{
+	<LL_BEGIN: "[" ("=")* "["> { longLiteralLevel = lengthOfMatch - 2; } : IN_LL_BODY
+}
+
+<IN_LL_BODY>
+MORE :
+{
+	<LL_BODY_BODY: (~["]"])+>
+|	"]" : IN_LL_END
+}
+
+<IN_LL_END>
+MORE :
+{
+	<LL_END_BODY: (~["]","="])+> : IN_LL_BODY
+}
+
+<IN_LL_END>
+TOKEN :
+{
+	<LL_TAIL: ("=")* "]">
+		{
+			if (longLiteralLevel == lengthOfMatch - 1) {
+				longLiteralLevel = -1;
+				SwitchTo(DEFAULT);
+			}
+		}
+}
+
+<IN_LL_END>
+MORE :
+{
+	<LL_END_NOTAIL: ("=")+> : IN_LL_BODY
+}
+
 
 /* Comments */
-
-// TODO: multi-line comments, nested comments
-
-//MORE :
-//{
-//  "%" : IN_LINE_COMMENT
-//}
 
 SPECIAL_TOKEN :
 {
@@ -215,10 +257,23 @@ Name Name() :
 
 SourceElement<StringLiteral> Str() :
 {
-	Token t;
+	Token t, u;
+	StringBuilder bld;
 }
 {
 	t=<LITERAL_STRING>  { return new SourceElement(src(t), StringLiteral.fromString(t.image)); }
+|	t=<LL_BEGIN> { bld = new StringBuilder(); } (u=<LL_TAIL> { bld.append(u.image); })+
+		{
+			// skip the closing bracket
+			bld.setLength(bld.length() - t.image.length());
+
+			return new SourceElement(
+					src(t),
+					// skip the leading newline if there is one
+					StringLiteral.verbatim(bld.length() > 0 && bld.charAt(0) == '\n'
+							? bld.substring(1)
+							: bld.toString()));
+		}
 }
 
 SourceElement<Numeral> Num() :

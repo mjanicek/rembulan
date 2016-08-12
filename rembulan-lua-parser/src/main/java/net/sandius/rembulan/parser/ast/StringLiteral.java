@@ -161,6 +161,10 @@ public class StringLiteral extends Literal {
 		return new StringLiteral(stringValueOf(s));
 	}
 
+	public static StringLiteral verbatim(String s) {
+		return new StringLiteral(s);
+	}
+
 	public static StringLiteral fromName(Name n) {
 		return new StringLiteral(n.value());
 	}

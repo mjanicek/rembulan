@@ -30,7 +30,7 @@ object Expressions {
     exprs += ((s, true))
   }
 
-  protected def nok(s: String): Unit = {
+  protected def not_ok(s: String): Unit = {
     exprs += ((s, false))
   }
 
@@ -39,7 +39,7 @@ object Expressions {
   ok ("nil")
   ok ("x")
 
-  nok ("x x")
+  not_ok ("x x")
 
   ok ("1 + 2")
   ok ("x ^ 2")
@@ -79,7 +79,7 @@ object Expressions {
   ok ("{...}")
   ok ("{x = ...}")
 
-  nok ("{;}")
+  not_ok ("{;}")
 
   ok ("#t")
 
@@ -95,10 +95,10 @@ object Expressions {
 
   ok ("(...).x + 1")
 
-  nok ("4.x")
-  nok ("0()")
-  nok ("nil.x")
-  nok ("true()")
+  not_ok ("4.x")
+  not_ok ("0()")
+  not_ok ("nil.x")
+  not_ok ("true()")
 
   ok ("f:g()")
 
@@ -132,5 +132,17 @@ object Expressions {
   ok ("x < 0 or x > 10")
 
   ok ("not not x == false and x ~= nil")
+
+  ok ("[[hello]]")
+  ok ("[=[hello]] there]=]")
+  ok ("[==[hello [[and]=] welcome]== [[ [==[ ] ==] ]==]")
+
+  ok ("[[hello]] .. ' ' .. there")
+
+  ok ("[[[[]=]]")
+  ok ("[[[[] ]]")
+  not_ok ("[[[[]]]")
+  not_ok ("[[[[]=]]]")
+  ok ("[[[[]=] ]]")
 
 }
