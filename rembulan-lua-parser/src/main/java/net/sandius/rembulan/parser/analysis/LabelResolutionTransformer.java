@@ -237,6 +237,7 @@ class LabelResolutionTransformer extends Transformer {
 				assert (old == null);
 			}
 
+			List<PendingGoto> resolvedGotos = new ArrayList<>();
 			for (PendingGoto pg : pending) {
 				GotoStatement gotoStat = pg.statement;
 
@@ -248,13 +249,12 @@ class LabelResolutionTransformer extends Transformer {
 					else {
 						ResolvedLabel old = uses.put(gotoStat, rl);
 						assert (old == null);
-
-						// found the goto
-						pending.remove(pg);
-						break;
+						resolvedGotos.add(pg);  // mark for removal from the pending set
 					}
 				}
 			}
+
+			pending.removeAll(resolvedGotos);
 		}
 
 		public void useLabel(GotoStatement node) {

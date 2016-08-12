@@ -931,6 +931,22 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   GotoLastStatementWithLocals in EmptyContext succeedsWith ()
 
+  val IfsAndGotos = fragment ("IfsAndGotos") {
+    """local function f(a)
+      |  if a == 1 then goto l1
+      |  elseif a == 2 then goto l2
+      |  elseif a == 3 then goto l2
+      |  else if a == 4 then goto l3
+      |    else goto l3
+      |    end
+      |  end
+      |  ::l1:: ::l2:: ::l3:: ::l4::
+      |end
+      |return f(0)
+    """
+  }
+  IfsAndGotos in EmptyContext succeedsWith ()
+
   val PureFunctionsAreReused = fragment ("PureFunctionsAreReused") {
     """function pure(x)
       |  return function()
