@@ -33,6 +33,7 @@ import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
+import net.sandius.rembulan.parser.TokenMgrError;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
@@ -266,6 +267,24 @@ public class RembulanConsole {
 					codeBuffer.append(line).append('\n');
 					try {
 						fn = compileAndLoadProgram(codeBuffer.toString(), "stdin");
+					}
+					catch (TokenMgrError ex) {
+						String msg = ex.getMessage();
+						// TODO: is there really no better way?
+						if (msg.contains("Encountered: <EOF>")) {
+							// partial input
+							reader.setPrompt(prompt2());
+							multiline = true;
+						}
+						else {
+							// faulty input
+							out.println(msg);
+
+							// reset back to initial state
+							codeBuffer.setLength(0);
+							multiline = false;
+							reader.setPrompt(prompt1());
+						}
 					}
 					catch (ParseException ex) {
 						if (ex.currentToken != null
