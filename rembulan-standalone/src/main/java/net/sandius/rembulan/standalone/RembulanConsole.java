@@ -258,7 +258,7 @@ public class RembulanConsole {
 					try {
 						fn = compileAndLoadProgram("return " + line, "stdin");
 					}
-					catch (ParseException ex) {
+					catch (TokenMgrError | ParseException ex) {
 						// ignore
 					}
 				}
