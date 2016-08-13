@@ -16,12 +16,14 @@
 
 package net.sandius.rembulan.compiler.ir;
 
+import net.sandius.rembulan.util.Check;
+
 public class Line extends BodyNode {
 
 	private final int lineNumber;
 
 	public Line(int lineNumber) {
-		this.lineNumber = lineNumber;
+		this.lineNumber = Check.positive(lineNumber);
 	}
 
 	public int lineNumber() {

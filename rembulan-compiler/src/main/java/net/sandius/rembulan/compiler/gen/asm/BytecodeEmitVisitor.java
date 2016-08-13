@@ -942,4 +942,11 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		}
 	}
 
+	@Override
+	public void visit(Line node) {
+		LabelNode l = new LabelNode();
+		il.add(l);
+		il.add(new LineNumberNode(node.lineNumber(), l));
+	}
+
 }
