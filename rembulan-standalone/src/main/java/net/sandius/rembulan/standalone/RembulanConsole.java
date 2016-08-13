@@ -44,8 +44,6 @@ import java.util.concurrent.ExecutionException;
 
 public class RembulanConsole {
 
-	private static final String VERSION = "0.1-SNAPSHOT";
-
 	private final CommandLineArguments config;
 
 	private final InputStream in;
@@ -110,7 +108,12 @@ public class RembulanConsole {
 	}
 
 	private void printVersion() {
-		out.println("Rembulan version " + VERSION + " (" + System.getProperty("java.vm.name") + ", Java " + System.getProperty("java.version") + ")");
+		out.println("Rembulan " + Constants.VERSION
+				+ " ("
+				+ System.getProperty("java.vm.name")
+				+ ", Java "
+				+ System.getProperty("java.version")
+				+ ")");
 	}
 
 	private static void printUsage(PrintStream out) {

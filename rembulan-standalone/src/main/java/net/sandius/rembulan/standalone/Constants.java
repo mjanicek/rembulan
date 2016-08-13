@@ -19,6 +19,11 @@ package net.sandius.rembulan.standalone;
 abstract class Constants {
 
 	/**
+	 * Version reported in the version string.
+	 */
+	public static final String VERSION = "0.1-SNAPSHOT";
+
+	/**
 	 * Default prompt for the first input line in interactive mode.
 	 */
 	public static final String DEFAULT_PROMPT = "> ";
