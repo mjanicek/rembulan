@@ -18,7 +18,7 @@ package net.sandius.rembulan.parser
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintWriter}
 
-import net.sandius.rembulan.parser.analysis.{FunctionVarInfo, NameResolver}
+import net.sandius.rembulan.parser.analysis.{FunctionVarInfo, NameResolver, Variable}
 import net.sandius.rembulan.parser.ast._
 import net.sandius.rembulan.parser.util.FormattingPrinterVisitor
 import net.sandius.rembulan.test.fragments._
@@ -26,6 +26,7 @@ import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 @RunWith(classOf[JUnitRunner])
@@ -75,10 +76,10 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
     m.toMap
   }
 
-  def prettyPrint(chunk: Chunk): String = {
+  def prettyPrint(chunk: Chunk, resolved: Boolean): String = {
     val bais = new ByteArrayOutputStream()
     val pw = new PrintWriter(bais)
-    val visitor = new FormattingPrinterVisitor(pw)
+    val visitor = new FormattingPrinterVisitor(pw, resolved)
     visitor.visit(chunk.block())
     pw.flush()
     String.valueOf(bais.toByteArray map { _.toChar })
@@ -110,7 +111,7 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
           }
 
           it ("pretty-printed is parsable") {
-            val prettyPrinted = prettyPrint(tryParseChunk(f.code))
+            val prettyPrinted = prettyPrint(tryParseChunk(f.code), false)
             try {
               val reparsed = tryParseChunk(prettyPrinted)
               reparsed mustNot be (null)
@@ -127,7 +128,7 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
             val resolvedChunk = resolveNames(parsedChunk)
 
             println("---BEGIN---")
-            val pp = prettyPrint(resolvedChunk)
+            val pp = prettyPrint(resolvedChunk, true)
             println(pp)
             println("----END----")
 
@@ -153,9 +154,14 @@ class FragmentParsingTest extends FunSpec with MustMatchers {
               val declaredVararg = params.isVararg.toString
               val actualVararg = varInfo.isVararg().toString
 
+              def varToString(v: Variable): String = v.name.value + "_" + Integer.toHexString(v.hashCode())
+
               println(o + lineSuffix)
               println("--> %d params, %d locals, %d upvals, vararg:%s/%s (declared/actual)".format(
                 numParams, numLocals, numUpvals, declaredVararg, actualVararg))
+              println("\tparams: " + (params.names().asScala map { _.value }).mkString("(", ", ", ")"))
+              println("\tlocals: " + (varInfo.locals().asScala map { varToString }).mkString("(", ", ", ")"))
+              println("\tupvals: " + (varInfo.upvalues().asScala map { uv => varToString(uv.`var`()) }).mkString("(", ", ", ")"))
               println()
             }
 

@@ -17,11 +17,17 @@
 package net.sandius.rembulan.parser.util;
 
 import net.sandius.rembulan.LuaFormat;
+import net.sandius.rembulan.parser.analysis.FunctionVarInfo;
+import net.sandius.rembulan.parser.analysis.ResolvedLabel;
+import net.sandius.rembulan.parser.analysis.ResolvedVariable;
+import net.sandius.rembulan.parser.analysis.VarMapping;
+import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
+import java.util.List;
 
 public class FormattingPrinterVisitor extends Visitor {
 
@@ -29,14 +35,21 @@ public class FormattingPrinterVisitor extends Visitor {
 	private final String indentString;
 	private final int indent;
 
-	FormattingPrinterVisitor(PrintWriter out, String indentString, int indent) {
+	private final boolean withResolvedNames;
+
+	FormattingPrinterVisitor(PrintWriter out, String indentString, int indent, boolean withResolvedNames) {
 		this.out = Check.notNull(out);
 		this.indentString = Check.notNull(indentString);
 		this.indent = indent;
+		this.withResolvedNames = withResolvedNames;
+	}
+
+	public FormattingPrinterVisitor(PrintWriter out, boolean withResolvedNames) {
+		this(out, "\t", 0, withResolvedNames);
 	}
 
 	public FormattingPrinterVisitor(PrintWriter out) {
-		this(out, "\t", 0);
+		this(out, false);
 	}
 
 	private void doIndent() {
@@ -46,11 +59,56 @@ public class FormattingPrinterVisitor extends Visitor {
 	}
 
 	private FormattingPrinterVisitor subVisitor() {
-		return new FormattingPrinterVisitor(out, indentString, indent + 1);
+		return new FormattingPrinterVisitor(out, indentString, indent + 1, withResolvedNames);
 	}
 
-	private void printName(Name n) {
-		out.print(n.value());
+	private static <T> T getOrNull(List<T> list, int idx) {
+		return (list != null && idx >= 0 && idx < list.size()) ? list.get(idx) : null;
+	}
+
+	private static Variable mappedVar(VarMapping vm, int idx) {
+		return vm != null ? getOrNull(vm.vars(), idx) : null;
+	}
+
+	private String varNameToString(Name n, Variable v) {
+		if (withResolvedNames) {
+			return v == null
+					? "_unresolved_" + n.value()
+					: v.name().value() + "_" + Integer.toHexString(v.hashCode());
+		}
+		else {
+			return n.value();
+		}
+	}
+
+	private void printName(Name n, Variable v) {
+		out.print(varNameToString(n, v));
+	}
+
+	private void printName(Name n, ResolvedVariable rv) {
+		final String result;
+		if (withResolvedNames) {
+			result = rv == null
+					? varNameToString(n, null)
+					: (rv.isUpvalue() ? "--[[^]]" : "") + varNameToString(n, rv.variable());
+		}
+		else {
+			result = n.value();
+		}
+		out.print(result);
+	}
+
+	private void printLabelName(Name n, ResolvedLabel rl) {
+		final String result;
+		if (withResolvedNames) {
+			result = rl == null
+					? "_unresolved_" + n.value()
+					: n.value() + "_" + Integer.toHexString(rl.hashCode());
+		}
+		else {
+			result = n.value();
+		}
+		out.print(result);
 	}
 
 	private void printExpr(Expr expr) {
@@ -78,14 +136,23 @@ public class FormattingPrinterVisitor extends Visitor {
 		}
 	}
 
-	private void printNameList(Iterable<Name> names) {
+	private void printNameList(Iterable<Name> names, List<Variable> vars) {
 		Iterator<Name> it = names.iterator();
+		int i = 0;
 		while (it.hasNext()) {
-			printName(it.next());
+			printName(it.next(), getOrNull(vars, i++));
 			if (it.hasNext()) {
 				out.print(", ");
 			}
 		}
+	}
+
+	private void printNameList(Iterable<Name> names, VarMapping varMapping) {
+		printNameList(names, varMapping != null ? varMapping.vars() : null);
+	}
+
+	private void printFixedParamList(Iterable<Name> names, FunctionVarInfo fvi) {
+		printNameList(names, fvi != null ? fvi.params() : null);
 	}
 
 	@Override
@@ -135,7 +202,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	public void visit(LocalDeclStatement node) {
 		doIndent();
 		out.print("local ");
-		printNameList(node.names());
+		printNameList(node.names(), node.attributes().get(VarMapping.class));
 		if (!node.initialisers().isEmpty()) {
 			out.print(" = ");
 			printExprList(node.initialisers());
@@ -172,7 +239,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	public void visit(NumericForStatement node) {
 		doIndent();
 		out.print("for ");
-		printName(node.name());
+		printName(node.name(), mappedVar(node.attributes().get(VarMapping.class), 0));
 		out.print(" = ");
 		printExpr(node.init());
 		out.print(", ");
@@ -191,7 +258,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	public void visit(GenericForStatement node) {
 		doIndent();
 		out.print("for ");
-		printNameList(node.names());
+		printNameList(node.names(), node.attributes().get(VarMapping.class));
 		out.print(" in ");
 		printExprList(node.exprs());
 		out.println(" do");
@@ -232,7 +299,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	public void visit(GotoStatement node) {
 		doIndent();
 		out.print("goto ");
-		printName(node.labelName());
+		printLabelName(node.labelName(), node.attributes().get(ResolvedLabel.class));
 		out.println();
 	}
 
@@ -240,13 +307,13 @@ public class FormattingPrinterVisitor extends Visitor {
 	public void visit(LabelStatement node) {
 		doIndent();
 		out.print("::");
-		printName(node.labelName());
+		printLabelName(node.labelName(), node.attributes().get(ResolvedLabel.class));
 		out.println("::");
 	}
 
 	@Override
 	public void visit(VarExpr node) {
-		printName(node.name());
+		printName(node.name(), node.attributes().get(ResolvedVariable.class));
 	}
 
 	@Override
@@ -269,7 +336,7 @@ public class FormattingPrinterVisitor extends Visitor {
 	public void visit(CallExpr.MethodCallExpr node) {
 		printVarExpr(node.target());
 		out.print(":");
-		printName(node.methodName());
+		out.print(node.methodName().value());
 		out.print("(");
 		printExprList(node.args());
 		out.print(")");
@@ -280,7 +347,7 @@ public class FormattingPrinterVisitor extends Visitor {
 		out.print("function ");
 		out.print("(");
 
-		printNameList(node.params().names());
+		printFixedParamList(node.params().names(), node.attributes().get(FunctionVarInfo.class));
 		if (node.params().isVararg()) {
 			if (!node.params().names().isEmpty()) {
 				out.print(", ");
