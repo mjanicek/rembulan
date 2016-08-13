@@ -32,7 +32,6 @@ import net.sandius.rembulan.core.impl.DefaultLuaState;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.parser.ParseException;
-import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.TokenMgrError;
 import net.sandius.rembulan.util.Check;
 
@@ -46,9 +45,6 @@ import java.util.concurrent.ExecutionException;
 public class RembulanConsole {
 
 	private static final String VERSION = "0.1-SNAPSHOT";
-
-	private static final String DEFAULT_PROMPT_1 = "> ";
-	private static final String DEFAULT_PROMPT_2 = ">> ";
 
 	private final CommandLineArguments config;
 
@@ -66,7 +62,19 @@ public class RembulanConsole {
 
 	private final Function requireFunction;
 
+	private final boolean stackTraceForCompileErrors;
+	private final String[] tracebackSuppress;
+	private final boolean tracebackOmitCommonSuffix;
+
 	public RembulanConsole(CommandLineArguments cmdLineArgs, InputStream in, PrintStream out, PrintStream err) {
+
+		boolean fullTraceback = System.getenv(Constants.ENV_FULL_TRACEBACK) != null;
+		tracebackSuppress = fullTraceback ? null : new String[] {
+				"net.sandius.rembulan.core",
+				this.getClass().getName()
+		};
+		tracebackOmitCommonSuffix = !fullTraceback;
+		stackTraceForCompileErrors = fullTraceback;
 
 		this.config = Check.notNull(cmdLineArgs);
 
@@ -119,27 +127,46 @@ public class RembulanConsole {
 		out.println("  -        stop handling options and execute stdin");
 	}
 
-	private CompiledModule parseProgram(String sourceText, String sourceFileName) throws ParseException {
-		String rootClassName = "rembulan_repl_" + (chunkIndex++);
-		return compiler.compile(
-				sourceText,
-				sourceFileName != null ? sourceFileName : "stdin",
-				rootClassName);
+	private CompiledModule parseProgram(String sourceText, String sourceFileName)
+			throws CompileException {
+
+		try {
+			String rootClassName = "rembulan_repl_" + (chunkIndex++);
+			return compiler.compile(
+					sourceText,
+					sourceFileName != null ? sourceFileName : "stdin",
+					rootClassName);
+		}
+		catch (TokenMgrError | ParseException ex) {
+			throw new CompileException(sourceFileName, ex);
+		}
 	}
 
-	private Function compileAndLoadProgram(String sourceText, String sourceFileName) throws ParseException, ReflectiveOperationException {
+	private Function compileAndLoadProgram(String sourceText, String sourceFileName)
+			throws CompileException {
+
 		CompiledModule cm = parseProgram(sourceText, sourceFileName);
 
 		assert (cm != null);
 
 		String mainClassName = loader.install(cm);
-		Class<?> clazz = loader.loadClass(mainClassName);
-		Constructor<?> constructor = clazz.getConstructor(Variable.class);
-		Object instance = constructor.newInstance(new Variable(env));
-		return (Function) instance;
+		final Object instance;
+
+		try {
+			Class<?> clazz = loader.loadClass(mainClassName);
+			Constructor<?> constructor = clazz.getConstructor(Variable.class);
+			instance = constructor.newInstance(new Variable(env));
+			return (Function) instance;
+		}
+		catch (ReflectiveOperationException ex) {
+			// fatal error
+			throw new RuntimeException(ex);
+		}
 	}
 
-	private Object[] callFunction(Function fn, Object... args) throws ExecutionException, InterruptedException {
+	private Object[] callFunction(Function fn, Object... args)
+			throws CallException {
+
 		Call call = Call.init(state, fn, args);
 		Call.EventHandler handler = new Call.DefaultEventHandler();
 		PreemptionContext preemptionContext = new PreemptionContext.Never();
@@ -148,11 +175,19 @@ public class RembulanConsole {
 			call.resume(handler, preemptionContext);
 		}
 
-		return call.result().get();
+		try {
+			return call.result().get();
+		}
+		catch (ExecutionException e) {
+			throw new CallException(e.getCause());
+		}
+		catch (InterruptedException ex) {
+			throw new CallException(ex);
+		}
 	}
 
 	private void executeProgram(String sourceText, String sourceFileName, String[] args)
-			throws ParseException, ReflectiveOperationException, ExecutionException, InterruptedException {
+			throws CompileException, CallException {
 
 		Check.notNull(sourceText);
 		Check.notNull(sourceFileName);
@@ -167,38 +202,74 @@ public class RembulanConsole {
 	}
 
 	private void executeFile(String fileName, String[] args)
-			throws IOException, InterruptedException, ReflectiveOperationException, ExecutionException, ParseException {
+			throws CompileException, CallException  {
+
 		Check.notNull(fileName);
-		executeProgram(Utils.skipLeadingShebang(Utils.readFile(fileName)), fileName, Check.notNull(args));
+		final String source;
+		try {
+			source = Utils.readFile(fileName);
+		}
+		catch (IOException e) {
+			throw new CompileException(fileName, e);
+		}
+
+		executeProgram(Utils.skipLeadingShebang(source), fileName, Check.notNull(args));
 	}
 
-	private void executeStdin(String[] args) throws InterruptedException, ReflectiveOperationException, ExecutionException, ParseException, IOException {
-		executeProgram(Utils.skipLeadingShebang(Utils.readInputStream(in)), "stdin", Check.notNull(args));
+	private void executeStdin(String[] args)
+			throws CompileException, CallException  {
+
+		final String source;
+		try {
+			source = Utils.readInputStream(in);
+		}
+		catch (IOException e) {
+			throw new CompileException(Constants.SOURCE_STDIN, e);
+		}
+
+		executeProgram(Utils.skipLeadingShebang(source), Constants.SOURCE_STDIN, Check.notNull(args));
 	}
 
-	private void requireModule(String moduleName) throws ExecutionException, InterruptedException {
+	private void requireModule(String moduleName) throws CallException {
 		callFunction(requireFunction, Check.notNull(moduleName));
 	}
 
-	private void execute(Function fn) throws ExecutionException, InterruptedException {
+	private void execute(Function fn) throws CallException {
 		Object[] results = callFunction(fn);
 		if (results.length > 0) {
 			callFunction(new DefaultBasicLib.Print(out), results);
 		}
 	}
 
-	public void start() throws Exception {
-		for (CommandLineArguments.Step step : config.steps()) {
-			executeStep(step);
+	public boolean start() throws IOException {
+		try {
+			for (CommandLineArguments.Step step : config.steps()) {
+				executeStep(step);
+			}
+		}
+		catch (CallException ex) {
+			ex.printLuaFormatStackTraceback(err, tracebackOmitCommonSuffix, tracebackSuppress);
+			return false;
+		}
+		catch (CompileException ex) {
+			if (!stackTraceForCompileErrors) {
+				err.println(ex.getLuaStyleErrorMessage());
+			}
+			else {
+				ex.printStackTrace(err);
+			}
+			return false;
 		}
 
 		if (config.interactive()) {
 			startInteractive();
 		}
+
+		return true;
 	}
 
 	private void executeStep(CommandLineArguments.Step s)
-			throws InterruptedException, ReflectiveOperationException, ExecutionException, ParseException, IOException {
+			throws CompileException, CallException  {
 
 		Check.notNull(s);
 
@@ -227,14 +298,14 @@ public class RembulanConsole {
 		}
 	}
 
-	private String prompt1() {
-		String s = Conversions.stringValueOf(env.rawget("_PROMPT"));
-		return s != null ? s : DEFAULT_PROMPT_1;
+	private String getPrompt() {
+		String s = Conversions.stringValueOf(env.rawget(Constants.VAR_NAME_PROMPT));
+		return s != null ? s : Constants.DEFAULT_PROMPT;
 	}
 
-	private String prompt2() {
-		String s = Conversions.stringValueOf(env.rawget("_PROMPT2"));
-		return s != null ? s : DEFAULT_PROMPT_2;
+	private String getPrompt2() {
+		String s = Conversions.stringValueOf(env.rawget(Constants.VAR_NAME_PROMPT2));
+		return s != null ? s : Constants.DEFAULT_PROMPT2;
 	}
 
 	private void startInteractive() throws IOException {
@@ -244,90 +315,63 @@ public class RembulanConsole {
 
 		String line;
 		StringBuilder codeBuffer = new StringBuilder();
-		boolean multiline = false;
-		reader.setPrompt(prompt1());
+		reader.setPrompt(getPrompt());
 
 		while ((line = reader.readLine()) != null) {
 			out.print("");
 
 			Function fn = null;
 
-			try {
-				if (!multiline) {
-					try {
-						fn = compileAndLoadProgram("return " + line, "stdin");
-					}
-					catch (TokenMgrError | ParseException ex) {
-						// ignore
-					}
+			boolean firstLine = codeBuffer.length() != 0;
+			boolean emptyInput = line.trim().isEmpty();
+
+			if (firstLine && !emptyInput) {
+				try {
+					fn = compileAndLoadProgram("return " + line, Constants.SOURCE_STDIN);
 				}
-
-				if (fn == null) {
-					codeBuffer.append(line).append('\n');
-					try {
-						fn = compileAndLoadProgram(codeBuffer.toString(), "stdin");
-					}
-					catch (TokenMgrError ex) {
-						String msg = ex.getMessage();
-						// TODO: is there really no better way?
-						if (msg.contains("Encountered: <EOF>")) {
-							// partial input
-							reader.setPrompt(prompt2());
-							multiline = true;
-						}
-						else {
-							// faulty input
-							out.println(msg);
-
-							// reset back to initial state
-							codeBuffer.setLength(0);
-							multiline = false;
-							reader.setPrompt(prompt1());
-						}
-					}
-					catch (ParseException ex) {
-						if (ex.currentToken != null
-								&& ex.currentToken.next != null
-								&& ex.currentToken.next.kind == Parser.EOF) {
-
-							// partial input
-							reader.setPrompt(prompt2());
-							multiline = true;
-						}
-						else {
-							// faulty input
-							out.println(ex.getMessage());
-
-							// reset back to initial state
-							codeBuffer.setLength(0);
-							multiline = false;
-							reader.setPrompt(prompt1());
-						}
-					}
+				catch (CompileException ex) {
+					// ignore
 				}
 			}
-			catch (ReflectiveOperationException ex) {
-				// this is a fatal error
-				throw new RuntimeException(ex);
+
+			if (fn == null) {
+				codeBuffer.append(line).append('\n');
+				try {
+					fn = compileAndLoadProgram(codeBuffer.toString(), Constants.SOURCE_STDIN);
+				}
+				catch (CompileException ex) {
+					if (ex.isPartialInputError()) {
+						// partial input
+						reader.setPrompt(getPrompt2());
+					}
+					else {
+						// faulty input
+						if (!stackTraceForCompileErrors) {
+							err.println(ex.getLuaStyleErrorMessage());
+						}
+						else {
+							ex.printStackTrace(err);
+						}
+
+						// reset back to initial state
+						codeBuffer.setLength(0);
+						reader.setPrompt(getPrompt());
+					}
+				}
 			}
 
 			if (fn != null) {
 				// reset back to initial state
 				codeBuffer.setLength(0);
-				multiline = false;
 
 				try {
 					execute(fn);
 				}
-				catch (ExecutionException ex) {
-					// TODO: print a Lua stacktrace
-					ex.printStackTrace(out);
-				}
-				catch (InterruptedException ex) {
-					err.println("Interrupted");
+				catch (CallException ex) {
+					ex.printLuaFormatStackTraceback(err, tracebackOmitCommonSuffix, tracebackSuppress);
 				}
 
-				reader.setPrompt(prompt1());
+				reader.setPrompt(getPrompt());
 			}
 		}
 	}
@@ -350,16 +394,17 @@ public class RembulanConsole {
 
 		RembulanConsole console = new RembulanConsole(cmdLineArgs, System.in, System.out, System.err);
 
+		int rc;
 		try {
-			console.start();
+			rc = console.start() ? 1 : 0;
 		}
 		catch (Exception ex) {
-			// TODO: print a Lua stacktrace
+			System.err.println("Encountered fatal error (aborting):");
 			ex.printStackTrace(System.err);
-			System.exit(1);
+			rc = 1;
 		}
 
-		System.exit(0);
+		System.exit(rc);
 	}
 
 }

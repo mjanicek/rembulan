@@ -172,7 +172,7 @@ class CommandLineArguments {
 				if (suffix.isEmpty()) {
 					// statement is in the next argument
 					if (i + 1 < args.length) {
-						step = Step.executeString(args[++i], "(command line)");
+						step = Step.executeString(args[++i], Constants.SOURCE_COMMAND_LINE);
 					}
 					else {
 						throw new IllegalArgumentException("'-e' needs argument");
@@ -180,7 +180,7 @@ class CommandLineArguments {
 				}
 				else {
 					// suffix is the statement
-					step = Step.executeString(suffix, "(command line)");
+					step = Step.executeString(suffix, Constants.SOURCE_COMMAND_LINE);
 				}
 
 				steps.add(step);
@@ -308,11 +308,16 @@ class CommandLineArguments {
 		}
 
 		// check LUA_INIT_5_3 or LUA_INIT
-		if (!explicitIgnoreEnvVars) {
-			String origin = "LUA_INIT_5_3";
-			String init = System.getenv(origin);
-			if (init == null) {
-				origin = "LUA_INIT";
+		String[] initEnvVars = explicitIgnoreEnvVars
+				? new String[0]
+				: new String[] { Constants.ENV_INIT_FIRST, Constants.ENV_INIT_SECOND };
+
+		{
+			String origin = null;
+			String init = null;
+
+			for (String envVar : initEnvVars) {
+				origin = envVar;
 				init = System.getenv(origin);
 			}
 
