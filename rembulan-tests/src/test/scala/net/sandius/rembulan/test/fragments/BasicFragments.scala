@@ -68,7 +68,7 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
     """return '\\',"\\",'\\',"\\"
     """
   }
-  StringParsing3 in EmptyContext succeedsWith ("\\", "\\")
+  StringParsing3 in EmptyContext succeedsWith ("\\", "\\", "\\", "\\")
 
   val LocalEnvResolution = fragment ("LocalEnvResolution") {
     """local _ENV
