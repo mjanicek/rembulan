@@ -655,6 +655,18 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   BlockLocals in EmptyContext succeedsWith ()
 
+  val BlockLocalShadowing = fragment ("BlockLocalShadowing") {
+    """local a, b = 1, 2
+      |local x, y
+      |do
+      |  local a, b = "x", "y"
+      |  x, y = a, b
+      |end
+      |return x, y
+    """
+  }
+  BlockLocalShadowing in EmptyContext succeedsWith ("x", "y")
+
   val Tailcalls = fragment ("Tailcalls") {
     """function f(x)
       |  print(x)

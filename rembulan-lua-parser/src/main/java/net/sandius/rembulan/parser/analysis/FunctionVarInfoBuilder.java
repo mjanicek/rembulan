@@ -24,13 +24,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
-import java.util.Stack;
 
 class FunctionVarInfoBuilder {
 
 	private final FunctionVarInfoBuilder parent;
 
-	private final Stack<BlockScope> blockScopes;
+	// Used as a stack: not using Stack so as to iterate from top to bottom (see JDK bug [JDK-4475301])
+	private final Deque<BlockScope> blockScopes;
 	private final List<Variable> params;
 	private final List<Variable> locals;
 	private final List<Variable.Ref> upvals;
@@ -38,7 +38,7 @@ class FunctionVarInfoBuilder {
 
 	public FunctionVarInfoBuilder(FunctionVarInfoBuilder parent) {
 		this.parent = parent;
-		this.blockScopes = new Stack<>();
+		this.blockScopes = new ArrayDeque<>();
 		this.params = new ArrayList<>();
 		this.locals = new ArrayList<>();
 		this.upvals = new ArrayList<>();
