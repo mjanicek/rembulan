@@ -77,6 +77,18 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   LocalEnvResolution in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to index a nil value")
 
+  val LocalReassignResolve = fragment ("LocalReassignResolve") {
+    """local f = function (i) return "f1" end
+      |local a = f()
+      |function f(b) return "f2" end
+      |local b = f()
+      |local f = function (i) return "f3" end
+      |local c = f()
+      |return a, b, c
+    """
+  }
+  LocalReassignResolve in EmptyContext succeedsWith ("f1", "f2", "f3")
+
   val JustAdd = fragment ("JustAdd") {
     """return x + 1
     """

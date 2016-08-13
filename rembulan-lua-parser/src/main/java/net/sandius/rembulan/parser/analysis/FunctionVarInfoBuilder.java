@@ -19,8 +19,10 @@ package net.sandius.rembulan.parser.analysis;
 import net.sandius.rembulan.parser.ast.Name;
 import net.sandius.rembulan.util.Check;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
 import java.util.Stack;
 
@@ -137,10 +139,12 @@ class FunctionVarInfoBuilder {
 	}
 
 	private static class BlockScope {
-		public final Stack<Local> locals;
+		// NOTE: we're using a Deque rather than Stack in order to get the correct
+		// iteration order (top to bottom) (see JDK bug [JDK-4475301])
+		public final Deque<Local> locals;
 
 		public BlockScope() {
-			this.locals = new Stack<>();
+			this.locals = new ArrayDeque<>();
 		}
 
 		public Variable addLocal(Name n) {
