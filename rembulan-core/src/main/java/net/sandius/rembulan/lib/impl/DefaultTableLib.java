@@ -243,7 +243,7 @@ public class DefaultTableLib extends TableLib {
 			final int state;
 			final int j;
 
-			if (args.hasNext()) {
+			if (args.hasNext() && args.peek() != null) {
 				j = args.nextInt();
 				state = STATE_BEFORE_LOOP;
 			}
