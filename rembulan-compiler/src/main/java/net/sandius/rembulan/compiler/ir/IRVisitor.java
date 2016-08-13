@@ -177,4 +177,8 @@ public abstract class IRVisitor {
 		if (v != null) v.visit(node);
 	}
 
+	public void visit(Line node) {
+		if (v != null) v.visit(node);
+	}
+
 }

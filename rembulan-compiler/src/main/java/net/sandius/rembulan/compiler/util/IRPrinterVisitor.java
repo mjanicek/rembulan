@@ -215,4 +215,9 @@ public class IRPrinterVisitor extends CodeVisitor {
 		ps.println("\tcpu " + node.cost());
 	}
 
+	@Override
+	public void visit(Line node) {
+		ps.println("\tline " + node.lineNumber());
+	}
+
 }

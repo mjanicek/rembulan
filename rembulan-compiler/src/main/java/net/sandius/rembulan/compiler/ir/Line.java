@@ -14,29 +14,23 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.parser.ast;
+package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+public class Line extends BodyNode {
 
-public abstract class SyntaxElement {
+	private final int lineNumber;
 
-	private final Attributes attr;
-
-	protected SyntaxElement(Attributes attr) {
-		this.attr = Check.notNull(attr);
+	public Line(int lineNumber) {
+		this.lineNumber = lineNumber;
 	}
 
-	public SourceInfo sourceInfo() {
-		return attr.get(SourceInfo.class);
+	public int lineNumber() {
+		return lineNumber;
 	}
 
-	public int line() {
-		SourceInfo si = sourceInfo();
-		return si != null ? si.line() : 0;
-	}
-
-	public Attributes attributes() {
-		return attr;
+	@Override
+	public void accept(IRVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

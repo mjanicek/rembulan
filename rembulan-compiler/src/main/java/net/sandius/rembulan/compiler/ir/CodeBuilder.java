@@ -38,6 +38,7 @@ public class CodeBuilder {
 	private int labelIdx;
 
 	private Block currentBlock;
+	private int currentLine;
 
 	public CodeBuilder() {
 		this.uses = new HashMap<>();
@@ -49,6 +50,7 @@ public class CodeBuilder {
 		labelIdx = 0;
 
 		this.currentBlock = null;
+		this.currentLine = 0;
 
 		add(newLabel());
 	}
@@ -97,6 +99,9 @@ public class CodeBuilder {
 		assert (currentBlock == null);
 
 		currentBlock = new Block(label);
+		if (currentLine > 0) {
+			addLine(currentLine);
+		}
 	}
 
 	public void add(BodyNode node) {
@@ -117,12 +122,24 @@ public class CodeBuilder {
 		}
 
 		closeCurrentBlock(node);
+//		currentLine = 0;
 	}
 
 	public void addBranch(Branch.Condition cond, Label dest) {
 		Label next = newLabel();
 		add(new Branch(cond, dest, next));
 		add(next);
+	}
+
+	private void addLine(int line) {
+		add(new Line(line));
+	}
+
+	public void atLine(int line) {
+		if (line > 0 && line != currentLine) {
+			currentLine = line;
+			addLine(line);
+		}
 	}
 
 	private int uses(Label l) {

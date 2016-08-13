@@ -166,6 +166,8 @@ class IRTranslatorTransformer extends Transformer {
 	public LValueExpr transform(VarExpr e) {
 		ResolvedVariable rv = TranslationUtils.resolved(e);
 
+		insns.atLine(e.line());
+
 		if (rv.isUpvalue()) {
 			Variable.Ref ref = rv.variable().ref();
 			// upvalue
@@ -208,6 +210,8 @@ class IRTranslatorTransformer extends Transformer {
 
 		assigning = as;
 
+		insns.atLine(e.line());
+
 		if (assigning) {
 			Val value = popVal();
 			insns.add(new TabSet(obj, key, value));
@@ -219,6 +223,12 @@ class IRTranslatorTransformer extends Transformer {
 		}
 
 		return e;
+	}
+
+	@Override
+	public Expr transform(LiteralExpr e) {
+		insns.atLine(e.line());
+		return super.transform(e);
 	}
 
 	@Override
@@ -269,6 +279,8 @@ class IRTranslatorTransformer extends Transformer {
 		left.accept(this);
 		Val l = popVal();
 
+		// TODO: line
+
 		insns.addBranch(new Branch.Condition.Bool(l, false), l_false);
 
 		right.accept(this);
@@ -290,6 +302,8 @@ class IRTranslatorTransformer extends Transformer {
 
 		left.accept(this);
 		Val l = popVal();
+
+		// TODO: line
 
 		insns.addBranch(new Branch.Condition.Bool(l, true), l_true);
 
@@ -326,6 +340,8 @@ class IRTranslatorTransformer extends Transformer {
 		Val dest = provider.newVal();
 		vals.push(dest);
 
+		// TODO: line
+
 		insns.add(new BinOp(bop, dest, swap ? r : l, swap ? l : r));
 	}
 
@@ -347,12 +363,15 @@ class IRTranslatorTransformer extends Transformer {
 		Val dest = provider.newVal();
 		vals.push(dest);
 
+		insns.atLine(e.line());
+
 		insns.add(new UnOp(TranslationUtils.uop(e.op()), dest, arg));
 		return e;
 	}
 
 	@Override
 	public Expr transform(VarargsExpr e) {
+		insns.atLine(e.line());
 		MultiVal mv = provider.newMultiVal();
 		insns.add(new Vararg(mv));
 		multis.push(mv);
@@ -428,6 +447,7 @@ class IRTranslatorTransformer extends Transformer {
 	@Override
 	public Expr transform(CallExpr.FunctionCallExpr e) {
 		Call c = call(e);
+		insns.atLine(e.line());
 		insns.add(c);
 		multis.push(c.dest());
 		return e;
@@ -436,6 +456,7 @@ class IRTranslatorTransformer extends Transformer {
 	@Override
 	public Expr transform(CallExpr.MethodCallExpr e) {
 		Call c = call(e);
+		insns.atLine(e.line());
 		insns.add(c);
 		multis.push(c.dest());
 		return e;
@@ -476,6 +497,7 @@ class IRTranslatorTransformer extends Transformer {
 			}
 		}
 
+		insns.atLine(e.line());
 		insns.add(new Closure(dest, id, Collections.unmodifiableList(args)));
 
 		vals.push(dest);
@@ -499,6 +521,7 @@ class IRTranslatorTransformer extends Transformer {
 		}
 
 		vals.push(dest);
+		insns.atLine(e.line());
 		insns.add(new TabNew(dest, array, hash));
 
 		// According to the Lua 5.3 Reference Manual, the order of assignment is
@@ -609,10 +632,12 @@ class IRTranslatorTransformer extends Transformer {
 				throw new IllegalStateException("Illegal call expression: " + ce);
 			}
 
+			insns.atLine(node.line());
 			insns.add(new TCall(c.fn(), c.args()));
 		}
 		else {
 			VList args = vlist(node.exprs());
+			insns.atLine(node.line());
 			insns.add(new Ret(args));
 		}
 
@@ -637,6 +662,7 @@ class IRTranslatorTransformer extends Transformer {
 			}
 			else {
 				src = provider.newVal();
+				// TODO: line here?
 				insns.add(new LoadConst.Nil(src));
 			}
 
@@ -698,6 +724,8 @@ class IRTranslatorTransformer extends Transformer {
 
 	private void condBlock(ConditionalBlock cb, Label l_else, Label l_done) {
 		Check.notNull(l_done);
+
+		insns.atLine(cb.condition().line());
 
 		cb.condition().accept(this);
 		Val c = popVal();
@@ -766,6 +794,9 @@ class IRTranslatorTransformer extends Transformer {
 		Label l_top = insns.newLabel();
 		Label l_done = insns.newLabel();
 
+		insns.atLine(node.line());
+		// TODO: any more lines to insert?
+
 		// Note: we coerce parameters to numbers in the same order as in PUC Lua to get
 		// the same error reporting.
 
@@ -823,6 +854,9 @@ class IRTranslatorTransformer extends Transformer {
 	public BodyStatement transform(GenericForStatement node) {
 		Label l_top = insns.newLabel();
 		Label l_done = insns.newLabel();
+
+		insns.atLine(node.line());
+		// TODO: any more lines to insert?
 
 		VarMapping vm = TranslationUtils.varMapping(node);
 
@@ -924,6 +958,9 @@ class IRTranslatorTransformer extends Transformer {
 		Label l_test = insns.newLabel();
 		Label l_done = insns.newLabel();
 
+		insns.atLine(node.line());
+		// TODO: any more lines to insert?
+
 		insns.add(l_test);
 		node.condition().accept(this);
 		Val c = popVal();
@@ -944,6 +981,9 @@ class IRTranslatorTransformer extends Transformer {
 	public BodyStatement transform(RepeatUntilStatement node) {
 		Label l_body = insns.newLabel();
 		Label l_done = insns.newLabel();
+
+		insns.atLine(node.line());
+		// TODO: any more lines to insert?
 
 		insns.add(l_body);
 		breakLabels.add(l_done);
@@ -966,6 +1006,7 @@ class IRTranslatorTransformer extends Transformer {
 		ResolvedLabel rl = TranslationUtils.resolvedLabel(node);
 
 		insns.add(userLabel(rl));
+		insns.atLine(node.line());
 
 		return node;
 	}
@@ -974,6 +1015,7 @@ class IRTranslatorTransformer extends Transformer {
 	public BodyStatement transform(GotoStatement node) {
 		ResolvedLabel rl = TranslationUtils.resolvedLabel(node);
 
+		insns.atLine(node.line());
 		insns.add(new Jmp(userLabel(rl)));
 
 		return node;
@@ -981,6 +1023,8 @@ class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(BreakStatement node) {
+		insns.atLine(node.line());
+
 		if (breakLabels.isEmpty()) {
 			throw new IllegalStateException("<break> at " + AttributeUtils.sourceInfoString(node) + " not inside a loop");
 		}
@@ -993,6 +1037,8 @@ class IRTranslatorTransformer extends Transformer {
 
 	@Override
 	public BodyStatement transform(CallStatement node) {
+		insns.atLine(node.line());
+
 		node.callExpr().accept(this);
 
 		// discard results
