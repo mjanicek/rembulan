@@ -217,7 +217,7 @@ public class IRPrinterVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(Line node) {
-		ps.println("\tline " + node.lineNumber());
+		ps.println("\t; line " + node.lineNumber());
 	}
 
 }
