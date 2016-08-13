@@ -23,11 +23,12 @@ import net.sandius.rembulan.compiler.analysis.DependencyAnalyser;
 import net.sandius.rembulan.compiler.analysis.DependencyInfo;
 import net.sandius.rembulan.util.Check;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
 
 public abstract class ModuleFilter {
 
@@ -39,7 +40,7 @@ public abstract class ModuleFilter {
 		Check.notNull(m);
 
 		Set<FunctionId> visited = new HashSet<>();
-		Stack<IRFunc> open = new Stack<>();
+		Deque<IRFunc> open = new ArrayDeque<>();
 
 		open.add(m.main());
 		while (!open.isEmpty()) {

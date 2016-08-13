@@ -19,25 +19,17 @@ package net.sandius.rembulan.parser.analysis;
 import net.sandius.rembulan.parser.ast.*;
 import net.sandius.rembulan.util.Check;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 class LabelResolutionTransformer extends Transformer {
 
-	private final Stack<Scope> scopes;
+	private final Deque<Scope> scopes;
 
 	private final Map<LabelStatement, ResolvedLabel> defs;
 	private final Map<GotoStatement, ResolvedLabel> uses;
 
 	public LabelResolutionTransformer() {
-		this.scopes = new Stack<>();
+		this.scopes = new ArrayDeque<>();
 		this.defs = new HashMap<>();
 		this.uses = new HashMap<>();
 	}

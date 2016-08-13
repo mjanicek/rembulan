@@ -21,16 +21,17 @@ import net.sandius.rembulan.parser.ast.Operator;
 import net.sandius.rembulan.parser.ast.SourceInfo;
 import net.sandius.rembulan.util.Check;
 
-import java.util.Stack;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 class ExprBuilder {
 
-	private final Stack<Expr> operandStack;
-	private final Stack<SourceElement<Operator>> operatorStack;
+	private final Deque<Expr> operandStack;
+	private final Deque<SourceElement<Operator>> operatorStack;
 
 	ExprBuilder() {
-		this.operandStack = new Stack<>();
-		this.operatorStack = new Stack<>();
+		this.operandStack = new ArrayDeque<>();
+		this.operatorStack = new ArrayDeque<>();
 	}
 
 	private static boolean isRightAssociative(Operator op) {

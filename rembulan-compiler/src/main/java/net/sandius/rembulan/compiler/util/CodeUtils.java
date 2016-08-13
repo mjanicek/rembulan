@@ -149,7 +149,7 @@ public abstract class CodeUtils {
 		}
 
 		Set<Label> visited = new HashSet<>();
-		Stack<Label> open = new Stack<>();
+		Deque<Label> open = new ArrayDeque<>();
 
 		open.add(code.entryLabel());
 

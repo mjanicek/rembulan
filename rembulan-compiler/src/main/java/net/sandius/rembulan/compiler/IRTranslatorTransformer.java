@@ -26,13 +26,14 @@ import net.sandius.rembulan.parser.ast.*;
 import net.sandius.rembulan.parser.ast.util.AttributeUtils;
 import net.sandius.rembulan.util.Check;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 class IRTranslatorTransformer extends Transformer {
 
@@ -43,10 +44,10 @@ class IRTranslatorTransformer extends Transformer {
 	private final CodeBuilder insns;
 
 	private final RegProvider provider;
-	private final Stack<AbstractVal> vals;
-	private final Stack<MultiVal> multis;
+	private final Deque<AbstractVal> vals;
+	private final Deque<MultiVal> multis;
 
-	private final Stack<Label> breakLabels;
+	private final Deque<Label> breakLabels;
 	private final Map<ResolvedLabel, Label> userLabels;
 
 	private boolean assigning;
@@ -69,12 +70,12 @@ class IRTranslatorTransformer extends Transformer {
 
 		this.insns = new CodeBuilder();
 
-		this.vals = new Stack<>();
-		this.multis = new Stack<>();
+		this.vals = new ArrayDeque<>();
+		this.multis = new ArrayDeque<>();
 
 		this.assigning = false;
 //		this.onStack = false;
-		this.breakLabels = new Stack<>();
+		this.breakLabels = new ArrayDeque<>();
 		this.userLabels = new HashMap<>();
 
 		this.vars = new HashMap<>();
@@ -100,11 +101,11 @@ class IRTranslatorTransformer extends Transformer {
 	}
 
 	private boolean onStack() {
-		return !multis.empty();
+		return !multis.isEmpty();
 	}
 
 	private Val popVal() {
-		if (!multis.empty()) {
+		if (!multis.isEmpty()) {
 			Val v = provider.newVal();
 			MultiVal mv = multis.pop();
 			insns.add(new MultiGet(v, mv, 0));

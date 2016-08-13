@@ -20,15 +20,7 @@ import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.util.Check;
 
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class SlotAllocator {
 
@@ -151,7 +143,7 @@ public class SlotAllocator {
 		LivenessInfo liveness = LivenessAnalyser.computeLiveness(fn);
 
 		Set<Label> visited = new HashSet<>();
-		Stack<Label> open = new Stack<>();
+		Deque<Label> open = new ArrayDeque<>();
 		open.push(fn.code().entryLabel());
 
 		AllocatorVisitor visitor = new AllocatorVisitor(liveness);

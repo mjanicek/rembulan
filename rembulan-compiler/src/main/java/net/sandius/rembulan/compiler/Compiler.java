@@ -42,12 +42,13 @@ import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 public class Compiler {
 
@@ -146,7 +147,7 @@ public class Compiler {
 		assert (main != null);
 
 		Set<ProcessedFunc> result = new HashSet<>();
-		Stack<ProcessedFunc> open = new Stack<>();
+		Deque<ProcessedFunc> open = new ArrayDeque<>();
 
 		// only add functions reachable from main
 		open.add(main);

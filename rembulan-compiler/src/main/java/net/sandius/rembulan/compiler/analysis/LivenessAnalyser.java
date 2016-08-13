@@ -21,12 +21,13 @@ import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.util.CodeUtils;
 import net.sandius.rembulan.util.Check;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 public class LivenessAnalyser {
 
@@ -73,7 +74,7 @@ public class LivenessAnalyser {
 			}
 		}
 
-		Stack<Label> open = new Stack<>();
+		Deque<Label> open = new ArrayDeque<>();
 
 		// make sure we'll visit all labels at least once
 		for (Label l : CodeUtils.labelsBreadthFirst(code)) {

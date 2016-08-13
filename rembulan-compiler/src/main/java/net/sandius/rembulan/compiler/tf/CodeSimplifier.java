@@ -24,13 +24,14 @@ import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.util.Check;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 public abstract class CodeSimplifier {
 
@@ -52,7 +53,7 @@ public abstract class CodeSimplifier {
 
 	private static Map<Label, Integer> uses(Code code) {
 		Map<Label, Integer> uses = new HashMap<>();
-		Stack<Label> open = new Stack<>();
+		Deque<Label> open = new ArrayDeque<>();
 		open.add(code.entryLabel());
 
 		while (!open.isEmpty()) {
