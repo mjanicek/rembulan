@@ -61,13 +61,13 @@ public class DefaultTable extends Table {
 
 	@Override
 	public Object rawget(Object key) {
-		key = Conversions.normalise(key);
+		key = Conversions.normaliseKey(key);
 		return key != null ? values.get(key) : null;
 	}
 
 	@Override
 	public void rawset(Object key, Object value) {
-		key = Conversions.normalise(key);
+		key = Conversions.normaliseKey(key);
 
 		if (key == null) {
 			throw new IllegalArgumentException("table index is nil");

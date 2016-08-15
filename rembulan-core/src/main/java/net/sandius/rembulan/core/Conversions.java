@@ -144,16 +144,35 @@ public abstract class Conversions {
 	}
 
 	/**
-	 * If {@code o} is a number, returns {@code n} in its canonical representation
-	 * (see {@link #toCanonicalNumber(Number)}). Otherwise, returns {@code o}.
+	 * Normalises the number {@code n} so that it may be used as a key in a Lua
+	 * table.
+	 *
+	 * <p>If {@code n} has an integer value <i>i</i>, returns the canonical representation
+	 * of <i>i</i>; otherwise, returns the canonical representation of {@code n}.
+	 *
+	 * @param n  number to normalise, must not be {@code null}
+	 * @return  an canonical integer if {@code n} has an integer value,
+	 *          the canonical representation of {@code n} otherwise
+	 *
+	 * @throws NullPointerException if {@code n} is {@code null}
+	 */
+	public static Number normaliseKey(Number n) {
+		Long i = integerValueOf(n);
+		return i != null ? i : toCanonicalNumber(n);
+	}
+
+	/**
+	 * Normalises the argument {@code o} so that it may be used safely as a key
+	 * in a Lua table.
+	 *
+	 * <p>If {@code o} is a number, returns the number normalised (see {@link #normaliseKey(Number)}.
+	 * Otherwise, returns {@code o}.
 	 *
 	 * @param o  object to normalise, may be {@code null}
-	 * @return an instance of {@code Long} if {@code o} is an integer,
-	 *         an instance of {@code Double} if {@code o} is a float,
-	 *         or {@code o} if {@code o} is not a number
+	 * @return  normalised number if {@code o} is a number, {@code o} otherwise
 	 */
-	public static Object normalise(Object o) {
-		return o instanceof Number ? toCanonicalNumber((Number) o) : o;
+	public static Object normaliseKey(Object o) {
+		return o instanceof Number ? normaliseKey((Number) o) : o;
 	}
 
 	/**

@@ -572,6 +572,15 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   NilTableLength in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to get length of a nil value")
 
+  val TableFloatKeys = fragment ("TableFloatKeys") {
+    """local x = -1
+      |local mz = 0/x   -- minus zero
+      |local t = {[0] = 10, 20, 30, 40, 50}
+      |return t[mz], t[0], t[mz] == t[0], t[-0], t[0], t[-0] == t[0]
+    """
+  }
+  TableFloatKeys in EmptyContext succeedsWith (10, 10, true, 10, 10, true)
+
   val ConcatStrings = fragment ("ConcatStrings") {
     """return "hello".." ".."world"
     """
