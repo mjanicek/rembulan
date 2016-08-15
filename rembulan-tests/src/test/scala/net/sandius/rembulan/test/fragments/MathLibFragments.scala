@@ -26,6 +26,18 @@ object MathLibFragments extends FragmentBundle with FragmentExpectations with On
       program ("return math.floor(3.0), math.floor(3.1)") succeedsWith (3, 3)
     }
 
+    about ("modf") {
+      program ("return math.modf(3.5)") succeedsWith (3, 0.5)
+      program ("return math.modf(-2.5)") succeedsWith (-2, -0.5)
+      program ("return math.modf(-3e23)") succeedsWith (-3e23, 0.0)
+      program ("return math.modf(3e35)") succeedsWith (3e35, 0.0)
+      program ("return math.modf(-1/0)") succeedsWith (Double.NegativeInfinity, 0.0)
+      program ("return math.modf(1/0)") succeedsWith (Double.PositiveInfinity, 0.0)
+      program ("return math.modf(0/0)") succeedsWith (NaN, NaN)
+      program ("return math.modf(3)") succeedsWith (3, 0.0)
+      program ("return math.modf(math.mininteger)") succeedsWith (Long.MinValue, 0.0)
+    }
+
     about ("random") {
       program ("math.random(0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")
       program ("math.random(1, 0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")

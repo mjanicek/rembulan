@@ -519,8 +519,28 @@ public class DefaultMathLib extends MathLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Number x = args.nextNumber();
 
-			long intPart = x.longValue();
-			double fltPart = x.doubleValue() - intPart;
+			final Number intPart;
+			final Number fltPart;
+
+			double d = x.doubleValue();
+
+			if (d == d) {
+				double dd = d < 0 ? Math.ceil(d) : Math.floor(d);
+				long l = (long) dd;
+				if (dd == (double) l) {
+					intPart = l;
+					fltPart = d - l;
+				}
+				else {
+					intPart = x;
+					fltPart = 0.0;
+				}
+			}
+			else {
+				// NaN
+				intPart = x;
+				fltPart = x;
+			}
 
 			context.getObjectSink().setTo(intPart, fltPart);
 		}
