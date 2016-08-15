@@ -41,13 +41,12 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
         pfx + "return " + expr
       }
 
-      def expectedError(tpe: String, errorOrigin: String) = {
-        val sfx = if (errorOrigin != null && !errorOrigin.isEmpty) " (" + errorOrigin + ")" else ""
-        "attempt to " + kind + " a " + tpe + " value" + sfx
+      def expectedError(tpe: String) = {
+        "attempt to " + kind + " a " + tpe + " value"
       }
 
-      def apply(invalidArg: String, tpe: String, errorOrigin: String = null, codePrefix: String = null): Unit = {
-        val err = expectedError(tpe, errorOrigin)
+      def apply(invalidArg: String, tpe: String, codePrefix: String = null): Unit = {
+        val err = expectedError(tpe)
         for (e <- exps(invalidArg)) {
           program (testprogram (codePrefix, e)) failsWith err
         }
@@ -73,10 +72,10 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       test("\"x\"", "string")
       test("{}", "table")
 
-      test("x", "nil", "global 'x'")
-      test("x", "nil", "local 'x'", "local x")
-      test("x", "table", "global 'x'", "x = {}")
-      test("x.y", "nil", "field 'y'", "x = {}")
+      test("x", "nil")
+      test("x", "nil", "local x")
+      test("x", "table", "x = {}")
+      test("x.y", "nil", "x = {}")
     }
 
     def unary(op: String, kind: String): Unit = {
@@ -85,368 +84,374 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       test("nil", "nil")
       test("true", "boolean")
       test("false", "boolean")
-      test("\"\"", "string", "constant ''")
-      test("\"x\"", "string", "constant 'x'")
+      test("\"\"", "string")
+      test("\"x\"", "string")
       test("{}", "table")
 
-      test("x", "nil", "global 'x'")
-      test("x", "nil", "local 'x'", "local x")
-      test("x", "table", "global 'x'", "x = {}")
-      test("x.y", "nil", "field 'y'", "x = {}")
+      test("x", "nil")
+      test("x", "nil", "local x")
+      test("x", "table", "x = {}")
+      test("x.y", "nil", "x = {}")
     }
 
   }
 
-  about ("add") {
+  in (EmptyContext) {
 
-    program ("return 1 + 2") succeedsWith 3
-    program ("return 1 + 2.0") succeedsWith 3.0
-    program ("return 1.0 + 2.0") succeedsWith 3.0
-    program ("return -0.0 + 0") succeedsWith 0.0
-    program ("return -0.0 + 0.0") succeedsWith 0.0
-    program ("return 1 + \"2\"") succeedsWith 3.0
-    program ("return \"1\" + 0") succeedsWith 1.0
+    about ("add") {
 
-    program ("return (1 / 0) + 1") succeedsWith Double.PositiveInfinity
-    program ("return (-1 / 0) + 1") succeedsWith Double.NegativeInfinity
-    program ("return (1 / 0) + (-1 / 0)") succeedsWith NaN
-    program ("return (-1 / 0) + (-1 / 0)") succeedsWith Double.NegativeInfinity
+      program ("return 1 + 2") succeedsWith 3
+      program ("return 1 + 2.0") succeedsWith 3.0
+      program ("return 1.0 + 2.0") succeedsWith 3.0
+      program ("return -0.0 + 0") succeedsWith 0.0
+      program ("return -0.0 + 0.0") succeedsWith 0.0
+      program ("return 1 + \"2\"") succeedsWith 3.0
+      program ("return \"1\" + 0") succeedsWith 1.0
 
-    opArgErrors.binary("+", Arithmetic)
+      program ("return (1 / 0) + 1") succeedsWith Double.PositiveInfinity
+      program ("return (-1 / 0) + 1") succeedsWith Double.NegativeInfinity
+      program ("return (1 / 0) + (-1 / 0)") succeedsWith NaN
+      program ("return (-1 / 0) + (-1 / 0)") succeedsWith Double.NegativeInfinity
 
-  }
+      opArgErrors.binary("+", Arithmetic)
 
-  about ("sub") {
+    }
 
-    program ("return 1 - 2") succeedsWith -1
-    program ("return 1 - 2.0") succeedsWith -1.0
-    program ("return 1.0 - 2.0") succeedsWith -1.0
-    program ("return -0.0 - 0") succeedsWith -0.0
-    program ("return -0.0 - 0.0") succeedsWith -0.0
-    program ("return 1 - \"2\"") succeedsWith -1.0
-    program ("return \"1\" - 0") succeedsWith 1.0
+    about ("sub") {
 
-    program ("return (1 / 0) - 1") succeedsWith Double.PositiveInfinity
-    program ("return (-1 / 0) - 1") succeedsWith Double.NegativeInfinity
-    program ("return (1 / 0) - (-1 / 0)") succeedsWith Double.PositiveInfinity
-    program ("return (-1 / 0) - (-1 / 0)") succeedsWith NaN
+      program ("return 1 - 2") succeedsWith -1
+      program ("return 1 - 2.0") succeedsWith -1.0
+      program ("return 1.0 - 2.0") succeedsWith -1.0
+      program ("return -0.0 - 0") succeedsWith -0.0
+      program ("return -0.0 - 0.0") succeedsWith -0.0
+      program ("return 1 - \"2\"") succeedsWith -1.0
+      program ("return \"1\" - 0") succeedsWith 1.0
 
-    opArgErrors.binary("-", Arithmetic)
+      program ("return (1 / 0) - 1") succeedsWith Double.PositiveInfinity
+      program ("return (-1 / 0) - 1") succeedsWith Double.NegativeInfinity
+      program ("return (1 / 0) - (-1 / 0)") succeedsWith Double.PositiveInfinity
+      program ("return (-1 / 0) - (-1 / 0)") succeedsWith NaN
 
-  }
+      opArgErrors.binary("-", Arithmetic)
 
-  about ("idiv") {
+    }
 
-    program ("return 3 // 2") succeedsWith 1
-    program ("return 3.0 // 2") succeedsWith 1.0
-    program ("return 3 // -2") succeedsWith -2
-    program ("return 3 // -2.0") succeedsWith -2.0
-    program ("return \"3\" // 2") succeedsWith 1.0
-    program ("return \"3\" // \"-2\"") succeedsWith -2.0
+    about ("idiv") {
 
-    program ("return 3.0 // 0") succeedsWith Double.PositiveInfinity
-    program ("return 3.0 // -0") succeedsWith Double.PositiveInfinity
-    program ("return 3.0 // -0.0") succeedsWith Double.NegativeInfinity
+      program ("return 3 // 2") succeedsWith 1
+      program ("return 3.0 // 2") succeedsWith 1.0
+      program ("return 3 // -2") succeedsWith -2
+      program ("return 3 // -2.0") succeedsWith -2.0
+      program ("return \"3\" // 2") succeedsWith 1.0
+      program ("return \"3\" // \"-2\"") succeedsWith -2.0
 
-    program ("return 3 // 0") failsWith "attempt to divide by zero"
+      program ("return 3.0 // 0") succeedsWith Double.PositiveInfinity
+      program ("return 3.0 // -0") succeedsWith Double.PositiveInfinity
+      program ("return 3.0 // -0.0") succeedsWith Double.NegativeInfinity
 
-    opArgErrors.binary("//", Arithmetic)
+      program ("return 3 // 0") failsWith "attempt to divide by zero"
 
-  }
+      opArgErrors.binary("//", Arithmetic)
 
-  about ("div") {
+    }
 
-    program ("return 3 / 0") succeedsWith Double.PositiveInfinity
-    program ("return 3 / -0") succeedsWith Double.PositiveInfinity
-    program ("return -3 / -0") succeedsWith Double.NegativeInfinity
-    program ("return -3 / -0.0") succeedsWith Double.PositiveInfinity
+    about ("div") {
 
-    opArgErrors.binary("/", Arithmetic)
+      program ("return 3 / 0") succeedsWith Double.PositiveInfinity
+      program ("return 3 / -0") succeedsWith Double.PositiveInfinity
+      program ("return -3 / -0") succeedsWith Double.NegativeInfinity
+      program ("return -3 / -0.0") succeedsWith Double.PositiveInfinity
 
-  }
+      opArgErrors.binary("/", Arithmetic)
 
-  about ("mod") {
+    }
 
-    program ("return 3 % 2") succeedsWith 1
-    program ("return 3 % -2") succeedsWith -1
-    program ("return 3.0 % 2") succeedsWith 1.0
-    program ("return 3.0 % -2") succeedsWith -1.0
+    about ("mod") {
 
-    program ("return 3 % 0") failsWith "attempt to perform 'n%0'"
+      program ("return 3 % 2") succeedsWith 1
+      program ("return 3 % -2") succeedsWith -1
+      program ("return 3.0 % 2") succeedsWith 1.0
+      program ("return 3.0 % -2") succeedsWith -1.0
 
-    program ("return 3.0 % 0") succeedsWith NaN
+      program ("return 3 % 0") failsWith "attempt to perform 'n%0'"
 
-    opArgErrors.binary("%", Arithmetic)
+      program ("return 3.0 % 0") succeedsWith NaN
 
-  }
+      opArgErrors.binary("%", Arithmetic)
 
-  about ("unm") {
+    }
 
-    program ("return -1") succeedsWith -1
-    program ("return -0.0") succeedsWith 0.0
-    program ("return --0") succeedsWith ()
+    about ("unm") {
 
-    program ("return -\"1\"") succeedsWith -1.0
+      program ("return -1") succeedsWith -1
+      program ("return -0.0") succeedsWith 0.0
+      program ("return --0") succeedsWith ()
 
-    opArgErrors.unary("-", Arithmetic)
+      program ("return -\"1\"") succeedsWith -1.0
 
-  }
+      opArgErrors.unary("-", Arithmetic)
 
-  about ("shl") {
+    }
 
-    program ("return 0 << \"0\"") succeedsWith 0
-    program ("return -0.0 << 1") succeedsWith 0
+    about ("shl") {
 
-    program ("return 3 << 0") succeedsWith 3
+      program ("return 0 << \"0\"") succeedsWith 0
+      program ("return -0.0 << 1") succeedsWith 0
 
-    program ("return 1 << 63") succeedsWith Long.MinValue
-    program ("return (1 << 63) - 1") succeedsWith Long.MaxValue
+      program ("return 3 << 0") succeedsWith 3
 
-    program ("return 6 << 1000") succeedsWith 0
+      program ("return 1 << 63") succeedsWith Long.MinValue
+      program ("return (1 << 63) - 1") succeedsWith Long.MaxValue
 
-    program ("return 3 << 1") succeedsWith 6
-    program ("return 3.0 << 1") succeedsWith 6
-    program ("return \"3\" << 1") succeedsWith 6
+      program ("return 1 << 64") succeedsWith 0
 
-    program ("return 3 << 1.5") failsWith "number has no integer representation"
-    program ("return 3.5 << 0") failsWith "number has no integer representation"
+      program ("return 6 << 1000") succeedsWith 0
 
-    program ("return 5 << 2.0") succeedsWith 20
-    program ("return 5.0 << 2.0") succeedsWith 20
-    program ("return 5.0 << 2") succeedsWith 20
+      program ("return 3 << 1") succeedsWith 6
+      program ("return 3.0 << 1") succeedsWith 6
+      program ("return \"3\" << 1") succeedsWith 6
 
-    program ("return 7 << -1") succeedsWith 3
+      program ("return 3 << 1.5") failsWith "number has no integer representation"
+      program ("return 3.5 << 0") failsWith "number has no integer representation"
 
-    opArgErrors.binary("<<", Bitwise)
+      program ("return 5 << 2.0") succeedsWith 20
+      program ("return 5.0 << 2.0") succeedsWith 20
+      program ("return 5.0 << 2") succeedsWith 20
 
-  }
+      program ("return 7 << -1") succeedsWith 3
 
-  about ("shr") {
+      opArgErrors.binary("<<", Bitwise)
 
-    program ("return 0 >> 5") succeedsWith 0
-    program ("return 1 >> 100000") succeedsWith 0
+    }
 
-    program ("return 1 >> 1.2") failsWith "number has no integer representation"
-    program ("return 10.1 >> 0") failsWith "number has no integer representation"
+    about ("shr") {
 
-    program ("return -1 >> 1") succeedsWith Long.MaxValue
-    program ("return (-1 >> 1) + 1") succeedsWith Long.MinValue
+      program ("return 0 >> 5") succeedsWith 0
+      program ("return 1 >> 100000") succeedsWith 0
 
-    program ("return 9 >> 2.0") succeedsWith 2
-    program ("return 9.0 >> 2.0") succeedsWith 2
-    program ("return 9.0 >> 2") succeedsWith 2
+      program ("return 1 >> 1.2") failsWith "number has no integer representation"
+      program ("return 10.1 >> 0") failsWith "number has no integer representation"
 
-    program ("return 5 >> -2") succeedsWith 20
+      program ("return -1 >> 1") succeedsWith Long.MaxValue
+      program ("return (-1 >> 1) + 1") succeedsWith Long.MinValue
 
-    opArgErrors.binary("<<", Bitwise)
+      program ("return 9 >> 2.0") succeedsWith 2
+      program ("return 9.0 >> 2.0") succeedsWith 2
+      program ("return 9.0 >> 2") succeedsWith 2
 
-  }
+      program ("return 5 >> -2") succeedsWith 20
 
-  about ("band") {
+      opArgErrors.binary("<<", Bitwise)
 
-    program ("return 0 & 0") succeedsWith 0
-    program ("return 10 & 3") succeedsWith 2
+    }
 
-    program ("return 255 & -1") succeedsWith 255
-    program ("return 255 & -255") succeedsWith 1
-    program ("return -1 & 50") succeedsWith 50
-    program ("return -1 & -3") succeedsWith -3
+    about ("band") {
 
-    program ("return 10.0 & 3") succeedsWith 2
-    program ("return 10 & 3.0") succeedsWith 2
-    program ("return 10.0 & 3.0") succeedsWith 2
+      program ("return 0 & 0") succeedsWith 0
+      program ("return 10 & 3") succeedsWith 2
 
-    program ("return \"13\" & 6") succeedsWith 4
-    program ("return 13 & \"6\"") succeedsWith 4
+      program ("return 255 & -1") succeedsWith 255
+      program ("return 255 & -255") succeedsWith 1
+      program ("return -1 & 50") succeedsWith 50
+      program ("return -1 & -3") succeedsWith -3
 
-    program ("return 13 & 1.5") failsWith "number has no integer representation"
-    program ("return 1.2 & 255") failsWith "number has no integer representation"
+      program ("return 10.0 & 3") succeedsWith 2
+      program ("return 10 & 3.0") succeedsWith 2
+      program ("return 10.0 & 3.0") succeedsWith 2
 
-    opArgErrors.binary("&", Bitwise)
+      program ("return \"13\" & 6") succeedsWith 4
+      program ("return 13 & \"6\"") succeedsWith 4
 
-  }
+      program ("return 13 & 1.5") failsWith "number has no integer representation"
+      program ("return 1.2 & 255") failsWith "number has no integer representation"
 
-  about ("bor") {
+      opArgErrors.binary("&", Bitwise)
 
-    program ("return 0 | 0") succeedsWith 0
-    program ("return 10 | 3") succeedsWith 11
+    }
 
-    program ("return 2 | -1") succeedsWith -1
-    program ("return 1 | -255") succeedsWith -255
-    program ("return -1 | -10") succeedsWith -1
+    about ("bor") {
 
-    program ("return 10.0 | 3") succeedsWith 11
-    program ("return 10 | 3.0") succeedsWith 11
-    program ("return 10.0 | 3.0") succeedsWith 11
+      program ("return 0 | 0") succeedsWith 0
+      program ("return 10 | 3") succeedsWith 11
 
-    program ("return \"13\" | 6") succeedsWith 15
-    program ("return 13 | \"6\"") succeedsWith 15
+      program ("return 2 | -1") succeedsWith -1
+      program ("return 1 | -255") succeedsWith -255
+      program ("return -1 | -10") succeedsWith -1
 
-    program ("return 13 | 1.5") failsWith "number has no integer representation"
-    program ("return 1.2 | 255") failsWith "number has no integer representation"
+      program ("return 10.0 | 3") succeedsWith 11
+      program ("return 10 | 3.0") succeedsWith 11
+      program ("return 10.0 | 3.0") succeedsWith 11
 
-    opArgErrors.binary("|", Bitwise)
+      program ("return \"13\" | 6") succeedsWith 15
+      program ("return 13 | \"6\"") succeedsWith 15
 
-  }
+      program ("return 13 | 1.5") failsWith "number has no integer representation"
+      program ("return 1.2 | 255") failsWith "number has no integer representation"
 
-  about ("bxor") {
+      opArgErrors.binary("|", Bitwise)
 
-    program ("return 1 ~ 0") succeedsWith 1
-    program ("return 1 ~ 1") succeedsWith 0
-    program ("return 10 ~ 3") succeedsWith 9
+    }
 
-    program ("return 2 ~ -1") succeedsWith -3
-    program ("return 1 ~ -255") succeedsWith -256
-    program ("return -1 ~ -10") succeedsWith 9
+    about ("bxor") {
 
-    program ("return 10.0 ~ 3") succeedsWith 9
-    program ("return 10 ~ 3.0") succeedsWith 9
-    program ("return 10.0 ~ 3.0") succeedsWith 9
+      program ("return 1 ~ 0") succeedsWith 1
+      program ("return 1 ~ 1") succeedsWith 0
+      program ("return 10 ~ 3") succeedsWith 9
 
-    program ("return \"13\" ~ 6") succeedsWith 11
-    program ("return 13 ~ \"6\"") succeedsWith 11
+      program ("return 2 ~ -1") succeedsWith -3
+      program ("return 1 ~ -255") succeedsWith -256
+      program ("return -1 ~ -10") succeedsWith 9
 
-    program ("return 13 ~ 1.5") failsWith "number has no integer representation"
-    program ("return 1.2 ~ 255") failsWith "number has no integer representation"
+      program ("return 10.0 ~ 3") succeedsWith 9
+      program ("return 10 ~ 3.0") succeedsWith 9
+      program ("return 10.0 ~ 3.0") succeedsWith 9
 
-    opArgErrors.binary("~", Bitwise)
+      program ("return \"13\" ~ 6") succeedsWith 11
+      program ("return 13 ~ \"6\"") succeedsWith 11
 
-  }
+      program ("return 13 ~ 1.5") failsWith "number has no integer representation"
+      program ("return 1.2 ~ 255") failsWith "number has no integer representation"
 
-  about ("bnot") {
+      opArgErrors.binary("~", Bitwise)
 
-    program ("return ~0") succeedsWith -1
-    program ("return ~-1") succeedsWith 0
+    }
 
-    program ("return ~(-1 >> 1)") succeedsWith Long.MinValue
-    program ("return ~(-1 << 63)") succeedsWith Long.MaxValue
+    about ("bnot") {
 
-    program ("return ~3.6") failsWith "number has no integer representation"
-    program ("return ~\"10\"") succeedsWith -11
-    program ("return ~~35") succeedsWith 35
-    program ("return ~~35.0") succeedsWith 35
+      program ("return ~0") succeedsWith -1
+      program ("return ~-1") succeedsWith 0
 
-    opArgErrors.unary("~", Bitwise)
+      program ("return ~(-1 >> 1)") succeedsWith Long.MinValue
+      program ("return ~(-1 << 63)") succeedsWith Long.MaxValue
 
-  }
+      program ("return ~3.6") failsWith "number has no integer representation"
+      program ("return ~\"10\"") succeedsWith -11
+      program ("return ~~35") succeedsWith 35
+      program ("return ~~35.0") succeedsWith 35
 
-  about ("len") {
+      opArgErrors.unary("~", Bitwise)
 
-    program ("return #''") succeedsWith 0
-    program ("return #'hello'") succeedsWith 5
+    }
 
-    program ("return #{}") succeedsWith 0
-    program ("return #{3, 2, 1, 0}") succeedsWith 4
+    about ("len") {
 
-    // errors & origin reporting
-    val errTest = new opArgErrors.UnaryOpTester("#", Length)
+      program ("return #''") succeedsWith 0
+      program ("return #'hello'") succeedsWith 5
 
-    errTest("nil", "nil")
-    errTest("true", "boolean")
-    errTest("false", "boolean")
-    errTest("1", "number")
-    errTest("0.0", "number")
+      program ("return #{}") succeedsWith 0
+      program ("return #{3, 2, 1, 0}") succeedsWith 4
 
-    errTest("x", "nil", "global 'x'")
-    errTest("x", "nil", "local 'x'", "local x")
-    errTest("x", "number", "global 'x'", "x = 1")
-    errTest("x.y", "nil", "field 'y'", "x = {}")
+      // errors & origin reporting
+      val errTest = new opArgErrors.UnaryOpTester("#", Length)
 
-  }
+      errTest("nil", "nil")
+      errTest("true", "boolean")
+      errTest("false", "boolean")
+      errTest("1", "number")
+      errTest("0.0", "number")
 
-  about ("concat") {
+      errTest("x", "nil")
+      errTest("x", "nil", "local x")
+      errTest("x", "number", "x = 1")
+      errTest("x.y", "nil", "x = {}")
 
-    program ("return 0 .. 1") succeedsWith "01"
-    program ("return 0.0 .. -1") succeedsWith "0.0-1"
-    program ("return '0' .. 'x'") succeedsWith "0x"
-    program ("return '' .. ''") succeedsWith ""
-    program ("return (0/0)..(0/0)") succeedsWith "nannan"
-    program ("return (1/0)..(-1/0)") succeedsWith "inf-inf"
+    }
 
-    program ("return 1 .. 2 .. 3") succeedsWith "123"
-    program ("return 'a'..'b'..'c'..'d'") succeedsWith "abcd"
+    about ("concat") {
 
-    // errors & origin reporting
-    val errTest = new opArgErrors.BinaryOpTester("..", Concatenate, Seq("''"))
+      program ("return 0 .. 1") succeedsWith "01"
+      program ("return 0.0 .. -1") succeedsWith "0.0-1"
+      program ("return '0' .. 'x'") succeedsWith "0x"
+      program ("return '' .. ''") succeedsWith ""
+      program ("return (0/0)..(0/0)") succeedsWith "nannan"
+      program ("return (1/0)..(-1/0)") succeedsWith "inf-inf"
 
-    errTest("nil", "nil")
-    errTest("true", "boolean")
-    errTest("false", "boolean")
-    errTest("{}", "table")
+      program ("return 1 .. 2 .. 3") succeedsWith "123"
+      program ("return 'a'..'b'..'c'..'d'") succeedsWith "abcd"
 
-    errTest("x", "nil", "global 'x'")
-    errTest("x", "nil", "local 'x'", "local x")
-    errTest("x", "table", "global 'x'", "x = {}")
-    errTest("x.y", "nil", "field 'y'", "x = {}")
+      // errors & origin reporting
+      val errTest = new opArgErrors.BinaryOpTester("..", Concatenate, Seq("''"))
 
-  }
+      errTest("nil", "nil")
+      errTest("true", "boolean")
+      errTest("false", "boolean")
+      errTest("{}", "table")
 
-  about ("lt") {
+      errTest("x", "nil")
+      errTest("x", "nil", "local x")
+      errTest("x", "table", "x = {}")
+      errTest("x.y", "nil", "x = {}")
 
-    program ("return 1 < 2") succeedsWith true
-    program ("return 1 < 1") succeedsWith false
+    }
 
-    program ("return 'a' < 'b'") succeedsWith true
-    program ("return 'ab' < 'a'") succeedsWith false
-    program ("return 'ab' > 'a'") succeedsWith true
+    about ("lt") {
 
-    program ("return 0 < 0.0") succeedsWith false
-    program ("return '0' < '0.0'") succeedsWith true
+      program ("return 1 < 2") succeedsWith true
+      program ("return 1 < 1") succeedsWith false
 
-    program ("return x < y") failsWith "attempt to compare two nil values"
-    program ("return 1 < x") failsWith "attempt to compare number with nil"
-    program ("return 1 < false") failsWith "attempt to compare number with boolean"
-    program ("return true < false") failsWith "attempt to compare two boolean values"
-    program ("return {} < 1") failsWith "attempt to compare table with number"
-    program ("return {} < {}") failsWith "attempt to compare two table values"
+      program ("return 'a' < 'b'") succeedsWith true
+      program ("return 'ab' < 'a'") succeedsWith false
+      program ("return 'ab' > 'a'") succeedsWith true
 
-    program ("return '0' < 1") failsWith "attempt to compare string with number"
-    program ("return '0' > 1") failsWith "attempt to compare number with string"
+      program ("return 0 < 0.0") succeedsWith false
+      program ("return '0' < '0.0'") succeedsWith true
 
-  }
+      program ("return x < y") failsWith "attempt to compare two nil values"
+      program ("return 1 < x") failsWith "attempt to compare number with nil"
+      program ("return 1 < false") failsWith "attempt to compare number with boolean"
+      program ("return true < false") failsWith "attempt to compare two boolean values"
+      program ("return {} < 1") failsWith "attempt to compare table with number"
+      program ("return {} < {}") failsWith "attempt to compare two table values"
 
-  about ("le") {
+      program ("return '0' < 1") failsWith "attempt to compare string with number"
+      program ("return '0' > 1") failsWith "attempt to compare number with string"
 
-    program ("return 1 <= 2") succeedsWith true
-    program ("return 1 <= 1") succeedsWith true
+    }
 
-    program ("return 'a' <= 'b'") succeedsWith true
-    program ("return 'ab' <= 'a'") succeedsWith false
-    program ("return 'ab' >= 'a'") succeedsWith true
+    about ("le") {
 
-    program ("return 0 <= 0.0") succeedsWith true
-    program ("return '0' <= '0.0'") succeedsWith true
+      program ("return 1 <= 2") succeedsWith true
+      program ("return 1 <= 1") succeedsWith true
 
-    program ("return x <= y") failsWith "attempt to compare two nil values"
-    program ("return 1 <= x") failsWith "attempt to compare number with nil"
-    program ("return 1 <= false") failsWith "attempt to compare number with boolean"
-    program ("return true <= false") failsWith "attempt to compare two boolean values"
-    program ("return {} <= 1") failsWith "attempt to compare table with number"
-    program ("return {} <= {}") failsWith "attempt to compare two table values"
+      program ("return 'a' <= 'b'") succeedsWith true
+      program ("return 'ab' <= 'a'") succeedsWith false
+      program ("return 'ab' >= 'a'") succeedsWith true
 
-    program ("return '0' <= 1") failsWith "attempt to compare string with number"
-    program ("return '0' >= 1") failsWith "attempt to compare number with string"
+      program ("return 0 <= 0.0") succeedsWith true
+      program ("return '0' <= '0.0'") succeedsWith true
 
-  }
+      program ("return x <= y") failsWith "attempt to compare two nil values"
+      program ("return 1 <= x") failsWith "attempt to compare number with nil"
+      program ("return 1 <= false") failsWith "attempt to compare number with boolean"
+      program ("return true <= false") failsWith "attempt to compare two boolean values"
+      program ("return {} <= 1") failsWith "attempt to compare table with number"
+      program ("return {} <= {}") failsWith "attempt to compare two table values"
 
-  about ("eq") {
+      program ("return '0' <= 1") failsWith "attempt to compare string with number"
+      program ("return '0' >= 1") failsWith "attempt to compare number with string"
 
-    program ("return 0 == 0") succeedsWith true
-    program ("return nil == nil") succeedsWith true
-    program ("return 0 == '0'") succeedsWith false
+    }
 
-    program ("return {} == {}") succeedsWith false
-    program ("local x = {}; y = x; return x == y") succeedsWith true
+    about ("eq") {
 
-    program ("return 'x' == 'x'") succeedsWith true
-    program ("return 'x'..'y' == 'xy'") succeedsWith true
+      program ("return 0 == 0") succeedsWith true
+      program ("return nil == nil") succeedsWith true
+      program ("return 0 == '0'") succeedsWith false
 
-    program ("return 0 == 0.0") succeedsWith true
-    program ("return -0.0 == 0.0") succeedsWith true
+      program ("return {} == {}") succeedsWith false
+      program ("local x = {}; y = x; return x == y") succeedsWith true
 
-    program ("return (1 / 0) == (1 / 0)") succeedsWith true
-    program ("return (-1 / 0) == (-1 / 0)") succeedsWith true
-    program ("return (0 / 0) == (0 / 0)") succeedsWith false
+      program ("return 'x' == 'x'") succeedsWith true
+      program ("return 'x'..'y' == 'xy'") succeedsWith true
+
+      program ("return 0 == 0.0") succeedsWith true
+      program ("return -0.0 == 0.0") succeedsWith true
+
+      program ("return (1 / 0) == (1 / 0)") succeedsWith true
+      program ("return (-1 / 0) == (-1 / 0)") succeedsWith true
+      program ("return (0 / 0) == (0 / 0)") succeedsWith false
+
+    }
 
   }
 
