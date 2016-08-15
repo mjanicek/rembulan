@@ -170,7 +170,26 @@ class IRTranslationTest extends FunSpec with MustMatchers {
     describe ("from " + b.name + " :") {
       for (f <- b.all) {
         describe (f.description) {
-          it ("can be translated to IR") {
+          it ("can be translated to IR (translation only)") {
+            val code = f.code
+
+            println("--BEGIN--")
+            println(code)
+            println("---END---")
+
+            val ir = translate(parseChunk(code))
+
+            for (fn <- ir.fns.asScala) {
+              println("Function [" + fn.id + "]" + (if (fn.id.isRoot) " (main)" else ""))
+              println()
+              println("Code:")
+              printBlocks(fn.code)
+              println()
+            }
+
+          }
+
+          it ("can be translated to IR and optimised") {
             val code = f.code
 
             println("--BEGIN--")
