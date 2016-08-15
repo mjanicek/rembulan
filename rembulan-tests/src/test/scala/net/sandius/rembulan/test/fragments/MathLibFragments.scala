@@ -22,6 +22,10 @@ object MathLibFragments extends FragmentBundle with FragmentExpectations with On
 
   in (MathContext) {
 
+    about ("floor") {
+      program ("return math.floor(3.0), math.floor(3.1)") succeedsWith (3, 3)
+    }
+
     about ("random") {
       program ("math.random(0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")
       program ("math.random(1, 0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")

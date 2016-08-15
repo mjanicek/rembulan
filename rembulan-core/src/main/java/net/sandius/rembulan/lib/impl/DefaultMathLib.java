@@ -347,7 +347,9 @@ public class DefaultMathLib extends MathLib {
 		protected Number op(double x) {
 			double d = Math.floor(x);
 			long l = (long) d;
-			return d == (double) l ? l : d;
+			// Note: explicit type annotations are necessary: per JLS 15.25, the type of the
+			// expression would be *double* (not java.lang.Number) without them
+			return d == (double) l ? (Number) l : (Number) d;
 		}
 
 		@Override
