@@ -105,14 +105,14 @@ public abstract class RawOperators {
 //	public static Number rawbnot(long ln) {
 //		return ~ln;
 //	}
-//
-//	public static Number rawshl(long la, long lb) {
-//		return la << lb;
-//	}
-//
-//	public static Number rawshr(long la, long lb) {
-//		return la >>> lb;
-//	}
+
+	public static long rawshl(long a, long b) {
+		return b < 0 ? rawshr(a, -b) : (b < 64 ? a << b : 0);
+	}
+
+	public static long rawshr(long a, long b) {
+		return b < 0 ? rawshl(a, -b) : (b < 64 ? a >>> b : 0);
+	}
 
 	// Comparison operators
 

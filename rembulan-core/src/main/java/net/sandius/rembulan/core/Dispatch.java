@@ -336,7 +336,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la << lb);
+			context.getObjectSink().setTo(RawOperators.rawshl(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHL, a, b);
@@ -348,7 +348,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la >>> lb);
+			context.getObjectSink().setTo(RawOperators.rawshr(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHR, a, b);

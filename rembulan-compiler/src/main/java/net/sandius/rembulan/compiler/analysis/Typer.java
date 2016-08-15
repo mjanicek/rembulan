@@ -91,8 +91,8 @@ public class Typer {
 			case BAND: return il & ir;
 			case BOR:  return il | ir;
 			case BXOR: return il ^ ir;
-			case SHL:  return il << ir;
-			case SHR:  return il >>> ir;
+			case SHL:  return RawOperators.rawshl(il, ir);
+			case SHR:  return RawOperators.rawshr(il, ir);
 			default: throw new IllegalArgumentException("Illegal operation: " + op);
 		}
 	}

@@ -199,6 +199,7 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return -0.0 << 1") succeedsWith 0
 
       program ("return 3 << 0") succeedsWith 3
+      program ("return 3.0 << 0") succeedsWith 3
 
       program ("return 1 << 63") succeedsWith Long.MinValue
       program ("return (1 << 63) - 1") succeedsWith Long.MaxValue
@@ -232,6 +233,8 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return 1 >> 1.2") failsWith "number has no integer representation"
       program ("return 10.1 >> 0") failsWith "number has no integer representation"
 
+      program ("return 3.0 >> 0") succeedsWith 3
+
       program ("return -1 >> 1") succeedsWith Long.MaxValue
       program ("return (-1 >> 1) + 1") succeedsWith Long.MinValue
 
@@ -241,7 +244,7 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("return 5 >> -2") succeedsWith 20
 
-      opArgErrors.binary("<<", Bitwise)
+      opArgErrors.binary(">>", Bitwise)
 
     }
 
