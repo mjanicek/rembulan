@@ -325,7 +325,7 @@ public class RembulanConsole {
 
 			Function fn = null;
 
-			boolean firstLine = codeBuffer.length() != 0;
+			boolean firstLine = codeBuffer.length() == 0;
 			boolean emptyInput = line.trim().isEmpty();
 
 			if (firstLine && !emptyInput) {
