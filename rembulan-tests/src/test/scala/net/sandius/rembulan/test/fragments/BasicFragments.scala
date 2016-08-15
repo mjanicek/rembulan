@@ -209,6 +209,50 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   MultiReturn in EmptyContext succeedsWith (null, null)
 
+  val LocalMultiAssign = fragment ("LocalMultiAssign") {
+    """local a, b = (function() return 1, 2 end)()
+      |return a, b
+    """
+  }
+  LocalMultiAssign in EmptyContext succeedsWith (1, 2)
+
+  val LocalMultiAssignWithPrefix = fragment ("LocalMultiAssignWithPrefix") {
+    """local a, b, c = 3, (function() return 1, 2 end)()
+      |return a, b, c
+    """
+  }
+  LocalMultiAssignWithPrefix in EmptyContext succeedsWith (3, 1, 2)
+
+  val NonLocalMultiAssign = fragment ("NonLocalMultiAssign") {
+    """a, b = (function() return 1, 2 end)()
+      |return a, b
+    """
+  }
+  NonLocalMultiAssign in EmptyContext succeedsWith (1, 2)
+
+  val NonLocalMultiAssignWithPrefix = fragment ("NonLocalMultiAssignWithPrefix") {
+    """a, b, c = 3, (function() return 1, 2 end)()
+      |return a, b, c
+    """
+  }
+  NonLocalMultiAssignWithPrefix in EmptyContext succeedsWith (3, 1, 2)
+
+  val SplitLocalMultiAssign = fragment ("SplitLocalMultiAssign") {
+    """local a, b
+      |a, b = (function() return 1, 2 end)()
+      |return a, b
+    """
+  }
+  SplitLocalMultiAssign in EmptyContext succeedsWith (1, 2)
+
+  val SplitLocalMultiAssignWithPrefix = fragment ("SplitLocalMultiAssignWithPrefix") {
+    """local a, b, c
+      |a, b, c = 3, (function() return 1, 2 end)()
+      |return a, b, c
+    """
+  }
+  SplitLocalMultiAssignWithPrefix in EmptyContext succeedsWith (3, 1, 2)
+
   val SimpleForLoop = fragment("SimpleForLoop") {
     """local sum = 0
       |for i = 1, 10 do

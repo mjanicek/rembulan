@@ -105,13 +105,7 @@ class IRTranslatorTransformer extends Transformer {
 	}
 
 	private Val popVal() {
-		if (!multis.isEmpty()) {
-			Val v = provider.newVal();
-			MultiVal mv = multis.pop();
-			insns.add(new MultiGet(v, mv, 0));
-			return v;
-		}
-		else {
+		if (!vals.isEmpty()) {
 			AbstractVal aval = vals.pop();
 			if (aval instanceof PhiVal) {
 				Val v = provider.newVal();
@@ -124,6 +118,15 @@ class IRTranslatorTransformer extends Transformer {
 			else {
 				throw new UnsupportedOperationException("Unknown abstract value: " + aval);
 			}
+		}
+		else if (!multis.isEmpty()) {
+			Val v = provider.newVal();
+			MultiVal mv = multis.pop();
+			insns.add(new MultiGet(v, mv, 0));
+			return v;
+		}
+		else {
+			throw new IllegalStateException("no value on stack");
 		}
 	}
 	
@@ -161,6 +164,11 @@ class IRTranslatorTransformer extends Transformer {
 			userLabels.put(rl, l);
 			return l;
 		}
+	}
+
+	private void endStatement() {
+		multis.clear();
+		vals.clear();
 	}
 
 	@Override
@@ -383,8 +391,18 @@ class IRTranslatorTransformer extends Transformer {
 	public Expr transform(ParenExpr e) {
 		e.multiExpr().accept(this);
 
-		Val dest = popVal();
+		if (multis.isEmpty()) {
+			throw new IllegalStateException("empty multival stack");
+		}
+
+		Val dest = provider.newVal();
+		MultiVal mv = multis.pop();
+		insns.add(new MultiGet(dest, mv, 0));
+
 		vals.push(dest);
+
+//		Val dest = popVal();
+//		vals.push(dest);
 
 		return e;
 	}
@@ -521,7 +539,7 @@ class IRTranslatorTransformer extends Transformer {
 			}
 		}
 
-		vals.push(dest);
+//		vals.push(dest);
 		insns.atLine(e.line());
 		insns.add(new TabNew(dest, array, hash));
 
@@ -557,13 +575,13 @@ class IRTranslatorTransformer extends Transformer {
 				TableConstructorExpr.FieldInitialiser fi = it.next();
 
 				if (fi.key() == null) {
-					fi.value().accept(this);
+					Expr ve = fi.value();
+					ve.accept(this);
 
-					if (!it.hasNext() && onStack()) {
+					if (ve instanceof MultiExpr && !it.hasNext() && onStack()) {
 						// appending stack contents
 						MultiVal mv = multis.pop();
 						insns.add(new TabRawAppendMulti(dest, i, mv));
-//						onStack = false;  // FIXME: check this
 					}
 					else {
 						// single value
@@ -573,6 +591,8 @@ class IRTranslatorTransformer extends Transformer {
 				}
 			}
 		}
+
+		vals.push(dest);
 
 		return e;
 	}
@@ -642,6 +662,7 @@ class IRTranslatorTransformer extends Transformer {
 			insns.add(new Ret(args));
 		}
 
+		endStatement();
 		return node;
 	}
 
@@ -649,12 +670,25 @@ class IRTranslatorTransformer extends Transformer {
 	public BodyStatement transform(AssignStatement node) {
 		List<Val> ts = new ArrayList<>();
 
-		for (Expr e : node.exprs()) {
+		Iterator<Expr> eit = node.exprs().iterator();
+		while (eit.hasNext()) {
+			Expr e = eit.next();
 			e.accept(this);
-			ts.add(popVal());
+
+			if (e instanceof MultiExpr && !eit.hasNext() && onStack()) {
+				// multiple values at tail position
+				// -> ignore for now, will be handled below
+			}
+			else {
+				ts.add(popVal());
+			}
 		}
 
 		Iterator<Val> it = ts.iterator();
+
+		vals.clear();  // FIXME: needed?
+
+		int i = 0;
 		for (LValueExpr lv : node.vars()) {
 
 			final Val src;
@@ -663,8 +697,12 @@ class IRTranslatorTransformer extends Transformer {
 			}
 			else {
 				src = provider.newVal();
-				// TODO: line here?
-				insns.add(new LoadConst.Nil(src));
+				if (onStack()) {
+					insns.add(new MultiGet(src, multis.peek(), i++));
+				}
+				else {
+					insns.add(new LoadConst.Nil(src));
+				}
 			}
 
 			vals.push(src);
@@ -673,6 +711,7 @@ class IRTranslatorTransformer extends Transformer {
 			assigning = false;
 		}
 
+		endStatement();
 		return node;
 	}
 
@@ -717,9 +756,7 @@ class IRTranslatorTransformer extends Transformer {
 			insns.add(new VarInit(v, src));
 		}
 
-		multis.clear();  // FIXME
-//		onStack = false;
-
+		endStatement();
 		return node;
 	}
 
@@ -775,6 +812,7 @@ class IRTranslatorTransformer extends Transformer {
 
 		insns.add(l_done);
 
+		endStatement();
 		return node;
 	}
 
@@ -848,6 +886,7 @@ class IRTranslatorTransformer extends Transformer {
 
 		insns.add(l_done);
 
+		endStatement();
 		return node;
 	}
 
@@ -951,6 +990,7 @@ class IRTranslatorTransformer extends Transformer {
 
 		insns.add(l_done);
 
+		endStatement();
 		return node;
 	}
 
@@ -975,6 +1015,7 @@ class IRTranslatorTransformer extends Transformer {
 
 		insns.add(l_done);
 
+		endStatement();
 		return node;
 	}
 
@@ -999,6 +1040,7 @@ class IRTranslatorTransformer extends Transformer {
 
 		insns.add(l_done);
 
+		endStatement();
 		return node;
 	}
 
@@ -1009,6 +1051,7 @@ class IRTranslatorTransformer extends Transformer {
 		insns.add(userLabel(rl));
 		insns.atLine(node.line());
 
+		endStatement();
 		return node;
 	}
 
@@ -1019,6 +1062,7 @@ class IRTranslatorTransformer extends Transformer {
 		insns.atLine(node.line());
 		insns.add(new Jmp(userLabel(rl)));
 
+		endStatement();
 		return node;
 	}
 
@@ -1033,6 +1077,8 @@ class IRTranslatorTransformer extends Transformer {
 			Label l = breakLabels.peek();
 			insns.add(new Jmp(l));
 		}
+
+		endStatement();
 		return node;
 	}
 
@@ -1042,10 +1088,9 @@ class IRTranslatorTransformer extends Transformer {
 
 		node.callExpr().accept(this);
 
-		// discard results
-		multis.clear();  // FIXME
-//		onStack = false;
+		// results are discarded
 
+		endStatement();
 		return node;
 	}
 
