@@ -39,7 +39,10 @@ public class IllegalOperationAttemptException extends LuaRuntimeException {
 	public static IllegalOperationAttemptException comparison(Object a, Object b) {
 		String ta = PlainValueTypeNamer.INSTANCE.typeNameOf(a);
 		String tb = PlainValueTypeNamer.INSTANCE.typeNameOf(b);
-		return new IllegalOperationAttemptException("attempt to compare " + ta + " with " + tb);
+		String message = ta.equals(tb)
+				? "attempt to compare two " + ta + " values"
+				: "attempt to compare " + ta + " with " + tb;
+		return new IllegalOperationAttemptException(message);
 	}
 
 	public static IllegalOperationAttemptException call(Object o) {
