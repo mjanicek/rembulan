@@ -19,15 +19,19 @@ package net.sandius.rembulan.compiler;
 import net.sandius.rembulan.util.ByteVector;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class ChunkClassLoader extends ClassLoader {
 
 	private final Map<String, ByteVector> installed;
+	private final Set<String> loaded;
 
 	public ChunkClassLoader(ClassLoader parent) {
 		super(parent);
 		this.installed = new HashMap<>();
+		this.loaded = new HashSet<>();
 	}
 
 	public ChunkClassLoader() {
@@ -37,31 +41,48 @@ public class ChunkClassLoader extends ClassLoader {
 	public String install(AbstractChunk chunk) {
 		Map<String, ByteVector> classes = chunk.classMap();
 
-		for (String name : classes.keySet()) {
-			if (installed.containsKey(name)) {
-				// class already installed
-				throw new IllegalArgumentException();  // TODO: throw the right exception
+		synchronized (this) {
+			for (String name : classes.keySet()) {
+				if (installed.containsKey(name) || loaded.contains(name)) {
+					// class already installed
+					throw new IllegalStateException("Class already installed: " + name);
+				}
+
+				installed.put(name, classes.get(name));
 			}
 
-			installed.put(name, classes.get(name));
+			String main = chunk.mainClassName();
+			assert (installed.containsKey(main));
+			return main;
 		}
+	}
 
-		String main = chunk.mainClassName();
-		assert (installed.containsKey(main));
-		return main;
+	/**
+	 * Returns {@code true} if the Lua function class with the given {@code className}
+	 * has been installed into this ChunkClassLoader has already been loaded by it.
+	 *
+	 * @param className  class name of the Lua function, must not be {@code null}
+	 * @return  {@code true} iff the class {@code className} has been installed into this
+	 *          class loader or loaded by it
+	 * @throws NullPointerException  if {@code className} is {@code null}
+	 */
+	public boolean isInstalled(String className) {
+		synchronized (this) {
+			return installed.containsKey(className) || loaded.contains(className);
+		}
 	}
 
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
-		ByteVector bv = installed.get(name);
-
-		if (bv != null) {
-			// no need to keep it any longer (TODO: thread-safety)
-			installed.remove(name);
-			return defineClass(name, bv);
-		}
-		else {
-			throw new ClassNotFoundException(name);
+		synchronized (this) {
+			ByteVector bv = installed.remove(name);
+			if (bv != null) {
+				loaded.add(name);
+				return defineClass(name, bv);
+			}
+			else {
+				throw new ClassNotFoundException(name);
+			}
 		}
 	}
 

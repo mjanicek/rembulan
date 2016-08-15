@@ -60,19 +60,18 @@ public class RembulanConsole {
 
 	private final Function requireFunction;
 
+	private final boolean javaTraceback;
 	private final boolean stackTraceForCompileErrors;
 	private final String[] tracebackSuppress;
-	private final boolean tracebackOmitCommonSuffix;
 
 	public RembulanConsole(CommandLineArguments cmdLineArgs, InputStream in, PrintStream out, PrintStream err) {
 
-		boolean fullTraceback = System.getenv(Constants.ENV_FULL_TRACEBACK) != null;
-		tracebackSuppress = fullTraceback ? null : new String[] {
+		javaTraceback = System.getenv(Constants.ENV_FULL_TRACEBACK) != null;
+		tracebackSuppress = new String[] {
 				"net.sandius.rembulan.core",
 				this.getClass().getName()
 		};
-		tracebackOmitCommonSuffix = !fullTraceback;
-		stackTraceForCompileErrors = fullTraceback;
+		stackTraceForCompileErrors = javaTraceback;
 
 		this.config = Check.notNull(cmdLineArgs);
 
@@ -251,7 +250,12 @@ public class RembulanConsole {
 			}
 		}
 		catch (CallException ex) {
-			ex.printLuaFormatStackTraceback(err, tracebackOmitCommonSuffix, tracebackSuppress);
+			if (!javaTraceback) {
+				ex.printLuaFormatStackTraceback(err, loader, true, tracebackSuppress);
+			}
+			else {
+				ex.printStackTrace(err);
+			}
 			return false;
 		}
 		catch (CompileException ex) {
@@ -371,7 +375,12 @@ public class RembulanConsole {
 					execute(fn);
 				}
 				catch (CallException ex) {
-					ex.printLuaFormatStackTraceback(err, tracebackOmitCommonSuffix, tracebackSuppress);
+					if (!javaTraceback) {
+						ex.printLuaFormatStackTraceback(err, loader, true, tracebackSuppress);
+					}
+					else {
+						ex.printStackTrace(err);
+					}
 				}
 
 				reader.setPrompt(getPrompt());
