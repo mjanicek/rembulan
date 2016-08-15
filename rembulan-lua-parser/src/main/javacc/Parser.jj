@@ -220,8 +220,8 @@ TOKEN :
 |	<#HEX: "0" ["x","X"]>
 |	<#HEXEXP: ["p","P"]>
 
-|	<#DEC_NUMERAL: (<DECDIGIT>)+ ("." (<DECDIGIT>)*)? (<DECEXP> (<SIGN>)? (<DECDIGIT>)+)?>
-|	<#HEX_NUMERAL: <HEX> (<HEXDIGIT>)+ ("." (<HEXDIGIT>)*)? (<HEXEXP> (<SIGN>)? (<DECDIGIT>)+)?>
+|	<#DEC_NUMERAL: ((<DECDIGIT>)+ ("." (<DECDIGIT>)*)? | "." (<DECDIGIT>)+) (<DECEXP> (<SIGN>)? (<DECDIGIT>)+)?>
+|	<#HEX_NUMERAL: <HEX> ((<HEXDIGIT>)+ ("." (<HEXDIGIT>)*)? | "." (<HEXDIGIT>)+) (<HEXEXP> (<SIGN>)? (<DECDIGIT>)+)?>
 
 	// String literals
 |	<LITERAL_STRING: <DOUBLE_QUOTED_STRING> | <SINGLE_QUOTED_STRING>>

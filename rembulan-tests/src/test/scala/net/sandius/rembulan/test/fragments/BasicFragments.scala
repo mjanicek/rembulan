@@ -70,6 +70,12 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   StringParsing3 in EmptyContext succeedsWith ("\\", "\\", "\\", "\\")
 
+  val FloatParsing = fragment ("FloatParsing") {
+    """return 0e12 == 0 and .0 == 0 and 0. == 0 and .2e2 == 20 and 2.E-1 == 0.2
+    """
+  }
+  FloatParsing in EmptyContext succeedsWith (true)
+
   val LocalEnvResolution = fragment ("LocalEnvResolution") {
     """local _ENV
       |return x
