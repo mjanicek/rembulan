@@ -22,6 +22,7 @@ import net.sandius.rembulan.compiler.ir.AbstractVal;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.LoadConst;
+import net.sandius.rembulan.compiler.ir.MultiGet;
 import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.compiler.ir.VarInit;
 import net.sandius.rembulan.compiler.ir.VarLoad;
@@ -54,6 +55,13 @@ public class DeadCodePrunerVisitor extends CodeTransformerVisitor {
 
 	protected boolean isLiveOut(IRNode at, Var v) {
 		return liveness.entry(at).outVar().contains(v);
+	}
+
+	@Override
+	public void visit(LoadConst.Nil node) {
+		if (!isLiveOut(node, node.dest())) {
+			skip(node);
+		}
 	}
 
 	@Override
@@ -104,6 +112,13 @@ public class DeadCodePrunerVisitor extends CodeTransformerVisitor {
 	public void visit(VarLoad node) {
 		// FIXME: very inefficient
 		if (!types.isReified(node.var()) && !isLiveOut(node, node.dest())) {
+			skip(node);
+		}
+	}
+
+	@Override
+	public void visit(MultiGet node) {
+		if (!isLiveOut(node, node.dest())) {
 			skip(node);
 		}
 	}
