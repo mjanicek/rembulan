@@ -300,7 +300,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la & lb);
+			context.getObjectSink().setTo(RawOperators.rawband(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BAND, a, b);
@@ -312,7 +312,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la | lb);
+			context.getObjectSink().setTo(RawOperators.rawbor(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BOR, a, b);
@@ -324,7 +324,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(la ^ lb);
+			context.getObjectSink().setTo(RawOperators.rawbxor(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BXOR, a, b);
@@ -374,16 +374,20 @@ public abstract class Dispatch {
 		Long lo = Conversions.integerValueOf(o);
 
 		if (lo != null) {
-			context.getObjectSink().setTo(~lo);
+			context.getObjectSink().setTo(RawOperators.rawbnot(lo));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BNOT, o);
 		}
 	}
 
+	public static long len(String s) {
+		return s.getBytes().length;  // FIXME: wasteful!
+	}
+
 	public static void len(ExecutionContext context, Object o) throws ControlThrowable {
 		if (o instanceof String) {
-			context.getObjectSink().setTo((long) RawOperators.stringLen((String) o));
+			context.getObjectSink().setTo(len((String) o));
 		}
 		else {
 			Object handler = Metatables.getMetamethod(context.getState(), Metatables.MT_LEN, o);
@@ -444,7 +448,7 @@ public abstract class Dispatch {
 	}
 
 	private static void eq(ExecutionContext context, boolean polarity, Object a, Object b) throws ControlThrowable {
-		boolean rawEqual = RawOperators.raweq(a, b);
+		boolean rawEqual = ComparisonImplementation.eq(a, b);
 
 		if (!rawEqual
 				&& ((a instanceof Table && b instanceof Table)
@@ -472,7 +476,7 @@ public abstract class Dispatch {
 	}
 
 	public static boolean eq(Number a, Number b) {
-		return ComparisonImplementation.of(a, b).do_eq(a, b);
+		return ComparisonImplementation.numericEq(a, b);
 	}
 
 
@@ -494,7 +498,7 @@ public abstract class Dispatch {
 	}
 
 	public static boolean lt(Number a, Number b) {
-		return ComparisonImplementation.of(a, b).do_lt(a, b);
+		return ComparisonImplementation.numericLt(a, b);
 	}
 
 	public static void le(ExecutionContext context, Object a, Object b) throws ControlThrowable {
@@ -525,7 +529,7 @@ public abstract class Dispatch {
 	}
 
 	public static boolean le(Number a, Number b) {
-		return ComparisonImplementation.of(a, b).do_le(a, b);
+		return ComparisonImplementation.numericLe(a, b);
 	}
 
 	public static void index(ExecutionContext context, Object table, Object key) throws ControlThrowable {
@@ -598,22 +602,18 @@ public abstract class Dispatch {
 		}
 	}
 
-	private static boolean isNonZero(MathImplementation m, Number n) {
-		return !m.do_eq(0L, n);
-	}
+	private static final Long ZERO = Long.valueOf(0L);
 
 	public static boolean continueLoop(Number index, Number limit, Number step) {
-		MathImplementation m_step = MathImplementation.arithmetic(step, 0L);
-		if (!isNonZero(m_step, step)) {
+		if (ComparisonImplementation.numericEq(ZERO, step)) {
 			return false;  // step is zero or NaN
 		}
 
-		boolean ascending = m_step.do_lt(0L, step);
+		boolean ascending = ComparisonImplementation.numericLt(ZERO, step);
 
-		MathImplementation m_cmp = MathImplementation.arithmetic(index, limit);
-		return ascending
-				? m_cmp.do_le(index, limit)
-				: m_cmp.do_le(limit, index);
+		return ComparisonImplementation.numericLe(
+				ascending ? index : limit,
+				ascending ? limit : index);
 	}
 
 }

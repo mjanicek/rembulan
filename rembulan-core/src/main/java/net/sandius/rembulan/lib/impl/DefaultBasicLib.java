@@ -697,7 +697,7 @@ public class DefaultBasicLib extends BasicLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object a = args.nextAny();
 			Object b = args.nextAny();
-			context.getObjectSink().setTo(RawOperators.raweq(a, b));
+			context.getObjectSink().setTo(ComparisonImplementation.eq(a, b));
 		}
 
 	}
@@ -763,7 +763,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else if (arg1 instanceof String) {
 				String s = (String) arg1;
-				result = RawOperators.stringLen(s);
+				result = Dispatch.len(s);
 			}
 			else {
 				throw new BadArgumentException(1, name(), "table or string expected");

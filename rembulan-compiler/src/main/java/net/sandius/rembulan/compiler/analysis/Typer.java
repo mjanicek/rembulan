@@ -88,9 +88,9 @@ public class Typer {
 		}
 
 		switch (op) {
-			case BAND: return il & ir;
-			case BOR:  return il | ir;
-			case BXOR: return il ^ ir;
+			case BAND: return RawOperators.rawband(il, ir);
+			case BOR:  return RawOperators.rawbor(il, ir);
+			case BXOR: return RawOperators.rawbxor(il, ir);
 			case SHL:  return RawOperators.rawshl(il, ir);
 			case SHR:  return RawOperators.rawshr(il, ir);
 			default: throw new IllegalArgumentException("Illegal operation: " + op);
@@ -120,8 +120,10 @@ public class Typer {
 		}
 
 		switch (op) {
-			case EQ:  return c.do_eq(l, r);
-			case NEQ: return !c.do_eq(l, r);
+			case EQ:  return ComparisonImplementation.eq(l, r);
+			case NEQ: return !ComparisonImplementation.eq(l, r);
+//			case EQ:  return c.do_eq(l, r);
+//			case NEQ: return !c.do_eq(l, r);
 			case LT:  return c.do_lt(l, r);
 			case LE:  return c.do_le(l, r);
 			default: throw new IllegalArgumentException("Illegal operation: " + op);
@@ -178,7 +180,7 @@ public class Typer {
 
 			case BNOT: {
 				Long l = Conversions.integerValueOf(arg);
-				return l != null ? ~l : null;
+				return l != null ? RawOperators.rawbnot(l) : null;
 			}
 
 			case NOT:
@@ -186,7 +188,7 @@ public class Typer {
 
 			case LEN:
 				return arg instanceof String
-						? RawOperators.stringLen((String) arg)
+						? Dispatch.len((String) arg)
 						: null;
 
 			default:

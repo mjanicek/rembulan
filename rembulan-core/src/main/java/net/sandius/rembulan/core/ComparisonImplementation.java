@@ -16,6 +16,10 @@
 
 package net.sandius.rembulan.core;
 
+import static net.sandius.rembulan.core.RawOperators.raweq;
+import static net.sandius.rembulan.core.RawOperators.rawle;
+import static net.sandius.rembulan.core.RawOperators.rawlt;
+
 public abstract class ComparisonImplementation {
 
 	public static final NumericComparisonImplementation NUMERIC_CMP = new NumericComparisonImplementation();
@@ -25,66 +29,91 @@ public abstract class ComparisonImplementation {
 	public abstract boolean do_lt(Object a, Object b);
 	public abstract boolean do_le(Object a, Object b);
 
+	public static boolean eq(Object a, Object b) {
+		if (a == null && b == null) {
+			// two nils
+			return true;
+		}
+		else if (a == null) {
+			// b is definitely not nil; also ensures that neither a nor b is null in the tests below
+			return false;
+		}
+		else if (a instanceof Number && b instanceof Number) {
+			return numericEq((Number) a, (Number) b);
+		}
+		else if (a instanceof Boolean || a instanceof String || a instanceof Invokable) {
+			// value-based equality
+			return a.equals(b);
+		}
+		else {
+			// reference-based equality
+			return a == b;
+		}
+	}
+
+	public static boolean numericEq(Number a, Number b) {
+		boolean isflt_a = a instanceof Double || a instanceof Float;
+		boolean isflt_b = b instanceof Double || b instanceof Float;
+
+		if (isflt_a) {
+			return isflt_b
+					? raweq(a.doubleValue(), b.doubleValue())
+					: raweq(a.doubleValue(), b.longValue());
+		}
+		else {
+			return isflt_b
+					? raweq(a.longValue(), b.doubleValue())
+					: raweq(a.longValue(), b.longValue());
+		}
+	}
+
+	public static boolean numericLt(Number a, Number b) {
+		boolean isflt_a = a instanceof Double || a instanceof Float;
+		boolean isflt_b = b instanceof Double || b instanceof Float;
+
+		if (isflt_a) {
+			return isflt_b
+					? rawlt(a.doubleValue(), b.doubleValue())
+					: rawlt(a.doubleValue(), b.longValue());
+		}
+		else {
+			return isflt_b
+					? rawlt(a.longValue(), b.doubleValue())
+					: rawlt(a.longValue(), b.longValue());
+		}
+	}
+
+	public static boolean numericLe(Number a, Number b) {
+		boolean isflt_a = a instanceof Double || a instanceof Float;
+		boolean isflt_b = b instanceof Double || b instanceof Float;
+
+		if (isflt_a) {
+			return isflt_b
+					? rawle(a.doubleValue(), b.doubleValue())
+					: rawle(a.doubleValue(), b.longValue());
+		}
+		else {
+			return isflt_b
+					? rawle(a.longValue(), b.doubleValue())
+					: rawle(a.longValue(), b.longValue());
+		}
+	}
+
 	public static class NumericComparisonImplementation extends ComparisonImplementation {
 
 		@Override
 		public boolean do_eq(Object a, Object b) {
-			Number na = (Number) a;
-			Number nb = (Number) b;
-
-			boolean isflt_a = na instanceof Double || na instanceof Float;
-			boolean isflt_b = nb instanceof Double || nb instanceof Float;
-
-			if (isflt_a) {
-				return isflt_b
-						? RawOperators.raweq(na.doubleValue(), nb.doubleValue())
-						: RawOperators.raweq(na.doubleValue(), nb.longValue());
-			}
-			else {
-				return isflt_b
-						? RawOperators.raweq(na.longValue(), nb.doubleValue())
-						: RawOperators.raweq(na.longValue(), nb.longValue());
-			}
+			return numericEq((Number) a, (Number) b);
 		}
 
 		@Override
 		public boolean do_lt(Object a, Object b) {
-			Number na = (Number) a;
-			Number nb = (Number) b;
-
-			boolean isflt_a = na instanceof Double || na instanceof Float;
-			boolean isflt_b = nb instanceof Double || nb instanceof Float;
-
-			if (isflt_a) {
-				return isflt_b
-						? RawOperators.rawlt(na.doubleValue(), nb.doubleValue())
-						: RawOperators.rawlt(na.doubleValue(), nb.longValue());
-			}
-			else {
-				return isflt_b
-						? RawOperators.rawlt(na.longValue(), nb.doubleValue())
-						: RawOperators.rawlt(na.longValue(), nb.longValue());
-			}
+			return numericLt((Number) a, (Number) b);
 		}
 
 		@Override
 		public boolean do_le(Object a, Object b) {
-			Number na = (Number) a;
-			Number nb = (Number) b;
-
-			boolean isflt_a = na instanceof Double || na instanceof Float;
-			boolean isflt_b = nb instanceof Double || nb instanceof Float;
-
-			if (isflt_a) {
-				return isflt_b
-						? RawOperators.rawle(na.doubleValue(), nb.doubleValue())
-						: RawOperators.rawle(na.doubleValue(), nb.longValue());
-			}
-			else {
-				return isflt_b
-						? RawOperators.rawle(na.longValue(), nb.doubleValue())
-						: RawOperators.rawle(na.longValue(), nb.longValue());
-			}
+			return numericLe((Number) a, (Number) b);
 		}
 
 	}
@@ -118,10 +147,6 @@ public abstract class ComparisonImplementation {
 		else {
 			return null;
 		}
-	}
-
-	public static ComparisonImplementation of(Number a, Number b) {
-		return NUMERIC_CMP;
 	}
 
 }

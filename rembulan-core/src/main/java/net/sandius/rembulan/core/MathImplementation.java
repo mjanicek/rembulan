@@ -16,9 +16,14 @@
 
 package net.sandius.rembulan.core;
 
+import static net.sandius.rembulan.core.RawOperators.rawadd;
+import static net.sandius.rembulan.core.RawOperators.rawdiv;
 import static net.sandius.rembulan.core.RawOperators.rawidiv;
 import static net.sandius.rembulan.core.RawOperators.rawmod;
+import static net.sandius.rembulan.core.RawOperators.rawmul;
 import static net.sandius.rembulan.core.RawOperators.rawpow;
+import static net.sandius.rembulan.core.RawOperators.rawsub;
+import static net.sandius.rembulan.core.RawOperators.rawunm;
 
 public abstract class MathImplementation {
 
@@ -35,30 +40,26 @@ public abstract class MathImplementation {
 
 	public abstract Number do_unm(Number n);
 
-	public abstract boolean do_eq(Number a, Number b);
-	public abstract boolean do_lt(Number a, Number b);
-	public abstract boolean do_le(Number a, Number b);
-
 	public static class IntegerMathImplementation extends MathImplementation {
 
 		@Override
 		public Long do_add(Number a, Number b) {
-			return a.longValue() + b.longValue();
+			return rawadd(a.longValue(), b.longValue());
 		}
 
 		@Override
 		public Long do_sub(Number a, Number b) {
-			return a.longValue() - b.longValue();
+			return rawsub(a.longValue(), b.longValue());
 		}
 
 		@Override
 		public Long do_mul(Number a, Number b) {
-			return a.longValue() * b.longValue();
+			return rawmul(a.longValue(), b.longValue());
 		}
 
 		@Override
 		public Double do_div(Number a, Number b) {
-			return a.doubleValue() / b.doubleValue();
+			return rawdiv(a.longValue(), b.longValue());
 		}
 
 		@Override
@@ -73,27 +74,12 @@ public abstract class MathImplementation {
 
 		@Override
 		public Double do_pow(Number a, Number b) {
-			return rawpow(a.doubleValue(), b.doubleValue());
+			return rawpow(a.longValue(), b.longValue());
 		}
 
 		@Override
 		public Long do_unm(Number n) {
-			return -n.longValue();
-		}
-
-		@Override
-		public boolean do_eq(Number a, Number b) {
-			return a.longValue() == b.longValue();
-		}
-
-		@Override
-		public boolean do_lt(Number a, Number b) {
-			return a.longValue() < b.longValue();
-		}
-
-		@Override
-		public boolean do_le(Number a, Number b) {
-			return a.longValue() <= b.longValue();
+			return rawunm(n.longValue());
 		}
 
 	}
@@ -102,22 +88,22 @@ public abstract class MathImplementation {
 
 		@Override
 		public Double do_add(Number a, Number b) {
-			return a.doubleValue() + b.doubleValue();
+			return rawadd(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
 		public Double do_sub(Number a, Number b) {
-			return a.doubleValue() - b.doubleValue();
+			return rawsub(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
 		public Double do_mul(Number a, Number b) {
-			return a.doubleValue() * b.doubleValue();
+			return rawmul(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
 		public Double do_div(Number a, Number b) {
-			return a.doubleValue() / b.doubleValue();
+			return rawdiv(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
@@ -137,22 +123,7 @@ public abstract class MathImplementation {
 
 		@Override
 		public Double do_unm(Number n) {
-			return -n.doubleValue();
-		}
-
-		@Override
-		public boolean do_eq(Number a, Number b) {
-			return a.doubleValue() == b.doubleValue();
-		}
-
-		@Override
-		public boolean do_lt(Number a, Number b) {
-			return a.doubleValue() < b.doubleValue();
-		}
-
-		@Override
-		public boolean do_le(Number a, Number b) {
-			return a.doubleValue() <= b.doubleValue();
+			return rawunm(n.doubleValue());
 		}
 
 	}
