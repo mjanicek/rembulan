@@ -25,10 +25,14 @@ import static net.sandius.rembulan.LuaMathOperators.rawpow;
 import static net.sandius.rembulan.LuaMathOperators.rawsub;
 import static net.sandius.rembulan.LuaMathOperators.rawunm;
 
-public abstract class MathImplementation {
+public abstract class Arithmetic {
 
-	public static final IntegerMathImplementation INTEGER_MATH = new IntegerMathImplementation();
-	public static final FloatMathImplementation FLOAT_MATH = new FloatMathImplementation();
+	private Arithmetic() {
+		// not to be instantiated by the outside world
+	}
+
+	public static final IntegerArithmetic INTEGER = new IntegerArithmetic();
+	public static final FloatArithmetic FLOAT = new FloatArithmetic();
 
 	public abstract Number do_add(Number a, Number b);
 	public abstract Number do_sub(Number a, Number b);
@@ -40,7 +44,7 @@ public abstract class MathImplementation {
 
 	public abstract Number do_unm(Number n);
 
-	public static class IntegerMathImplementation extends MathImplementation {
+	public static final class IntegerArithmetic extends Arithmetic {
 
 		@Override
 		public Long do_add(Number a, Number b) {
@@ -84,7 +88,7 @@ public abstract class MathImplementation {
 
 	}
 
-	public static class FloatMathImplementation extends MathImplementation {
+	public static final class FloatArithmetic extends Arithmetic {
 
 		@Override
 		public Double do_add(Number a, Number b) {
@@ -128,38 +132,36 @@ public abstract class MathImplementation {
 
 	}
 
-	@Deprecated
-	public static MathImplementation arithmetic(Object a, Object b) {
-		return arithmetic(Conversions.arithmeticValueOf(a), Conversions.arithmeticValueOf(b));
+	public static Arithmetic of(Object a, Object b) {
+		return of(Conversions.arithmeticValueOf(a), Conversions.arithmeticValueOf(b));
 	}
 
-	public static MathImplementation arithmetic(Number a, Number b) {
+	public static Arithmetic of(Number a, Number b) {
 		if (a == null || b == null) {
 			return null;
 		}
 		else if ((a instanceof Double || a instanceof Float)
 				|| (b instanceof Double || b instanceof Float)) {
-			return FLOAT_MATH;
+			return FLOAT;
 		}
 		else {
-			return INTEGER_MATH;
+			return INTEGER;
 		}
 	}
 
-	@Deprecated
-	public static MathImplementation arithmetic(Object o) {
-		return arithmetic(Conversions.arithmeticValueOf(o));
+	public static Arithmetic of(Object o) {
+		return of(Conversions.arithmeticValueOf(o));
 	}
 
-	public static MathImplementation arithmetic(Number n) {
+	public static Arithmetic of(Number n) {
 		if (n == null) {
 			return null;
 		}
 		else if (n instanceof Double || n instanceof Float) {
-			return FLOAT_MATH;
+			return FLOAT;
 		}
 		else {
-			return INTEGER_MATH;
+			return INTEGER;
 		}
 	}
 

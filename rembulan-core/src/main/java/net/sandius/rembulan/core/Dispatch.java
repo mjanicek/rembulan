@@ -165,7 +165,7 @@ public abstract class Dispatch {
 	public static void add(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
-		MathImplementation math = MathImplementation.arithmetic(na, nb);
+		Arithmetic math = Arithmetic.of(na, nb);
 
 		if (math != null) {
 			context.getObjectSink().setTo(math.do_add(na, nb));
@@ -176,13 +176,13 @@ public abstract class Dispatch {
 	}
 
 	public static Number add(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_add(a, b);
+		return Arithmetic.of(a, b).do_add(a, b);
 	}
 
 	public static void sub(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
+		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_sub(na, nb));
 		}
@@ -192,13 +192,13 @@ public abstract class Dispatch {
 	}
 
 	public static Number sub(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_sub(a, b);
+		return Arithmetic.of(a, b).do_sub(a, b);
 	}
 
 	public static void mul(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
+		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_mul(na, nb));
 		}
@@ -208,13 +208,13 @@ public abstract class Dispatch {
 	}
 
 	public static Number mul(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_mul(a, b);
+		return Arithmetic.of(a, b).do_mul(a, b);
 	}
 
 	public static void div(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
+		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_div(na, nb));
 		}
@@ -224,13 +224,13 @@ public abstract class Dispatch {
 	}
 
 	public static Number div(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_div(a, b);
+		return Arithmetic.of(a, b).do_div(a, b);
 	}
 
 	public static void mod(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
+		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_mod(na, nb));
 		}
@@ -240,13 +240,13 @@ public abstract class Dispatch {
 	}
 
 	public static Number mod(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_mod(a, b);
+		return Arithmetic.of(a, b).do_mod(a, b);
 	}
 
 	public static void idiv(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
+		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_idiv(na, nb));
 		}
@@ -256,13 +256,13 @@ public abstract class Dispatch {
 	}
 
 	public static Number idiv(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_idiv(a, b);
+		return Arithmetic.of(a, b).do_idiv(a, b);
 	}
 
 	public static void pow(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
-		MathImplementation m = MathImplementation.arithmetic(na, nb);
+		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_pow(na, nb));
 		}
@@ -272,7 +272,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number pow(Number a, Number b) {
-		return MathImplementation.arithmetic(a, b).do_pow(a, b);
+		return Arithmetic.of(a, b).do_pow(a, b);
 	}
 
 	private static void try_mt_bitwise(ExecutionContext context, String event, Object a, Object b) throws ControlThrowable {
@@ -359,7 +359,7 @@ public abstract class Dispatch {
 
 	public static void unm(ExecutionContext context, Object o) throws ControlThrowable {
 		Number no = Conversions.arithmeticValueOf(o);
-		MathImplementation m = MathImplementation.arithmetic(no);
+		Arithmetic m = Arithmetic.of(no);
 		if (m != null) {
 			context.getObjectSink().setTo(m.do_unm(no));
 		}
@@ -369,7 +369,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number unm(Number n) {
-		return MathImplementation.arithmetic(n).do_unm(n);
+		return Arithmetic.of(n).do_unm(n);
 	}
 
 	public static void bnot(ExecutionContext context, Object o) throws ControlThrowable {
