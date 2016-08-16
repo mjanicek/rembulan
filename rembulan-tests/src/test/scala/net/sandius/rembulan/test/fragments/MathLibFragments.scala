@@ -38,8 +38,16 @@ object MathLibFragments extends FragmentBundle with FragmentExpectations with On
       program ("return math.modf(math.mininteger)") succeedsWith (Long.MinValue, 0.0)
     }
 
+    about ("huge") {
+      program ("return math.huge") succeedsWith Double.PositiveInfinity
+    }
+
     about ("maxinteger") {
-      program ("return (math.maxinteger - 1) // math.maxinteger") succeedsWith (0)
+      program ("return math.maxinteger") succeedsWith Long.MaxValue
+    }
+
+    about ("mininteger") {
+      program ("return math.mininteger") succeedsWith Long.MinValue
     }
 
     about ("random") {

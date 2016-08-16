@@ -25,6 +25,8 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
   val Length = "get length of"
   val Concatenate = "concatenate"
 
+  val minMaxPrefix = "local minint, maxint = 0x8000000000000000, 0x7fffffffffffffff\n"
+
   object opArgErrors {
 
 //    val ValidBinArgs = Seq("1", "1.0", "\"1\"", "\"1.0\"")
@@ -98,6 +100,10 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
 
   in (EmptyContext) {
 
+    about ("extreme ints") {
+      program (minMaxPrefix + "return minint, maxint") succeedsWith (Long.MinValue, Long.MaxValue)
+    }
+
     about ("add") {
 
       program ("return 1 + 2") succeedsWith 3
@@ -150,6 +156,8 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return 3.0 // -0.0") succeedsWith Double.NegativeInfinity
 
       program ("return 3 // 0") failsWith "attempt to divide by zero"
+
+      program (minMaxPrefix + "return (maxint - 1) // maxint") succeedsWith 0
 
       opArgErrors.binary("//", Arithmetic)
 
@@ -453,6 +461,26 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
       program ("return (1 / 0) == (1 / 0)") succeedsWith true
       program ("return (-1 / 0) == (-1 / 0)") succeedsWith true
       program ("return (0 / 0) == (0 / 0)") succeedsWith false
+
+    }
+
+    about ("int-float comparison") {
+
+      program ("return 1 < 1.1") succeedsWith true
+      program ("return 1 < 0.9") succeedsWith false
+      program ("return 1 <= 1.1") succeedsWith true
+      program ("return 1 <= 0.9") succeedsWith false
+      program ("return -1 < -0.9") succeedsWith true
+      program ("return -1 < -1.1") succeedsWith false
+      program ("return -1 <= -1.1") succeedsWith false
+      program ("return -1 <= -0.9") succeedsWith true
+
+      program (minMaxPrefix + "return minint <= minint + 0.0") succeedsWith true
+      program (minMaxPrefix + "return minint + 0.0 <= minint") succeedsWith true
+      program (minMaxPrefix + "return minint < minint + 0.0") succeedsWith false
+      program (minMaxPrefix + "return minint + 0.0 < minint") succeedsWith false
+      program (minMaxPrefix + "return maxint < minint * -1.0") succeedsWith true
+      program (minMaxPrefix + "return maxint <= minint * -1.0") succeedsWith true
 
     }
 
