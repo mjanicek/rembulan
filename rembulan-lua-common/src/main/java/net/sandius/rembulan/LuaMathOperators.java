@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
 /**
  * A collection of static methods for performing the equivalents of Lua's arithmetic,

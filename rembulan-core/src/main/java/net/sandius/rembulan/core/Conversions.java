@@ -17,6 +17,7 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.LuaFormat;
+import net.sandius.rembulan.LuaMathOperators;
 import net.sandius.rembulan.lib.BasicLib;
 
 /*

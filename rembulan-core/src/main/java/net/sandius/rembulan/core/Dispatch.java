@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.LuaMathOperators;
+
 public abstract class Dispatch {
 
 	private Dispatch() {

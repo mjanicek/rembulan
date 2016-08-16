@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.core.LuaMathOperators;
+import net.sandius.rembulan.LuaMathOperators;
 import net.sandius.rembulan.core.Table;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;

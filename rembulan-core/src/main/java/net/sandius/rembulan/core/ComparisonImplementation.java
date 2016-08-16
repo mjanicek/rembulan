@@ -16,9 +16,9 @@
 
 package net.sandius.rembulan.core;
 
-import static net.sandius.rembulan.core.LuaMathOperators.raweq;
-import static net.sandius.rembulan.core.LuaMathOperators.rawle;
-import static net.sandius.rembulan.core.LuaMathOperators.rawlt;
+import static net.sandius.rembulan.LuaMathOperators.raweq;
+import static net.sandius.rembulan.LuaMathOperators.rawle;
+import static net.sandius.rembulan.LuaMathOperators.rawlt;
 
 public abstract class ComparisonImplementation {
 
