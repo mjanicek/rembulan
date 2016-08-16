@@ -23,7 +23,7 @@ import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.UnOp;
-import net.sandius.rembulan.core.ComparisonImplementation;
+import net.sandius.rembulan.core.Comparison;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 
@@ -113,15 +113,15 @@ public class Typer {
 			return null;
 		}
 
-		ComparisonImplementation c = ComparisonImplementation.of(l, r);
+		Comparison c = Comparison.of(l, r);
 
 		if (c == null) {
 			return null;
 		}
 
 		switch (op) {
-			case EQ:  return ComparisonImplementation.eq(l, r);
-			case NEQ: return !ComparisonImplementation.eq(l, r);
+			case EQ:  return Comparison.eq(l, r);
+			case NEQ: return !Comparison.eq(l, r);
 //			case EQ:  return c.do_eq(l, r);
 //			case NEQ: return !c.do_eq(l, r);
 			case LT:  return c.do_lt(l, r);

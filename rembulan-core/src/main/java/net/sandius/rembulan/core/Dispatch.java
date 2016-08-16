@@ -450,7 +450,7 @@ public abstract class Dispatch {
 	}
 
 	private static void eq(ExecutionContext context, boolean polarity, Object a, Object b) throws ControlThrowable {
-		boolean rawEqual = ComparisonImplementation.eq(a, b);
+		boolean rawEqual = Comparison.eq(a, b);
 
 		if (!rawEqual
 				&& ((a instanceof Table && b instanceof Table)
@@ -478,12 +478,12 @@ public abstract class Dispatch {
 	}
 
 	public static boolean eq(Number a, Number b) {
-		return ComparisonImplementation.numericEq(a, b);
+		return Comparison.NUMERIC.do_eq(a, b);
 	}
 
 
 	public static void lt(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		ComparisonImplementation c = ComparisonImplementation.of(a, b);
+		Comparison c = Comparison.of(a, b);
 		if (c != null) {
 			context.getObjectSink().setTo(c.do_lt(a, b));
 		}
@@ -500,11 +500,15 @@ public abstract class Dispatch {
 	}
 
 	public static boolean lt(Number a, Number b) {
-		return ComparisonImplementation.numericLt(a, b);
+		return Comparison.NUMERIC.do_lt(a, b);
+	}
+
+	public static boolean lt(String a, String b) {
+		return Comparison.STRING.do_lt(a, b);
 	}
 
 	public static void le(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		ComparisonImplementation c = ComparisonImplementation.of(a, b);
+		Comparison c = Comparison.of(a, b);
 		if (c != null) {
 			context.getObjectSink().setTo(c.do_le(a, b));
 		}
@@ -531,7 +535,11 @@ public abstract class Dispatch {
 	}
 
 	public static boolean le(Number a, Number b) {
-		return ComparisonImplementation.numericLe(a, b);
+		return Comparison.NUMERIC.do_le(a, b);
+	}
+
+	public static boolean le(String a, String b) {
+		return Comparison.STRING.do_le(a, b);
 	}
 
 	public static void index(ExecutionContext context, Object table, Object key) throws ControlThrowable {
@@ -607,13 +615,13 @@ public abstract class Dispatch {
 	private static final Long ZERO = Long.valueOf(0L);
 
 	public static boolean continueLoop(Number index, Number limit, Number step) {
-		if (ComparisonImplementation.numericEq(ZERO, step)) {
+		if (Comparison.NUMERIC.do_eq(ZERO, step)) {
 			return false;  // step is zero or NaN
 		}
 
-		boolean ascending = ComparisonImplementation.numericLt(ZERO, step);
+		boolean ascending = Comparison.NUMERIC.do_lt(ZERO, step);
 
-		return ComparisonImplementation.numericLe(
+		return Comparison.NUMERIC.do_le(
 				ascending ? index : limit,
 				ascending ? limit : index);
 	}
