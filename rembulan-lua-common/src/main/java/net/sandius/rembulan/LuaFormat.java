@@ -180,7 +180,7 @@ public class LuaFormat {
 			}
 			else {
 				// escaping
-				bld.append('\'');
+				bld.append('\\');
 
 				int esc = shortEscape(c);
 
