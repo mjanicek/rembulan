@@ -231,12 +231,12 @@ public abstract class Conversions {
 	 *         or {@code null} if {@code n} does not have integer value
 	 *
 	 * @throws NullPointerException if {@code n} is {@code null}
-	 * @see RawOperators#hasExactIntegerRepresentation(double)
+	 * @see LuaMathOperators#hasExactIntegerRepresentation(double)
 	 */
 	public static Long integerValueOf(Number n) {
 		if (n instanceof Double || n instanceof Float) {
 			double d = n.doubleValue();
-			return RawOperators.hasExactIntegerRepresentation(d) ? Long.valueOf((long) d) : null;
+			return LuaMathOperators.hasExactIntegerRepresentation(d) ? Long.valueOf((long) d) : null;
 		}
 		else if (n instanceof Long) {
 			return (Long) n;

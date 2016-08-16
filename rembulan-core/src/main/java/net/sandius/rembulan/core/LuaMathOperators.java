@@ -35,9 +35,9 @@ package net.sandius.rembulan.core;
  * supply it with the required values; however, note that the method selection is well-behaved
  * under the type conversion rules of the Java programming language.</p>
  */
-public final class RawOperators {
+public final class LuaMathOperators {
 
-	private RawOperators() {
+	private LuaMathOperators() {
 		// not to be instantiated or extended
 	}
 

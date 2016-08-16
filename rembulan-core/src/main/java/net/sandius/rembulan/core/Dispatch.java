@@ -300,7 +300,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(RawOperators.rawband(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.rawband(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BAND, a, b);
@@ -312,7 +312,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(RawOperators.rawbor(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.rawbor(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BOR, a, b);
@@ -324,7 +324,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(RawOperators.rawbxor(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.rawbxor(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BXOR, a, b);
@@ -336,7 +336,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(RawOperators.rawshl(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.rawshl(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHL, a, b);
@@ -348,7 +348,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(RawOperators.rawshr(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.rawshr(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHR, a, b);
@@ -374,7 +374,7 @@ public abstract class Dispatch {
 		Long lo = Conversions.integerValueOf(o);
 
 		if (lo != null) {
-			context.getObjectSink().setTo(RawOperators.rawbnot(lo));
+			context.getObjectSink().setTo(LuaMathOperators.rawbnot(lo));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BNOT, o);

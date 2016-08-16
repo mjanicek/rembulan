@@ -16,14 +16,14 @@
 
 package net.sandius.rembulan.core;
 
-import static net.sandius.rembulan.core.RawOperators.rawadd;
-import static net.sandius.rembulan.core.RawOperators.rawdiv;
-import static net.sandius.rembulan.core.RawOperators.rawidiv;
-import static net.sandius.rembulan.core.RawOperators.rawmod;
-import static net.sandius.rembulan.core.RawOperators.rawmul;
-import static net.sandius.rembulan.core.RawOperators.rawpow;
-import static net.sandius.rembulan.core.RawOperators.rawsub;
-import static net.sandius.rembulan.core.RawOperators.rawunm;
+import static net.sandius.rembulan.core.LuaMathOperators.rawadd;
+import static net.sandius.rembulan.core.LuaMathOperators.rawdiv;
+import static net.sandius.rembulan.core.LuaMathOperators.rawidiv;
+import static net.sandius.rembulan.core.LuaMathOperators.rawmod;
+import static net.sandius.rembulan.core.LuaMathOperators.rawmul;
+import static net.sandius.rembulan.core.LuaMathOperators.rawpow;
+import static net.sandius.rembulan.core.LuaMathOperators.rawsub;
+import static net.sandius.rembulan.core.LuaMathOperators.rawunm;
 
 public abstract class MathImplementation {
 

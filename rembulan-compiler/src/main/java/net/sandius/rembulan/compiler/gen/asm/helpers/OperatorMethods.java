@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.core.LuaMathOperators;
 import net.sandius.rembulan.core.Table;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -38,7 +38,7 @@ public class OperatorMethods {
 	public static AbstractInsnNode rawBinaryOperator(String methodName, Type returnType, Type argType) {
 		return new MethodInsnNode(
 				INVOKESTATIC,
-				Type.getInternalName(RawOperators.class),
+				Type.getInternalName(LuaMathOperators.class),
 				methodName,
 				Type.getMethodDescriptor(
 						returnType,
@@ -50,7 +50,7 @@ public class OperatorMethods {
 	public static AbstractInsnNode stringLen() {
 		return new MethodInsnNode(
 				INVOKESTATIC,
-				Type.getInternalName(RawOperators.class),
+				Type.getInternalName(LuaMathOperators.class),
 				"stringLen",
 				Type.getMethodDescriptor(
 						Type.INT_TYPE,

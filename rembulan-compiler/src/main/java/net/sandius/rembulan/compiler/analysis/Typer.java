@@ -25,7 +25,7 @@ import net.sandius.rembulan.compiler.ir.UnOp;
 import net.sandius.rembulan.core.ComparisonImplementation;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
-import net.sandius.rembulan.core.RawOperators;
+import net.sandius.rembulan.core.LuaMathOperators;
 
 public class Typer {
 
@@ -88,11 +88,11 @@ public class Typer {
 		}
 
 		switch (op) {
-			case BAND: return RawOperators.rawband(il, ir);
-			case BOR:  return RawOperators.rawbor(il, ir);
-			case BXOR: return RawOperators.rawbxor(il, ir);
-			case SHL:  return RawOperators.rawshl(il, ir);
-			case SHR:  return RawOperators.rawshr(il, ir);
+			case BAND: return LuaMathOperators.rawband(il, ir);
+			case BOR:  return LuaMathOperators.rawbor(il, ir);
+			case BXOR: return LuaMathOperators.rawbxor(il, ir);
+			case SHL:  return LuaMathOperators.rawshl(il, ir);
+			case SHR:  return LuaMathOperators.rawshr(il, ir);
 			default: throw new IllegalArgumentException("Illegal operation: " + op);
 		}
 	}
@@ -180,7 +180,7 @@ public class Typer {
 
 			case BNOT: {
 				Long l = Conversions.integerValueOf(arg);
-				return l != null ? RawOperators.rawbnot(l) : null;
+				return l != null ? LuaMathOperators.rawbnot(l) : null;
 			}
 
 			case NOT:
