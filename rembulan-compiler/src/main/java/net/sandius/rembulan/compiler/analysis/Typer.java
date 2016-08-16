@@ -88,11 +88,11 @@ public class Typer {
 		}
 
 		switch (op) {
-			case BAND: return LuaMathOperators.rawband(il, ir);
-			case BOR:  return LuaMathOperators.rawbor(il, ir);
-			case BXOR: return LuaMathOperators.rawbxor(il, ir);
-			case SHL:  return LuaMathOperators.rawshl(il, ir);
-			case SHR:  return LuaMathOperators.rawshr(il, ir);
+			case BAND: return LuaMathOperators.band(il, ir);
+			case BOR:  return LuaMathOperators.bor(il, ir);
+			case BXOR: return LuaMathOperators.bxor(il, ir);
+			case SHL:  return LuaMathOperators.shl(il, ir);
+			case SHR:  return LuaMathOperators.shr(il, ir);
 			default: throw new IllegalArgumentException("Illegal operation: " + op);
 		}
 	}
@@ -180,7 +180,7 @@ public class Typer {
 
 			case BNOT: {
 				Long l = Conversions.integerValueOf(arg);
-				return l != null ? LuaMathOperators.rawbnot(l) : null;
+				return l != null ? LuaMathOperators.bnot(l) : null;
 			}
 
 			case NOT:

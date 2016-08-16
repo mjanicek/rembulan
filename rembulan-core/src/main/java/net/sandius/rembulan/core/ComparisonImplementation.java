@@ -16,9 +16,7 @@
 
 package net.sandius.rembulan.core;
 
-import static net.sandius.rembulan.LuaMathOperators.raweq;
-import static net.sandius.rembulan.LuaMathOperators.rawle;
-import static net.sandius.rembulan.LuaMathOperators.rawlt;
+import net.sandius.rembulan.LuaMathOperators;
 
 public abstract class ComparisonImplementation {
 
@@ -57,13 +55,13 @@ public abstract class ComparisonImplementation {
 
 		if (isflt_a) {
 			return isflt_b
-					? raweq(a.doubleValue(), b.doubleValue())
-					: raweq(a.doubleValue(), b.longValue());
+					? LuaMathOperators.eq(a.doubleValue(), b.doubleValue())
+					: LuaMathOperators.eq(a.doubleValue(), b.longValue());
 		}
 		else {
 			return isflt_b
-					? raweq(a.longValue(), b.doubleValue())
-					: raweq(a.longValue(), b.longValue());
+					? LuaMathOperators.eq(a.longValue(), b.doubleValue())
+					: LuaMathOperators.eq(a.longValue(), b.longValue());
 		}
 	}
 
@@ -73,13 +71,13 @@ public abstract class ComparisonImplementation {
 
 		if (isflt_a) {
 			return isflt_b
-					? rawlt(a.doubleValue(), b.doubleValue())
-					: rawlt(a.doubleValue(), b.longValue());
+					? LuaMathOperators.lt(a.doubleValue(), b.doubleValue())
+					: LuaMathOperators.lt(a.doubleValue(), b.longValue());
 		}
 		else {
 			return isflt_b
-					? rawlt(a.longValue(), b.doubleValue())
-					: rawlt(a.longValue(), b.longValue());
+					? LuaMathOperators.lt(a.longValue(), b.doubleValue())
+					: LuaMathOperators.lt(a.longValue(), b.longValue());
 		}
 	}
 
@@ -89,13 +87,13 @@ public abstract class ComparisonImplementation {
 
 		if (isflt_a) {
 			return isflt_b
-					? rawle(a.doubleValue(), b.doubleValue())
-					: rawle(a.doubleValue(), b.longValue());
+					? LuaMathOperators.le(a.doubleValue(), b.doubleValue())
+					: LuaMathOperators.le(a.doubleValue(), b.longValue());
 		}
 		else {
 			return isflt_b
-					? rawle(a.longValue(), b.doubleValue())
-					: rawle(a.longValue(), b.longValue());
+					? LuaMathOperators.le(a.longValue(), b.doubleValue())
+					: LuaMathOperators.le(a.longValue(), b.longValue());
 		}
 	}
 

@@ -168,7 +168,7 @@ public abstract class Dispatch {
 		Arithmetic math = Arithmetic.of(na, nb);
 
 		if (math != null) {
-			context.getObjectSink().setTo(math.do_add(na, nb));
+			context.getObjectSink().setTo(math.add(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_ADD, a, b);
@@ -176,7 +176,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number add(Number a, Number b) {
-		return Arithmetic.of(a, b).do_add(a, b);
+		return Arithmetic.of(a, b).add(a, b);
 	}
 
 	public static void sub(ExecutionContext context, Object a, Object b) throws ControlThrowable {
@@ -184,7 +184,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_sub(na, nb));
+			context.getObjectSink().setTo(m.sub(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_SUB, a, b);
@@ -192,7 +192,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number sub(Number a, Number b) {
-		return Arithmetic.of(a, b).do_sub(a, b);
+		return Arithmetic.of(a, b).sub(a, b);
 	}
 
 	public static void mul(ExecutionContext context, Object a, Object b) throws ControlThrowable {
@@ -200,7 +200,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_mul(na, nb));
+			context.getObjectSink().setTo(m.mul(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_MUL, a, b);
@@ -208,7 +208,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number mul(Number a, Number b) {
-		return Arithmetic.of(a, b).do_mul(a, b);
+		return Arithmetic.of(a, b).mul(a, b);
 	}
 
 	public static void div(ExecutionContext context, Object a, Object b) throws ControlThrowable {
@@ -216,7 +216,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_div(na, nb));
+			context.getObjectSink().setTo(m.div(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_DIV, a, b);
@@ -224,7 +224,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number div(Number a, Number b) {
-		return Arithmetic.of(a, b).do_div(a, b);
+		return Arithmetic.of(a, b).div(a, b);
 	}
 
 	public static void mod(ExecutionContext context, Object a, Object b) throws ControlThrowable {
@@ -232,7 +232,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_mod(na, nb));
+			context.getObjectSink().setTo(m.mod(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_MOD, a, b);
@@ -240,7 +240,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number mod(Number a, Number b) {
-		return Arithmetic.of(a, b).do_mod(a, b);
+		return Arithmetic.of(a, b).mod(a, b);
 	}
 
 	public static void idiv(ExecutionContext context, Object a, Object b) throws ControlThrowable {
@@ -248,7 +248,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_idiv(na, nb));
+			context.getObjectSink().setTo(m.idiv(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_IDIV, a, b);
@@ -256,7 +256,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number idiv(Number a, Number b) {
-		return Arithmetic.of(a, b).do_idiv(a, b);
+		return Arithmetic.of(a, b).idiv(a, b);
 	}
 
 	public static void pow(ExecutionContext context, Object a, Object b) throws ControlThrowable {
@@ -264,7 +264,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_pow(na, nb));
+			context.getObjectSink().setTo(m.pow(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_POW, a, b);
@@ -272,7 +272,7 @@ public abstract class Dispatch {
 	}
 
 	public static Number pow(Number a, Number b) {
-		return Arithmetic.of(a, b).do_pow(a, b);
+		return Arithmetic.of(a, b).pow(a, b);
 	}
 
 	private static void try_mt_bitwise(ExecutionContext context, String event, Object a, Object b) throws ControlThrowable {
@@ -302,7 +302,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(LuaMathOperators.rawband(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.band(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BAND, a, b);
@@ -314,7 +314,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(LuaMathOperators.rawbor(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.bor(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BOR, a, b);
@@ -326,7 +326,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(LuaMathOperators.rawbxor(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.bxor(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BXOR, a, b);
@@ -338,7 +338,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(LuaMathOperators.rawshl(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.shl(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHL, a, b);
@@ -350,7 +350,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getObjectSink().setTo(LuaMathOperators.rawshr(la, lb));
+			context.getObjectSink().setTo(LuaMathOperators.shr(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHR, a, b);
@@ -361,7 +361,7 @@ public abstract class Dispatch {
 		Number no = Conversions.arithmeticValueOf(o);
 		Arithmetic m = Arithmetic.of(no);
 		if (m != null) {
-			context.getObjectSink().setTo(m.do_unm(no));
+			context.getObjectSink().setTo(m.unm(no));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_UNM, o);
@@ -369,14 +369,14 @@ public abstract class Dispatch {
 	}
 
 	public static Number unm(Number n) {
-		return Arithmetic.of(n).do_unm(n);
+		return Arithmetic.of(n).unm(n);
 	}
 
 	public static void bnot(ExecutionContext context, Object o) throws ControlThrowable {
 		Long lo = Conversions.integerValueOf(o);
 
 		if (lo != null) {
-			context.getObjectSink().setTo(LuaMathOperators.rawbnot(lo));
+			context.getObjectSink().setTo(LuaMathOperators.bnot(lo));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BNOT, o);

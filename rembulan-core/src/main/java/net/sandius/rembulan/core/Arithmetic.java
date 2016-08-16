@@ -16,14 +16,7 @@
 
 package net.sandius.rembulan.core;
 
-import static net.sandius.rembulan.LuaMathOperators.rawadd;
-import static net.sandius.rembulan.LuaMathOperators.rawdiv;
-import static net.sandius.rembulan.LuaMathOperators.rawidiv;
-import static net.sandius.rembulan.LuaMathOperators.rawmod;
-import static net.sandius.rembulan.LuaMathOperators.rawmul;
-import static net.sandius.rembulan.LuaMathOperators.rawpow;
-import static net.sandius.rembulan.LuaMathOperators.rawsub;
-import static net.sandius.rembulan.LuaMathOperators.rawunm;
+import net.sandius.rembulan.LuaMathOperators;
 
 /**
  * A representation of one of the two arithmetic modes (integer or float).
@@ -48,9 +41,9 @@ import static net.sandius.rembulan.LuaMathOperators.rawunm;
  * <pre>
  *   // Number a, b
  *   final Number result;
- *   Arithmetic math = Arithmetic.of(a, b);
- *   if (math != null) {
- *       result = math.do_idiv(a, b);
+ *   Arithmetic m = Arithmetic.of(a, b);
+ *   if (m != null) {
+ *       result = m.idiv(a, b);
  *   }
  *   else {
  *       throw new IllegalStateException("a or b is nil");
@@ -66,118 +59,198 @@ public abstract class Arithmetic {
 	/**
 	 * Integer arithmetic.
 	 *
-	 * <p>Invokes arithmetic operations in {@link net.sandius.rembulan.LuaMathOperators}
-	 * with all arguments converted to integers (i.e. {@code long}s)</p>
+	 * <p>Invokes arithmetic operations from {@link LuaMathOperators} with all arguments
+	 * converted to Lua integers (i.e. {@code long}s).</p>
 	 */
 	public static final Arithmetic INTEGER = new IntegerArithmetic();
 
 	/**
 	 * Float arithmetic.
+	 *
+	 * <p>Invokes arithmetic operations from {@link LuaMathOperators} with all arguments
+	 * converted to Lua floats (i.e. {@code double}s).</p>
 	 */
 	public static final Arithmetic FLOAT = new FloatArithmetic();
 
-	public abstract Number do_add(Number a, Number b);
-	public abstract Number do_sub(Number a, Number b);
-	public abstract Number do_mul(Number a, Number b);
-	public abstract Double do_div(Number a, Number b);
-	public abstract Number do_mod(Number a, Number b);
-	public abstract Number do_idiv(Number a, Number b);
-	public abstract Double do_pow(Number a, Number b);
+	/**
+	 * Returns the boxed result of the Lua addition of the two numbers
+	 * {@code a} and {@code b}.
+	 * 
+	 * @param a  first addend, must not be {@code null}
+	 * @param b  second addend, must not be {@code null}
+	 * @return  the (boxed) value of the Lua expression {@code (a + b)}
+	 * 
+	 * @throws NullPointerException if {@code a} or {@code b} is {@code null}
+	 */
+	public abstract Number add(Number a, Number b);
 
-	public abstract Number do_unm(Number n);
+	/**
+	 * Returns the boxed result of the Lua subtraction of the two numbers
+	 * {@code a} and {@code b}.
+	 * 
+	 * @param a  the minuend, must not be {@code null}
+	 * @param b  the subtrahend, must not be {@code null}
+	 * @return  the (boxed) value of the Lua expression {@code (a - b)}
+	 * 
+	 * @throws NullPointerException if {@code a} or {@code b} is {@code null}
+	 */
+	public abstract Number sub(Number a, Number b);
+
+	/**
+	 * Returns the boxed result of the Lua multiplication of the two numbers
+	 * {@code a} and {@code b}.
+	 * 
+	 * @param a  first factor, must not be {@code null}
+	 * @param b  second factor, must not be {@code null}
+	 * @return  the (boxed) value of the Lua expression {@code (a * b)}
+	 * 
+	 * @throws NullPointerException if {@code a} or {@code b} is {@code null}
+	 */
+	public abstract Number mul(Number a, Number b);
+	
+	/**
+	 * Returns the boxed result of the Lua float division of the two numbers
+	 * {@code a} and {@code b}.
+	 * 
+	 * @param a  the dividend, must not be {@code null}
+	 * @param b  the divisor, must not be {@code null}
+	 * @return  the (boxed) value of the Lua expression {@code (a / b)}
+	 * 
+	 * @throws NullPointerException if {@code a} or {@code b} is {@code null}
+	 */
+	public abstract Double div(Number a, Number b);
+	
+	/**
+	 * Returns the boxed result of the Lua modulo of the two numbers
+	 * {@code a} and {@code b}.
+	 * 
+	 * @param a  the dividend, must not be {@code null}
+	 * @param b  the divisor, must not be {@code null}
+	 * @return  the (boxed) value of the Lua expression {@code (a % b)}
+	 * 
+	 * @throws NullPointerException if {@code a} or {@code b} is {@code null}
+	 */
+	public abstract Number mod(Number a, Number b);
+	
+	/**
+	 * Returns the boxed result of the Lua floor division of the two numbers
+	 * {@code a} and {@code b}.
+	 * 
+	 * @param a  the dividend, must not be {@code null}
+	 * @param b  the divisor, must not be {@code null}
+	 * @return  the (boxed) value of the Lua expression {@code (a // b)}
+	 * 
+	 * @throws NullPointerException if {@code a} or {@code b} is {@code null}
+	 */
+	public abstract Number idiv(Number a, Number b);
+	
+	/**
+	 * Returns the boxed result of the Lua exponentiation of the two numbers
+	 * {@code a} and {@code b}.
+	 * 
+	 * @param a  the base, must not be {@code null}
+	 * @param b  the exponent, must not be {@code null}
+	 * @return  the (boxed) value of the Lua expression {@code (a ^ b)}
+	 * 
+	 * @throws NullPointerException if {@code a} or {@code b} is {@code null}
+	 */
+	public abstract Double pow(Number a, Number b);
+	
+	/**
+	 * Returns the boxed result of the Lua arithmetic negation of the number
+	 * {@code n}.
+	 * 
+	 * @param n  the operand, must not be {@code null}
+	 * @return  the (boxed) value of the Lua expression {@code (-n)}
+	 * 
+	 * @throws NullPointerException if {@code n} is {@code null}
+	 */
+	public abstract Number unm(Number n);
 
 	private static final class IntegerArithmetic extends Arithmetic {
 
-		private IntegerArithmetic() {
-			// not to be instantiated by the outside world
+		@Override
+		public Long add(Number a, Number b) {
+			return LuaMathOperators.add(a.longValue(), b.longValue());
 		}
 
 		@Override
-		public Long do_add(Number a, Number b) {
-			return rawadd(a.longValue(), b.longValue());
+		public Long sub(Number a, Number b) {
+			return LuaMathOperators.sub(a.longValue(), b.longValue());
 		}
 
 		@Override
-		public Long do_sub(Number a, Number b) {
-			return rawsub(a.longValue(), b.longValue());
+		public Long mul(Number a, Number b) {
+			return LuaMathOperators.mul(a.longValue(), b.longValue());
 		}
 
 		@Override
-		public Long do_mul(Number a, Number b) {
-			return rawmul(a.longValue(), b.longValue());
+		public Double div(Number a, Number b) {
+			return LuaMathOperators.div(a.longValue(), b.longValue());
 		}
 
 		@Override
-		public Double do_div(Number a, Number b) {
-			return rawdiv(a.longValue(), b.longValue());
+		public Long mod(Number a, Number b) {
+			return LuaMathOperators.mod(a.longValue(), b.longValue());
 		}
 
 		@Override
-		public Long do_mod(Number a, Number b) {
-			return rawmod(a.longValue(), b.longValue());
+		public Long idiv(Number a, Number b) {
+			return LuaMathOperators.idiv(a.longValue(), b.longValue());
 		}
 
 		@Override
-		public Long do_idiv(Number a, Number b) {
-			return rawidiv(a.longValue(), b.longValue());
+		public Double pow(Number a, Number b) {
+			return LuaMathOperators.pow(a.longValue(), b.longValue());
 		}
 
 		@Override
-		public Double do_pow(Number a, Number b) {
-			return rawpow(a.longValue(), b.longValue());
-		}
-
-		@Override
-		public Long do_unm(Number n) {
-			return rawunm(n.longValue());
+		public Long unm(Number n) {
+			return LuaMathOperators.unm(n.longValue());
 		}
 
 	}
 
 	private static final class FloatArithmetic extends Arithmetic {
 
-		private FloatArithmetic() {
-			// not to be instantiated by the outside world
+		@Override
+		public Double add(Number a, Number b) {
+			return LuaMathOperators.add(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
-		public Double do_add(Number a, Number b) {
-			return rawadd(a.doubleValue(), b.doubleValue());
+		public Double sub(Number a, Number b) {
+			return LuaMathOperators.sub(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
-		public Double do_sub(Number a, Number b) {
-			return rawsub(a.doubleValue(), b.doubleValue());
+		public Double mul(Number a, Number b) {
+			return LuaMathOperators.mul(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
-		public Double do_mul(Number a, Number b) {
-			return rawmul(a.doubleValue(), b.doubleValue());
+		public Double div(Number a, Number b) {
+			return LuaMathOperators.div(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
-		public Double do_div(Number a, Number b) {
-			return rawdiv(a.doubleValue(), b.doubleValue());
+		public Double mod(Number a, Number b) {
+			return LuaMathOperators.mod(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
-		public Double do_mod(Number a, Number b) {
-			return rawmod(a.doubleValue(), b.doubleValue());
+		public Double idiv(Number a, Number b) {
+			return LuaMathOperators.idiv(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
-		public Double do_idiv(Number a, Number b) {
-			return rawidiv(a.doubleValue(), b.doubleValue());
+		public Double pow(Number a, Number b) {
+			return LuaMathOperators.pow(a.doubleValue(), b.doubleValue());
 		}
 
 		@Override
-		public Double do_pow(Number a, Number b) {
-			return rawpow(a.doubleValue(), b.doubleValue());
-		}
-
-		@Override
-		public Double do_unm(Number n) {
-			return rawunm(n.doubleValue());
+		public Double unm(Number n) {
+			return LuaMathOperators.unm(n.doubleValue());
 		}
 
 	}

@@ -27,8 +27,8 @@ package net.sandius.rembulan;
  * <p>For each operation, there are as many variants in the form of a static method
  * as there are valid type combinations. While all arithmetic operations
  * are defined in two variants (for two {@code long}s and two {@code double}s, e.g.
- * {@link #rawidiv(long, long)} and {@link #rawidiv(double, double)}), bitwise operations
- * have single variants (taking two {@code long}s, e.g. {@link #rawband(long, long)}),
+ * {@link #idiv(long, long)} and {@link #idiv(double, double)}), bitwise operations
+ * have single variants (taking two {@code long}s, e.g. {@link #band(long, long)}),
  * and numerical comparison operations have four variants (for argument type combination).</p>
  *
  * <p>It is the task of a Lua implementation to select the appropriate method and
@@ -52,7 +52,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a + b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static long rawadd(long a, long b) {
+	public static long add(long a, long b) {
 		return a + b;
 	}
 
@@ -65,7 +65,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a + b)},
 	 *          where {@code a} and {@code b} are Lua floats
 	 */
-	public static double rawadd(double a, double b) {
+	public static double add(double a, double b) {
 		return a + b;
 	}
 
@@ -78,7 +78,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a - b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static long rawsub(long a, long b) {
+	public static long sub(long a, long b) {
 		return a - b;
 	}
 
@@ -91,7 +91,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a - b)},
 	 *          where {@code a} and {@code b} are Lua floats
 	 */
-	public static double rawsub(double a, double b) {
+	public static double sub(double a, double b) {
 		return a - b;
 	}
 
@@ -104,7 +104,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a * b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static long rawmul(long a, long b) {
+	public static long mul(long a, long b) {
 		return a * b;
 	}
 
@@ -117,7 +117,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a * b)},
 	 *          where {@code a} and {@code b} are Lua floats
 	 */
-	public static double rawmul(double a, double b) {
+	public static double mul(double a, double b) {
 		return a * b;
 	}
 
@@ -133,7 +133,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a / b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static double rawdiv(long a, long b) {
+	public static double div(long a, long b) {
 		return ((double) a) / ((double) b);
 	}
 
@@ -146,7 +146,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a / b)},
 	 *          where {@code a} and {@code b} are Lua floats
 	 */
-	public static double rawdiv(double a, double b) {
+	public static double div(double a, double b) {
 		return a / b;
 	}
 
@@ -171,7 +171,7 @@ public final class LuaMathOperators {
 	 *
 	 * @throws ArithmeticException  if {@code b} is zero
 	 */
-	public static long rawmod(long a, long b) {
+	public static long mod(long a, long b) {
 		// Note: in JDK 8+, Math.floorMod could be used
 		if (b == 0) throw new ArithmeticException("attempt to perform 'n%0'");
 		else return a - b * (long) Math.floor((double) a / (double) b);
@@ -196,7 +196,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a % b)},
 	 *          where {@code a} and {@code b} are Lua floats
 	 */
-	public static double rawmod(double a, double b) {
+	public static double mod(double a, double b) {
 		return b != 0 ? a - b * Math.floor(a / b) : Double.NaN;
 	}
 
@@ -218,7 +218,7 @@ public final class LuaMathOperators {
 	 *
 	 * @throws ArithmeticException  if {@code b} is zero
 	 */
-	public static long rawidiv(long a, long b) {
+	public static long idiv(long a, long b) {
 		if (b == 0) throw new ArithmeticException("attempt to divide by zero");
 		else {
 			long q = a / b;
@@ -242,7 +242,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a // b)}
 	 *          where {@code a} and {@code b} are Lua floats
 	 */
-	public static double rawidiv(double a, double b) {
+	public static double idiv(double a, double b) {
 		return Math.floor(a / b);
 	}
 
@@ -255,7 +255,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a ^ b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static double rawpow(long a, long b) {
+	public static double pow(long a, long b) {
 		return Math.pow((double) a, (double) b);
 	}
 
@@ -268,7 +268,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a ^ b)},
 	 *          where {@code a} and {@code b} are Lua floats
 	 */
-	public static double rawpow(double a, double b) {
+	public static double pow(double a, double b) {
 		return Math.pow(a, b);
 	}
 
@@ -280,7 +280,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (-n)},
 	 *          where {@code n} is a Lua integer
 	 */
-	public static long rawunm(long n) {
+	public static long unm(long n) {
 		return -n;
 	}
 
@@ -292,7 +292,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (-n)},
 	 *          where {@code n} is a Lua float
 	 */
-	public static double rawunm(double n) {
+	public static double unm(double n) {
 		return -n;
 	}
 
@@ -308,7 +308,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a & b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static long rawband(long a, long b) {
+	public static long band(long a, long b) {
 		return a & b;
 	}
 
@@ -321,7 +321,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a | b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static long rawbor(long a, long b) {
+	public static long bor(long a, long b) {
 		return a | b;
 	}
 
@@ -334,7 +334,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a ~ b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static long rawbxor(long a, long b) {
+	public static long bxor(long a, long b) {
 		return a ^ b;
 	}
 
@@ -351,8 +351,8 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a << b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static long rawshl(long a, long b) {
-		return b < 0 ? rawshr(a, -b) : (b < 64 ? a << b : 0);
+	public static long shl(long a, long b) {
+		return b < 0 ? shr(a, -b) : (b < 64 ? a << b : 0);
 	}
 
 	/**
@@ -368,8 +368,8 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (a << b)},
 	 *          where {@code a} and {@code b} are Lua integers
 	 */
-	public static long rawshr(long a, long b) {
-		return b < 0 ? rawshl(a, -b) : (b < 64 ? a >>> b : 0);
+	public static long shr(long a, long b) {
+		return b < 0 ? shl(a, -b) : (b < 64 ? a >>> b : 0);
 	}
 
 	/**
@@ -380,7 +380,7 @@ public final class LuaMathOperators {
 	 * @return  the value of the Lua expression {@code (~b)},
 	 *          where {@code n} is a Lua integer
 	 */
-	public static long rawbnot(long n) {
+	public static long bnot(long n) {
 		return ~n;
 	}
 
@@ -430,7 +430,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} and {@code b} are Lua integers,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean raweq(long a, long b) {
+	public static boolean eq(long a, long b) {
 		return a == b;
 	}
 
@@ -445,7 +445,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} is a Lua integer and {@code b} is a Lua float,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean raweq(long a, double b) {
+	public static boolean eq(long a, double b) {
 		return hasExactFloatRepresentation(a) && (double) a == b;
 	}
 
@@ -460,7 +460,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} is a Lua float and {@code b} is a Lua integer,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean raweq(double a, long b) {
+	public static boolean eq(double a, long b) {
 		return hasExactFloatRepresentation(b) && a == (double) b;
 	}
 
@@ -475,7 +475,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} and {@code b} are Lua floats,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean raweq(double a, double b) {
+	public static boolean eq(double a, double b) {
 		return a == b;
 	}
 
@@ -490,7 +490,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} and {@code b} are Lua integers,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean rawlt(long a, long b) {
+	public static boolean lt(long a, long b) {
 		return a < b;
 	}
 
@@ -505,7 +505,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} is a Lua integer and {@code b} is a Lua float,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean rawlt(long a, double b) {
+	public static boolean lt(long a, double b) {
 		if (hasExactFloatRepresentation(a)) {
 			return (double) a < b;
 		}
@@ -525,8 +525,8 @@ public final class LuaMathOperators {
 	 *          where {@code a} is a Lua float and {@code b} is a Lua integer,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean rawlt(double a, long b) {
-		return a == a && !rawle(b, a);
+	public static boolean lt(double a, long b) {
+		return a == a && !le(b, a);
 	}
 
 	/**
@@ -540,7 +540,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} and {@code b} are Lua floats,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean rawlt(double a, double b) {
+	public static boolean lt(double a, double b) {
 		return a < b;
 	}
 
@@ -556,7 +556,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} and {@code b} are Lua integers,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean rawle(long a, long b) {
+	public static boolean le(long a, long b) {
 		return a <= b;
 	}
 
@@ -572,7 +572,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} is a Lua integer and {@code b} is a Lua float,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean rawle(long a, double b) {
+	public static boolean le(long a, double b) {
 		if (hasExactFloatRepresentation(a)) {
 			return (double) a <= b;
 		}
@@ -593,8 +593,8 @@ public final class LuaMathOperators {
 	 *          where {@code a} is a Lua float and {@code b} is a Lua integer,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean rawle(double a, long b) {
-		return a == a && !rawlt(b, a);
+	public static boolean le(double a, long b) {
+		return a == a && !lt(b, a);
 	}
 
 	/**
@@ -609,7 +609,7 @@ public final class LuaMathOperators {
 	 *          where {@code a} and {@code b} are Lua floats,
 	 *          would evaluate to (Lua) <b>true</b>
 	 */
-	public static boolean rawle(double a, double b) {
+	public static boolean le(double a, double b) {
 		return a <= b;
 	}
 
