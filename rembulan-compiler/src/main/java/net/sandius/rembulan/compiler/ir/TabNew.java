@@ -23,6 +23,7 @@ public class TabNew extends BodyNode {
 	private final Val dest;
 	private final int array;
 	private final int hash;
+	// TODO: dynamic size of array part when multi-vals are used
 
 	public TabNew(Val dest, int array, int hash) {
 		this.dest = Check.notNull(dest);
