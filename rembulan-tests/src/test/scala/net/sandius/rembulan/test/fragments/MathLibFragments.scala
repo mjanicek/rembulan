@@ -38,6 +38,10 @@ object MathLibFragments extends FragmentBundle with FragmentExpectations with On
       program ("return math.modf(math.mininteger)") succeedsWith (Long.MinValue, 0.0)
     }
 
+    about ("maxinteger") {
+      program ("return (math.maxinteger - 1) // math.maxinteger") succeedsWith (0)
+    }
+
     about ("random") {
       program ("math.random(0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")
       program ("math.random(1, 0)") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'random' (interval is empty)")

@@ -73,7 +73,10 @@ public abstract class RawOperators {
 
 	public static long rawidiv(long a, long b) {
 		if (b == 0) throw new ArithmeticException("attempt to divide by zero");
-		else return (long) Math.floor((double) a / (double) b);
+		else {
+			long q = a / b;
+			return q * b == a || (a ^ b) >= 0 ? q : q - 1;
+		}
 	}
 
 	public static double rawpow(double a, double b) {
