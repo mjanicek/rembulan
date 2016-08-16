@@ -144,15 +144,73 @@ public abstract class RawOperators {
 		}
 	}
 
-	@Deprecated
+	private static final double MAX_LONG_AS_DOUBLE = (double) Long.MAX_VALUE;
+
+	private static final double MIN_LONG_AS_DOUBLE = (double) Long.MIN_VALUE;
+
+	private static boolean hasExactFloatRepresentation(long l) {
+		double d = (double) l;
+		return (long) d == l && l != Long.MAX_VALUE;
+	}
+
+	public static boolean raweq(long a, long b) {
+		return a == b;
+	}
+
+	public static boolean raweq(long a, double b) {
+		return hasExactFloatRepresentation(a) && (double) a == b;
+	}
+
+	public static boolean raweq(double a, long b) {
+		return hasExactFloatRepresentation(b) && a == (double) b;
+	}
+
+	public static boolean raweq(double a, double b) {
+		return a == b;
+	}
+
 	public static boolean rawlt(long a, long b) {
 		return a < b;
 	}
 
-	@Deprecated
+	public static boolean rawlt(long a, double b) {
+		if (hasExactFloatRepresentation(a)) {
+			return (double) a < b;
+		}
+		else {
+			return b == b && b > MIN_LONG_AS_DOUBLE && (b >= MAX_LONG_AS_DOUBLE || a < (long) b);
+		}
+	}
+
+	public static boolean rawlt(double a, long b) {
+		return a == a && !rawle(b, a);
+	}
+
 	public static boolean rawlt(double a, double b) {
 		return a < b;
 	}
+
+	public static boolean rawle(long a, long b) {
+		return a <= b;
+	}
+
+	public static boolean rawle(long a, double b) {
+		if (hasExactFloatRepresentation(a)) {
+			return (double) a <= b;
+		}
+		else {
+			return b == b && b > MIN_LONG_AS_DOUBLE && (b >= MAX_LONG_AS_DOUBLE || a <= (long) b);
+		}
+	}
+
+	public static boolean rawle(double a, long b) {
+		return a == a && !rawlt(b, a);
+	}
+
+	public static boolean rawle(double a, double b) {
+		return a <= b;
+	}
+
 
 	@Deprecated
 	public static boolean rawlt(String a, String b) {
@@ -160,26 +218,10 @@ public abstract class RawOperators {
 	}
 
 	@Deprecated
-	public static boolean rawle(long a, long b) {
-		return a <= b;
-	}
-
-	@Deprecated
-	public static boolean rawle(double a, double b) {
-		return a <= b;
-	}
-
-	@Deprecated
-	public static boolean rawle(Number a, Number b) {
-		throw new UnsupportedOperationException();  // TODO
-	}
-
-	@Deprecated
 	public static boolean rawle(String a, String b) {
 		return a.compareTo(b) <= 0;
 	}
 
-	// Logical operators
 
 	public static int stringLen(String s) {
 		Check.notNull(s);

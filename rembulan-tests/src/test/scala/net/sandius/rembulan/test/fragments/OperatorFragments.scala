@@ -102,6 +102,11 @@ object OperatorFragments extends FragmentBundle with FragmentExpectations with O
 
     about ("extreme ints") {
       program (minMaxPrefix + "return minint, maxint") succeedsWith (Long.MinValue, Long.MaxValue)
+
+      program (minMaxPrefix + "return (maxint + 0.0) >> 0") failsWith ("number has no integer representation")
+      program (minMaxPrefix + "return (minint + 0.0) >> 0") succeedsWith (Long.MinValue)
+      program (minMaxPrefix + "return (minint - 1.0) >> 0") succeedsWith (Long.MinValue)
+
     }
 
     about ("add") {

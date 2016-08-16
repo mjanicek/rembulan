@@ -18,48 +18,73 @@ package net.sandius.rembulan.core;
 
 public abstract class ComparisonImplementation {
 
-	public static final IntegerComparisonImplementation INTEGER_CMP = new IntegerComparisonImplementation();
-	public static final FloatComparisonImplementation FLOAT_CMP = new FloatComparisonImplementation();
+	public static final NumericComparisonImplementation NUMERIC_CMP = new NumericComparisonImplementation();
 	public static final StringComparisonImplementation STRING_CMP = new StringComparisonImplementation();
 
 	public abstract boolean do_eq(Object a, Object b);
 	public abstract boolean do_lt(Object a, Object b);
 	public abstract boolean do_le(Object a, Object b);
 
-	public static class IntegerComparisonImplementation extends ComparisonImplementation {
+	public static class NumericComparisonImplementation extends ComparisonImplementation {
 
 		@Override
 		public boolean do_eq(Object a, Object b) {
-			return ((Number) a).longValue() == ((Number) b).longValue();
+			Number na = (Number) a;
+			Number nb = (Number) b;
+
+			boolean isflt_a = na instanceof Double || na instanceof Float;
+			boolean isflt_b = nb instanceof Double || nb instanceof Float;
+
+			if (isflt_a) {
+				return isflt_b
+						? RawOperators.raweq(na.doubleValue(), nb.doubleValue())
+						: RawOperators.raweq(na.doubleValue(), nb.longValue());
+			}
+			else {
+				return isflt_b
+						? RawOperators.raweq(na.longValue(), nb.doubleValue())
+						: RawOperators.raweq(na.longValue(), nb.longValue());
+			}
 		}
 
 		@Override
 		public boolean do_lt(Object a, Object b) {
-			return ((Number) a).longValue() < ((Number) b).longValue();
+			Number na = (Number) a;
+			Number nb = (Number) b;
+
+			boolean isflt_a = na instanceof Double || na instanceof Float;
+			boolean isflt_b = nb instanceof Double || nb instanceof Float;
+
+			if (isflt_a) {
+				return isflt_b
+						? RawOperators.rawlt(na.doubleValue(), nb.doubleValue())
+						: RawOperators.rawlt(na.doubleValue(), nb.longValue());
+			}
+			else {
+				return isflt_b
+						? RawOperators.rawlt(na.longValue(), nb.doubleValue())
+						: RawOperators.rawlt(na.longValue(), nb.longValue());
+			}
 		}
 
 		@Override
 		public boolean do_le(Object a, Object b) {
-			return ((Number) a).longValue() <= ((Number) b).longValue();
-		}
+			Number na = (Number) a;
+			Number nb = (Number) b;
 
-	}
+			boolean isflt_a = na instanceof Double || na instanceof Float;
+			boolean isflt_b = nb instanceof Double || nb instanceof Float;
 
-	public static class FloatComparisonImplementation extends ComparisonImplementation {
-
-		@Override
-		public boolean do_eq(Object a, Object b) {
-			return ((Number) a).doubleValue() == ((Number) b).doubleValue();
-		}
-
-		@Override
-		public boolean do_lt(Object a, Object b) {
-			return ((Number) a).doubleValue() < ((Number) b).doubleValue();
-		}
-
-		@Override
-		public boolean do_le(Object a, Object b) {
-			return ((Number) a).doubleValue() <= ((Number) b).doubleValue();
+			if (isflt_a) {
+				return isflt_b
+						? RawOperators.rawle(na.doubleValue(), nb.doubleValue())
+						: RawOperators.rawle(na.doubleValue(), nb.longValue());
+			}
+			else {
+				return isflt_b
+						? RawOperators.rawle(na.longValue(), nb.doubleValue())
+						: RawOperators.rawle(na.longValue(), nb.longValue());
+			}
 		}
 
 	}
@@ -85,7 +110,7 @@ public abstract class ComparisonImplementation {
 
 	public static ComparisonImplementation of(Object a, Object b) {
 		if (a instanceof Number && b instanceof Number) {
-			return of((Number) a, (Number) b);
+			return NUMERIC_CMP;
 		}
 		else if (a instanceof String && b instanceof String) {
 			return STRING_CMP;
@@ -96,16 +121,7 @@ public abstract class ComparisonImplementation {
 	}
 
 	public static ComparisonImplementation of(Number a, Number b) {
-		if (a == null || b == null) {
-			return null;
-		}
-		if ((a instanceof Double || a instanceof Float)
-				|| (b instanceof Double || b instanceof Float)) {
-			return FLOAT_CMP;
-		}
-		else {
-			return INTEGER_CMP;
-		}
+		return NUMERIC_CMP;
 	}
 
 }

@@ -236,7 +236,7 @@ public abstract class Conversions {
 		if (n instanceof Double || n instanceof Float) {
 			double d = n.doubleValue();
 			long l = (long) d;
-			return (double) l == d ? Long.valueOf(l) : null;
+			return (double) l == d && l != Long.MAX_VALUE ? Long.valueOf(l) : null;
 		}
 		else if (n instanceof Long) {
 			return (Long) n;
