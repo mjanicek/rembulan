@@ -450,7 +450,7 @@ public abstract class Dispatch {
 	}
 
 	private static void eq(ExecutionContext context, boolean polarity, Object a, Object b) throws ControlThrowable {
-		boolean rawEqual = Comparison.isRawEqual(a, b);
+		boolean rawEqual = Ordering.isRawEqual(a, b);
 
 		if (!rawEqual
 				&& ((a instanceof Table && b instanceof Table)
@@ -478,12 +478,12 @@ public abstract class Dispatch {
 	}
 
 	public static boolean eq(Number a, Number b) {
-		return Comparison.NUMERIC.eq(a, b);
+		return Ordering.NUMERIC.eq(a, b);
 	}
 
 
 	public static void lt(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Comparison c = Comparison.of(a, b);
+		Ordering c = Ordering.of(a, b);
 		if (c != null) {
 			@SuppressWarnings("unchecked")
 			boolean result = c.lt(a, b);
@@ -502,15 +502,15 @@ public abstract class Dispatch {
 	}
 
 	public static boolean lt(Number a, Number b) {
-		return Comparison.NUMERIC.lt(a, b);
+		return Ordering.NUMERIC.lt(a, b);
 	}
 
 	public static boolean lt(String a, String b) {
-		return Comparison.STRING.lt(a, b);
+		return Ordering.STRING.lt(a, b);
 	}
 
 	public static void le(ExecutionContext context, Object a, Object b) throws ControlThrowable {
-		Comparison c = Comparison.of(a, b);
+		Ordering c = Ordering.of(a, b);
 		if (c != null) {
 			@SuppressWarnings("unchecked")
 			boolean result = c.le(a, b);
@@ -539,11 +539,11 @@ public abstract class Dispatch {
 	}
 
 	public static boolean le(Number a, Number b) {
-		return Comparison.NUMERIC.le(a, b);
+		return Ordering.NUMERIC.le(a, b);
 	}
 
 	public static boolean le(String a, String b) {
-		return Comparison.STRING.le(a, b);
+		return Ordering.STRING.le(a, b);
 	}
 
 	public static void index(ExecutionContext context, Object table, Object key) throws ControlThrowable {
@@ -619,12 +619,12 @@ public abstract class Dispatch {
 	private static final Long ZERO = Long.valueOf(0L);
 
 	public static boolean continueLoop(Number index, Number limit, Number step) {
-		if (Comparison.NUMERIC.eq(ZERO, step)) {
+		if (Ordering.NUMERIC.eq(ZERO, step)) {
 			return false;  // step is zero or NaN
 		}
-		return Comparison.NUMERIC.lt(ZERO, step)  // ascending?
-				? Comparison.NUMERIC.le(index, limit)
-				: Comparison.NUMERIC.le(limit, index);
+		return Ordering.NUMERIC.lt(ZERO, step)  // ascending?
+				? Ordering.NUMERIC.le(index, limit)
+				: Ordering.NUMERIC.le(limit, index);
 	}
 
 }
