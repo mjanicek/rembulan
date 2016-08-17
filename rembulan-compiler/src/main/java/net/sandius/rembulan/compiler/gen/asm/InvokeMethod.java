@@ -17,7 +17,6 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
-import net.sandius.rembulan.compiler.gen.asm.helpers.UtilMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.core.ExecutionContext;
@@ -106,6 +105,8 @@ class InvokeMethod {
 			int lv_varargsSize = 3;
 			int lv_varargs = 4;
 
+			int numParams = context.numOfParameters();
+
 			if (context.isVararg()) {
 
 				LabelNode l_v_begin = new LabelNode();
@@ -115,8 +116,6 @@ class InvokeMethod {
 
 				il.add(new VarInsnNode(ALOAD, 2));
 				il.add(new InsnNode(ARRAYLENGTH));
-
-				int numParams = context.numOfParameters();
 
 				if (numParams > 0) {
 					il.add(ASMUtils.loadInt(context.numOfParameters()));
@@ -178,23 +177,66 @@ class InvokeMethod {
 				locals.add(new LocalVariableNode("varargs", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, l_v_done, end, lv_varargs));
 			}
 
+			// load #numOfParameters, mapping them onto #numOfRegisters
+
+			int lv_param_offset = context.isVararg() ? lv_varargs + 1 : lv_varargsSize;
+
+			if (numParams > 0) {
+				// initialise parameter slot variables to null
+
+				for (int i = 0; i < numParams; i++) {
+					LabelNode l = new LabelNode();
+					int lv = lv_param_offset + i;
+					il.add(new InsnNode(ACONST_NULL));
+					il.add(new VarInsnNode(ASTORE, lv));
+					il.add(l);
+					il.add(new FrameNode(F_APPEND, 1, new Object[] { Type.getInternalName(Object.class) }, 0, null));
+					locals.add(new LocalVariableNode("arg_" + i, Type.getDescriptor(Object.class), null, l, end, lv));
+				}
+
+				// insert switch for filling parameter slots
+
+				LabelNode[] l_s_table = new LabelNode[numParams + 1];
+				for (int i = 0; i < numParams + 1; i++) {
+					l_s_table[i] = new LabelNode();
+				}
+
+				il.add(new VarInsnNode(ALOAD, 2));
+				il.add(new InsnNode(ARRAYLENGTH));
+				il.add(new TableSwitchInsnNode(0, numParams, l_s_table[numParams], l_s_table));
+
+				for (int i = numParams; i >= 0; i--) {
+					// length of args is at least i; may assign into param (i - 1)
+					int paramIdx = i - 1;
+
+					il.add(l_s_table[i]);
+					il.add(new FrameNode(F_SAME, 0, null, 0, null));
+
+					if (paramIdx >= 0) {
+						// assign into param #paramIdx
+						il.add(new VarInsnNode(ALOAD, 2));
+						il.add(ASMUtils.loadInt(paramIdx));
+						il.add(new InsnNode(AALOAD));
+						il.add(new VarInsnNode(ASTORE, lv_param_offset + paramIdx));
+					}
+				}
+			}
+
+			// now assemble the run() method invocation, filling in nulls for non-parameter slots
+
 			il.add(new VarInsnNode(ALOAD, 0));  // this
 			il.add(new VarInsnNode(ALOAD, 1));  // context
 			il.add(ASMUtils.loadInt(0));  // resumption point
-
 			if (context.isVararg()) {
 				il.add(new VarInsnNode(ALOAD, lv_varargs));
 			}
-
-			// load #numOfParameters, mapping them onto #numOfRegisters
-
 			for (int paramIdx : slotParamMap) {
 				if (paramIdx < 0) {
-					// slot unused
+					// slot not used by a parameter
 					il.add(new InsnNode(ACONST_NULL));
 				}
 				else {
-					// used by the parameter #paramIdx
+					// slot is parameter #paramIdx
 					Var param = context.fn.params().get(paramIdx);
 					boolean reified = context.types.isReified(param);
 
@@ -203,15 +245,13 @@ class InvokeMethod {
 						il.add(new InsnNode(DUP));
 					}
 
-					il.add(new VarInsnNode(ALOAD, 2));  // TODO: use dup instead?
-					il.add(UtilMethods.getArrayElementOrNull(paramIdx));
+					il.add(new VarInsnNode(ALOAD, lv_param_offset + paramIdx));
 
 					if (reified) {
 						il.add(VariableMethods.constructor());
 					}
 				}
 			}
-
 		}
 
 		il.add(runMethod.methodInvokeInsn());

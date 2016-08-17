@@ -853,6 +853,24 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   VarargDecomposition in EmptyContext failsWith (classOf[IllegalOperationAttemptException], "attempt to call a nil value")
 
+  val VarargCallWithFixedPrefix = fragment ("VarargCallWithFixedPrefix") {
+    """x = 10
+      |local function f(g, ...) return x, g(...) end
+      |return f(function (a, b) return x + a, x + b end, 1, 2.3, "456")
+    """
+  }
+  VarargCallWithFixedPrefix in EmptyContext succeedsWith (10, 11, 12.3)
+
+  val BigParamListFunctionCall = fragment ("BigParamListFunctionCall") {
+    """local function f(a,b,c,d,e,f,g,h)
+      |  return h or g or f or e or d or c or b or a or z
+      |end
+      |
+      |return f(1,2,3,4), f(1,2,3), f(1,2,3,4,5,6)
+    """
+  }
+  BigParamListFunctionCall in EmptyContext succeedsWith (4, 3, 6)
+
   val FunctionCalls = fragment ("FunctionCalls") {
     """local function f(x, y)
       |  return x + y
