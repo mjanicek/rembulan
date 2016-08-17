@@ -182,6 +182,9 @@ public abstract class Ordering<T> implements Comparator<T> {
 	 *     while {@code eq(-0.0, 0.0) == true} and {@code lt(-0.0, 0.0) == false}.</li>
 	 * </ul>
 	 *
+	 * <p>Note that the total ordering imposed by the {@link #compare(Number, Number)}
+	 * is <i>inconsistent with equals</i>.</p>
+	 *
 	 * <p>For proper treatment of <i>NaN</i>s and (float) zero values, use the
 	 * {@code Ordering} methods directly.</p>
 	 *
@@ -304,8 +307,8 @@ public abstract class Ordering<T> implements Comparator<T> {
 		 *     while {@code eq(-0.0, 0.0) == true} and {@code lt(-0.0, 0.0) == false}.</li>
 		 * </ul>
 		 *
-		 * <p>This is ensures that the natural ordering of {@code Number} objects
-		 * imposed by this {@code Comparator} is consistent with equals.</p>
+		 * <p>The total ordering of {@code Number} objects imposed by this method
+		 * is <i>inconsistent with equals</i>.</p>
 		 *
 		 * @param a  first argument, must not be {@code null}
 		 * @param b  second argument, must not be {@code null}
