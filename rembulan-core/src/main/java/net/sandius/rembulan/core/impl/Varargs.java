@@ -28,20 +28,4 @@ public abstract class Varargs {
 		return idx >= 0 && idx < a.length ? a[idx] : null;
 	}
 
-	@Deprecated
-	public static Object[] from(Object[] args, int fromIndex) {
-		assert (fromIndex >= 0);
-
-		int n = args.length - fromIndex;
-
-		if (n > 0) {
-			Object[] result = new Object[n];
-			System.arraycopy(args, fromIndex, result, 0, n);
-			return result;
-		}
-		else {
-			return new Object[0];
-		}
-	}
-
 }

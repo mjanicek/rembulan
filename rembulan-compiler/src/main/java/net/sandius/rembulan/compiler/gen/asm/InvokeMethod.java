@@ -23,24 +23,14 @@ import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.Check;
+import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.InsnList;
-import org.objectweb.asm.tree.InsnNode;
-import org.objectweb.asm.tree.LabelNode;
-import org.objectweb.asm.tree.LocalVariableNode;
-import org.objectweb.asm.tree.MethodNode;
-import org.objectweb.asm.tree.TypeInsnNode;
-import org.objectweb.asm.tree.VarInsnNode;
+import org.objectweb.asm.tree.*;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
-import static org.objectweb.asm.Opcodes.ACONST_NULL;
-import static org.objectweb.asm.Opcodes.ALOAD;
-import static org.objectweb.asm.Opcodes.DUP;
-import static org.objectweb.asm.Opcodes.NEW;
-import static org.objectweb.asm.Opcodes.RETURN;
+import static org.objectweb.asm.Opcodes.*;
 
 class InvokeMethod {
 
@@ -70,10 +60,6 @@ class InvokeMethod {
 
 		il.add(begin);
 
-		il.add(new VarInsnNode(ALOAD, 0));  // this
-		il.add(new VarInsnNode(ALOAD, 1));  // context
-		il.add(ASMUtils.loadInt(0));  // resumption point
-
 		// a (slotIdx -> paramIdx) map
 		int[] slotParamMap = new int[context.slots.numSlots()];
 		Arrays.fill(slotParamMap, -1);
@@ -85,6 +71,10 @@ class InvokeMethod {
 		}
 
 		if (invokeKind > 0) {
+			il.add(new VarInsnNode(ALOAD, 0));  // this
+			il.add(new VarInsnNode(ALOAD, 1));  // context
+			il.add(ASMUtils.loadInt(0));  // resumption point
+
 			// we have (invokeKind - 1) standalone parameters, mapping them onto numSlots
 
 			for (int paramIdx : slotParamMap) {
@@ -113,9 +103,87 @@ class InvokeMethod {
 		else {
 			// variable number of parameters, encoded in an array at position 2
 
+			int lv_varargsSize = 3;
+			int lv_varargs = 4;
+
 			if (context.isVararg()) {
+
+				LabelNode l_v_begin = new LabelNode();
+				LabelNode l_v_nonempty = new LabelNode();
+				LabelNode l_v_empty = new LabelNode();
+				LabelNode l_v_done = new LabelNode();
+
 				il.add(new VarInsnNode(ALOAD, 2));
-				il.add(UtilMethods.arrayFrom(context.numOfParameters()));
+				il.add(new InsnNode(ARRAYLENGTH));
+
+				int numParams = context.numOfParameters();
+
+				if (numParams > 0) {
+					il.add(ASMUtils.loadInt(context.numOfParameters()));
+					il.add(new InsnNode(ISUB));
+				}
+				il.add(new VarInsnNode(ISTORE, lv_varargsSize));
+
+				il.add(l_v_begin);
+
+				il.add(new VarInsnNode(ILOAD, lv_varargsSize));
+				il.add(new JumpInsnNode(IFLE, l_v_empty));
+
+				// nonempty varargs
+
+				// varargs = new Object[varargsSize];
+				il.add(new VarInsnNode(ILOAD, lv_varargsSize));
+				il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+				il.add(new VarInsnNode(ASTORE, lv_varargs));
+
+				il.add(l_v_nonempty);
+
+				// call System.arraycopy(src, srcPos, dest, destPos, len)
+				il.add(new VarInsnNode(ALOAD, 2));  // src
+				il.add(ASMUtils.loadInt(numParams));  // srcPos
+				il.add(new VarInsnNode(ALOAD, lv_varargs));  // dest
+				il.add(ASMUtils.loadInt(0));  // destPos
+				il.add(new VarInsnNode(ILOAD, lv_varargsSize));  // len
+				il.add(new MethodInsnNode(
+						INVOKESTATIC,
+						Type.getInternalName(System.class),
+						"arraycopy",
+						Type.getMethodDescriptor(
+								Type.VOID_TYPE,
+								Type.getType(Object.class),
+								Type.INT_TYPE,
+								Type.getType(Object.class),
+								Type.INT_TYPE,
+								Type.INT_TYPE),
+						false));
+
+				il.add(new JumpInsnNode(GOTO, l_v_done));
+
+				// empty varargs
+				il.add(l_v_empty);
+				il.add(new FrameNode(F_APPEND, 1, new Object[] { Opcodes.INTEGER }, 0, null));
+
+				// varargs = new Object[0];
+				il.add(ASMUtils.loadInt(0));
+				il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
+				il.add(new VarInsnNode(ASTORE, lv_varargs));
+
+				il.add(l_v_done);
+				il.add(new FrameNode(F_APPEND, 1, new Object[] {
+							ASMUtils.arrayTypeFor(Object.class).getInternalName()
+						}, 0, null));
+
+				locals.add(new LocalVariableNode("sz", Type.INT_TYPE.getDescriptor(), null, l_v_begin, end, lv_varargsSize));
+				locals.add(new LocalVariableNode("varargs", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, l_v_nonempty, l_v_empty, lv_varargs));
+				locals.add(new LocalVariableNode("varargs", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, l_v_done, end, lv_varargs));
+			}
+
+			il.add(new VarInsnNode(ALOAD, 0));  // this
+			il.add(new VarInsnNode(ALOAD, 1));  // context
+			il.add(ASMUtils.loadInt(0));  // resumption point
+
+			if (context.isVararg()) {
+				il.add(new VarInsnNode(ALOAD, lv_varargs));
 			}
 
 			// load #numOfParameters, mapping them onto #numOfRegisters
@@ -153,19 +221,15 @@ class InvokeMethod {
 
 		locals.add(new LocalVariableNode("this", context.thisClassType().getDescriptor(), null, begin, end, 0));
 		locals.add(new LocalVariableNode("context", Type.getDescriptor(ExecutionContext.class), null, begin, end, 1));
-		if (invokeKind < 0) {
-			locals.add(new LocalVariableNode("args", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 2));
-
-			// TODO: maxLocals, maxStack
-		}
-		else {
+		if (invokeKind > 0) {
 			for (int i = 0; i < invokeKind; i++) {
 				locals.add(new LocalVariableNode("arg_" + i, Type.getDescriptor(Object.class), null, begin, end, 2 + i));
 			}
-
 			// TODO: maxLocals, maxStack
-			node.maxLocals = 2 + invokeKind;
-			node.maxStack = 4 + runMethod.numOfRegisters();
+		}
+		else {
+			locals.add(new LocalVariableNode("args", ASMUtils.arrayTypeFor(Object.class).getDescriptor(), null, begin, end, 2));
+			// TODO: maxLocals, maxStack
 		}
 
 		return node;
