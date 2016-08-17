@@ -48,23 +48,6 @@ public class UtilMethods {
 		return il;
 	}
 
-	public static InsnList arrayFrom(int index) {
-		InsnList il = new InsnList();
-
-		il.add(ASMUtils.loadInt(index));
-		il.add(new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Varargs.class),
-				"from",
-				Type.getMethodDescriptor(
-						ASMUtils.arrayTypeFor(Object.class),
-						ASMUtils.arrayTypeFor(Object.class),
-						Type.INT_TYPE),
-				false));
-
-		return il;
-	}
-
 	public static AbstractInsnNode StringBuilder_append(Type t) {
 		return new MethodInsnNode(
 				INVOKEVIRTUAL,
