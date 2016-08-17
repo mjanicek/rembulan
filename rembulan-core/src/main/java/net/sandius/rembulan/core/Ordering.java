@@ -43,7 +43,7 @@ import net.sandius.rembulan.LuaMathOperators;
  * <pre>
  *     // Object a, b
  *     final boolean result;
- *     Comparison&lt;?&gt; cmp = Comparison.of(a, b);
+ *     Ordering&lt;?&gt; cmp = Ordering.of(a, b);
  *     if (cmp != null) {
  *         // a and b are comparable in cmp
  *         {@literal @}SuppressWarnings("unchecked")
@@ -56,9 +56,9 @@ import net.sandius.rembulan.LuaMathOperators;
  *
  * @param <T>  the type of values comparable in the ordering
  */
-public abstract class Comparison<T> {
+public abstract class Ordering<T> {
 
-	private Comparison() {
+	private Ordering() {
 		// not to be instantiated by the outside world
 	}
 
@@ -69,14 +69,14 @@ public abstract class Comparison<T> {
 	 * defining the ordering as one based on the ordering of the mathematical values
 	 * of the numbers in question.
 	 */
-	public static final Comparison<Number> NUMERIC = new NumericComparison();
+	public static final Ordering<Number> NUMERIC = new NumericOrdering();
 
 	/**
 	 * String ordering.
 	 *
 	 * Strings are compared using the method {@link String#compareTo(String)}.
 	 */
-	public static final Comparison<String> STRING = new StringComparison();
+	public static final Ordering<String> STRING = new StringOrdering();
 
 	/**
 	 * Returns {@code true} if {@code a} is equal to {@code b} in this ordering.
@@ -146,10 +146,10 @@ public abstract class Comparison<T> {
 			return false;
 		}
 		else if (a instanceof Number && b instanceof Number) {
-			return Comparison.NUMERIC.eq((Number) a, (Number) b);
+			return Ordering.NUMERIC.eq((Number) a, (Number) b);
 		}
 		else if (a instanceof String && b instanceof String) {
-			return Comparison.STRING.eq((String) a, (String) b);
+			return Ordering.STRING.eq((String) a, (String) b);
 		}
 		else if (a instanceof Boolean || a instanceof Invokable) {
 			// value-based equality
@@ -161,7 +161,7 @@ public abstract class Comparison<T> {
 		}
 	}
 
-	private static final class NumericComparison extends Comparison<Number> {
+	private static final class NumericOrdering extends Ordering<Number> {
 
 		@Override
 		public boolean eq(Number a, Number b) {
@@ -216,7 +216,7 @@ public abstract class Comparison<T> {
 
 	}
 
-	private static final class StringComparison extends Comparison<String> {
+	private static final class StringOrdering extends Ordering<String> {
 
 		@Override
 		public boolean eq(String a, String b) {
@@ -252,7 +252,7 @@ public abstract class Comparison<T> {
 	 *
 	 * <pre>
 	 *     // Object a, b
-	 *     Comparison&lt;?&gt; cmp = Comparison.of(a, b);
+	 *     Ordering&lt;?&gt; cmp = Ordering.of(a, b);
 	 *     if (cmp != null) {
 	 *         // a and b are subclasses of cmp's (erased) type parameter,
 	 *         // so it is okay to suppress the warning here:
@@ -267,7 +267,7 @@ public abstract class Comparison<T> {
 	 *          {@link #STRING} if both {@code a} and {@code b} are strings;
 	 *          {@code null} otherwise
 	 */
-	public static Comparison<?> of(Object a, Object b) {
+	public static Ordering<?> of(Object a, Object b) {
 		if (a instanceof Number && b instanceof Number) {
 			return NUMERIC;
 		}
