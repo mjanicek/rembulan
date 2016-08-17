@@ -120,12 +120,10 @@ public class Typer {
 		}
 
 		switch (op) {
-			case EQ:  return Comparison.eq(l, r);
-			case NEQ: return !Comparison.eq(l, r);
-//			case EQ:  return c.do_eq(l, r);
-//			case NEQ: return !c.do_eq(l, r);
-			case LT:  return c.do_lt(l, r);
-			case LE:  return c.do_le(l, r);
+			case EQ:  return c.eq(l, r);
+			case NEQ: return !c.eq(l, r);
+			case LT:  return c.lt(l, r);
+			case LE:  return c.le(l, r);
 			default: throw new IllegalArgumentException("Illegal operation: " + op);
 		}
 	}

@@ -697,7 +697,7 @@ public class DefaultBasicLib extends BasicLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object a = args.nextAny();
 			Object b = args.nextAny();
-			context.getObjectSink().setTo(Comparison.eq(a, b));
+			context.getObjectSink().setTo(Comparison.isRawEqual(a, b));
 		}
 
 	}
