@@ -37,6 +37,8 @@ import java.io.OutputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DefaultIoLib extends IoLib {
 
@@ -478,13 +480,12 @@ public class DefaultIoLib extends IoLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			IoFile file = lib.getDefaultInputFile();
 
-			Object[] rest = args.getAll();
-			Object[] callArgs = new Object[rest.length + 1];
-			callArgs[0] = file;
-			System.arraycopy(rest, 0, callArgs, 1, rest.length);
+			ArrayList<Object> callArgs = new ArrayList<>();
+			callArgs.add(file);
+			callArgs.addAll(Arrays.asList(args.getAll()));
 
 			try {
-				Dispatch.call(context, IoFile.Read.INSTANCE, callArgs);
+				Dispatch.call(context, IoFile.Read.INSTANCE, callArgs.toArray());
 			}
 			catch (ControlThrowable ct) {
 				throw ct.push(this, null);
@@ -546,13 +547,12 @@ public class DefaultIoLib extends IoLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			IoFile file = lib.getDefaultOutputFile();
 
-			Object[] rest = args.getAll();
-			Object[] callArgs = new Object[rest.length + 1];
-			callArgs[0] = file;
-			System.arraycopy(rest, 0, callArgs, 1, rest.length);
+			ArrayList<Object> callArgs = new ArrayList<>();
+			callArgs.add(file);
+			callArgs.addAll(Arrays.asList(args.getAll()));
 
 			try {
-				Dispatch.call(context, IoFile.Write.INSTANCE, callArgs);
+				Dispatch.call(context, IoFile.Write.INSTANCE, callArgs.toArray());
 			}
 			catch (ControlThrowable ct) {
 				throw ct.push(this, null);

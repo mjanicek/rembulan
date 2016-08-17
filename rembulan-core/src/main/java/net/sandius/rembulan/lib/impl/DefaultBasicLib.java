@@ -24,6 +24,7 @@ import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class DefaultBasicLib extends BasicLib {
@@ -566,11 +567,11 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			// success: prepend true
-			Object[] r = context.getObjectSink().toArray();
-			Object[] result = new Object[r.length + 1];
-			result[0] = Boolean.TRUE;
-			System.arraycopy(r, 0, result, 1, r.length);
-			context.getObjectSink().setToArray(result);
+			ObjectSink os = context.getObjectSink();
+			ArrayList<Object> result = new ArrayList<>();
+			result.add(Boolean.TRUE);
+			result.addAll(Arrays.asList(os.toArray()));
+			os.setToArray(result.toArray());
 		}
 
 		@Override
@@ -602,11 +603,11 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		private static void prependTrue(ExecutionContext context) {
-			Object[] r = context.getObjectSink().toArray();
-			Object[] result = new Object[r.length + 1];
-			result[0] = Boolean.TRUE;
-			System.arraycopy(r, 0, result, 1, r.length);
-			context.getObjectSink().setToArray(result);
+			ObjectSink os = context.getObjectSink();
+			ArrayList<Object> result = new ArrayList<>();
+			result.add(Boolean.TRUE);
+			result.addAll(Arrays.asList(os.toArray()));
+			os.setToArray(result.toArray());
 		}
 
 		private static void prependFalseAndTrim(ExecutionContext context) {

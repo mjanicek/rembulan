@@ -20,10 +20,14 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.util.Check;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DefaultCoroutineLib extends CoroutineLib {
 
@@ -106,11 +110,11 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			Object[] r = context.getObjectSink().toArray();
-			Object[] result = new Object[r.length + 1];
-			result[0] = Boolean.TRUE;
-			System.arraycopy(r, 0, result, 1, r.length);
-			context.getObjectSink().setToArray(result);
+			ObjectSink os = context.getObjectSink();
+			ArrayList<Object> result = new ArrayList<>();
+			result.add(Boolean.TRUE);
+			result.addAll(Arrays.asList(os.toArray()));
+			os.setToArray(result.toArray());
 		}
 
 		@Override
