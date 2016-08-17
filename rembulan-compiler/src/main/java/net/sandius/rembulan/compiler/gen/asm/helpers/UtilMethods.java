@@ -31,18 +31,6 @@ public class UtilMethods {
 		// not to be instantiated
 	}
 
-	public static AbstractInsnNode concatenateArrays() {
-		return new MethodInsnNode(
-				INVOKESTATIC,
-				Type.getInternalName(Varargs.class),
-				"concat",
-				Type.getMethodDescriptor(
-						ASMUtils.arrayTypeFor(Object.class),
-						ASMUtils.arrayTypeFor(Object.class),
-						ASMUtils.arrayTypeFor(Object.class)),
-				false);
-	}
-
 	public static InsnList getArrayElementOrNull(int index) {
 		InsnList il = new InsnList();
 

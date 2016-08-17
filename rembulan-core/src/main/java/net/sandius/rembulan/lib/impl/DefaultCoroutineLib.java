@@ -106,7 +106,11 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			context.getObjectSink().prepend(Boolean.TRUE);
+			Object[] r = context.getObjectSink().toArray();
+			Object[] result = new Object[r.length + 1];
+			result[0] = Boolean.TRUE;
+			System.arraycopy(r, 0, result, 1, r.length);
+			context.getObjectSink().setToArray(result);
 		}
 
 		@Override

@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.core.impl.Varargs;
-
 public abstract class ObjectSink {
 
 	protected boolean tailCall;
@@ -53,12 +51,6 @@ public abstract class ObjectSink {
 	}
 
 	public abstract void push(Object o);
-
-	public void pushAll(Object[] a) {
-		for (Object o : a) {
-			push(o);
-		}
-	}
 
 	public void setTo() {
 		reset();
@@ -104,23 +96,6 @@ public abstract class ObjectSink {
 		for (Object o : a) {
 			push(o);
 		}
-	}
-
-	public void drop(int i) {
-		if (i > 0) {
-			setToArray(Varargs.from(toArray(), i));
-		}
-	}
-
-	public void prepend(Object o) {
-		prepend(new Object[] {o});
-	}
-
-	public void prepend(Object[] values) {
-		Object[] old = toArray();
-		reset();
-		pushAll(values);
-		pushAll(old);
 	}
 
 	public void tailCall(Object target) {

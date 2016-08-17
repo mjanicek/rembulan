@@ -25,7 +25,6 @@ import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
-import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IoLib;
 import net.sandius.rembulan.lib.Lib;
@@ -478,7 +477,11 @@ public class DefaultIoLib extends IoLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			IoFile file = lib.getDefaultInputFile();
-			Object[] callArgs = Varargs.concat(new Object[] { file }, args.getAll());
+
+			Object[] rest = args.getAll();
+			Object[] callArgs = new Object[rest.length + 1];
+			callArgs[0] = file;
+			System.arraycopy(rest, 0, callArgs, 1, rest.length);
 
 			try {
 				Dispatch.call(context, IoFile.Read.INSTANCE, callArgs);
@@ -542,7 +545,11 @@ public class DefaultIoLib extends IoLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			IoFile file = lib.getDefaultOutputFile();
-			Object[] callArgs = Varargs.concat(new Object[] { file }, args.getAll());
+
+			Object[] rest = args.getAll();
+			Object[] callArgs = new Object[rest.length + 1];
+			callArgs[0] = file;
+			System.arraycopy(rest, 0, callArgs, 1, rest.length);
 
 			try {
 				Dispatch.call(context, IoFile.Write.INSTANCE, callArgs);

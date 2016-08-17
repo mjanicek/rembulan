@@ -22,11 +22,11 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Userdata;
 import net.sandius.rembulan.core.ValueTypeNamer;
-import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -102,7 +102,7 @@ public class ArgumentIterator implements Iterator<Object> {
 	}
 
 	public Object[] getTail() {
-		return Varargs.from(args, index);
+		return Arrays.copyOfRange(args, index, args.length);
 	}
 
 	protected BadArgumentException badArgument(Throwable cause) {

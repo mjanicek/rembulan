@@ -18,13 +18,13 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.*;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
-import net.sandius.rembulan.core.impl.Varargs;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 
 public class DefaultBasicLib extends BasicLib {
 
@@ -176,7 +176,7 @@ public class DefaultBasicLib extends BasicLib {
 					Dispatch.call(context, ToString.INSTANCE, a);
 				}
 				catch (ControlThrowable ct) {
-					throw ct.push(this, Varargs.from(args, i + 1));
+					throw ct.push(this, Arrays.copyOfRange(args, i + 1, args.length));
 				}
 
 				Object s = context.getObjectSink()._0();
@@ -556,22 +556,26 @@ public class DefaultBasicLib extends BasicLib {
 				throw ct.push(this, null);
 			}
 			catch (Exception ex) {
-				context.getObjectSink().setTo(Boolean.FALSE, Conversions.toErrorObject(ex));  // failure
+				resumeError(context, null, Conversions.toErrorObject(ex));
 				return;
 			}
 
-			context.getObjectSink().prepend(Boolean.TRUE);  // success
+			resume(context, null);
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			// success
-			context.getObjectSink().prepend(Boolean.TRUE);
+			// success: prepend true
+			Object[] r = context.getObjectSink().toArray();
+			Object[] result = new Object[r.length + 1];
+			result[0] = Boolean.TRUE;
+			System.arraycopy(r, 0, result, 1, r.length);
+			context.getObjectSink().setToArray(result);
 		}
 
 		@Override
 		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
-			context.getObjectSink().setTo(Boolean.FALSE, error);
+			context.getObjectSink().setTo(Boolean.FALSE, error);  // failure
 		}
 
 	}
@@ -597,11 +601,15 @@ public class DefaultBasicLib extends BasicLib {
 			}
 		}
 
-		private void prependTrue(ExecutionContext context) {
-			context.getObjectSink().prepend(Boolean.TRUE);
+		private static void prependTrue(ExecutionContext context) {
+			Object[] r = context.getObjectSink().toArray();
+			Object[] result = new Object[r.length + 1];
+			result[0] = Boolean.TRUE;
+			System.arraycopy(r, 0, result, 1, r.length);
+			context.getObjectSink().setToArray(result);
 		}
 
-		private void prependFalseAndTrim(ExecutionContext context) {
+		private static void prependFalseAndTrim(ExecutionContext context) {
 			ObjectSink os = context.getObjectSink();
 			Object errorObject = os._0();
 			os.setTo(Boolean.FALSE, errorObject);
@@ -803,7 +811,10 @@ public class DefaultBasicLib extends BasicLib {
 					throw new BadArgumentException(1, name(), "index out of range");
 				}
 
-				context.getObjectSink().setToArray(Varargs.from(args.getAll(), from));
+				Object[] r = args.getAll();
+				final Object[] result;
+				result = from > r.length ? new Object[0] : Arrays.copyOfRange(r, from, r.length);
+				context.getObjectSink().setToArray(result);
 			}
 		}
 

@@ -79,46 +79,6 @@ public class ObjectSinkMethods {
 		return il;
 	}
 
-	public static AbstractInsnNode reset() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"reset",
-				Type.getMethodType(
-						Type.VOID_TYPE).getDescriptor(),
-				false);
-	}
-
-	public static AbstractInsnNode push() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"push",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						Type.getType(Object.class)).getDescriptor(),
-				false);
-	}
-
-	public static AbstractInsnNode addAll() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"addAll",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				false);
-	}
-
-	public static int adjustKind_setTo(int kind) {
-		return kind > 0 ? (setTo_method(kind).exists() ? kind : 0) : 0;
-	}
-
-	public static int adjustKind_tailCall(int kind) {
-		return kind > 0 ? (tailCall_method(kind).exists() ? kind : 0) : 0;
-	}
-
 	public final static int MAX_SETTO_KIND;
 	static {
 		int k = 1;
@@ -158,50 +118,6 @@ public class ObjectSinkMethods {
 				"toArray",
 				Type.getMethodType(
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				false);
-	}
-
-	public static AbstractInsnNode drop() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"drop",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						Type.INT_TYPE).getDescriptor(),
-				false);
-	}
-
-	public static AbstractInsnNode prepend() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"prepend",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				false);
-	}
-
-	public static AbstractInsnNode pushAll() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"pushAll",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				false);
-	}
-
-	public static AbstractInsnNode setTailCallTarget() {
-		return new MethodInsnNode(
-				INVOKEVIRTUAL,
-				selfTpe().getInternalName(),
-				"setTailCallTarget",
-				Type.getMethodType(
-						Type.VOID_TYPE,
-						Type.getType(Object.class)).getDescriptor(),
 				false);
 	}
 
