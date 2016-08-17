@@ -49,8 +49,13 @@ public abstract class AbstractFunction2 extends Function {
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-		Object a = args.length >= 1 ? args[0] : null;
-		Object b = args.length >= 2 ? args[1] : null;
+		Object a = null, b = null;
+		switch (args.length) {
+			default:
+			case 2: b = args[1];
+			case 1: a = args[0];
+			case 0:
+		}
 		invoke(context, a, b);
 	}
 

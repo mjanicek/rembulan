@@ -49,10 +49,15 @@ public abstract class AbstractFunction4 extends Function {
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-		Object a = Varargs.getElement(args, 0);
-		Object b = Varargs.getElement(args, 1);;
-		Object c = Varargs.getElement(args, 2);;
-		Object d = Varargs.getElement(args, 3);;
+		Object a = null, b = null, c = null, d = null;
+		switch (args.length) {
+			default:
+			case 4: d = args[3];
+			case 3: c = args[2];
+			case 2: b = args[1];
+			case 1: a = args[0];
+			case 0:
+		}
 		invoke(context, a, b, c, d);
 	}
 

@@ -16,16 +16,19 @@
 
 package net.sandius.rembulan.core.impl;
 
+@Deprecated
 public abstract class Varargs {
 
 	private Varargs() {
 		// not to be instantiated or extended
 	}
 
+	@Deprecated
 	public static Object getElement(Object[] a, int idx) {
 		return idx >= 0 && idx < a.length ? a[idx] : null;
 	}
 
+	@Deprecated
 	public static Object[] from(Object[] args, int fromIndex) {
 		assert (fromIndex >= 0);
 
@@ -41,6 +44,7 @@ public abstract class Varargs {
 		}
 	}
 
+	@Deprecated
 	public static Object[] concat(Object[] left, Object[] right) {
 		Object[] result = new Object[left.length + right.length];
 		System.arraycopy(left, 0, result, 0, left.length);
