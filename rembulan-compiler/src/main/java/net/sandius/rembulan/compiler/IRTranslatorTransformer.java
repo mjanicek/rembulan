@@ -1028,7 +1028,7 @@ class IRTranslatorTransformer extends Transformer {
 		// TODO: any more lines to insert?
 
 		insns.add(l_body);
-		breakLabels.add(l_done);
+		breakLabels.push(l_done);
 		nestedBlock(node.block());
 		breakLabels.pop();
 
