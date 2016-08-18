@@ -26,13 +26,13 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.ConversionMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.DispatchMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ExecutionContextMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
-import net.sandius.rembulan.compiler.gen.asm.helpers.ObjectSinkMethods;
+import net.sandius.rembulan.compiler.gen.asm.helpers.ReturnVectorMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.TableMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.ReturnVector;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.Check;
@@ -174,13 +174,13 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				true);
 	}
 
-	static AbstractInsnNode loadSink() {
+	static AbstractInsnNode loadReturnVector() {
 		return new MethodInsnNode(
 				INVOKEINTERFACE,
 				Type.getInternalName(ExecutionContext.class),
-				"getObjectSink",
+				"getReturnVector",
 				Type.getMethodDescriptor(
-						Type.getType(ObjectSink.class)),
+						Type.getType(ReturnVector.class)),
 				true);
 	}
 
@@ -188,8 +188,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		InsnList il = new InsnList();
 
 		il.add(loadExecutionContext());
-		il.add(loadSink());
-		il.add(ObjectSinkMethods.get(0));
+		il.add(loadReturnVector());
+		il.add(ReturnVectorMethods.get(0));
 
 		return il;
 	}
@@ -496,10 +496,10 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		 In Java terms, we're translating this into the following loop:
 
 			Table tab;
-			ObjectSink stack = context.getObjectSink();
+			ReturnVector rvec = context.getReturnVector();
 			int i = 0;
-			while (i < stack.size()) {
-				tab.rawset(OFFSET + i, stack.get(i));
+			while (i < rvec.size()) {
+				tab.rawset(OFFSET + i, rvec.get(i));
 				i++;
 			}
 		*/
@@ -513,7 +513,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		int lv_idx_i = nextLocalVariableIndex() + 2;
 
 		locals.add(new LocalVariableNode("tab", Type.getDescriptor(Table.class), null, begin, end, lv_idx_tab));
-		locals.add(new LocalVariableNode("stack", Type.getDescriptor(ObjectSink.class), null, begin, end, lv_idx_stack));
+		locals.add(new LocalVariableNode("rvec", Type.getDescriptor(ReturnVector.class), null, begin, end, lv_idx_stack));
 		locals.add(new LocalVariableNode("i", Type.INT_TYPE.getDescriptor(), null, begin, end, lv_idx_i));
 
 		il.add(begin);
@@ -523,7 +523,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(new VarInsnNode(ASTORE, lv_idx_tab));
 
 		il.add(loadExecutionContext());
-		il.add(loadSink());
+		il.add(loadReturnVector());
 		il.add(new VarInsnNode(ASTORE, lv_idx_stack));
 
 		il.add(ASMUtils.loadInt(0));
@@ -532,13 +532,13 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(top);
 		il.add(new FrameNode(F_APPEND, 3, new Object[] {
 					Type.getInternalName(Table.class),
-					Type.getInternalName(ObjectSink.class),
+					Type.getInternalName(ReturnVector.class),
 					Opcodes.INTEGER
 				}, 0, null));
 
 		il.add(new VarInsnNode(ILOAD, lv_idx_i));
 		il.add(new VarInsnNode(ALOAD, lv_idx_stack));
-		il.add(ObjectSinkMethods.size());
+		il.add(ReturnVectorMethods.size());
 		il.add(new JumpInsnNode(IF_ICMPGE, end));
 
 		il.add(new VarInsnNode(ALOAD, lv_idx_tab));
@@ -551,7 +551,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		// stack.get(i)
 		il.add(new VarInsnNode(ALOAD, lv_idx_stack));
 		il.add(new VarInsnNode(ILOAD, lv_idx_i));
-		il.add(ObjectSinkMethods.get());
+		il.add(ReturnVectorMethods.get());
 
 		// tab.rawset(offset + i, stack.get(i))
 		il.add(TableMethods.rawset_int());
@@ -569,9 +569,9 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	@Override
 	public void visit(Vararg node) {
 		il.add(loadExecutionContext());
-		il.add(loadSink());
+		il.add(loadReturnVector());
 		il.add(new VarInsnNode(ALOAD, runMethod.LV_VARARGS));
-		il.add(ObjectSinkMethods.setTo(0));
+		il.add(ReturnVectorMethods.setTo(0));
 	}
 
 	private int loadVList(VList vl, int maxKind) {
@@ -581,8 +581,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 			if (vl.addrs().size() == 0) {
 				// no prefix, simply take the stack contents as an array
 				il.add(loadExecutionContext());
-				il.add(loadSink());
-				il.add(ObjectSinkMethods.toArray());
+				il.add(loadReturnVector());
+				il.add(ReturnVectorMethods.toArray());
 				return 0;
 			}
 			else {
@@ -603,8 +603,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 				// get stack contents as an array
 				il.add(loadExecutionContext());
-				il.add(loadSink());
-				il.add(ObjectSinkMethods.toArray());
+				il.add(loadReturnVector());
+				il.add(ReturnVectorMethods.toArray());
 				il.add(new VarInsnNode(ASTORE, lv_idx_stack));
 
 				// compute the overall arg list length
@@ -681,19 +681,19 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	@Override
 	public void visit(Ret node) {
 		il.add(loadExecutionContext());
-		il.add(loadSink());
-		int kind = loadVList(node.args(), ObjectSinkMethods.MAX_SETTO_KIND);  // values
-		il.add(ObjectSinkMethods.setTo(kind));
+		il.add(loadReturnVector());
+		int kind = loadVList(node.args(), ReturnVectorMethods.MAX_SETTO_KIND);  // values
+		il.add(ReturnVectorMethods.setTo(kind));
 		il.add(new InsnNode(RETURN));
 	}
 
 	@Override
 	public void visit(TCall node) {
 		il.add(loadExecutionContext());
-		il.add(loadSink());
+		il.add(loadReturnVector());
 		il.add(new VarInsnNode(ALOAD, slot(node.target())));  // call target
-		int kind = loadVList(node.args(), ObjectSinkMethods.MAX_TAILCALL_KIND);  // call args
-		il.add(ObjectSinkMethods.tailCall(kind));
+		int kind = loadVList(node.args(), ReturnVectorMethods.MAX_TAILCALL_KIND);  // call args
+		il.add(ReturnVectorMethods.tailCall(kind));
 		il.add(new InsnNode(RETURN));
 	}
 
@@ -713,8 +713,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	@Override
 	public void visit(MultiGet node) {
 		il.add(loadExecutionContext());
-		il.add(loadSink());
-		il.add(ObjectSinkMethods.get(node.idx()));
+		il.add(loadReturnVector());
+		il.add(ReturnVectorMethods.get(node.idx()));
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
 

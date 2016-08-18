@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Call {
 
 	private final LuaState state;
-	private final ObjectSink objectSink;
+	private final ReturnVector returnVector;
 
 	private Coroutine currentCoroutine;
 
@@ -46,11 +46,11 @@ public class Call {
 
 	private Call(
 			LuaState state,
-			ObjectSink objectSink,
+			ReturnVector returnVector,
 			Coroutine mainCoroutine) {
 
 		this.state = Check.notNull(state);
-		this.objectSink = Check.notNull(objectSink);
+		this.returnVector = Check.notNull(returnVector);
 
 		this.currentCoroutine = Check.notNull(mainCoroutine);
 
@@ -63,10 +63,10 @@ public class Call {
 			Object fn,
 			Object... args) {
 
-		ObjectSink objectSink = state.newObjectSink();
+		ReturnVector returnVector = state.newReturnVector();
 		Coroutine c = new Coroutine(fn);
-		objectSink.setToArray(args);
-		return new Call(state, objectSink, c);
+		returnVector.setToArray(args);
+		return new Call(state, returnVector, c);
 	}
 
 	public enum State {
@@ -236,8 +236,8 @@ public class Call {
 		}
 
 		@Override
-		public ObjectSink getObjectSink() {
-			return call.objectSink;
+		public ReturnVector getReturnVector() {
+			return call.returnVector;
 		}
 
 		@Override
@@ -520,7 +520,7 @@ public class Call {
 
 		if (error == null) {
 			// main coroutine returned
-			final Object[] result = objectSink.toArray();
+			final Object[] result = returnVector.toArray();
 			return new Hook(result) {
 				@Override
 				public Runnable body(Continuation cont) {

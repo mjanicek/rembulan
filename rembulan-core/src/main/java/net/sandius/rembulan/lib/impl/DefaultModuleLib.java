@@ -125,7 +125,7 @@ public class DefaultModuleLib extends ModuleLib {
 			Object mod = _loaded.rawget(modName);
 
 			if (mod != null) {
-				context.getObjectSink().setTo(mod);
+				context.getReturnVector().setTo(mod);
 			}
 			else {
 				throw new UnsupportedOperationException("loading module '" + modName + "': not implemented");

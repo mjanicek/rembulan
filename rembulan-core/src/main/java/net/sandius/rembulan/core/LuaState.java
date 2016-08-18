@@ -18,7 +18,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.LuaType;
 
-public abstract class LuaState implements MetatableProvider, TableFactory, ObjectSinkFactory {
+public abstract class LuaState implements MetatableProvider, TableFactory, ReturnVectorFactory {
 
 	public abstract Table nilMetatable();
 	public abstract Table booleanMetatable();
@@ -75,11 +75,11 @@ public abstract class LuaState implements MetatableProvider, TableFactory, Objec
 		}
 	}
 
-	public abstract ObjectSinkFactory objectSinkFactory();
+	public abstract ReturnVectorFactory returnVectorFactory();
 
 	@Override
-	public ObjectSink newObjectSink() {
-		return objectSinkFactory().newObjectSink();
+	public ReturnVector newReturnVector() {
+		return returnVectorFactory().newReturnVector();
 	}
 
 	public abstract TableFactory tableFactory();

@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.core;
 
-public interface ObjectSinkFactory {
+public interface ReturnVectorFactory {
 
-	ObjectSink newObjectSink();
+	ReturnVector newReturnVector();
 
 }

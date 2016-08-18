@@ -16,17 +16,17 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.ObjectSinkFactory;
+import net.sandius.rembulan.core.ReturnVector;
+import net.sandius.rembulan.core.ReturnVectorFactory;
 
 import java.util.ArrayList;
 
-public class TripleCachingObjectSink extends ObjectSink {
+public class TripleCachingReturnVector extends ReturnVector {
 
-	public static final ObjectSinkFactory FACTORY_INSTANCE = new ObjectSinkFactory() {
+	public static final ReturnVectorFactory FACTORY_INSTANCE = new ReturnVectorFactory() {
 		@Override
-		public ObjectSink newObjectSink() {
-			return new TripleCachingObjectSink();
+		public ReturnVector newReturnVector() {
+			return new TripleCachingReturnVector();
 		}
 	};
 
@@ -38,7 +38,7 @@ public class TripleCachingObjectSink extends ObjectSink {
 
 	private int size;
 
-	public TripleCachingObjectSink() {
+	public TripleCachingReturnVector() {
 		super();
 		_var = new ArrayList<>();
 	}

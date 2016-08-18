@@ -200,7 +200,7 @@ public class DefaultDebugLib extends DebugLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object value = args.nextAny();
 			Table mt = context.getState().getMetatable(value);
-			context.getObjectSink().setTo(mt);
+			context.getReturnVector().setTo(mt);
 		}
 
 	}
@@ -224,7 +224,7 @@ public class DefaultDebugLib extends DebugLib {
 			context.getState().setMetatable(value, mt);
 
 			// return value
-			context.getObjectSink().setTo(value);
+			context.getReturnVector().setTo(value);
 		}
 
 	}
@@ -260,12 +260,12 @@ public class DefaultDebugLib extends DebugLib {
 					throw new LuaRuntimeException(ex);
 				}
 
-				context.getObjectSink().setTo(name, value);
+				context.getReturnVector().setTo(name, value);
 			}
 			else {
 				// contrary to what its documentation says, PUC-Lua 5.3.2 doesn't seem to return
 				// nil but rather an empty list
-				context.getObjectSink().reset();
+				context.getReturnVector().reset();
 			}
 
 		}
@@ -310,7 +310,7 @@ public class DefaultDebugLib extends DebugLib {
 				name = null;
 			}
 
-			context.getObjectSink().setTo(name);
+			context.getReturnVector().setTo(name);
 		}
 
 	}
@@ -344,7 +344,7 @@ public class DefaultDebugLib extends DebugLib {
 					throw new LuaRuntimeException(ex);
 				}
 
-				context.getObjectSink().setTo(uv);
+				context.getReturnVector().setTo(uv);
 			}
 		}
 
@@ -390,7 +390,7 @@ public class DefaultDebugLib extends DebugLib {
 				throw new LuaRuntimeException(ex);
 			}
 
-			context.getObjectSink().reset();
+			context.getReturnVector().reset();
 		}
 
 	}
@@ -409,7 +409,7 @@ public class DefaultDebugLib extends DebugLib {
 			Object o = args.peekOrNil();
 
 			Object result = o instanceof Userdata ? ((Userdata) o).getUserValue() : null;
-			context.getObjectSink().setTo(result);
+			context.getReturnVector().setTo(result);
 		}
 
 	}
@@ -429,7 +429,7 @@ public class DefaultDebugLib extends DebugLib {
 			Object value = args.nextAny();
 
 			userdata.setUserValue(value);
-			context.getObjectSink().setTo(userdata);
+			context.getReturnVector().setTo(userdata);
 		}
 
 	}

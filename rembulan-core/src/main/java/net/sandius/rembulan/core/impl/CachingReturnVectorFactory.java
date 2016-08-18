@@ -16,35 +16,35 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.ObjectSinkFactory;
+import net.sandius.rembulan.core.ReturnVector;
+import net.sandius.rembulan.core.ReturnVectorFactory;
 
-public class CachingObjectSinkFactory implements ObjectSinkFactory {
+public class CachingReturnVectorFactory implements ReturnVectorFactory {
 
 	public static final int DEFAULT_CACHE_SIZE = 2;
 
-	public static final CachingObjectSinkFactory DEFAULT_INSTANCE = new CachingObjectSinkFactory(DEFAULT_CACHE_SIZE);
+	public static final CachingReturnVectorFactory DEFAULT_INSTANCE = new CachingReturnVectorFactory(DEFAULT_CACHE_SIZE);
 
 	private final int cacheSize;
-	private final ObjectSinkFactory factory;
+	private final ReturnVectorFactory factory;
 
-	public CachingObjectSinkFactory(int cacheSize) {
-		ObjectSinkFactory fac = forSize(cacheSize);
+	public CachingReturnVectorFactory(int cacheSize) {
+		ReturnVectorFactory fac = forSize(cacheSize);
 		if (fac != null) {
 			this.factory = fac;
 			this.cacheSize = cacheSize;
 		}
 		else {
-			this.factory = ArrayListObjectSink.FACTORY_INSTANCE;
+			this.factory = ArrayListReturnVector.FACTORY_INSTANCE;
 			this.cacheSize = 0;
 		}
 	}
 
-	private static ObjectSinkFactory forSize(int cacheSize) {
+	private static ReturnVectorFactory forSize(int cacheSize) {
 		switch (cacheSize) {
-			case 2: return PairCachingObjectSink.FACTORY_INSTANCE;
-			case 3: return TripleCachingObjectSink.FACTORY_INSTANCE;
-			case 4: return QuintupleCachingObjectSink.FACTORY_INSTANCE;
+			case 2: return PairCachingReturnVector.FACTORY_INSTANCE;
+			case 3: return TripleCachingReturnVector.FACTORY_INSTANCE;
+			case 4: return QuintupleCachingReturnVector.FACTORY_INSTANCE;
 			default: return null;
 		}
 	}
@@ -54,8 +54,8 @@ public class CachingObjectSinkFactory implements ObjectSinkFactory {
 	}
 
 	@Override
-	public ObjectSink newObjectSink() {
-		return factory.newObjectSink();
+	public ReturnVector newReturnVector() {
+		return factory.newReturnVector();
 	}
 
 }

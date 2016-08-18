@@ -20,8 +20,8 @@ import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.ObjectSink;
 import net.sandius.rembulan.core.ProtectedResumable;
+import net.sandius.rembulan.core.ReturnVector;
 import net.sandius.rembulan.core.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.util.Check;
@@ -79,7 +79,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Function func = args.nextFunction();
 			Coroutine c = context.newCoroutine(func);
-			context.getObjectSink().setTo(c);
+			context.getReturnVector().setTo(c);
 		}
 
 	}
@@ -98,7 +98,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			Coroutine coroutine = args.nextCoroutine();
 			Object[] resumeArgs = args.getTail();
 
-			context.getObjectSink().reset();
+			context.getReturnVector().reset();
 
 			try {
 				context.resume(coroutine, resumeArgs);
@@ -110,16 +110,16 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			ObjectSink os = context.getObjectSink();
+			ReturnVector rvec = context.getReturnVector();
 			ArrayList<Object> result = new ArrayList<>();
 			result.add(Boolean.TRUE);
-			result.addAll(Arrays.asList(os.toArray()));
-			os.setToArray(result.toArray());
+			result.addAll(Arrays.asList(rvec.toArray()));
+			rvec.setToArray(result.toArray());
 		}
 
 		@Override
 		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
-			context.getObjectSink().setTo(Boolean.FALSE, error);
+			context.getReturnVector().setTo(Boolean.FALSE, error);
 		}
 
 	}
@@ -161,7 +161,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			context.getObjectSink().setTo(context.canYield());
+			context.getReturnVector().setTo(context.canYield());
 		}
 
 	}
@@ -195,7 +195,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Coroutine coroutine = args.nextCoroutine();
-			context.getObjectSink().setTo(status(context, coroutine));
+			context.getReturnVector().setTo(status(context, coroutine));
 		}
 
 	}
@@ -212,7 +212,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Coroutine c = context.getCurrentCoroutine();
-			context.getObjectSink().setTo(c, !c.canYield());
+			context.getReturnVector().setTo(c, !c.canYield());
 		}
 
 	}
@@ -233,7 +233,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 			@Override
 			public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-				context.getObjectSink().reset();
+				context.getReturnVector().reset();
 				try {
 					context.resume(coroutine, args);
 				}
@@ -258,7 +258,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Function f = args.nextFunction();
 			Function result = new WrappedCoroutine(f, context);
-			context.getObjectSink().setTo(result);
+			context.getReturnVector().setTo(result);
 		}
 
 	}

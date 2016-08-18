@@ -20,7 +20,7 @@ public interface ExecutionContext {
 
 	LuaState getState();
 
-	ObjectSink getObjectSink();
+	ReturnVector getReturnVector();
 
 	Coroutine getCurrentCoroutine();
 

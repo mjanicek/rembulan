@@ -23,7 +23,7 @@ import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
-import net.sandius.rembulan.core.ObjectSink;
+import net.sandius.rembulan.core.ReturnVector;
 import net.sandius.rembulan.core.impl.AbstractFunction0;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -189,12 +189,12 @@ public class DefaultStringLib extends StringLib {
 			i = lowerBound(i, len);
 			j = upperBound(j, len);
 
-			context.getObjectSink().reset();
+			context.getReturnVector().reset();
 
 			for (int idx = i; idx <= j; idx++) {
 				// FIXME: these are not bytes!
 				char c = s.charAt(idx - 1);
-				context.getObjectSink().push((long) c);
+				context.getReturnVector().push((long) c);
 			}
 		}
 
@@ -218,7 +218,7 @@ public class DefaultStringLib extends StringLib {
 			}
 
 			String s = String.valueOf(chars);
-			context.getObjectSink().setTo(s);
+			context.getReturnVector().setTo(s);
 		}
 
 	}
@@ -264,10 +264,10 @@ public class DefaultStringLib extends StringLib {
 				// find a substring
 				int at = s.indexOf(pattern, init - 1);
 				if (at >= 0) {
-					context.getObjectSink().setTo(at + 1, at + pattern.length());
+					context.getReturnVector().setTo(at + 1, at + pattern.length());
 				}
 				else {
-					context.getObjectSink().setTo(null);
+					context.getReturnVector().setTo(null);
 				}
 			}
 			else {
@@ -293,17 +293,17 @@ public class DefaultStringLib extends StringLib {
 
 				if (nextIndex < 1) {
 					// pattern not found
-					context.getObjectSink().setTo(null);
+					context.getReturnVector().setTo(null);
 				}
 				else {
 					// pattern found
-					ObjectSink objectSink = context.getObjectSink();
-					objectSink.reset();
+					ReturnVector returnVector = context.getReturnVector();
+					returnVector.reset();
 					for (Object r : results) {
-						objectSink.push(r);
+						returnVector.push(r);
 					}
 					for (Object c : captures) {
-						objectSink.push(c);
+						returnVector.push(c);
 					}
 				}
 			}
@@ -717,7 +717,7 @@ public class DefaultStringLib extends StringLib {
 				}
 			} while (idx >= 0);
 
-			context.getObjectSink().setTo(bld.toString());
+			context.getReturnVector().setTo(bld.toString());
 		}
 
 		@Override
@@ -774,17 +774,17 @@ public class DefaultStringLib extends StringLib {
 
 				if (nextIndex < 1) {
 					// no match
-					context.getObjectSink().reset();
+					context.getReturnVector().reset();
 				}
 				else {
 					// match
 					if (captures.isEmpty()) {
-						context.getObjectSink().setTo(fullMatch);
+						context.getReturnVector().setTo(fullMatch);
 					}
 					else {
-						context.getObjectSink().reset();
+						context.getReturnVector().reset();
 						for (Object c : captures) {
-							context.getObjectSink().push(c);
+							context.getReturnVector().push(c);
 						}
 					}
 				}
@@ -810,7 +810,7 @@ public class DefaultStringLib extends StringLib {
 
 			Function f = new IteratorFunction(s, pat);
 
-			context.getObjectSink().setTo(f);
+			context.getReturnVector().setTo(f);
 		}
 
 	}
@@ -827,7 +827,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
-			context.getObjectSink().setTo((long) s.length());
+			context.getReturnVector().setTo((long) s.length());
 		}
 
 	}
@@ -844,7 +844,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
-			context.getObjectSink().setTo(s.toLowerCase());
+			context.getReturnVector().setTo(s.toLowerCase());
 		}
 
 	}
@@ -885,18 +885,18 @@ public class DefaultStringLib extends StringLib {
 
 			if (nextIndex < 1) {
 				// no match found
-				context.getObjectSink().setTo(null);
+				context.getReturnVector().setTo(null);
 			}
 			else {
 				// match was found
 				if (captures.isEmpty()) {
 					// no captures
-					context.getObjectSink().setTo(fullMatch[0]);
+					context.getReturnVector().setTo(fullMatch[0]);
 				}
 				else {
-					context.getObjectSink().reset();
+					context.getReturnVector().reset();
 					for (Object c : captures) {
-						context.getObjectSink().push(c);
+						context.getReturnVector().push(c);
 					}
 				}
 			}
@@ -936,7 +936,7 @@ public class DefaultStringLib extends StringLib {
 				result = "";
 			}
 
-			context.getObjectSink().setTo(result);
+			context.getReturnVector().setTo(result);
 		}
 
 	}
@@ -963,7 +963,7 @@ public class DefaultStringLib extends StringLib {
 
 			String result = String.valueOf(chars);
 
-			context.getObjectSink().setTo(result);
+			context.getReturnVector().setTo(result);
 		}
 
 	}
@@ -989,7 +989,7 @@ public class DefaultStringLib extends StringLib {
 
 			String result = s.substring(i, j);
 
-			context.getObjectSink().setTo(result);
+			context.getReturnVector().setTo(result);
 		}
 
 	}
@@ -1006,7 +1006,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
-			context.getObjectSink().setTo(s.toUpperCase());
+			context.getReturnVector().setTo(s.toUpperCase());
 		}
 
 	}

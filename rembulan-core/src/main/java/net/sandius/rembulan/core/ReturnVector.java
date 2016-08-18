@@ -16,12 +16,12 @@
 
 package net.sandius.rembulan.core;
 
-public abstract class ObjectSink {
+public abstract class ReturnVector {
 
 	protected boolean tailCall;
 	protected Object tailCallTarget;
 
-	protected ObjectSink() {
+	protected ReturnVector() {
 		tailCall = false;
 		tailCallTarget = null;
 	}

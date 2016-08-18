@@ -180,7 +180,7 @@ public class DefaultBasicLib extends BasicLib {
 					throw ct.push(this, Arrays.copyOfRange(args, i + 1, args.length));
 				}
 
-				Object s = context.getObjectSink()._0();
+				Object s = context.getReturnVector()._0();
 				if (s instanceof String) {
 					out.print(s);
 				}
@@ -195,7 +195,7 @@ public class DefaultBasicLib extends BasicLib {
 			out.println();
 
 			// returning nothing
-			context.getObjectSink().setTo();
+			context.getReturnVector().setTo();
 		}
 
 		@Override
@@ -222,7 +222,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
-			context.getObjectSink().setTo(typeName);
+			context.getReturnVector().setTo(typeName);
 		}
 
 	}
@@ -252,11 +252,11 @@ public class DefaultBasicLib extends BasicLib {
 
 			if (nxt == null) {
 				// we've reached the end
-				context.getObjectSink().setTo(null);
+				context.getReturnVector().setTo(null);
 			}
 			else {
 				Object value = table.rawget(nxt);
-				context.getObjectSink().setTo(nxt, value);
+				context.getReturnVector().setTo(nxt, value);
 			}
 		}
 
@@ -280,10 +280,10 @@ public class DefaultBasicLib extends BasicLib {
 
 			Object o = table.rawget(index);
 			if (o != null) {
-				context.getObjectSink().setTo(index, o);
+				context.getReturnVector().setTo(index, o);
 			}
 			else {
-				context.getObjectSink().setTo(null);
+				context.getReturnVector().setTo(null);
 			}
 		}
 
@@ -311,19 +311,19 @@ public class DefaultBasicLib extends BasicLib {
 					throw ct.push(this, null);
 				}
 
-				ObjectSink os = context.getObjectSink();
-				os.setTo(os._0(), os._1(), os._2());
+				ReturnVector rvec = context.getReturnVector();
+				rvec.setTo(rvec._0(), rvec._1(), rvec._2());
 			}
 			else {
-				ObjectSink os = context.getObjectSink();
-				os.setTo(Next.INSTANCE, t, null);
+				ReturnVector rvec = context.getReturnVector();
+				rvec.setTo(Next.INSTANCE, t, null);
 			}
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
-			ObjectSink os = context.getObjectSink();
-			os.setTo(os._0(), os._1(), os._2());
+			ReturnVector rvec = context.getReturnVector();
+			rvec.setTo(rvec._0(), rvec._1(), rvec._2());
 		}
 
 	}
@@ -340,7 +340,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table t = args.nextTable();
-			context.getObjectSink().setTo(INext.INSTANCE, t, 0L);
+			context.getReturnVector().setTo(INext.INSTANCE, t, 0L);
 		}
 
 	}
@@ -373,15 +373,15 @@ public class DefaultBasicLib extends BasicLib {
 			else {
 				// no metamethod, just call the default toString
 				String s = Conversions.toHumanReadableString(arg);
-				context.getObjectSink().setTo(s);
+				context.getReturnVector().setTo(s);
 			}
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			// trim to single value
-			Object result = context.getObjectSink()._0();
-			context.getObjectSink().setTo(result);
+			Object result = context.getReturnVector()._0();
+			context.getReturnVector().setTo(result);
 		}
 
 	}
@@ -410,7 +410,7 @@ public class DefaultBasicLib extends BasicLib {
 				// no base
 				Object o = args.nextAny();
 				Number n = Conversions.numericalValueOf(o);
-				context.getObjectSink().setTo(n);
+				context.getReturnVector().setTo(n);
 			}
 			else {
 				// We do the argument checking gymnastics in order to achieve the same error
@@ -423,7 +423,7 @@ public class DefaultBasicLib extends BasicLib {
 				String s = args.nextStrictString();
 				int base = args.nextIntRange("base", Character.MIN_RADIX, Character.MAX_RADIX);
 
-				context.getObjectSink().setTo(toNumber(s, base));
+				context.getReturnVector().setTo(toNumber(s, base));
 
 			}
 		}
@@ -449,7 +449,7 @@ public class DefaultBasicLib extends BasicLib {
 					? meta  // __metatable field present, return its value
 					: context.getState().getMetatable(arg);  // return the entire metatable
 
-			context.getObjectSink().setTo(result);
+			context.getReturnVector().setTo(result);
 		}
 
 	}
@@ -473,7 +473,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				t.setMetatable(mt);
-				context.getObjectSink().setTo(t);
+				context.getReturnVector().setTo(t);
 			}
 		}
 
@@ -509,7 +509,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			if (Conversions.booleanValueOf(args.nextAny())) {
-				context.getObjectSink().setToArray(args.getAll());
+				context.getReturnVector().setToArray(args.getAll());
 			}
 			else {
 				final AssertionFailedException ex;
@@ -567,16 +567,16 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			// success: prepend true
-			ObjectSink os = context.getObjectSink();
+			ReturnVector rvec = context.getReturnVector();
 			ArrayList<Object> result = new ArrayList<>();
 			result.add(Boolean.TRUE);
-			result.addAll(Arrays.asList(os.toArray()));
-			os.setToArray(result.toArray());
+			result.addAll(Arrays.asList(rvec.toArray()));
+			rvec.setToArray(result.toArray());
 		}
 
 		@Override
 		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
-			context.getObjectSink().setTo(Boolean.FALSE, error);  // failure
+			context.getReturnVector().setTo(Boolean.FALSE, error);  // failure
 		}
 
 	}
@@ -603,17 +603,17 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		private static void prependTrue(ExecutionContext context) {
-			ObjectSink os = context.getObjectSink();
+			ReturnVector rvec = context.getReturnVector();
 			ArrayList<Object> result = new ArrayList<>();
 			result.add(Boolean.TRUE);
-			result.addAll(Arrays.asList(os.toArray()));
-			os.setToArray(result.toArray());
+			result.addAll(Arrays.asList(rvec.toArray()));
+			rvec.setToArray(result.toArray());
 		}
 
 		private static void prependFalseAndTrim(ExecutionContext context) {
-			ObjectSink os = context.getObjectSink();
-			Object errorObject = os._0();
-			os.setTo(Boolean.FALSE, errorObject);
+			ReturnVector rvec = context.getReturnVector();
+			Object errorObject = rvec._0();
+			rvec.setTo(Boolean.FALSE, errorObject);
 		}
 
 		private void handleError(ExecutionContext context, Function handler, int depth, Object errorObject) throws ControlThrowable {
@@ -641,7 +641,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				// depth must be >= MAX_DEPTH
-				context.getObjectSink().setTo(Boolean.FALSE, "error in error handling");
+				context.getReturnVector().setTo(Boolean.FALSE, "error in error handling");
 			}
 		}
 
@@ -706,7 +706,7 @@ public class DefaultBasicLib extends BasicLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object a = args.nextAny();
 			Object b = args.nextAny();
-			context.getObjectSink().setTo(Ordering.isRawEqual(a, b));
+			context.getReturnVector().setTo(Ordering.isRawEqual(a, b));
 		}
 
 	}
@@ -724,7 +724,7 @@ public class DefaultBasicLib extends BasicLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table table = args.nextTable();
 			Object key = args.nextAny();
-			context.getObjectSink().setTo(table.rawget(key));
+			context.getReturnVector().setTo(table.rawget(key));
 		}
 
 	}
@@ -745,7 +745,7 @@ public class DefaultBasicLib extends BasicLib {
 			Object value = args.nextAny();
 
 			table.rawset(key, value);
-			context.getObjectSink().setTo(table);
+			context.getReturnVector().setTo(table);
 		}
 
 	}
@@ -778,7 +778,7 @@ public class DefaultBasicLib extends BasicLib {
 				throw new BadArgumentException(1, name(), "table or string expected");
 			}
 
-			context.getObjectSink().setTo(result);
+			context.getReturnVector().setTo(result);
 		}
 
 	}
@@ -799,7 +799,7 @@ public class DefaultBasicLib extends BasicLib {
 			if (index instanceof String && ((String) index).startsWith("#")) {
 				// return the number of remaining args
 				int count = args.tailSize() - 1;
-				context.getObjectSink().setTo((long) count);
+				context.getReturnVector().setTo((long) count);
 			}
 			else {
 				int idx = args.nextIntRange("index", -args.size() + 1, Integer.MAX_VALUE);
@@ -815,7 +815,7 @@ public class DefaultBasicLib extends BasicLib {
 				Object[] r = args.getAll();
 				final Object[] result;
 				result = from > r.length ? new Object[0] : Arrays.copyOfRange(r, from, r.length);
-				context.getObjectSink().setToArray(result);
+				context.getReturnVector().setToArray(result);
 			}
 		}
 

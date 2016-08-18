@@ -16,31 +16,28 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ObjectSink;
-import net.sandius.rembulan.core.ObjectSinkFactory;
+import net.sandius.rembulan.core.ReturnVector;
+import net.sandius.rembulan.core.ReturnVectorFactory;
 
 import java.util.ArrayList;
 
-public class QuintupleCachingObjectSink extends ObjectSink {
+public class PairCachingReturnVector extends ReturnVector {
 
-	public static final ObjectSinkFactory FACTORY_INSTANCE = new ObjectSinkFactory() {
+	public static final ReturnVectorFactory FACTORY_INSTANCE = new ReturnVectorFactory() {
 		@Override
-		public ObjectSink newObjectSink() {
-			return new QuintupleCachingObjectSink();
+		public ReturnVector newReturnVector() {
+			return new PairCachingReturnVector();
 		}
 	};
 
 	private Object _0;
 	private Object _1;
-	private Object _2;
-	private Object _3;
-	private Object _4;
 
 	private final ArrayList<Object> _var;
 
 	private int size;
 
-	public QuintupleCachingObjectSink() {
+	public PairCachingReturnVector() {
 		super();
 		_var = new ArrayList<>();
 	}
@@ -50,13 +47,10 @@ public class QuintupleCachingObjectSink extends ObjectSink {
 		return size;
 	}
 
-	protected void setCacheAndClearList(Object a, Object b, Object c, Object d, Object e) {
+	protected void setCacheAndClearList(Object a, Object b) {
 		_0 = a;
 		_1 = b;
-		_2 = c;
-		_3 = d;
-		_4 = e;
-		if (size > 5) {
+		if (size > 2) {
 			_var.clear();
 		}
 		resetTailCall();
@@ -64,37 +58,43 @@ public class QuintupleCachingObjectSink extends ObjectSink {
 
 	@Override
 	public void reset() {
-		setCacheAndClearList(null, null, null, null, null);
+		setCacheAndClearList(null, null);
 		size = 0;
 	}
 
 	@Override
 	public void setTo(Object a) {
-		setCacheAndClearList(a, null, null, null, null);
+		setCacheAndClearList(a, null);
 		size = 1;
 	}
 
 	@Override
 	public void setTo(Object a, Object b) {
-		setCacheAndClearList(a, b, null, null, null);
+		setCacheAndClearList(a, b);
 		size = 2;
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c) {
-		setCacheAndClearList(a, b, c, null, null);
+		setCacheAndClearList(a, b);
+		_var.add(c);
 		size = 3;
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c, Object d) {
-		setCacheAndClearList(a, b, c, d, null);
+		setCacheAndClearList(a, b);
+		_var.add(c);
+		_var.add(d);
 		size = 4;
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c, Object d, Object e) {
-		setCacheAndClearList(a, b, c, d, e);
+		setCacheAndClearList(a, b);
+		_var.add(c);
+		_var.add(d);
+		_var.add(e);
 		size = 5;
 	}
 
@@ -106,15 +106,6 @@ public class QuintupleCachingObjectSink extends ObjectSink {
 				break;
 			case 1:
 				_1 = o;
-				break;
-			case 2:
-				_2 = o;
-				break;
-			case 3:
-				_3 = o;
-				break;
-			case 4:
-				_4 = o;
 				break;
 			default:
 				_var.add(o);
@@ -130,18 +121,12 @@ public class QuintupleCachingObjectSink extends ObjectSink {
 			case 0: return EMPTY_ARRAY;
 			case 1: return new Object[] { _0 };
 			case 2: return new Object[] { _0, _1 };
-			case 3: return new Object[] { _0, _1, _2 };
-			case 4: return new Object[] { _0, _1, _2, _3 };
-			case 5: return new Object[] { _0, _1, _2, _3, _4 };
 			default:
 				Object[] result = new Object[size];
 				result[0] = _0;
 				result[1] = _1;
-				result[2] = _2;
-				result[3] = _3;
-				result[4] = _4;
 				Object[] tmp = _var.toArray();
-				System.arraycopy(tmp, 0, result, 5, tmp.length);
+				System.arraycopy(tmp, 0, result, 2, tmp.length);
 				return result;
 		}
 	}
@@ -151,10 +136,7 @@ public class QuintupleCachingObjectSink extends ObjectSink {
 		switch (idx) {
 			case 0: return _0;
 			case 1: return _1;
-			case 2: return _2;
-			case 3: return _3;
-			case 4: return _4;
-			default: return idx < size && idx > 4 ? _var.get(idx - 5) : null;
+			default: return idx < size && idx > 1 ? _var.get(idx - 2) : null;
 		}
 	}
 
@@ -170,17 +152,17 @@ public class QuintupleCachingObjectSink extends ObjectSink {
 
 	@Override
 	public Object _2() {
-		return _2;
+		return size > 2 ? _var.get(0) : null;
 	}
 
 	@Override
 	public Object _3() {
-		return _3;
+		return size > 3 ? _var.get(1) : null;
 	}
 
 	@Override
 	public Object _4() {
-		return _4;
+		return size > 4 ? _var.get(2) : null;
 	}
 
 }

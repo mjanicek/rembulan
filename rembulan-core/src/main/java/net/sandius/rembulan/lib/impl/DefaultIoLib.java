@@ -340,12 +340,12 @@ public class DefaultIoLib extends IoLib {
 				IoFile f = lib.openFile(filename, Open.Mode.READ);
 				assert (f != null);
 				lib.setDefaultInputFile(f);
-				context.getObjectSink().setTo(f);
+				context.getReturnVector().setTo(f);
 			}
 			else {
 				// return the default input file
 				IoFile inFile = lib.getDefaultInputFile();
-				context.getObjectSink().setTo(inFile);
+				context.getReturnVector().setTo(inFile);
 			}
 		}
 
@@ -420,13 +420,13 @@ public class DefaultIoLib extends IoLib {
 				file = lib.openFile(filename, mode);
 			}
 			catch (Exception ex) {
-				context.getObjectSink().setTo(null, ex.getMessage());
+				context.getReturnVector().setTo(null, ex.getMessage());
 				return;
 			}
 
 			assert (file != null);
 
-			context.getObjectSink().setTo(file);
+			context.getReturnVector().setTo(file);
 		}
 
 	}
@@ -452,12 +452,12 @@ public class DefaultIoLib extends IoLib {
 				IoFile f = lib.openFile(filename, Open.Mode.WRITE);
 				assert (f != null);
 				lib.setDefaultOutputFile(f);
-				context.getObjectSink().setTo(f);
+				context.getReturnVector().setTo(f);
 			}
 			else {
 				// return the default output file
 				IoFile outFile = lib.getDefaultOutputFile();
-				context.getObjectSink().setTo(outFile);
+				context.getReturnVector().setTo(outFile);
 			}
 		}
 
@@ -524,7 +524,7 @@ public class DefaultIoLib extends IoLib {
 				result = null;
 			}
 
-			context.getObjectSink().setTo(result);
+			context.getReturnVector().setTo(result);
 		}
 
 	}
