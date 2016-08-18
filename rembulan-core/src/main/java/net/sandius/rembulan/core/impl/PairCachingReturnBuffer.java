@@ -16,15 +16,15 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ReturnVector;
-import net.sandius.rembulan.core.ReturnVectorFactory;
+import net.sandius.rembulan.core.ReturnBuffer;
+import net.sandius.rembulan.core.ReturnBufferFactory;
 
-public class PairCachingReturnVector implements ReturnVector {
+public class PairCachingReturnBuffer implements ReturnBuffer {
 
-	public static final ReturnVectorFactory FACTORY_INSTANCE = new ReturnVectorFactory() {
+	public static final ReturnBufferFactory FACTORY_INSTANCE = new ReturnBufferFactory() {
 		@Override
-		public ReturnVector newReturnVector() {
-			return new PairCachingReturnVector();
+		public ReturnBuffer newReturnBuffer() {
+			return new PairCachingReturnBuffer();
 		}
 	};
 
@@ -46,7 +46,7 @@ public class PairCachingReturnVector implements ReturnVector {
 	private Object tailCallTarget;
 	private boolean tailCall;
 
-	public PairCachingReturnVector(int preferredBufSize) {
+	public PairCachingReturnBuffer(int preferredBufSize) {
 		if (preferredBufSize < MIN_BUF_SIZE) {
 			throw new IllegalArgumentException("Preferred array size must be at least " + MIN_BUF_SIZE);
 		}
@@ -62,7 +62,7 @@ public class PairCachingReturnVector implements ReturnVector {
 		this.tailCall = false;
 	}
 
-	public PairCachingReturnVector() {
+	public PairCachingReturnBuffer() {
 		this(DEFAULT_PREFERRED_BUF_SIZE);
 	}
 

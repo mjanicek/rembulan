@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.core;
 
-public interface ReturnVectorFactory {
+public interface ReturnBufferFactory {
 
-	ReturnVector newReturnVector();
+	ReturnBuffer newReturnBuffer();
 
 }

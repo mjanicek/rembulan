@@ -16,40 +16,34 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ReturnVector;
-import net.sandius.rembulan.core.ReturnVectorFactory;
+import net.sandius.rembulan.core.ReturnBuffer;
 
-import java.util.Arrays;
+public abstract class AbstractReturnBuffer implements ReturnBuffer {
 
-public class SimpleReturnVector implements ReturnVector {
+	protected boolean tailCall;
+	protected Object tailCallTarget;
 
-	public static final ReturnVectorFactory FACTORY_INSTANCE = new ReturnVectorFactory() {
-		@Override
-		public ReturnVector newReturnVector() {
-			return new SimpleReturnVector();
-		}
-	};
-
-	private static final Object[] EMPTY_ARRAY = new Object[0];
-
-	private Object[] values;
-	private Object tailCallTarget;
-	private boolean tailCall;
-
-	public SimpleReturnVector() {
-		this.values = EMPTY_ARRAY;
-		this.tailCallTarget = null;
-		this.tailCall = false;
-	}
-
-	@Override
-	public int size() {
-		return values.length;
+	protected AbstractReturnBuffer() {
+		tailCall = false;
+		tailCallTarget = null;
 	}
 
 	@Override
 	public boolean isTailCall() {
 		return tailCall;
+	}
+
+	// resets tail call to false, size to 0
+	protected abstract void reset();
+
+	protected void resetTailCall() {
+		tailCall = false;
+		tailCallTarget = null;
+	}
+
+	protected void setTailCallTarget(Object target) {
+		tailCall = true;
+		tailCallTarget = target;
 	}
 
 	@Override
@@ -62,98 +56,101 @@ public class SimpleReturnVector implements ReturnVector {
 		}
 	}
 
-	private void update(Object[] values, boolean tailCall, Object tailCallTarget) {
-		this.values = values;
-		this.tailCall = tailCall;
-		this.tailCallTarget = tailCallTarget;
-	}
-
-	private void setReturn(Object[] values) {
-		update(values, false, null);
-	}
-
-	private void setTailCall(Object target, Object[] args) {
-		update(args, true, target);
-	}
+	protected abstract void push(Object o);
 
 	@Override
 	public void setTo() {
-		setReturn(EMPTY_ARRAY);
+		reset();
 	}
 
 	@Override
 	public void setTo(Object a) {
-		setReturn(new Object[] {a});
+		reset();
+		push(a);
 	}
 
 	@Override
 	public void setTo(Object a, Object b) {
-		setReturn(new Object[] {a, b});
+		reset();
+		push(a);
+		push(b);
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c) {
-		setReturn(new Object[] {a, b, c});
+		reset();
+		push(a);
+		push(b);
+		push(c);
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c, Object d) {
-		setReturn(new Object[] {a, b, c, d});
+		reset();
+		push(a);
+		push(b);
+		push(c);
+		push(d);
 	}
 
 	@Override
 	public void setTo(Object a, Object b, Object c, Object d, Object e) {
-		setReturn(new Object[] {a, b, c, d, e});
+		reset();
+		push(a);
+		push(b);
+		push(c);
+		push(d);
+		push(e);
 	}
 
 	@Override
 	public void setToArray(Object[] a) {
-		setReturn(Arrays.copyOf(a, a.length));
+		reset();
+		for (Object o : a) {
+			push(o);
+		}
 	}
 
 	@Override
 	public void tailCall(Object target) {
-		setTailCall(target, EMPTY_ARRAY);
+		setTo();
+		setTailCallTarget(target);
 	}
 
 	@Override
 	public void tailCall(Object target, Object arg1) {
-		setTailCall(target, new Object[] { arg1 });
+		setTo(arg1);
+		setTailCallTarget(target);
 	}
 
 	@Override
 	public void tailCall(Object target, Object arg1, Object arg2) {
-		setTailCall(target, new Object[] { arg1, arg2 });
+		setTo(arg1, arg2);
+		setTailCallTarget(target);
 	}
 
 	@Override
 	public void tailCall(Object target, Object arg1, Object arg2, Object arg3) {
-		setTailCall(target, new Object[] { arg1, arg2, arg3 });
+		setTo(arg1, arg2, arg3);
+		setTailCallTarget(target);
 	}
 
 	@Override
 	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
-		setTailCall(target, new Object[] { arg1, arg2, arg3, arg4 });
+		setTo(arg1, arg2, arg3, arg4);
+		setTailCallTarget(target);
 	}
 
 	@Override
 	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
-		setTailCall(target, new Object[] { arg1, arg2, arg3, arg4, arg5 });
+		setTo(arg1, arg2, arg3, arg4, arg5);
+		setTailCallTarget(target);
 	}
 
 	@Override
 	public void tailCall(Object target, Object[] args) {
-		setTailCall(target, Arrays.copyOf(args, args.length));
-	}
-
-	@Override
-	public Object[] toArray() {
-		return Arrays.copyOf(values, values.length);
-	}
-
-	@Override
-	public Object get(int idx) {
-		return idx < values.length ? values[idx] : null;
+		setToArray(args);
+		setTailCallTarget(target);
 	}
 
 	@Override

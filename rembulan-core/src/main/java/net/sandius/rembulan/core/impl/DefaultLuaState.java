@@ -17,7 +17,7 @@
 package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ReturnVectorFactory;
+import net.sandius.rembulan.core.ReturnBufferFactory;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.util.Check;
@@ -25,7 +25,7 @@ import net.sandius.rembulan.util.GenericBuilder;
 
 public class DefaultLuaState extends LuaState {
 
-	private final ReturnVectorFactory returnVectorFactory;
+	private final ReturnBufferFactory returnBufferFactory;
 	private final TableFactory tableFactory;
 
 	protected Table nilMetatable;
@@ -36,15 +36,15 @@ public class DefaultLuaState extends LuaState {
 	protected Table threadMetatable;
 	protected Table lightuserdataMetatable;
 
-	public DefaultLuaState(ReturnVectorFactory returnVectorFactory,
+	public DefaultLuaState(ReturnBufferFactory returnBufferFactory,
 						   TableFactory tableFactory) {
 
-		this.returnVectorFactory = Check.notNull(returnVectorFactory);
+		this.returnBufferFactory = Check.notNull(returnBufferFactory);
 		this.tableFactory = Check.notNull(tableFactory);
 	}
 
 	public DefaultLuaState() {
-		this(CachingReturnVectorFactory.DEFAULT_INSTANCE,
+		this(CachingReturnBufferFactory.DEFAULT_INSTANCE,
 				DefaultTable.FACTORY_INSTANCE);
 	}
 
@@ -133,8 +133,8 @@ public class DefaultLuaState extends LuaState {
 	}
 
 	@Override
-	public ReturnVectorFactory returnVectorFactory() {
-		return returnVectorFactory;
+	public ReturnBufferFactory returnBufferFactory() {
+		return returnBufferFactory;
 	}
 
 	@Override
@@ -144,24 +144,24 @@ public class DefaultLuaState extends LuaState {
 
 	public static class Builder implements GenericBuilder<DefaultLuaState> {
 
-		private ReturnVectorFactory returnVectorFactory;
+		private ReturnBufferFactory returnBufferFactory;
 		private TableFactory tableFactory;
 
-		protected Builder(ReturnVectorFactory returnVectorFactory,
+		protected Builder(ReturnBufferFactory returnBufferFactory,
 							   TableFactory tableFactory) {
 
-			this.returnVectorFactory = Check.notNull(returnVectorFactory);
+			this.returnBufferFactory = Check.notNull(returnBufferFactory);
 			this.tableFactory = Check.notNull(tableFactory);
 		}
 
 		public Builder() {
 			// defaults
-			this(CachingReturnVectorFactory.DEFAULT_INSTANCE,
+			this(CachingReturnBufferFactory.DEFAULT_INSTANCE,
 					DefaultTable.FACTORY_INSTANCE);
 		}
 
-		public Builder withReturnVectorFactory(ReturnVectorFactory factory) {
-			this.returnVectorFactory = Check.notNull(factory);
+		public Builder withReturnBufferFactory(ReturnBufferFactory factory) {
+			this.returnBufferFactory = Check.notNull(factory);
 			return this;
 		}
 
@@ -173,7 +173,7 @@ public class DefaultLuaState extends LuaState {
 		@Override
 		public DefaultLuaState build() {
 			return new DefaultLuaState(
-					returnVectorFactory,
+					returnBufferFactory,
 					tableFactory);
 		}
 		

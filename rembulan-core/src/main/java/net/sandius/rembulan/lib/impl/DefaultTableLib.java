@@ -101,7 +101,7 @@ public class DefaultTableLib extends TableLib {
 			}
 			table.rawset("n", Long.valueOf(n));
 
-			context.getReturnVector().setTo(table);
+			context.getReturnBuffer().setTo(table);
 		}
 
 	}
@@ -149,7 +149,7 @@ public class DefaultTableLib extends TableLib {
 			for (int k = i; k <= j; k++) {
 				r.add(t.rawget(k));
 			}
-			context.getReturnVector().setToArray(r.toArray(new Object[r.size()]));
+			context.getReturnBuffer().setToArray(r.toArray(new Object[r.size()]));
 		}
 
 		private static final int STATE_LEN_PREPARE = 0;
@@ -166,7 +166,7 @@ public class DefaultTableLib extends TableLib {
 						Dispatch.len(context, obj);  // may suspend, will pass #obj through the stack
 
 					case STATE_LEN_RESUME: {
-						Object o = context.getReturnVector()._0();
+						Object o = context.getReturnBuffer()._0();
 						Long l = Conversions.integerValueOf(o);
 						if (l == null) {
 							throw new LuaRuntimeException("object length is not an integer");
@@ -196,7 +196,7 @@ public class DefaultTableLib extends TableLib {
 						}
 						else {
 							// interval empty, we're done
-							context.getReturnVector().setTo();
+							context.getReturnBuffer().setTo();
 							return;
 						}
 
@@ -205,7 +205,7 @@ public class DefaultTableLib extends TableLib {
 							// k now points to the *next* item to retrieve; we've just processed
 							// (k - 1), need to add it to the results
 
-							Object v = context.getReturnVector()._0();
+							Object v = context.getReturnBuffer()._0();
 							result.add(v);
 
 							// we may now continue
@@ -221,7 +221,7 @@ public class DefaultTableLib extends TableLib {
 						assert (k > j);
 
 						// we're done!
-						context.getReturnVector().setToArray(result.toArray(new Object[result.size()]));
+						context.getReturnBuffer().setToArray(result.toArray(new Object[result.size()]));
 						return;
 					}
 

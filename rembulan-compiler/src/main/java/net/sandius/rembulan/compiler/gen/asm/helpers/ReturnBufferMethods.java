@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.core.ReturnVector;
+import net.sandius.rembulan.core.ReturnBuffer;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
@@ -25,14 +25,14 @@ import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 
-public class ReturnVectorMethods {
+public class ReturnBufferMethods {
 
-	private ReturnVectorMethods() {
+	private ReturnBufferMethods() {
 		// not to be instantiated
 	}
 
 	private static Type selfTpe() {
-		return Type.getType(ReturnVector.class);
+		return Type.getType(ReturnBuffer.class);
 	}
 
 	public static AbstractInsnNode size() {
@@ -95,12 +95,12 @@ public class ReturnVectorMethods {
 
 	private static ReflectionUtils.Method setTo_method(int kind) {
 		String methodName = kind > 0 ? "setTo" : "setToArray";
-		return ReflectionUtils.virtualArgListMethodFromKind(ReturnVector.class, methodName, null, kind);
+		return ReflectionUtils.virtualArgListMethodFromKind(ReturnBuffer.class, methodName, null, kind);
 	}
 
 	private static ReflectionUtils.Method tailCall_method(int kind) {
 		String methodName = "tailCall";
-		return ReflectionUtils.virtualArgListMethodFromKind(ReturnVector.class, methodName, new Class[] { Object.class }, kind);
+		return ReflectionUtils.virtualArgListMethodFromKind(ReturnBuffer.class, methodName, new Class[] { Object.class }, kind);
 	}
 
 	public static AbstractInsnNode setTo(int kind) {

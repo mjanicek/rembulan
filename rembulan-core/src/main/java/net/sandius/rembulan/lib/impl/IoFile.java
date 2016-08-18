@@ -71,11 +71,11 @@ public abstract class IoFile extends DefaultUserdata {
 				f.close();
 			}
 			catch (Exception ex) {
-				context.getReturnVector().setTo(null, ex.getMessage());
+				context.getReturnBuffer().setTo(null, ex.getMessage());
 				return;
 			}
 
-			context.getReturnVector().setTo(true);
+			context.getReturnBuffer().setTo(true);
 		}
 
 	}
@@ -96,11 +96,11 @@ public abstract class IoFile extends DefaultUserdata {
 				f.flush();
 			}
 			catch (Exception ex) {
-				context.getReturnVector().setTo(null, ex.getMessage());
+				context.getReturnBuffer().setTo(null, ex.getMessage());
 				return;
 			}
 
-			context.getReturnVector().setTo(true);
+			context.getReturnBuffer().setTo(true);
 		}
 
 	}
@@ -183,11 +183,11 @@ public abstract class IoFile extends DefaultUserdata {
 				position = file.seek(whence, offset);
 			}
 			catch (Exception ex) {
-				context.getReturnVector().setTo(null, ex.getMessage());
+				context.getReturnBuffer().setTo(null, ex.getMessage());
 				return;
 			}
 
-			context.getReturnVector().setTo(position);
+			context.getReturnBuffer().setTo(position);
 		}
 
 	}
@@ -226,12 +226,12 @@ public abstract class IoFile extends DefaultUserdata {
 					f.write(s);
 				}
 				catch (Exception ex) {
-					context.getReturnVector().setTo(null, ex.getMessage());
+					context.getReturnBuffer().setTo(null, ex.getMessage());
 					return;
 				}
 			}
 
-			context.getReturnVector().setTo(f);
+			context.getReturnBuffer().setTo(f);
 		}
 
 	}
@@ -248,7 +248,7 @@ public abstract class IoFile extends DefaultUserdata {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			IoFile f = args.nextUserdata(typeName(), IoFile.class);
-			context.getReturnVector().setTo(f.toString());
+			context.getReturnBuffer().setTo(f.toString());
 		}
 
 	}

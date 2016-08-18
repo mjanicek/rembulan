@@ -189,7 +189,7 @@ public class DefaultMathLib extends MathLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Number x = args.nextNumber();
 			Number result = x instanceof Float || x instanceof Double ? op(x.doubleValue()) : op(x.longValue());
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -392,7 +392,7 @@ public class DefaultMathLib extends MathLib {
 				}
 			}
 
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -422,7 +422,7 @@ public class DefaultMathLib extends MathLib {
 				result = ln;
 			}
 
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -473,13 +473,13 @@ public class DefaultMathLib extends MathLib {
 					throw ct.push(this, new State(args, idx, best));
 				}
 
-				if (Conversions.booleanValueOf(context.getReturnVector()._0())) {
+				if (Conversions.booleanValueOf(context.getReturnBuffer()._0())) {
 					best = o;
 				}
 			}
 
 			// we're done
-			context.getReturnVector().setTo(best);
+			context.getReturnBuffer().setTo(best);
 		}
 
 		@Override
@@ -497,7 +497,7 @@ public class DefaultMathLib extends MathLib {
 			Object best = ss.best;
 
 			// best <> args[idx] comparison has just finished
-			if (Conversions.booleanValueOf(context.getReturnVector()._0())) {
+			if (Conversions.booleanValueOf(context.getReturnBuffer()._0())) {
 				best = args[idx];
 			}
 
@@ -542,7 +542,7 @@ public class DefaultMathLib extends MathLib {
 				fltPart = x;
 			}
 
-			context.getReturnVector().setTo(intPart, fltPart);
+			context.getReturnBuffer().setTo(intPart, fltPart);
 		}
 
 	}
@@ -629,7 +629,7 @@ public class DefaultMathLib extends MathLib {
 				}
 			}
 
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -657,7 +657,7 @@ public class DefaultMathLib extends MathLib {
 
 			random.setSeed(seed);
 
-			context.getReturnVector().setTo();
+			context.getReturnBuffer().setTo();
 		}
 
 	}
@@ -722,7 +722,7 @@ public class DefaultMathLib extends MathLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object x = args.nextAny();
-			context.getReturnVector().setTo(Conversions.integerValueOf(x));
+			context.getReturnBuffer().setTo(Conversions.integerValueOf(x));
 		}
 
 	}
@@ -746,7 +746,7 @@ public class DefaultMathLib extends MathLib {
 							: "integer")
 					: null;
 
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -764,7 +764,7 @@ public class DefaultMathLib extends MathLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			long x = args.nextInteger();
 			long y = args.nextInteger();
-			context.getReturnVector().setTo((x - y) < 0);
+			context.getReturnBuffer().setTo((x - y) < 0);
 		}
 
 	}

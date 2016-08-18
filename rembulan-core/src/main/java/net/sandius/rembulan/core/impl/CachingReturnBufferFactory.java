@@ -16,35 +16,35 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ReturnVector;
-import net.sandius.rembulan.core.ReturnVectorFactory;
+import net.sandius.rembulan.core.ReturnBuffer;
+import net.sandius.rembulan.core.ReturnBufferFactory;
 
-public class CachingReturnVectorFactory implements ReturnVectorFactory {
+public class CachingReturnBufferFactory implements ReturnBufferFactory {
 
 	public static final int DEFAULT_CACHE_SIZE = 2;
 
-	public static final CachingReturnVectorFactory DEFAULT_INSTANCE = new CachingReturnVectorFactory(DEFAULT_CACHE_SIZE);
+	public static final CachingReturnBufferFactory DEFAULT_INSTANCE = new CachingReturnBufferFactory(DEFAULT_CACHE_SIZE);
 
 	private final int cacheSize;
-	private final ReturnVectorFactory factory;
+	private final ReturnBufferFactory factory;
 
-	public CachingReturnVectorFactory(int cacheSize) {
-		ReturnVectorFactory fac = forSize(cacheSize);
+	public CachingReturnBufferFactory(int cacheSize) {
+		ReturnBufferFactory fac = forSize(cacheSize);
 		if (fac != null) {
 			this.factory = fac;
 			this.cacheSize = cacheSize;
 		}
 		else {
-			this.factory = ArrayListReturnVector.FACTORY_INSTANCE;
+			this.factory = ArrayListReturnBuffer.FACTORY_INSTANCE;
 			this.cacheSize = 0;
 		}
 	}
 
-	private static ReturnVectorFactory forSize(int cacheSize) {
+	private static ReturnBufferFactory forSize(int cacheSize) {
 		switch (cacheSize) {
-			case 2: return PairCachingReturnVector.FACTORY_INSTANCE;
-			case 3: return TripleCachingReturnVector.FACTORY_INSTANCE;
-			case 4: return QuintupleCachingReturnVector.FACTORY_INSTANCE;
+			case 2: return PairCachingReturnBuffer.FACTORY_INSTANCE;
+			case 3: return TripleCachingReturnBuffer.FACTORY_INSTANCE;
+			case 4: return QuintupleCachingReturnBuffer.FACTORY_INSTANCE;
 			default: return null;
 		}
 	}
@@ -54,8 +54,8 @@ public class CachingReturnVectorFactory implements ReturnVectorFactory {
 	}
 
 	@Override
-	public ReturnVector newReturnVector() {
-		return factory.newReturnVector();
+	public ReturnBuffer newReturnBuffer() {
+		return factory.newReturnBuffer();
 	}
 
 }

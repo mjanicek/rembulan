@@ -20,7 +20,7 @@ public interface ExecutionContext {
 
 	LuaState getState();
 
-	ReturnVector getReturnVector();
+	ReturnBuffer getReturnBuffer();
 
 	Coroutine getCurrentCoroutine();
 

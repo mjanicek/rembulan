@@ -90,7 +90,7 @@ public abstract class Dispatch {
 	}
 
 	public static void evaluateTailCalls(ExecutionContext context) throws ControlThrowable {
-		ReturnVector r = context.getReturnVector();
+		ReturnBuffer r = context.getReturnBuffer();
 		while (r.isTailCall()) {
 			Object target = r.getTailCallTarget();
 			switch (r.size()) {
@@ -168,7 +168,7 @@ public abstract class Dispatch {
 		Arithmetic math = Arithmetic.of(na, nb);
 
 		if (math != null) {
-			context.getReturnVector().setTo(math.add(na, nb));
+			context.getReturnBuffer().setTo(math.add(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_ADD, a, b);
@@ -184,7 +184,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getReturnVector().setTo(m.sub(na, nb));
+			context.getReturnBuffer().setTo(m.sub(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_SUB, a, b);
@@ -200,7 +200,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getReturnVector().setTo(m.mul(na, nb));
+			context.getReturnBuffer().setTo(m.mul(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_MUL, a, b);
@@ -216,7 +216,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getReturnVector().setTo(m.div(na, nb));
+			context.getReturnBuffer().setTo(m.div(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_DIV, a, b);
@@ -232,7 +232,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getReturnVector().setTo(m.mod(na, nb));
+			context.getReturnBuffer().setTo(m.mod(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_MOD, a, b);
@@ -248,7 +248,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getReturnVector().setTo(m.idiv(na, nb));
+			context.getReturnBuffer().setTo(m.idiv(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_IDIV, a, b);
@@ -264,7 +264,7 @@ public abstract class Dispatch {
 		Number nb = Conversions.arithmeticValueOf(b);
 		Arithmetic m = Arithmetic.of(na, nb);
 		if (m != null) {
-			context.getReturnVector().setTo(m.pow(na, nb));
+			context.getReturnBuffer().setTo(m.pow(na, nb));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_POW, a, b);
@@ -302,7 +302,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getReturnVector().setTo(LuaMathOperators.band(la, lb));
+			context.getReturnBuffer().setTo(LuaMathOperators.band(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BAND, a, b);
@@ -314,7 +314,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getReturnVector().setTo(LuaMathOperators.bor(la, lb));
+			context.getReturnBuffer().setTo(LuaMathOperators.bor(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BOR, a, b);
@@ -326,7 +326,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getReturnVector().setTo(LuaMathOperators.bxor(la, lb));
+			context.getReturnBuffer().setTo(LuaMathOperators.bxor(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BXOR, a, b);
@@ -338,7 +338,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getReturnVector().setTo(LuaMathOperators.shl(la, lb));
+			context.getReturnBuffer().setTo(LuaMathOperators.shl(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHL, a, b);
@@ -350,7 +350,7 @@ public abstract class Dispatch {
 		Long lb = Conversions.integerValueOf(b);
 
 		if (la != null && lb != null) {
-			context.getReturnVector().setTo(LuaMathOperators.shr(la, lb));
+			context.getReturnBuffer().setTo(LuaMathOperators.shr(la, lb));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_SHR, a, b);
@@ -361,7 +361,7 @@ public abstract class Dispatch {
 		Number no = Conversions.arithmeticValueOf(o);
 		Arithmetic m = Arithmetic.of(no);
 		if (m != null) {
-			context.getReturnVector().setTo(m.unm(no));
+			context.getReturnBuffer().setTo(m.unm(no));
 		}
 		else {
 			try_mt_arithmetic(context, Metatables.MT_UNM, o);
@@ -376,7 +376,7 @@ public abstract class Dispatch {
 		Long lo = Conversions.integerValueOf(o);
 
 		if (lo != null) {
-			context.getReturnVector().setTo(LuaMathOperators.bnot(lo));
+			context.getReturnBuffer().setTo(LuaMathOperators.bnot(lo));
 		}
 		else {
 			try_mt_bitwise(context, Metatables.MT_BNOT, o);
@@ -389,7 +389,7 @@ public abstract class Dispatch {
 
 	public static void len(ExecutionContext context, Object o) throws ControlThrowable {
 		if (o instanceof String) {
-			context.getReturnVector().setTo(len((String) o));
+			context.getReturnBuffer().setTo(len((String) o));
 		}
 		else {
 			Object handler = Metatables.getMetamethod(context.getState(), Metatables.MT_LEN, o);
@@ -397,7 +397,7 @@ public abstract class Dispatch {
 				call(context, handler, o);
 			}
 			else if (o instanceof Table) {
-				context.getReturnVector().setTo((long) ((Table) o).rawlen());
+				context.getReturnBuffer().setTo((long) ((Table) o).rawlen());
 			}
 			else {
 				throw IllegalOperationAttemptException.length(o);
@@ -410,7 +410,7 @@ public abstract class Dispatch {
 		String sb = Conversions.stringValueOf(b);
 
 		if (sa != null && sb != null) {
-			context.getReturnVector().setTo(sa.concat(sb));
+			context.getReturnBuffer().setTo(sa.concat(sb));
 		}
 		else {
 			Object handler = Metatables.binaryHandlerFor(context.getState(), Metatables.MT_CONCAT, a, b);
@@ -428,7 +428,7 @@ public abstract class Dispatch {
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			Boolean b = (Boolean) suspendedState;
-			ReturnVector result = context.getReturnVector();
+			ReturnBuffer result = context.getReturnBuffer();
 			boolean resultValue = Conversions.booleanValueOf(result._0());
 			result.setTo(b == resultValue);
 		}
@@ -445,7 +445,7 @@ public abstract class Dispatch {
 			throw ct;
 		}
 		// not suspended: set the result, possibly flipping it
-		ReturnVector result = context.getReturnVector();
+		ReturnBuffer result = context.getReturnBuffer();
 		result.setTo(Conversions.booleanValueOf(result._0()) == cmpTo);
 	}
 
@@ -466,7 +466,7 @@ public abstract class Dispatch {
 			// else keep the result as false
 		}
 
-		context.getReturnVector().setTo(rawEqual == polarity);
+		context.getReturnBuffer().setTo(rawEqual == polarity);
 	}
 
 	public static void eq(ExecutionContext context, Object a, Object b) throws ControlThrowable {
@@ -487,7 +487,7 @@ public abstract class Dispatch {
 		if (c != null) {
 			@SuppressWarnings("unchecked")
 			boolean result = c.lt(a, b);
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 		else {
 			Object handler = Metatables.binaryHandlerFor(context.getState(), Metatables.MT_LT, a, b);
@@ -514,7 +514,7 @@ public abstract class Dispatch {
 		if (c != null) {
 			@SuppressWarnings("unchecked")
 			boolean result = c.le(a, b);
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 		else {
 			LuaState state = context.getState();
@@ -552,7 +552,7 @@ public abstract class Dispatch {
 			Object value = t.rawget(key);
 
 			if (value != null) {
-				context.getReturnVector().setTo(value);
+				context.getReturnBuffer().setTo(value);
 				return;
 			}
 			// else fall through and check the __index a metamethod
@@ -562,7 +562,7 @@ public abstract class Dispatch {
 
 		if (handler == null && table instanceof Table) {
 			// key not found and no index metamethod, returning nil
-			context.getReturnVector().setTo(null);
+			context.getReturnBuffer().setTo(null);
 			return;
 		}
 		if (handler instanceof Invokable) {

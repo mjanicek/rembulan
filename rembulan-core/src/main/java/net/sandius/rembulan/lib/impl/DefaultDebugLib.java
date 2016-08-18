@@ -200,7 +200,7 @@ public class DefaultDebugLib extends DebugLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Object value = args.nextAny();
 			Table mt = context.getState().getMetatable(value);
-			context.getReturnVector().setTo(mt);
+			context.getReturnBuffer().setTo(mt);
 		}
 
 	}
@@ -224,7 +224,7 @@ public class DefaultDebugLib extends DebugLib {
 			context.getState().setMetatable(value, mt);
 
 			// return value
-			context.getReturnVector().setTo(value);
+			context.getReturnBuffer().setTo(value);
 		}
 
 	}
@@ -260,12 +260,12 @@ public class DefaultDebugLib extends DebugLib {
 					throw new LuaRuntimeException(ex);
 				}
 
-				context.getReturnVector().setTo(name, value);
+				context.getReturnBuffer().setTo(name, value);
 			}
 			else {
 				// contrary to what its documentation says, PUC-Lua 5.3.2 doesn't seem to return
 				// nil but rather an empty list
-				context.getReturnVector().setTo();
+				context.getReturnBuffer().setTo();
 			}
 
 		}
@@ -310,7 +310,7 @@ public class DefaultDebugLib extends DebugLib {
 				name = null;
 			}
 
-			context.getReturnVector().setTo(name);
+			context.getReturnBuffer().setTo(name);
 		}
 
 	}
@@ -344,7 +344,7 @@ public class DefaultDebugLib extends DebugLib {
 					throw new LuaRuntimeException(ex);
 				}
 
-				context.getReturnVector().setTo(uv);
+				context.getReturnBuffer().setTo(uv);
 			}
 		}
 
@@ -390,7 +390,7 @@ public class DefaultDebugLib extends DebugLib {
 				throw new LuaRuntimeException(ex);
 			}
 
-			context.getReturnVector().setTo();
+			context.getReturnBuffer().setTo();
 		}
 
 	}
@@ -409,7 +409,7 @@ public class DefaultDebugLib extends DebugLib {
 			Object o = args.peekOrNil();
 
 			Object result = o instanceof Userdata ? ((Userdata) o).getUserValue() : null;
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -429,7 +429,7 @@ public class DefaultDebugLib extends DebugLib {
 			Object value = args.nextAny();
 
 			userdata.setUserValue(value);
-			context.getReturnVector().setTo(userdata);
+			context.getReturnBuffer().setTo(userdata);
 		}
 
 	}

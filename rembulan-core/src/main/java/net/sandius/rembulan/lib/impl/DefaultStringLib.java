@@ -195,7 +195,7 @@ public class DefaultStringLib extends StringLib {
 				char c = s.charAt(idx - 1);
 				buf.add(Long.valueOf(c));
 			}
-			context.getReturnVector().setToArray(buf.toArray());
+			context.getReturnBuffer().setToArray(buf.toArray());
 		}
 
 	}
@@ -218,7 +218,7 @@ public class DefaultStringLib extends StringLib {
 			}
 
 			String s = String.valueOf(chars);
-			context.getReturnVector().setTo(s);
+			context.getReturnBuffer().setTo(s);
 		}
 
 	}
@@ -264,10 +264,10 @@ public class DefaultStringLib extends StringLib {
 				// find a substring
 				int at = s.indexOf(pattern, init - 1);
 				if (at >= 0) {
-					context.getReturnVector().setTo(at + 1, at + pattern.length());
+					context.getReturnBuffer().setTo(at + 1, at + pattern.length());
 				}
 				else {
-					context.getReturnVector().setTo(null);
+					context.getReturnBuffer().setTo(null);
 				}
 			}
 			else {
@@ -293,14 +293,14 @@ public class DefaultStringLib extends StringLib {
 
 				if (nextIndex < 1) {
 					// pattern not found
-					context.getReturnVector().setTo(null);
+					context.getReturnBuffer().setTo(null);
 				}
 				else {
 					// pattern found
 					List<Object> buf = new ArrayList<>();
 					buf.addAll(results);
 					buf.addAll(captures);
-					context.getReturnVector().setToArray(buf.toArray());
+					context.getReturnBuffer().setToArray(buf.toArray());
 				}
 			}
 		}
@@ -713,7 +713,7 @@ public class DefaultStringLib extends StringLib {
 				}
 			} while (idx >= 0);
 
-			context.getReturnVector().setTo(bld.toString());
+			context.getReturnBuffer().setTo(bld.toString());
 		}
 
 		@Override
@@ -770,15 +770,15 @@ public class DefaultStringLib extends StringLib {
 
 				if (nextIndex < 1) {
 					// no match
-					context.getReturnVector().setTo();
+					context.getReturnBuffer().setTo();
 				}
 				else {
 					// match
 					if (captures.isEmpty()) {
-						context.getReturnVector().setTo(fullMatch[0]);
+						context.getReturnBuffer().setTo(fullMatch[0]);
 					}
 					else {
-						context.getReturnVector().setToArray(captures.toArray());
+						context.getReturnBuffer().setToArray(captures.toArray());
 					}
 				}
 			}
@@ -803,7 +803,7 @@ public class DefaultStringLib extends StringLib {
 
 			Function f = new IteratorFunction(s, pat);
 
-			context.getReturnVector().setTo(f);
+			context.getReturnBuffer().setTo(f);
 		}
 
 	}
@@ -820,7 +820,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
-			context.getReturnVector().setTo((long) s.length());
+			context.getReturnBuffer().setTo((long) s.length());
 		}
 
 	}
@@ -837,7 +837,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
-			context.getReturnVector().setTo(s.toLowerCase());
+			context.getReturnBuffer().setTo(s.toLowerCase());
 		}
 
 	}
@@ -878,16 +878,16 @@ public class DefaultStringLib extends StringLib {
 
 			if (nextIndex < 1) {
 				// no match found
-				context.getReturnVector().setTo(null);
+				context.getReturnBuffer().setTo(null);
 			}
 			else {
 				// match was found
 				if (captures.isEmpty()) {
 					// no captures
-					context.getReturnVector().setTo(fullMatch[0]);
+					context.getReturnBuffer().setTo(fullMatch[0]);
 				}
 				else {
-					context.getReturnVector().setToArray(captures.toArray());
+					context.getReturnBuffer().setToArray(captures.toArray());
 				}
 			}
 		}
@@ -926,7 +926,7 @@ public class DefaultStringLib extends StringLib {
 				result = "";
 			}
 
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -953,7 +953,7 @@ public class DefaultStringLib extends StringLib {
 
 			String result = String.valueOf(chars);
 
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -979,7 +979,7 @@ public class DefaultStringLib extends StringLib {
 
 			String result = s.substring(i, j);
 
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
@@ -996,7 +996,7 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
-			context.getReturnVector().setTo(s.toUpperCase());
+			context.getReturnBuffer().setTo(s.toUpperCase());
 		}
 
 	}

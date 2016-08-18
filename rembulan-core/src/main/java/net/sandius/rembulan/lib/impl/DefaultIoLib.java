@@ -340,12 +340,12 @@ public class DefaultIoLib extends IoLib {
 				IoFile f = lib.openFile(filename, Open.Mode.READ);
 				assert (f != null);
 				lib.setDefaultInputFile(f);
-				context.getReturnVector().setTo(f);
+				context.getReturnBuffer().setTo(f);
 			}
 			else {
 				// return the default input file
 				IoFile inFile = lib.getDefaultInputFile();
-				context.getReturnVector().setTo(inFile);
+				context.getReturnBuffer().setTo(inFile);
 			}
 		}
 
@@ -420,13 +420,13 @@ public class DefaultIoLib extends IoLib {
 				file = lib.openFile(filename, mode);
 			}
 			catch (Exception ex) {
-				context.getReturnVector().setTo(null, ex.getMessage());
+				context.getReturnBuffer().setTo(null, ex.getMessage());
 				return;
 			}
 
 			assert (file != null);
 
-			context.getReturnVector().setTo(file);
+			context.getReturnBuffer().setTo(file);
 		}
 
 	}
@@ -452,12 +452,12 @@ public class DefaultIoLib extends IoLib {
 				IoFile f = lib.openFile(filename, Open.Mode.WRITE);
 				assert (f != null);
 				lib.setDefaultOutputFile(f);
-				context.getReturnVector().setTo(f);
+				context.getReturnBuffer().setTo(f);
 			}
 			else {
 				// return the default output file
 				IoFile outFile = lib.getDefaultOutputFile();
-				context.getReturnVector().setTo(outFile);
+				context.getReturnBuffer().setTo(outFile);
 			}
 		}
 
@@ -524,7 +524,7 @@ public class DefaultIoLib extends IoLib {
 				result = null;
 			}
 
-			context.getReturnVector().setTo(result);
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}

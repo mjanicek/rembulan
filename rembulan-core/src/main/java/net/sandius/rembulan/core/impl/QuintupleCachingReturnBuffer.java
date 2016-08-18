@@ -16,17 +16,17 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ReturnVector;
-import net.sandius.rembulan.core.ReturnVectorFactory;
+import net.sandius.rembulan.core.ReturnBuffer;
+import net.sandius.rembulan.core.ReturnBufferFactory;
 
 import java.util.ArrayList;
 
-public class QuintupleCachingReturnVector extends AbstractReturnVector {
+public class QuintupleCachingReturnBuffer extends AbstractReturnBuffer {
 
-	public static final ReturnVectorFactory FACTORY_INSTANCE = new ReturnVectorFactory() {
+	public static final ReturnBufferFactory FACTORY_INSTANCE = new ReturnBufferFactory() {
 		@Override
-		public ReturnVector newReturnVector() {
-			return new QuintupleCachingReturnVector();
+		public ReturnBuffer newReturnBuffer() {
+			return new QuintupleCachingReturnBuffer();
 		}
 	};
 
@@ -40,7 +40,7 @@ public class QuintupleCachingReturnVector extends AbstractReturnVector {
 
 	private int size;
 
-	public QuintupleCachingReturnVector() {
+	public QuintupleCachingReturnBuffer() {
 		super();
 		_var = new ArrayList<>();
 	}

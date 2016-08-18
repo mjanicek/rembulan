@@ -19,7 +19,7 @@ package net.sandius.rembulan.core;
 /**
  * TODO: summary
  */
-public interface ReturnVector {
+public interface ReturnBuffer {
 
 	/**
 	 * Return the number of values stored in this buffer.
@@ -137,7 +137,7 @@ public interface ReturnVector {
 	 *
 	 * <p>The contents of {@code array} are not modified by the buffer, and the reference
 	 * to {@code array} is not retained by the buffer. (In other words,
-	 * implementations of the {@code ReturnVector} interface are required to make copy of
+	 * implementations of the {@code ReturnBuffer} interface are required to make copy of
 	 * {@code array}'s contents.)</p>
 	 *
 	 * <p>For result values of known length, it is recommended to use the appropriate
@@ -275,7 +275,7 @@ public interface ReturnVector {
 	 *
 	 * <p>The contents of {@code args} are not modified by the buffer, and the reference
 	 * to {@code args} is not retained by the buffer. (In other words,
-	 * implementations of the {@code ReturnVector} interface are required to make copy of
+	 * implementations of the {@code ReturnBuffer} interface are required to make copy of
 	 * {@code args}'s contents.)</p>
 	 *
 	 * <p>For tail calls with a fixed number of arguments known at compile time, it is
