@@ -284,6 +284,7 @@ public interface ReturnBuffer {
 	 * <p>Note that this method does <i>not</i> evaluate the tail call, but is rather
 	 * the <i>specification</i> of the call.</p>
 	 *
+	 * @param target  tail call target, may be {@code null}
 	 * @param args  the array to set values from, must not be {@code null}
 	 *
 	 * @throws NullPointerException  if {@code args} is {@code null}
@@ -303,7 +304,7 @@ public interface ReturnBuffer {
 	 * <pre>
 	 *     public Object[] toArray() {
 	 *         Object[] result = new Object[size()];
-	 *         for (int i = 0; i < size(); i++) {
+	 *         for (int i = 0; i &lt; size(); i++) {
 	 *             result[i] = get(i);
 	 *         }
 	 *         return result;
