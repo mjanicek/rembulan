@@ -54,7 +54,12 @@ public class SimpleReturnVector implements ReturnVector {
 
 	@Override
 	public Object getTailCallTarget() {
-		return tailCallTarget;
+		if (!tailCall) {
+			throw new IllegalStateException("Not a tail call");
+		}
+		else {
+			return tailCallTarget;
+		}
 	}
 
 	private void update(Object[] values, boolean tailCall, Object tailCallTarget) {

@@ -48,7 +48,12 @@ public abstract class AbstractReturnVector implements ReturnVector {
 
 	@Override
 	public Object getTailCallTarget() {
-		return tailCallTarget;
+		if (!tailCall) {
+			throw new IllegalStateException("Not a tail call");
+		}
+		else {
+			return tailCallTarget;
+		}
 	}
 
 	protected abstract void push(Object o);
