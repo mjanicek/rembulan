@@ -23,7 +23,6 @@ import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
-import net.sandius.rembulan.core.ReturnVector;
 import net.sandius.rembulan.core.impl.AbstractFunction0;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -31,6 +30,7 @@ import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultStringLib extends StringLib {
@@ -189,13 +189,13 @@ public class DefaultStringLib extends StringLib {
 			i = lowerBound(i, len);
 			j = upperBound(j, len);
 
-			context.getReturnVector().reset();
-
+			List<Object> buf = new ArrayList<>();
 			for (int idx = i; idx <= j; idx++) {
 				// FIXME: these are not bytes!
 				char c = s.charAt(idx - 1);
-				context.getReturnVector().push((long) c);
+				buf.add(Long.valueOf(c));
 			}
+			context.getReturnVector().setToArray(buf.toArray());
 		}
 
 	}
@@ -297,14 +297,10 @@ public class DefaultStringLib extends StringLib {
 				}
 				else {
 					// pattern found
-					ReturnVector returnVector = context.getReturnVector();
-					returnVector.reset();
-					for (Object r : results) {
-						returnVector.push(r);
-					}
-					for (Object c : captures) {
-						returnVector.push(c);
-					}
+					List<Object> buf = new ArrayList<>();
+					buf.addAll(results);
+					buf.addAll(captures);
+					context.getReturnVector().setToArray(buf.toArray());
 				}
 			}
 		}
@@ -774,18 +770,15 @@ public class DefaultStringLib extends StringLib {
 
 				if (nextIndex < 1) {
 					// no match
-					context.getReturnVector().reset();
+					context.getReturnVector().setTo();
 				}
 				else {
 					// match
 					if (captures.isEmpty()) {
-						context.getReturnVector().setTo(fullMatch);
+						context.getReturnVector().setTo(fullMatch[0]);
 					}
 					else {
-						context.getReturnVector().reset();
-						for (Object c : captures) {
-							context.getReturnVector().push(c);
-						}
+						context.getReturnVector().setToArray(captures.toArray());
 					}
 				}
 			}
@@ -894,10 +887,7 @@ public class DefaultStringLib extends StringLib {
 					context.getReturnVector().setTo(fullMatch[0]);
 				}
 				else {
-					context.getReturnVector().reset();
-					for (Object c : captures) {
-						context.getReturnVector().push(c);
-					}
+					context.getReturnVector().setToArray(captures.toArray());
 				}
 			}
 		}

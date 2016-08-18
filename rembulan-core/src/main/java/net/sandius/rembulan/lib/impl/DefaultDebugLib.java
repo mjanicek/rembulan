@@ -265,7 +265,7 @@ public class DefaultDebugLib extends DebugLib {
 			else {
 				// contrary to what its documentation says, PUC-Lua 5.3.2 doesn't seem to return
 				// nil but rather an empty list
-				context.getReturnVector().reset();
+				context.getReturnVector().setTo();
 			}
 
 		}
@@ -390,7 +390,7 @@ public class DefaultDebugLib extends DebugLib {
 				throw new LuaRuntimeException(ex);
 			}
 
-			context.getReturnVector().reset();
+			context.getReturnVector().setTo();
 		}
 
 	}

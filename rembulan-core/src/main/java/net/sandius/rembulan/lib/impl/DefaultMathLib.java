@@ -657,7 +657,7 @@ public class DefaultMathLib extends MathLib {
 
 			random.setSeed(seed);
 
-			context.getReturnVector().reset();
+			context.getReturnVector().setTo();
 		}
 
 	}

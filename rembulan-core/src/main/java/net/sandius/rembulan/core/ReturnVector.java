@@ -16,145 +16,55 @@
 
 package net.sandius.rembulan.core;
 
-public abstract class ReturnVector {
-
-	protected boolean tailCall;
-	protected Object tailCallTarget;
-
-	protected ReturnVector() {
-		tailCall = false;
-		tailCallTarget = null;
-	}
+public interface ReturnVector {
 
 	// return the size of the arg-list part
-	public abstract int size();
+	int size();
 
-	public boolean isTailCall() {
-		return tailCall;
-	}
+	boolean isTailCall();
 
-	// resets tail call to false, size to 0
-	public abstract void reset();
+	Object getTailCallTarget();
 
-	protected void resetTailCall() {
-		tailCall = false;
-		tailCallTarget = null;
-	}
+	void setTo();
 
-	public void setTailCallTarget(Object target) {
-		tailCall = true;
-		tailCallTarget = target;
-	}
+	void setTo(Object a);
 
-	public Object getTailCallTarget() {
-		return tailCallTarget;
-	}
+	void setTo(Object a, Object b);
 
-	public abstract void push(Object o);
+	void setTo(Object a, Object b, Object c);
 
-	public void setTo() {
-		reset();
-	}
+	void setTo(Object a, Object b, Object c, Object d);
 
-	public void setTo(Object a) {
-		reset();
-		push(a);
-	}
+	void setTo(Object a, Object b, Object c, Object d, Object e);
 
-	public void setTo(Object a, Object b) {
-		reset();
-		push(a);
-		push(b);
-	}
+	void setToArray(Object[] a);
 
-	public void setTo(Object a, Object b, Object c) {
-		reset();
-		push(a);
-		push(b);
-		push(c);
-	}
+	void tailCall(Object target);
 
-	public void setTo(Object a, Object b, Object c, Object d) {
-		reset();
-		push(a);
-		push(b);
-		push(c);
-		push(d);
-	}
+	void tailCall(Object target, Object arg1);
 
-	public void setTo(Object a, Object b, Object c, Object d, Object e) {
-		reset();
-		push(a);
-		push(b);
-		push(c);
-		push(d);
-		push(e);
-	}
+	void tailCall(Object target, Object arg1, Object arg2);
 
-	public void setToArray(Object[] a) {
-		reset();
-		for (Object o : a) {
-			push(o);
-		}
-	}
+	void tailCall(Object target, Object arg1, Object arg2, Object arg3);
 
-	public void tailCall(Object target) {
-		setTo();
-		setTailCallTarget(target);
-	}
+	void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4);
 
-	public void tailCall(Object target, Object arg1) {
-		setTo(arg1);
-		setTailCallTarget(target);
-	}
+	void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
-	public void tailCall(Object target, Object arg1, Object arg2) {
-		setTo(arg1, arg2);
-		setTailCallTarget(target);
-	}
+	void tailCall(Object target, Object[] args);
 
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3) {
-		setTo(arg1, arg2, arg3);
-		setTailCallTarget(target);
-	}
+	Object[] toArray();
 
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
-		setTo(arg1, arg2, arg3, arg4);
-		setTailCallTarget(target);
-	}
+	Object get(int idx);
 
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
-		setTo(arg1, arg2, arg3, arg4, arg5);
-		setTailCallTarget(target);
-	}
+	Object _0();
 
-	public void tailCall(Object target, Object[] args) {
-		setToArray(args);
-		setTailCallTarget(target);
-	}
+	Object _1();
 
-	public abstract Object[] toArray();
+	Object _2();
 
-	public abstract Object get(int idx);
+	Object _3();
 
-	public Object _0() {
-		return get(0);
-	}
-
-	public Object _1() {
-		return get(1);
-	}
-
-	public Object _2() {
-		return get(2);
-	}
-
-	public Object _3() {
-		return get(3);
-	}
-
-	public Object _4() {
-		return get(4);
-	}
+	Object _4();
 
 }

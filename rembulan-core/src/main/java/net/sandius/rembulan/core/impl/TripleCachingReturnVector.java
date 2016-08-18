@@ -21,7 +21,7 @@ import net.sandius.rembulan.core.ReturnVectorFactory;
 
 import java.util.ArrayList;
 
-public class TripleCachingReturnVector extends ReturnVector {
+public class TripleCachingReturnVector extends AbstractReturnVector {
 
 	public static final ReturnVectorFactory FACTORY_INSTANCE = new ReturnVectorFactory() {
 		@Override
@@ -59,7 +59,7 @@ public class TripleCachingReturnVector extends ReturnVector {
 	}
 
 	@Override
-	public void reset() {
+	protected void reset() {
 		setCacheAndClearList(null, null, null);
 		size = 0;
 	}
@@ -98,7 +98,7 @@ public class TripleCachingReturnVector extends ReturnVector {
 	}
 
 	@Override
-	public void push(Object o) {
+	protected void push(Object o) {
 		switch (size++) {
 			case 0:
 				_0 = o;

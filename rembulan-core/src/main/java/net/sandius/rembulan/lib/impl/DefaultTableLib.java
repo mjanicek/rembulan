@@ -196,7 +196,7 @@ public class DefaultTableLib extends TableLib {
 						}
 						else {
 							// interval empty, we're done
-							context.getReturnVector().reset();
+							context.getReturnVector().setTo();
 							return;
 						}
 

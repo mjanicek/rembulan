@@ -98,7 +98,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			Coroutine coroutine = args.nextCoroutine();
 			Object[] resumeArgs = args.getTail();
 
-			context.getReturnVector().reset();
+			context.getReturnVector().setTo();
 
 			try {
 				context.resume(coroutine, resumeArgs);
@@ -233,7 +233,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 			@Override
 			public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-				context.getReturnVector().reset();
+				context.getReturnVector().setTo();
 				try {
 					context.resume(coroutine, args);
 				}

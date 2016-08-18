@@ -23,7 +23,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 
 public class ReturnVectorMethods {
 
@@ -37,23 +37,23 @@ public class ReturnVectorMethods {
 
 	public static AbstractInsnNode size() {
 		return new MethodInsnNode(
-				INVOKEVIRTUAL,
+				INVOKEINTERFACE,
 				selfTpe().getInternalName(),
 				"size",
 				Type.getMethodType(
 						Type.INT_TYPE).getDescriptor(),
-				false);
+				true);
 	}
 
 	public static AbstractInsnNode get() {
 		return new MethodInsnNode(
-				INVOKEVIRTUAL,
+				INVOKEINTERFACE,
 				selfTpe().getInternalName(),
 				"get",
 				Type.getMethodType(
 						Type.getType(Object.class),
 						Type.INT_TYPE).getDescriptor(),
-				false);
+				true);
 	}
 
 	public static InsnList get(int index) {
@@ -64,12 +64,12 @@ public class ReturnVectorMethods {
 		if (index <= 4) {
 			String methodName = "_" + index;
 			il.add(new MethodInsnNode(
-					INVOKEVIRTUAL,
+					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
 					methodName,
 					Type.getMethodType(
 							Type.getType(Object.class)).getDescriptor(),
-					false));
+					true));
 		}
 		else {
 			il.add(ASMUtils.loadInt(index));
@@ -113,12 +113,12 @@ public class ReturnVectorMethods {
 
 	public static AbstractInsnNode toArray() {
 		return new MethodInsnNode(
-				INVOKEVIRTUAL,
+				INVOKEINTERFACE,
 				selfTpe().getInternalName(),
 				"toArray",
 				Type.getMethodType(
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
-				false);
+				true);
 	}
 
 }

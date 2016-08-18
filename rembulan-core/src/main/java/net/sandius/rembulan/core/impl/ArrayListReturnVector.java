@@ -21,7 +21,7 @@ import net.sandius.rembulan.core.ReturnVectorFactory;
 
 import java.util.ArrayList;
 
-public class ArrayListReturnVector extends ReturnVector {
+public class ArrayListReturnVector extends AbstractReturnVector {
 
 	public static final ReturnVectorFactory FACTORY_INSTANCE = new ReturnVectorFactory() {
 		@Override
@@ -43,13 +43,13 @@ public class ArrayListReturnVector extends ReturnVector {
 	}
 
 	@Override
-	public void reset() {
+	protected void reset() {
 		buf.clear();
 		resetTailCall();
 	}
 
 	@Override
-	public void push(Object o) {
+	protected void push(Object o) {
 		buf.add(o);
 	}
 
