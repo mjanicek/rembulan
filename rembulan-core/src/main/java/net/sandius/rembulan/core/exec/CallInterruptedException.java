@@ -24,6 +24,7 @@ public class CallInterruptedException extends InterruptedException {
 	private final Call.Continuation continuation;
 
 	CallInterruptedException(Call.Continuation continuation) {
+		super("Call interrupted");
 		this.continuation = Check.notNull(continuation);
 	}
 
