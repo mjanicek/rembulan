@@ -22,6 +22,7 @@ import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.core.Call.EventHandler
 import net.sandius.rembulan.core._
+import net.sandius.rembulan.core.exec.{CallException, CallInterruptedException, DirectCallExecutor}
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.lib.Lib
@@ -185,7 +186,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             override def failed(c: Call, error: Throwable) = resultPromise.failure(error)
           }
 
-          val exec = Util.timed("Compilation and setup") {
+          val (state, func) = Util.timed("Compilation and setup") {
 
             val ldr = l.loader()
 
@@ -194,40 +195,51 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
             val env = envForContext(state, ctx)
             val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)
 
-            Call.init(state, func)
+            (state, func)
           }
 
           var steps = 0
 
           val before = System.nanoTime()
 
-          while (exec.state() == Call.State.PAUSED) {
-            preemptionContext.deposit(s)
-            if (preemptionContext.allowed) {
-              exec.resume(handler, preemptionContext)
-            }
-            steps += 1
-          }
+          val callExecutor = DirectCallExecutor.newExecutorWithCpuLimit(state, s)
 
-          val res = resultPromise.future.value match {
-            case Some(Success(vs)) => Success(vs.toSeq)
-            case Some(Failure(ex)) => Failure(ex);
-            case None => Failure(null)
+          var resultValues: Array[AnyRef] = null
+          var continuation: Call.Continuation = Call.init(state, func).currentContinuation()
+          var error: CallException = null
+
+          do {
+            try {
+              steps += 1
+              resultValues = callExecutor.resume(continuation)
+            }
+            catch {
+              case ex: CallInterruptedException => continuation = ex.getContinuation
+              case ex: CallException => error = ex
+            }
+          } while (error == null && resultValues == null)
+
+          val res = if (error != null) {
+            Failure(error.getCause)
+          }
+          else {
+            require (resultValues != null, "result must not be null")
+            Success(resultValues.toSeq)
           }
 
           val after = System.nanoTime()
 
           val totalTimeMillis = (after - before) / 1000000.0
-          val totalCPUUnitsSpent = preemptionContext.totalCost
-          val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
-          val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+//          val totalCPUUnitsSpent = preemptionContext.totalCost
+//          val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
+//          val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
 
           println("Execution took %.1f ms".format(totalTimeMillis))
-          println("Total CPU cost: " + preemptionContext.totalCost + " LI")
+//          println("Total CPU cost: " + preemptionContext.totalCost + " LI")
           println("Computation steps: " + steps)
-          println()
-          println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
-          println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+//          println()
+//          println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+//          println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
           println()
 
           res match {
