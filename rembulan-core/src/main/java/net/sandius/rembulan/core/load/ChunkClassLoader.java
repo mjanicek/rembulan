@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.compiler;
+package net.sandius.rembulan.core.load;
 
 import net.sandius.rembulan.util.ByteVector;
 

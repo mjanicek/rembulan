@@ -19,10 +19,11 @@ package net.sandius.rembulan.test
 import java.io.PrintStream
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
-import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
+import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.core.Call.EventHandler
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.impl.DefaultLuaState
+import net.sandius.rembulan.core.load.ChunkClassLoader
 import net.sandius.rembulan.lib.Lib
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.test.FragmentExpectations.Env

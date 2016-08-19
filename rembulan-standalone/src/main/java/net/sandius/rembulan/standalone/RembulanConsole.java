@@ -17,11 +17,11 @@
 package net.sandius.rembulan.standalone;
 
 import jline.console.ConsoleReader;
-import net.sandius.rembulan.compiler.ChunkClassLoader;
 import net.sandius.rembulan.compiler.CompiledModule;
 import net.sandius.rembulan.compiler.Compiler;
 import net.sandius.rembulan.compiler.CompilerSettings;
 import net.sandius.rembulan.core.Call;
+import net.sandius.rembulan.core.CallException;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
@@ -29,6 +29,7 @@ import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.impl.DefaultLuaState;
+import net.sandius.rembulan.core.load.ChunkClassLoader;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.parser.ParseException;

@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.standalone;
+package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.compiler.ChunkClassLoader;
-import net.sandius.rembulan.core.Dispatch;
+import net.sandius.rembulan.core.load.ChunkClassLoader;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;
