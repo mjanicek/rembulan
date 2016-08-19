@@ -91,16 +91,16 @@ public abstract class Dispatch {
 
 	public static void evaluateTailCalls(ExecutionContext context) throws ControlThrowable {
 		ReturnBuffer r = context.getReturnBuffer();
-		while (r.isTailCall()) {
-			Object target = r.getTailCallTarget();
+		while (r.isCall()) {
+			Object target = r.getCallTarget();
 			switch (r.size()) {
 				case 0: mt_invoke(context, target); break;
-				case 1: mt_invoke(context, target, r._0()); break;
-				case 2: mt_invoke(context, target, r._0(), r._1()); break;
-				case 3: mt_invoke(context, target, r._0(), r._1(), r._2()); break;
-				case 4: mt_invoke(context, target, r._0(), r._1(), r._2(), r._3()); break;
-				case 5: mt_invoke(context, target, r._0(), r._1(), r._2(), r._3(), r._4()); break;
-				default: mt_invoke(context, target, r.toArray()); break;
+				case 1: mt_invoke(context, target, r.get0()); break;
+				case 2: mt_invoke(context, target, r.get0(), r.get1()); break;
+				case 3: mt_invoke(context, target, r.get0(), r.get1(), r.get2()); break;
+				case 4: mt_invoke(context, target, r.get0(), r.get1(), r.get2(), r.get3()); break;
+				case 5: mt_invoke(context, target, r.get0(), r.get1(), r.get2(), r.get3(), r.get4()); break;
+				default: mt_invoke(context, target, r.getAsArray()); break;
 			}
 		}
 	}
@@ -429,7 +429,7 @@ public abstract class Dispatch {
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			Boolean b = (Boolean) suspendedState;
 			ReturnBuffer result = context.getReturnBuffer();
-			boolean resultValue = Conversions.booleanValueOf(result._0());
+			boolean resultValue = Conversions.booleanValueOf(result.get0());
 			result.setTo(b == resultValue);
 		}
 
@@ -446,7 +446,7 @@ public abstract class Dispatch {
 		}
 		// not suspended: set the result, possibly flipping it
 		ReturnBuffer result = context.getReturnBuffer();
-		result.setTo(Conversions.booleanValueOf(result._0()) == cmpTo);
+		result.setTo(Conversions.booleanValueOf(result.get0()) == cmpTo);
 	}
 
 	private static void eq(ExecutionContext context, boolean polarity, Object a, Object b) throws ControlThrowable {

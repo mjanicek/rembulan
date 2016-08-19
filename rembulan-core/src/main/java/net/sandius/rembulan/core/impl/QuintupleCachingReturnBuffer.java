@@ -125,7 +125,7 @@ public class QuintupleCachingReturnBuffer extends AbstractReturnBuffer {
 	private static final Object[] EMPTY_ARRAY = new Object[0];
 
 	@Override
-	public Object[] toArray() {
+	public Object[] getAsArray() {
 		switch (size) {
 			case 0: return EMPTY_ARRAY;
 			case 1: return new Object[] { _0 };
@@ -159,27 +159,27 @@ public class QuintupleCachingReturnBuffer extends AbstractReturnBuffer {
 	}
 
 	@Override
-	public Object _0() {
+	public Object get0() {
 		return _0;
 	}
 
 	@Override
-	public Object _1() {
+	public Object get1() {
 		return _1;
 	}
 
 	@Override
-	public Object _2() {
+	public Object get2() {
 		return _2;
 	}
 
 	@Override
-	public Object _3() {
+	public Object get3() {
 		return _3;
 	}
 
 	@Override
-	public Object _4() {
+	public Object get4() {
 		return _4;
 	}
 

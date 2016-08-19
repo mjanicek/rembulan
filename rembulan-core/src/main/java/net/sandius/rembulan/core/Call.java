@@ -65,7 +65,7 @@ public class Call {
 
 		ReturnBuffer returnBuffer = state.newReturnBuffer();
 		Coroutine c = new Coroutine(fn);
-		returnBuffer.setToArray(args);
+		returnBuffer.setToContentsOf(args);
 		return new Call(state, returnBuffer, c);
 	}
 
@@ -520,7 +520,7 @@ public class Call {
 
 		if (error == null) {
 			// main coroutine returned
-			final Object[] result = returnBuffer.toArray();
+			final Object[] result = returnBuffer.getAsArray();
 			return new Hook(result) {
 				@Override
 				public Runnable body(Continuation cont) {

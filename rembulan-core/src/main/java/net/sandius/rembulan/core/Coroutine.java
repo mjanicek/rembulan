@@ -80,7 +80,7 @@ public final class Coroutine {
 
 		@Override
 		public void resume(ExecutionContext context, Object target) throws ControlThrowable {
-			Dispatch.call(context, target, context.getReturnBuffer().toArray());
+			Dispatch.call(context, target, context.getReturnBuffer().getAsArray());
 		}
 
 	}
@@ -173,7 +173,7 @@ public final class Coroutine {
 
 				Coroutine c = this.yield();
 				if (c != null) {
-					context.getReturnBuffer().setToArray(yield.args);
+					context.getReturnBuffer().setToContentsOf(yield.args);
 					return new ResumeResult.Switch(c);
 				}
 				else {
@@ -186,7 +186,7 @@ public final class Coroutine {
 				final Coroutine c;
 				try {
 					c = this.resume(resume.coroutine);
-					context.getReturnBuffer().setToArray(resume.args);
+					context.getReturnBuffer().setToContentsOf(resume.args);
 					return new ResumeResult.Switch(c);
 				}
 				catch (Exception ex) {

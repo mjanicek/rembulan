@@ -473,7 +473,7 @@ public class DefaultMathLib extends MathLib {
 					throw ct.push(this, new State(args, idx, best));
 				}
 
-				if (Conversions.booleanValueOf(context.getReturnBuffer()._0())) {
+				if (Conversions.booleanValueOf(context.getReturnBuffer().get0())) {
 					best = o;
 				}
 			}
@@ -497,7 +497,7 @@ public class DefaultMathLib extends MathLib {
 			Object best = ss.best;
 
 			// best <> args[idx] comparison has just finished
-			if (Conversions.booleanValueOf(context.getReturnBuffer()._0())) {
+			if (Conversions.booleanValueOf(context.getReturnBuffer().get0())) {
 				best = args[idx];
 			}
 

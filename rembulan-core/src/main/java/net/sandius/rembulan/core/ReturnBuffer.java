@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.core;
 
+import java.util.Collection;
+
 /**
  * TODO: summary
  */
@@ -24,8 +26,8 @@ public interface ReturnBuffer {
 	/**
 	 * Return the number of values stored in this buffer.
 	 *
-	 * <p>When the buffer contains a tail call, this is the number of arguments to the call;
-	 * otherwise, it is the number of return values.</p>
+	 * <p>When the buffer contains a tail call, this is the number of arguments to the call
+	 * (i.e., the call target is not counted); otherwise, it is the number of return values.</p>
 	 *
 	 * @return  the number of values stored in this buffer
 	 */
@@ -34,32 +36,41 @@ public interface ReturnBuffer {
 	/**
 	 * Returns {@code true} iff this buffer contains a tail call.
 	 *
+	 * <p>If this method returns {@code true}, the call target may be retrieved using
+	 * {@link #getCallTarget()}.</p>
+	 *
 	 * @return  {@code true} iff this buffer contains a tail call
 	 */
-	boolean isTailCall();
+	boolean isCall();
 
 	/**
-	 * If this buffer contains a tail call, returns the target of the call (e.g.
-	 * the function to be tail called).
+	 * If this buffer contains a tail call, returns the target of the call, i.e,
+	 * the object {@code f} to be called with the arguments <i>args</i>
+	 * as {@code f(}<i>args</i>{@code )}.
 	 *
 	 * <p>If this buffer does not contain a tail call, an {@link IllegalStateException}
-	 * is thrown; use {@link #isTailCall()} to find out whether the buffer contains
+	 * is thrown; use {@link #isCall()} to find out whether the buffer contains
 	 * a tail call.</p>
 	 *
-	 * <p>Note that the target of the tail call may be any object, including {@code null}.
-	 * </p>
+	 * <p>In order to retrieve the call arguments, use any of the value getter methods
+	 * (e.g., {@link #getAsArray()}).</p>
+	 *
+	 * <p>Note that the target of the tail call may be any object, including {@code null}.</p>
 	 *
 	 * @return  the target of the tail call
 	 *
 	 * @throws IllegalStateException  when this buffer does not contain a tail call
 	 */
-	Object getTailCallTarget();
+	Object getCallTarget();
 
 	/**
 	 * Sets the result value in this buffer to the empty sequence.
 	 *
-	 * <p>The effect of this method is equivalent to {@code setToArray(new Object[] {})};
-	 * however, implementations of this interface may be optimised due to the fact
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToContentsOf(new Object[] {})
+	 * </pre>
+	 * <p>However, implementations of this method may be optimised due to the fact
 	 * that the number of values in this case is known at compile time.</p>
 	 */
 	void setTo();
@@ -67,9 +78,17 @@ public interface ReturnBuffer {
 	/**
 	 * Sets the result value in this buffer to a single value.
 	 *
-	 * <p>The effect of this method is equivalent to {@code setToArray(new Object[] {a})};
-	 * however, implementations of this interface may be optimised due to the fact
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToContentsOf(new Object[] {a})
+	 * </pre>
+	 * <p>However, implementations of this method may be optimised due to the fact
 	 * that the number of values in this case is known at compile time.</p>
+	 *
+	 * <p><b>Note</b>: the argument {@code a} is taken as-is, even if {@code a} is
+	 * an array or a collection. To set the result value of this buffer to the <i>contents</i>
+	 * of {@code a}, use {@link #setToContentsOf(Object[])}
+	 * or {@link #setToContentsOf(Collection)}.</p>
 	 *
 	 * @param a  the result value, may be {@code null}
 	 */
@@ -78,8 +97,11 @@ public interface ReturnBuffer {
 	/**
 	 * Sets the result value in this buffer to two values.
 	 *
-	 * <p>The effect of this method is equivalent to {@code setToArray(new Object[] {a, b})};
-	 * however, implementations of this interface may be optimised due to the fact
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToContentsOf(new Object[] {a, b})
+	 * </pre>
+	 * <p>However, implementations of this method may be optimised due to the fact
 	 * that the number of values in this case is known at compile time.</p>
 	 *
 	 * @param a  the first value, may be {@code null}
@@ -90,10 +112,12 @@ public interface ReturnBuffer {
 	/**
 	 * Sets the result value in this buffer to three values.
 	 *
-	 * <p>The effect of this method is equivalent to
-	 * {@code setToArray(new Object[] {a, b, c})}; however, implementations of this interface
-	 * may be optimised due to the fact that the number of values in this case is known
-	 * at compile time.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToContentsOf(new Object[] {a, b, c})
+	 * </pre>
+	 * <p>However, implementations of this method may be optimised due to the fact
+	 * that the number of values in this case is known at compile time.</p>
 	 *
 	 * @param a  the first value, may be {@code null}
 	 * @param b  the second value, may be {@code null}
@@ -104,10 +128,12 @@ public interface ReturnBuffer {
 	/**
 	 * Sets the result value in this buffer to four values.
 	 *
-	 * <p>The effect of this method is equivalent to
-	 * {@code setToArray(new Object[] {a, b, c, d})}; however, implementations of this
-	 * interface may be optimised due to the fact that the number of values in this case
-	 * is known at compile time.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToContentsOf(new Object[] {a, b, c, d})
+	 * </pre>
+	 * <p>However, implementations of this method may be optimised due to the fact
+	 * that the number of values in this case is known at compile time.</p>
 	 *
 	 * @param a  the first value, may be {@code null}
 	 * @param b  the second value, may be {@code null}
@@ -119,10 +145,12 @@ public interface ReturnBuffer {
 	/**
 	 * Sets the result value in this buffer to five values.
 	 *
-	 * <p>The effect of this method is equivalent to
-	 * {@code setToArray(new Object[] {a, b, c, d, e})}; however, implementations of this
-	 * interface may be optimised due to the fact that the number of values in this case
-	 * is known at compile time.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToContentsOf(new Object[] {a, b, c, d, e})
+	 * </pre>
+	 * <p>However, implementations of this method may be optimised due to the fact
+	 * that the number of values in this case is known at compile time.</p>
 	 *
 	 * @param a  the first value, may be {@code null}
 	 * @param b  the second value, may be {@code null}
@@ -137,7 +165,7 @@ public interface ReturnBuffer {
 	 *
 	 * <p>The contents of {@code array} are not modified by the buffer, and the reference
 	 * to {@code array} is not retained by the buffer. (In other words,
-	 * implementations of the {@code ReturnBuffer} interface are required to make copy of
+	 * implementations of the {@code ReturnBuffer} interface are required to make a copy of
 	 * {@code array}'s contents.)</p>
 	 *
 	 * <p>For result values of known length, it is recommended to use the appropriate
@@ -147,90 +175,134 @@ public interface ReturnBuffer {
 	 *
 	 * @throws NullPointerException  if {@code array} is {@code null}
 	 */
-	void setToArray(Object[] array);
+	void setToContentsOf(Object[] array);
+
+	/**
+	 * Sets the result value in this buffer to the contents of {@code collection},
+	 * in the order given by {@code collection}'s {@link Collection#iterator() iterator()}.
+	 *
+	 * <p>The contents of {@code collection} are not modified by the buffer,
+	 * and the reference to {@code collection} is not retained by the buffer.
+	 * (In other words, implementations of the {@code ReturnBuffer} interface are required
+	 * to make a copy {@code collection}'s contents.</p>
+	 *
+	 * <p>When the contents of {@code collection} are modified concurrently with
+	 * the execution of this method, the behaviour of this method is undefined.</p>
+	 *
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToContentsOf(collection.toArray())
+	 * </pre>
+	 * <p>However, implementations of this method may be expected to iterate over the
+	 * elements of {@code collection} directly (i.e, avoiding the conversion to array).</p>
+	 *
+	 * <p>For result values of known length, it is recommended to use the appropriate
+	 * {@code setTo(...)} method.</p>
+	 *
+	 * @param collection  the collection to set values from, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code collection} is {@code null}
+	 */
+	void setToContentsOf(Collection<?> collection);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} without arguments,
 	 * i.e., to {@code target()}.
 	 *
-	 * <p>The effect of this method is equivalent to {@code tailCall(target, new Object[] {})};
-	 * however, implementations of this interface may optimise this method since the number
-	 * of arguments is known at compile time.</p>
+	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
+	 * into the buffer a description of how the call should be made.</p>
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the tail call, but is rather
-	 * the <i>specification</i> of the call.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToCallWithContentsOf(target, new Object[] {})
+	 * </pre>
+	 * <p>However, implementations of this method may optimise this method since the number
+	 * of arguments is known at compile time.</p>
 	 *
 	 * @param target  tail call target, may be {@code null}
 	 */
-	void tailCall(Object target);
+	void setToCall(Object target);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with a single
 	 * argument {@code arg1}, i.e., to {@code target(arg1)}.
 	 *
-	 * <p>The effect of this method is equivalent to
-	 * {@code tailCall(target, new Object[] {arg1})}; however, implementations of this
-	 * interface may optimise this method  since the number of arguments is known at compile
-	 * time.</p>
+	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
+	 * into the buffer a description of how the call should be made.</p>
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the tail call, but is rather
-	 * the <i>specification</i> of the call.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToCallWithContentsOf(target, new Object[] {arg1})
+	 * </pre>
+	 * <p>However, implementations of this method may optimise this method since the number
+	 * of arguments is known at compile time.</p>
+	 *
+	 * <p><b>Note</b>: the argument {@code arg1} is taken as-is, even if {@code arg1} is
+	 * an array or a collection. To set the call arguments to the <i>contents</i>
+	 * of {@code arg1}, use {@link #setToCallWithContentsOf(Object, Object[])}}
+	 * or {@link #setToCallWithContentsOf(Object, Collection)}}.</p>
 	 *
 	 * @param target  tail call target, may be {@code null}
 	 * @param arg1  the first call argument, may be {@code null}
 	 */
-	void tailCall(Object target, Object arg1);
+	void setToCall(Object target, Object arg1);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
 	 * {@code arg1} and {@code arg2}, i.e., to {@code target(arg1, arg2)}.
 	 *
-	 * <p>The effect of this method is equivalent to
-	 * {@code tailCall(target, new Object[] {arg1, arg2})}; however, implementations of this
-	 * interface may optimise this method since the number of arguments is known at compile
-	 * time.</p>
+	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
+	 * into the buffer a description of how the call should be made.</p>
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the tail call, but is rather
-	 * the <i>specification</i> of the call.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToCallWithContentsOf(target, new Object[] {arg1, arg2})
+	 * </pre>
+	 * <p>However, implementations of this method may optimise this method since the number
+	 * of arguments is known at compile time.</p>
 	 *
 	 * @param target  tail call target, may be {@code null}
 	 * @param arg1  the first call argument, may be {@code null}
 	 * @param arg2  the second call argument, may be {@code null}
 	 */
-	void tailCall(Object target, Object arg1, Object arg2);
+	void setToCall(Object target, Object arg1, Object arg2);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
 	 * {@code arg1}, {@code arg2} and {@code arg3}, i.e.,
 	 * to {@code target(arg1, arg2, arg3)}.
 	 *
-	 * <p>The effect of this method is equivalent to
-	 * {@code tailCall(target, new Object[] {arg1, arg2, arg3})}; however, implementations
-	 * of this interface may optimise this method since the number of arguments is known
-	 * at compile time.</p>
+	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
+	 * into the buffer a description of how the call should be made.</p>
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the tail call, but is rather
-	 * the <i>specification</i> of the call.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToCallWithContentsOf(target, new Object[] {arg1, arg2, arg3})
+	 * </pre>
+	 * <p>However, implementations of this method may optimise this method since the number
+	 * of arguments is known at compile time.</p>
 	 *
 	 * @param target  tail call target, may be {@code null}
 	 * @param arg1  the first call argument, may be {@code null}
 	 * @param arg2  the second call argument, may be {@code null}
 	 * @param arg3  the third call argument, may be {@code null}
 	 */
-	void tailCall(Object target, Object arg1, Object arg2, Object arg3);
+	void setToCall(Object target, Object arg1, Object arg2, Object arg3);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
 	 * {@code arg1}, {@code arg2}, {@code arg3} and {@code arg4}, i.e.,
 	 * to {@code target(arg1, arg2, arg3, arg4)}.
 	 *
-	 * <p>The effect of this method is equivalent to
-	 * {@code tailCall(target, new Object[] {arg1, arg2, arg3, arg4})}; however,
-	 * implementations of this method may optimise this method since the number of arguments
-	 * is known at compile time.</p>
+	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
+	 * into the buffer a description of how the call should be made.</p>
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the tail call, but is rather
-	 * the <i>specification</i> of the call.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToCallWithContentsOf(target, new Object[] {arg1, arg2, arg3, arg4})
+	 * </pre>
+	 * <p>However, implementations of this method may optimise this method since the number
+	 * of arguments is known at compile time.</p>
 	 *
 	 * @param target  tail call target, may be {@code null}
 	 * @param arg1  the first call argument, may be {@code null}
@@ -238,20 +310,22 @@ public interface ReturnBuffer {
 	 * @param arg3  the third call argument, may be {@code null}
 	 * @param arg4  the fourth call argument, may be {@code null}
 	 */
-	void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4);
+	void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
 	 * {@code arg1}, {@code arg2}, {@code arg3}, {@code arg4} and {@code arg5} , i.e.,
 	 * to {@code target(arg1, arg2, arg3, arg4, arg5)}.
 	 *
-	 * <p>The effect of this method is equivalent to
-	 * {@code tailCall(target, new Object[] {arg1, arg2, arg3, arg4, arg5})}; however,
-	 * implementations of this method may optimise this method since the number of arguments
-	 * is known at compile time.</p>
+	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
+	 * into the buffer a description of how the call should be made.</p>
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the tail call, but is rather
-	 * the <i>specification</i> of the call.</p>
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToCallWithContentsOf(target, new Object[] {arg1, arg2, arg3, arg4, arg5})
+	 * </pre>
+	 * <p>However, implementations of this method may optimise this method since the number
+	 * of arguments is known at compile time.</p>
 	 *
 	 * @param target  tail call target, may be {@code null}
 	 * @param arg1  the first call argument, may be {@code null}
@@ -260,18 +334,21 @@ public interface ReturnBuffer {
 	 * @param arg4  the fourth call argument, may be {@code null}
 	 * @param arg5  the fifth call argument, may be {@code null}
 	 */
-	void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
+	void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
 	/**
-	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
-	 * {@code args} passed as an array.
+	 * Sets the result in this buffer to a tail call of {@code target} with the contents
+	 * of the array {@code args} used as call arguments.
 	 *
-	 * <p>Conceptually, this corresponds to the call</p>
+	 * <p>This corresponds to the call</p>
 	 * <pre>
 	 *     target(a_0, ..., a_n)
 	 * </pre>
 	 * <p>where {@code a_i} denotes the value of {@code args[i]} and {@code n} is equal
-	 * to {@code args.length}.</p>
+	 * to {@code (args.length - 1)}.</p>
+	 *
+	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
+	 * into the buffer a description of how the call should be made.</p>
 	 *
 	 * <p>The contents of {@code args} are not modified by the buffer, and the reference
 	 * to {@code args} is not retained by the buffer. (In other words,
@@ -279,17 +356,50 @@ public interface ReturnBuffer {
 	 * {@code args}'s contents.)</p>
 	 *
 	 * <p>For tail calls with a fixed number of arguments known at compile time, it is
-	 * recommended to use the appropriate {@code tailCall(...)} method.</p>
-	 *
-	 * <p>Note that this method does <i>not</i> evaluate the tail call, but is rather
-	 * the <i>specification</i> of the call.</p>
+	 * recommended to use the appropriate {@code setToCall(...)} method.</p>
 	 *
 	 * @param target  tail call target, may be {@code null}
 	 * @param args  the array to set values from, must not be {@code null}
 	 *
 	 * @throws NullPointerException  if {@code args} is {@code null}
 	 */
-	void tailCall(Object target, Object[] args);
+	void setToCallWithContentsOf(Object target, Object[] args);
+
+	/**
+	 * Sets the result in this buffer to a tail call of {@code target} with the contents
+	 * of the collection {@code args} used as call arguments.
+	 *
+	 * <p>This corresponds to the call</p>
+	 * <pre>
+	 *     target(a_0, ..., a_n)
+	 * </pre>
+	 * <p>where {@code a_i} denotes the value returned by the {@code (i+1)}-th invocation
+	 * of an iterator on {@code args}, and {@code n} is equal to {@code args.size() - 1}.</p>
+	 *
+	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
+	 * into the buffer a description of how the call should be made.</p>
+	 *
+	 * <p>The contents of {@code args} are not modified by the buffer, and the reference
+	 * to {@code args} is not retained by the buffer. (In other words,
+	 * implementations of the {@code ReturnBuffer} interface are required to make copy of
+	 * {@code args}'s contents.)</p>
+	 *
+	 * <p>The effect of this method is equivalent to</p>
+	 * <pre>
+	 *     setToTailCallWithContentsOf(target, args.toArray())
+	 * </pre>
+	 * <p>However, implementations of this method may be expected to iterate over the
+	 * elements of {@code collection} directly (i.e, avoiding the conversion to array).</p>
+	 *
+	 * <p>For tail calls with a fixed number of arguments known at compile time, it is
+	 * recommended to use the appropriate {@code setToCall(...)} method.</p>
+	 *
+	 * @param target  tail call target, may be {@code null}
+	 * @param args  the array to set values from, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code args} is {@code null}
+	 */
+	void setToCallWithContentsOf(Object target, Collection<?> args);
 
 	/**
 	 * Returns the values stored in this buffer as an array.
@@ -302,7 +412,7 @@ public interface ReturnBuffer {
 	 *
 	 * <p>This method's functionality is equivalent to the following:</p>
 	 * <pre>
-	 *     public Object[] toArray() {
+	 *     public Object[] getAsArray() {
 	 *         Object[] result = new Object[size()];
 	 *         for (int i = 0; i &lt; size(); i++) {
 	 *             result[i] = get(i);
@@ -315,7 +425,7 @@ public interface ReturnBuffer {
 	 *
 	 * @return  values stored in this buffer as an array, guaranteed to be non-{@code null}
 	 */
-	Object[] toArray();
+	Object[] getAsArray();
 
 	/**
 	 * Returns the {@code idx}-th value stored in this buffer, or {@code null} if there is
@@ -331,7 +441,7 @@ public interface ReturnBuffer {
 	 * these two cases, an explicit query of the {@link #size()} must be used.</p>
 	 *
 	 * <p>Note that when the index is known at compile time, it is recommended to use the
-	 * appropriate optimised getter method (e.g., {@link #_0()} for accessing the first
+	 * appropriate optimised getter method (e.g., {@link #get0()} for accessing the first
 	 * value).</p>
 	 *
 	 * @param idx  the index of the value to be retrieved
@@ -353,7 +463,7 @@ public interface ReturnBuffer {
 	 * @return  the value of the first value stored in this buffer (may be {@code null}),
 	 *          or {@code null} if this buffer is empty
 	 */
-	Object _0();
+	Object get0();
 
 	/**
 	 * Returns the second value stored in this buffer.
@@ -368,7 +478,7 @@ public interface ReturnBuffer {
 	 * @return  the value of the second value stored in this buffer (may be {@code null}),
 	 *          or {@code null} if this buffer's size is empty
 	 */
-	Object _1();
+	Object get1();
 
 	/**
 	 * Returns the third value stored in this buffer.
@@ -383,7 +493,7 @@ public interface ReturnBuffer {
 	 * @return  the value of the third value stored in this buffer (may be {@code null}),
 	 *          or {@code null} if this buffer's size is empty
 	 */
-	Object _2();
+	Object get2();
 
 	/**
 	 * Returns the fourth value stored in this buffer.
@@ -398,7 +508,7 @@ public interface ReturnBuffer {
 	 * @return  the value of the fourth value stored in this buffer (may be {@code null}),
 	 *          or {@code null} if this buffer's size is empty
 	 */
-	Object _3();
+	Object get3();
 
 	/**
 	 * Returns the fifth value stored in this buffer.
@@ -413,6 +523,6 @@ public interface ReturnBuffer {
 	 * @return  the value of the fifth value stored in this buffer (may be {@code null}),
 	 *          or {@code null} if this buffer's size is empty
 	 */
-	Object _4();
+	Object get4();
 
 }

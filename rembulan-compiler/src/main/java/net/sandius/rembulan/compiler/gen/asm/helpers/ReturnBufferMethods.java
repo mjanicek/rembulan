@@ -62,7 +62,7 @@ public class ReturnBufferMethods {
 		InsnList il = new InsnList();
 
 		if (index <= 4) {
-			String methodName = "_" + index;
+			String methodName = "get" + index;
 			il.add(new MethodInsnNode(
 					INVOKEINTERFACE,
 					selfTpe().getInternalName(),
@@ -94,12 +94,12 @@ public class ReturnBufferMethods {
 	}
 
 	private static ReflectionUtils.Method setTo_method(int kind) {
-		String methodName = kind > 0 ? "setTo" : "setToArray";
+		String methodName = kind > 0 ? "setTo" : "setToContentsOf";
 		return ReflectionUtils.virtualArgListMethodFromKind(ReturnBuffer.class, methodName, null, kind);
 	}
 
 	private static ReflectionUtils.Method tailCall_method(int kind) {
-		String methodName = "tailCall";
+		String methodName = kind >0 ? "setToCall" : "setToCallWithContentsOf";
 		return ReflectionUtils.virtualArgListMethodFromKind(ReturnBuffer.class, methodName, new Class[] { Object.class }, kind);
 	}
 
@@ -115,7 +115,7 @@ public class ReturnBufferMethods {
 		return new MethodInsnNode(
 				INVOKEINTERFACE,
 				selfTpe().getInternalName(),
-				"toArray",
+				"getAsArray",
 				Type.getMethodType(
 						ASMUtils.arrayTypeFor(Object.class)).getDescriptor(),
 				true);

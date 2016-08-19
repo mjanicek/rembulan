@@ -180,7 +180,7 @@ public class DefaultBasicLib extends BasicLib {
 					throw ct.push(this, Arrays.copyOfRange(args, i + 1, args.length));
 				}
 
-				Object s = context.getReturnBuffer()._0();
+				Object s = context.getReturnBuffer().get0();
 				if (s instanceof String) {
 					out.print(s);
 				}
@@ -312,7 +312,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 
 				ReturnBuffer rbuf = context.getReturnBuffer();
-				rbuf.setTo(rbuf._0(), rbuf._1(), rbuf._2());
+				rbuf.setTo(rbuf.get0(), rbuf.get1(), rbuf.get2());
 			}
 			else {
 				ReturnBuffer rbuf = context.getReturnBuffer();
@@ -323,7 +323,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			ReturnBuffer rbuf = context.getReturnBuffer();
-			rbuf.setTo(rbuf._0(), rbuf._1(), rbuf._2());
+			rbuf.setTo(rbuf.get0(), rbuf.get1(), rbuf.get2());
 		}
 
 	}
@@ -380,7 +380,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			// trim to single value
-			Object result = context.getReturnBuffer()._0();
+			Object result = context.getReturnBuffer().get0();
 			context.getReturnBuffer().setTo(result);
 		}
 
@@ -509,7 +509,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			if (Conversions.booleanValueOf(args.nextAny())) {
-				context.getReturnBuffer().setToArray(args.getAll());
+				context.getReturnBuffer().setToContentsOf(args.getAll());
 			}
 			else {
 				final AssertionFailedException ex;
@@ -570,8 +570,8 @@ public class DefaultBasicLib extends BasicLib {
 			ReturnBuffer rbuf = context.getReturnBuffer();
 			ArrayList<Object> result = new ArrayList<>();
 			result.add(Boolean.TRUE);
-			result.addAll(Arrays.asList(rbuf.toArray()));
-			rbuf.setToArray(result.toArray());
+			result.addAll(Arrays.asList(rbuf.getAsArray()));
+			rbuf.setToContentsOf(result);
 		}
 
 		@Override
@@ -606,13 +606,13 @@ public class DefaultBasicLib extends BasicLib {
 			ReturnBuffer rbuf = context.getReturnBuffer();
 			ArrayList<Object> result = new ArrayList<>();
 			result.add(Boolean.TRUE);
-			result.addAll(Arrays.asList(rbuf.toArray()));
-			rbuf.setToArray(result.toArray());
+			result.addAll(Arrays.asList(rbuf.getAsArray()));
+			rbuf.setToContentsOf(result);
 		}
 
 		private static void prependFalseAndTrim(ExecutionContext context) {
 			ReturnBuffer rbuf = context.getReturnBuffer();
-			Object errorObject = rbuf._0();
+			Object errorObject = rbuf.get0();
 			rbuf.setTo(Boolean.FALSE, errorObject);
 		}
 
@@ -815,7 +815,7 @@ public class DefaultBasicLib extends BasicLib {
 				Object[] r = args.getAll();
 				final Object[] result;
 				result = from > r.length ? new Object[0] : Arrays.copyOfRange(r, from, r.length);
-				context.getReturnBuffer().setToArray(result);
+				context.getReturnBuffer().setToContentsOf(result);
 			}
 		}
 

@@ -113,8 +113,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			ReturnBuffer rbuf = context.getReturnBuffer();
 			ArrayList<Object> result = new ArrayList<>();
 			result.add(Boolean.TRUE);
-			result.addAll(Arrays.asList(rbuf.toArray()));
-			rbuf.setToArray(result.toArray());
+			result.addAll(Arrays.asList(rbuf.getAsArray()));
+			rbuf.setToContentsOf(result);
 		}
 
 		@Override

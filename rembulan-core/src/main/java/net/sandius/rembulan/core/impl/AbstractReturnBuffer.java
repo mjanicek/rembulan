@@ -18,6 +18,8 @@ package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.ReturnBuffer;
 
+import java.util.Collection;
+
 public abstract class AbstractReturnBuffer implements ReturnBuffer {
 
 	protected boolean tailCall;
@@ -29,7 +31,7 @@ public abstract class AbstractReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public boolean isTailCall() {
+	public boolean isCall() {
 		return tailCall;
 	}
 
@@ -47,7 +49,7 @@ public abstract class AbstractReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public Object getTailCallTarget() {
+	public Object getCallTarget() {
 		if (!tailCall) {
 			throw new IllegalStateException("Not a tail call");
 		}
@@ -104,7 +106,7 @@ public abstract class AbstractReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public void setToArray(Object[] a) {
+	public void setToContentsOf(Object[] a) {
 		reset();
 		for (Object o : a) {
 			push(o);
@@ -112,69 +114,83 @@ public abstract class AbstractReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public void tailCall(Object target) {
+	public void setToContentsOf(Collection<?> collection) {
+		reset();
+		for (Object o : collection) {
+			push(o);
+		}
+	}
+
+	@Override
+	public void setToCall(Object target) {
 		setTo();
 		setTailCallTarget(target);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1) {
+	public void setToCall(Object target, Object arg1) {
 		setTo(arg1);
 		setTailCallTarget(target);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2) {
+	public void setToCall(Object target, Object arg1, Object arg2) {
 		setTo(arg1, arg2);
 		setTailCallTarget(target);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3) {
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3) {
 		setTo(arg1, arg2, arg3);
 		setTailCallTarget(target);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
 		setTo(arg1, arg2, arg3, arg4);
 		setTailCallTarget(target);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
 		setTo(arg1, arg2, arg3, arg4, arg5);
 		setTailCallTarget(target);
 	}
 
 	@Override
-	public void tailCall(Object target, Object[] args) {
-		setToArray(args);
+	public void setToCallWithContentsOf(Object target, Object[] args) {
+		setToContentsOf(args);
 		setTailCallTarget(target);
 	}
 
 	@Override
-	public Object _0() {
+	public void setToCallWithContentsOf(Object target, Collection<?> args) {
+		setToContentsOf(args);
+		setTailCallTarget(target);
+	}
+
+	@Override
+	public Object get0() {
 		return get(0);
 	}
 
 	@Override
-	public Object _1() {
+	public Object get1() {
 		return get(1);
 	}
 
 	@Override
-	public Object _2() {
+	public Object get2() {
 		return get(2);
 	}
 
 	@Override
-	public Object _3() {
+	public Object get3() {
 		return get(3);
 	}
 
 	@Override
-	public Object _4() {
+	public Object get4() {
 		return get(4);
 	}
 

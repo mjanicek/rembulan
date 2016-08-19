@@ -195,7 +195,7 @@ public class DefaultStringLib extends StringLib {
 				char c = s.charAt(idx - 1);
 				buf.add(Long.valueOf(c));
 			}
-			context.getReturnBuffer().setToArray(buf.toArray());
+			context.getReturnBuffer().setToContentsOf(buf);
 		}
 
 	}
@@ -300,7 +300,7 @@ public class DefaultStringLib extends StringLib {
 					List<Object> buf = new ArrayList<>();
 					buf.addAll(results);
 					buf.addAll(captures);
-					context.getReturnBuffer().setToArray(buf.toArray());
+					context.getReturnBuffer().setToContentsOf(buf);
 				}
 			}
 		}
@@ -778,7 +778,7 @@ public class DefaultStringLib extends StringLib {
 						context.getReturnBuffer().setTo(fullMatch[0]);
 					}
 					else {
-						context.getReturnBuffer().setToArray(captures.toArray());
+						context.getReturnBuffer().setToContentsOf(captures);
 					}
 				}
 			}
@@ -887,7 +887,7 @@ public class DefaultStringLib extends StringLib {
 					context.getReturnBuffer().setTo(fullMatch[0]);
 				}
 				else {
-					context.getReturnBuffer().setToArray(captures.toArray());
+					context.getReturnBuffer().setToContentsOf(captures);
 				}
 			}
 		}

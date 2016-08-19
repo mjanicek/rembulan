@@ -54,7 +54,7 @@ public class ArrayListReturnBuffer extends AbstractReturnBuffer {
 	}
 
 	@Override
-	public Object[] toArray() {
+	public Object[] getAsArray() {
 		return buf.toArray();
 	}
 

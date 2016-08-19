@@ -19,6 +19,9 @@ package net.sandius.rembulan.core.impl;
 import net.sandius.rembulan.core.ReturnBuffer;
 import net.sandius.rembulan.core.ReturnBufferFactory;
 
+import java.util.Collection;
+import java.util.Iterator;
+
 public class PairCachingReturnBuffer implements ReturnBuffer {
 
 	public static final ReturnBufferFactory FACTORY_INSTANCE = new ReturnBufferFactory() {
@@ -67,12 +70,12 @@ public class PairCachingReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public boolean isTailCall() {
+	public boolean isCall() {
 		return tailCall;
 	}
 
 	@Override
-	public Object getTailCallTarget() {
+	public Object getCallTarget() {
 		if (tailCall) {
 			return tailCallTarget;
 		}
@@ -86,7 +89,7 @@ public class PairCachingReturnBuffer implements ReturnBuffer {
 		tailCallTarget = null;
 	}
 
-	protected void setTailCall(Object target) {
+	protected void _setTailCall(Object target) {
 		tailCall = true;
 		tailCallTarget = target;
 	}
@@ -146,6 +149,25 @@ public class PairCachingReturnBuffer implements ReturnBuffer {
 		size = sz;
 	}
 
+	private void _setCollection(Collection<?> collection) {
+		int sz = collection.size();
+
+		// make sure the buffer is big enough
+		ensureBufSizeAtLeast(Math.max(0, sz - 2));
+
+		Iterator<?> it = collection.iterator();
+
+		_0 = it.hasNext() ? it.next() : null;
+		_1 = it.hasNext() ? it.next() : null;
+
+		// copy contents into the buffer
+		for (int i = 0; i < sz - 2; i++) {
+			_buf[i] = it.next();
+		}
+
+		size = sz;
+	}
+
 	@Override
 	public void setTo() {
 		unsetTailCall();
@@ -189,47 +211,53 @@ public class PairCachingReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public void setToArray(Object[] a) {
+	public void setToContentsOf(Object[] a) {
 		unsetTailCall();
 		_setArray(a);
 	}
 
 	@Override
-	public void tailCall(Object target) {
-		setTailCall(target);
+	public void setToContentsOf(Collection<?> collection) {
+		unsetTailCall();
+		_setCollection(collection);
+	}
+
+	@Override
+	public void setToCall(Object target) {
+		_setTailCall(target);
 		_set(null, null, 0, 0);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1) {
-		setTailCall(target);
+	public void setToCall(Object target, Object arg1) {
+		_setTailCall(target);
 		_set(arg1, null, 0, 1);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2) {
-		setTailCall(target);
+	public void setToCall(Object target, Object arg1, Object arg2) {
+		_setTailCall(target);
 		_set(arg1, arg2, 0, 2);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3) {
-		setTailCall(target);
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3) {
+		_setTailCall(target);
 		_set(arg1, arg2, 1, 3);
 		_buf[0] = arg3;
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
-		setTailCall(target);
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
+		_setTailCall(target);
 		_set(arg1, arg2, 2, 4);
 		_buf[0] = arg3;
 		_buf[1] = arg4;
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
-		setTailCall(target);
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+		_setTailCall(target);
 		_set(arg1, arg2, 3, 5);
 		_buf[0] = arg3;
 		_buf[1] = arg4;
@@ -237,13 +265,19 @@ public class PairCachingReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public void tailCall(Object target, Object[] args) {
-		setTailCall(target);
+	public void setToCallWithContentsOf(Object target, Object[] args) {
+		_setTailCall(target);
 		_setArray(args);
 	}
 
 	@Override
-	public Object[] toArray() {
+	public void setToCallWithContentsOf(Object target, Collection<?> args) {
+		_setTailCall(target);
+		_setCollection(args);
+	}
+
+	@Override
+	public Object[] getAsArray() {
 		switch (size) {
 			case 0: return EMPTY_ARRAY;
 			case 1: return new Object[] { _0 };
@@ -272,29 +306,29 @@ public class PairCachingReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public Object _0() {
+	public Object get0() {
 		return _0;
 	}
 
 	@Override
-	public Object _1() {
+	public Object get1() {
 		return _1;
 	}
 
 	@Override
-	public Object _2() {
+	public Object get2() {
 		// assuming buf is always big enough
 		return _buf[0];
 	}
 
 	@Override
-	public Object _3() {
+	public Object get3() {
 		// assuming buf is always big enough
 		return _buf[1];
 	}
 
 	@Override
-	public Object _4() {
+	public Object get4() {
 		// assuming buf is always big enough
 		return _buf[2];
 	}

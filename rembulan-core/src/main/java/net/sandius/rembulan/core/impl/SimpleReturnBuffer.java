@@ -20,6 +20,7 @@ import net.sandius.rembulan.core.ReturnBuffer;
 import net.sandius.rembulan.core.ReturnBufferFactory;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 public class SimpleReturnBuffer implements ReturnBuffer {
 
@@ -48,12 +49,12 @@ public class SimpleReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public boolean isTailCall() {
+	public boolean isCall() {
 		return tailCall;
 	}
 
 	@Override
-	public Object getTailCallTarget() {
+	public Object getCallTarget() {
 		if (!tailCall) {
 			throw new IllegalStateException("Not a tail call");
 		}
@@ -72,7 +73,7 @@ public class SimpleReturnBuffer implements ReturnBuffer {
 		update(values, false, null);
 	}
 
-	private void setTailCall(Object target, Object[] args) {
+	private void setToTailCall(Object target, Object[] args) {
 		update(args, true, target);
 	}
 
@@ -107,47 +108,57 @@ public class SimpleReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public void setToArray(Object[] a) {
+	public void setToContentsOf(Object[] a) {
 		setReturn(Arrays.copyOf(a, a.length));
 	}
 
 	@Override
-	public void tailCall(Object target) {
-		setTailCall(target, EMPTY_ARRAY);
+	public void setToContentsOf(Collection<?> collection) {
+		setReturn(collection.toArray());
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1) {
-		setTailCall(target, new Object[] { arg1 });
+	public void setToCall(Object target) {
+		setToTailCall(target, EMPTY_ARRAY);
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2) {
-		setTailCall(target, new Object[] { arg1, arg2 });
+	public void setToCall(Object target, Object arg1) {
+		setToTailCall(target, new Object[] { arg1 });
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3) {
-		setTailCall(target, new Object[] { arg1, arg2, arg3 });
+	public void setToCall(Object target, Object arg1, Object arg2) {
+		setToTailCall(target, new Object[] { arg1, arg2 });
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
-		setTailCall(target, new Object[] { arg1, arg2, arg3, arg4 });
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3) {
+		setToTailCall(target, new Object[] { arg1, arg2, arg3 });
 	}
 
 	@Override
-	public void tailCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
-		setTailCall(target, new Object[] { arg1, arg2, arg3, arg4, arg5 });
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4) {
+		setToTailCall(target, new Object[] { arg1, arg2, arg3, arg4 });
 	}
 
 	@Override
-	public void tailCall(Object target, Object[] args) {
-		setTailCall(target, Arrays.copyOf(args, args.length));
+	public void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) {
+		setToTailCall(target, new Object[] { arg1, arg2, arg3, arg4, arg5 });
 	}
 
 	@Override
-	public Object[] toArray() {
+	public void setToCallWithContentsOf(Object target, Object[] args) {
+		setToTailCall(target, Arrays.copyOf(args, args.length));
+	}
+
+	@Override
+	public void setToCallWithContentsOf(Object target, Collection<?> args) {
+		setToTailCall(target, args.toArray());
+	}
+
+	@Override
+	public Object[] getAsArray() {
 		return Arrays.copyOf(values, values.length);
 	}
 
@@ -157,27 +168,27 @@ public class SimpleReturnBuffer implements ReturnBuffer {
 	}
 
 	@Override
-	public Object _0() {
+	public Object get0() {
 		return get(0);
 	}
 
 	@Override
-	public Object _1() {
+	public Object get1() {
 		return get(1);
 	}
 
 	@Override
-	public Object _2() {
+	public Object get2() {
 		return get(2);
 	}
 
 	@Override
-	public Object _3() {
+	public Object get3() {
 		return get(3);
 	}
 
 	@Override
-	public Object _4() {
+	public Object get4() {
 		return get(4);
 	}
 
