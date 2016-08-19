@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.core.exec;
 
-import net.sandius.rembulan.core.StackTraceback;
 import net.sandius.rembulan.core.load.ChunkClassLoader;
 
 import java.io.PrintStream;
