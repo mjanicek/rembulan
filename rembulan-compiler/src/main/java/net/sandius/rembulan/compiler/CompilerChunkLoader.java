@@ -24,7 +24,7 @@ import net.sandius.rembulan.core.load.ChunkLoader;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.util.Check;
 
-public class CompilerChunkLoader extends ChunkLoader {
+public class CompilerChunkLoader implements ChunkLoader {
 
 	private final ChunkClassLoader chunkClassLoader;
 	private final Compiler compiler;

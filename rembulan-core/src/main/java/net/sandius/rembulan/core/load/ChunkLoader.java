@@ -20,10 +20,10 @@ import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LoaderException;
 import net.sandius.rembulan.core.Variable;
 
-public abstract class ChunkLoader {
+public interface ChunkLoader {
 
-	public abstract Function loadTextChunk(Variable env, String chunkName, String chunk) throws LoaderException;
+	Function loadTextChunk(Variable env, String chunkName, String chunk) throws LoaderException;
 
-	public abstract Function loadBinaryChunk(Variable env, String chunkName, byte[] chunk, int offset, int len) throws LoaderException;
+	Function loadBinaryChunk(Variable env, String chunkName, byte[] chunk, int offset, int len) throws LoaderException;
 
 }
