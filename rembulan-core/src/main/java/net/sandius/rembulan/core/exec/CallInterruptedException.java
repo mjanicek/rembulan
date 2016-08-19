@@ -32,4 +32,10 @@ public class CallInterruptedException extends InterruptedException {
 		return continuation;
 	}
 
+	@Override
+	public synchronized Throwable fillInStackTrace() {
+		// don't fill in the stack trace
+		return this;
+	}
+
 }
