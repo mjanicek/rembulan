@@ -14,8 +14,11 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.exec;
 
+import net.sandius.rembulan.core.Call;
+import net.sandius.rembulan.core.LuaState;
+import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.util.Check;
 
 import java.util.HashMap;

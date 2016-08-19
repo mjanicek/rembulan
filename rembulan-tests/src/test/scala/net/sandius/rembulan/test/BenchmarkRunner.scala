@@ -23,8 +23,9 @@ import java.util.concurrent.Executors
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{ChunkClassLoader, CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.core.Call.Continuation
-import net.sandius.rembulan.core.CallMultiplexer.PreemptionHandler
 import net.sandius.rembulan.core._
+import net.sandius.rembulan.core.exec.CallMultiplexer
+import net.sandius.rembulan.core.exec.CallMultiplexer.PreemptionHandler
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
