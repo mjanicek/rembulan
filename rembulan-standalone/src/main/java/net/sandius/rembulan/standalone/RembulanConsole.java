@@ -206,7 +206,7 @@ public class RembulanConsole {
 		}
 		catch (CallException ex) {
 			if (!javaTraceback) {
-				ex.printLuaFormatStackTraceback(err, loader.getChunkClassLoader(), true, tracebackSuppress);
+				ex.printLuaFormatStackTraceback(err, loader.getChunkClassLoader(), tracebackSuppress);
 			}
 			else {
 				ex.printStackTrace(err);
@@ -331,7 +331,7 @@ public class RembulanConsole {
 				}
 				catch (CallException ex) {
 					if (!javaTraceback) {
-						ex.printLuaFormatStackTraceback(err, loader.getChunkClassLoader(), true, tracebackSuppress);
+						ex.printLuaFormatStackTraceback(err, loader.getChunkClassLoader(), tracebackSuppress);
 					}
 					else {
 						ex.printStackTrace(err);
