@@ -18,14 +18,14 @@ package net.sandius.rembulan.standalone;
 
 import jline.console.ConsoleReader;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
-import net.sandius.rembulan.core.Call;
 import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.exec.CallException;
+import net.sandius.rembulan.core.exec.CallInterruptedException;
+import net.sandius.rembulan.core.exec.DirectCallExecutor;
 import net.sandius.rembulan.core.impl.DefaultLuaState;
 import net.sandius.rembulan.core.load.LoaderException;
 import net.sandius.rembulan.lib.ModuleLib;
@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.FileSystems;
-import java.util.concurrent.ExecutionException;
 
 public class RembulanConsole {
 
@@ -59,6 +58,8 @@ public class RembulanConsole {
 	private final boolean stackTraceForCompileErrors;
 	private final String[] tracebackSuppress;
 
+	private final DirectCallExecutor callExecutor;
+
 	public RembulanConsole(CommandLineArguments cmdLineArgs, InputStream in, PrintStream out, PrintStream err) {
 
 		javaTraceback = System.getenv(Constants.ENV_FULL_TRACEBACK) != null;
@@ -76,6 +77,8 @@ public class RembulanConsole {
 
 		this.state = new DefaultLuaState();
 		this.env = state.newTable();
+
+		this.callExecutor = DirectCallExecutor.newExecutor(state);
 
 		this.loader = new CompilerChunkLoader(this.getClass().getClassLoader(), "rembulan_repl_");
 
@@ -124,21 +127,10 @@ public class RembulanConsole {
 	private Object[] callFunction(Function fn, Object... args)
 			throws CallException {
 
-		Call call = Call.init(state, fn, args);
-		Call.EventHandler handler = new Call.DefaultEventHandler();
-		PreemptionContext preemptionContext = new PreemptionContext.Never();
-
-		while (call.state() == Call.State.PAUSED) {
-			call.resume(handler, preemptionContext);
-		}
-
 		try {
-			return call.result().get();
+			return callExecutor.call(fn, args);
 		}
-		catch (ExecutionException e) {
-			throw new CallException(e.getCause());
-		}
-		catch (InterruptedException ex) {
+		catch (CallInterruptedException ex) {
 			throw new CallException(ex);
 		}
 	}
