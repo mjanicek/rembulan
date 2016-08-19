@@ -393,19 +393,19 @@ public class Call {
 		}
 	}
 
-	private Object[] resumeCurrentContinuation(EventHandler handler, PreemptionContext preemptionContext) throws Exception {
-		return currentContinuation().toCallable(handler, preemptionContext).call();
-	}
-
-	@Deprecated
-	public void resume(EventHandler handler, PreemptionContext preemptionContext) {
-		try {
-			resumeCurrentContinuation(handler, preemptionContext);
-		}
-		catch (Exception e) {
-			// no-op
-		}
-	}
+//	private Object[] resumeCurrentContinuation(EventHandler handler, PreemptionContext preemptionContext) throws Exception {
+//		return currentContinuation().toCallable(handler, preemptionContext).call();
+//	}
+//
+//	@Deprecated
+//	public void resume(EventHandler handler, PreemptionContext preemptionContext) {
+//		try {
+//			resumeCurrentContinuation(handler, preemptionContext);
+//		}
+//		catch (Exception e) {
+//			// no-op
+//		}
+//	}
 
 	private Object[] resume(Context context, int version, final EventHandler handler) {
 		if (version == VERSION_RUNNING || version == VERSION_TERMINATED || version == VERSION_CANCELLED) {
