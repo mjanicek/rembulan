@@ -16,13 +16,13 @@
 
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.core.load.AbstractChunk;
+import net.sandius.rembulan.core.load.CompiledChunk;
 import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Map;
 
-public class CompiledModule extends AbstractChunk {
+public class CompiledModule implements CompiledChunk {
 
 	private final Map<String, ByteVector> classMap;
 	private final String mainClassName;

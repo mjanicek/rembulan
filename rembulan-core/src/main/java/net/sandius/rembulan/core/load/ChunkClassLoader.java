@@ -38,7 +38,7 @@ public class ChunkClassLoader extends ClassLoader {
 		this(ChunkClassLoader.class.getClassLoader());
 	}
 
-	public String install(AbstractChunk chunk) {
+	public String install(CompiledChunk chunk) {
 		Map<String, ByteVector> classes = chunk.classMap();
 
 		synchronized (this) {

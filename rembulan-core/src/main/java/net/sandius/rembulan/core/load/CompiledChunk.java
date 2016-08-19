@@ -20,10 +20,10 @@ import net.sandius.rembulan.util.ByteVector;
 
 import java.util.Map;
 
-public abstract class AbstractChunk {
+public interface CompiledChunk {
 
-	public abstract Map<String, ByteVector> classMap();
+	Map<String, ByteVector> classMap();
 
-	public abstract String mainClassName();
+	String mainClassName();
 
 }
