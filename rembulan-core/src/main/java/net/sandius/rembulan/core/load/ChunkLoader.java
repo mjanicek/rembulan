@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.load;
+
+import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.core.LoaderException;
+import net.sandius.rembulan.core.Variable;
 
 public abstract class ChunkLoader {
 
