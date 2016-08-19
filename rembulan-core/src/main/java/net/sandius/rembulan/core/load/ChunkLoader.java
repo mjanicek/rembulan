@@ -17,7 +17,6 @@
 package net.sandius.rembulan.core.load;
 
 import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LoaderException;
 import net.sandius.rembulan.core.Variable;
 
 public interface ChunkLoader {
