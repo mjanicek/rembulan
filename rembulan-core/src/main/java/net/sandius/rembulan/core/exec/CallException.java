@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.exec;
 
+import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.load.ChunkClassLoader;
 import net.sandius.rembulan.util.Check;
 
