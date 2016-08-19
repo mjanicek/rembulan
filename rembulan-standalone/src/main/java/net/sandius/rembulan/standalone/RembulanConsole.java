@@ -17,9 +17,7 @@
 package net.sandius.rembulan.standalone;
 
 import jline.console.ConsoleReader;
-import net.sandius.rembulan.compiler.CompiledModule;
-import net.sandius.rembulan.compiler.Compiler;
-import net.sandius.rembulan.compiler.CompilerSettings;
+import net.sandius.rembulan.compiler.CompilerChunkLoader;
 import net.sandius.rembulan.core.Call;
 import net.sandius.rembulan.core.CallException;
 import net.sandius.rembulan.core.Conversions;
@@ -29,17 +27,14 @@ import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.impl.DefaultLuaState;
-import net.sandius.rembulan.core.load.ChunkClassLoader;
+import net.sandius.rembulan.core.load.LoaderException;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
-import net.sandius.rembulan.parser.ParseException;
-import net.sandius.rembulan.parser.TokenMgrError;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Constructor;
 import java.nio.file.FileSystems;
 import java.util.concurrent.ExecutionException;
 
@@ -54,8 +49,7 @@ public class RembulanConsole {
 	private final LuaState state;
 	private final Table env;
 
-	private final Compiler compiler;
-	private final ChunkClassLoader loader;
+	private final CompilerChunkLoader loader;
 
 	private int chunkIndex;
 
@@ -83,10 +77,7 @@ public class RembulanConsole {
 		this.state = new DefaultLuaState();
 		this.env = state.newTable();
 
-		this.compiler = new Compiler(CompilerSettings.defaultSettings());
-		this.loader = new ChunkClassLoader(this.getClass().getClassLoader());
-
-		this.chunkIndex = 0;
+		this.loader = new CompilerChunkLoader(this.getClass().getClassLoader(), "rembulan_repl_");
 
 		// install libraries
 		new DefaultBasicLib(new PrintStream(out)).installInto(state, env);
@@ -130,43 +121,6 @@ public class RembulanConsole {
 		out.println("  -        stop handling options and execute stdin");
 	}
 
-	private CompiledModule parseProgram(String sourceText, String sourceFileName)
-			throws CompileException {
-
-		try {
-			String rootClassName = "rembulan_repl_" + (chunkIndex++);
-			return compiler.compile(
-					sourceText,
-					sourceFileName != null ? sourceFileName : "stdin",
-					rootClassName);
-		}
-		catch (TokenMgrError | ParseException ex) {
-			throw new CompileException(sourceFileName, ex);
-		}
-	}
-
-	private Function compileAndLoadProgram(String sourceText, String sourceFileName)
-			throws CompileException {
-
-		CompiledModule cm = parseProgram(sourceText, sourceFileName);
-
-		assert (cm != null);
-
-		String mainClassName = loader.install(cm);
-		final Object instance;
-
-		try {
-			Class<?> clazz = loader.loadClass(mainClassName);
-			Constructor<?> constructor = clazz.getConstructor(Variable.class);
-			instance = constructor.newInstance(new Variable(env));
-			return (Function) instance;
-		}
-		catch (ReflectiveOperationException ex) {
-			// fatal error
-			throw new RuntimeException(ex);
-		}
-	}
-
 	private Object[] callFunction(Function fn, Object... args)
 			throws CallException {
 
@@ -190,13 +144,13 @@ public class RembulanConsole {
 	}
 
 	private void executeProgram(String sourceText, String sourceFileName, String[] args)
-			throws CompileException, CallException {
+			throws LoaderException, CallException {
 
 		Check.notNull(sourceText);
 		Check.notNull(sourceFileName);
 		Check.notNull(args);
 
-		Function fn = compileAndLoadProgram(sourceText, sourceFileName);
+		Function fn = loader.loadTextChunk(new Variable(env), sourceFileName, sourceText);
 
 		Object[] callArgs = new Object[args.length];
 		System.arraycopy(args, 0, callArgs, 0, args.length);
@@ -205,29 +159,29 @@ public class RembulanConsole {
 	}
 
 	private void executeFile(String fileName, String[] args)
-			throws CompileException, CallException  {
+			throws LoaderException, CallException  {
 
 		Check.notNull(fileName);
 		final String source;
 		try {
 			source = Utils.readFile(fileName);
 		}
-		catch (IOException e) {
-			throw new CompileException(fileName, e);
+		catch (IOException ex) {
+			throw new LoaderException(ex, fileName);
 		}
 
 		executeProgram(Utils.skipLeadingShebang(source), fileName, Check.notNull(args));
 	}
 
 	private void executeStdin(String[] args)
-			throws CompileException, CallException  {
+			throws LoaderException, CallException  {
 
 		final String source;
 		try {
 			source = Utils.readInputStream(in);
 		}
-		catch (IOException e) {
-			throw new CompileException(Constants.SOURCE_STDIN, e);
+		catch (IOException ex) {
+			throw new LoaderException(ex, Constants.SOURCE_STDIN);
 		}
 
 		executeProgram(Utils.skipLeadingShebang(source), Constants.SOURCE_STDIN, Check.notNull(args));
@@ -252,14 +206,14 @@ public class RembulanConsole {
 		}
 		catch (CallException ex) {
 			if (!javaTraceback) {
-				ex.printLuaFormatStackTraceback(err, loader, true, tracebackSuppress);
+				ex.printLuaFormatStackTraceback(err, loader.getChunkClassLoader(), true, tracebackSuppress);
 			}
 			else {
 				ex.printStackTrace(err);
 			}
 			return false;
 		}
-		catch (CompileException ex) {
+		catch (LoaderException ex) {
 			if (!stackTraceForCompileErrors) {
 				err.println(ex.getLuaStyleErrorMessage());
 			}
@@ -277,7 +231,7 @@ public class RembulanConsole {
 	}
 
 	private void executeStep(CommandLineArguments.Step s)
-			throws CompileException, CallException  {
+			throws LoaderException, CallException  {
 
 		Check.notNull(s);
 
@@ -335,9 +289,9 @@ public class RembulanConsole {
 
 			if (firstLine && !emptyInput) {
 				try {
-					fn = compileAndLoadProgram("return " + line, Constants.SOURCE_STDIN);
+					fn = loader.loadTextChunk(new Variable(env), Constants.SOURCE_STDIN, "return " + line);
 				}
-				catch (CompileException ex) {
+				catch (LoaderException ex) {
 					// ignore
 				}
 			}
@@ -345,9 +299,9 @@ public class RembulanConsole {
 			if (fn == null) {
 				codeBuffer.append(line).append('\n');
 				try {
-					fn = compileAndLoadProgram(codeBuffer.toString(), Constants.SOURCE_STDIN);
+					fn = loader.loadTextChunk(new Variable(env), Constants.SOURCE_STDIN, codeBuffer.toString());
 				}
-				catch (CompileException ex) {
+				catch (LoaderException ex) {
 					if (ex.isPartialInputError()) {
 						// partial input
 						reader.setPrompt(getPrompt2());
@@ -377,7 +331,7 @@ public class RembulanConsole {
 				}
 				catch (CallException ex) {
 					if (!javaTraceback) {
-						ex.printLuaFormatStackTraceback(err, loader, true, tracebackSuppress);
+						ex.printLuaFormatStackTraceback(err, loader.getChunkClassLoader(), true, tracebackSuppress);
 					}
 					else {
 						ex.printStackTrace(err);

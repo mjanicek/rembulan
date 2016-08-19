@@ -22,43 +22,68 @@ import net.sandius.rembulan.core.load.ChunkClassLoader;
 import net.sandius.rembulan.core.load.ChunkLoader;
 import net.sandius.rembulan.core.load.LoaderException;
 import net.sandius.rembulan.parser.ParseException;
+import net.sandius.rembulan.parser.Parser;
+import net.sandius.rembulan.parser.TokenMgrError;
 import net.sandius.rembulan.util.Check;
 
 public class CompilerChunkLoader implements ChunkLoader {
 
 	private final ChunkClassLoader chunkClassLoader;
+	private final String rootClassPrefix;
 	private final Compiler compiler;
 
 	private int idx;
 
-	public CompilerChunkLoader(ClassLoader classLoader, Compiler compiler) {
+	public CompilerChunkLoader(ClassLoader classLoader, Compiler compiler, String rootClassPrefix) {
 		this.chunkClassLoader = new ChunkClassLoader(classLoader);
 		this.compiler = Check.notNull(compiler);
+		this.rootClassPrefix = Check.notNull(rootClassPrefix);
 		this.idx = 0;
 	}
 
 	public CompilerChunkLoader(
 			ClassLoader classLoader,
-			CompilerSettings compilerSettings) {
-		this(classLoader, new Compiler(compilerSettings));
+			CompilerSettings compilerSettings,
+			String rootClassPrefix) {
+		this(classLoader, new Compiler(compilerSettings), rootClassPrefix);
 	}
 
-	public CompilerChunkLoader(ClassLoader classLoader) {
-		this(classLoader, CompilerSettings.defaultSettings());
+	public CompilerChunkLoader(ClassLoader classLoader, String rootClassPrefix) {
+		this(classLoader, CompilerSettings.defaultSettings(), rootClassPrefix);
+	}
+
+	public ChunkClassLoader getChunkClassLoader() {
+		return chunkClassLoader;
 	}
 
 	@Override
 	public Function loadTextChunk(Variable env, String chunkName, String sourceText) throws LoaderException {
+		String rootClassName = rootClassPrefix + (idx++);
 		try {
-			CompiledModule result = compiler.compile(sourceText, "stdin", "f" + (idx++));  // FIXME
+			CompiledModule result = compiler.compile(sourceText, chunkName, rootClassName);
 
 			String mainClassName = chunkClassLoader.install(result);
 			Class<?> clazz = chunkClassLoader.loadClass(mainClassName);
 
 			return (Function) clazz.getConstructor(Variable.class).newInstance(env);
 		}
-		catch (ParseException | RuntimeException | LinkageError | ReflectiveOperationException ex) {
-			throw new LoaderException(ex);
+		catch (TokenMgrError ex) {
+			String msg = ex.getMessage();
+			int line = 0;  // TODO
+			boolean partial = msg != null && msg.contains("Encountered: <EOF>");  // TODO: is there really no better way?
+			throw new LoaderException(ex, chunkName, line, partial);
+		}
+		catch (ParseException ex) {
+			boolean partial = ex.currentToken != null
+					&& ex.currentToken.next != null
+					&& ex.currentToken.next.kind == Parser.EOF;
+			int line = ex.currentToken != null
+					? ex.currentToken.beginLine
+					: 0;
+			throw new LoaderException(ex, chunkName, line, partial);
+		}
+		catch (RuntimeException | LinkageError | ReflectiveOperationException ex) {
+			throw new LoaderException(ex, chunkName, 0, false);
 		}
 	}
 

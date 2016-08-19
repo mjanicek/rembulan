@@ -125,7 +125,7 @@ object BenchmarkRunner {
 
     val preemptionContext = pc
 
-    val ldr = new CompilerChunkLoader(new ChunkClassLoader(), settings)
+    val ldr = new CompilerChunkLoader(new ChunkClassLoader(), settings, "benchmark_")
 
     val state = new DefaultLuaState()
 
