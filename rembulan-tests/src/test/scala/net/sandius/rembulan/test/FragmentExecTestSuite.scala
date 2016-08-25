@@ -20,7 +20,6 @@ import java.io.PrintStream
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
-import net.sandius.rembulan.core.Call.EventHandler
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.exec.{CallException, CallInterruptedException, DirectCallExecutor}
 import net.sandius.rembulan.core.impl.DefaultLuaState
@@ -31,12 +30,9 @@ import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{core => lua}
 import org.scalatest.{FunSpec, MustMatchers}
 
-import scala.concurrent.Promise
 import scala.util.{Failure, Success}
 
 trait FragmentExecTestSuite extends FunSpec with MustMatchers {
-
-  import FragmentExecTestSuite._
 
   def bundles: Seq[FragmentBundle]
   def expectations: Seq[FragmentExpectations]
@@ -172,19 +168,6 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
         }
 
         it (l.name + " / " + stepDesc) {
-
-          val preemptionContext = new CountingPreemptionContext()
-
-          val resultPromise = Promise[Array[AnyRef]]()
-
-          val handler = new EventHandler {
-            override def paused(c: Call, cont: Call.Continuation, pc: PreemptionContext) { }
-            override def waiting(c: Call, task: Runnable, cont: Call.Continuation, pc: PreemptionContext) = {
-              task.run()
-            }
-            override def returned(c: Call, result: Array[AnyRef]) = resultPromise.success(result)
-            override def failed(c: Call, error: Throwable) = resultPromise.failure(error)
-          }
 
           val (state, func) = Util.timed("Compilation and setup") {
 

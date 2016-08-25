@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.core.exec;
 
-import net.sandius.rembulan.core.exec.AsyncTask;
+public interface ContinueCallback {
 
-public interface ExecutionContext {
+	void success(Object result);
 
-	LuaState getState();
-
-	ReturnBuffer getReturnBuffer();
-
-	Coroutine getCurrentCoroutine();
-
-	Coroutine newCoroutine(Function function);
-
-	boolean canYield();
-
-	void resume(Coroutine coroutine, Object[] args) throws ControlThrowable;
-
-	void yield(Object[] args) throws ControlThrowable;
-
-	void checkPreempt(int cost) throws ControlThrowable;
-
-	void resumeAfter(AsyncTask task) throws ControlThrowable;
+	void failure(Throwable error);
 
 }

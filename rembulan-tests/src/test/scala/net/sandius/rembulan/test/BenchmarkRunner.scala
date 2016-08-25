@@ -18,14 +18,11 @@ package net.sandius.rembulan.test
 
 import java.io.PrintStream
 import java.util.Scanner
-import java.util.concurrent.Executors
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
-import net.sandius.rembulan.core.Call.Continuation
 import net.sandius.rembulan.core._
-import net.sandius.rembulan.core.exec.CallMultiplexer
-import net.sandius.rembulan.core.exec.CallMultiplexer.PreemptionHandler
+import net.sandius.rembulan.core.exec.DirectCallExecutor
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.load.ChunkClassLoader
 import net.sandius.rembulan.lib.impl._
@@ -153,62 +150,30 @@ object BenchmarkRunner {
       init(pc, settings, filename, args:_*)
     }
 
-    def newPc() = new CountingPreemptionContext()
+    val c = initCall()
 
-    val numParallel = 1
 
-    val calls = for (i <- 1 to numParallel) yield initCall()
-
-    var steps = 0
-
-    val preemptionHandler = new PreemptionHandler {
-      override def preempted(c: Continuation, context: PreemptionContext) = {
-        context match {
-          case pc: CountingPreemptionContext =>
-            pc.deposit(stepSize)
-            steps += 1
-            true
-          case _ =>
-            false
-        }
-      }
-    }
-
-    val multiplexer = new CallMultiplexer(Executors.newSingleThreadExecutor(), preemptionHandler)
+    val executor = DirectCallExecutor.newExecutor(c.state)
 
     val before = System.nanoTime()
-
-    for (c <- calls) {
-      multiplexer.submitCall(c.state, newPc(), c.fn)
-    }
-
-    multiplexer.awaitAll()
-    multiplexer.shutdown()
-
-//    while (exec.state() == Call.State.PAUSED) {
-//      pc.deposit(stepSize)
-//      if (pc.allowed) {
-//        exec.resume()
-//      }
-//      steps += 1
-//    }
+    executor.call(c.fn)
     val after = System.nanoTime()
 
     val totalTimeMillis = (after - before) / 1000000.0
-    val totalCPUUnitsSpent = pc.totalCost
-    val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
-    val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
+//    val totalCPUUnitsSpent = pc.totalCost
+//    val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
+//    val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
 
     println(prefix + "Execution took %.1f ms".format(totalTimeMillis))
     if (settings.cpuAccountingMode() != CPUAccountingMode.NO_CPU_ACCOUNTING) {
-      println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
-      println(prefix)
-      println(prefix + "Step size: " + stepSize + " LI")
-      println(prefix + "Num of steps: " + steps)
-      println(prefix + "Avg time per step: %.3f ms".format(totalTimeMillis / steps))
-      println(prefix)
-      println(prefix + "Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
-      println(prefix + "Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
+//      println(prefix + "Total CPU cost: " + pc.totalCost + " LI")
+//      println(prefix)
+//      println(prefix + "Step size: " + stepSize + " LI")
+//      println(prefix + "Num of steps: " + steps)
+//      println(prefix + "Avg time per step: %.3f ms".format(totalTimeMillis / steps))
+//      println(prefix)
+//      println(prefix + "Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
+//      println(prefix + "Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
     }
     println()
   }

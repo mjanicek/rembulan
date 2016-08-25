@@ -16,26 +16,10 @@
 
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.core.exec.AsyncTask;
+public class OutdatedContinuationException extends RuntimeException {
 
-public interface ExecutionContext {
-
-	LuaState getState();
-
-	ReturnBuffer getReturnBuffer();
-
-	Coroutine getCurrentCoroutine();
-
-	Coroutine newCoroutine(Function function);
-
-	boolean canYield();
-
-	void resume(Coroutine coroutine, Object[] args) throws ControlThrowable;
-
-	void yield(Object[] args) throws ControlThrowable;
-
-	void checkPreempt(int cost) throws ControlThrowable;
-
-	void resumeAfter(AsyncTask task) throws ControlThrowable;
+	public OutdatedContinuationException(String message) {
+		super(message);
+	}
 
 }

@@ -130,7 +130,7 @@ public class RembulanConsole {
 		try {
 			return callExecutor.call(fn, args);
 		}
-		catch (CallInterruptedException ex) {
+		catch (CallInterruptedException | InterruptedException ex) {
 			throw new CallException(ex);
 		}
 	}

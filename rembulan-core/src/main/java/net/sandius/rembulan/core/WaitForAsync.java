@@ -16,17 +16,18 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.core.exec.AsyncTask;
 import net.sandius.rembulan.util.Check;
 
 class WaitForAsync extends ControlThrowable {
 
-	private final Runnable task;
+	private final AsyncTask task;
 
-	public WaitForAsync(Runnable task) {
+	public WaitForAsync(AsyncTask task) {
 		this.task = Check.notNull(task);
 	}
 
-	public Runnable task() {
+	public AsyncTask task() {
 		return task;
 	}
 

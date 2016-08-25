@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.core.exec.AsyncTask;
 import net.sandius.rembulan.util.Check;
 
 public abstract class ResumeResult {
@@ -56,9 +57,9 @@ public abstract class ResumeResult {
 
 	public static class WaitForAsync extends ResumeResult {
 
-		public final Runnable task;
+		public final AsyncTask task;
 
-		public WaitForAsync(Runnable task) {
+		public WaitForAsync(AsyncTask task) {
 			this.task = task;
 		}
 

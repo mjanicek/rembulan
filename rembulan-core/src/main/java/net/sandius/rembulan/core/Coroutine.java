@@ -139,7 +139,7 @@ public final class Coroutine {
 		}
 	}
 
-	public ResumeResult resume(ExecutionContext context, Throwable error) {
+	ResumeResult resume(ExecutionContext context, Throwable error) {
 		Check.isNull(resuming);
 
 		while (callStack != null) {

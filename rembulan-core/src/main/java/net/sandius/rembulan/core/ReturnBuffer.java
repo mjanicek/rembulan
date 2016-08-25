@@ -19,12 +19,25 @@ package net.sandius.rembulan.core;
 import java.util.Collection;
 
 /**
- * TODO: summary
+ * A buffer used to pass the results of function calls to the caller.
+ *
+ * <p>{@code ReturnBuffer} is part of the calling convention used in Rembulan.</p>
+ *
+ * <p>Conceptually, a return buffer contains a sequence of values (possibly {@code null}s)
+ * of a certain length. To query the length of the sequence, use {@link #size()}.
+ * To access the values, use {@link #getAsArray()} to get the entire sequence packed
+ * into an array, {@link #get(int)} to get a single value in the sequence (or {@code null}
+ * when the index is not between 0 (inclusive) and {@code size()} (exclusive), or
+ * {@link #get0()}, {@link #get1()}, ... for possibly more optimised versions of {@code get(int)}.
+ * </p>
+ *
+ * <p>To set the value</p>
+ *
  */
 public interface ReturnBuffer {
 
 	/**
-	 * Return the number of values stored in this buffer.
+	 * Returns the number of values stored in this buffer.
 	 *
 	 * <p>When the buffer contains a tail call, this is the number of arguments to the call
 	 * (i.e., the call target is not counted); otherwise, it is the number of return values.</p>

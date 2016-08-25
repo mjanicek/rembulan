@@ -21,7 +21,8 @@ import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.util.Check;
 
-import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectCallExecutor {
 
@@ -39,6 +40,120 @@ public class DirectCallExecutor {
 
 	public static DirectCallExecutor newExecutorWithCpuLimit(LuaState state, int cpuLimit) {
 		return new DirectCallExecutor(state, Check.positive(cpuLimit));
+	}
+
+	private static class Result implements Call.EventHandler {
+
+		private final AtomicBoolean wasSet;
+
+		// if wasSet.get() == true, then at most one of the next three fields may be null;
+		// otherwise, all must be null.
+
+		private Call.Continuation cont;
+		private Object[] values;
+		private Throwable error;
+
+		// may only be non-null if wasSet.get() == true and cont != null
+		private AsyncTask task;
+
+		Result() {
+			this.wasSet = new AtomicBoolean(false);
+			this.cont = null;
+			this.values = null;
+			this.error = null;
+			this.task = null;
+		}
+
+		@Override
+		public void returned(Call c, Object[] result) {
+			if (result != null) {
+				if (wasSet.compareAndSet(false, true)) {
+					this.values = result;
+				}
+				else {
+					throw new IllegalStateException("Call result already set");
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Return values array must not be null");
+			}
+		}
+
+		@Override
+		public void failed(Call c, Throwable error) {
+			if (error != null) {
+				if (wasSet.compareAndSet(false, true)) {
+					this.error = error;
+				}
+				else {
+					throw new IllegalStateException("Call result already set");
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Error must not be null");
+			}
+		}
+
+		@Override
+		public void paused(Call c, Call.Continuation cont) {
+			if (cont != null) {
+				if (wasSet.compareAndSet(false, true)) {
+					this.cont = cont;
+				}
+				else {
+					throw new IllegalStateException("Call result already set");
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Continuation must not be null");
+			}
+		}
+
+		@Override
+		public void async(Call c, final Call.Continuation cont, AsyncTask task) {
+			if (cont != null && task != null) {
+				if (wasSet.compareAndSet(false, true)) {
+					this.cont = cont;
+					this.task = task;
+				}
+				else {
+					throw new IllegalStateException("Call result already set");
+				}
+			}
+			else {
+				throw new IllegalArgumentException("Continuation and task must not be null");
+			}
+		}
+
+		boolean isDone() {
+			return wasSet.get();
+		}
+
+		Call.Continuation getContinuation() {
+			return cont;
+		}
+
+		AsyncTask getTask() {
+			return task;
+		}
+
+		public Object[] get()
+				throws CallException, CallInterruptedException {
+
+			if (!wasSet.get()) {
+				throw new IllegalStateException("Call result has not been set");
+			}
+			else {
+				if (values != null) return values;
+				else if (cont != null) throw new CallInterruptedException(cont);
+				else if (error != null) throw new CallException(error);
+				else {
+					// should not happen
+					throw new AssertionError();
+				}
+			}
+		}
+
 	}
 
 	private static class CountingPreemptionContext implements PreemptionContext {
@@ -70,68 +185,47 @@ public class DirectCallExecutor {
 		return cpuLimit > 0 ? new CountingPreemptionContext(cpuLimit) : PreemptionContext.Never.INSTANCE;
 	}
 
-	private static class Handler implements Call.EventHandler {
-
-		private Call.Continuation continuation;
-
-		Handler() {
-			this.continuation = null;
-		}
-
-		@Override
-		public void paused(Call c, Call.Continuation cont, PreemptionContext preemptionContext) {
-			continuation = cont;
-		}
-
-		@Override
-		public void waiting(Call c, Runnable task, Call.Continuation cont, PreemptionContext preemptionContext) {
-			throw new UnsupportedOperationException("Waiting not supported");
-		}
-
-		@Override
-		public void returned(Call c, Object[] result) {
-			// no-op
-		}
-
-		@Override
-		public void failed(Call c, Throwable error) {
-			// no-op
-		}
-	}
-
 	public Object[] call(Object fn, Object... args)
-			throws CallException, CallInterruptedException {
+			throws CallException, CallInterruptedException, InterruptedException {
 
 		Call call = Call.init(state, fn, args);
 		return resume(call.currentContinuation());
 	}
 
 	public Object[] resume(Call.Continuation continuation)
-			throws CallException, CallInterruptedException {
+			throws CallException, CallInterruptedException, InterruptedException {
 
-		Handler handler = new Handler();
+		while (true) {
+			Result result = new Result();
+			continuation.resume(result, preemptionContext());
 
-		Callable<Object[]> task = continuation.toCallable(handler, preemptionContext());
-		Object[] result = null;
-		try {
-			result = task.call();
-		}
-		catch (Exception ex) {
-			throw new CallException(ex);
-		}
+			if (result.wasSet.get() && result.task != null && result.cont != null) {
+				// an asynchronous task
 
-		if (result == null) {
-			Call.Continuation cont = handler.continuation;
-			if (cont != null) {
-				throw new CallInterruptedException(cont);
+				final CountDownLatch latch = new CountDownLatch(1);
+				ContinueCallback callback = new ContinueCallback() {
+					@Override
+					public void success(Object result) {
+						latch.countDown();
+					}
+
+					@Override
+					public void failure(Throwable error) {
+						latch.countDown();
+					}
+				};
+
+				continuation = result.cont;
+				result.task.execute(callback);
+
+				// TODO: handle interrupts while waiting, and give the user a chance to try again?
+				latch.await();
 			}
 			else {
-				throw new IllegalStateException("Call paused, but no continuation given");
+				return result.get();
 			}
 		}
-		else {
-			return result;
-		}
+
 	}
 
 }
