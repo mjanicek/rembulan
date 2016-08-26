@@ -39,7 +39,7 @@ public abstract class ExecutionContextMethods {
 		il.add(ASMUtils.loadInt(cost));
 		il.add(new MethodInsnNode(
 				INVOKEINTERFACE,
-				Type.getInternalName(ExecutionContext.class),
+				selfTpe().getInternalName(),
 				"registerTimeSlice",
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE,
@@ -52,7 +52,7 @@ public abstract class ExecutionContextMethods {
 	public static MethodInsnNode checkCallYield() {
 		return new MethodInsnNode(
 				INVOKEINTERFACE,
-				Type.getInternalName(ExecutionContext.class),
+				selfTpe().getInternalName(),
 				"checkCallYield",
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE),
