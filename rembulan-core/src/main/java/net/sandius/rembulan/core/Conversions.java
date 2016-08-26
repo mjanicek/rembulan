@@ -290,6 +290,32 @@ public abstract class Conversions {
 	}
 
 	/**
+	 * Returns the integer value of the object {@code o}, throwing
+	 * a {@link NoIntegerRepresentationException} if {@code o} does not have an integer value.
+	 *
+	 * <p>This is a variant of {@link #integerValueOf(Object)}; the difference is that
+	 * this method throws an exception rather than returning {@code null} to signal that
+	 * {@code o} does not have an integer value.
+	 *
+	 * @param o  object to be converted to integer, may be {@code null}
+	 * @return integer value of {@code n}
+	 *
+	 * @throws NoIntegerRepresentationException if {@code o} does not have an integer value
+	 *
+	 * @param o
+	 * @return
+	 */
+	public static long toIntegerValue(Object o) {
+		Long l = integerValueOf(o);
+		if (l != null) {
+			return l.longValue();
+		}
+		else {
+			throw new NoIntegerRepresentationException();
+		}
+	}
+
+	/**
 	 * Returns the float value of the number {@code n}.
 	 *
 	 * <p>The float value of {@code n} is its numerical value converted to {@code double}.
