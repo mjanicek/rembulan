@@ -130,8 +130,8 @@ public interface ExecutionContext {
 	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
 	 * handled and re-thrown by the caller of this method.
 	 *
-	 * <p>In order to mark {@code task} as completed, the task must call the appropriate
-	 * method in {@link ContinueCallback}.</p>
+	 * <p>In order to mark {@code task} as completed, the task must call
+	 * {@link ContinueCallback#finished()}.</p>
 	 *
 	 * @param task  the task to be executed, must not be {@code null}
 	 *

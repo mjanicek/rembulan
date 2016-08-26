@@ -18,8 +18,6 @@ package net.sandius.rembulan.core;
 
 public interface ContinueCallback {
 
-	void success(Object result);
-
-	void failure(Throwable error);
+	void finished();
 
 }

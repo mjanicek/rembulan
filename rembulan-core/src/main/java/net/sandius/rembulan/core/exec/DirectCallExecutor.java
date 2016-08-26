@@ -173,12 +173,7 @@ public class DirectCallExecutor {
 				final CountDownLatch latch = new CountDownLatch(1);
 				ContinueCallback callback = new ContinueCallback() {
 					@Override
-					public void success(Object result) {
-						latch.countDown();
-					}
-
-					@Override
-					public void failure(Throwable error) {
+					public void finished() {
 						latch.countDown();
 					}
 				};

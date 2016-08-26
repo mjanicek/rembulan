@@ -37,19 +37,17 @@ public class AsyncExample extends AbstractFunction1 {
 					new Thread(new Runnable() {
 						@Override
 						public void run() {
-							boolean completed = false;
 							try {
 								long before = System.currentTimeMillis();
 								Thread.sleep(millis);
 								long after = System.currentTimeMillis();
 								v.set(after - before);
-								completed = true;
 							}
 							catch (InterruptedException ex) {
-								callback.failure(ex);
+								// ignore
 							}
-							if (completed) {
-								callback.success(null);
+							finally {
+								callback.finished();
 							}
 						}
 					}).start();
