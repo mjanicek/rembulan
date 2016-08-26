@@ -125,8 +125,8 @@ public class Call {
 		}
 
 		@Override
-		public void resume(CallEventHandler handler, PreemptionContext preemptionContext) {
-			Call.this.resume(handler, preemptionContext, version);
+		public void resume(CallEventHandler handler, SchedulingContext schedulingContext) {
+			Call.this.resume(handler, schedulingContext, version);
 		}
 
 	}
@@ -143,9 +143,9 @@ public class Call {
 		}
 	}
 
-	private void resume(CallEventHandler handler, PreemptionContext preemptionContext, int version) {
+	private void resume(CallEventHandler handler, SchedulingContext schedulingContext, int version) {
 		Check.notNull(handler);
-		Check.notNull(preemptionContext);
+		Check.notNull(schedulingContext);
 
 		if (version == VERSION_RUNNING || version == VERSION_TERMINATED) {
 			throw new IllegalArgumentException("Illegal version: " + version);
@@ -161,7 +161,7 @@ public class Call {
 		ResumeResult rr = null;
 		Continuation cont = null;
 		try {
-			Resumer resumer = new Resumer(preemptionContext);
+			Resumer resumer = new Resumer(schedulingContext);
 			rr = resumer.resume();
 			assert (rr != null);
 			if (rr.pause) {
@@ -261,14 +261,14 @@ public class Call {
 
 	class Resumer implements ExecutionContext, ControlThrowable.Visitor {
 
-		private final PreemptionContext preemptionContext;
+		private final SchedulingContext schedulingContext;
 
 		private ResumeResult result;
 		private Throwable error;
 		private Cons<ResumeInfo> callStack;
 
-		Resumer(PreemptionContext preemptionContext) {
-			this.preemptionContext = Check.notNull(preemptionContext);
+		Resumer(SchedulingContext schedulingContext) {
+			this.schedulingContext = Check.notNull(schedulingContext);
 			this.result = null;
 			this.error = null;
 		}
@@ -294,7 +294,7 @@ public class Call {
 		}
 
 		@Override
-		public boolean canYield() {
+		public boolean isInMainCoroutine() {
 			return coroutineStack.cdr != null;
 		}
 
@@ -314,15 +314,20 @@ public class Call {
 		}
 
 		@Override
-		public void registerTimeSlice(int cost) {
-			preemptionContext.withdraw(cost);
+		public void registerTicks(int ticks) {
+			schedulingContext.registerTicks(ticks);
 		}
 
 		@Override
 		public void checkCallYield() throws ControlThrowable {
-			if (preemptionContext.isPreempted()) {
-				throw new ControlThrowable(PAUSED_PAYLOAD);
+			if (schedulingContext.shouldYield()) {
+				pause();
 			}
+		}
+
+		@Override
+		public void pause() throws ControlThrowable {
+			throw new ControlThrowable(PAUSED_PAYLOAD);
 		}
 
 		@Override

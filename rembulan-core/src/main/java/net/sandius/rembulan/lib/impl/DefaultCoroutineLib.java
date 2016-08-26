@@ -161,7 +161,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			context.getReturnBuffer().setTo(context.canYield());
+			context.getReturnBuffer().setTo(context.isInMainCoroutine());
 		}
 
 	}
@@ -213,7 +213,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Coroutine c = context.getCurrentCoroutine();
-			context.getReturnBuffer().setTo(c, !context.canYield());
+			context.getReturnBuffer().setTo(c, !context.isInMainCoroutine());
 		}
 
 	}

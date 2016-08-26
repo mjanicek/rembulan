@@ -26,7 +26,6 @@ import net.sandius.rembulan.core.exec.DirectCallExecutor
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.load.ChunkClassLoader
 import net.sandius.rembulan.lib.impl._
-import net.sandius.rembulan.test.FragmentExecTestSuite.CountingPreemptionContext
 import net.sandius.rembulan.{core => lua}
 
 import scala.util.Try
@@ -114,13 +113,11 @@ object BenchmarkRunner {
 
   case class EnvWithMainChunk(state: LuaState, fn: lua.Function)
 
-  def init(pc: PreemptionContext, settings: CompilerSettings, filename: String, args: String*) = {
+  def init(settings: CompilerSettings, filename: String, args: String*) = {
     val resourceStream = getClass.getResourceAsStream(filename)
     require (resourceStream != null, "resource must exist, is null")
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
     require (sourceContents != null, "source contents must not be null")
-
-    val preemptionContext = pc
 
     val ldr = new CompilerChunkLoader(new ChunkClassLoader(), settings, "benchmark_")
 
@@ -144,10 +141,9 @@ object BenchmarkRunner {
   }
 
   def doFile(prefix: String, stepSize: Int, settings: CompilerSettings, filename: String, args: String*): Unit = {
-    val pc = new CountingPreemptionContext()
 
     def initCall() = timed (prefix + "init") {
-      init(pc, settings, filename, args:_*)
+      init(settings, filename, args:_*)
     }
 
     val c = initCall()

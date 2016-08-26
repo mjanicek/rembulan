@@ -248,26 +248,3 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   }
 
 }
-
-object FragmentExecTestSuite {
-
-  class CountingPreemptionContext extends PreemptionContext {
-    var totalCost = 0L
-    private var allowance = 0L
-
-    override def withdraw(cost: Int): Unit = {
-      totalCost += cost
-      allowance -= cost
-    }
-
-    override def isPreempted = allowance <= 0
-
-    def deposit(n: Int): Unit = {
-      allowance += n
-    }
-
-    def allowed = allowance > 0
-
-  }
-
-}

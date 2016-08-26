@@ -18,6 +18,6 @@ package net.sandius.rembulan.core;
 
 public interface Continuation {
 
-	void resume(CallEventHandler handler, PreemptionContext preemptionContext);
+	void resume(CallEventHandler handler, SchedulingContext schedulingContext);
 
 }

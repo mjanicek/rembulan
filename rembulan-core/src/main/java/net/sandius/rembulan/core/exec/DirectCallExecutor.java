@@ -20,7 +20,8 @@ import net.sandius.rembulan.core.Call;
 import net.sandius.rembulan.core.CallEventHandler;
 import net.sandius.rembulan.core.Continuation;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.PreemptionContext;
+import net.sandius.rembulan.core.SchedulingContext;
+import net.sandius.rembulan.core.SchedulingContexts;
 import net.sandius.rembulan.util.Check;
 
 import java.util.concurrent.CountDownLatch;
@@ -146,27 +147,8 @@ public class DirectCallExecutor {
 
 	}
 
-	private static class CountingPreemptionContext implements PreemptionContext {
-
-		private int allowance;
-
-		CountingPreemptionContext(int allowance) {
-			this.allowance = allowance;
-		}
-
-		@Override
-		public void withdraw(int cost) {
-			allowance -= Math.max(0, cost);
-		}
-
-		@Override
-		public boolean isPreempted() {
-			return allowance <= 0;
-		}
-	}
-
-	private PreemptionContext preemptionContext() {
-		return cpuLimit > 0 ? new CountingPreemptionContext(cpuLimit) : PreemptionContext.Never.INSTANCE;
+	private SchedulingContext preemptionContext() {
+		return cpuLimit > 0 ? SchedulingContexts.upTo(cpuLimit) : SchedulingContexts.never();
 	}
 
 	public Object[] call(Object fn, Object... args)
