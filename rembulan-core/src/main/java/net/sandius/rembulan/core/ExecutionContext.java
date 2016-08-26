@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.core.exec.AsyncTask;
-
 /**
  * An interface to the execution context of a Lua call.
  *
@@ -133,7 +131,7 @@ public interface ExecutionContext {
 	 * handled and re-thrown by the caller of this method.
 	 *
 	 * <p>In order to mark {@code task} as completed, the task must call the appropriate
-	 * method in {@link net.sandius.rembulan.core.exec.ContinueCallback}.</p>
+	 * method in {@link ContinueCallback}.</p>
 	 *
 	 * @param task  the task to be executed, must not be {@code null}
 	 *

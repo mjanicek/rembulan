@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.core.exec.AsyncTask;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 

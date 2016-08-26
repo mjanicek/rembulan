@@ -16,9 +16,11 @@
 
 package net.sandius.rembulan.core.exec;
 
+import net.sandius.rembulan.core.AsyncTask;
 import net.sandius.rembulan.core.Call;
 import net.sandius.rembulan.core.CallEventHandler;
 import net.sandius.rembulan.core.Continuation;
+import net.sandius.rembulan.core.ContinueCallback;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.SchedulingContext;
 import net.sandius.rembulan.core.SchedulingContexts;
