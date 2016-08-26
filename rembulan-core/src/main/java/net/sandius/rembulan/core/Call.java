@@ -156,23 +156,11 @@ public class Call {
 
 	}
 
-	public interface EventHandler {
-
-		void returned(Call c, Object[] result);
-
-		void failed(Call c, Throwable error);
-
-		void paused(Call c, Continuation cont);
-
-		void async(Call c, Continuation cont, AsyncTask task);
-
-	}
-
-	public class Continuation {
+	private class CallContinuation implements Continuation {
 
 		private final int version;
 
-		private Continuation(int version) {
+		private CallContinuation(int version) {
 			this.version = version;
 		}
 
@@ -185,7 +173,7 @@ public class Call {
 			if (this == o) return true;
 			if (o == null || getClass() != o.getClass()) return false;
 
-			Continuation that = (Continuation) o;
+			CallContinuation that = (CallContinuation) o;
 
 			return this.version == that.version && this.outer().equals(that.outer());
 		}
@@ -197,7 +185,7 @@ public class Call {
 			return result;
 		}
 
-		public Runnable toRunnable(final EventHandler handler, final PreemptionContext preemptionContext) {
+		public Runnable toRunnable(final CallEventHandler handler, final PreemptionContext preemptionContext) {
 			return new Runnable() {
 				@Override
 				public void run() {
@@ -206,14 +194,15 @@ public class Call {
 			};
 		}
 
-		public void resume(EventHandler handler, PreemptionContext preemptionContext) {
+		@Override
+		public void resume(CallEventHandler handler, PreemptionContext preemptionContext) {
 			Call.this.resume(new Context(Call.this, preemptionContext), version, handler);
 		}
 
 	}
 
 	private Continuation continuation(int version) {
-		return isPaused(version) ? new Continuation(version) : null;
+		return isPaused(version) ? new CallContinuation(version) : null;
 	}
 
 	public Continuation currentContinuation() {
@@ -228,7 +217,7 @@ public class Call {
 		}
 	}
 
-	private void resume(Context context, int version, EventHandler handler) {
+	private void resume(Context context, int version, CallEventHandler handler) {
 		if (version == VERSION_RUNNING || version == VERSION_TERMINATED) {
 			throw new IllegalArgumentException("Illegal version: " + version);
 		}
@@ -248,7 +237,7 @@ public class Call {
 			assert (rr != null);
 			if (rr.pause) {
 				newVersion = newPausedVersion(version);
-				cont = new Continuation(newVersion);
+				cont = new CallContinuation(newVersion);
 			}
 		}
 		finally {
@@ -284,7 +273,7 @@ public class Call {
 			}
 		}
 
-		void fire(EventHandler handler, Call c, Continuation cont) {
+		void fire(CallEventHandler handler, Call c, Continuation cont) {
 			if (pause) {
 				handler.paused(c, Check.notNull(cont));
 			}
@@ -301,6 +290,7 @@ public class Call {
 				throw new AssertionError();
 			}
 		}
+
 	}
 
 	private static final ResumeResult PAUSE_RESULT = new ResumeResult(true, null, null, null);

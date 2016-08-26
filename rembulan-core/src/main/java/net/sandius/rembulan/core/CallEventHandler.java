@@ -14,28 +14,19 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core.exec;
+package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.core.Continuation;
-import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.core.exec.AsyncTask;
 
-public class CallInterruptedException extends Exception {
+public interface CallEventHandler {
 
-	private final Continuation continuation;
+	void returned(Call c, Object[] result);
 
-	CallInterruptedException(Continuation continuation) {
-		super("Call interrupted");
-		this.continuation = Check.notNull(continuation);
-	}
+	void failed(Call c, Throwable error);
 
-	public Continuation getContinuation() {
-		return continuation;
-	}
+	void paused(Call c, Continuation cont);
 
-	@Override
-	public synchronized Throwable fillInStackTrace() {
-		// don't fill in the stack trace
-		return this;
-	}
+	void async(Call c, Continuation cont, AsyncTask task);
 
 }
+

@@ -17,6 +17,8 @@
 package net.sandius.rembulan.core.exec;
 
 import net.sandius.rembulan.core.Call;
+import net.sandius.rembulan.core.CallEventHandler;
+import net.sandius.rembulan.core.Continuation;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.PreemptionContext;
 import net.sandius.rembulan.util.Check;
@@ -42,14 +44,14 @@ public class DirectCallExecutor {
 		return new DirectCallExecutor(state, Check.positive(cpuLimit));
 	}
 
-	private static class Result implements Call.EventHandler {
+	private static class Result implements CallEventHandler {
 
 		private final AtomicBoolean wasSet;
 
 		// if wasSet.get() == true, then at most one of the next three fields may be null;
 		// otherwise, all must be null.
 
-		private Call.Continuation cont;
+		private Continuation cont;
 		private Object[] values;
 		private Throwable error;
 
@@ -95,7 +97,7 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public void paused(Call c, Call.Continuation cont) {
+		public void paused(Call c, Continuation cont) {
 			if (cont != null) {
 				if (wasSet.compareAndSet(false, true)) {
 					this.cont = cont;
@@ -110,7 +112,7 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public void async(Call c, final Call.Continuation cont, AsyncTask task) {
+		public void async(Call c, final Continuation cont, AsyncTask task) {
 			if (cont != null && task != null) {
 				if (wasSet.compareAndSet(false, true)) {
 					this.cont = cont;
@@ -123,18 +125,6 @@ public class DirectCallExecutor {
 			else {
 				throw new IllegalArgumentException("Continuation and task must not be null");
 			}
-		}
-
-		boolean isDone() {
-			return wasSet.get();
-		}
-
-		Call.Continuation getContinuation() {
-			return cont;
-		}
-
-		AsyncTask getTask() {
-			return task;
 		}
 
 		public Object[] get()
@@ -192,7 +182,7 @@ public class DirectCallExecutor {
 		return resume(call.currentContinuation());
 	}
 
-	public Object[] resume(Call.Continuation continuation)
+	public Object[] resume(Continuation continuation)
 			throws CallException, CallInterruptedException, InterruptedException {
 
 		while (true) {
