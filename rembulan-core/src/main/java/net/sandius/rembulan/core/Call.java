@@ -31,7 +31,6 @@ public class Call {
 	private final LuaState state;
 	private final ReturnBuffer returnBuffer;
 
-//	private Coroutine currentCoroutine;
 	private Cons<Coroutine> coroutineStack;
 
 	private final AtomicInteger currentVersion;
@@ -47,7 +46,6 @@ public class Call {
 		this.state = Check.notNull(state);
 		this.returnBuffer = Check.notNull(returnBuffer);
 
-//		this.currentCoroutine = Check.notNull(mainCoroutine);
 		this.coroutineStack = new Cons<>(Check.notNull(mainCoroutine));
 
 		int startingVersion = newPausedVersion(0);
@@ -183,15 +181,6 @@ public class Call {
 			int result = outer().hashCode();
 			result = 31 * result + version;
 			return result;
-		}
-
-		public Runnable toRunnable(final CallEventHandler handler, final PreemptionContext preemptionContext) {
-			return new Runnable() {
-				@Override
-				public void run() {
-					resume(handler, preemptionContext);
-				}
-			};
 		}
 
 		@Override
