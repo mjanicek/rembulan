@@ -33,20 +33,30 @@ public abstract class ExecutionContextMethods {
 		return Type.getType(ExecutionContext.class);
 	}
 
-	public static InsnList checkCpu(int cost) {
+	public static InsnList registerTimeSlice(int cost) {
 		InsnList il = new InsnList();
 
 		il.add(ASMUtils.loadInt(cost));
 		il.add(new MethodInsnNode(
 				INVOKEINTERFACE,
 				Type.getInternalName(ExecutionContext.class),
-				"checkPreempt",
+				"registerTimeSlice",
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE,
 						Type.INT_TYPE),
 				true));
 
 		return il;
+	}
+
+	public static MethodInsnNode checkCallYield() {
+		return new MethodInsnNode(
+				INVOKEINTERFACE,
+				Type.getInternalName(ExecutionContext.class),
+				"checkCallYield",
+				Type.getMethodDescriptor(
+						Type.VOID_TYPE),
+				true);
 	}
 
 }

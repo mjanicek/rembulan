@@ -34,8 +34,10 @@ public interface ExecutionContext {
 
 	void yield(Object[] args) throws ControlThrowable;
 
-	void checkPreempt(int cost) throws ControlThrowable;
-
 	void resumeAfter(AsyncTask task) throws ControlThrowable;
+
+	void registerTimeSlice(int cost);
+
+	void checkCallYield() throws ControlThrowable;
 
 }

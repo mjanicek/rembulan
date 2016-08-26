@@ -309,15 +309,20 @@ public class Call {
 		}
 
 		@Override
-		public void checkPreempt(int cost) throws ControlThrowable {
-			if (preemptionContext.withdraw(cost)) {
-				throw new ControlThrowable(PAUSED_PAYLOAD);
-			}
+		public void resumeAfter(AsyncTask task) throws ControlThrowable {
+			throw new ControlThrowable(new ControlPayload(false, null, null, task));
 		}
 
 		@Override
-		public void resumeAfter(AsyncTask task) throws ControlThrowable {
-			throw new ControlThrowable(new ControlPayload(false, null, null, task));
+		public void registerTimeSlice(int cost) {
+			preemptionContext.withdraw(cost);
+		}
+
+		@Override
+		public void checkCallYield() throws ControlThrowable {
+			if (preemptionContext.isPreempted()) {
+				throw new ControlThrowable(PAUSED_PAYLOAD);
+			}
 		}
 
 		@Override

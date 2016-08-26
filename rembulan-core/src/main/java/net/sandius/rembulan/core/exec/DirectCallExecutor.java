@@ -155,14 +155,8 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public boolean withdraw(int cost) {
-			if (cost > 0) {
-				allowance -= cost;
-				return allowance <= 0;
-			}
-			else {
-				return false;
-			}
+		public void withdraw(int cost) {
+			allowance -= Math.max(0, cost);
 		}
 
 		@Override

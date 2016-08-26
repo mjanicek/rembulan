@@ -18,7 +18,7 @@ package net.sandius.rembulan.core;
 
 public interface PreemptionContext {
 
-	boolean withdraw(int cost);
+	void withdraw(int cost);
 
 	boolean isPreempted();
 
@@ -27,8 +27,8 @@ public interface PreemptionContext {
 		public static final Always INSTANCE = new Always();
 
 		@Override
-		public boolean withdraw(int cost) {
-			return true;
+		public void withdraw(int cost) {
+			// no-op
 		}
 
 		@Override
@@ -43,8 +43,8 @@ public interface PreemptionContext {
 		public static final Never INSTANCE = new Never();
 
 		@Override
-		public boolean withdraw(int cost) {
-			return false;
+		public void withdraw(int cost) {
+			// no-op
 		}
 
 		@Override

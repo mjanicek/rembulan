@@ -932,7 +932,9 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				il.add(rp.save());
 
 				il.add(loadExecutionContext());
-				il.add(ExecutionContextMethods.checkCpu(node.cost()));
+				il.add(new InsnNode(DUP));
+				il.add(ExecutionContextMethods.registerTimeSlice(node.cost()));
+				il.add(ExecutionContextMethods.checkCallYield());
 
 				il.add(rp.resume());
 				break;
