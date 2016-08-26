@@ -163,7 +163,7 @@ public class Call {
 			Resumer resumer = new Resumer(schedulingContext);
 			rr = resumer.resume();
 			assert (rr != null);
-			if (rr.pause) {
+			if (rr.pause || rr.asyncTask != null) {
 				newVersion = newPausedVersion(version);
 				cont = new CallContinuation(newVersion);
 			}
