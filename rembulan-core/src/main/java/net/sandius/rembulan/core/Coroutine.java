@@ -19,20 +19,13 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
 public final class Coroutine {
-
-	private final Lock lock;
 
 	// paused call stack: up-to-date only iff coroutine is not running
 	private Cons<ResumeInfo> callStack;
 	private Status status;
 
 	public Coroutine(Object function) {
-		this.lock = new ReentrantLock();
-
 		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, Check.notNull(function)));
 		this.status = Status.SUSPENDED;
 	}
@@ -44,14 +37,8 @@ public final class Coroutine {
 		DEAD
 	}
 
-	private Status getStatus() {
-		lock.lock();
-		try {
-			return status;
-		}
-		finally {
-			lock.unlock();
-		}
+	private synchronized Status getStatus() {
+		return status;
 	}
 
 	public boolean isResuming() {
@@ -79,14 +66,14 @@ public final class Coroutine {
 	}
 
 	// (RUNNING, SUSPENDED) -> (NORMAL, RUNNING)
-	static Cons<ResumeInfo> _resume(Coroutine a, Coroutine b, Cons<ResumeInfo> cs) {
+	static Cons<ResumeInfo> _resume(final Coroutine a, final Coroutine b, Cons<ResumeInfo> cs) {
+		Check.notNull(a);
+		Check.notNull(b);
 		Check.notNull(cs);
 
-		a.lock.lock();
-		try {
+		synchronized (a) {
 			if (a.status == Status.RUNNING) {
-				try {
-					b.lock.lock();
+				synchronized (b) {
 					if (b.status == Status.SUSPENDED) {
 						Cons<ResumeInfo> result = b.callStack;
 						a.callStack = cs;
@@ -104,26 +91,18 @@ public final class Coroutine {
 						}
 					}
 				}
-				finally {
-					b.lock.unlock();
-				}
 			}
 			else {
 				throw new IllegalStateException("resuming coroutine not in running state");
 			}
 		}
-		finally {
-			a.lock.unlock();
-		}
 	}
 
 	// (NORMAL, RUNNING) -> (RUNNING, SUSPENDED)
-	static Cons<ResumeInfo> _yield(Coroutine a, Coroutine b, Cons<ResumeInfo> cs) {
-		a.lock.lock();
-		try {
+	static Cons<ResumeInfo> _yield(final Coroutine a, final Coroutine b, Cons<ResumeInfo> cs) {
+		synchronized (a) {
 			if (a.status == Status.NORMAL) {
-				b.lock.lock();
-				try {
+				synchronized (b) {
 					if (b.status == Status.RUNNING) {
 						Cons<ResumeInfo> result = a.callStack;
 						a.callStack = null;
@@ -136,16 +115,10 @@ public final class Coroutine {
 						throw new IllegalCoroutineStateException("yielding coroutine not in running state");
 					}
 				}
-				finally {
-					b.lock.unlock();
-				}
 			}
 			else {
 				throw new IllegalCoroutineStateException("yielding coroutine not in normal state");
 			}
-		}
-		finally {
-			a.lock.unlock();
 		}
 	}
 
@@ -154,29 +127,17 @@ public final class Coroutine {
 		return _yield(a, b, null);
 	}
 
-	Cons<ResumeInfo> unpause() {
+	synchronized Cons<ResumeInfo> unpause() {
 		// TODO: check status?
-		lock.lock();
-		try {
-			status = Status.RUNNING;
-			Cons<ResumeInfo> result = callStack;
-			callStack = null;
-			return result;
-		}
-		finally {
-			lock.unlock();
-		}
+		status = Status.RUNNING;
+		Cons<ResumeInfo> result = callStack;
+		callStack = null;
+		return result;
 	}
 
-	void pause(Cons<ResumeInfo> callStack) {
+	synchronized void pause(Cons<ResumeInfo> callStack) {
 		// TODO: check status?
-		lock.lock();
-		try {
-			this.callStack = callStack;
-		}
-		finally {
-			lock.unlock();
-		}
+		this.callStack = callStack;
 	}
 
 }
