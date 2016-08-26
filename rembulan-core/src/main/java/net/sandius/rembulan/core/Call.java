@@ -18,8 +18,10 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.core.exec.AsyncTask;
 import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.util.Cons;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -29,7 +31,8 @@ public class Call {
 	private final LuaState state;
 	private final ReturnBuffer returnBuffer;
 
-	private Coroutine currentCoroutine;
+//	private Coroutine currentCoroutine;
+	private Cons<Coroutine> coroutineStack;
 
 	private final AtomicInteger currentVersion;
 
@@ -44,7 +47,8 @@ public class Call {
 		this.state = Check.notNull(state);
 		this.returnBuffer = Check.notNull(returnBuffer);
 
-		this.currentCoroutine = Check.notNull(mainCoroutine);
+//		this.currentCoroutine = Check.notNull(mainCoroutine);
+		this.coroutineStack = new Cons<>(Check.notNull(mainCoroutine));
 
 		int startingVersion = newPausedVersion(0);
 		this.currentVersion = new AtomicInteger(startingVersion);
@@ -93,7 +97,7 @@ public class Call {
 		return versionToState(currentVersion.get());
 	}
 
-	protected static class Context implements ExecutionContext {
+	private class Context implements ExecutionContext {
 
 		private final Call call;
 		private final PreemptionContext preemptionContext;
@@ -115,7 +119,7 @@ public class Call {
 
 		@Override
 		public Coroutine getCurrentCoroutine() {
-			return call.currentCoroutine;
+			return coroutineStack.car;
 		}
 
 		@Override
@@ -125,7 +129,7 @@ public class Call {
 
 		@Override
 		public boolean canYield() {
-			return call.currentCoroutine.canYield();
+			return coroutineStack.cdr != null;
 		}
 
 		@Override
@@ -164,14 +168,16 @@ public class Call {
 
 	}
 
-	public static class Continuation {
+	public class Continuation {
 
-		private final Call call;
 		private final int version;
 
-		private Continuation(Call call, int version) {
-			this.call = call;
+		private Continuation(int version) {
 			this.version = version;
+		}
+
+		private Call outer() {
+			return Call.this;
 		}
 
 		@Override
@@ -181,12 +187,12 @@ public class Call {
 
 			Continuation that = (Continuation) o;
 
-			return this.version == that.version && this.call.equals(that.call);
+			return this.version == that.version && this.outer().equals(that.outer());
 		}
 
 		@Override
 		public int hashCode() {
-			int result = call.hashCode();
+			int result = outer().hashCode();
 			result = 31 * result + version;
 			return result;
 		}
@@ -201,13 +207,13 @@ public class Call {
 		}
 
 		public void resume(EventHandler handler, PreemptionContext preemptionContext) {
-			call.resume(new Context(call, preemptionContext), version, handler);
+			Call.this.resume(new Context(Call.this, preemptionContext), version, handler);
 		}
 
 	}
 
 	private Continuation continuation(int version) {
-		return isPaused(version) ? new Continuation(this, version) : null;
+		return isPaused(version) ? new Continuation(version) : null;
 	}
 
 	public Continuation currentContinuation() {
@@ -234,14 +240,15 @@ public class Call {
 		}
 
 		int newVersion = VERSION_TERMINATED;
-		RResult rr = null;
+		ResumeResult rr = null;
 		Continuation cont = null;
 		try {
-			rr = doResume(context);
+			Resumer resumer = new Resumer(context);
+			rr = resumer.resume();
 			assert (rr != null);
 			if (rr.pause) {
 				newVersion = newPausedVersion(version);
-				cont = new Continuation(this, newVersion);
+				cont = new Continuation(newVersion);
 			}
 		}
 		finally {
@@ -254,18 +261,18 @@ public class Call {
 		rr.fire(handler, this, cont);
 	}
 
-	private static final class RResult {
+	private static final class ResumeResult {
 		private final boolean pause;
 		private final Object[] values;
 		private final Throwable error;
 		private final AsyncTask asyncTask;
 
-		private RResult(boolean pause, Object[] values, Throwable error, AsyncTask asyncTask) {
+		private ResumeResult(boolean pause, Object[] values, Throwable error, AsyncTask asyncTask) {
 			// validate: at most one may be true/non-null
 			if ((pause && (values == null && error == null && asyncTask == null))
 					|| (values != null && (!pause && error == null && asyncTask == null))
 					|| (error != null && (!pause && values == null && asyncTask == null))
-					|| (asyncTask != null && (!pause && values == null && asyncTask == null))) {
+					|| (asyncTask != null && (!pause && values == null && error == null))) {
 				this.pause = pause;
 				this.values = values;
 				this.error = error;
@@ -296,54 +303,179 @@ public class Call {
 		}
 	}
 
-	private static final RResult PAUSE_RESULT = new RResult(true, null, null, null);
+	private static final ResumeResult PAUSE_RESULT = new ResumeResult(true, null, null, null);
 
-	private RResult doResume(ExecutionContext context) {
-		Throwable error = null;
+	class Resumer implements ControlThrowableVisitor {
 
-		while (currentCoroutine != null) {
-			ResumeResult result = currentCoroutine.resume(context, error);
+		private final ExecutionContext context;
 
-			if (result instanceof ResumeResult.Pause) {
-				return PAUSE_RESULT;
-			}
-			if (result instanceof ResumeResult.WaitForAsync) {
-				ResumeResult.WaitForAsync wait = (ResumeResult.WaitForAsync) result;
-				return new RResult(false, null, null, wait.task);
-			}
-			else if (result instanceof ResumeResult.Switch) {
-				currentCoroutine = ((ResumeResult.Switch) result).target;
-				error = null;
-			}
-			else if (result instanceof ResumeResult.ImplicitYield) {
-				ResumeResult.ImplicitYield r = (ResumeResult.ImplicitYield) result;
-				currentCoroutine = r.target;
-				error = r.error;
-			}
-			else if (result instanceof ResumeResult.Error) {
-				currentCoroutine = null;
-				error = ((ResumeResult.Error) result).error;
-			}
-			else if (result instanceof ResumeResult.Finished) {
-				currentCoroutine = null;
-				error = null;
+		private ResumeResult result;
+		private Throwable error;
+		private Cons<ResumeInfo> callStack;
+
+		Resumer(ExecutionContext context) {
+			this.context = context;
+			this.result = null;
+			this.error = null;
+		}
+
+		@Override
+		public void preempted() {
+			result = PAUSE_RESULT;
+		}
+
+		@Override
+		public void coroutineYield(Object[] values) {
+			assert (coroutineStack != null);
+
+			if (coroutineStack.cdr == null) {
+				error = new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
 			}
 			else {
-				throw new IllegalStateException("Illegal result: " + result);
+				Coroutine top = coroutineStack.car;
+				Coroutine prev = coroutineStack.cdr.car;
+
+				boolean yielded = false;
+				try {
+					callStack = Coroutine._yield(prev, top, callStack);
+					yielded = true;
+				}
+				catch (IllegalCoroutineStateException ex) {
+					error = ex;
+				}
+
+				if (yielded) {
+					coroutineStack = coroutineStack.cdr;
+					context.getReturnBuffer().setToContentsOf(values);
+				}
 			}
 		}
 
-		if (error == null) {
-			// main coroutine returned
-			final Object[] result = returnBuffer.getAsArray();
-			assert (result != null);
-			return new RResult(false, result, null, null);
-		}
-		else {
-			// exception in the main coroutine
-			return new RResult(false, null, error, null);
-		}
-	}
+		public void coroutineReturn() {
+			assert (coroutineStack != null);
 
+			if (coroutineStack.cdr == null) {
+				// this was the main coroutine
+				if (error == null) {
+					Object[] values = context.getReturnBuffer().getAsArray();
+					result = new ResumeResult(false, values, null, null);
+				}
+				else {
+					result = new ResumeResult(false, null, error, null);
+				}
+			}
+			else {
+				// an implicit yield
+				Coroutine top = coroutineStack.car;
+				Coroutine prev = coroutineStack.cdr.car;
+
+				boolean yielded = false;
+				try {
+					callStack = Coroutine._return(prev, top);
+					yielded = true;
+				}
+				catch (IllegalCoroutineStateException ex) {
+					error = ex;
+				}
+
+				if (yielded) {
+					coroutineStack = coroutineStack.cdr;
+				}
+			}
+		}
+
+		@Override
+		public void coroutineResume(Coroutine target, Object[] values) {
+			assert (coroutineStack != null);
+
+			Coroutine prev = coroutineStack.car;
+
+			boolean resumed = false;
+			try {
+				callStack = Coroutine._resume(prev, target, callStack);
+				resumed = true;
+			}
+			catch (IllegalCoroutineStateException ex) {
+				error = ex;
+			}
+
+			if (resumed) {
+				coroutineStack = new Cons<>(target, coroutineStack);
+				context.getReturnBuffer().setToContentsOf(values);
+			}
+		}
+
+		@Override
+		public void async(AsyncTask task) {
+			result = new ResumeResult(false, null, null, task);
+		}
+
+		private void saveFrames(ControlThrowable ct) {
+			Iterator<ResumeInfo> it = ct.frames();
+			while (it.hasNext()) {
+				callStack = new Cons<>(it.next(), callStack);
+			}
+		}
+
+		private void continueCurrentCoroutine() {
+			while (callStack != null) {
+				ResumeInfo top = callStack.car;
+				callStack = callStack.cdr;
+
+				try {
+					if (error == null) {
+						// no errors
+						top.resume(context);
+						Dispatch.evaluateTailCalls(context);
+					}
+					else {
+						// there is an error to be handled
+						if (top.resumable instanceof ProtectedResumable) {
+							// top is protected, can handle the error
+							Throwable e = error;
+							error = null;  // this exception will be handled
+
+							ProtectedResumable pr = (ProtectedResumable) top.resumable;
+							pr.resumeError(context, top.savedState, Conversions.toErrorObject(e));
+							Dispatch.evaluateTailCalls(context);
+						}
+						else {
+							// top is not protected, continue unwinding the stack
+						}
+					}
+				}
+				catch (ControlThrowable ct) {
+					saveFrames(ct);
+					ct.accept(this);
+					return;
+				}
+				catch (Exception ex) {
+					// unhandled exception: will try finding a handler in the next iteration
+					error = ex;
+				}
+			}
+
+			assert (callStack == null);
+
+			coroutineReturn();
+		}
+
+		ResumeResult resume() {
+			try {
+				callStack = coroutineStack.car.unpause();
+				do {
+					continueCurrentCoroutine();
+				} while (result == null);
+
+				return result;
+			}
+			finally {
+				if (coroutineStack != null) {
+					coroutineStack.car.pause(callStack);
+				}
+			}
+		}
+
+	}
 
 }

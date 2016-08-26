@@ -19,54 +19,47 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 
-import java.util.Iterator;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
-/*
- Properties:
-
-   1) For any coroutine c,
-         (c.resuming == null || c.resuming.yieldingTo == c) && (c.yieldingTo == null || c.yieldingTo.resuming == c)
-         (i.e. coroutines form a doubly-linked list)
-
-   2) if c is the currently-running coroutine, then c.resuming == null
-
-   3) if c is the main coroutine, then c.yieldingTo == null
-
- Coroutine d can be resumed from c iff
-   c != d && d.resuming == null && d.yieldingTo == null
-
- This means that
-   c.resuming = d
-   d.yieldingTo = c
- */
 public final class Coroutine {
+
+	private final Lock lock;
 
 	// paused call stack: up-to-date only iff coroutine is not running
 	private Cons<ResumeInfo> callStack;
-
-	private Coroutine yieldingTo;
-	private Coroutine resuming;
+	private Status status;
 
 	public Coroutine(Object function) {
+		this.lock = new ReentrantLock();
+
 		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, Check.notNull(function)));
-		this.yieldingTo = null;
-		this.resuming = null;
+		this.status = Status.SUSPENDED;
 	}
 
-	public boolean isPaused() {
-		return callStack != null;
+	private enum Status {
+		SUSPENDED,
+		RUNNING,
+		NORMAL,
+		DEAD
+	}
+
+	private Status getStatus() {
+		lock.lock();
+		try {
+			return status;
+		}
+		finally {
+			lock.unlock();
+		}
 	}
 
 	public boolean isResuming() {
-		return resuming != null;
+		return getStatus() == Status.NORMAL;
 	}
 
 	public boolean isDead() {
-		return callStack == null;
-	}
-
-	public boolean canYield() {
-		return yieldingTo != null;
+		return getStatus() == Status.DEAD;
 	}
 
 	@Override
@@ -85,142 +78,104 @@ public final class Coroutine {
 
 	}
 
-	// FIXME: name clash
-	private Coroutine resume(Coroutine target) {
-		Check.notNull(target);
+	// (RUNNING, SUSPENDED) -> (NORMAL, RUNNING)
+	static Cons<ResumeInfo> _resume(Coroutine a, Coroutine b, Cons<ResumeInfo> cs) {
+		Check.notNull(cs);
 
-		synchronized (this) {
-			synchronized (target) {
-
-				if (target.callStack == null) {
-					// dead coroutine
-					throw new IllegalStateException("cannot resume dead coroutine");
+		a.lock.lock();
+		try {
+			if (a.status == Status.RUNNING) {
+				try {
+					b.lock.lock();
+					if (b.status == Status.SUSPENDED) {
+						Cons<ResumeInfo> result = b.callStack;
+						a.callStack = cs;
+						b.callStack = null;
+						a.status = Status.NORMAL;
+						b.status = Status.RUNNING;
+						return result;
+					}
+					else {
+						if (b.status == Status.DEAD) {
+							throw new IllegalCoroutineStateException("cannot resume dead coroutine");
+						}
+						else {
+							throw new IllegalCoroutineStateException("cannot resume non-suspended coroutine");
+						}
+					}
 				}
-				else if (target == this || target.resuming != null) {
-					// running or normal coroutine
-					throw new IllegalStateException("cannot resume non-suspended coroutine");
-				}
-				else {
-					target.yieldingTo = this;
-					this.resuming = target;
-
-					return target;
-				}
-			}
-		}
-	}
-
-	private Coroutine yield() {
-		synchronized (this) {
-			Coroutine target = this.yieldingTo;
-
-			if (target != null) {
-				synchronized (target) {  // FIXME: unsafe: target may have been changed already!
-
-					assert (this.resuming == null);
-					assert (target.resuming == this);
-
-					this.yieldingTo = null;
-					target.resuming = null;
-
-					return target;
+				finally {
+					b.lock.unlock();
 				}
 			}
 			else {
-				return null;
+				throw new IllegalStateException("resuming coroutine not in running state");
 			}
 		}
-	}
-
-	private void saveFrames(ControlThrowable ct) {
-		Iterator<ResumeInfo> it = ct.frames();
-		while (it.hasNext()) {
-			callStack = new Cons<>(it.next(), callStack);
+		finally {
+			a.lock.unlock();
 		}
 	}
 
-	ResumeResult resume(ExecutionContext context, Throwable error) {
-		Check.isNull(resuming);
-
-		while (callStack != null) {
-			ResumeInfo top = callStack.car;
-			callStack = callStack.cdr;
-
-			try {
-				if (error == null) {
-					// no errors
-					top.resume(context);
-					Dispatch.evaluateTailCalls(context);
-				}
-				else {
-					// there is an error to be handled
-					if (top.resumable instanceof ProtectedResumable) {
-						// top is protected, can handle the error
-						Throwable e = error;
-						error = null;  // this exception will be handled
-
-						ProtectedResumable pr = (ProtectedResumable) top.resumable;
-						pr.resumeError(context, top.savedState, Conversions.toErrorObject(e));
-						Dispatch.evaluateTailCalls(context);
+	// (NORMAL, RUNNING) -> (RUNNING, SUSPENDED)
+	static Cons<ResumeInfo> _yield(Coroutine a, Coroutine b, Cons<ResumeInfo> cs) {
+		a.lock.lock();
+		try {
+			if (a.status == Status.NORMAL) {
+				b.lock.lock();
+				try {
+					if (b.status == Status.RUNNING) {
+						Cons<ResumeInfo> result = a.callStack;
+						a.callStack = null;
+						b.callStack = cs;
+						a.status = Status.RUNNING;
+						b.status = b.callStack != null ? Status.SUSPENDED : Status.DEAD;
+						return result;
 					}
 					else {
-						// top is not protected, continue unwinding the stack
+						throw new IllegalCoroutineStateException("yielding coroutine not in running state");
 					}
 				}
-			}
-			catch (CoroutineSwitch.Yield yield) {
-				saveFrames(yield);
-
-				Coroutine c = this.yield();
-				if (c != null) {
-					context.getReturnBuffer().setToContentsOf(yield.args);
-					return new ResumeResult.Switch(c);
-				}
-				else {
-					error = new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
+				finally {
+					b.lock.unlock();
 				}
 			}
-			catch (CoroutineSwitch.Resume resume) {
-				saveFrames(resume);
-
-				final Coroutine c;
-				try {
-					c = this.resume(resume.coroutine);
-					context.getReturnBuffer().setToContentsOf(resume.args);
-					return new ResumeResult.Switch(c);
-				}
-				catch (Exception ex) {
-					error = ex;
-				}
-			}
-			catch (Preempted preempted) {
-				saveFrames(preempted);
-				assert (callStack != null);
-				return ResumeResult.Pause.INSTANCE;
-			}
-			catch (WaitForAsync waitForAsync) {
-				saveFrames(waitForAsync);
-				assert (callStack != null);
-				return new ResumeResult.WaitForAsync(waitForAsync.task());
-			}
-			catch (ControlThrowable ct) {
-				throw new UnsupportedOperationException(ct);
-			}
-			catch (Exception ex) {
-				// unhandled exception: will try finding a handler in the next iteration
-				error = ex;
+			else {
+				throw new IllegalCoroutineStateException("yielding coroutine not in normal state");
 			}
 		}
-
-		assert (callStack == null);
-
-		Coroutine yieldTarget = yield();
-		if (yieldTarget != null) {
-			return new ResumeResult.ImplicitYield(yieldTarget, error);
+		finally {
+			a.lock.unlock();
 		}
-		else {
-			// main coroutine return
-			return error == null ? ResumeResult.Finished.INSTANCE : new ResumeResult.Error(error);
+	}
+
+	// (NORMAL, RUNNING) -> (RUNNING, DEAD)
+	static Cons<ResumeInfo> _return(Coroutine a, Coroutine b) {
+		return _yield(a, b, null);
+	}
+
+	Cons<ResumeInfo> unpause() {
+		// TODO: check status?
+		lock.lock();
+		try {
+			status = Status.RUNNING;
+			Cons<ResumeInfo> result = callStack;
+			callStack = null;
+			return result;
+		}
+		finally {
+			lock.unlock();
+		}
+	}
+
+	void pause(Cons<ResumeInfo> callStack) {
+		// TODO: check status?
+		lock.lock();
+		try {
+			this.callStack = callStack;
+		}
+		finally {
+			lock.unlock();
 		}
 	}
 

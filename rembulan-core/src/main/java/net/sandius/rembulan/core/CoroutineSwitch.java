@@ -28,6 +28,11 @@ abstract class CoroutineSwitch extends ControlThrowable {
 			this.args = Check.notNull(args);
 		}
 
+		@Override
+		void accept(ControlThrowableVisitor visitor) {
+			visitor.coroutineYield(args);
+		}
+
 	}
 
 	static final class Resume extends CoroutineSwitch {
@@ -38,6 +43,11 @@ abstract class CoroutineSwitch extends ControlThrowable {
 		public Resume(Coroutine coroutine, Object[] args) {
 			this.coroutine = Check.notNull(coroutine);
 			this.args = Check.notNull(args);
+		}
+
+		@Override
+		void accept(ControlThrowableVisitor visitor) {
+			visitor.coroutineResume(coroutine, args);
 		}
 
 	}

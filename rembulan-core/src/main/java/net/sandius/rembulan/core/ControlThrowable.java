@@ -39,4 +39,6 @@ public abstract class ControlThrowable extends Throwable {
 		return Cons.newIterator(resumeStack);
 	}
 
+	abstract void accept(ControlThrowableVisitor visitor);
+
 }

@@ -16,11 +16,16 @@
 
 package net.sandius.rembulan.core;
 
-class Preempted extends ControlThrowable {
+import net.sandius.rembulan.core.exec.AsyncTask;
 
-	@Override
-	void accept(ControlThrowableVisitor visitor) {
-		visitor.preempted();
-	}
+interface ControlThrowableVisitor {
+
+	void preempted();
+
+	void coroutineYield(Object[] values);
+
+	void coroutineResume(Coroutine target, Object[] values);
+
+	void async(AsyncTask task);
 
 }

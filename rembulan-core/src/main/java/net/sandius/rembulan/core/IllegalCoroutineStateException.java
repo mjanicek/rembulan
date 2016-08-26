@@ -16,11 +16,10 @@
 
 package net.sandius.rembulan.core;
 
-class Preempted extends ControlThrowable {
+class IllegalCoroutineStateException extends IllegalStateException {
 
-	@Override
-	void accept(ControlThrowableVisitor visitor) {
-		visitor.preempted();
+	public IllegalCoroutineStateException(String message) {
+		super(message);
 	}
 
 }

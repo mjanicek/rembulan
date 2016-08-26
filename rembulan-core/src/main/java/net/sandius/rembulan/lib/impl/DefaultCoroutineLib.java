@@ -184,6 +184,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			if (coroutine == currentCoroutine) return STATUS_RUNNING;
 			else if (coroutine.isDead()) return STATUS_DEAD;
 			else if (coroutine.isResuming()) return STATUS_NORMAL;
+			// FIXME: this is not true for coroutines running concurrently
 			else return STATUS_SUSPENDED;
 		}
 
@@ -212,7 +213,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Coroutine c = context.getCurrentCoroutine();
-			context.getReturnBuffer().setTo(c, !c.canYield());
+			context.getReturnBuffer().setTo(c, !context.canYield());
 		}
 
 	}

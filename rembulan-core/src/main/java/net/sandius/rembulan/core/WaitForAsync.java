@@ -31,4 +31,9 @@ class WaitForAsync extends ControlThrowable {
 		return task;
 	}
 
+	@Override
+	void accept(ControlThrowableVisitor visitor) {
+		visitor.async(task);
+	}
+
 }
