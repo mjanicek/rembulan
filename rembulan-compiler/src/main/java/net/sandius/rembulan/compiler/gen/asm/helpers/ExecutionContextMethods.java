@@ -40,7 +40,7 @@ public abstract class ExecutionContextMethods {
 		il.add(new MethodInsnNode(
 				INVOKEINTERFACE,
 				selfTpe().getInternalName(),
-				"registerTimeSlice",
+				"registerTicks",
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE,
 						Type.INT_TYPE),
