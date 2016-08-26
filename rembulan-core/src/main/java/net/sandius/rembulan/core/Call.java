@@ -95,6 +95,90 @@ public class Call {
 		return versionToState(currentVersion.get());
 	}
 
+	private class CallContinuation implements Continuation {
+
+		private final int version;
+
+		private CallContinuation(int version) {
+			this.version = version;
+		}
+
+		private Call outer() {
+			return Call.this;
+		}
+
+		@Override
+		public boolean equals(Object o) {
+			if (this == o) return true;
+			if (o == null || getClass() != o.getClass()) return false;
+
+			CallContinuation that = (CallContinuation) o;
+
+			return this.version == that.version && this.outer().equals(that.outer());
+		}
+
+		@Override
+		public int hashCode() {
+			int result = outer().hashCode();
+			result = 31 * result + version;
+			return result;
+		}
+
+		@Override
+		public void resume(CallEventHandler handler, PreemptionContext preemptionContext) {
+			Call.this.resume(handler, preemptionContext, version);
+		}
+
+	}
+
+	public Continuation currentContinuation() {
+		int version = currentVersion.get();
+
+		if (!isPaused(version)) {
+			State s = versionToState(version);
+			throw new IllegalStateException("Cannot get continuation of a " + s + " call");
+		}
+		else {
+			return new CallContinuation(version);
+		}
+	}
+
+	private void resume(CallEventHandler handler, PreemptionContext preemptionContext, int version) {
+		Check.notNull(handler);
+		Check.notNull(preemptionContext);
+
+		if (version == VERSION_RUNNING || version == VERSION_TERMINATED) {
+			throw new IllegalArgumentException("Illegal version: " + version);
+		}
+
+		// claim this version
+		if (!currentVersion.compareAndSet(version, VERSION_RUNNING)) {
+			throw new OutdatedContinuationException("Cannot resume call: not in the expected state (0x"
+					+ Integer.toHexString(version) + ")");
+		}
+
+		int newVersion = VERSION_TERMINATED;
+		ResumeResult rr = null;
+		Continuation cont = null;
+		try {
+			Resumer resumer = new Resumer(preemptionContext);
+			rr = resumer.resume();
+			assert (rr != null);
+			if (rr.pause) {
+				newVersion = newPausedVersion(version);
+				cont = new CallContinuation(newVersion);
+			}
+		}
+		finally {
+			int old = currentVersion.getAndSet(newVersion);
+			assert (old == VERSION_RUNNING);
+		}
+
+		assert (rr != null);
+
+		rr.fire(handler, this, cont);
+	}
+
 	private static class ControlPayload implements ControlThrowable.Payload {
 
 		private final boolean preempted;
@@ -129,150 +213,6 @@ public class Call {
 	}
 
 	private static final ControlPayload PAUSED_PAYLOAD = new ControlPayload(true, null, null, null);
-
-	private class Context implements ExecutionContext {
-
-		private final Call call;
-		private final PreemptionContext preemptionContext;
-
-		public Context(Call call, PreemptionContext preemptionContext) {
-			this.call = call;
-			this.preemptionContext = preemptionContext;
-		}
-
-		@Override
-		public LuaState getState() {
-			return call.state;
-		}
-
-		@Override
-		public ReturnBuffer getReturnBuffer() {
-			return call.returnBuffer;
-		}
-
-		@Override
-		public Coroutine getCurrentCoroutine() {
-			return coroutineStack.car;
-		}
-
-		@Override
-		public Coroutine newCoroutine(Function function) {
-			return new Coroutine(function);
-		}
-
-		@Override
-		public boolean canYield() {
-			return coroutineStack.cdr != null;
-		}
-
-		@Override
-		public void resume(Coroutine coroutine, Object[] args) throws ControlThrowable {
-			throw new ControlThrowable(new ControlPayload(false, coroutine, args, null));
-		}
-
-		@Override
-		public void yield(Object[] args) throws ControlThrowable {
-			throw new ControlThrowable(new ControlPayload(false, null, args, null));
-		}
-
-		@Override
-		public void checkPreempt(int cost) throws ControlThrowable {
-			if (preemptionContext.withdraw(cost)) {
-				throw new ControlThrowable(PAUSED_PAYLOAD);
-			}
-		}
-
-		@Override
-		public void resumeAfter(AsyncTask task) throws ControlThrowable {
-			throw new ControlThrowable(new ControlPayload(false, null, null, task));
-		}
-
-	}
-
-	private class CallContinuation implements Continuation {
-
-		private final int version;
-
-		private CallContinuation(int version) {
-			this.version = version;
-		}
-
-		private Call outer() {
-			return Call.this;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-
-			CallContinuation that = (CallContinuation) o;
-
-			return this.version == that.version && this.outer().equals(that.outer());
-		}
-
-		@Override
-		public int hashCode() {
-			int result = outer().hashCode();
-			result = 31 * result + version;
-			return result;
-		}
-
-		@Override
-		public void resume(CallEventHandler handler, PreemptionContext preemptionContext) {
-			Call.this.resume(new Context(Call.this, preemptionContext), version, handler);
-		}
-
-	}
-
-	private Continuation continuation(int version) {
-		return isPaused(version) ? new CallContinuation(version) : null;
-	}
-
-	public Continuation currentContinuation() {
-		int version = currentVersion.get();
-
-		if (!isPaused(version)) {
-			State s = versionToState(version);
-			throw new IllegalStateException("Cannot get continuation of a " + s + " call");
-		}
-		else {
-			return continuation(version);
-		}
-	}
-
-	private void resume(Context context, int version, CallEventHandler handler) {
-		if (version == VERSION_RUNNING || version == VERSION_TERMINATED) {
-			throw new IllegalArgumentException("Illegal version: " + version);
-		}
-
-		// claim this version
-		if (!currentVersion.compareAndSet(version, VERSION_RUNNING)) {
-			throw new OutdatedContinuationException("Cannot resume call: not in the expected state (0x"
-					+ Integer.toHexString(version) + ")");
-		}
-
-		int newVersion = VERSION_TERMINATED;
-		ResumeResult rr = null;
-		Continuation cont = null;
-		try {
-			Resumer resumer = new Resumer(context);
-			rr = resumer.resume();
-			assert (rr != null);
-			if (rr.pause) {
-				newVersion = newPausedVersion(version);
-				cont = new CallContinuation(newVersion);
-			}
-		}
-		finally {
-			int old = currentVersion.getAndSet(newVersion);
-			assert (old == VERSION_RUNNING);
-		}
-
-		assert (rr != null);
-
-		rr.fire(handler, this, cont);
-	}
 
 	private static final class ResumeResult {
 		private final boolean pause;
@@ -319,18 +259,65 @@ public class Call {
 
 	private static final ResumeResult PAUSE_RESULT = new ResumeResult(true, null, null, null);
 
-	class Resumer implements ControlThrowable.Visitor {
+	class Resumer implements ExecutionContext, ControlThrowable.Visitor {
 
-		private final ExecutionContext context;
+		private final PreemptionContext preemptionContext;
 
 		private ResumeResult result;
 		private Throwable error;
 		private Cons<ResumeInfo> callStack;
 
-		Resumer(ExecutionContext context) {
-			this.context = context;
+		Resumer(PreemptionContext preemptionContext) {
+			this.preemptionContext = Check.notNull(preemptionContext);
 			this.result = null;
 			this.error = null;
+		}
+
+		@Override
+		public LuaState getState() {
+			return state;
+		}
+
+		@Override
+		public ReturnBuffer getReturnBuffer() {
+			return returnBuffer;
+		}
+
+		@Override
+		public Coroutine getCurrentCoroutine() {
+			return coroutineStack.car;
+		}
+
+		@Override
+		public Coroutine newCoroutine(Function function) {
+			return new Coroutine(function);
+		}
+
+		@Override
+		public boolean canYield() {
+			return coroutineStack.cdr != null;
+		}
+
+		@Override
+		public void resume(Coroutine coroutine, Object[] args) throws ControlThrowable {
+			throw new ControlThrowable(new ControlPayload(false, coroutine, args, null));
+		}
+
+		@Override
+		public void yield(Object[] args) throws ControlThrowable {
+			throw new ControlThrowable(new ControlPayload(false, null, args, null));
+		}
+
+		@Override
+		public void checkPreempt(int cost) throws ControlThrowable {
+			if (preemptionContext.withdraw(cost)) {
+				throw new ControlThrowable(PAUSED_PAYLOAD);
+			}
+		}
+
+		@Override
+		public void resumeAfter(AsyncTask task) throws ControlThrowable {
+			throw new ControlThrowable(new ControlPayload(false, null, null, task));
 		}
 
 		@Override
@@ -360,7 +347,7 @@ public class Call {
 
 				if (yielded) {
 					coroutineStack = coroutineStack.cdr;
-					context.getReturnBuffer().setToContentsOf(values);
+					getReturnBuffer().setToContentsOf(values);
 				}
 			}
 		}
@@ -371,7 +358,7 @@ public class Call {
 			if (coroutineStack.cdr == null) {
 				// this was the main coroutine
 				if (error == null) {
-					Object[] values = context.getReturnBuffer().getAsArray();
+					Object[] values = getReturnBuffer().getAsArray();
 					result = new ResumeResult(false, values, null, null);
 				}
 				else {
@@ -415,7 +402,7 @@ public class Call {
 
 			if (resumed) {
 				coroutineStack = new Cons<>(target, coroutineStack);
-				context.getReturnBuffer().setToContentsOf(values);
+				getReturnBuffer().setToContentsOf(values);
 			}
 		}
 
@@ -439,8 +426,8 @@ public class Call {
 				try {
 					if (error == null) {
 						// no errors
-						top.resume(context);
-						Dispatch.evaluateTailCalls(context);
+						top.resume(this);
+						Dispatch.evaluateTailCalls(this);
 					}
 					else {
 						// there is an error to be handled
@@ -450,8 +437,8 @@ public class Call {
 							error = null;  // this exception will be handled
 
 							ProtectedResumable pr = (ProtectedResumable) top.resumable;
-							pr.resumeError(context, top.savedState, Conversions.toErrorObject(e));
-							Dispatch.evaluateTailCalls(context);
+							pr.resumeError(this, top.savedState, Conversions.toErrorObject(e));
+							Dispatch.evaluateTailCalls(this);
 						}
 						else {
 							// top is not protected, continue unwinding the stack
