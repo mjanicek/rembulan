@@ -16,16 +16,20 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.core.exec.AsyncTask;
+import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 
 import java.util.Iterator;
 
-public abstract class ControlThrowable extends Throwable {
+public final class ControlThrowable extends Throwable {
 
+	private final Payload payload;
 	private Cons<ResumeInfo> resumeStack;
 
-	protected ControlThrowable() {
+	ControlThrowable(Payload payload) {
 		super(null, null, true, false);
+		this.payload = Check.notNull(payload);
 		this.resumeStack = null;
 	}
 
@@ -39,6 +43,26 @@ public abstract class ControlThrowable extends Throwable {
 		return Cons.newIterator(resumeStack);
 	}
 
-	abstract void accept(ControlThrowableVisitor visitor);
+	public void accept(Visitor visitor) {
+		payload.accept(visitor);
+	}
+
+	interface Payload {
+
+		void accept(Visitor visitor);
+
+	}
+
+	public interface Visitor {
+
+		void preempted();
+
+		void coroutineYield(Object[] values);
+
+		void coroutineResume(Coroutine target, Object[] values);
+
+		void async(AsyncTask task);
+
+	}
 
 }

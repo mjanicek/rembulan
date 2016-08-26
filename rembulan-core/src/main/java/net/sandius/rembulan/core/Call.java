@@ -95,6 +95,41 @@ public class Call {
 		return versionToState(currentVersion.get());
 	}
 
+	private static class ControlPayload implements ControlThrowable.Payload {
+
+		private final boolean preempted;
+		private final Coroutine target;
+		private final Object[] values;
+		private final AsyncTask task;
+
+		private ControlPayload(boolean preempted, Coroutine target, Object[] values, AsyncTask task) {
+			if ((preempted && target == null && values == null && task == null)
+					|| (!preempted && values != null && task == null)
+					|| (!preempted && target == null && values == null && task != null)) {
+
+				this.preempted = preempted;
+				this.target = target;
+				this.values = values;
+				this.task = task;
+			}
+			else {
+				throw new IllegalArgumentException();
+			}
+		}
+
+		@Override
+		public void accept(ControlThrowable.Visitor visitor) {
+			if (preempted) visitor.preempted();
+			else if (target != null && values != null) visitor.coroutineResume(target, values);
+			else if (target == null && values != null) visitor.coroutineYield(values);
+			else if (task != null) visitor.async(task);
+			else throw new AssertionError();
+		}
+
+	}
+
+	private static final ControlPayload PAUSED_PAYLOAD = new ControlPayload(true, null, null, null);
+
 	private class Context implements ExecutionContext {
 
 		private final Call call;
@@ -132,24 +167,24 @@ public class Call {
 
 		@Override
 		public void resume(Coroutine coroutine, Object[] args) throws ControlThrowable {
-			throw new CoroutineSwitch.Resume(coroutine, args);
+			throw new ControlThrowable(new ControlPayload(false, coroutine, args, null));
 		}
 
 		@Override
 		public void yield(Object[] args) throws ControlThrowable {
-			throw new CoroutineSwitch.Yield(args);
+			throw new ControlThrowable(new ControlPayload(false, null, args, null));
 		}
 
 		@Override
 		public void checkPreempt(int cost) throws ControlThrowable {
 			if (preemptionContext.withdraw(cost)) {
-				throw new Preempted();
+				throw new ControlThrowable(PAUSED_PAYLOAD);
 			}
 		}
 
 		@Override
 		public void resumeAfter(AsyncTask task) throws ControlThrowable {
-			throw new WaitForAsync(task);
+			throw new ControlThrowable(new ControlPayload(false, null, null, task));
 		}
 
 	}
@@ -284,7 +319,7 @@ public class Call {
 
 	private static final ResumeResult PAUSE_RESULT = new ResumeResult(true, null, null, null);
 
-	class Resumer implements ControlThrowableVisitor {
+	class Resumer implements ControlThrowable.Visitor {
 
 		private final ExecutionContext context;
 
