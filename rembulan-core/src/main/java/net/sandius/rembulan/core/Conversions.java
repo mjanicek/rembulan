@@ -301,9 +301,6 @@ public abstract class Conversions {
 	 * @return integer value of {@code n}
 	 *
 	 * @throws NoIntegerRepresentationException if {@code o} does not have an integer value
-	 *
-	 * @param o
-	 * @return
 	 */
 	public static long toIntegerValue(Object o) {
 		Long l = integerValueOf(o);
