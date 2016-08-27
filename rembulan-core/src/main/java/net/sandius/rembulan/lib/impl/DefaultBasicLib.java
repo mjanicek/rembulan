@@ -18,6 +18,8 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.*;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
+import net.sandius.rembulan.core.load.ChunkLoader;
+import net.sandius.rembulan.core.load.LoaderException;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
@@ -34,10 +36,18 @@ public class DefaultBasicLib extends BasicLib {
 	private final Function _load;
 	private final Function _loadfile;
 
-	public DefaultBasicLib(PrintStream out) {
+	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Object defaultEnv) {
 		this._print = new Print(out);
 		this._dofile = new UnimplementedFunction("dofile");  // TODO
-		this._load = new UnimplementedFunction("load");  // TODO
+
+		if (loader != null) {
+			this._load = new Load(loader, defaultEnv);
+		}
+		else {
+			// no loader supplied
+			this._load = null;
+		}
+
 		this._loadfile = new UnimplementedFunction("loadfile");  // TODO
 	}
 
@@ -836,6 +846,150 @@ public class DefaultBasicLib extends BasicLib {
 				throw new UnsupportedOperationException();  // TODO
 			}
 			// TODO
+		}
+
+	}
+
+	public static class Load extends AbstractLibFunction {
+
+		private final ChunkLoader loader;
+		private final Object defaultEnv;
+
+		public Load(ChunkLoader loader, Object env) {
+			this.loader = Check.notNull(loader);
+			this.defaultEnv = env;
+		}
+
+		@Override
+		protected String name() {
+			return "load";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+
+			// chunk
+			final Object chunk = args.hasNext() && Conversions.stringValueOf(args.peek()) != null
+					? args.nextString()
+					: args.nextFunction();
+
+			assert (chunk != null);
+
+			// chunk name
+			final String chunkName;
+			if (args.hasNext() && args.peek() != null) {
+				chunkName = "[string \"" + args.nextString() + "\"]";
+			}
+			else {
+				if (args.hasNext()) args.skip();  // next is nil
+				chunkName = chunk instanceof String
+						? "[string \"" + (String) chunk + "\"]"
+						: "=(load)";
+			}
+
+			// mode
+			final String modeString = args.hasNext()
+					? args.nextString()
+					: "bt";
+
+			final Object env = args.hasNext()
+					? args.nextAny()
+					: defaultEnv;
+
+			// TODO: binary chunks
+
+			if (!modeString.contains("t")) {
+				context.getReturnBuffer().setTo(null, "attempt to load a text chunk (mode is '" + modeString + "')");
+			}
+			else {
+				if (chunk instanceof String) {
+					loadFromString(context, chunkName, env, (String) chunk);
+				}
+				else {
+					Function fn = (Function) chunk;
+					loadFromFunction(context, false, chunkName, env, new StringBuilder(), fn);
+				}
+			}
+
+		}
+
+		private void loadFromString(ExecutionContext context, String chunkName, Object env, String chunkText) {
+			final Function fn;
+			try {
+				fn = loader.loadTextChunk(new Variable(env), chunkName, chunkText);
+			}
+			catch (LoaderException ex) {
+				context.getReturnBuffer().setTo(null, Conversions.toErrorObject(ex));
+				return;
+			}
+
+			if (fn != null) {
+				context.getReturnBuffer().setTo(fn);
+			}
+			else {
+				// don't trust the loader to return a non-null value
+				context.getReturnBuffer().setTo(null, "loader returned nil");
+			}
+		}
+
+		private static class State {
+
+			public final String chunkName;
+			public final Object env;
+			public final StringBuilder bld;
+			public final Function fn;
+
+			private State(String chunkName, Object env, StringBuilder bld, Function fn) {
+				this.chunkName = chunkName;
+				this.env = env;
+				this.bld = bld;
+				this.fn = fn;
+			}
+
+		}
+
+		private void loadFromFunction(ExecutionContext context, boolean resuming, String chunkName, Object env, StringBuilder bld, Function fn)
+				throws ControlThrowable {
+
+			String chunkText = null;
+
+			try {
+				while (chunkText == null) {
+					if (!resuming) {
+						Dispatch.call(context, fn);
+					}
+
+					resuming = false;
+
+					Object o = context.getReturnBuffer().get0();
+					if (o == null) {
+						chunkText = bld.toString();
+					}
+					else {
+						String s = Conversions.stringValueOf(o);
+						if (s != null) {
+							bld.append(s);
+						}
+						else {
+							context.getReturnBuffer().setTo(null, "reader function must return a string");
+							return;
+						}
+					}
+				}
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, new State(chunkName, env, bld, fn));
+			}
+
+			assert (chunkText != null);
+
+			loadFromString(context, chunkName, env, chunkText);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			State state = (State) suspendedState;
+			loadFromFunction(context, true, state.chunkName, state.env, state.bld, state.fn);
 		}
 
 	}

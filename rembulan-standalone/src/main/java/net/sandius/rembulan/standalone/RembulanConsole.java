@@ -83,7 +83,7 @@ public class RembulanConsole {
 		this.loader = new CompilerChunkLoader(this.getClass().getClassLoader(), "rembulan_repl_");
 
 		// install libraries
-		new DefaultBasicLib(new PrintStream(out)).installInto(state, env);
+		new DefaultBasicLib(new PrintStream(out), loader, env).installInto(state, env);
 		ModuleLib moduleLib = new DefaultModuleLib(state, env);
 		moduleLib.installInto(state, env);
 		moduleLib.install(new DefaultCoroutineLib());

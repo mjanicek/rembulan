@@ -56,41 +56,41 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
     impl.installInto(state, env)
   }
 
-  protected def envForContext(state: LuaState, ctx: Env): Table = {
+  protected def envForContext(state: LuaState, ctx: Env, ldr: ChunkLoader): Table = {
     val env = state.newTable()
     ctx match {
       case Empty =>
         // no-op
 
       case Basic =>
-        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
 
       case Coro =>
-        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
         new DefaultCoroutineLib().installInto(state, env)
 
       case Math =>
-        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
         new DefaultMathLib().installInto(state, env)
 
       case Str =>
-        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
         new DefaultStringLib().installInto(state, env)
 
       case IO =>
-        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
         new DefaultIoLib(state).installInto(state, env)
 
       case Tab =>
-        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
         new DefaultTableLib().installInto(state, env)
 
       case Debug =>
-        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
         new DefaultDebugLib().installInto(state, env)
 
       case Full =>
-        new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
         new DefaultModuleLib(state, env).installInto(state, env)
         new DefaultCoroutineLib().installInto(state, env)
         new DefaultMathLib().installInto(state, env)
@@ -175,7 +175,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
             val state = new DefaultLuaState()
 
-            val env = envForContext(state, ctx)
+            val env = envForContext(state, ctx, ldr)
             val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)
 
             (state, func)

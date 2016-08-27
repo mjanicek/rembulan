@@ -24,7 +24,7 @@ import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.exec.DirectCallExecutor
 import net.sandius.rembulan.core.impl.DefaultLuaState
-import net.sandius.rembulan.core.load.ChunkClassLoader
+import net.sandius.rembulan.core.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.{core => lua}
 
@@ -87,10 +87,10 @@ object BenchmarkRunner {
     }
   }
 
-  def initEnv(state: LuaState, args: Seq[String]): Table = {
+  def initEnv(state: LuaState, loader: ChunkLoader, args: Seq[String]): Table = {
     val env = state.newTable()
 
-    new DefaultBasicLib(new PrintStream(System.out)).installInto(state, env)
+    new DefaultBasicLib(new PrintStream(System.out), loader, env).installInto(state, env)
     new DefaultModuleLib(state, env).installInto(state, env)
     new DefaultCoroutineLib().installInto(state, env)
     new DefaultMathLib().installInto(state, env)
@@ -123,7 +123,7 @@ object BenchmarkRunner {
 
     val state = new DefaultLuaState()
 
-    val env = initEnv(state, args)
+    val env = initEnv(state, ldr, args)
 
     val func = ldr.loadTextChunk(new Variable(env), "benchmarkMain", sourceContents)
 

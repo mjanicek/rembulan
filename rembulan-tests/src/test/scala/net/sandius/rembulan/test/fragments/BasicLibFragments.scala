@@ -16,7 +16,9 @@
 
 package net.sandius.rembulan.test.fragments
 
+import net.sandius.rembulan.core.Table
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
+import net.sandius.rembulan.{core => lua}
 
 object BasicLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
@@ -334,6 +336,42 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return select(3, 1, 2, 3, 4, 5)") succeedsWith (3, 4, 5)
       program ("return select(-2, 1, 2, 3, 4, 5)") succeedsWith (4, 5)
       program ("return select(-3, 1, 2, 3, 4, 5)") succeedsWith (3, 4, 5)
+    }
+
+    about ("load") {
+
+      program ("load()") failsWith "bad argument #1 to 'load' (function expected, got no value)"
+      program ("load({})") failsWith "bad argument #1 to 'load' (function expected, got table)"
+      program ("load(nil)") failsWith "bad argument #1 to 'load' (function expected, got nil)"
+
+      program ("return load(42)") succeedsWith (null, classOf[String])
+      program ("return load(42, 42, 42)") succeedsWith (null, "attempt to load a text chunk (mode is '42')")
+
+      program ("return load('return nil', nil)") succeedsWith (classOf[lua.Function])
+
+      program ("return load('return 1 + 2')()") succeedsWith (3)
+
+      program ("return load('return x', nil, 't', {x = 10})()") succeedsWith (10)
+
+      program ("local x = 20; return load('return x')()") succeedsWith (null)
+      program ("x = 20; return load('return x')()") succeedsWith (20)
+
+      program ("local e = load('return _ENV')(); return _ENV, e, _ENV == e") succeedsWith (classOf[Table], classOf[Table], true)
+
+      program (
+        """local n = 5
+          |local i = 0
+          |local function f()
+          |    i = i + 1
+          |    if i == 1 then return "return "
+          |        elseif i < n+1 then return (i-1) .. ","
+          |        elseif i == n+1 then return (i-1)
+          |        else return nil
+          |    end
+          |end
+          |return load(f)()
+        """) succeedsWith (1, 2, 3, 4, 5)
+
     }
 
 
