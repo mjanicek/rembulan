@@ -245,12 +245,12 @@ public class DefaultStringLib extends StringLib {
 			}
 			else {
 				// find a pattern
-				Pattern pat = Pattern.fromString(pattern);
+				StringPattern pat = StringPattern.fromString(pattern);
 
 				final ArrayList<Object> results = new ArrayList<>();
 				final ArrayList<Object> captures = new ArrayList<>();
 
-				int nextIndex = pat.match(s, init, new Pattern.MatchAction() {
+				int nextIndex = pat.match(s, init, new StringPattern.MatchAction() {
 
 					@Override
 					public void onMatch(String s, int firstIndex, int lastIndex) {
@@ -704,10 +704,10 @@ public class DefaultStringLib extends StringLib {
 		public static class IteratorFunction extends AbstractFunction0 {
 
 			public final String string;
-			public final Pattern pattern;
+			public final StringPattern pattern;
 			private final AtomicInteger index;
 
-			public IteratorFunction(String string, Pattern pattern) {
+			public IteratorFunction(String string, StringPattern pattern) {
 				this.string = Check.notNull(string);
 				this.pattern = Check.notNull(pattern);
 				this.index = new AtomicInteger(1);
@@ -727,7 +727,7 @@ public class DefaultStringLib extends StringLib {
 					fullMatch[0] = null;
 					captures.clear();
 
-					nextIndex = pattern.match(string, oldIndex, new Pattern.MatchAction() {
+					nextIndex = pattern.match(string, oldIndex, new StringPattern.MatchAction() {
 						@Override
 						public void onMatch(String s, int firstIndex, int lastIndex) {
 							fullMatch[0] = s.substring(firstIndex - 1, lastIndex);
@@ -772,7 +772,7 @@ public class DefaultStringLib extends StringLib {
 			String s = args.nextString();
 			String pattern = args.nextString();
 
-			Pattern pat = Pattern.fromString(pattern, true);
+			StringPattern pat = StringPattern.fromString(pattern, true);
 
 			Function f = new IteratorFunction(s, pat);
 
@@ -832,12 +832,12 @@ public class DefaultStringLib extends StringLib {
 
 			init = lowerBound(init, s.length());
 
-			Pattern pat = Pattern.fromString(pattern);
+			StringPattern pat = StringPattern.fromString(pattern);
 
 			final String[] fullMatch = new String[] { null };
 			final ArrayList<Object> captures = new ArrayList<>();
 
-			int nextIndex = pat.match(s, init, new Pattern.MatchAction() {
+			int nextIndex = pat.match(s, init, new StringPattern.MatchAction() {
 				@Override
 				public void onMatch(String s, int firstIndex, int lastIndex) {
 					fullMatch[0] = s.substring(firstIndex - 1, lastIndex);

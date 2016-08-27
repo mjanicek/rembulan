@@ -16,16 +16,16 @@
 
 package net.sandius.rembulan.lib.impl;
 
-public class Pattern {
+public class StringPattern {
 
-	private Pattern() {
+	private StringPattern() {
 	}
 
-	public static Pattern fromString(String pattern, boolean ignoreCaret) {
+	public static StringPattern fromString(String pattern, boolean ignoreCaret) {
 		throw new UnsupportedOperationException();  // TODO
 	}
 
-	public static Pattern fromString(String pattern) {
+	public static StringPattern fromString(String pattern) {
 		return fromString(pattern, false);
 	}
 
