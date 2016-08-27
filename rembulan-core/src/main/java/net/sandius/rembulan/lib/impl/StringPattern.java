@@ -164,11 +164,11 @@ import java.util.List;
  */
 public class StringPattern {
 
-	private final List<PatternItem> items;
+	private final List<PI> items;
 	private final boolean anchoredBegin;
 
 	private StringPattern(
-			List<PatternItem> items,
+			List<PI> items,
 			boolean anchoredBegin) {
 
 		this.items = Check.notNull(items);
@@ -233,9 +233,9 @@ public class StringPattern {
 
 		static class CharacterClassSetElement extends SetElement {
 
-			private final CharacterClass ccl;
+			private final CC ccl;
 
-			CharacterClassSetElement(CharacterClass ccl) {
+			CharacterClassSetElement(CC ccl) {
 				this.ccl = Check.notNull(ccl);
 			}
 
@@ -248,202 +248,201 @@ public class StringPattern {
 
 	}
 
-	static abstract class CharacterClass {
+	static abstract class CC {
+	}
 
-		static class LiteralCharacterClass extends CharacterClass {
+	static class CC_lit extends CC {
 
-			private final char c;
+		private final char c;
 
-			LiteralCharacterClass(char c) {
-				this.c = c;
-			}
-
-			@Override
-			public String toString() {
-				return (isMagic(c) ? "%" : "") + Character.toString(c);
-			}
-
+		CC_lit(char c) {
+			this.c = c;
 		}
 
-		static class SpecialCharacterClass extends CharacterClass {
-
-			enum ClassDesc {
-
-				ALL("."),  // .
-				LETTERS("%a"),  // %a
-				LOWERCASE_LETTERS("%l"),  // %l
-				UPPERCASE_LETTERS("%u"),  // %u
-				DECIMAL_DIGITS("%d"),  // %d
-				HEXADECIMAL_DIGITS("%x"),  // %x
-				ALPHANUMERIC("%w"),  // %w
-				SPACE("%s"),  // %s
-				CONTROL_CHARS("%c"),  // %c
-				PUNCTUATION("%p"),  // %p
-				PRINTABLE_EXCEPT_SPACE("%g");  // %g
-
-				private final String s;
-
-				ClassDesc(String s) {
-					this.s = s;
-				}
-
-				@Override
-				public String toString() {
-					return s;
-				}
-
-			}
-
-			private final ClassDesc desc;
-			private final boolean complement;
-
-			SpecialCharacterClass(ClassDesc desc, boolean complement) {
-				this.desc = Check.notNull(desc);
-				this.complement = complement;
-			}
-
-			@Override
-			public String toString() {
-				String s = desc.toString();
-				return complement ? s.toUpperCase() : s;
-			}
-
-		}
-
-		static class SetCharacterClass extends CharacterClass {
-
-			private final CharacterSet cs;
-			private final boolean complement;
-
-			SetCharacterClass(CharacterSet cs, boolean complement) {
-				this.cs = Check.notNull(cs);
-				this.complement = complement;
-			}
-
-			@Override
-			public String toString() {
-				return (complement ? "[^" : "[") + cs.toString() + "]";
-			}
-
+		@Override
+		public String toString() {
+			return (isMagic(c) ? "%" : "") + Character.toString(c);
 		}
 
 	}
 
-	static abstract class PatternItem {
+	static class CC_spec extends CC {
 
-		static class EosPatternItem extends PatternItem {
+		enum ClassDesc {
+
+			ALL("."),  // .
+			LETTERS("%a"),  // %a
+			LOWERCASE_LETTERS("%l"),  // %l
+			UPPERCASE_LETTERS("%u"),  // %u
+			DECIMAL_DIGITS("%d"),  // %d
+			HEXADECIMAL_DIGITS("%x"),  // %x
+			ALPHANUMERIC("%w"),  // %w
+			SPACE("%s"),  // %s
+			CONTROL_CHARS("%c"),  // %c
+			PUNCTUATION("%p"),  // %p
+			PRINTABLE_EXCEPT_SPACE("%g");  // %g
+
+			private final String s;
+
+			ClassDesc(String s) {
+				this.s = s;
+			}
 
 			@Override
 			public String toString() {
-				return "$";
+				return s;
 			}
 
 		}
 
-		static class CharacterClassPatternItem extends PatternItem {
+		private final ClassDesc desc;
+		private final boolean complement;
 
-			enum Modifier {
-
-				EXACTLY_ONCE(""),  // no modifier
-				LONGEST_ZERO_OR_MORE("*"),  // *
-				SHORTEST_ZERO_OR_MORE("-"),  // -
-				ONE_OR_MORE("+"),  // +
-				AT_MOST_ONCE("?");  // ?
-
-				private final String s;
-
-				Modifier(String s) {
-					this.s = s;
-				}
-
-				@Override
-				public String toString() {
-					return s;
-				}
-
-			}
-
-			private final CharacterClass ccl;
-			private final Modifier mod;
-
-			CharacterClassPatternItem(CharacterClass ccl, Modifier mod) {
-				this.ccl = Check.notNull(ccl);
-				this.mod = Check.notNull(mod);
-			}
-
-			@Override
-			public String toString() {
-				return ccl.toString() + mod.toString();
-			}
-
+		CC_spec(ClassDesc desc, boolean complement) {
+			this.desc = Check.notNull(desc);
+			this.complement = complement;
 		}
 
-		// %1, %2, ..., %9
-		static class CaptureMatchPatternItem extends PatternItem {
-
-			private final int index;
-
-			CaptureMatchPatternItem(int index) {
-				this.index = Check.inRange(index, 1, 9);
-			}
-
-			@Override
-			public String toString() {
-				return "%" + index;
-			}
-
+		@Override
+		public String toString() {
+			String s = desc.toString();
+			return complement ? s.toUpperCase() : s;
 		}
 
-		// %bxy
-		static class BalancedPatternItem extends PatternItem {
+	}
 
-			private final char first;
-			private final char second;
+	static class CC_set extends CC {
 
-			BalancedPatternItem(char first, char second) {
-				this.first = first;
-				this.second = second;
-			}
+		private final CharacterSet cs;
+		private final boolean complement;
 
-			@Override
-			public String toString() {
-				return "%b" + first + second;
-			}
-
+		CC_set(CharacterSet cs, boolean complement) {
+			this.cs = Check.notNull(cs);
+			this.complement = complement;
 		}
 
-		// %f[set]
-		static class FrontierPatternItem extends PatternItem {
-
-			private final CharacterSet cs;
-
-			FrontierPatternItem(CharacterSet cs) {
-				this.cs = Check.notNull(cs);
-			}
-
-			@Override
-			public String toString() {
-				return "%f[" + cs.toString() + "]";
-			}
-
+		@Override
+		public String toString() {
+			return (complement ? "[^" : "[") + cs.toString() + "]";
 		}
 
-		// (pattern)
-		static class CapturePatternItem extends PatternItem {
+	}
 
-			private final List<PatternItem> subPattern;  // may be empty
-			private final int index;
+	enum Repeat {
 
-			CapturePatternItem(List<PatternItem> subPattern, int index) {
-				this.subPattern = Check.notNull(subPattern);
-				this.index = Check.positive(index);
-			}
+		EXACTLY_ONCE(""),  // no modifier
+		LONGEST_ZERO_OR_MORE("*"),  // *
+		SHORTEST_ZERO_OR_MORE("-"),  // -
+		ONE_OR_MORE("+"),  // +
+		AT_MOST_ONCE("?");  // ?
 
-			@Override
-			public String toString() {
-				return "(" + patternItemsToString(subPattern) + ")";
-			}
+		private final String s;
 
+		Repeat(String s) {
+			this.s = s;
+		}
+
+		@Override
+		public String toString() {
+			return s;
+		}
+
+	}
+
+	static abstract class PI {
+
+	}
+
+	static class PI_eos extends PI {
+
+		@Override
+		public String toString() {
+			return "$";
+		}
+
+	}
+
+	static class PI_cc extends PI {
+
+		private final CC ccl;
+		private final Repeat mod;
+
+		PI_cc(CC ccl, Repeat mod) {
+			this.ccl = Check.notNull(ccl);
+			this.mod = Check.notNull(mod);
+		}
+
+		@Override
+		public String toString() {
+			return ccl.toString() + mod.toString();
+		}
+
+	}
+
+	// %1, %2, ..., %9
+	static class PI_cmatch extends PI {
+
+		private final int index;
+
+		PI_cmatch(int index) {
+			this.index = Check.inRange(index, 1, 9);
+		}
+
+		@Override
+		public String toString() {
+			return "%" + index;
+		}
+
+	}
+
+	// %bxy
+	static class PI_balanced extends PI {
+
+		private final char first;
+		private final char second;
+
+		PI_balanced(char first, char second) {
+			this.first = first;
+			this.second = second;
+		}
+
+		@Override
+		public String toString() {
+			return "%b" + first + second;
+		}
+
+	}
+
+	// %f[set]
+	static class PI_frontier extends PI {
+
+		private final CharacterSet cs;
+
+		PI_frontier(CharacterSet cs) {
+			this.cs = Check.notNull(cs);
+		}
+
+		@Override
+		public String toString() {
+			return "%f[" + cs.toString() + "]";
+		}
+
+	}
+
+	// (pattern)
+	static class PI_capture extends PI {
+
+		private final List<PI> subPattern;  // may be empty
+		private final int index;
+
+		PI_capture(List<PI> subPattern, int index) {
+			this.subPattern = Check.notNull(subPattern);
+			this.index = Check.positive(index);
+		}
+
+		@Override
+		public String toString() {
+			return "(" + listOfPIToString(subPattern) + ")";
 		}
 
 	}
@@ -507,22 +506,22 @@ public class StringPattern {
 			index += offset;
 		}
 
-		private PatternItem.CharacterClassPatternItem.Modifier modifier() {
+		private Repeat repeat() {
 			if (!isEos()) {
 				char d = peek();
 				switch (d) {
-					case '+': skip(1); return PatternItem.CharacterClassPatternItem.Modifier.ONE_OR_MORE;
-					case '*': skip(1); return PatternItem.CharacterClassPatternItem.Modifier.LONGEST_ZERO_OR_MORE;
-					case '-': skip(1); return PatternItem.CharacterClassPatternItem.Modifier.SHORTEST_ZERO_OR_MORE;
-					case '?': skip(1); return PatternItem.CharacterClassPatternItem.Modifier.AT_MOST_ONCE;
+					case '+': skip(1); return Repeat.ONE_OR_MORE;
+					case '*': skip(1); return Repeat.LONGEST_ZERO_OR_MORE;
+					case '-': skip(1); return Repeat.SHORTEST_ZERO_OR_MORE;
+					case '?': skip(1); return Repeat.AT_MOST_ONCE;
 				}
 			}
 
-			return PatternItem.CharacterClassPatternItem.Modifier.EXACTLY_ONCE;
+			return Repeat.EXACTLY_ONCE;
 		}
 
 		private CharacterSet.SetElement characterSetElement() {
-			CharacterClass ccl = maybeEscClass();
+			CC ccl = tryEscapedCC();
 			if (ccl != null) {
 				return new CharacterSet.CharacterClassSetElement(ccl);
 			}
@@ -537,7 +536,7 @@ public class StringPattern {
 				}
 				else {
 					// not a range
-					return new CharacterSet.CharacterClassSetElement(litClass(c));
+					return new CharacterSet.CharacterClassSetElement(CC_lit(c));
 				}
 			}
 		}
@@ -555,26 +554,26 @@ public class StringPattern {
 			return new CharacterSet(Collections.unmodifiableList(elems));
 		}
 
-		private PatternItem.FrontierPatternItem frontier() {
+		private PI_frontier PI_frontier() {
 			consume("%f[");
 			CharacterSet cs = characterSetBody();
 			consume("]");
-			return new PatternItem.FrontierPatternItem(cs);
+			return new PI_frontier(cs);
 		}
 
-		private PatternItem.BalancedPatternItem balanced() {
+		private PI_balanced PI_balanced() {
 			consume("%b");
 			char x = next();
 			char y = next();
-			return new PatternItem.BalancedPatternItem(x, y);
+			return new PI_balanced(x, y);
 		}
 
-		private PatternItem.CaptureMatchPatternItem captureMatch() {
+		private PI_cmatch PI_cmatch() {
 			consume("%");
 			char c = next();
 			if (c >= '0' && c <= '9') {
 				int cidx = (int) c - (int) '0';
-				return new PatternItem.CaptureMatchPatternItem(cidx);
+				return new PI_cmatch(cidx);
 			}
 			else {
 				throw new IllegalArgumentException("error at character " + index + ": expected '0'..'9', got "
@@ -597,43 +596,43 @@ public class StringPattern {
 			return true;
 		}
 
-		private CharacterClass.LiteralCharacterClass litClass(char c) {
+		private CC_lit CC_lit(char c) {
 			if (isMagic(c)) {
 				throw new IllegalArgumentException("error at character " + index + ": unexpected magic character '" + c + "'");
 			}
-			return new CharacterClass.LiteralCharacterClass(c);
+			return new CC_lit(c);
 		}
 
-		private static CharacterClass.SpecialCharacterClass.ClassDesc maybeClassDesc(int c) {
+		private static CC_spec.ClassDesc maybeClassDesc(int c) {
 			switch (c) {
-				case 'a': return CharacterClass.SpecialCharacterClass.ClassDesc.LETTERS;
-				case 'c': return CharacterClass.SpecialCharacterClass.ClassDesc.CONTROL_CHARS;
-				case 'd': return CharacterClass.SpecialCharacterClass.ClassDesc.DECIMAL_DIGITS;
-				case 'g': return CharacterClass.SpecialCharacterClass.ClassDesc.PRINTABLE_EXCEPT_SPACE;
-				case 'l': return CharacterClass.SpecialCharacterClass.ClassDesc.LOWERCASE_LETTERS;
-				case 'p': return CharacterClass.SpecialCharacterClass.ClassDesc.PUNCTUATION;
-				case 's': return CharacterClass.SpecialCharacterClass.ClassDesc.SPACE;
-				case 'u': return CharacterClass.SpecialCharacterClass.ClassDesc.UPPERCASE_LETTERS;
-				case 'w': return CharacterClass.SpecialCharacterClass.ClassDesc.ALPHANUMERIC;
-				case 'x': return CharacterClass.SpecialCharacterClass.ClassDesc.HEXADECIMAL_DIGITS;
+				case 'a': return CC_spec.ClassDesc.LETTERS;
+				case 'c': return CC_spec.ClassDesc.CONTROL_CHARS;
+				case 'd': return CC_spec.ClassDesc.DECIMAL_DIGITS;
+				case 'g': return CC_spec.ClassDesc.PRINTABLE_EXCEPT_SPACE;
+				case 'l': return CC_spec.ClassDesc.LOWERCASE_LETTERS;
+				case 'p': return CC_spec.ClassDesc.PUNCTUATION;
+				case 's': return CC_spec.ClassDesc.SPACE;
+				case 'u': return CC_spec.ClassDesc.UPPERCASE_LETTERS;
+				case 'w': return CC_spec.ClassDesc.ALPHANUMERIC;
+				case 'x': return CC_spec.ClassDesc.HEXADECIMAL_DIGITS;
 				default: return null;
 			}
 		}
 
-		private CharacterClass maybeEscClass() {
+		private CC tryEscapedCC() {
 			if (continuesWith("%")) {
 				int o = charAtOffset(1);
 				int lo = Character.toLowerCase(o);
-				CharacterClass.SpecialCharacterClass.ClassDesc cd = maybeClassDesc(lo);
+				CC_spec.ClassDesc cd = maybeClassDesc(lo);
 				if (cd != null) {
 					consume("%");
 					skip(1);
-					return new CharacterClass.SpecialCharacterClass(cd, lo != o);
+					return new CC_spec(cd, lo != o);
 				}
 				else {
 					consume("%");
 					char c = next();
-					return new CharacterClass.LiteralCharacterClass(c);
+					return new CC_lit(c);
 				}
 			}
 			else {
@@ -641,24 +640,24 @@ public class StringPattern {
 			}
 		}
 
-		private CharacterClass cclass() {
+		private CC cclass() {
 
 			if (continuesWith("[^")) {
 				consume("[^");
 				CharacterSet cs = characterSetBody();
 				consume("]");
-				return new CharacterClass.SetCharacterClass(cs, true);
+				return new CC_set(cs, true);
 			}
 
 			if (continuesWith("[")) {
 				consume("[");
 				CharacterSet cs = characterSetBody();
 				consume("]");
-				return new CharacterClass.SetCharacterClass(cs, false);
+				return new CC_set(cs, false);
 			}
 
 
-			CharacterClass ccl = maybeEscClass();
+			CC ccl = tryEscapedCC();
 
 			if (ccl != null) {
 				return ccl;
@@ -666,57 +665,57 @@ public class StringPattern {
 			else {
 				char c = next();
 				if (c == '.') {
-					return new CharacterClass.SpecialCharacterClass(CharacterClass.SpecialCharacterClass.ClassDesc.ALL, false);
+					return new CC_spec(CC_spec.ClassDesc.ALL, false);
 				}
 				else {
-					return litClass(c);
+					return CC_lit(c);
 				}
 			}
 		}
 
-		private PatternItem.CharacterClassPatternItem characterClassPatternItem() {
-			CharacterClass ccl = cclass();
-			PatternItem.CharacterClassPatternItem.Modifier mod = modifier();
-			return new PatternItem.CharacterClassPatternItem(ccl, mod);
+		private PI_cc PI_cc() {
+			CC ccl = cclass();
+			Repeat mod = repeat();
+			return new PI_cc(ccl, mod);
 		}
 
-		private PatternItem patternItem() {
+		private PI PI() {
 			if (continuesWith("(")) {
-				return capture();
+				return PI_capture();
 			}
 			else if (continuesWith("%f[")) {
-				return frontier();
+				return PI_frontier();
 			}
 			else if (continuesWith("%b")) {
-				return balanced();
+				return PI_balanced();
 			}
 			else if (continuesWith("%") && charAtOffset(1) >= (int) '0' && charAtOffset(1) <= (int) '9') {
-				return captureMatch();
+				return PI_cmatch();
 			}
 			else if (continuesWith("$") && charAtOffset(1) == -1) {
 				skip(1);
-				return new PatternItem.EosPatternItem();
+				return new PI_eos();
 			}
 			else {
-				return characterClassPatternItem();
+				return PI_cc();
 			}
 		}
 
-		private PatternItem.CapturePatternItem capture() {
+		private PI_capture PI_capture() {
 			consume('(');
 			int capIdx = nextCaptureIndex++;
-			List<PatternItem> items = new ArrayList<>();
+			List<PI> items = new ArrayList<>();
 			while (!isEos() && peek() != ')') {
-				items.add(patternItem());
+				items.add(PI());
 			}
 			consume(')');
-			return new PatternItem.CapturePatternItem(Collections.unmodifiableList(items), capIdx);
+			return new PI_capture(Collections.unmodifiableList(items), capIdx);
 		}
 
-		private List<PatternItem> parse() {
-			List<PatternItem> items = new ArrayList<>();
+		private List<PI> parse() {
+			List<PI> items = new ArrayList<>();
 			while (!isEos()) {
-				items.add(patternItem());
+				items.add(PI());
 			}
 			return Collections.unmodifiableList(items);
 		}
@@ -738,7 +737,7 @@ public class StringPattern {
 		}
 
 		PatternBuilder builder = new PatternBuilder(pattern);
-		List<PatternItem> items = builder.parse();
+		List<PI> items = builder.parse();
 
 		return new StringPattern(items, anchoredBegin);
 	}
@@ -747,9 +746,9 @@ public class StringPattern {
 		return fromString(pattern, false);
 	}
 
-	private static String patternItemsToString(List<PatternItem> items) {
+	private static String listOfPIToString(List<PI> items) {
 		StringBuilder builder = new StringBuilder();
-		for (PatternItem pi : items) {
+		for (PI pi : items) {
 			builder.append(pi.toString());
 		}
 		return builder.toString();
@@ -759,7 +758,7 @@ public class StringPattern {
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		if (anchoredBegin) builder.append('^');
-		builder.append(patternItemsToString(items));
+		builder.append(listOfPIToString(items));
 		return builder.toString();
 	}
 
