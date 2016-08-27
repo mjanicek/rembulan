@@ -132,33 +132,6 @@ public class DefaultStringLib extends StringLib {
 		return Upper.INSTANCE;
 	}
 
-	public static class Pattern {
-
-		private Pattern() {
-		}
-
-		public static Pattern fromString(String pattern, boolean ignoreCaret) {
-			throw new UnsupportedOperationException();  // TODO
-		}
-
-		public static Pattern fromString(String pattern) {
-			return fromString(pattern, false);
-		}
-
-		public interface MatchAction {
-			void onMatch(String s, int firstIndex, int lastIndex);
-			// if value == null, it's just the index
-			void onCapture(String s, int index, String value);
-		}
-
-		// returns the index immediately following the match,
-		// or 0 if not match was found
-		public int match(String s, int fromIndex, MatchAction action) {
-			throw new UnsupportedOperationException();  // TODO
-		}
-
-	}
-
 	private static int lowerBound(int i, int len) {
 		int j = i < 0 ? len + i + 1 : i;
 		return j < 1 ? 1 : j;
