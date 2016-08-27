@@ -48,7 +48,9 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Patterns in Lua are described by regular strings, which are interpreted as patterns
@@ -452,11 +454,17 @@ public class StringPattern {
 		private final CharSequence pattern;
 		private int index;
 		private int nextCaptureIndex;
+		private Set<Integer> assignedCaptures;
 
 		PatternBuilder(CharSequence pattern) {
 			this.pattern = Check.notNull(pattern);
 			this.index = 0;
 			this.nextCaptureIndex = 1;
+			assignedCaptures = new HashSet<>();
+		}
+
+		private static RuntimeException parseError(int index, String message) {
+			return new IllegalArgumentException("error at character " + index + ": " + message);
 		}
 
 		private char peek() {
@@ -464,16 +472,13 @@ public class StringPattern {
 				return pattern.charAt(index);
 			}
 			else {
-				throw new IllegalArgumentException("unexpected end of string at character " + index);
+				throw parseError(index, "unexpected <eos>");
 			}
 		}
 
 		private String pretty(int idx) {
-			return idx >= 0
-					? idx < pattern.length()
-							? "'" + pattern.charAt(idx) + "'"
-							: "<eos>"
-					: "<neg>";
+			// assuming idx >= 0
+			return idx < pattern.length() ? "'" + pattern.charAt(idx) + "'" : "<eos>";
 		}
 
 		private boolean isEos() {
@@ -491,8 +496,7 @@ public class StringPattern {
 				index += 1;
 			}
 			else {
-				throw new IllegalArgumentException("error at character " + index + ": expected '"
-						+ c + "', got " + pretty(index));
+				throw parseError(index, "expected '" + c + "', got " + pretty(index));
 			}
 		}
 
@@ -548,7 +552,7 @@ public class StringPattern {
 			}
 
 			if (elems.isEmpty()) {
-				throw new IllegalArgumentException("error at character " + index + ": empty character set");
+				throw parseError(index, "empty character set");
 			}
 
 			return new CharacterSet(Collections.unmodifiableList(elems));
@@ -571,13 +575,18 @@ public class StringPattern {
 		private PI_cmatch PI_cmatch() {
 			consume("%");
 			char c = next();
-			if (c >= '0' && c <= '9') {
+			if (c >= '1' && c <= '9') {
 				int cidx = (int) c - (int) '0';
-				return new PI_cmatch(cidx);
+				// "(()%1)" and "()%2" should be rejected, but "(()%2)" is ok
+				if (!assignedCaptures.contains(cidx)) {
+					throw parseError(index, "capture #" + cidx + " not resolved at this point");
+				}
+				else {
+					return new PI_cmatch(cidx);
+				}
 			}
 			else {
-				throw new IllegalArgumentException("error at character " + index + ": expected '0'..'9', got "
-						+ pretty(index));
+				throw parseError(index, "expected '1'..'9', got " + pretty(index));
 			}
 		}
 
@@ -598,7 +607,7 @@ public class StringPattern {
 
 		private CC_lit CC_lit(char c) {
 			if (isMagic(c)) {
-				throw new IllegalArgumentException("error at character " + index + ": unexpected magic character '" + c + "'");
+				throw parseError(index, "unexpected character '" + c + "'");
 			}
 			return new CC_lit(c);
 		}
@@ -689,7 +698,7 @@ public class StringPattern {
 			else if (continuesWith("%b")) {
 				return PI_balanced();
 			}
-			else if (continuesWith("%") && charAtOffset(1) >= (int) '0' && charAtOffset(1) <= (int) '9') {
+			else if (continuesWith("%") && charAtOffset(1) >= (int) '1' && charAtOffset(1) <= (int) '9') {
 				return PI_cmatch();
 			}
 			else if (continuesWith("$") && charAtOffset(1) == -1) {
@@ -708,6 +717,7 @@ public class StringPattern {
 			while (!isEos() && peek() != ')') {
 				items.add(PI());
 			}
+			assignedCaptures.add(capIdx);
 			consume(')');
 			return new PI_capture(Collections.unmodifiableList(items), capIdx);
 		}
