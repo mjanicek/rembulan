@@ -44,6 +44,11 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.lib.StringLib;
+import net.sandius.rembulan.util.Check;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Patterns in Lua are described by regular strings, which are interpreted as patterns
@@ -159,15 +164,21 @@ import net.sandius.rembulan.lib.StringLib;
  */
 public class StringPattern {
 
-	private StringPattern() {
+	private final List<PatternItem> items;
+	private final boolean anchoredBegin;
+
+	private StringPattern(
+			List<PatternItem> items,
+			boolean anchoredBegin) {
+
+		this.items = Check.notNull(items);
+		this.anchoredBegin = anchoredBegin;
 	}
 
-	public static StringPattern fromString(String pattern, boolean ignoreCaret) {
-		throw new UnsupportedOperationException();  // TODO
-	}
+	private static final String MAGIC = "^$()%.[]*+-?";
 
-	public static StringPattern fromString(String pattern) {
-		return fromString(pattern, false);
+	private static boolean isMagic(char c) {
+		return MAGIC.indexOf(c) != -1;
 	}
 
 	public interface MatchAction {
@@ -180,6 +191,576 @@ public class StringPattern {
 	// or 0 if not match was found
 	public int match(String s, int fromIndex, MatchAction action) {
 		throw new UnsupportedOperationException();  // TODO
+	}
+
+	static class CharacterSet {
+
+		private final List<SetElement> elements;
+
+		CharacterSet(List<SetElement> elements) {
+			this.elements = Check.notNull(elements);
+		}
+
+		@Override
+		public String toString() {
+			StringBuilder bld = new StringBuilder();
+			for (SetElement element : elements) {
+				bld.append(element);
+			}
+			return bld.toString();
+		}
+
+		static abstract class SetElement {
+
+		}
+
+		static class RangeSetElement extends SetElement {
+
+			private final char min;
+			private final char max;
+
+			RangeSetElement(char min, char max) {
+				this.min = min;
+				this.max = max;
+			}
+
+			@Override
+			public String toString() {
+				return min + "-" + max;
+			}
+
+		}
+
+		static class CharacterClassSetElement extends SetElement {
+
+			private final CharacterClass ccl;
+
+			CharacterClassSetElement(CharacterClass ccl) {
+				this.ccl = Check.notNull(ccl);
+			}
+
+			@Override
+			public String toString() {
+				return ccl.toString();
+			}
+
+		}
+
+	}
+
+	static abstract class CharacterClass {
+
+		static class LiteralCharacterClass extends CharacterClass {
+
+			private final char c;
+
+			LiteralCharacterClass(char c) {
+				this.c = c;
+			}
+
+			@Override
+			public String toString() {
+				return (isMagic(c) ? "%" : "") + Character.toString(c);
+			}
+
+		}
+
+		static class SpecialCharacterClass extends CharacterClass {
+
+			enum ClassDesc {
+
+				ALL("."),  // .
+				LETTERS("%a"),  // %a
+				LOWERCASE_LETTERS("%l"),  // %l
+				UPPERCASE_LETTERS("%u"),  // %u
+				DECIMAL_DIGITS("%d"),  // %d
+				HEXADECIMAL_DIGITS("%x"),  // %x
+				ALPHANUMERIC("%w"),  // %w
+				SPACE("%s"),  // %s
+				CONTROL_CHARS("%c"),  // %c
+				PUNCTUATION("%p"),  // %p
+				PRINTABLE_EXCEPT_SPACE("%g");  // %g
+
+				private final String s;
+
+				ClassDesc(String s) {
+					this.s = s;
+				}
+
+				@Override
+				public String toString() {
+					return s;
+				}
+
+			}
+
+			private final ClassDesc desc;
+			private final boolean complement;
+
+			SpecialCharacterClass(ClassDesc desc, boolean complement) {
+				this.desc = Check.notNull(desc);
+				this.complement = complement;
+			}
+
+			@Override
+			public String toString() {
+				String s = desc.toString();
+				return complement ? s.toUpperCase() : s;
+			}
+
+		}
+
+		static class SetCharacterClass extends CharacterClass {
+
+			private final CharacterSet cs;
+			private final boolean complement;
+
+			SetCharacterClass(CharacterSet cs, boolean complement) {
+				this.cs = Check.notNull(cs);
+				this.complement = complement;
+			}
+
+			@Override
+			public String toString() {
+				return (complement ? "[^" : "[") + cs.toString() + "]";
+			}
+
+		}
+
+	}
+
+	static abstract class PatternItem {
+
+		static class EosPatternItem extends PatternItem {
+
+			@Override
+			public String toString() {
+				return "$";
+			}
+
+		}
+
+		static class CharacterClassPatternItem extends PatternItem {
+
+			enum Modifier {
+
+				EXACTLY_ONCE(""),  // no modifier
+				LONGEST_ZERO_OR_MORE("*"),  // *
+				SHORTEST_ZERO_OR_MORE("-"),  // -
+				ONE_OR_MORE("+"),  // +
+				AT_MOST_ONCE("?");  // ?
+
+				private final String s;
+
+				Modifier(String s) {
+					this.s = s;
+				}
+
+				@Override
+				public String toString() {
+					return s;
+				}
+
+			}
+
+			private final CharacterClass ccl;
+			private final Modifier mod;
+
+			CharacterClassPatternItem(CharacterClass ccl, Modifier mod) {
+				this.ccl = Check.notNull(ccl);
+				this.mod = Check.notNull(mod);
+			}
+
+			@Override
+			public String toString() {
+				return ccl.toString() + mod.toString();
+			}
+
+		}
+
+		// %1, %2, ..., %9
+		static class CaptureMatchPatternItem extends PatternItem {
+
+			private final int index;
+
+			CaptureMatchPatternItem(int index) {
+				this.index = Check.inRange(index, 1, 9);
+			}
+
+			@Override
+			public String toString() {
+				return "%" + index;
+			}
+
+		}
+
+		// %bxy
+		static class BalancedPatternItem extends PatternItem {
+
+			private final char first;
+			private final char second;
+
+			BalancedPatternItem(char first, char second) {
+				this.first = first;
+				this.second = second;
+			}
+
+			@Override
+			public String toString() {
+				return "%b" + first + second;
+			}
+
+		}
+
+		// %f[set]
+		static class FrontierPatternItem extends PatternItem {
+
+			private final CharacterSet cs;
+
+			FrontierPatternItem(CharacterSet cs) {
+				this.cs = Check.notNull(cs);
+			}
+
+			@Override
+			public String toString() {
+				return "%f[" + cs.toString() + "]";
+			}
+
+		}
+
+		// (pattern)
+		static class CapturePatternItem extends PatternItem {
+
+			private final List<PatternItem> subPattern;  // may be empty
+			private final int index;
+
+			CapturePatternItem(List<PatternItem> subPattern, int index) {
+				this.subPattern = Check.notNull(subPattern);
+				this.index = Check.positive(index);
+			}
+
+			@Override
+			public String toString() {
+				return "(" + patternItemsToString(subPattern) + ")";
+			}
+
+		}
+
+	}
+
+	static class PatternBuilder {
+
+		private final CharSequence pattern;
+		private int index;
+		private int nextCaptureIndex;
+
+		PatternBuilder(CharSequence pattern) {
+			this.pattern = Check.notNull(pattern);
+			this.index = 0;
+			this.nextCaptureIndex = 1;
+		}
+
+		private char peek() {
+			if (index < pattern.length()) {
+				return pattern.charAt(index);
+			}
+			else {
+				throw new IllegalArgumentException("unexpected end of string at character " + index);
+			}
+		}
+
+		private String pretty(int idx) {
+			return idx >= 0
+					? idx < pattern.length()
+							? "'" + pattern.charAt(idx) + "'"
+							: "<eos>"
+					: "<neg>";
+		}
+
+		private boolean isEos() {
+			return index >= pattern.length();
+		}
+
+		private void consume(String s) {
+			for (int i = 0; i < s.length(); i++) {
+				consume(s.charAt(i));
+			}
+		}
+
+		private void consume(char c) {
+			if (index < pattern.length() && pattern.charAt(index) == c) {
+				index += 1;
+			}
+			else {
+				throw new IllegalArgumentException("error at character " + index + ": expected '"
+						+ c + "', got " + pretty(index));
+			}
+		}
+
+		private char next() {
+			char c = peek();
+			index++;
+			return c;
+		}
+
+		private void skip(int offset) {
+			index += offset;
+		}
+
+		private PatternItem.CharacterClassPatternItem.Modifier modifier() {
+			if (!isEos()) {
+				char d = peek();
+				switch (d) {
+					case '+': skip(1); return PatternItem.CharacterClassPatternItem.Modifier.ONE_OR_MORE;
+					case '*': skip(1); return PatternItem.CharacterClassPatternItem.Modifier.LONGEST_ZERO_OR_MORE;
+					case '-': skip(1); return PatternItem.CharacterClassPatternItem.Modifier.SHORTEST_ZERO_OR_MORE;
+					case '?': skip(1); return PatternItem.CharacterClassPatternItem.Modifier.AT_MOST_ONCE;
+				}
+			}
+
+			return PatternItem.CharacterClassPatternItem.Modifier.EXACTLY_ONCE;
+		}
+
+		private CharacterSet.SetElement characterSetElement() {
+			CharacterClass ccl = maybeEscClass();
+			if (ccl != null) {
+				return new CharacterSet.CharacterClassSetElement(ccl);
+			}
+			else {
+				// not escaped
+				char c = next();
+				if (peek() == '-') {
+					// it's a range
+					consume("-");
+					char d = next();
+					return new CharacterSet.RangeSetElement(c, d);
+				}
+				else {
+					// not a range
+					return new CharacterSet.CharacterClassSetElement(litClass(c));
+				}
+			}
+		}
+
+		private CharacterSet characterSetBody() {
+			List<CharacterSet.SetElement> elems = new ArrayList<>();
+			while (!isEos() && peek() != ']') {
+				elems.add(characterSetElement());
+			}
+
+			if (elems.isEmpty()) {
+				throw new IllegalArgumentException("error at character " + index + ": empty character set");
+			}
+
+			return new CharacterSet(Collections.unmodifiableList(elems));
+		}
+
+		private PatternItem.FrontierPatternItem frontier() {
+			consume("%f[");
+			CharacterSet cs = characterSetBody();
+			consume("]");
+			return new PatternItem.FrontierPatternItem(cs);
+		}
+
+		private PatternItem.BalancedPatternItem balanced() {
+			consume("%b");
+			char x = next();
+			char y = next();
+			return new PatternItem.BalancedPatternItem(x, y);
+		}
+
+		private PatternItem.CaptureMatchPatternItem captureMatch() {
+			consume("%");
+			char c = next();
+			if (c >= '0' && c <= '9') {
+				int cidx = (int) c - (int) '0';
+				return new PatternItem.CaptureMatchPatternItem(cidx);
+			}
+			else {
+				throw new IllegalArgumentException("error at character " + index + ": expected '0'..'9', got "
+						+ pretty(index));
+			}
+		}
+
+		private int charAtOffset(int idx) {
+			int j = index + idx;
+			return j >= 0 && j < pattern.length() ? pattern.charAt(j) : -1;
+		}
+
+		private boolean continuesWith(String s) {
+			for (int i = 0; i < s.length(); i++) {
+				int j = index + i;
+				if (j >= pattern.length() || s.charAt(i) != pattern.charAt(j)) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private CharacterClass.LiteralCharacterClass litClass(char c) {
+			if (isMagic(c)) {
+				throw new IllegalArgumentException("error at character " + index + ": unexpected magic character '" + c + "'");
+			}
+			return new CharacterClass.LiteralCharacterClass(c);
+		}
+
+		private static CharacterClass.SpecialCharacterClass.ClassDesc maybeClassDesc(int c) {
+			switch (c) {
+				case 'a': return CharacterClass.SpecialCharacterClass.ClassDesc.LETTERS;
+				case 'c': return CharacterClass.SpecialCharacterClass.ClassDesc.CONTROL_CHARS;
+				case 'd': return CharacterClass.SpecialCharacterClass.ClassDesc.DECIMAL_DIGITS;
+				case 'g': return CharacterClass.SpecialCharacterClass.ClassDesc.PRINTABLE_EXCEPT_SPACE;
+				case 'l': return CharacterClass.SpecialCharacterClass.ClassDesc.LOWERCASE_LETTERS;
+				case 'p': return CharacterClass.SpecialCharacterClass.ClassDesc.PUNCTUATION;
+				case 's': return CharacterClass.SpecialCharacterClass.ClassDesc.SPACE;
+				case 'u': return CharacterClass.SpecialCharacterClass.ClassDesc.UPPERCASE_LETTERS;
+				case 'w': return CharacterClass.SpecialCharacterClass.ClassDesc.ALPHANUMERIC;
+				case 'x': return CharacterClass.SpecialCharacterClass.ClassDesc.HEXADECIMAL_DIGITS;
+				default: return null;
+			}
+		}
+
+		private CharacterClass maybeEscClass() {
+			if (continuesWith("%")) {
+				int o = charAtOffset(1);
+				int lo = Character.toLowerCase(o);
+				CharacterClass.SpecialCharacterClass.ClassDesc cd = maybeClassDesc(lo);
+				if (cd != null) {
+					consume("%");
+					skip(1);
+					return new CharacterClass.SpecialCharacterClass(cd, lo != o);
+				}
+				else {
+					consume("%");
+					char c = next();
+					return new CharacterClass.LiteralCharacterClass(c);
+				}
+			}
+			else {
+				return null;
+			}
+		}
+
+		private CharacterClass cclass() {
+
+			if (continuesWith("[^")) {
+				consume("[^");
+				CharacterSet cs = characterSetBody();
+				consume("]");
+				return new CharacterClass.SetCharacterClass(cs, true);
+			}
+
+			if (continuesWith("[")) {
+				consume("[");
+				CharacterSet cs = characterSetBody();
+				consume("]");
+				return new CharacterClass.SetCharacterClass(cs, false);
+			}
+
+
+			CharacterClass ccl = maybeEscClass();
+
+			if (ccl != null) {
+				return ccl;
+			}
+			else {
+				char c = next();
+				if (c == '.') {
+					return new CharacterClass.SpecialCharacterClass(CharacterClass.SpecialCharacterClass.ClassDesc.ALL, false);
+				}
+				else {
+					return litClass(c);
+				}
+			}
+		}
+
+		private PatternItem.CharacterClassPatternItem characterClassPatternItem() {
+			CharacterClass ccl = cclass();
+			PatternItem.CharacterClassPatternItem.Modifier mod = modifier();
+			return new PatternItem.CharacterClassPatternItem(ccl, mod);
+		}
+
+		private PatternItem patternItem() {
+			if (continuesWith("(")) {
+				return capture();
+			}
+			else if (continuesWith("%f[")) {
+				return frontier();
+			}
+			else if (continuesWith("%b")) {
+				return balanced();
+			}
+			else if (continuesWith("%") && charAtOffset(1) >= (int) '0' && charAtOffset(1) <= (int) '9') {
+				return captureMatch();
+			}
+			else if (continuesWith("$") && charAtOffset(1) == -1) {
+				skip(1);
+				return new PatternItem.EosPatternItem();
+			}
+			else {
+				return characterClassPatternItem();
+			}
+		}
+
+		private PatternItem.CapturePatternItem capture() {
+			consume('(');
+			int capIdx = nextCaptureIndex++;
+			List<PatternItem> items = new ArrayList<>();
+			while (!isEos() && peek() != ')') {
+				items.add(patternItem());
+			}
+			consume(')');
+			return new PatternItem.CapturePatternItem(Collections.unmodifiableList(items), capIdx);
+		}
+
+		private List<PatternItem> parse() {
+			List<PatternItem> items = new ArrayList<>();
+			while (!isEos()) {
+				items.add(patternItem());
+			}
+			return Collections.unmodifiableList(items);
+		}
+
+	}
+
+	public static StringPattern fromString(String pattern, boolean ignoreCaret) {
+		Check.notNull(pattern);
+
+		final boolean anchoredBegin;
+		final boolean anchoredEnd;
+
+		if (pattern.startsWith("^")) {
+			pattern = pattern.substring(1);
+			anchoredBegin = !ignoreCaret;
+		}
+		else {
+			anchoredBegin = false;
+		}
+
+		PatternBuilder builder = new PatternBuilder(pattern);
+		List<PatternItem> items = builder.parse();
+
+		return new StringPattern(items, anchoredBegin);
+	}
+
+	public static StringPattern fromString(String pattern) {
+		return fromString(pattern, false);
+	}
+
+	private static String patternItemsToString(List<PatternItem> items) {
+		StringBuilder builder = new StringBuilder();
+		for (PatternItem pi : items) {
+			builder.append(pi.toString());
+		}
+		return builder.toString();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		if (anchoredBegin) builder.append('^');
+		builder.append(patternItemsToString(items));
+		return builder.toString();
 	}
 
 }
