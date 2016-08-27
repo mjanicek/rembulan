@@ -47,6 +47,7 @@ import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -167,20 +168,21 @@ import java.util.Set;
 public class StringPattern {
 
 	private final List<PI> items;
-	private final boolean anchoredBegin;
+	private final int numCaptures;
 
 	private StringPattern(
 			List<PI> items,
-			boolean anchoredBegin) {
+			int numCaptures) {
 
 		this.items = Check.notNull(items);
-		this.anchoredBegin = anchoredBegin;
+		this.numCaptures = Check.nonNegative(numCaptures);
 	}
 
-	private static final String MAGIC = "^$()%.[]*+-?";
+	private static final String MAGIC_CHARS = "^$()%.[]*+-?";
+	private static final String PUNCTUATION_CHARS = ".,;:?!";
 
 	private static boolean isMagic(char c) {
-		return MAGIC.indexOf(c) != -1;
+		return MAGIC_CHARS.indexOf(c) != -1;
 	}
 
 	public interface MatchAction {
@@ -193,6 +195,81 @@ public class StringPattern {
 	// or 0 if not match was found
 	public int match(String s, int fromIndex, MatchAction action) {
 		throw new UnsupportedOperationException();  // TODO
+	}
+
+	public static class Match {
+
+		private final String originalString;
+		private final int beginIndex;
+		private final int endIndex;
+		private final List<Object> captures;
+
+		protected Match(String originalString, int beginIndex, int endIndex, List<Object> captures) {
+			this.originalString = Check.notNull(originalString);
+			this.beginIndex = beginIndex;
+			this.endIndex = endIndex;
+			this.captures = Check.notNull(captures);
+		}
+
+		public String originalString() {
+			return originalString;
+		}
+
+		public int beginIndex() {
+			return beginIndex;
+		}
+
+		public int endIndex() {
+			return endIndex;
+		}
+
+		public String fullMatch() {
+			return originalString.substring(beginIndex, endIndex);
+		}
+
+		public List<Object> captures() {
+			return captures;
+		}
+
+	}
+
+	// returns null to signal no-match
+	public Match match(String s, int fromIndex) {
+		Matcher matcher = new Matcher(s, fromIndex);
+		return matcher.match();
+	}
+
+	private class Matcher {
+
+		private final String str;
+		private final int beginIndex;
+		private int index;
+
+		private final Object[] captures;
+
+		Matcher(String str, int fromIndex) {
+			this.str = Check.notNull(str);
+			this.beginIndex = fromIndex;
+			this.index = this.beginIndex;
+			this.captures = new Object[numCaptures];
+		}
+
+		public Match match() {
+			for (PI pi : items) {
+				if (!pi.match(this)) {
+					return null;
+				}
+			}
+
+			int endIndex = index;
+
+			return new Match(str, beginIndex, endIndex, Collections.unmodifiableList(Arrays.asList(captures)));
+		}
+
+		public int peek() {
+			return index < str.length() ? str.charAt(index) : -1;
+		}
+
 	}
 
 	static class CharacterSet {
@@ -212,7 +289,18 @@ public class StringPattern {
 			return bld.toString();
 		}
 
+		public boolean matches(char c) {
+			for (SetElement elem : elements) {
+				if (elem.matches(c)) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		static abstract class SetElement {
+
+			public abstract boolean matches(char c);
 
 		}
 
@@ -231,6 +319,11 @@ public class StringPattern {
 				return min + "-" + max;
 			}
 
+			@Override
+			public boolean matches(char c) {
+				return c >= min && c <= max;
+			}
+
 		}
 
 		static class CharacterClassSetElement extends SetElement {
@@ -246,24 +339,37 @@ public class StringPattern {
 				return ccl.toString();
 			}
 
+			@Override
+			public boolean matches(char c) {
+				return ccl.matches(c);
+			}
+
 		}
 
 	}
 
 	static abstract class CC {
+
+		public abstract boolean matches(int c);
+
 	}
 
 	static class CC_lit extends CC {
 
-		private final char c;
+		private final char ch;
 
-		CC_lit(char c) {
-			this.c = c;
+		CC_lit(char ch) {
+			this.ch = ch;
 		}
 
 		@Override
 		public String toString() {
-			return (isMagic(c) ? "%" : "") + Character.toString(c);
+			return (isMagic(ch) ? "%" : "") + Character.toString(ch);
+		}
+
+		@Override
+		public boolean matches(int c) {
+			return c >= 0 && ch == (char) c;
 		}
 
 	}
@@ -301,6 +407,7 @@ public class StringPattern {
 		private final boolean complement;
 
 		CC_spec(ClassDesc desc, boolean complement) {
+			Check.isFalse(desc == ClassDesc.ALL && complement);
 			this.desc = Check.notNull(desc);
 			this.complement = complement;
 		}
@@ -309,6 +416,47 @@ public class StringPattern {
 		public String toString() {
 			String s = desc.toString();
 			return complement ? s.toUpperCase() : s;
+		}
+
+		@Override
+		public boolean matches(int c) {
+			if (c >= 0) {
+				if (desc == ClassDesc.ALL) {
+					return true;
+				}
+				else {
+					char ch = (char) c;
+					switch (desc) {
+						case LETTERS:
+							return complement != Character.isLetter(ch);
+						case LOWERCASE_LETTERS:
+							return complement != (Character.isLetter(ch) && Character.isLowerCase(ch));
+						case UPPERCASE_LETTERS:
+							return complement != (Character.isLetter(ch) && Character.isUpperCase(ch));
+						case DECIMAL_DIGITS:
+							return complement != (ch >= '0' && ch <= '9');
+						case HEXADECIMAL_DIGITS:
+							return complement != ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f') || (ch >= 'A' && ch <= 'F'));
+						case ALPHANUMERIC: {
+							char lc = Character.toLowerCase(ch);
+							return complement != ((lc >= '0' && lc <= '9') || (lc >= 'a' && lc <= 'z'));
+						}
+						case SPACE:
+							return complement != Character.isWhitespace(ch);
+						case CONTROL_CHARS:
+							return complement != Character.isISOControl(ch);
+						case PUNCTUATION:
+							return complement != (PUNCTUATION_CHARS.indexOf(ch) != -1);
+						case PRINTABLE_EXCEPT_SPACE:
+							return complement != (!Character.isISOControl(ch) && ch != ' ');
+
+						default: throw new IllegalStateException();
+					}
+				}
+			}
+			else {
+				return false;
+			}
 		}
 
 	}
@@ -326,6 +474,11 @@ public class StringPattern {
 		@Override
 		public String toString() {
 			return (complement ? "[^" : "[") + cs.toString() + "]";
+		}
+
+		@Override
+		public boolean matches(int c) {
+			return c >= 0 && complement != cs.matches((char) c);
 		}
 
 	}
@@ -353,6 +506,22 @@ public class StringPattern {
 
 	static abstract class PI {
 
+		public abstract boolean match(Matcher matcher);
+
+	}
+
+	static class PI_begin extends PI {
+
+		@Override
+		public String toString() {
+			return "^";
+		}
+
+		@Override
+		public boolean match(Matcher matcher) {
+			return matcher.index == 0;
+		}
+
 	}
 
 	static class PI_eos extends PI {
@@ -360,6 +529,11 @@ public class StringPattern {
 		@Override
 		public String toString() {
 			return "$";
+		}
+
+		@Override
+		public boolean match(Matcher matcher) {
+			return matcher.index == matcher.str.length() - 1;
 		}
 
 	}
@@ -379,6 +553,67 @@ public class StringPattern {
 			return ccl.toString() + mod.toString();
 		}
 
+		@Override
+		public boolean match(Matcher matcher) {
+			switch (mod) {
+
+				case EXACTLY_ONCE: {
+					int c = matcher.peek();
+					if (ccl.matches(c)) {
+						matcher.index++;
+						return true;
+					}
+					else {
+						return false;
+					}
+				}
+
+				case LONGEST_ZERO_OR_MORE: {
+					do {
+						int c = matcher.peek();
+						if (!ccl.matches(c)) {
+							return true;
+						}
+						else {
+							matcher.index++;
+						}
+					} while (true);
+
+					// control never reaches this point
+				}
+
+				case SHORTEST_ZERO_OR_MORE:
+					// simply match the empty sequence -- TODO: is it really this simple?
+					return matcher.index < matcher.str.length();
+
+				case ONE_OR_MORE: {
+					int c = matcher.peek();
+					if (ccl.matches(c)) {
+						matcher.index++;
+						while (ccl.matches(matcher.peek())) {
+							matcher.index++;
+						}
+						return true;
+					}
+					else {
+						return false;
+					}
+				}
+
+				case AT_MOST_ONCE: {
+					int c = matcher.peek();
+					if (ccl.matches(c)) {
+						matcher.index++;
+					}
+					return true;
+				}
+
+				default:
+					// should not happen
+					throw new IllegalStateException();
+			}
+		}
+
 	}
 
 	// %1, %2, ..., %9
@@ -395,6 +630,31 @@ public class StringPattern {
 			return "%" + index;
 		}
 
+		@Override
+		public boolean match(Matcher matcher) {
+			Object o = matcher.captures[index-1];
+			if (o instanceof String) {
+				String s = (String) o;
+				for (int i = 0; i < s.length(); i++) {
+					if (index + i >= matcher.str.length()) {
+						// EOS
+						return false;
+					}
+
+					if (matcher.str.charAt(index + i) != s.charAt(i)) {
+						// non-matching character
+						return false;
+					}
+				}
+				matcher.index += s.length();
+				return true;
+			}
+			else {
+				// don't match positions
+				return false;
+			}
+		}
+
 	}
 
 	// %bxy
@@ -404,6 +664,7 @@ public class StringPattern {
 		private final char second;
 
 		PI_balanced(char first, char second) {
+			Check.isTrue(first != second);
 			this.first = first;
 			this.second = second;
 		}
@@ -411,6 +672,42 @@ public class StringPattern {
 		@Override
 		public String toString() {
 			return "%b" + first + second;
+		}
+
+		@Override
+		public boolean match(Matcher matcher) {
+			int idx = matcher.index;
+			// skip non-first characters
+			while (idx < matcher.str.length() && matcher.str.charAt(idx) != first) {
+				idx++;
+			}
+
+			if (idx >= matcher.str.length()) {
+				// reached EOS
+				return false;
+			}
+
+			int balance = 0;
+			while (idx < matcher.str.length()) {
+				char c = matcher.str.charAt(idx);
+				if (c == first) {
+					balance += 1;
+				}
+				else if (c == second) {
+					balance -= 1;
+				}
+
+				idx++;
+
+				if (balance == 0) {
+					// we're done
+					matcher.index = idx;
+					return true;
+				}
+			}
+
+			// not balanced
+			return false;
 		}
 
 	}
@@ -427,6 +724,19 @@ public class StringPattern {
 		@Override
 		public String toString() {
 			return "%f[" + cs.toString() + "]";
+		}
+
+		@Override
+		public boolean match(Matcher matcher) {
+			if (matcher.index > 0 && matcher.index < matcher.str.length()) {
+				char c = matcher.str.charAt(matcher.index - 1);
+				char d = matcher.str.charAt(matcher.index);
+
+				return !cs.matches(c) && cs.matches(d);
+			}
+			else {
+				return false;
+			}
 		}
 
 	}
@@ -447,17 +757,50 @@ public class StringPattern {
 			return "(" + listOfPIToString(subPattern) + ")";
 		}
 
+		@Override
+		public boolean match(Matcher matcher) {
+			if (subPattern.isEmpty()) {
+				// record the position
+				matcher.captures[index-1] = matcher.index;
+				return true;
+			}
+			else {
+				int begin = matcher.index;
+				for (PI pi : subPattern) {
+					if (!pi.match(matcher)) {
+						return false;
+					}
+				}
+				int end = matcher.index;
+				matcher.captures[index-1] = matcher.str.substring(begin, end);
+				return true;
+			}
+		}
+
 	}
 
 	static class PatternBuilder {
 
-		private final CharSequence pattern;
+		private final String pattern;
+		private final boolean anchoredBegin;
 		private int index;
 		private int nextCaptureIndex;
 		private Set<Integer> assignedCaptures;
 
-		PatternBuilder(CharSequence pattern) {
+		PatternBuilder(String pattern, boolean ignoreCaret) {
+			final boolean anchoredBegin;
+
+			if (pattern.startsWith("^")) {
+				pattern = pattern.substring(1);
+				anchoredBegin = !ignoreCaret;
+			}
+			else {
+				anchoredBegin = false;
+			}
+
 			this.pattern = Check.notNull(pattern);
+			this.anchoredBegin = anchoredBegin;
+
 			this.index = 0;
 			this.nextCaptureIndex = 1;
 			assignedCaptures = new HashSet<>();
@@ -569,6 +912,9 @@ public class StringPattern {
 			consume("%b");
 			char x = next();
 			char y = next();
+			if (x == y) {
+				throw parseError(index, "x == y in %bxy");
+			}
 			return new PI_balanced(x, y);
 		}
 
@@ -722,34 +1068,23 @@ public class StringPattern {
 			return new PI_capture(Collections.unmodifiableList(items), capIdx);
 		}
 
-		private List<PI> parse() {
+		private StringPattern parse() {
 			List<PI> items = new ArrayList<>();
+			if (anchoredBegin) {
+				items.add(new PI_begin());
+			}
 			while (!isEos()) {
 				items.add(PI());
 			}
-			return Collections.unmodifiableList(items);
+			items = Collections.unmodifiableList(items);
+
+			return new StringPattern(items, nextCaptureIndex - 1);
 		}
 
 	}
 
 	public static StringPattern fromString(String pattern, boolean ignoreCaret) {
-		Check.notNull(pattern);
-
-		final boolean anchoredBegin;
-		final boolean anchoredEnd;
-
-		if (pattern.startsWith("^")) {
-			pattern = pattern.substring(1);
-			anchoredBegin = !ignoreCaret;
-		}
-		else {
-			anchoredBegin = false;
-		}
-
-		PatternBuilder builder = new PatternBuilder(pattern);
-		List<PI> items = builder.parse();
-
-		return new StringPattern(items, anchoredBegin);
+		return new PatternBuilder(pattern, ignoreCaret).parse();
 	}
 
 	public static StringPattern fromString(String pattern) {
@@ -766,10 +1101,7 @@ public class StringPattern {
 
 	@Override
 	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		if (anchoredBegin) builder.append('^');
-		builder.append(listOfPIToString(items));
-		return builder.toString();
+		return listOfPIToString(items);
 	}
 
 }
