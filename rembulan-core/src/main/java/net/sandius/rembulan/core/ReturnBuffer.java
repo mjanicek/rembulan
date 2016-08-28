@@ -31,7 +31,7 @@ import java.util.Collection;
  * {@link #get0()}, {@link #get1()}, ... for possibly more optimised versions of {@code get(int)}.
  * </p>
  *
- * <p>To set the value</p>
+ * <p>TODO: finish this, mention tail calls.</p>
  *
  */
 public interface ReturnBuffer {
