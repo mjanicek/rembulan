@@ -235,8 +235,20 @@ public class StringPattern {
 
 	// returns null to signal no-match
 	public Match match(String s, int fromIndex) {
-		Matcher matcher = new Matcher(s, fromIndex);
-		return matcher.match();
+		while (fromIndex < s.length()) {
+			Matcher matcher = new Matcher(s, fromIndex);
+			Match m = matcher.match();
+			if (m != null) {
+				return m;
+			}
+			else {
+				// no match: skip the first character and try again
+				fromIndex += 1;
+			}
+		}
+
+		// no match
+		return null;
 	}
 
 	private class Matcher {
@@ -677,13 +689,8 @@ public class StringPattern {
 		@Override
 		public boolean match(Matcher matcher) {
 			int idx = matcher.index;
-			// skip non-first characters
-			while (idx < matcher.str.length() && matcher.str.charAt(idx) != first) {
-				idx++;
-			}
 
-			if (idx >= matcher.str.length()) {
-				// reached EOS
+			if (idx >= matcher.str.length() || matcher.str.charAt(idx) != first) {
 				return false;
 			}
 
