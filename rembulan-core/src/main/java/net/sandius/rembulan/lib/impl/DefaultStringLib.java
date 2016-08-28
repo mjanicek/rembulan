@@ -710,49 +710,37 @@ public class DefaultStringLib extends StringLib {
 			public IteratorFunction(String string, StringPattern pattern) {
 				this.string = Check.notNull(string);
 				this.pattern = Check.notNull(pattern);
-				this.index = new AtomicInteger(1);
+				this.index = new AtomicInteger(0);
 			}
 
 			@Override
 			public void invoke(ExecutionContext context) throws ControlThrowable {
-				final String[] fullMatch = new String[] { null };
-				final ArrayList<Object> captures = new ArrayList<>();
 
-				int oldIndex;
-				int nextIndex;
+				int idx = index.get();
 
-				do {
-					oldIndex = index.get();
+				if (idx >= 0) {
+					StringPattern.Match m = pattern.match(string, idx);
 
-					fullMatch[0] = null;
-					captures.clear();
+					if (m != null) {
+						// found a match
+						index.set(m.endIndex());
 
-					nextIndex = pattern.match(string, oldIndex, new StringPattern.MatchAction() {
-						@Override
-						public void onMatch(String s, int firstIndex, int lastIndex) {
-							fullMatch[0] = s.substring(firstIndex - 1, lastIndex);
+						if (!m.captures().isEmpty()) {
+							context.getReturnBuffer().setToContentsOf(m.captures());
 						}
-
-						@Override
-						public void onCapture(String s, int index, String value) {
-							captures.add(value != null ? value : (long) index);
+						else {
+							context.getReturnBuffer().setTo(m.fullMatch());
 						}
-					});
-
-				} while (!index.compareAndSet(oldIndex, nextIndex));
-
-				if (nextIndex < 1) {
-					// no match
-					context.getReturnBuffer().setTo();
-				}
-				else {
-					// match
-					if (captures.isEmpty()) {
-						context.getReturnBuffer().setTo(fullMatch[0]);
 					}
 					else {
-						context.getReturnBuffer().setToContentsOf(captures);
+						// no match; go to end state
+						index.set(-1);
+						context.getReturnBuffer().setTo();
 					}
+				}
+				else {
+					// in end state
+					context.getReturnBuffer().setTo();
 				}
 			}
 

@@ -235,7 +235,7 @@ public class StringPattern {
 
 	// returns null to signal no-match
 	public Match match(String s, int fromIndex) {
-		while (fromIndex < s.length()) {
+		while (fromIndex >= 0 && fromIndex < s.length()) {
 			Matcher matcher = new Matcher(s, fromIndex);
 			Match m = matcher.match();
 			if (m != null) {
