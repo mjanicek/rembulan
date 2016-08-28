@@ -25,7 +25,7 @@ class StringLibFragmentsRunSpec extends FragmentExecTestSuite {
 
   override def bundles = Seq(StringLibFragments)
   override def expectations = Seq(StringLibFragments)
-  override def contexts = Seq(Str)
+  override def contexts = Seq(Str, Full)
 
   override def steps = Seq(1, Int.MaxValue)
 

@@ -18,7 +18,7 @@ package net.sandius.rembulan.test.fragments
 
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
-import net.sandius.rembulan.{core => lua}
+import net.sandius.rembulan.{LuaFormat, core => lua}
 
 object StringLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
@@ -144,6 +144,79 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""return string.format("%g", 3/70000)""") succeedsWith ("4.28571e-05")
 
       program ("""return ("%c%c%c%c%c"):format(104,101,108,108,111)""") succeedsWith ("hello")
+    }
+
+    // will need table.unpack for this
+    in (FullContext) {
+
+      about ("gmatch") {
+
+        def gmatches(name: String, s: String, pattern: String): RichFragment.InContext = {
+          val namePrefix = "-- " + name
+          val fn =
+            """local function gmatches(s, pattern)
+              |  local t, i = {}, 1
+              |  for m in string.gmatch(s, pattern) do
+              |    t[i] = m
+              |    i = i + 1
+              |  end
+              |  return table.unpack(t)
+              |end
+            """
+          program (namePrefix + "\n" + fn.stripMargin + "\n" + "return gmatches("
+              + LuaFormat.escape(s) + ", " + LuaFormat.escape(pattern) + ")\n")
+        }
+
+        gmatches ("1", "hello world", "%a+") succeedsWith ("hello", "world")
+        gmatches ("2", "hello world", "(%a+)") succeedsWith ("hello", "world")
+        gmatches ("3", "!! hello--world !!", "(%a+)") succeedsWith ("hello", "world")
+
+      }
+
+      about ("gsub") {
+
+        // examples from the manual
+
+        program (
+          """return string.gsub("hello world", "(%w+)", "%1 %1")
+          """
+        ) succeedsWith ("hello hello world world")
+
+        program (
+          """return string.gsub("hello world", "%w+", "%0 %0", 1)
+          """
+        ) succeedsWith ("hello hello world")
+
+        program (
+          """return string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1")
+          """
+        ) succeedsWith ("world hello Lua from")
+
+        program (
+          """local function getenv(n)
+            |  if n == "HOME" then return "/home/roberto"
+            |  elseif n == "USER" then return "roberto"
+            |  else return nil
+            |end
+            |return string.gsub("home = $HOME, user = $USER", "%$(%w+)", getenv)
+          """
+        ) succeedsWith ("home = /home/roberto, user = roberto")
+
+        program (
+          """return string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s)
+            |  return load(s)()
+            |end)
+          """
+        ) succeedsWith ("4+5 = 9")
+
+        program (
+          """local t = {name="lua", version="5.3"}
+            |return string.gsub("$name-$version.tar.gz", "%$(%w+)", t)
+          """
+        ) succeedsWith ("lua-5.3.tar.gz")
+
+      }
+
     }
 
   }
