@@ -815,34 +815,18 @@ public class DefaultStringLib extends StringLib {
 
 			StringPattern pat = StringPattern.fromString(pattern);
 
-			final String[] fullMatch = new String[] { null };
-			final ArrayList<Object> captures = new ArrayList<>();
-
-			int nextIndex = pat.match(s, init, new StringPattern.MatchAction() {
-				@Override
-				public void onMatch(String s, int firstIndex, int lastIndex) {
-					fullMatch[0] = s.substring(firstIndex - 1, lastIndex);
-				}
-
-				@Override
-				public void onCapture(String s, int index, String value) {
-					captures.add(value != null ? value : (long) index);
-				}
-			});
-
-			if (nextIndex < 1) {
-				// no match found
-				context.getReturnBuffer().setTo(null);
-			}
-			else {
-				// match was found
-				if (captures.isEmpty()) {
-					// no captures
-					context.getReturnBuffer().setTo(fullMatch[0]);
+			StringPattern.Match m = pat.match(s, init - 1);
+			if (m != null) {
+				if (m.captures().isEmpty()) {
+					context.getReturnBuffer().setTo(m.fullMatch());
 				}
 				else {
-					context.getReturnBuffer().setToContentsOf(captures);
+					context.getReturnBuffer().setToContentsOf(m.captures());
 				}
+			}
+			else {
+				// no match
+				context.getReturnBuffer().setTo(null);
 			}
 		}
 

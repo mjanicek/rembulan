@@ -168,6 +168,37 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""return string.find("hello there", "he", -3, true)""") succeedsWith (null)
       program ("""return string.find("hello there", "he", -4, true)""") succeedsWith (8, 9)
 
+      program ("""return string.find("hello there", "()(.)%2")""") succeedsWith (3, 4, 3, "l")
+
+    }
+
+    about ("match") {
+
+      program ("""return string.match("hello there", "he")""") succeedsWith ("he")
+      program ("""return string.match("hello there", "()he")""") succeedsWith (1)
+      program ("""return string.match("hello there", "()(he)")""") succeedsWith (1, "he")
+
+      program ("""return string.match("hello there", "")""") succeedsWith ("")
+      program ("""return string.match("hello there", "", 0)""") succeedsWith ("")
+      program ("""return string.match("hello there", "", -1)""") succeedsWith ("")
+      program ("""return string.match("hello there", "", -20)""") succeedsWith ("")
+      program ("""return string.match("hello there", "", 20)""") succeedsWith (null)
+
+      program ("""return string.match("hello there", "()", 20)""") succeedsWith (null)
+      program ("""return string.match("hello there", "()", -20)""") succeedsWith (1)
+
+      program ("""return string.match("hello there", "()(.)%2")""") succeedsWith (3, "l")
+
+      program ("""return string.match("hello there", "()(%a+)")""") succeedsWith (1, "hello")
+      program ("""return string.match("hello there", "()(%a+)", 2)""") succeedsWith (2, "ello")
+      program ("""return string.match("hello there", "()(%a+)", -2)""") succeedsWith (10, "re")
+
+      program ("""return string.match("hello there", "()((%a).+%3)")""") succeedsWith (1, "hello th", "h")
+      program ("""return string.match("hello there", "()((%a).+%3)", 0)""") succeedsWith (1, "hello th", "h")
+      program ("""return string.match("hello there", "()((%a).+%3)", 2)""") succeedsWith (2, "ello there", "e")
+      program ("""return string.match("hello there", "()((%a).+%3)", -3)""") succeedsWith (9, "ere", "e")
+
+
     }
 
     // will need table.unpack for this

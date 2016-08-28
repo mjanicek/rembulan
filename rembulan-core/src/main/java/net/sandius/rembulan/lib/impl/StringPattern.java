@@ -779,7 +779,7 @@ public class StringPattern {
 						return false;
 					}
 				}
-				int end = matcher.index;
+				int end = Math.min(matcher.str.length(), matcher.index);
 				matcher.captures[index-1] = matcher.str.substring(begin, end);
 				return true;
 			}
