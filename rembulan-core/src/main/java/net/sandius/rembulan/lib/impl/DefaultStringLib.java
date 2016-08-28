@@ -723,7 +723,13 @@ public class DefaultStringLib extends StringLib {
 
 					if (m != null) {
 						// found a match
-						index.set(m.endIndex());
+						int endIndex = m.endIndex();
+						if (endIndex == idx) {
+							// avoid looping on empty matches
+							endIndex += 1;
+						}
+
+						index.set(endIndex);
 
 						if (!m.captures().isEmpty()) {
 							context.getReturnBuffer().setToContentsOf(m.captures());

@@ -235,7 +235,8 @@ public class StringPattern {
 
 	// returns null to signal no-match
 	public Match match(String s, int fromIndex) {
-		while (fromIndex >= 0 && fromIndex < s.length()) {
+		// iterate one character beyond the last one: empty matches succeed at EOS
+		while (fromIndex >= 0 && fromIndex <= s.length()) {
 			Matcher matcher = new Matcher(s, fromIndex);
 			Match m = matcher.match();
 			if (m != null) {
@@ -767,8 +768,8 @@ public class StringPattern {
 		@Override
 		public boolean match(Matcher matcher) {
 			if (subPattern.isEmpty()) {
-				// record the position
-				matcher.captures[index-1] = matcher.index;
+				// record the position: use Long, adjust index
+				matcher.captures[index-1] = Long.valueOf(matcher.index + 1);
 				return true;
 			}
 			else {

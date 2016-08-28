@@ -171,6 +171,9 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
         gmatches ("2", "hello world", "(%a+)") succeedsWith ("hello", "world")
         gmatches ("3", "!! hello--world !!", "(%a+)") succeedsWith ("hello", "world")
 
+        gmatches ("4", "hi.", "()") succeedsWith (1, 2, 3, 4)
+        gmatches ("5", "hello world", "()%a+") succeedsWith (1, 7)
+
       }
 
       about ("gsub") {
