@@ -23,6 +23,7 @@ import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.IllegalOperationAttemptException;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.impl.AbstractFunction0;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -35,13 +36,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultStringLib extends StringLib {
 
-	private final Function _gsub;
 	private final Function _pack;
 	private final Function _packsize;
 	private final Function _unpack;
 
 	public DefaultStringLib() {
-		this._gsub = new UnimplementedFunction("string.gsub");  // TODO
 		this._pack = new UnimplementedFunction("string.pack");  // TODO
 		this._packsize = new UnimplementedFunction("string.packsize");  // TODO
 		this._unpack = new UnimplementedFunction("string.unpack");  // TODO
@@ -79,7 +78,7 @@ public class DefaultStringLib extends StringLib {
 
 	@Override
 	public Function _gsub() {
-		return _gsub;
+		return GSub.INSTANCE;
 	}
 
 	@Override
@@ -758,6 +757,50 @@ public class DefaultStringLib extends StringLib {
 			Function f = new IteratorFunction(s, pat);
 
 			context.getReturnBuffer().setTo(f);
+		}
+
+	}
+
+	public static class GSub extends AbstractLibFunction {
+
+		public static final GSub INSTANCE = new GSub();
+
+		private static final String ARG3_ERROR_MESSAGE = "string/function/table expected";
+
+		@Override
+		protected String name() {
+			return "gsub";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			String s = args.nextString();
+			String pattern = args.nextString();
+
+			final Object repl;
+			if (!args.hasNext()) {
+				throw args.badArgument(3, ARG3_ERROR_MESSAGE);
+			}
+			else {
+				Object o = args.nextAny();
+
+				// a string?
+				String replStr = Conversions.stringValueOf(o);
+				if (replStr != null) {
+					repl = replStr;
+				}
+				else if (o instanceof Table || o instanceof Function) {
+					repl = o;
+				}
+				else {
+					throw args.badArgument(3, ARG3_ERROR_MESSAGE);
+				}
+			}
+
+			boolean all = !args.hasNext();
+			int n = args.optNextInt(Integer.MAX_VALUE);
+
+			throw new UnsupportedOperationException("not implemented");  // TODO
 		}
 
 	}

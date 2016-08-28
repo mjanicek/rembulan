@@ -233,45 +233,59 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
 
       about ("gsub") {
 
+        program ("""return string.gsub()""") failsWith "bad argument #1 to 'gsub' (string expected, got no value)"
+        program ("""return string.gsub("")""") failsWith "bad argument #2 to 'gsub' (string expected, got no value)"
+        program ("""return string.gsub("", "")""") failsWith "bad argument #3 to 'gsub' (string/function/table expected)"
+
+        program ("""return string.gsub("", "", "")""") succeedsWith ("", 1)
+        program ("""return string.gsub("", "", "", 0)""") succeedsWith ("", 0)
+        program ("""return string.gsub("", "", "", -1)""") succeedsWith ("", -1)
+
+        program ("""return string.gsub("", "", "", {})""") failsWith "bad argument #4 to 'gsub' (number expected, got table)"
+        program ("""return string.gsub("", "", "", 2.1)""") failsWith "bad argument #4 to 'gsub' (number has no integer representation)"
+
+        program ("""return string.gsub("", "", 3)""") succeedsWith ("3", 1)
+
         // examples from the manual
 
         program (
           """return string.gsub("hello world", "(%w+)", "%1 %1")
           """
-        ) succeedsWith ("hello hello world world")
+        ) succeedsWith ("hello hello world world", 2)
 
         program (
           """return string.gsub("hello world", "%w+", "%0 %0", 1)
           """
-        ) succeedsWith ("hello hello world")
+        ) succeedsWith ("hello hello world", 1)
 
         program (
           """return string.gsub("hello world from Lua", "(%w+)%s*(%w+)", "%2 %1")
           """
-        ) succeedsWith ("world hello Lua from")
+        ) succeedsWith ("world hello Lua from", 2)
 
         program (
           """local function getenv(n)
             |  if n == "HOME" then return "/home/roberto"
             |  elseif n == "USER" then return "roberto"
             |  else return nil
+            |  end
             |end
             |return string.gsub("home = $HOME, user = $USER", "%$(%w+)", getenv)
           """
-        ) succeedsWith ("home = /home/roberto, user = roberto")
+        ) succeedsWith ("home = /home/roberto, user = roberto", 2)
 
         program (
           """return string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s)
             |  return load(s)()
             |end)
           """
-        ) succeedsWith ("4+5 = 9")
+        ) succeedsWith ("4+5 = 9", 1)
 
         program (
           """local t = {name="lua", version="5.3"}
             |return string.gsub("$name-$version.tar.gz", "%$(%w+)", t)
           """
-        ) succeedsWith ("lua-5.3.tar.gz")
+        ) succeedsWith ("lua-5.3.tar.gz", 2)
 
       }
 
