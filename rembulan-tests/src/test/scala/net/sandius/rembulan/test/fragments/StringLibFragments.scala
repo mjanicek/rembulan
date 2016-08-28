@@ -239,7 +239,7 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
 
         program ("""return string.gsub("", "", "")""") succeedsWith ("", 1)
         program ("""return string.gsub("", "", "", 0)""") succeedsWith ("", 0)
-        program ("""return string.gsub("", "", "", -1)""") succeedsWith ("", -1)
+        program ("""return string.gsub("", "", "", -1)""") succeedsWith ("", 0)
 
         program ("""return string.gsub("", "", "", {})""") failsWith "bad argument #4 to 'gsub' (number expected, got table)"
         program ("""return string.gsub("", "", "", 2.1)""") failsWith "bad argument #4 to 'gsub' (number has no integer representation)"

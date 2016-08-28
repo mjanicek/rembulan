@@ -31,6 +31,7 @@ import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -772,6 +773,46 @@ public class DefaultStringLib extends StringLib {
 			return "gsub";
 		}
 
+		private static String replace(String s, String fullMatch, List<Object> captures) {
+			StringBuilder bld = new StringBuilder();
+
+			for (int i = 0; i < s.length(); i++) {
+				char c = s.charAt(i);
+
+				if (c == '%' && i + 1 < s.length()) {
+					char d = s.charAt(i + 1);
+					i += 1;  // skip the escape
+
+					if (d >= '0' && d <= '9') {
+						int idx = (int) d - (int) '0';
+						if (idx == 0) {
+							bld.append(fullMatch);
+						}
+						else {
+							if (idx - 1 < captures.size()) {
+								// captures are either strings or integers
+								String sv = Conversions.stringValueOf(captures.get(idx - 1));
+								assert (sv != null);
+								bld.append(sv);
+							}
+							else {
+								// no capture with this index
+								bld.append(d);
+							}
+						}
+					}
+					else {
+						bld.append(d);
+					}
+				}
+				else {
+					bld.append(c);
+				}
+			}
+
+			return bld.toString();
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			String s = args.nextString();
@@ -800,7 +841,55 @@ public class DefaultStringLib extends StringLib {
 			boolean all = !args.hasNext();
 			int n = args.optNextInt(Integer.MAX_VALUE);
 
-			throw new UnsupportedOperationException("not implemented");  // TODO
+			StringPattern pat = StringPattern.fromString(pattern);
+
+			StringBuilder bld = new StringBuilder();
+
+			int idx = 0;
+			int count = 0;
+
+			while (all || count < n) {
+				StringPattern.Match m = pat.match(s, idx);
+
+				if (m == null) {
+					// no more matches
+					break;
+				}
+
+				count += 1;
+
+				// non-matching prefix
+				if (idx < m.beginIndex()) {
+					bld.append(s.substring(idx, m.beginIndex()));
+				}
+
+				List<Object> captures = m.captures().isEmpty()
+						? Collections.singletonList((Object) m.fullMatch())
+						: m.captures();
+
+				if (repl instanceof String) {
+					bld.append(replace((String) repl, m.fullMatch(), captures));
+				}
+				else if (repl instanceof Table) {
+					throw new UnsupportedOperationException();  // TODO
+				}
+				else if (repl instanceof Function) {
+					throw new UnsupportedOperationException();  // TODO
+				}
+				else {
+					throw new IllegalStateException("Illegal replacement: " + repl);
+				}
+
+				// avoid looping indefinitely for empty matches
+				idx = m.endIndex() != idx ? m.endIndex() : m.endIndex() + 1;
+			}
+
+			// non-matching suffix
+			if (idx < s.length()) {
+				bld.append(s.substring(idx, s.length()));
+			}
+
+			context.getReturnBuffer().setTo(bld.toString(), (long) count);
 		}
 
 	}
