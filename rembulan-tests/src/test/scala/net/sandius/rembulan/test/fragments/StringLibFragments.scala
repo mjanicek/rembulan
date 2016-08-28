@@ -246,6 +246,11 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
 
         program ("""return string.gsub("", "", 3)""") succeedsWith ("3", 1)
 
+        program ("""return string.gsub("hello", "(..)", {'?', he='Eh', ll={}})""") failsWith "invalid replacement value (a table)"
+        program ("""return string.gsub("hello", "(..)", {'?', he='Eh', ll=3})""") succeedsWith ("Eh3o", 2)
+        program ("""return string.gsub("hello", "()(..)", {'?', he='Eh', ll=3})""") succeedsWith ("?llo", 2)
+        program ("""return string.gsub("hello", "()(..)", {'A', 'B', 'C', 'D'})""") succeedsWith ("ACo", 2)
+
         // examples from the manual
 
         program (

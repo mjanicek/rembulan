@@ -17,13 +17,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Conversions;
-import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.IllegalOperationAttemptException;
-import net.sandius.rembulan.core.NonsuspendableFunctionException;
-import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.*;
 import net.sandius.rembulan.core.impl.AbstractFunction0;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -773,7 +767,110 @@ public class DefaultStringLib extends StringLib {
 			return "gsub";
 		}
 
-		private static String replace(String s, String fullMatch, List<Object> captures) {
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			String s = args.nextString();
+			String pattern = args.nextString();
+
+			final Object repl;
+			if (!args.hasNext()) {
+				throw args.badArgument(3, ARG3_ERROR_MESSAGE);
+			}
+			else {
+				Object o = args.nextAny();
+
+				// a string?
+				String replStr = Conversions.stringValueOf(o);
+				if (replStr != null) {
+					repl = replStr;
+				}
+				else if (o instanceof Table || o instanceof Function) {
+					repl = o;
+				}
+				else {
+					throw args.badArgument(3, ARG3_ERROR_MESSAGE);
+				}
+			}
+
+			int n = args.optNextInt(Integer.MAX_VALUE);
+
+			StringPattern pat = StringPattern.fromString(pattern);
+
+			run(context, s, 0, new StringBuilder(), pat, 0, n, repl);
+		}
+
+		private static class State {
+
+			public final String str;
+			public final StringPattern pat;
+			public final int count;
+			public final int num;
+
+			public final Object repl;
+
+			public final StringBuilder bld;
+			public final String fullMatch;
+			public final int idx;
+
+			private State(String str, StringPattern pat, int count, int num, Object repl, StringBuilder bld, String fullMatch, int idx) {
+				this.str = str;
+				this.pat = pat;
+				this.count = count;
+				this.num = num;
+				this.repl = repl;
+				this.bld = bld;
+				this.fullMatch = fullMatch;
+				this.idx = idx;
+			}
+
+		}
+
+		private void run(ExecutionContext context, String str, int idx, StringBuilder bld, StringPattern pat, int count, int num, Object repl)
+				throws ControlThrowable {
+
+			while (count < num) {
+				StringPattern.Match m = pat.match(str, idx);
+
+				if (m == null) {
+					// no more matches
+					break;
+				}
+
+				count += 1;
+
+				// non-matching prefix
+				if (idx < m.beginIndex()) {
+					bld.append(str.substring(idx, m.beginIndex()));
+				}
+
+				List<Object> captures = m.captures().isEmpty()
+						? Collections.singletonList((Object) m.fullMatch())
+						: m.captures();
+
+				// avoid looping indefinitely for empty matches
+				idx = m.endIndex() != idx ? m.endIndex() : m.endIndex() + 1;
+
+				if (repl instanceof String) {
+					String r = stringReplace((String) repl, m.fullMatch(), captures);
+					bld.append(r);
+				}
+				else {
+					// NOTE: throws and handles ControlThrowables
+					nonStringReplace(
+							context, str, pat, idx, count, num, bld,
+							repl, m.fullMatch(), captures);
+				}
+			}
+
+			// non-matching suffix
+			if (idx < str.length()) {
+				bld.append(str.substring(idx, str.length()));
+			}
+
+			context.getReturnBuffer().setTo(bld.toString(), (long) count);
+		}
+
+		private static String stringReplace(String s, String fullMatch, List<Object> captures) {
 			StringBuilder bld = new StringBuilder();
 
 			for (int i = 0; i < s.length(); i++) {
@@ -813,83 +910,64 @@ public class DefaultStringLib extends StringLib {
 			return bld.toString();
 		}
 
-		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+		private void nonStringReplace(
+				ExecutionContext context,
+				String str,
+				StringPattern pat,
+				int idx,
+				int count,
+				int num,
+				StringBuilder bld,
+				Object repl,
+				String fullMatch,
+				List<Object> captures)
+				throws ControlThrowable {
 
-			final Object repl;
-			if (!args.hasNext()) {
-				throw args.badArgument(3, ARG3_ERROR_MESSAGE);
-			}
-			else {
-				Object o = args.nextAny();
+			assert (!captures.isEmpty());
 
-				// a string?
-				String replStr = Conversions.stringValueOf(o);
-				if (replStr != null) {
-					repl = replStr;
-				}
-				else if (o instanceof Table || o instanceof Function) {
-					repl = o;
-				}
-				else {
-					throw args.badArgument(3, ARG3_ERROR_MESSAGE);
-				}
-			}
+			Object cap = captures.get(0);
 
-			boolean all = !args.hasNext();
-			int n = args.optNextInt(Integer.MAX_VALUE);
-
-			StringPattern pat = StringPattern.fromString(pattern);
-
-			StringBuilder bld = new StringBuilder();
-
-			int idx = 0;
-			int count = 0;
-
-			while (all || count < n) {
-				StringPattern.Match m = pat.match(s, idx);
-
-				if (m == null) {
-					// no more matches
-					break;
-				}
-
-				count += 1;
-
-				// non-matching prefix
-				if (idx < m.beginIndex()) {
-					bld.append(s.substring(idx, m.beginIndex()));
-				}
-
-				List<Object> captures = m.captures().isEmpty()
-						? Collections.singletonList((Object) m.fullMatch())
-						: m.captures();
-
-				if (repl instanceof String) {
-					bld.append(replace((String) repl, m.fullMatch(), captures));
-				}
-				else if (repl instanceof Table) {
-					throw new UnsupportedOperationException();  // TODO
+			try {
+				if (repl instanceof Table) {
+					Dispatch.index(context, (Table) repl, cap);
 				}
 				else if (repl instanceof Function) {
-					throw new UnsupportedOperationException();  // TODO
+					Dispatch.call(context, (Function) repl, (Object[]) captures.toArray());
 				}
 				else {
 					throw new IllegalStateException("Illegal replacement: " + repl);
 				}
-
-				// avoid looping indefinitely for empty matches
-				idx = m.endIndex() != idx ? m.endIndex() : m.endIndex() + 1;
 			}
-
-			// non-matching suffix
-			if (idx < s.length()) {
-				bld.append(s.substring(idx, s.length()));
+			catch (ControlThrowable ct) {
+				throw ct.push(this, new State(str, pat, count, num, repl, bld, fullMatch, idx));
 			}
+			resumeReplace(context, bld, fullMatch);
+		}
 
-			context.getReturnBuffer().setTo(bld.toString(), (long) count);
+		private static void resumeReplace(ExecutionContext context, StringBuilder bld, String fullMatch) {
+			Object value = context.getReturnBuffer().get0();
+			String sv = Conversions.stringValueOf(value);
+			if (sv != null) {
+				bld.append(sv);
+			}
+			else {
+				if (!Conversions.booleanValueOf(value)) {
+					// false or nil
+	                bld.append(fullMatch);
+				}
+				else {
+					throw new LuaRuntimeException("invalid replacement value (a "
+							+ PlainValueTypeNamer.INSTANCE.typeNameOf(value) + ")");
+				}
+			}
+		}
+
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			State state = (State) suspendedState;
+			resumeReplace(context, state.bld, state.fullMatch);
+			run(context, state.str, state.idx, state.bld, state.pat, state.count, state.num, state.repl);
 		}
 
 	}
