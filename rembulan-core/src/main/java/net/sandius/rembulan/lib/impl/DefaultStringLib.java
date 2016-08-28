@@ -237,7 +237,9 @@ public class DefaultStringLib extends StringLib {
 				// find a substring
 				int at = s.indexOf(pattern, init - 1);
 				if (at >= 0) {
-					context.getReturnBuffer().setTo(at + 1, at + pattern.length());
+					context.getReturnBuffer().setTo(
+							(long) (at + 1),
+							(long) (at + pattern.length()));
 				}
 				else {
 					context.getReturnBuffer().setTo(null);
@@ -247,33 +249,18 @@ public class DefaultStringLib extends StringLib {
 				// find a pattern
 				StringPattern pat = StringPattern.fromString(pattern);
 
-				final ArrayList<Object> results = new ArrayList<>();
-				final ArrayList<Object> captures = new ArrayList<>();
+				StringPattern.Match m = pat.match(s, init - 1);
 
-				int nextIndex = pat.match(s, init, new StringPattern.MatchAction() {
-
-					@Override
-					public void onMatch(String s, int firstIndex, int lastIndex) {
-						results.add((long) firstIndex);
-						results.add((long) lastIndex);
-					}
-
-					@Override
-					public void onCapture(String s, int index, String value) {
-						captures.add(value != null ? value : (long) index);
-					}
-				});
-
-				if (nextIndex < 1) {
-					// pattern not found
-					context.getReturnBuffer().setTo(null);
+				if (m != null) {
+					List<Object> result = new ArrayList<>();
+					result.add((long) (m.beginIndex() + 1));
+					result.add((long) m.endIndex());
+					result.addAll(m.captures());
+					context.getReturnBuffer().setToContentsOf(result);
 				}
 				else {
-					// pattern found
-					List<Object> buf = new ArrayList<>();
-					buf.addAll(results);
-					buf.addAll(captures);
-					context.getReturnBuffer().setToContentsOf(buf);
+					// no match
+					context.getReturnBuffer().setTo(null);
 				}
 			}
 		}

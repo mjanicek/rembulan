@@ -146,6 +146,30 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""return ("%c%c%c%c%c"):format(104,101,108,108,111)""") succeedsWith ("hello")
     }
 
+    about ("find") {
+
+      program ("""return string.find("hello there", "%a+")""") succeedsWith (1, 5)
+      program ("""return string.find("hello there", "%a+", -3)""") succeedsWith (9, 11)
+
+      program ("""return string.find("hello there", "(%a+)")""") succeedsWith (1, 5, "hello")
+      program ("""return string.find("hello there", "(%a+)", 5)""") succeedsWith (5, 5, "o")
+      program ("""return string.find("hello there", "(%a+)", 6)""") succeedsWith (7, 11, "there")
+
+      program ("""return string.find("hello there", "", 5)""") succeedsWith (5, 4)
+      program ("""return string.find("hello there", "()", 5)""") succeedsWith (5, 4, 5)
+      program ("""return string.find("hello there", "", 5, true)""") succeedsWith (5, 4)
+
+      program ("""return string.find("hello there", "e", 1, true)""") succeedsWith (2, 2)
+      program ("""return string.find("hello there", "e", 0, true)""") succeedsWith (2, 2)
+      program ("""return string.find("hello there", "e", -1, true)""") succeedsWith (11, 11)
+      program ("""return string.find("hello there", "e", -5, true)""") succeedsWith (9, 9)
+      program ("""return string.find("hello there", "e", -20, true)""") succeedsWith (2, 2)
+
+      program ("""return string.find("hello there", "he", -3, true)""") succeedsWith (null)
+      program ("""return string.find("hello there", "he", -4, true)""") succeedsWith (8, 9)
+
+    }
+
     // will need table.unpack for this
     in (FullContext) {
 
