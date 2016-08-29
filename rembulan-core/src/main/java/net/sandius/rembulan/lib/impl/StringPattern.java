@@ -247,12 +247,14 @@ public class StringPattern {
 		private int index;
 
 		private final Object[] captures;
+		private final int[] captureOpen;
 
 		Matcher(String str, int fromIndex) {
 			this.str = Check.notNull(str);
 			this.beginIndex = fromIndex;
 			this.index = this.beginIndex;
 			this.captures = new Object[numCaptures];
+			this.captureOpen = new int[numCaptures];
 		}
 
 		public Match match() {
@@ -269,6 +271,18 @@ public class StringPattern {
 
 		public int peek() {
 			return index < str.length() ? str.charAt(index) : -1;
+		}
+
+		public void capturePosition(int captureIndex, int stringPosition) {
+			captures[captureIndex - 1] = Long.valueOf(stringPosition);
+		}
+
+		public void captureBegin(int captureIndex, int stringPosition) {
+			captureOpen[captureIndex - 1] = stringPosition;
+		}
+
+		public void captureEnd(int captureIndex, int stringPosition) {
+			captures[captureIndex - 1] = str.substring(captureOpen[captureIndex - 1], stringPosition);
 		}
 
 	}
@@ -511,6 +525,9 @@ public class StringPattern {
 
 	}
 
+	private static final PI_begin PI_BEGIN = new PI_begin();
+	private static final PI_eos PI_EOS = new PI_eos();
+
 	static class PI_begin extends PI {
 
 		@Override
@@ -738,41 +755,70 @@ public class StringPattern {
 	}
 
 	// (pattern)
-	static class PI_capture extends PI {
+	static abstract class PI_capture extends PI {
 
-		private final List<PI> subPattern;  // may be empty
-		private final int index;
+		protected final int index;
 
-		PI_capture(List<PI> subPattern, int index) {
-			this.subPattern = Check.notNull(subPattern);
+		PI_capture(int index) {
 			this.index = Check.positive(index);
+		}
+
+	}
+
+	static class PI_capture_pos extends PI_capture {
+
+		PI_capture_pos(int index) {
+			super(index);
 		}
 
 		@Override
 		public String toString() {
-			return "(" + listOfPIToString(subPattern) + ")";
+			return "()";
 		}
 
 		@Override
 		public boolean match(Matcher matcher) {
-			if (subPattern.isEmpty()) {
-				// record the position: use Long, adjust index
-				matcher.captures[index-1] = Long.valueOf(matcher.index + 1);
-				return true;
-			}
-			else {
-				int begin = matcher.index;
-				for (PI pi : subPattern) {
-					if (!pi.match(matcher)) {
-						return false;
-					}
-				}
-				int end = Math.min(matcher.str.length(), matcher.index);
-				matcher.captures[index-1] = matcher.str.substring(begin, end);
-				return true;
-			}
+			matcher.capturePosition(index, matcher.index + 1);
+			return true;
 		}
 
+	}
+
+	static class PI_capture_begin extends PI_capture {
+
+		PI_capture_begin(int index) {
+			super(index);
+		}
+
+		@Override
+		public String toString() {
+			return "(";
+		}
+
+		@Override
+		public boolean match(Matcher matcher) {
+			matcher.captureBegin(index, matcher.index);
+			return true;
+		}
+
+	}
+
+	static class PI_capture_end extends PI_capture {
+
+		PI_capture_end(int index) {
+			super(index);
+		}
+
+		@Override
+		public String toString() {
+			return ")";
+		}
+
+		@Override
+		public boolean match(Matcher matcher) {
+			matcher.captureEnd(index, Math.min(matcher.str.length(), matcher.index));
+			return true;
+		}
 	}
 
 	static class PatternBuilder {
@@ -897,24 +943,24 @@ public class StringPattern {
 			return new CharacterSet(Collections.unmodifiableList(elems));
 		}
 
-		private PI_frontier PI_frontier() {
+		private void PI_frontier(List<PI> pis) {
 			consume("%f[");
 			CharacterSet cs = characterSetBody();
 			consume("]");
-			return new PI_frontier(cs);
+			pis.add(new PI_frontier(cs));
 		}
 
-		private PI_balanced PI_balanced() {
+		private void PI_balanced(List<PI> pis) {
 			consume("%b");
 			char x = next();
 			char y = next();
 			if (x == y) {
 				throw parseError(index, "x == y in %bxy");
 			}
-			return new PI_balanced(x, y);
+			pis.add(new PI_balanced(x, y));
 		}
 
-		private PI_cmatch PI_cmatch() {
+		private void PI_cmatch(List<PI> pis) {
 			consume("%");
 			char c = next();
 			if (c >= '1' && c <= '9') {
@@ -924,7 +970,7 @@ public class StringPattern {
 					throw parseError(index, "capture #" + cidx + " not resolved at this point");
 				}
 				else {
-					return new PI_cmatch(cidx);
+					pis.add(new PI_cmatch(cidx));
 				}
 			}
 			else {
@@ -1024,53 +1070,63 @@ public class StringPattern {
 			}
 		}
 
-		private PI_cc PI_cc() {
+		private void PI_cc(List<PI> pis) {
 			CC ccl = cclass();
 			Repeat mod = repeat();
-			return new PI_cc(ccl, mod);
+			pis.add(new PI_cc(ccl, mod));
 		}
 
-		private PI PI() {
+		private void PI(List<PI> pis) {
 			if (continuesWith("(")) {
-				return PI_capture();
+				PI_capture(pis);
 			}
 			else if (continuesWith("%f[")) {
-				return PI_frontier();
+				PI_frontier(pis);
 			}
 			else if (continuesWith("%b")) {
-				return PI_balanced();
+				PI_balanced(pis);
 			}
 			else if (continuesWith("%") && charAtOffset(1) >= (int) '1' && charAtOffset(1) <= (int) '9') {
-				return PI_cmatch();
+				PI_cmatch(pis);
 			}
 			else if (continuesWith("$") && charAtOffset(1) == -1) {
 				skip(1);
-				return new PI_eos();
+				pis.add(PI_EOS);
 			}
 			else {
-				return PI_cc();
+				PI_cc(pis);
 			}
 		}
 
-		private PI_capture PI_capture() {
-			consume('(');
+		private void PI_capture(List<PI> pis) {
 			int capIdx = nextCaptureIndex++;
-			List<PI> items = new ArrayList<>();
+
+			consume('(');
+			List<PI> nested = new ArrayList<>();
 			while (!isEos() && peek() != ')') {
-				items.add(PI());
+				PI(nested);
 			}
-			assignedCaptures.add(capIdx);
 			consume(')');
-			return new PI_capture(Collections.unmodifiableList(items), capIdx);
+
+			assignedCaptures.add(capIdx);
+
+			if (nested.isEmpty()) {
+				pis.add(new PI_capture_pos(capIdx));
+			}
+			else {
+				pis.add(new PI_capture_begin(capIdx));
+				pis.addAll(nested);
+				pis.add(new PI_capture_end(capIdx));
+			}
 		}
 
 		private StringPattern parse() {
 			List<PI> items = new ArrayList<>();
 			if (anchoredBegin) {
-				items.add(new PI_begin());
+				items.add(PI_BEGIN);
 			}
 			while (!isEos()) {
-				items.add(PI());
+				PI(items);
 			}
 			items = Collections.unmodifiableList(items);
 
