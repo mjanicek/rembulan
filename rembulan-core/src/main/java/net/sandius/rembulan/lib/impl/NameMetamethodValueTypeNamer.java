@@ -24,10 +24,28 @@ import net.sandius.rembulan.core.Values;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.util.Check;
 
+/**
+ * A value type namer that looks up type names in object metatables, and distinguishes
+ * light userdata from full userdata.
+ *
+ * <p>The namer first tries to find the key {@code "__name"} (see {@link Lib#MT_NAME})
+ * in the object's metatable. If a value with such key exists and is a string, it is
+ * used as the type name. Otherwise, light userdata is assigned the type name
+ * {@code "light userdata"} ({@link Lib#TYPENAME_LIGHT_USERDATA}), and the rest is
+ * assigned the same name as assigned by {@link PlainValueTypeNamer}.</p>
+ *
+ */
 public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 
 	private final MetatableProvider metatableProvider;
 
+	/**
+	 * Creates a new instance of this value type namer that uses the supplied
+	 * metatable provider {@code metatableProvider} for looking up type names.
+	 *
+	 * @param metatableProvider  the metatable provider, must not be {@code null}
+	 * @throws IllegalArgumentException  if {@code metatableProvider} is {@code null}
+	 */
 	public NameMetamethodValueTypeNamer(MetatableProvider metatableProvider) {
 		this.metatableProvider = Check.notNull(metatableProvider);
 	}

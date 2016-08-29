@@ -27,10 +27,30 @@ import static net.sandius.rembulan.LuaFormat.TYPENAME_TABLE;
 import static net.sandius.rembulan.LuaFormat.TYPENAME_THREAD;
 import static net.sandius.rembulan.LuaFormat.TYPENAME_USERDATA;
 
+/**
+ * A value type namer that uses a fixed mapping from types to type names.
+ *
+ * <p>This is a wrapper of the static method {@link #luaTypeToName(LuaType)}.</p>
+ */
 public class PlainValueTypeNamer implements ValueTypeNamer {
 
+	/**
+	 * A static instance of this value type namer.
+	 */
 	public static final PlainValueTypeNamer INSTANCE = new PlainValueTypeNamer();
 
+	/**
+	 * Returns the name (a string) of a given Lua type.
+	 *
+	 * <p>The result of this method is one of {@code "nil"}, {@code "boolean"}, {@code "number"},
+	 * {@code "string"}, {@code "table"}, {@code "function"}, {@code "userdata"}
+	 * and {@code "thread"}.</p>
+	 *
+	 * @param type  the type, must not be {@code null}
+	 * @return  the name of {@code type}
+	 *
+	 * @throws NullPointerException  if {@code type} is {@code null}
+	 */
 	public static String luaTypeToName(LuaType type) {
 		switch (type) {
 			case NIL: return TYPENAME_NIL;
@@ -41,7 +61,7 @@ public class PlainValueTypeNamer implements ValueTypeNamer {
 			case FUNCTION: return TYPENAME_FUNCTION;
 			case USERDATA: return TYPENAME_USERDATA;
 			case THREAD: return TYPENAME_THREAD;
-			default: throw new IllegalStateException("Illegal type: " + type);
+			default: throw new NullPointerException("Illegal type: " + type);
 		}
 	}
 

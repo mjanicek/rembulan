@@ -1237,8 +1237,8 @@ public final class Dispatch {
 	 * be caught, handled and re-thrown by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
-	 * @param table  the first operand, may be any value
-	 * @param key  the second operand, may be any value
+	 * @param table  the target, may be any value
+	 * @param key  the key, may be any value
 	 *
 	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
@@ -1287,8 +1287,9 @@ public final class Dispatch {
 	 * be caught, handled and re-thrown by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
-	 * @param table  the first operand, may be any value
-	 * @param key  the second operand, may be any value
+	 * @param table  the target, may be any value
+	 * @param key  the key, may be any value
+	 * @param value  the value, may be any value
 	 *
 	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
