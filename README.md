@@ -11,6 +11,8 @@ Java threads.
 The goal of the Rembulan project is to develop a scalable, correct,
 complete and performant implementation for untrusted Lua code on the JVM.
 
+See the [completeness table](doc/CompletenessTable.md).
+
 ## Feature list
 
 * **Full Lua 5.3 semantics** --
