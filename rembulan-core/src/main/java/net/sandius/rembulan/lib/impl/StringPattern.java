@@ -225,10 +225,11 @@ public class StringPattern {
 	public Match match(String s, int fromIndex) {
 		// iterate one character beyond the last one: empty matches succeed at EOS
 		while (fromIndex >= 0 && fromIndex <= s.length()) {
-			Matcher matcher = new Matcher(s, fromIndex);
-			Match m = matcher.match();
-			if (m != null) {
-				return m;
+			MatchState ms = new MatchState(items, s, fromIndex);
+			int result = ms.start();
+			if (result != NO_MATCH) {
+				// got a match
+				return new Match(s, fromIndex, result, Collections.unmodifiableList(Arrays.asList(ms.cap)));
 			}
 			else {
 				// no match: skip the first character and try again
@@ -238,53 +239,6 @@ public class StringPattern {
 
 		// no match
 		return null;
-	}
-
-	private class Matcher {
-
-		private final String str;
-		private final int beginIndex;
-		private int index;
-
-		private final Object[] captures;
-		private final int[] captureOpen;
-
-		Matcher(String str, int fromIndex) {
-			this.str = Check.notNull(str);
-			this.beginIndex = fromIndex;
-			this.index = this.beginIndex;
-			this.captures = new Object[numCaptures];
-			this.captureOpen = new int[numCaptures];
-		}
-
-		public Match match() {
-			for (PI pi : items) {
-				if (!pi.match(this)) {
-					return null;
-				}
-			}
-
-			int endIndex = index;
-
-			return new Match(str, beginIndex, endIndex, Collections.unmodifiableList(Arrays.asList(captures)));
-		}
-
-		public int peek() {
-			return index < str.length() ? str.charAt(index) : -1;
-		}
-
-		public void capturePosition(int captureIndex, int stringPosition) {
-			captures[captureIndex - 1] = Long.valueOf(stringPosition);
-		}
-
-		public void captureBegin(int captureIndex, int stringPosition) {
-			captureOpen[captureIndex - 1] = stringPosition;
-		}
-
-		public void captureEnd(int captureIndex, int stringPosition) {
-			captures[captureIndex - 1] = str.substring(captureOpen[captureIndex - 1], stringPosition);
-		}
-
 	}
 
 	static class CharacterSet {
@@ -519,11 +473,77 @@ public class StringPattern {
 
 	}
 
-	static abstract class PI {
+	class MatchState {
+		private final int piIdx;
+		private final List<PI> pis;
+		private final String str;
+		private final int strIdx;
+		private final int[] capBegin;
+		private final Object[] cap;
 
-		public abstract boolean match(Matcher matcher);
+		MatchState(int piIdx, List<PI> pis, String str, int strIdx, int[] capBegin, Object[] cap) {
+			this.piIdx = piIdx;
+			this.pis = pis;
+			this.str = str;
+			this.strIdx = strIdx;
+			this.capBegin = capBegin;
+			this.cap = cap;
+		}
+
+		MatchState(List<PI> pis, String str, int strIdx) {
+			this(0, pis, str, strIdx, new int[numCaptures], new Object[numCaptures]);
+		}
+
+		private PI pi() {
+			return pis.get(piIdx);
+		}
+
+		private MatchState nextState(int strIdx) {
+			if (piIdx + 1 < pis.size()) {
+				return new MatchState(piIdx + 1, pis, str, strIdx, capBegin, cap);
+			}
+			else {
+				return null;
+			}
+		}
+
+		public int start() {
+			if (pis.isEmpty()) {
+				return strIdx;
+			}
+			else {
+				PI pi = pis.get(0);
+				return pi.match(this);
+			}
+		}
+
+		public int next(int strIdx) {
+			MatchState ms = nextState(strIdx);
+			if (ms != null) {
+				return ms.pi().match(ms);
+			}
+			else {
+				return strIdx;
+			}
+		}
+
+		public int peek(int pos) {
+			return pos >= 0 && pos < str.length() ? str.charAt(pos) : -1;
+		}
+
+		public int peek() {
+			return peek(strIdx);
+		}
 
 	}
+
+	static abstract class PI {
+
+		public abstract int match(MatchState ms);
+
+	}
+
+	private static final int NO_MATCH = -1;
 
 	private static final PI_begin PI_BEGIN = new PI_begin();
 	private static final PI_eos PI_EOS = new PI_eos();
@@ -536,8 +556,13 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
-			return matcher.index == 0;
+		public int match(MatchState ms) {
+			if (ms.strIdx == 0) {
+				return ms.next(ms.strIdx);
+			}
+			else {
+				return NO_MATCH;
+			}
 		}
 
 	}
@@ -550,8 +575,13 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
-			return matcher.index == matcher.str.length() - 1;
+		public int match(MatchState ms) {
+			if (ms.strIdx == ms.str.length() - 1) {
+				return ms.next(ms.strIdx);
+			}
+			else {
+				return NO_MATCH;
+			}
 		}
 
 	}
@@ -572,58 +602,102 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
+		public int match(MatchState ms) {
 			switch (mod) {
 
 				case EXACTLY_ONCE: {
-					int c = matcher.peek();
+					int c = ms.peek();
 					if (ccl.matches(c)) {
-						matcher.index++;
-						return true;
+						return ms.next(ms.strIdx + 1);
 					}
 					else {
-						return false;
+						return NO_MATCH;
 					}
 				}
 
 				case LONGEST_ZERO_OR_MORE: {
-					do {
-						int c = matcher.peek();
-						if (!ccl.matches(c)) {
-							return true;
-						}
-						else {
-							matcher.index++;
-						}
-					} while (true);
+					final int min = ms.strIdx;
+					final int max;
 
-					// control never reaches this point
+					{
+						int i = min;
+						while (ccl.matches(ms.peek(i))) {
+							i++;
+						}
+						max = i;
+					}
+
+					for (int j = max; j >= min; j--) {
+						int nxt = ms.next(j);
+						if (nxt != NO_MATCH) {
+							return nxt;
+						}
+					}
+
+					return NO_MATCH;
 				}
 
-				case SHORTEST_ZERO_OR_MORE:
-					// simply match the empty sequence -- TODO: is it really this simple?
-					return matcher.index < matcher.str.length();
+				case SHORTEST_ZERO_OR_MORE: {
+					final int min = ms.strIdx;
+					final int max;
+
+					{
+						int i = min;
+						while (ccl.matches(ms.peek(i))) {
+							i++;
+						}
+						max = i;
+					}
+
+					for (int j = min; j < max; j++) {
+						int nxt = ms.next(j);
+						if (nxt != NO_MATCH) {
+							return nxt;
+						}
+					}
+
+					return NO_MATCH;
+				}
 
 				case ONE_OR_MORE: {
-					int c = matcher.peek();
+					int c = ms.peek();
 					if (ccl.matches(c)) {
-						matcher.index++;
-						while (ccl.matches(matcher.peek())) {
-							matcher.index++;
+						final int min = ms.strIdx + 1;
+						final int max;
+
+						{
+							int i = min;
+							while (ccl.matches(ms.peek(i))) {
+								i++;
+							}
+							max = i;
 						}
-						return true;
+
+						for (int j = max; j >= min; j--) {
+							int nxt = ms.next(j);
+							if (nxt != NO_MATCH) {
+								return nxt;
+							}
+						}
+
+						return NO_MATCH;
 					}
 					else {
-						return false;
+						return NO_MATCH;
 					}
 				}
 
 				case AT_MOST_ONCE: {
-					int c = matcher.peek();
+					int c = ms.peek();
 					if (ccl.matches(c)) {
-						matcher.index++;
+						int nxt = ms.next(ms.strIdx + 1);
+						if (nxt != NO_MATCH) {
+							return nxt;
+						}
+						// else fall through and try without this character
 					}
-					return true;
+
+					return ms.next(ms.strIdx);
 				}
 
 				default:
@@ -649,27 +723,29 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
-			Object o = matcher.captures[index-1];
+		public int match(MatchState ms) {
+			Object o = ms.cap[index-1];
+
 			if (o instanceof String) {
-				String s = (String) o;
-				for (int i = 0; i < s.length(); i++) {
-					if (index + i >= matcher.str.length()) {
+				String cs = (String) o;
+				int offset = ms.strIdx;
+				for (int i = 0; i < cs.length(); i++) {
+					if (offset + i >= ms.str.length()) {
 						// EOS
-						return false;
+						return NO_MATCH;
 					}
 
-					if (matcher.str.charAt(index + i) != s.charAt(i)) {
+					if (ms.str.charAt(offset + i) != cs.charAt(i)) {
 						// non-matching character
-						return false;
+						return NO_MATCH;
 					}
 				}
-				matcher.index += s.length();
-				return true;
+
+				return ms.next(offset + cs.length());
 			}
 			else {
 				// don't match positions
-				return false;
+				return NO_MATCH;
 			}
 		}
 
@@ -693,16 +769,16 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
-			int idx = matcher.index;
+		public int match(MatchState ms) {
+			int idx = ms.strIdx;
 
-			if (idx >= matcher.str.length() || matcher.str.charAt(idx) != first) {
-				return false;
+			if (idx >= ms.str.length() || ms.str.charAt(idx) != first) {
+				return NO_MATCH;
 			}
 
 			int balance = 0;
-			while (idx < matcher.str.length()) {
-				char c = matcher.str.charAt(idx);
+			while (idx < ms.str.length()) {
+				char c = ms.str.charAt(idx);
 				if (c == first) {
 					balance += 1;
 				}
@@ -713,14 +789,19 @@ public class StringPattern {
 				idx++;
 
 				if (balance == 0) {
-					// we're done
-					matcher.index = idx;
-					return true;
+					int nxt = ms.next(idx);
+					if (nxt != NO_MATCH) {
+						// we're done
+						return nxt;
+					}
+					else {
+						// continue
+					}
 				}
 			}
 
 			// not balanced
-			return false;
+			return NO_MATCH;
 		}
 
 	}
@@ -740,15 +821,20 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
-			if (matcher.index > 0 && matcher.index < matcher.str.length()) {
-				char c = matcher.str.charAt(matcher.index - 1);
-				char d = matcher.str.charAt(matcher.index);
+		public int match(MatchState ms) {
+			if (ms.strIdx > 0 && ms.strIdx < ms.str.length()) {
+				char c = ms.str.charAt(ms.strIdx - 1);
+				char d = ms.str.charAt(ms.strIdx);
 
-				return !cs.matches(c) && cs.matches(d);
+				if (!cs.matches(c) && cs.matches(d)) {
+					return ms.next(ms.strIdx);
+				}
+				else {
+					return NO_MATCH;
+				}
 			}
 			else {
-				return false;
+				return NO_MATCH;
 			}
 		}
 
@@ -777,9 +863,9 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
-			matcher.capturePosition(index, matcher.index + 1);
-			return true;
+		public int match(MatchState ms) {
+			ms.cap[index - 1] = Long.valueOf(ms.strIdx + 1);
+			return ms.next(ms.strIdx);
 		}
 
 	}
@@ -796,9 +882,9 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
-			matcher.captureBegin(index, matcher.index);
-			return true;
+		public int match(MatchState ms) {
+			ms.capBegin[index - 1] = ms.strIdx;
+			return ms.next(ms.strIdx);
 		}
 
 	}
@@ -815,10 +901,13 @@ public class StringPattern {
 		}
 
 		@Override
-		public boolean match(Matcher matcher) {
-			matcher.captureEnd(index, Math.min(matcher.str.length(), matcher.index));
-			return true;
+		public int match(MatchState ms) {
+			int endIdx = Math.min(ms.str.length(), ms.strIdx);
+			String s = ms.str.substring(ms.capBegin[index - 1], endIdx);
+			ms.cap[index - 1] = s;
+			return ms.next(ms.strIdx);
 		}
+
 	}
 
 	static class PatternBuilder {
