@@ -121,7 +121,7 @@ Statuses:
 | `math.ult` | ![complete](complete.png) | |
 | `io.close` | ![complete](complete.png) | untested |
 | `io.flush` | ![complete](complete.png) | untested |
-| `io.input` | ![complete](complete.png) | access default input file only, no `open` |
+| `io.input` | ![partial](partial.png) | access default input file only, no `open` |
 | `io.lines` | ![not implemented](not-implemented.png) | |
 | `io.open` | ![not implemented](not-implemented.png) | |
 | `io.output` | ![partial](partial.png) | access default output file only, no `open` |
