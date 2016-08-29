@@ -17,15 +17,12 @@
 package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.ReturnBufferFactory;
 import net.sandius.rembulan.core.Table;
 import net.sandius.rembulan.core.TableFactory;
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.GenericBuilder;
 
 public class DefaultLuaState extends LuaState {
 
-	private final ReturnBufferFactory returnBufferFactory;
 	private final TableFactory tableFactory;
 
 	protected Table nilMetatable;
@@ -36,16 +33,12 @@ public class DefaultLuaState extends LuaState {
 	protected Table threadMetatable;
 	protected Table lightuserdataMetatable;
 
-	public DefaultLuaState(ReturnBufferFactory returnBufferFactory,
-						   TableFactory tableFactory) {
-
-		this.returnBufferFactory = Check.notNull(returnBufferFactory);
+	public DefaultLuaState(TableFactory tableFactory) {
 		this.tableFactory = Check.notNull(tableFactory);
 	}
 
 	public DefaultLuaState() {
-		this(CachingReturnBufferFactory.DEFAULT_INSTANCE,
-				DefaultTable.FACTORY_INSTANCE);
+		this(DefaultTable.FACTORY_INSTANCE);
 	}
 
 	@Override
@@ -133,50 +126,8 @@ public class DefaultLuaState extends LuaState {
 	}
 
 	@Override
-	public ReturnBufferFactory returnBufferFactory() {
-		return returnBufferFactory;
-	}
-
-	@Override
 	public TableFactory tableFactory() {
 		return tableFactory;
-	}
-
-	public static class Builder implements GenericBuilder<DefaultLuaState> {
-
-		private ReturnBufferFactory returnBufferFactory;
-		private TableFactory tableFactory;
-
-		protected Builder(ReturnBufferFactory returnBufferFactory,
-							   TableFactory tableFactory) {
-
-			this.returnBufferFactory = Check.notNull(returnBufferFactory);
-			this.tableFactory = Check.notNull(tableFactory);
-		}
-
-		public Builder() {
-			// defaults
-			this(CachingReturnBufferFactory.DEFAULT_INSTANCE,
-					DefaultTable.FACTORY_INSTANCE);
-		}
-
-		public Builder withReturnBufferFactory(ReturnBufferFactory factory) {
-			this.returnBufferFactory = Check.notNull(factory);
-			return this;
-		}
-
-		public Builder withTableFactory(TableFactory factory) {
-			this.tableFactory = Check.notNull(factory);
-			return this;
-		}
-
-		@Override
-		public DefaultLuaState build() {
-			return new DefaultLuaState(
-					returnBufferFactory,
-					tableFactory);
-		}
-		
 	}
 
 }

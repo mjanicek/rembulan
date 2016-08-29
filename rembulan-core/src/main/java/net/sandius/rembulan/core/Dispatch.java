@@ -18,13 +18,16 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.LuaMathOperators;
 
-public abstract class Dispatch {
+/**
+ * A static class for dispatching operations according to the semantics of Lua 5.3.
+ */
+public final class Dispatch {
 
 	private Dispatch() {
-		// not to be instantiated or extended
+		// not to be instantiated
 	}
 
-	public static Invokable callTarget(MetatableProvider metatableProvider, Object target) {
+	static Invokable callTarget(MetatableProvider metatableProvider, Object target) {
 		if (target instanceof Invokable) {
 			return (Invokable) target;
 		}
@@ -40,43 +43,43 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target) throws ControlThrowable {
+	static void mt_invoke(ExecutionContext context, Object target) throws ControlThrowable {
 		Invokable fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context);
 		else fn.invoke(context, target);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1) throws ControlThrowable {
+	static void mt_invoke(ExecutionContext context, Object target, Object arg1) throws ControlThrowable {
 		Invokable fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1);
 		else fn.invoke(context, target, arg1);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2) throws ControlThrowable {
+	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2) throws ControlThrowable {
 		Invokable fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1, arg2);
 		else fn.invoke(context, target, arg1, arg2);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
 		Invokable fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3);
 		else fn.invoke(context, target, arg1, arg2, arg3);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
+	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
 		Invokable fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4);
 		else fn.invoke(context, target, arg1, arg2, arg3, arg4);
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
+	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
 		Invokable fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4, arg5);
 		else fn.invoke(context, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
 	}
 
-	public static void mt_invoke(ExecutionContext context, Object target, Object[] args) throws ControlThrowable {
+	static void mt_invoke(ExecutionContext context, Object target, Object[] args) throws ControlThrowable {
 		Invokable fn = callTarget(context.getState(), target);
 		if (fn == target) {
 			fn.invoke(context, args);
@@ -89,6 +92,18 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates tail calls stored in the return buffer associated with the execution
+	 * context {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 *
+	 * @throws ControlThrowable  if a tail call initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void evaluateTailCalls(ExecutionContext context) throws ControlThrowable {
 		ReturnBuffer r = context.getReturnBuffer();
 		while (r.isCall()) {
@@ -105,36 +120,216 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Calls the object {@code target} with no arguments.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This is the equivalent of the Lua expression</p>
+	 * <pre>
+	 *     target()
+	 * </pre>
+	 * <p>including metamethod handling and tail call evaluation. Consequently, {@code target}
+	 * may be any value (i.e., is not required to be a function).</p>
+	 *
+	 * <p>The results of the call will be stored in the return buffer associated with
+	 * {@code context}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param target  call target, may be {@code null}
+	 *
+	 * @throws ControlThrowable  if the call initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target) throws ControlThrowable {
 		mt_invoke(context, target);
 		evaluateTailCalls(context);
 	}
 
+	/**
+	 * Calls the object {@code target} with a single argument {@code arg1}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This is the equivalent of the Lua expression</p>
+	 * <pre>
+	 *     target(arg1)
+	 * </pre>
+	 * <p>including metamethod handling and tail call evaluation. Consequently, {@code target}
+	 * may be any value (i.e., is not required to be a function).</p>
+	 *
+	 * <p>The results of the call will be stored in the return buffer associated with
+	 * {@code context}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param target  call target, may be {@code null}
+	 * @param arg1  the first argument to the call, may be {@code null}
+	 *
+	 * @throws ControlThrowable  if the call initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1) throws ControlThrowable {
 		mt_invoke(context, target, arg1);
 		evaluateTailCalls(context);
 	}
 
+	/**
+	 * Calls the object {@code target} with the arguments {@code arg1} and {@code arg2}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This is the equivalent of the Lua expression</p>
+	 * <pre>
+	 *     target(arg1, arg2)
+	 * </pre>
+	 * <p>including metamethod handling and tail call evaluation. Consequently, {@code target}
+	 * may be any value (i.e., is not required to be a function).</p>
+	 *
+	 * <p>The results of the call will be stored in the return buffer associated with
+	 * {@code context}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param target  call target, may be {@code null}
+	 * @param arg1  the first argument to the call, may be {@code null}
+	 * @param arg2  the second argument to the call, may be {@code null}
+	 *
+	 * @throws ControlThrowable  if the call initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2) throws ControlThrowable {
 		mt_invoke(context, target, arg1, arg2);
 		evaluateTailCalls(context);
 	}
 
+	/**
+	 * Calls the object {@code target} with the arguments {@code arg1}, {@code arg2} and
+	 * {@code arg3}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This is the equivalent of the Lua expression</p>
+	 * <pre>
+	 *     target(arg1, arg2, arg3)
+	 * </pre>
+	 * <p>including metamethod handling and tail call evaluation. Consequently, {@code target}
+	 * may be any value (i.e., is not required to be a function).</p>
+	 *
+	 * <p>The results of the call will be stored in the return buffer associated with
+	 * {@code context}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param target  call target, may be {@code null}
+	 * @param arg1  the first argument to the call, may be {@code null}
+	 * @param arg2  the second argument to the call, may be {@code null}
+	 * @param arg3  the third argument to the call, may be {@code null}
+	 *
+	 * @throws ControlThrowable  if the call initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
 		mt_invoke(context, target, arg1, arg2, arg3);
 		evaluateTailCalls(context);
 	}
 
+	/**
+	 * Calls the object {@code target} with the arguments {@code arg1}, {@code arg2},
+	 * {@code arg3} and {@code arg4}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This is the equivalent of the Lua expression</p>
+	 * <pre>
+	 *     target(arg1, arg2, arg3, arg4)
+	 * </pre>
+	 * <p>including metamethod handling and tail call evaluation. Consequently, {@code target}
+	 * may be any value (i.e., is not required to be a function).</p>
+	 *
+	 * <p>The results of the call will be stored in the return buffer associated with
+	 * {@code context}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param target  call target, may be {@code null}
+	 * @param arg1  the first argument to the call, may be {@code null}
+	 * @param arg2  the second argument to the call, may be {@code null}
+	 * @param arg3  the third argument to the call, may be {@code null}
+	 * @param arg4  the fourth argument to the call, may be {@code null}
+	 *
+	 * @throws ControlThrowable  if the call initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
 		mt_invoke(context, target, arg1, arg2, arg3, arg4);
 		evaluateTailCalls(context);
 	}
 
+	/**
+	 * Calls the object {@code target} with the arguments {@code arg1}, {@code arg2},
+	 * {@code arg3}, {@code arg4} and {@code arg5}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This is the equivalent of the Lua expression</p>
+	 * <pre>
+	 *     target(arg1, arg2, arg3, arg4, arg5)
+	 * </pre>
+	 * <p>including metamethod handling and tail call evaluation. Consequently, {@code target}
+	 * may be any value (i.e., is not required to be a function).</p>
+	 *
+	 * <p>The results of the call will be stored in the return buffer associated with
+	 * {@code context}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param target  call target, may be {@code null}
+	 * @param arg1  the first argument to the call, may be {@code null}
+	 * @param arg2  the second argument to the call, may be {@code null}
+	 * @param arg3  the third argument to the call, may be {@code null}
+	 * @param arg4  the fourth argument to the call, may be {@code null}
+	 * @param arg5  the fifth argument to the call, may be {@code null}
+	 *
+	 * @throws ControlThrowable  if the call initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
 		mt_invoke(context, target, arg1, arg2, arg3, arg4, arg5);
 		evaluateTailCalls(context);
 	}
 
+	/**
+	 * Calls the object {@code target} with the arguments passed in the array {@code args}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This is the equivalent of the Lua expression</p>
+	 * <pre>
+	 *     target(a_0, ..., a_n)
+	 * </pre>
+	 * <p>where {@code a_i} denotes the value of {@code args[i]} and {@code n} is equal
+	 * to {@code (args.length - 1)}, including metamethod handling and tail call evaluation.
+	 * Consequently, {@code target} may be any value (i.e., is not required to be a function).</p>
+	 *
+	 * <p>Note that the array {@code args} is passed to the called function, and the function
+	 * may modify its contents. It is therefore not safe to assume that the contents of
+	 * {@code args} will be the same after this method has returned.</p>
+	 *
+	 * <p>The results of the call will be stored in the return buffer associated with
+	 * {@code context}.</p>
+	 *
+	 * <p>If {@code args} is {@code null}, then the behaviour of this method is undefined.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param target  call target, may be {@code null}
+	 * @param args  call arguments, must not be {@code null}
+	 *
+	 * @throws ControlThrowable  if the call initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object[] args) throws ControlThrowable {
 		mt_invoke(context, target, args);
 		evaluateTailCalls(context);
@@ -162,6 +357,21 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a + b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void add(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
@@ -175,10 +385,39 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a + b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a + b}
+	 *
+	 * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static Number add(Number a, Number b) {
 		return Arithmetic.of(a, b).add(a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a - b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void sub(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
@@ -191,10 +430,39 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a - b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a - b}
+	 *
+	 * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static Number sub(Number a, Number b) {
 		return Arithmetic.of(a, b).sub(a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a * b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void mul(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
@@ -207,10 +475,39 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a * b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a * b}
+	 *
+	 * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static Number mul(Number a, Number b) {
 		return Arithmetic.of(a, b).mul(a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a / b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void div(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
@@ -223,10 +520,39 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a / b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a / b}
+	 *
+	 * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static Number div(Number a, Number b) {
 		return Arithmetic.of(a, b).div(a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a % b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void mod(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
@@ -239,10 +565,39 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a % b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a % b}
+	 *
+	 * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static Number mod(Number a, Number b) {
 		return Arithmetic.of(a, b).mod(a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a // b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void idiv(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
@@ -255,10 +610,39 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a // b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a // b}
+	 *
+	 * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static Number idiv(Number a, Number b) {
 		return Arithmetic.of(a, b).idiv(a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a ^ b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void pow(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Number na = Conversions.arithmeticValueOf(a);
 		Number nb = Conversions.arithmeticValueOf(b);
@@ -271,6 +655,20 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a ^ b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a ^ b}
+	 *
+	 * @throws NullPointerException  if {@code a} or {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static Number pow(Number a, Number b) {
 		return Arithmetic.of(a, b).pow(a, b);
 	}
@@ -297,6 +695,21 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a & b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void band(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.integerValueOf(a);
 		Long lb = Conversions.integerValueOf(b);
@@ -309,6 +722,21 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a | b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void bor(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.integerValueOf(a);
 		Long lb = Conversions.integerValueOf(b);
@@ -321,6 +749,21 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a ~ b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void bxor(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.integerValueOf(a);
 		Long lb = Conversions.integerValueOf(b);
@@ -333,6 +776,21 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a << b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void shl(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.integerValueOf(a);
 		Long lb = Conversions.integerValueOf(b);
@@ -345,6 +803,21 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a >> b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void shr(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Long la = Conversions.integerValueOf(a);
 		Long lb = Conversions.integerValueOf(b);
@@ -357,6 +830,20 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code -a}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param o  the argument, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void unm(ExecutionContext context, Object o) throws ControlThrowable {
 		Number no = Conversions.arithmeticValueOf(o);
 		Arithmetic m = Arithmetic.of(no);
@@ -368,10 +855,36 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code -n}, where {@code n} is a number.
+	 *
+	 * <p>Note that when {@code n} is a number, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param n  the argument, must not be {@code null}
+	 * @return  the value of the Lua expression {@code -a}
+	 *
+	 * @throws NullPointerException  if {@code n} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static Number unm(Number n) {
 		return Arithmetic.of(n).unm(n);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code ~o}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param o  the argument, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void bnot(ExecutionContext context, Object o) throws ControlThrowable {
 		Long lo = Conversions.integerValueOf(o);
 
@@ -383,10 +896,36 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code #s}, where {@code s} is a string.
+	 *
+	 * <p>Note that when {@code s} is a string, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param s  the string argument, must not be {@code null}
+	 * @return  the value of the Lua expression {@code #s}
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static long len(String s) {
 		return s.getBytes().length;  // FIXME: wasteful!
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code #o}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param o  the argument, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void len(ExecutionContext context, Object o) throws ControlThrowable {
 		if (o instanceof String) {
 			context.getReturnBuffer().setTo(len((String) o));
@@ -405,6 +944,21 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a .. b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void concat(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		String sa = Conversions.stringValueOf(a);
 		String sb = Conversions.stringValueOf(b);
@@ -469,19 +1023,77 @@ public abstract class Dispatch {
 		context.getReturnBuffer().setTo(rawEqual == polarity);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a == b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void eq(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		eq(context, true, a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a != b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void neq(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		eq(context, false, a, b);
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a == b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a == b}
+	 *
+	 * @throws NullPointerException  if {@code a} of {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static boolean eq(Number a, Number b) {
 		return Ordering.NUMERIC.eq(a, b);
 	}
 
-
+	/**
+	 * Evaluates the Lua expression {@code a < b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void lt(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Ordering c = Ordering.of(a, b);
 		if (c != null) {
@@ -501,14 +1113,57 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a < b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a < b}
+	 *
+	 * @throws NullPointerException  if {@code a} of {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static boolean lt(Number a, Number b) {
 		return Ordering.NUMERIC.lt(a, b);
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a < b}, where {@code a} and {@code b}
+	 * are strings.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are strings, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a < b}
+	 *
+	 * @throws NullPointerException  if {@code a} of {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static boolean lt(String a, String b) {
 		return Ordering.STRING.lt(a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code a <= b}, including the handling of metamethods,
+	 * and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param a  the first operand, may be any value
+	 * @param b  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void le(ExecutionContext context, Object a, Object b) throws ControlThrowable {
 		Ordering c = Ordering.of(a, b);
 		if (c != null) {
@@ -538,14 +1193,58 @@ public abstract class Dispatch {
 		}
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a <= b}, where {@code a} and {@code b}
+	 * are numbers.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are numbers, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a <= b}
+	 *
+	 * @throws NullPointerException  if {@code a} of {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static boolean le(Number a, Number b) {
 		return Ordering.NUMERIC.le(a, b);
 	}
 
+	/**
+	 * Returns the value of the Lua expression {@code a <= b}, where {@code a} and {@code b}
+	 * are strings.
+	 *
+	 * <p>Note that when {@code a} and {@code b} are strings, no metamethods will be consulted,
+	 * and that consequently, this method does not throw {@code ControlThrowable}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @return  the value of the Lua expression {@code a <= b}
+	 *
+	 * @throws NullPointerException  if {@code a} of {@code b} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static boolean le(String a, String b) {
 		return Ordering.STRING.le(a, b);
 	}
 
+	/**
+	 * Evaluates the Lua expression {@code table[key]} (in non-assignment context) including
+	 * the handling of metamethods, and stores the result to the return buffer associated with
+	 * {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should
+	 * be caught, handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param table  the first operand, may be any value
+	 * @param key  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
 	public static void index(ExecutionContext context, Object table, Object key) throws ControlThrowable {
 		if (table instanceof Table) {
 			Table t = (Table) table;
@@ -581,7 +1280,22 @@ public abstract class Dispatch {
 		}
 	}
 
-	public static void newindex(ExecutionContext context, Object table, Object key, Object value) throws ControlThrowable {
+	/**
+	 * Executes the Lua statement {@code table[key] = value}, including the handling of
+	 * metamethods, and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should
+	 * be caught, handled and re-thrown by the caller of this method.
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param table  the first operand, may be any value
+	 * @param key  the second operand, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} is {@code null}
+	 */
+	@SuppressWarnings("unused")
+	public static void setindex(ExecutionContext context, Object table, Object key, Object value) throws ControlThrowable {
 		if (table instanceof Table) {
 			Table t = (Table) table;
 			Object r = t.rawget(key);
@@ -609,7 +1323,7 @@ public abstract class Dispatch {
 		}
 		else if (handler instanceof Table) {
 			// TODO: protect against infinite loops
-			newindex(context, handler, key, value);
+			setindex(context, handler, key, value);
 		}
 		else {
 			throw IllegalOperationAttemptException.index(table, key);
@@ -618,13 +1332,25 @@ public abstract class Dispatch {
 
 	private static final Long ZERO = Long.valueOf(0L);
 
-	public static boolean continueLoop(Number index, Number limit, Number step) {
-		if (Ordering.NUMERIC.eq(ZERO, step)) {
-			return false;  // step is zero or NaN
-		}
-		return Ordering.NUMERIC.lt(ZERO, step)  // ascending?
-				? Ordering.NUMERIC.le(index, limit)
-				: Ordering.NUMERIC.le(limit, index);
+	/**
+	 * Returns {@code true} iff {@code a} <i>op</i> {@code b}, where <i>op</i> is
+	 * "{@code <=}" (lesser than or equal to) if {@code sign > 0}, or "{@code >=}" (greater
+	 * than or equal to) if {@code sign < 0}.
+	 *
+	 * <p>When {@code sign} is zero or <i>NaN</i>, returns {@code false}.</p>
+	 *
+	 * @param a  the first operand, must not be {@code null}
+	 * @param b  the second operand, must not be {@code null}
+	 * @param sign  the sign, must not be {@code null}
+	 *
+	 * @return  {@code true} iff {@code a} is below {@code b} depending on the sign
+	 *          of {@code sign}
+	 *
+	 * @throws NullPointerException  if {@code a}, {@code b} or {@code sign} is {@code null}
+	 */
+	@SuppressWarnings("unused")
+	public static boolean signed_le(Number a, Number b, Number sign) {
+		return !eq(ZERO, sign) && (lt(ZERO, sign) ? le(a, b) : le(b, a));
 	}
 
 }

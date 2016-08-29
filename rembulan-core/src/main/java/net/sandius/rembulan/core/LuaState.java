@@ -18,7 +18,7 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.LuaType;
 
-public abstract class LuaState implements MetatableProvider, TableFactory, ReturnBufferFactory {
+public abstract class LuaState implements MetatableProvider, TableFactory {
 
 	public abstract Table nilMetatable();
 	public abstract Table booleanMetatable();
@@ -73,13 +73,6 @@ public abstract class LuaState implements MetatableProvider, TableFactory, Retur
 				default: throw new IllegalStateException("Illegal type: " + type);
 			}
 		}
-	}
-
-	public abstract ReturnBufferFactory returnBufferFactory();
-
-	@Override
-	public ReturnBuffer newReturnBuffer() {
-		return returnBufferFactory().newReturnBuffer();
 	}
 
 	public abstract TableFactory tableFactory();

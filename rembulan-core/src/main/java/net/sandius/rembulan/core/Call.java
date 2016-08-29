@@ -56,7 +56,7 @@ public class Call {
 			Object fn,
 			Object... args) {
 
-		ReturnBuffer returnBuffer = state.newReturnBuffer();
+		ReturnBuffer returnBuffer = ReturnBuffers.newDefaultReturnBuffer();
 		Coroutine c = new Coroutine(fn);
 		returnBuffer.setToContentsOf(args);
 		return new Call(state, returnBuffer, c);

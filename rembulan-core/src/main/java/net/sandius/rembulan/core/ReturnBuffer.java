@@ -19,20 +19,26 @@ package net.sandius.rembulan.core;
 import java.util.Collection;
 
 /**
- * A buffer used to pass the results of function calls to the caller.
+ * A buffer used to store and retrieve the results of function calls and Lua operations
+ * initiated via the {@link Dispatch} methods.
  *
- * <p>{@code ReturnBuffer} is part of the calling convention used in Rembulan.</p>
+ * <p>In Lua, a function may return either a sequence of values, or a tail call
+ * of another Lua function. A return buffer represents both possibilities as an optional
+ * call target (for tail calls), and mandatory sequence of values (for tail calls, these
+ * are the call arguments; for plain returns, these are the actual values).</p>
  *
- * <p>Conceptually, a return buffer contains a sequence of values (possibly {@code null}s)
- * of a certain length. To query the length of the sequence, use {@link #size()}.
- * To access the values, use {@link #getAsArray()} to get the entire sequence packed
- * into an array, {@link #get(int)} to get a single value in the sequence (or {@code null}
- * when the index is not between 0 (inclusive) and {@code size()} (exclusive), or
- * {@link #get0()}, {@link #get1()}, ... for possibly more optimised versions of {@code get(int)}.
- * </p>
+ * <p>To query the length of the sequence, use {@link #size()}. To access the values, use
+ * {@link #getAsArray()} to get the entire sequence packed into an array, {@link #get(int)}
+ * to get a single value in the sequence (or {@code null} when the index is not between 0
+ * (inclusive) and {@code size()} (exclusive), or {@link #get0()}, {@link #get1()}, ...
+ * for possibly more optimised versions of {@code get(int)}.</p>
  *
- * <p>TODO: finish this, mention tail calls.</p>
+ * <p>To determine whether the return buffer contains a tail call, the method {@link #isCall()}
+ * may be used; when it returns {@code true}, then the call target (i.e. the object to
+ * be tail-called) is accessible using {@link #getCallTarget()}.</p>
  *
+ * <p>New return buffer instances may be created using the methods provided by the static
+ * factory class {@link ReturnBuffers}.</p>
  */
 public interface ReturnBuffer {
 
@@ -44,6 +50,7 @@ public interface ReturnBuffer {
 	 *
 	 * @return  the number of values stored in this buffer
 	 */
+	@SuppressWarnings("unused")
 	int size();
 
 	/**
@@ -54,6 +61,7 @@ public interface ReturnBuffer {
 	 *
 	 * @return  {@code true} iff this buffer contains a tail call
 	 */
+	@SuppressWarnings("unused")
 	boolean isCall();
 
 	/**
@@ -74,10 +82,18 @@ public interface ReturnBuffer {
 	 *
 	 * @throws IllegalStateException  when this buffer does not contain a tail call
 	 */
+	@SuppressWarnings("unused")
 	Object getCallTarget();
 
 	/**
 	 * Sets the result value in this buffer to the empty sequence.
+	 *
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return
+	 * </pre>
+	 * <p>(Note, however, that this method has no influence on the control flow of its
+	 * caller.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -86,10 +102,18 @@ public interface ReturnBuffer {
 	 * <p>However, implementations of this method may be optimised due to the fact
 	 * that the number of values in this case is known at compile time.</p>
 	 */
+	@SuppressWarnings("unused")
 	void setTo();
 
 	/**
 	 * Sets the result value in this buffer to a single value.
+	 *
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return a
+	 * </pre>
+	 * <p>(Note, however, that this method has no influence on the control flow of its
+	 * caller.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -105,10 +129,18 @@ public interface ReturnBuffer {
 	 *
 	 * @param a  the result value, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setTo(Object a);
 
 	/**
 	 * Sets the result value in this buffer to two values.
+	 *
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return a, b
+	 * </pre>
+	 * <p>(Note, however, that this method has no influence on the control flow of its
+	 * caller.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -120,10 +152,18 @@ public interface ReturnBuffer {
 	 * @param a  the first value, may be {@code null}
 	 * @param b  the second value, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setTo(Object a, Object b);
 
 	/**
 	 * Sets the result value in this buffer to three values.
+	 *
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return a, b, c
+	 * </pre>
+	 * <p>(Note, however, that this method has no influence on the control flow of its
+	 * caller.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -136,10 +176,18 @@ public interface ReturnBuffer {
 	 * @param b  the second value, may be {@code null}
 	 * @param c  the third value, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setTo(Object a, Object b, Object c);
 
 	/**
 	 * Sets the result value in this buffer to four values.
+	 *
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return a, b, c, d
+	 * </pre>
+	 * <p>(Note, however, that this method has no influence on the control flow of its
+	 * caller.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -153,10 +201,18 @@ public interface ReturnBuffer {
 	 * @param c  the third value, may be {@code null}
 	 * @param d  the fourth value, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setTo(Object a, Object b, Object c, Object d);
 
 	/**
 	 * Sets the result value in this buffer to five values.
+	 *
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return a, b, c, d, e
+	 * </pre>
+	 * <p>(Note, however, that this method has no influence on the control flow of its
+	 * caller.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -171,10 +227,19 @@ public interface ReturnBuffer {
 	 * @param d  the fourth value, may be {@code null}
 	 * @param e  the fifth value, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setTo(Object a, Object b, Object c, Object d, Object e);
 
 	/**
 	 * Sets the result value in this buffer to the contents of {@code array}.
+	 *
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return a_0, ..., a_n
+	 * </pre>
+	 * <p>where {@code a_i} denotes the value of {@code args[i]} and {@code n} is equal
+	 * to {@code (args.length - 1)}. (Note, however, that this method has no influence on
+	 * the control flow of its caller.)</p>
 	 *
 	 * <p>The contents of {@code array} are not modified by the buffer, and the reference
 	 * to {@code array} is not retained by the buffer. (In other words,
@@ -188,11 +253,20 @@ public interface ReturnBuffer {
 	 *
 	 * @throws NullPointerException  if {@code array} is {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToContentsOf(Object[] array);
 
 	/**
 	 * Sets the result value in this buffer to the contents of {@code collection},
 	 * in the order given by {@code collection}'s {@link Collection#iterator() iterator()}.
+	 *
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return a_0, ..., a_n
+	 * </pre>
+	 * <p>where {@code a_i} denotes the value returned by the {@code (i+1)}-th invocation
+	 * of an iterator on {@code args}, and {@code n} is equal to {@code args.size() - 1}.
+	 * (Note, however, that this method has no influence on the control flow of its caller.)</p>
 	 *
 	 * <p>The contents of {@code collection} are not modified by the buffer,
 	 * and the reference to {@code collection} is not retained by the buffer.
@@ -216,14 +290,20 @@ public interface ReturnBuffer {
 	 *
 	 * @throws NullPointerException  if {@code collection} is {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToContentsOf(Collection<?> collection);
 
 	/**
-	 * Sets the result in this buffer to a tail call of {@code target} without arguments,
-	 * i.e., to {@code target()}.
+	 * Sets the result in this buffer to a tail call of {@code target} without arguments.
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
-	 * into the buffer a description of how the call should be made.</p>
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return target()
+	 * </pre>
+	 * <p>Note, however, that this method is not a control statement that it does <i>not</i>
+	 * evaluate the call, but rather stores into the buffer a description of how the call
+	 * should be made. (In order to execute such a call in a non-tail-call setting, use
+	 * {@link Dispatch#call(ExecutionContext, Object)}.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -234,14 +314,21 @@ public interface ReturnBuffer {
 	 *
 	 * @param target  tail call target, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToCall(Object target);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with a single
-	 * argument {@code arg1}, i.e., to {@code target(arg1)}.
+	 * argument {@code arg1}.
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
-	 * into the buffer a description of how the call should be made.</p>
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return target(arg1)
+	 * </pre>
+	 * <p>Note, however, that this method is not a control statement that it does <i>not</i>
+	 * evaluate the call, but rather stores into the buffer a description of how the call
+	 * should be made. (In order to execute such a call in a non-tail-call setting, use
+	 * {@link Dispatch#call(ExecutionContext, Object, Object)}.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -258,14 +345,21 @@ public interface ReturnBuffer {
 	 * @param target  tail call target, may be {@code null}
 	 * @param arg1  the first call argument, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToCall(Object target, Object arg1);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
-	 * {@code arg1} and {@code arg2}, i.e., to {@code target(arg1, arg2)}.
+	 * {@code arg1} and {@code arg2}.
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
-	 * into the buffer a description of how the call should be made.</p>
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return target(arg1, arg2)
+	 * </pre>
+	 * <p>Note, however, that this method is not a control statement that it does <i>not</i>
+	 * evaluate the call, but rather stores into the buffer a description of how the call
+	 * should be made. (In order to execute such a call in a non-tail-call setting, use
+	 * {@link Dispatch#call(ExecutionContext, Object, Object, Object)}.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -278,15 +372,21 @@ public interface ReturnBuffer {
 	 * @param arg1  the first call argument, may be {@code null}
 	 * @param arg2  the second call argument, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToCall(Object target, Object arg1, Object arg2);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
-	 * {@code arg1}, {@code arg2} and {@code arg3}, i.e.,
-	 * to {@code target(arg1, arg2, arg3)}.
+	 * {@code arg1}, {@code arg2} and {@code arg3}.
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
-	 * into the buffer a description of how the call should be made.</p>
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return target(arg1, arg2, arg3)
+	 * </pre>
+	 * <p>Note, however, that this method is not a control statement that it does <i>not</i>
+	 * evaluate the call, but rather stores into the buffer a description of how the call
+	 * should be made. (In order to execute such a call in a non-tail-call setting, use
+	 * {@link Dispatch#call(ExecutionContext, Object, Object, Object, Object)}.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -300,15 +400,21 @@ public interface ReturnBuffer {
 	 * @param arg2  the second call argument, may be {@code null}
 	 * @param arg3  the third call argument, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToCall(Object target, Object arg1, Object arg2, Object arg3);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
-	 * {@code arg1}, {@code arg2}, {@code arg3} and {@code arg4}, i.e.,
-	 * to {@code target(arg1, arg2, arg3, arg4)}.
+	 * {@code arg1}, {@code arg2}, {@code arg3} and {@code arg4}.
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
-	 * into the buffer a description of how the call should be made.</p>
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return target(arg1, arg2, arg3, arg4)
+	 * </pre>
+	 * <p>Note, however, that this method is not a control statement that it does <i>not</i>
+	 * evaluate the call, but rather stores into the buffer a description of how the call
+	 * should be made. (In order to execute such a call in a non-tail-call setting, use
+	 * {@link Dispatch#call(ExecutionContext, Object, Object, Object, Object, Object)}.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -323,15 +429,21 @@ public interface ReturnBuffer {
 	 * @param arg3  the third call argument, may be {@code null}
 	 * @param arg4  the fourth call argument, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the arguments
-	 * {@code arg1}, {@code arg2}, {@code arg3}, {@code arg4} and {@code arg5} , i.e.,
-	 * to {@code target(arg1, arg2, arg3, arg4, arg5)}.
+	 * {@code arg1}, {@code arg2}, {@code arg3}, {@code arg4} and {@code arg5}.
 	 *
-	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
-	 * into the buffer a description of how the call should be made.</p>
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
+	 * <pre>
+	 *     return target(arg1, arg2, arg3, arg4, arg5)
+	 * </pre>
+	 * <p>Note, however, that this method is not a control statement that it does <i>not</i>
+	 * evaluate the call, but rather stores into the buffer a description of how the call
+	 * should be made. (In order to execute such a call in a non-tail-call setting, use
+	 * {@link Dispatch#call(ExecutionContext, Object, Object, Object, Object, Object)}.)</p>
 	 *
 	 * <p>The effect of this method is equivalent to</p>
 	 * <pre>
@@ -347,21 +459,23 @@ public interface ReturnBuffer {
 	 * @param arg4  the fourth call argument, may be {@code null}
 	 * @param arg5  the fifth call argument, may be {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToCall(Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5);
 
 	/**
 	 * Sets the result in this buffer to a tail call of {@code target} with the contents
 	 * of the array {@code args} used as call arguments.
 	 *
-	 * <p>This corresponds to the call</p>
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
 	 * <pre>
-	 *     target(a_0, ..., a_n)
+	 *     return target(a_0, ..., a_n)
 	 * </pre>
 	 * <p>where {@code a_i} denotes the value of {@code args[i]} and {@code n} is equal
-	 * to {@code (args.length - 1)}.</p>
-	 *
-	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
-	 * into the buffer a description of how the call should be made.</p>
+	 * to {@code (args.length - 1)}.
+	 * Note, however, that this method is not a control statement that it does <i>not</i>
+	 * evaluate the call, but rather stores into the buffer a description of how the call
+	 * should be made. (In order to execute such a call in a non-tail-call setting, use
+	 * {@link Dispatch#call(ExecutionContext, Object, Object[])}.)</p>
 	 *
 	 * <p>The contents of {@code args} are not modified by the buffer, and the reference
 	 * to {@code args} is not retained by the buffer. (In other words,
@@ -382,15 +496,16 @@ public interface ReturnBuffer {
 	 * Sets the result in this buffer to a tail call of {@code target} with the contents
 	 * of the collection {@code args} used as call arguments.
 	 *
-	 * <p>This corresponds to the call</p>
+	 * <p>This equivalent to the assignment of return values by the Lua statement</p>
 	 * <pre>
-	 *     target(a_0, ..., a_n)
+	 *     return target(a_0, ..., a_n)
 	 * </pre>
 	 * <p>where {@code a_i} denotes the value returned by the {@code (i+1)}-th invocation
-	 * of an iterator on {@code args}, and {@code n} is equal to {@code args.size() - 1}.</p>
-	 *
-	 * <p>Note that this method does <i>not</i> evaluate the call, but rather stores
-	 * into the buffer a description of how the call should be made.</p>
+	 * of an iterator on {@code args}, and {@code n} is equal to {@code args.size() - 1}.
+	 * Note, however, that this method is not a control statement that it does <i>not</i>
+	 * evaluate the call, but rather stores into the buffer a description of how the call
+	 * should be made. (In order to execute such a call in a non-tail-call setting, use
+	 * {@link Dispatch#call(ExecutionContext, Object, Object[])}.)</p>
 	 *
 	 * <p>The contents of {@code args} are not modified by the buffer, and the reference
 	 * to {@code args} is not retained by the buffer. (In other words,
@@ -412,6 +527,7 @@ public interface ReturnBuffer {
 	 *
 	 * @throws NullPointerException  if {@code args} is {@code null}
 	 */
+	@SuppressWarnings("unused")
 	void setToCallWithContentsOf(Object target, Collection<?> args);
 
 	/**

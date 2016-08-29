@@ -16,8 +16,23 @@
 
 package net.sandius.rembulan.core;
 
+/**
+ * An interface for obtaining metatables for arbitrary values.
+ *
+ * <p>In Lua, only tables and (full) userdata carry their own metatables; for all other
+ * types of values <i>T</i>, all values of type <i>T</i> share a metatable. This interface
+ * provides uniform access to metatables of all types.</p>
+ */
 public interface MetatableProvider {
 
+	/**
+	 * Returns the metatable for the object {@code instance}, or {@code null} if this
+	 * metatable provider does not assign any metatable to {@code instance}.
+	 *
+	 * @param instance  the object to obtain a metatable for, may be {@code null}
+	 * @return  the metatable of {@code instance}, or {@code null} if there is no metatable
+	 *          assigned to {@code instance} in this provider
+	 */
 	Table getMetatable(Object instance);
 
 }

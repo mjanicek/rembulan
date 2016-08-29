@@ -17,19 +17,15 @@
 package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.ReturnBuffer;
-import net.sandius.rembulan.core.ReturnBufferFactory;
 
 import java.util.Arrays;
 import java.util.Collection;
 
+/**
+ * A return buffer implementation that stores values in an array freshly reallocated
+ * on every assignment.
+ */
 public class SimpleReturnBuffer implements ReturnBuffer {
-
-	public static final ReturnBufferFactory FACTORY_INSTANCE = new ReturnBufferFactory() {
-		@Override
-		public ReturnBuffer newReturnBuffer() {
-			return new SimpleReturnBuffer();
-		}
-	};
 
 	private static final Object[] EMPTY_ARRAY = new Object[0];
 

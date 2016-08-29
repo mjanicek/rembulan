@@ -58,7 +58,7 @@ public class DispatchMethods {
 	public static final String OP_LE = "le";
 
 	public static final String OP_INDEX = "index";
-	public static final String OP_NEWINDEX = "newindex";
+	public static final String OP_SETINDEX = "setindex";
 
 	public static final String OP_CALL = "call";
 
@@ -95,8 +95,8 @@ public class DispatchMethods {
 		return dynamic(OP_INDEX, 2);
 	}
 
-	public static AbstractInsnNode newindex() {
-		return dynamic(OP_NEWINDEX, 3);
+	public static AbstractInsnNode setindex() {
+		return dynamic(OP_SETINDEX, 3);
 	}
 
 	public static int adjustKind_call(int kind) {
@@ -123,7 +123,7 @@ public class DispatchMethods {
 		return new MethodInsnNode(
 				INVOKESTATIC,
 				Type.getInternalName(Dispatch.class),
-				"continueLoop",
+				"signed_le",
 				Type.getMethodDescriptor(
 						Type.BOOLEAN_TYPE,
 						Type.getType(Number.class),

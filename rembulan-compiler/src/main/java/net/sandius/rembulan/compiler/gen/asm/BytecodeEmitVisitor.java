@@ -467,7 +467,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(new VarInsnNode(ALOAD, slot(node.obj())));
 		il.add(new VarInsnNode(ALOAD, slot(node.key())));
 		il.add(new VarInsnNode(ALOAD, slot(node.value())));
-		il.add(DispatchMethods.newindex());
+		il.add(DispatchMethods.setindex());
 
 		il.add(rp.resume());
 	}
