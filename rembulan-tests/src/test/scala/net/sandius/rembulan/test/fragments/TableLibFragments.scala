@@ -22,6 +22,99 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
   in (TableContext) {
 
+    about ("table.concat") {
+
+      program ("""return table.concat()""") failsWith "bad argument #1 to 'concat' (table expected, got no value)"
+      program ("""return table.concat(nil)""") failsWith "bad argument #1 to 'concat' (table expected, got nil)"
+      program ("""return table.concat({}, nil)""") succeedsWith ("")
+      program ("""return table.concat({}, false)""") failsWith "bad argument #2 to 'concat' (string expected, got boolean)"
+      program ("""return table.concat({}, true, true)""") failsWith "bad argument #2 to 'concat' (string expected, got boolean)"
+      program ("""return table.concat({}, true, true, false)""") failsWith "bad argument #2 to 'concat' (string expected, got boolean)"
+
+      in (FullContext) {
+        // strings have the __index metamethod, but concat doesn't care about them
+        program ("""return table.concat("hello", " ")""") failsWith "bad argument #1 to 'concat' (table expected, got string)"
+      }
+
+      program ("""return table.concat({}, "", true, false)""") failsWith "bad argument #3 to 'concat' (number expected, got boolean)"
+      program ("""return table.concat({}, "", nil, false)""") failsWith "bad argument #4 to 'concat' (number expected, got boolean)"
+      program ("""return table.concat({}, nil, nil, nil)""") succeedsWith ("")
+
+      program ("""return table.concat({3, 2, 1})""") succeedsWith ("321")
+      program ("""return table.concat({3, [4]=0, 2, 1})""") succeedsWith ("3210")
+      program ("""return table.concat({3, x=0, 2, 1})""") succeedsWith ("321")
+
+      program ("""return table.concat({[-1]=1, [-2]=2, [0]=0, [2]=-2, [1.0]=-1}, "", -2)""") succeedsWith ("210-1-2")
+      program ("""return table.concat({[-1]=1, [-2]=2, [0]=0, [2]=-2, [1.0]=-1})""") succeedsWith ("-1-2")
+
+      program ("""return table.concat({})""") succeedsWith ("")
+      program ("""return table.concat({}, "BOO")""") succeedsWith ("")
+
+      program ("""return table.concat({}, "", 50)""") succeedsWith ("")
+      program ("""return table.concat({}, "", 0)""") failsWith "invalid value (nil) at index 0 in table for 'concat'"
+      program ("""return table.concat({}, "", -1)""") failsWith "invalid value (nil) at index -1 in table for 'concat'"
+      program ("""return table.concat({}, "", 1, 20)""") failsWith "invalid value (nil) at index 1 in table for 'concat'"
+
+      program ("""return table.concat({1, 2}, "", 1, 1)""") succeedsWith ("1")
+      program ("""return table.concat({1, 2, 3, 4}, "", -2, 3)""") failsWith "invalid value (nil) at index -2 in table for 'concat'"
+
+      program ("""return table.concat({"hello", "world", 0})""") succeedsWith ("helloworld0")
+      program ("""return table.concat({"hello", "world", 0}, " ")""") succeedsWith ("hello world 0")
+
+      program ("""return table.concat({"a", 1, "b", 2, "c", 3}, nil)""") succeedsWith ("a1b2c3")
+      program ("""return table.concat({"a", 1, "b"}, -0.0)""") succeedsWith ("a-0.01-0.0b")
+
+      program ("""return table.concat({"a", 1, {}})""") failsWith "invalid value (table) at index 3 in table for 'concat'"
+      program ("""return table.concat({{}, {}})""") failsWith "invalid value (table) at index 1 in table for 'concat'"
+
+      in (FullContext) {
+        program ("""return table.concat({io.stdin})""") failsWith "invalid value (userdata) at index 1 in table for 'concat'"
+      }
+
+      // concat uses the __index metamethod on the concatenated table
+      program (
+        """local mt = {__index = function(t, k) return k end}
+          |return table.concat(setmetatable({}, mt), " ", 3, 5)
+        """) succeedsWith ("3 4 5")
+
+      // concat uses the __len metamethod on the concatenated table
+      program (
+        """local mt = {__len = function() return 2 end}
+          |return table.concat(setmetatable({5, 4, 3, 2, 1, 0}, mt), " ")
+        """) succeedsWith ("5 4")
+
+      program ("""local mt = {__len = 10}; return table.concat(setmetatable({}, mt))""") failsWith "attempt to call a number value"
+      program ("""local mt = {__len = function() return "x" end}; return table.concat(setmetatable({}, mt))""") failsWith "object length is not an integer"
+      program ("""local mt = {__len = function() return "2" end}; return table.concat(setmetatable({"a", "b", "c"}, mt))""") succeedsWith "ab"
+      program (
+        """local mt = {__len = function() return "3.0" end}
+          |return table.concat(setmetatable({"a", "b", "c"}, mt))
+        """) succeedsWith "abc"
+
+      program ("""return table.concat(setmetatable({}, {__len = error("BOOM")}), "", 1, true)""") failsWith "BOOM"
+      program ("""return table.concat(setmetatable({}, {__len = error("BOOM")}), true, true)""") failsWith "BOOM"
+      program ("""return table.concat(setmetatable({}, {__len = error("BOOM")}), false)""") failsWith "BOOM"
+
+      // concat uses the __index and __len metamethods on the concatenated table
+      program (
+        """local mt = {__index = function(t, k) return k end; __len = function() return 2 end}
+          |return table.concat(setmetatable({}, mt), "_", -2)
+        """) succeedsWith ("-2_-1_0_1_2")
+
+      // concat does not use the __tostring metamethod of table elements
+      program (
+        """local mt = {__tostring = function() return "{}" end}
+          |return table.concat({"a", 1, setmetatable({}, mt)})
+        """) failsWith "invalid value (table) at index 3 in table for 'concat'"
+
+      // concat does not use the __concat metamethod of table elements
+      program (
+        """local mt = {__concat = function() return "{}" end}
+          |return table.concat({"a", 1, setmetatable({}, mt)})
+        """) failsWith "invalid value (table) at index 3 in table for 'concat'"
+
+    }
+
     about ("table.pack") {
 
       program ("""return table.pack(xx, yy, zz).n""") succeedsWith (3)
@@ -68,6 +161,8 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
         program ("""return table.unpack(setmetatable({}, { __len = function() error("boom") end }), -1)""") failsWithLuaError "boom"
 
         program ("""return table.unpack(setmetatable({}, { __len = function() return 2 end }), -1)""") succeedsWith (null, null, null, null)
+        program ("""return table.unpack(setmetatable({}, { __len = function() return "2" end }), -1)""") succeedsWith (null, null, null, null)
+        program ("""return table.unpack(setmetatable({}, { __len = function() return "2.0" end }), -1)""") succeedsWith (null, null, null, null)
         program ("""return table.unpack(setmetatable({}, { __len = function() return "boo" end }), 1)""") failsWith "object length is not an integer"
 
       }

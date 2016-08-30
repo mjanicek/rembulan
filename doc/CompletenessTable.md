@@ -86,7 +86,7 @@ Statuses:
 | `utf8.codepoint` | ![not implemented](not-implemented.png) | |
 | `utf8.len` | ![not implemented](not-implemented.png) | |
 | `utf8.offset` | ![not implemented](not-implemented.png) | |
-| `table.concat` | ![not implemented](not-implemented.png) | |
+| `table.concat` | ![complete](complete.png) | |
 | `table.insert` | ![not implemented](not-implemented.png) | |
 | `table.move` | ![not implemented](not-implemented.png) | |
 | `table.pack` | ![complete](complete.png) | |
