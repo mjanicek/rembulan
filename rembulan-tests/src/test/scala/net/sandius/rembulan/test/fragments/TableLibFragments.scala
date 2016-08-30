@@ -91,9 +91,9 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
           |return table.concat(setmetatable({"a", "b", "c"}, mt))
         """) succeedsWith "abc"
 
-      program ("""return table.concat(setmetatable({}, {__len = error("BOOM")}), "", 1, true)""") failsWith "BOOM"
-      program ("""return table.concat(setmetatable({}, {__len = error("BOOM")}), true, true)""") failsWith "BOOM"
-      program ("""return table.concat(setmetatable({}, {__len = error("BOOM")}), false)""") failsWith "BOOM"
+      program ("""return table.concat(setmetatable({}, {__len = function() error("BOOM") end}), "", 1, true)""") failsWith "BOOM"
+      program ("""return table.concat(setmetatable({}, {__len = function() error("BOOM") end}), true, true)""") failsWith "BOOM"
+      program ("""return table.concat(setmetatable({}, {__len = function() error("BOOM") end}), false)""") failsWith "BOOM"
 
       // concat uses the __index and __len metamethods on the concatenated table
       program (
@@ -112,6 +112,146 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
         """local mt = {__concat = function() return "{}" end}
           |return table.concat({"a", 1, setmetatable({}, mt)})
         """) failsWith "invalid value (table) at index 3 in table for 'concat'"
+
+    }
+
+    about ("table.insert") {
+
+      program ("table.insert()") failsWith "bad argument #1 to 'insert' (table expected, got no value)"
+      program ("table.insert(nil)") failsWith "bad argument #1 to 'insert' (table expected, got nil)"
+      program ("table.insert(123)") failsWith "bad argument #1 to 'insert' (table expected, got number)"
+
+      program ("table.insert({})") failsWith "wrong number of arguments to 'insert'"
+      program ("table.insert({}, 1, 2, 3)") failsWith "wrong number of arguments to 'insert'"
+      program ("table.insert({}, 1, 2, nil)") failsWith "wrong number of arguments to 'insert'"
+
+      program ("""local t = {}; table.insert(t, "a"); return #t, t[1]""") succeedsWith (1, "a")
+      program ("""local t = {"a"}; table.insert(t, "b"); return #t, t[1], t[2]""") succeedsWith (2, "a", "b")
+      program ("""local t = {"a"}; table.insert(t, 1, "b"); return #t, t[1], t[2]""") succeedsWith (2, "b", "a")
+      program ("""local t = {"a"}; table.insert(t, "1", "b"); return #t, t[1], t[2]""") succeedsWith (2, "b", "a")
+      program ("""local t = {"a"}; table.insert(t, "1.0", "b"); return #t, t[1], t[2]""") succeedsWith (2, "b", "a")
+
+      program ("""table.insert({}, 0, "x")""") failsWith "bad argument #2 to 'insert' (position out of bounds)"
+      program ("""table.insert({}, 0, nil)""") failsWith "bad argument #2 to 'insert' (position out of bounds)"
+      program ("""table.insert({}, 10, "x")""") failsWith "bad argument #2 to 'insert' (position out of bounds)"
+      program ("""table.insert({}, 10, nil)""") failsWith "bad argument #2 to 'insert' (position out of bounds)"
+
+      // __len metamethod
+
+      program ("""table.insert(setmetatable({}, {__len = function() error("BOOM") end}), 10)""") failsWith "BOOM"
+      program ("""table.insert(setmetatable({}, {__len = function() return 1.1 end}), 10)""") failsWith "object length is not an integer"
+
+      program ("""local t = setmetatable(t, {__len = function() return -1 end}); table.insert(t, "x"); return #t, t[0]""") succeedsWith (-1, "x")
+      program ("""local t = setmetatable(t, {__len = function() return "-1" end}); table.insert(t, "x"); return #t, t[0]""") succeedsWith ("-1", "x")
+      program ("""local t = setmetatable(t, {__len = function() return "-0.0" end}); table.insert(, "x"); return #t, t[1]""") succeedsWith ("-0.0", "x")
+      program ("""table.insert(setmetatable({}, {__len = function() return -1 end}), 0, "x")""") failsWith "bad argument #2 to 'insert' (position out of bounds)"
+      program ("""table.insert(setmetatable({}, {__len = function() return 2 end}), 4, "x")""") failsWith "bad argument #2 to 'insert' (position out of bounds)"
+
+      // __index and __newindex
+
+      program ("""local t = setmetatable({"x"}, {__index = error}); table.insert(t, 1, "y"); return #t, t[1], t[2]""") succeedsWith (2, "y", "x")
+
+      program ("""table.insert(setmetatable({"x"}, {__newindex = function(t, k, v) error(k..v) end}), "y")""") failsWith "2y"
+      program ("""table.insert(setmetatable({"x"}, {__newindex = function(t, k, v) error(k..v) end}), 1, "y")""") failsWith "2x"
+
+      program (
+        """-- meta #1
+          |local ks = ""
+          |local n = 0
+          |local t = setmetatable({}, {
+          |  __len = function() return n end;
+          |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
+          |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
+          |})
+          |
+          |table.insert(t, "a")
+          |table.insert(t, "b")
+          |table.insert(t, 1, "c")
+          |t[2] = nil
+          |table.insert(t, 1, "d")
+          |return ks, #t, t[1], t[2], t[3], t[4], t[5]
+        """
+      ) succeedsWith ("[1a][2b][3b][4b]{2}[2c]", 5, "d", "c", null, "b", null)
+
+      program (
+        """-- meta #2
+          |local ks = ""
+          |local n = 0
+          |local t = setmetatable({}, {
+          |  __len = function() return n end;
+          |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
+          |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
+          |})
+          |          |
+          |table.insert(t, "a")
+          |table.insert(t, "b")
+          |table.insert(t, 1, "c")
+          |n = n - 1
+          |rawset(t, 1, nil)
+          |table.insert(t, 1, "d")
+          |return ks, #t, t[1], t[2], t[3], t[4], t[5]
+        """
+      ) succeedsWith ("[1a][2b][3b]{1}[1d]", 3, "d", null, "a", null, null)
+
+      program (
+        """-- meta #3
+          |local ks = ""
+          |local n = 0
+          |local t = setmetatable({}, {
+          |  __len = function() return n end;
+          |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
+          |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
+          |})
+          |
+          |table.insert(t, "a")
+          |table.insert(t, "b")
+          |table.insert(t, 1, "c")
+          |n = n - 1
+          |rawset(t, 2, nil)
+          |table.insert(t, 1, "d")
+          |return ks, #t, t[1], t[2], t[3], t[4], t[5]
+        """
+      ) succeedsWith ("[1a][2b][3b]{2}[2c]", 3, "d", "c", null, null, null)
+
+      program (
+        """-- meta #4
+          |local ks = ""
+          |local n = 0
+          |local t = setmetatable({}, {
+          |  __len = function() return n end;
+          |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
+          |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
+          |})
+          |          |
+          |table.insert(t, "a")
+          |table.insert(t, "b")
+          |table.insert(t, 1, "c")
+          |n = n - 1
+          |rawset(t, 3, nil)
+          |table.insert(t, 1, "d")
+          |return ks, #t, t[1], t[2], t[3], t[4], t[5]
+        """
+      ) succeedsWith ("[1a][2b][3b][3a]", 3, "d", "c", "a", null, null)
+
+      program (
+        """-- meta #5
+          |local ks = ""
+          |local n = 0
+          |local t = setmetatable({}, {
+          |  __len = function() return n end;
+          |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
+          |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
+          |})
+          |          |
+          |table.insert(t, "a")
+          |table.insert(t, "b")
+          |table.insert(t, 1, "c")
+          |n = n - 1
+          |rawset(t, 4, nil)
+          |table.insert(t, 1, "d")
+          |return ks, #t, t[1], t[2], t[3], t[4], t[5]
+        """
+      ) succeedsWith ("[1a][2b][3b]", 2, "d", "c", "a", null, null)
 
     }
 
