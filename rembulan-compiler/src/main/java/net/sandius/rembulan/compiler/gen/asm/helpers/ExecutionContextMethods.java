@@ -18,7 +18,6 @@ package net.sandius.rembulan.compiler.gen.asm.helpers;
 
 import net.sandius.rembulan.core.ExecutionContext;
 import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
@@ -33,20 +32,15 @@ public abstract class ExecutionContextMethods {
 		return Type.getType(ExecutionContext.class);
 	}
 
-	public static InsnList registerTimeSlice(int cost) {
-		InsnList il = new InsnList();
-
-		il.add(ASMUtils.loadInt(cost));
-		il.add(new MethodInsnNode(
+	public static MethodInsnNode registerTicks() {
+		return new MethodInsnNode(
 				INVOKEINTERFACE,
 				selfTpe().getInternalName(),
 				"registerTicks",
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE,
 						Type.INT_TYPE),
-				true));
-
-		return il;
+				true);
 	}
 
 	public static MethodInsnNode checkCallYield() {

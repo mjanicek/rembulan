@@ -73,6 +73,16 @@ public abstract class DefaultNodeActionVisitor extends IRVisitor {
 	}
 
 	@Override
+	public void visit(TabRawSet node) {
+		action(node);
+	}
+
+	@Override
+	public void visit(TabRawSetInt node) {
+		action(node);
+	}
+
+	@Override
 	public void visit(TabRawAppendMulti node) {
 		action(node);
 	}

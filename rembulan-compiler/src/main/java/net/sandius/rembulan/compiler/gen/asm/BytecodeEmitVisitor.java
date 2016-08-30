@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
+import net.sandius.rembulan.compiler.CompilerSettings;
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
@@ -498,6 +499,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 			Table tab;
 			ReturnBuffer rbuf = context.getReturnBuffer();
 			int i = 0;
+			context.registerTicks(rbuf.size());  // only when we care about ticks spent
 			while (i < rbuf.size()) {
 				tab.rawset(OFFSET + i, rbuf.get(i));
 				i++;
@@ -528,6 +530,14 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 		il.add(ASMUtils.loadInt(0));
 		il.add(new VarInsnNode(ISTORE, lv_idx_i));
+
+		// context.registerTicks(rbuf.size());
+		if (countingTicks()) {
+			il.add(loadExecutionContext());
+			il.add(new VarInsnNode(ALOAD, lv_idx_stack));
+			il.add(ReturnBufferMethods.size());
+			il.add(ExecutionContextMethods.registerTicks());
+		}
 
 		il.add(top);
 		il.add(new FrameNode(F_APPEND, 3, new Object[] {
@@ -919,8 +929,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(new JumpInsnNode(IFEQ, dest));
 	}
 
-	@Override
-	public void visit(CPUWithdraw node) {
+	private void staticCpuWithdraw(int cost) {
 		switch (context.compilerSettings.cpuAccountingMode()) {
 			case NO_CPU_ACCOUNTING: {
 				// no-op
@@ -933,7 +942,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 				il.add(loadExecutionContext());
 				il.add(new InsnNode(DUP));
-				il.add(ExecutionContextMethods.registerTimeSlice(node.cost()));
+				il.add(ASMUtils.loadInt(cost));
+				il.add(ExecutionContextMethods.registerTicks());
 				il.add(ExecutionContextMethods.checkCallYield());
 
 				il.add(rp.resume());
@@ -942,6 +952,17 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 			default: throw new UnsupportedOperationException("Unsupported CPU accounting mode: " + context.compilerSettings.cpuAccountingMode());
 		}
+	}
+
+	// do we care about counting ticks?
+	private boolean countingTicks() {
+		return (context.compilerSettings.cpuAccountingMode()
+				!= CompilerSettings.CPUAccountingMode.NO_CPU_ACCOUNTING);
+	}
+
+	@Override
+	public void visit(CPUWithdraw node) {
+		staticCpuWithdraw(node.cost());
 	}
 
 	@Override

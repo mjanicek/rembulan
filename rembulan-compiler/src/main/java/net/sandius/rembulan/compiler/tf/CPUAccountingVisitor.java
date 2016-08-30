@@ -16,14 +16,13 @@
 
 package net.sandius.rembulan.compiler.tf;
 
-import net.sandius.rembulan.compiler.ir.BasicBlock;
-import net.sandius.rembulan.compiler.ir.BodyNode;
-import net.sandius.rembulan.compiler.ir.CPUWithdraw;
-import net.sandius.rembulan.compiler.ir.IRNode;
+import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.util.DefaultNodeActionVisitor;
 import net.sandius.rembulan.util.Check;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 class CPUAccountingVisitor extends CodeTransformerVisitor {
 
@@ -47,7 +46,15 @@ class CPUAccountingVisitor extends CodeTransformerVisitor {
 
 		public abstract void cpuNode(CPUWithdraw node);
 
-		public abstract void otherNode(IRNode node);
+		public abstract void noCost();
+
+		public abstract void staticCost(int c);
+
+		public void staticCost() {
+			staticCost(1);
+		}
+
+		public abstract void dynamicCost();
 
 	}
 
@@ -58,9 +65,20 @@ class CPUAccountingVisitor extends CodeTransformerVisitor {
 		}
 
 		@Override
-		public void otherNode(IRNode node) {
-			add(1);
+		public void noCost() {
+			// no-op
 		}
+
+		@Override
+		public void staticCost(int c) {
+			add(c);
+		}
+
+		@Override
+		public void dynamicCost() {
+			// no-op
+		}
+
 	};
 
 	public static final Account COLLECT = new Account() {
@@ -70,27 +88,124 @@ class CPUAccountingVisitor extends CodeTransformerVisitor {
 		}
 
 		@Override
-		public void otherNode(IRNode node) {
+		public void noCost() {
 			// no-op
 		}
+
+		@Override
+		public void staticCost(int c) {
+			// no-op
+		}
+
+		@Override
+		public void dynamicCost() {
+			// no-op
+		}
+
 	};
 
 	private static class Visitor extends DefaultNodeActionVisitor {
 
 		private final Account account;
+		private final Set<Label> visitedLabels;
 
 		public Visitor(Account account) {
 			this.account = Check.notNull(account);
+			this.visitedLabels = new HashSet<>();
 		}
 
+		// the default action
 		@Override
 		protected void action(IRNode node) {
-			account.otherNode(node);
+			account.noCost();
 		}
 
 		@Override
 		public void visit(CPUWithdraw node) {
 			account.cpuNode(node);
+		}
+
+		@Override
+		public void visit(Label label) {
+			visitedLabels.add(label);
+		}
+
+		@Override
+		public void visit(BinOp node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(UnOp node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(TabNew node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(TabGet node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(TabSet node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(TabRawSet node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(TabRawSetInt node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(TabRawAppendMulti node) {
+			account.dynamicCost();
+		}
+
+		@Override
+		public void visit(Ret node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(TCall node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(Call node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(Closure node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(ToNumber node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(Branch node) {
+			account.staticCost();
+		}
+
+		@Override
+		public void visit(Jmp node) {
+			if (visitedLabels.contains(node.jmpDest())) {
+				// count in backward jumps only
+				account.staticCost();
+			}
 		}
 
 	}
