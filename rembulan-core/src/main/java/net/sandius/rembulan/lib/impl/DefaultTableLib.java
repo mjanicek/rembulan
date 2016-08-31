@@ -16,29 +16,20 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Conversions;
-import net.sandius.rembulan.core.Dispatch;
-import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaRuntimeException;
-import net.sandius.rembulan.core.Metatables;
-import net.sandius.rembulan.core.PlainValueTypeNamer;
-import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.core.*;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
+import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.TableLib;
 
 import java.util.ArrayList;
 
 public class DefaultTableLib extends TableLib {
 
-	private final Function _insert;
 	private final Function _move;
 	private final Function _remove;
 	private final Function _sort;
 
 	public DefaultTableLib() {
-		this._insert = new UnimplementedFunction("table.insert");  // TODO
 		this._move = new UnimplementedFunction("table.move");  // TODO
 		this._remove = new UnimplementedFunction("table.remove");  // TODO
 		this._sort = new UnimplementedFunction("table.sort");  // TODO
@@ -51,7 +42,7 @@ public class DefaultTableLib extends TableLib {
 
 	@Override
 	public Function _insert() {
-		return _insert;
+		return Insert.INSTANCE;
 	}
 
 	@Override
@@ -85,6 +76,28 @@ public class DefaultTableLib extends TableLib {
 
 	static boolean hasIndexMetamethod(ExecutionContext context, Table t) {
 		return Metatables.getMetamethod(context.getState(), Metatables.MT_INDEX, t) != null;
+	}
+
+	static boolean hasNewIndexMetamethod(ExecutionContext context, Table t) {
+		return Metatables.getMetamethod(context.getState(), Metatables.MT_NEWINDEX, t) != null;
+	}
+
+	static int getLength(ReturnBuffer rbuf) {
+		Object o = rbuf.get0();
+		Long l = Conversions.integerValueOf(o);
+		if (l == null) {
+			throw new LuaRuntimeException("object length is not an integer");
+		}
+		long ll = l.longValue();
+
+		// does it fit into a 32-bit int?
+		int i = (int) ll;
+		if ((long) i != ll) {
+			throw new LuaRuntimeException("object length is not a 32-bit integer");
+		}
+		else {
+			return i;
+		}
 	}
 
 	public static class Concat extends AbstractLibFunction {
@@ -157,12 +170,7 @@ public class DefaultTableLib extends TableLib {
 						Dispatch.len(context, t);  // may suspend, will pass #obj through the stack
 
 					case STATE_LEN_RESUME: {
-						Object o = context.getReturnBuffer().get0();
-						Long l = Conversions.integerValueOf(o);
-						if (l == null) {
-							throw new LuaRuntimeException("object length is not an integer");
-						}
-						j = (int) l.longValue();
+						j = getLength(context.getReturnBuffer());
 					}
 
 					case STATE_BEFORE_LOOP:
@@ -263,6 +271,233 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
+	public static class Insert extends AbstractLibFunction {
+
+		public static final Insert INSTANCE = new Insert();
+
+		@Override
+		protected String name() {
+			return "insert";
+		}
+
+		private static class SuspendedState {
+
+			public final int state;
+			public final Table t;
+			public final Integer pos;
+			public final int len;
+			public final Object value;
+
+			private SuspendedState(int state, Table t, Integer pos, int len, Object value) {
+				this.state = state;
+				this.t = t;
+				this.pos = pos;
+				this.len = len;
+				this.value = value;
+			}
+
+		}
+
+		private static final int PHASE_SHIFT = 3;
+		private static final int _LEN  = 0;
+		private static final int _LOOP = 1;
+		private static final int _END  = 2;
+
+		private static final int _LEN_PREPARE = (_LEN << PHASE_SHIFT) | 0;
+		private static final int _LEN_RESUME  = (_LEN << PHASE_SHIFT) | 1;
+
+		private static final int _LOOP_TEST   = (_LOOP << PHASE_SHIFT) | 0;
+		private static final int _LOOP_TABGET = (_LOOP << PHASE_SHIFT) | 1;
+		private static final int _LOOP_TABSET = (_LOOP << PHASE_SHIFT) | 2;
+
+		private static final int _END_TABSET = (_END << PHASE_SHIFT) | 0;
+		private static final int _END_RETURN = (_END << PHASE_SHIFT) | 1;
+
+		private static void rawInsert(Table t, int pos, int len, Object value) {
+			for (int k = len + 1; k > pos; k--) {
+				t.rawset(k, t.rawget(k - 1));
+			}
+			t.rawset(pos, value);
+		}
+
+		private void checkValidPos(int pos, int len) {
+			if (pos < 1 || pos > len + 1) {
+				throw new BadArgumentException(2, name(), "position out of bounds");
+			}
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Table t = args.nextTable();
+			final int pos;
+			final Object value;
+
+			if (args.size() == 2) {
+				// implicit pos (#t + 1)
+				value = args.nextAny();
+
+				if (!hasLenMetamethod(context, t)) {
+					int len = t.rawlen();
+					start_loop(context, t, len + 1, len, value);
+				}
+				else {
+					_len(context, _LEN_PREPARE, t, null, value);
+				}
+			}
+			else if (args.size() == 3) {
+				// explicit pos
+				pos = args.nextInt();
+				value = args.nextAny();
+
+				if (!hasLenMetamethod(context, t)) {
+					int len = t.rawlen();
+					checkValidPos(pos, len);
+					start_loop(context, t, pos, len, value);
+				}
+				else {
+					_len(context, _LEN_PREPARE, t, Integer.valueOf(pos), value);
+				}
+			}
+			else {
+				throw new LuaRuntimeException("wrong number of arguments to 'insert'");
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			SuspendedState ss = (SuspendedState) suspendedState;
+			switch (ss.state >> PHASE_SHIFT) {
+				case _LEN:  _len(context, ss.state, ss.t, ss.pos, ss.value); break;
+				case _LOOP: _loop(context, ss.state, ss.t, ss.pos, ss.len, ss.value); break;
+				case _END:  _end(context, ss.state, ss.t, ss.pos, ss.value); break;
+				default: throw new IllegalStateException("Illegal state: " + ss.state);
+			}
+		}
+
+		private void _len(ExecutionContext context, int state, Table t, Integer pos, Object value)
+				throws ControlThrowable {
+
+			// __len is defined, must go through Dispatch
+
+			final int p;
+			final int len;
+
+			try {
+				switch (state) {
+					case _LEN_PREPARE:
+						state = _LEN_RESUME;
+						Dispatch.len(context, t);
+
+					case _LEN_RESUME: {
+						len = getLength(context.getReturnBuffer());
+						if (pos != null) {
+							// explicit pos
+							p = pos.intValue();
+							checkValidPos(p, len);
+						}
+						else {
+							// implicit pos
+							p = len + 1;
+						}
+						break;
+					}
+
+					default:
+						throw new IllegalStateException("Illegal state: " + state);
+				}
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, new SuspendedState(state, t, pos, 0, value));
+			}
+
+			// continue with the loop
+			start_loop(context, t, p, len, value);
+		}
+
+		private void start_loop(ExecutionContext context, Table t, int pos, int len, Object value)
+				throws ControlThrowable {
+
+			// check whether we can use raw accesses instead of having to go through
+			// Dispatch and potential metamethods
+
+			if (!hasIndexMetamethod(context, t) && !hasNewIndexMetamethod(context, t)) {
+				// raw case
+				rawInsert(t, pos, len, value);
+				context.getReturnBuffer().setTo();
+			}
+			else {
+				// generic (Dispatch'd) case
+				// initialise k = len + 1 (will be decremented in the next TEST, so add +1 here)
+				_loop(context, _LOOP_TEST, t, pos, len + 2, value);
+			}
+		}
+
+		private void _loop(ExecutionContext context, int state, Table t, int pos, int k, Object value)
+				throws ControlThrowable {
+
+			// came from start_loop in the invoke path
+
+			try {
+				loop: while (true) {
+					switch (state) {
+						case _LOOP_TEST:
+							k -= 1;
+							state = _LOOP_TABGET;
+							if (k <= pos) {
+								break loop;  // end the loop
+							}
+
+						case _LOOP_TABGET:
+							state = _LOOP_TABSET;
+							Dispatch.index(context, t, Long.valueOf(k - 1));
+
+						case _LOOP_TABSET:
+							state = _LOOP_TEST;
+							Object v = context.getReturnBuffer().get0();
+							Dispatch.setindex(context, t, Long.valueOf(k), v);
+							break;  // go to next iteration
+
+						default:
+							throw new IllegalStateException("Illegal state: " + state);
+
+					}
+				}
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, new SuspendedState(state, t, Integer.valueOf(pos), k, value));
+			}
+
+			// continue into the last stage
+			state = _END_TABSET;
+			_end(context, state, t, pos, value);
+		}
+
+		private void _end(ExecutionContext context, int state, Table t, int pos, Object value)
+				throws ControlThrowable {
+			try {
+				switch (state) {
+
+					case _END_TABSET:
+						state = _END_RETURN;
+						Dispatch.setindex(context, t, Long.valueOf(pos), value);
+
+					case _END_RETURN:
+						break;
+
+					default:
+						throw new IllegalStateException("Illegal state: " + state);
+				}
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, new SuspendedState(state, t, Integer.valueOf(pos), -1, value));
+			}
+
+			// finished!
+			context.getReturnBuffer().setTo();
+		}
+
+	}
+
 	public static class Pack extends AbstractLibFunction {
 
 		public static final Pack INSTANCE = new Pack();
@@ -340,12 +575,7 @@ public class DefaultTableLib extends TableLib {
 						Dispatch.len(context, obj);  // may suspend, will pass #obj through the stack
 
 					case STATE_LEN_RESUME: {
-						Object o = context.getReturnBuffer().get0();
-						Long l = Conversions.integerValueOf(o);
-						if (l == null) {
-							throw new LuaRuntimeException("object length is not an integer");
-						}
-						j = (int) l.longValue();
+						j = getLength(context.getReturnBuffer());
 					}
 
 					case STATE_BEFORE_LOOP:

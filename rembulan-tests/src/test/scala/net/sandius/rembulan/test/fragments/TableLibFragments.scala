@@ -141,15 +141,17 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""table.insert(setmetatable({}, {__len = function() error("BOOM") end}), 10)""") failsWith "BOOM"
       program ("""table.insert(setmetatable({}, {__len = function() return 1.1 end}), 10)""") failsWith "object length is not an integer"
 
-      program ("""local t = setmetatable(t, {__len = function() return -1 end}); table.insert(t, "x"); return #t, t[0]""") succeedsWith (-1, "x")
-      program ("""local t = setmetatable(t, {__len = function() return "-1" end}); table.insert(t, "x"); return #t, t[0]""") succeedsWith ("-1", "x")
-      program ("""local t = setmetatable(t, {__len = function() return "-0.0" end}); table.insert(, "x"); return #t, t[1]""") succeedsWith ("-0.0", "x")
+      program ("""local t = setmetatable({}, {__len = function() return -1 end}); table.insert(t, "x"); return #t, t[0]""") succeedsWith (-1, "x")
+      program ("""local t = setmetatable({}, {__len = function() return "-1" end}); table.insert(t, "x"); return #t, t[0]""") succeedsWith ("-1", "x")
+      program ("""local t = setmetatable({}, {__len = function() return "-0.0" end}); table.insert(t, "x"); return #t, t[1]""") succeedsWith ("-0.0", "x")
       program ("""table.insert(setmetatable({}, {__len = function() return -1 end}), 0, "x")""") failsWith "bad argument #2 to 'insert' (position out of bounds)"
       program ("""table.insert(setmetatable({}, {__len = function() return 2 end}), 4, "x")""") failsWith "bad argument #2 to 'insert' (position out of bounds)"
+      program ("""table.insert(setmetatable({}, {__len = function() error("Boom.") end}), 0, "x")""") failsWith "Boom."
 
       // __index and __newindex
 
-      program ("""local t = setmetatable({"x"}, {__index = error}); table.insert(t, 1, "y"); return #t, t[1], t[2]""") succeedsWith (2, "y", "x")
+      program ("""local t = setmetatable({"x"}, {__index = function(t,k) error(k) end}); table.insert(t, 1, "y"); return #t, t[1], t[2]""") succeedsWith (2, "y", "x")
+//      program ("""local t = setmetatable({"x"}, {__index = error}); table.insert(t, 1, "y"); return #t, t[1], t[2]""") succeedsWith (2, "y", "x")
 
       program ("""table.insert(setmetatable({"x"}, {__newindex = function(t, k, v) error(k..v) end}), "y")""") failsWith "2y"
       program ("""table.insert(setmetatable({"x"}, {__newindex = function(t, k, v) error(k..v) end}), 1, "y")""") failsWith "2x"
@@ -182,7 +184,7 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
           |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
           |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
           |})
-          |          |
+          |
           |table.insert(t, "a")
           |table.insert(t, "b")
           |table.insert(t, 1, "c")
@@ -222,7 +224,7 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
           |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
           |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
           |})
-          |          |
+          |
           |table.insert(t, "a")
           |table.insert(t, "b")
           |table.insert(t, 1, "c")
@@ -242,7 +244,7 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
           |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
           |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
           |})
-          |          |
+          |
           |table.insert(t, "a")
           |table.insert(t, "b")
           |table.insert(t, 1, "c")
