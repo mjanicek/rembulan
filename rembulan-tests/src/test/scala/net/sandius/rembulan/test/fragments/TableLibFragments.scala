@@ -91,6 +91,7 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
           |return table.concat(setmetatable({"a", "b", "c"}, mt))
         """) succeedsWith "abc"
 
+      // length is retrieved before the 2nd argument to concat
       program ("""return table.concat(setmetatable({}, {__len = function() error("BOOM") end}), "", 1, true)""") failsWith "BOOM"
       program ("""return table.concat(setmetatable({}, {__len = function() error("BOOM") end}), true, true)""") failsWith "BOOM"
       program ("""return table.concat(setmetatable({}, {__len = function() error("BOOM") end}), false)""") failsWith "BOOM"

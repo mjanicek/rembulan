@@ -114,15 +114,17 @@ public class DefaultTableLib extends TableLib {
 			public final int state;
 
 			public final Table t;
+			public final ArgumentIterator args;
 			public final String sep;
 			public final int i;
 			public final int j;
 			public final int k;
 			public final StringBuilder bld;
 
-			public SuspendedState(int state, Table t, String sep, int i, int j, int k, StringBuilder bld) {
+			public SuspendedState(int state, Table t, ArgumentIterator args, String sep, int i, int j, int k, StringBuilder bld) {
 				this.state = state;
 				this.t = t;
+				this.args = args;
 				this.sep = sep;
 				this.i = i;
 				this.j = j;
@@ -162,19 +164,36 @@ public class DefaultTableLib extends TableLib {
 		private static final int STATE_BEFORE_LOOP = 2;
 		private static final int STATE_LOOP = 3;
 
-		private void run(ExecutionContext context, int state, Table t, String sep, int i, int j, int k, StringBuilder bld) throws ControlThrowable {
+		private void run(ExecutionContext context, int state, Table t, ArgumentIterator args, String sep, int i, int j, int k, StringBuilder bld)
+				throws ControlThrowable {
+
 			try {
 				switch (state) {
+					// entry point for t with __len
 					case STATE_LEN_PREPARE:
 						state = STATE_LEN_RESUME;
 						Dispatch.len(context, t);  // may suspend, will pass #obj through the stack
 
+					// resume point #1
 					case STATE_LEN_RESUME: {
-						j = getLength(context.getReturnBuffer());
+						// pass length in k
+						k = getLength(context.getReturnBuffer());
 					}
 
-					case STATE_BEFORE_LOOP:
-						// j is known;
+					// entry point for t without __len; k == #t
+					case STATE_BEFORE_LOOP: {
+						int len = k;
+						k = 0;  // clear k
+
+						// process arguments
+						sep = args.hasNext() && args.peek() != null ? args.nextString() : "";
+						i = args.optNextInt(1);
+						j = args.hasNext() && args.peek() != null ? args.nextInt() : len;
+
+						// don't need the args any more
+						args = null;
+
+						// i, j are known, k is 0
 
 						// is this a clean table without __index?
 						if (!hasIndexMetamethod(context, t)) {
@@ -198,6 +217,7 @@ public class DefaultTableLib extends TableLib {
 							context.getReturnBuffer().setTo("");  // return the empty string
 							return;
 						}
+					}
 
 					case STATE_LOOP: {
 						while (true) {
@@ -232,41 +252,34 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (ControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, sep, i, j, k, bld));
+				throw ct.push(this, new SuspendedState(state, t, args, sep, i, j, k, bld));
 			}
 		}
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			final Table t = args.nextTable();
-
-			final String sep = args.hasNext() && args.peek() != null ? args.nextString() : "";
-
-			final int i = args.optNextInt(1);
-
 			final int state;
-			final int j;
+			final int k;
 
-			if (args.hasNext() && args.peek() != null) {
-				j = args.nextInt();
+			if (!hasLenMetamethod(context, t)) {
+				// safe to use rawlen
 				state = STATE_BEFORE_LOOP;
-			}
-			else if (!hasLenMetamethod(context, t)) {
-				j = t.rawlen();  // safe to use rawlen
-				state = STATE_BEFORE_LOOP;
+				k = t.rawlen();
 			}
 			else {
-				j = 0;  // placeholder, will be retrieved in the run() method
+				// must use Dispatch
 				state = STATE_LEN_PREPARE;
+				k = 0;  // dummy value, will be overwritten
 			}
 
-			run(context, state, t, sep, i, j, 0, null);
+			run(context, state, t, args, null, 0, 0, k, null);
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			SuspendedState ss = (SuspendedState) suspendedState;
-			run(context, ss.state, ss.t, ss.sep, ss.i, ss.j, ss.k, ss.bld);
+			run(context, ss.state, ss.t, ss.args, ss.sep, ss.i, ss.j, ss.k, ss.bld);
 		}
 
 	}
