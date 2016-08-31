@@ -656,6 +656,19 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   Upvalues3 in EmptyContext succeedsWith (classOf[lua.Function])
 
+  val Upvalues4 = fragment ("Upvalues4") {
+    """local n = 0
+      |local function f() n = n + 1 end
+      |f()
+      |f()
+      |local m = n
+      |n = n - 1
+      |local l = n
+      |return m, l
+    """
+  }
+  Upvalues4 in EmptyContext succeedsWith (2, 1)
+
   val SetUpvalue = fragment ("SetUpvalue") {
     """local x = 1
       |

@@ -166,6 +166,15 @@ class TyperVisitor extends CodeVisitor {
 				return false;
 			}
 		}
+
+		public void clearReifiedVars() {
+			for (Var v : this.types.keySet()) {
+				if (reifiedVars.contains(v)) {
+					store(v, LuaTypes.ANY);
+				}
+			}
+		}
+
 	}
 
 	private VarState varState(Label l) {
@@ -186,6 +195,10 @@ class TyperVisitor extends CodeVisitor {
 
 	private void impure() {
 		// TODO: clear upvalue states
+
+		// clear var state of all escaping local variables
+		// TODO: could be restricted for variables that escape but are read-only
+		currentVarState.clearReifiedVars();
 	}
 
 	private void mayCallMetamethod() {
