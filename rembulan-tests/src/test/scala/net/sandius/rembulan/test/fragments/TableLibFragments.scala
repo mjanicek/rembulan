@@ -123,6 +123,7 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("table.insert(123)") failsWith "bad argument #1 to 'insert' (table expected, got number)"
 
       program ("table.insert({})") failsWith "wrong number of arguments to 'insert'"
+      program ("table.insert({}, false, false)") failsWith "bad argument #2 to 'insert' (number expected, got boolean)"
       program ("table.insert({}, 1, 2, 3)") failsWith "wrong number of arguments to 'insert'"
       program ("table.insert({}, 1, 2, nil)") failsWith "wrong number of arguments to 'insert'"
 
@@ -142,6 +143,10 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""table.insert(setmetatable({}, {__len = function() error("BOOM") end}), 10)""") failsWith "BOOM"
       program ("""table.insert(setmetatable({}, {__len = function() return 1.1 end}), 10)""") failsWith "object length is not an integer"
 
+      // length is queried before processing the rest of the arguments
+      program ("""table.insert(setmetatable({}, {__len = function() error("BOOM") end}), false, false)""") failsWith "BOOM"
+      program ("""table.insert(setmetatable({}, {__len = function() error("BOOM") end}), 1, 2, nil)""") failsWith "BOOM"
+
       program ("""local t = setmetatable({}, {__len = function() return -1 end}); table.insert(t, "x"); return #t, t[0]""") succeedsWith (-1, "x")
       program ("""local t = setmetatable({}, {__len = function() return "-1" end}); table.insert(t, "x"); return #t, t[0]""") succeedsWith ("-1", "x")
       program ("""local t = setmetatable({}, {__len = function() return "-0.0" end}); table.insert(t, "x"); return #t, t[1]""") succeedsWith ("-0.0", "x")
@@ -151,8 +156,7 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
       // __index and __newindex
 
-      program ("""local t = setmetatable({"x"}, {__index = function(t,k) error(k) end}); table.insert(t, 1, "y"); return #t, t[1], t[2]""") succeedsWith (2, "y", "x")
-//      program ("""local t = setmetatable({"x"}, {__index = error}); table.insert(t, 1, "y"); return #t, t[1], t[2]""") succeedsWith (2, "y", "x")
+      program ("""local t = setmetatable({"x"}, {__index = error}); table.insert(t, 1, "y"); return #t, t[1], t[2]""") succeedsWith (2, "y", "x")
 
       program ("""table.insert(setmetatable({"x"}, {__newindex = function(t, k, v) error(k..v) end}), "y")""") failsWith "2y"
       program ("""table.insert(setmetatable({"x"}, {__newindex = function(t, k, v) error(k..v) end}), 1, "y")""") failsWith "2x"
@@ -262,6 +266,120 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("""return table.pack(xx, yy, zz).n""") succeedsWith (3)
       program ("""return #table.pack(3, 2, 1, 0, -1)""") succeedsWith (5)
+
+    }
+
+    about ("table.remove") {
+
+      program ("""table.remove()""") failsWith "bad argument #1 to 'remove' (table expected, got no value)"
+      program ("""table.remove("")""") failsWith "bad argument #1 to 'remove' (table expected, got string)"
+
+      program ("""return table.remove({})""") succeedsWith (null)
+      program ("""return table.remove({}, 1)""") succeedsWith (null)
+      program ("""return table.remove({}, 0)""") succeedsWith (null)
+      program ("""return table.remove({}, nil)""") succeedsWith (null)
+
+      program ("""return table.remove({}, nil, "extra", "args", "ignored")""") succeedsWith (null)
+
+      program ("""return table.remove({}, "1")""") succeedsWith (null)
+      program ("""return table.remove({}, "1.0")""") succeedsWith (null)
+      program ("""return table.remove({}, -0.0)""") succeedsWith (null)
+      program ("""return table.remove({}, "-0.0")""") succeedsWith (null)
+
+      program ("""table.remove({}, false)""") failsWith "bad argument #2 to 'remove' (number expected, got boolean)"
+      program ("""table.remove({}, "x")""") failsWith "bad argument #2 to 'remove' (number expected, got string)"
+
+      program ("""table.remove({}, 2)""") failsWith "bad argument #2 to 'remove' (position out of bounds)"
+      program ("""table.remove({}, -1)""") failsWith "bad argument #2 to 'remove' (position out of bounds)"
+
+      program ("""local t = {42}; local x = table.remove(t); return x, #t, t[1]""") succeedsWith (42, 0, null)
+      program ("""return table.remove({42}, 0)""") failsWith "bad argument #2 to 'remove' (position out of bounds)"
+      program ("""local t = {42}; local x = table.remove(t, 1); return x, #t, t[1]""") succeedsWith (42, 0, null)
+      program ("""local t = {42}; local x = table.remove(t, 2); return x, #t, t[1]""") succeedsWith (null, 1, 42)
+
+      program ("""local t = {"a", "b", "c", "d"}; local x = table.remove(t); return x, #t, t[1], t[2], t[3], t[4]""") succeedsWith ("d", 3, "a", "b", "c", null)
+      program ("""local t = {"a", "b", "c", "d"}; local x = table.remove(t, 1); return x, t[1], t[2], t[3], t[4]""") succeedsWith ("a", "b", "c", "d", null)
+      program ("""local t = {"a", "b", "c", "d"}; local x = table.remove(t, 2); return x, t[1], t[2], t[3], t[4]""") succeedsWith ("b", "a", "c", "d", null)
+      program ("""local t = {"a", "b", "c", "d"}; local x = table.remove(t, 3); return x, t[1], t[2], t[3], t[4]""") succeedsWith ("c", "a", "b", "d", null)
+      program ("""local t = {"a", "b", "c", "d"}; local x = table.remove(t, 4); return x, t[1], t[2], t[3], t[4]""") succeedsWith ("d", "a", "b", "c", null)
+
+      // the __len metamethod
+
+      // __len is always consulted when defined
+      program("""local t = setmetatable({}, {__len=function() error("Boom") end}); return table.remove(t)""") failsWith "Boom"
+      program("""local t = setmetatable({"a"}, {__len=function() error("Boom") end}); return table.remove(t, 0)""") failsWith "Boom"
+      program("""local t = setmetatable({"a"}, {__len=function() error("Boom") end}); return table.remove(t, 1)""") failsWith "Boom"
+      program("""local t = setmetatable({"a"}, {__len=function() error("Boom") end}); return table.remove(t, 2)""") failsWith "Boom"
+
+      // no shift variants (just erase the element at pos)
+      program("""local t = setmetatable({[0]="x", "a", "b"}, {__len=function() return 0 end}); return table.remove(t, 0), #t, t[0], t[1], t[2]""") succeedsWith ("x", 0, null, "a", "b")
+      program("""local t = setmetatable({"a", "b", "c", "d"}, {__len=function() return 1 end}); return table.remove(t, 2), #t, t[1], t[2], t[3], t[4]""") succeedsWith ("b", 1, "a", null, "c", "d")
+
+      // length is queried before the position is processed
+      program("""local t = setmetatable({"a"}, {__len=function() error("Boom") end}); table.remove(t, false)""") failsWith "Boom"
+
+      program("""local t = setmetatable({}, {__len=function() return -1 end}); return table.remove(t)""") succeedsWith (null)
+      program("""local t = setmetatable({}, {__len=function() return -1 end}); return table.remove(t, -2)""") failsWith "bad argument #2 to 'remove' (position out of bounds)"
+      program("""local t = setmetatable({}, {__len=function() return -1 end}); return table.remove(t, -1)""") succeedsWith(null)
+      program("""local t = setmetatable({}, {__len=function() return -1 end}); return table.remove(t, 0)""") failsWith "bad argument #2 to 'remove' (position out of bounds)"
+      program("""local t = setmetatable({}, {__len=function() return -1 end}); return table.remove(t, 1)""") failsWith "bad argument #2 to 'remove' (position out of bounds)"
+
+
+      // __index and __newindex
+
+      // no shift variants (just erase the element at pos); using the __index metamethod
+      program("""local t = setmetatable({[0]="x", "a", "b"}, {__len=function() return 0 end; __index=rawget}); return table.remove(t, 0), #t, t[0], t[1], t[2]""") succeedsWith ("x", 0, null, "a", "b")
+      program("""local t = setmetatable({"a", "b", "c", "d"}, {__len=function() return 1 end; __index=rawget}); return table.remove(t, 2), #t, t[1], t[2], t[3], t[4]""") succeedsWith ("b", 1, "a", null, "c", "d")
+
+      program ("""local t = setmetatable({"x"}, {__index = error}); return table.remove(t)""") succeedsWith ("x")
+      program ("""local t = setmetatable({nil, "x"}, {__len = function() return 2 end; __index = function(t,k) error(tostring(k)) end}); return table.remove(t, 1)""") failsWith ("1")
+      program ("""local t = setmetatable({"x", nil}, {__index = function(t,k) error(tostring(k)) end}); return table.remove(t, 2)""") failsWith ("2")
+
+      program ("""local t = setmetatable({nil, "x"}, {__len = function() return 2 end; __newindex = function(t,k,v) error(tostring(k)..tostring(v)) end}); return table.remove(t, 2)""") succeedsWith ("x")
+      program ("""local t = setmetatable({nil, "x"}, {__len = function() return 2 end; __newindex = function(t,k,v) error(tostring(k)..tostring(v)) end}); return table.remove(t, 1)""") failsWith ("1x")
+
+      program (
+        """-- meta #1
+          |local ks = ""
+          |local n = 0
+          |local t = setmetatable({}, {
+          |  __len = function() return n end;
+          |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
+          |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
+          |})
+          |
+          |t[1] = "a"
+          |t[3] = "c"
+          |t[2] = "b"
+          |t[4] = "d"
+          |n = n - 1
+          |rawset(t, 3, nil)
+          |local x = table.remove(t, 2)
+          |return ks, #t, x, t[1], t[2], t[3], t[4]
+        """
+      ) succeedsWith ("[1a][3c][2b][4d]{3}[3nil]", 4, "b", "a", null, null, "d")
+
+      program (
+        """-- meta #2
+          |local ks = ""
+          |local n = 0
+          |local t = setmetatable({}, {
+          |  __len = function() return n end;
+          |  __newindex = function(t, k, v) n = n + 1; ks = ks.."["..k..tostring(v).."]"; rawset(t, k, v) end;
+          |  __index = function(t, k) ks = ks.."{"..k.."}"; return rawget(t, k) end
+          |})
+          |
+          |t[1] = "a"
+          |t[3] = "c"
+          |t[2] = "b"
+          |t[4] = "d"
+          |n = n - 1
+          |rawset(t, 3, nil)
+          |local x = table.remove(t, 2)
+          |local y = table.remove(t)
+          |return ks, #t, x, y, t[1], t[2], t[3], t[4]
+        """
+      ) succeedsWith ("[1a][3c][2b][4d]{3}[3nil]", 4, "b", "d", "a", null, null, null)
 
     }
 

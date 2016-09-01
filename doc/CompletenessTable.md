@@ -90,7 +90,7 @@ Statuses:
 | `table.insert` | ![complete](complete.png) | |
 | `table.move` | ![not implemented](not-implemented.png) | |
 | `table.pack` | ![complete](complete.png) | |
-| `table.remove` | ![not implemented](not-implemented.png) | |
+| `table.remove` | ![complete](complete.png) | |
 | `table.sort` | ![not implemented](not-implemented.png) | |
 | `table.unpack` | ![complete](complete.png) | |
 | `math.abs` | ![complete](complete.png) | |

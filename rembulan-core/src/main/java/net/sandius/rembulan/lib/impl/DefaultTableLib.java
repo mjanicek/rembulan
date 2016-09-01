@@ -26,12 +26,10 @@ import java.util.ArrayList;
 public class DefaultTableLib extends TableLib {
 
 	private final Function _move;
-	private final Function _remove;
 	private final Function _sort;
 
 	public DefaultTableLib() {
 		this._move = new UnimplementedFunction("table.move");  // TODO
-		this._remove = new UnimplementedFunction("table.remove");  // TODO
 		this._sort = new UnimplementedFunction("table.sort");  // TODO
 	}
 
@@ -57,7 +55,7 @@ public class DefaultTableLib extends TableLib {
 
 	@Override
 	public Function _remove() {
-		return _remove;
+		return Remove.INSTANCE;
 	}
 
 	@Override
@@ -297,13 +295,15 @@ public class DefaultTableLib extends TableLib {
 
 			public final int state;
 			public final Table t;
-			public final Integer pos;
+			public final ArgumentIterator args;
+			public final int pos;
 			public final int len;
 			public final Object value;
 
-			private SuspendedState(int state, Table t, Integer pos, int len, Object value) {
+			private SuspendedState(int state, Table t, ArgumentIterator args, int pos, int len, Object value) {
 				this.state = state;
 				this.t = t;
+				this.args = args;
 				this.pos = pos;
 				this.len = len;
 				this.value = value;
@@ -326,6 +326,12 @@ public class DefaultTableLib extends TableLib {
 		private static final int _END_TABSET = (_END << PHASE_SHIFT) | 0;
 		private static final int _END_RETURN = (_END << PHASE_SHIFT) | 1;
 
+		private void checkValidPos(int pos, int len) {
+			if (pos < 1 || pos > len + 1) {
+				throw new BadArgumentException(2, name(), "position out of bounds");
+			}
+		}
+
 		private static void rawInsert(Table t, int pos, int len, Object value) {
 			for (int k = len + 1; k > pos; k--) {
 				t.rawset(k, t.rawget(k - 1));
@@ -333,46 +339,15 @@ public class DefaultTableLib extends TableLib {
 			t.rawset(pos, value);
 		}
 
-		private void checkValidPos(int pos, int len) {
-			if (pos < 1 || pos > len + 1) {
-				throw new BadArgumentException(2, name(), "position out of bounds");
-			}
-		}
-
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
 			Table t = args.nextTable();
-			final int pos;
-			final Object value;
 
-			if (args.size() == 2) {
-				// implicit pos (#t + 1)
-				value = args.nextAny();
-
-				if (!hasLenMetamethod(context, t)) {
-					int len = t.rawlen();
-					start_loop(context, t, len + 1, len, value);
-				}
-				else {
-					_len(context, _LEN_PREPARE, t, null, value);
-				}
-			}
-			else if (args.size() == 3) {
-				// explicit pos
-				pos = args.nextInt();
-				value = args.nextAny();
-
-				if (!hasLenMetamethod(context, t)) {
-					int len = t.rawlen();
-					checkValidPos(pos, len);
-					start_loop(context, t, pos, len, value);
-				}
-				else {
-					_len(context, _LEN_PREPARE, t, Integer.valueOf(pos), value);
-				}
+			if (!hasLenMetamethod(context, t)) {
+				run_args(context, t, args, t.rawlen());
 			}
 			else {
-				throw new LuaRuntimeException("wrong number of arguments to 'insert'");
+				_len(context, _LEN_PREPARE, t, args);
 			}
 		}
 
@@ -380,19 +355,18 @@ public class DefaultTableLib extends TableLib {
 		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
 			SuspendedState ss = (SuspendedState) suspendedState;
 			switch (ss.state >> PHASE_SHIFT) {
-				case _LEN:  _len(context, ss.state, ss.t, ss.pos, ss.value); break;
+				case _LEN:  _len(context, ss.state, ss.t, ss.args); break;
 				case _LOOP: _loop(context, ss.state, ss.t, ss.pos, ss.len, ss.value); break;
 				case _END:  _end(context, ss.state, ss.t, ss.pos, ss.value); break;
 				default: throw new IllegalStateException("Illegal state: " + ss.state);
 			}
 		}
 
-		private void _len(ExecutionContext context, int state, Table t, Integer pos, Object value)
+		private void _len(ExecutionContext context, int state, Table t, ArgumentIterator args)
 				throws ControlThrowable {
 
 			// __len is defined, must go through Dispatch
 
-			final int p;
 			final int len;
 
 			try {
@@ -403,15 +377,6 @@ public class DefaultTableLib extends TableLib {
 
 					case _LEN_RESUME: {
 						len = getLength(context.getReturnBuffer());
-						if (pos != null) {
-							// explicit pos
-							p = pos.intValue();
-							checkValidPos(p, len);
-						}
-						else {
-							// implicit pos
-							p = len + 1;
-						}
 						break;
 					}
 
@@ -420,11 +385,36 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (ControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, pos, 0, value));
+				throw ct.push(this, new SuspendedState(state, t, args, 0, 0, null));
 			}
 
-			// continue with the loop
-			start_loop(context, t, p, len, value);
+			// next: process the arguments
+			run_args(context, t, args, len);
+		}
+
+		private void run_args(ExecutionContext context, Table t, ArgumentIterator args, int len)
+				throws ControlThrowable {
+
+			final int pos;
+			final Object value;
+
+			if (args.size() == 2) {
+				// implicit pos (#t + 1)
+				pos = len + 1;
+				value = args.nextAny();
+			}
+			else if (args.size() == 3) {
+				// explicit pos
+				pos = args.nextInt();
+				checkValidPos(pos, len);
+				value = args.nextAny();
+			}
+			else {
+				throw new LuaRuntimeException("wrong number of arguments to 'insert'");
+			}
+
+			// next: start the loop
+			start_loop(context, t, pos, len, value);
 		}
 
 		private void start_loop(ExecutionContext context, Table t, int pos, int len, Object value)
@@ -477,7 +467,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (ControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, Integer.valueOf(pos), k, value));
+				throw ct.push(this, new SuspendedState(state, t, null, pos, k, value));
 			}
 
 			// continue into the last stage
@@ -502,7 +492,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (ControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, Integer.valueOf(pos), -1, value));
+				throw ct.push(this, new SuspendedState(state, t, null, pos, -1, value));
 			}
 
 			// finished!
@@ -532,6 +522,270 @@ public class DefaultTableLib extends TableLib {
 			table.rawset("n", Long.valueOf(n));
 
 			context.getReturnBuffer().setTo(table);
+		}
+
+	}
+
+	public static class Remove extends AbstractLibFunction {
+
+		public static final Remove INSTANCE = new Remove();
+
+		@Override
+		protected String name() {
+			return "remove";
+		}
+
+		private static class SuspendedState {
+
+			public final int state;
+			public final Table t;
+			public final ArgumentIterator args;
+			public final int pos;
+			public final int len;
+			public final Object result;
+
+			private SuspendedState(int state, Table t, ArgumentIterator args, int pos, int len, Object result) {
+				this.state = state;
+				this.t = t;
+				this.args = args;
+				this.pos = pos;
+				this.len = len;
+				this.result = result;
+			}
+
+		}
+
+		private static final int PHASE_SHIFT = 4;
+		private static final int _LEN  = 0;
+		private static final int _GET  = 1;
+		private static final int _LOOP = 2;
+		private static final int _ERASE  = 4;
+
+		private static final int _LEN_PREPARE = (_LEN << PHASE_SHIFT) | 0;
+		private static final int _LEN_RESUME  = (_LEN << PHASE_SHIFT) | 1;
+
+		private static final int _GET_PREPARE = (_GET << PHASE_SHIFT) | 0;
+		private static final int _GET_RESUME  = (_GET << PHASE_SHIFT) | 1;
+
+		private static final int _LOOP_TEST   = (_LOOP << PHASE_SHIFT) | 0;
+		private static final int _LOOP_TABGET = (_LOOP << PHASE_SHIFT) | 1;
+		private static final int _LOOP_TABSET = (_LOOP << PHASE_SHIFT) | 2;
+
+		private static final int _ERASE_PREPARE = (_ERASE << PHASE_SHIFT) | 0;
+		private static final int _ERASE_RESUME  = (_ERASE << PHASE_SHIFT) | 1;
+
+		private void checkValidPos(int pos, int len) {
+			if (!((len == 0 && pos == 0) || pos == len)  // the no-shift case
+					&& (pos < 1 || pos > len + 1)) {
+				throw new BadArgumentException(2, name(), "position out of bounds");
+			}
+		}
+
+		private static Object rawRemove(Table t, int pos, int len) {
+			Object result = t.rawget(pos);
+
+			if (pos == 0 || pos == len || pos == len + 1) {
+				// erase t[pos]
+				t.rawset(pos, null);
+			}
+			else {
+				// shift down t[pos+1],...,t[len]; erase t[len]
+				for (int k = pos + 1; k <= len; k++) {
+					t.rawset(k - 1, t.rawget(k));
+				}
+				t.rawset(len, null);
+			}
+
+			return result;
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+			Table t = args.nextTable();
+
+			if (!hasLenMetamethod(context, t)) {
+				run_args(context, t, args, t.rawlen());
+			}
+			else {
+				_len(context, _LEN_PREPARE, t, args);
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			SuspendedState ss = (SuspendedState) suspendedState;
+			switch (ss.state >> PHASE_SHIFT) {
+				case _LEN:   _len(context, ss.state, ss.t, ss.args); break;
+				case _GET:   _get_result(context, ss.state, ss.t, ss.pos, ss.len); break;
+				case _LOOP:  _loop(context, ss.state, ss.t, ss.pos, ss.len, ss.result); break;
+				case _ERASE: _erase(context, ss.state, ss.t, 0, ss.result); break;  // index not needed any more when resuming
+				default: throw new IllegalStateException("Illegal state: " + ss.state);
+			}
+		}
+
+		private void _len(ExecutionContext context, int state, Table t, ArgumentIterator args)
+				throws ControlThrowable {
+
+			// __len is defined, must go through Dispatch
+
+			final int len;
+
+			try {
+				switch (state) {
+					case _LEN_PREPARE:
+						state = _LEN_RESUME;
+						Dispatch.len(context, t);
+
+					case _LEN_RESUME: {
+						len = getLength(context.getReturnBuffer());
+						break;
+					}
+
+					default:
+						throw new IllegalStateException("Illegal state: " + state);
+				}
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, new SuspendedState(state, t, args, 0, 0, null));
+			}
+
+			// next: process the arguments
+			run_args(context, t, args, len);
+		}
+
+		private void run_args(ExecutionContext context, Table t, ArgumentIterator args, int len)
+				throws ControlThrowable {
+
+			final int pos;
+
+			if (args.hasNext() && args.peek() != null) {
+				// explicit pos
+				pos = args.nextInt();
+				checkValidPos(pos, len);
+			}
+			else {
+				// implicit pos (#t)
+				pos = len;
+			}
+
+			// next: start the loop
+			start_loop(context, t, pos, len);
+		}
+
+		private void start_loop(ExecutionContext context, Table t, int pos, int len)
+				throws ControlThrowable {
+
+			// check whether we can use raw accesses instead of having to go through
+			// Dispatch and potential metamethods
+
+			if (!hasIndexMetamethod(context, t) && !hasNewIndexMetamethod(context, t)) {
+				// raw case
+				Object result = rawRemove(t, pos, len);
+				context.getReturnBuffer().setTo(result);
+			}
+			else {
+				// generic (Dispatch'd) case
+				// initialise k = len + 1 (will be decremented in the next TEST, so add +1 here)
+				_get_result(context, _GET_PREPARE, t, pos, len);
+			}
+		}
+
+		private void _get_result(ExecutionContext context, int state, Table t, int pos, int len)
+				throws ControlThrowable {
+
+			final Object result;
+			try {
+				switch (state) {
+					case _GET_PREPARE:
+						state = _GET_RESUME;
+						Dispatch.index(context, t, pos);
+
+					case _GET_RESUME:
+						result = context.getReturnBuffer().get0();
+					    break;
+
+					default:
+						throw new IllegalStateException("Illegal state: " + state);
+				}
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, new SuspendedState(state, t, null, pos, len, null));
+			}
+
+
+			if (pos == 0 || pos == len || pos == len + 1) {
+				// erase t[pos]
+				_erase(context, _ERASE_PREPARE, t, pos, result);
+			}
+			else {
+				// pos now used for iteration; want (pos + 1), but it will be incremented before the test
+				_loop(context, _LOOP_TEST, t, pos, len, result);
+			}
+		}
+
+		private void _loop(ExecutionContext context, int state, Table t, int k, int len, Object result)
+				throws ControlThrowable {
+
+			// came from start_loop in the invoke path
+
+			try {
+				loop: while (true) {
+					switch (state) {
+						case _LOOP_TEST:
+							k += 1;
+							state = _LOOP_TABGET;
+							if (k > len) {
+								break loop;  // end the loop
+							}
+
+						case _LOOP_TABGET:
+							state = _LOOP_TABSET;
+							Dispatch.index(context, t, Long.valueOf(k));
+
+						case _LOOP_TABSET:
+							state = _LOOP_TEST;
+							Object v = context.getReturnBuffer().get0();
+							Dispatch.setindex(context, t, Long.valueOf(k - 1), v);
+							break;  // go to next iteration
+
+						default:
+							throw new IllegalStateException("Illegal state: " + state);
+
+					}
+				}
+			}
+			catch (ControlThrowable ct) {
+				throw ct.push(this, new SuspendedState(state, t, null, k, len, result));
+			}
+
+			// erase the last element, return the result
+			_erase(context, _ERASE_PREPARE, t, len, result);
+		}
+
+		private void _erase(ExecutionContext context, int state, Table t, int idx, Object result)
+				throws ControlThrowable {
+
+			try {
+				switch (state) {
+					case _ERASE_PREPARE:
+						state = _ERASE_RESUME;
+						Dispatch.setindex(context, t, Long.valueOf(idx), null);
+
+					case _ERASE_RESUME:
+						// we're done
+						break;
+
+					default:
+						throw new IllegalStateException("Illegal state: " + state);
+				}
+			}
+			catch (ControlThrowable ct) {
+				// no need to carry any information but the result around
+				throw ct.push(this, new SuspendedState(state, null, null, 0, 0, result));
+			}
+
+			// finished, set the result
+			context.getReturnBuffer().setTo(result);
 		}
 
 	}
