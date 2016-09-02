@@ -20,7 +20,7 @@
 
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-core</artifactId>
+      <artifactId>rembulan-runtime</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
 
