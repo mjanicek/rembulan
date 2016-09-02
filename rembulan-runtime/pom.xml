@@ -17,19 +17,6 @@
   <packaging>jar</packaging>
 
   <dependencies>
-
-    <dependency>
-      <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-util</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-lua-common</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-
   </dependencies>
 
 </project>

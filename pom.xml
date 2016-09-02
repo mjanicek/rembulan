@@ -12,8 +12,6 @@
 
   <modules>
     <module>rembulan-parent</module>
-    <module>rembulan-util</module>
-    <module>rembulan-lua-common</module>
     <module>rembulan-runtime</module>
     <module>rembulan-compiler</module>
     <module>rembulan-tests</module>

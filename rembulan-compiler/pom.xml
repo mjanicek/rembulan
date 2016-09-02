@@ -24,12 +24,6 @@
 
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-lua-common</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>net.sandius.rembulan</groupId>
       <artifactId>rembulan-runtime</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
