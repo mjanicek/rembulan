@@ -18,7 +18,6 @@ package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaMathOperators;
-import net.sandius.rembulan.lib.BasicLib;
 
 /*
  * "to" conversions always succeed (they never return null),
@@ -410,7 +409,6 @@ public abstract class Conversions {
 	 * @return human-readable string representation of {@code o}
 	 *
 	 * @see #stringValueOf(Object)
-	 * @see BasicLib#_tostring()
 	 */
 	public static String toHumanReadableString(Object o) {
 		if (o == null) return LuaFormat.NIL;

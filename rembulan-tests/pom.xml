@@ -38,9 +38,16 @@
     </dependency>
 
     <dependency>
+      <groupId>net.sandius.rembulan</groupId>
+      <artifactId>rembulan-stdlib</artifactId>
+      <version>${project.parent.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.scala-lang</groupId>
       <artifactId>scala-library</artifactId>
       <version>${scala.version}</version>
+      <scope>test</scope>
     </dependency>
 
     <dependency>

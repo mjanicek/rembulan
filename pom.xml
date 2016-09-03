@@ -14,6 +14,7 @@
     <module>rembulan-parent</module>
     <module>rembulan-runtime</module>
     <module>rembulan-compiler</module>
+    <module>rembulan-stdlib</module>
     <module>rembulan-tests</module>
     <module>rembulan-standalone</module>
   </modules>
