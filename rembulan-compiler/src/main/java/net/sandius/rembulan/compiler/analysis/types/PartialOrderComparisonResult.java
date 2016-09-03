@@ -14,31 +14,32 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.util;
+package net.sandius.rembulan.compiler.analysis.types;
 
-import java.util.Iterator;
+public enum PartialOrderComparisonResult {
 
-public class UnmodifiableIterator<T> implements Iterator<T> {
+	EQUAL,
+	LESSER_THAN,
+	GREATER_THAN,
+	NOT_COMPARABLE;
 
-	private final Iterator<T> iterator;
-
-	public UnmodifiableIterator(Iterator<T> iterator) {
-		this.iterator = Check.notNull(iterator);
+	public boolean isDefined() {
+		return this != NOT_COMPARABLE;
 	}
 
-	@Override
-	public boolean hasNext() {
-		return iterator.hasNext();
+	public static PartialOrderComparisonResult fromTotalOrderComparison(int cmp) {
+		if (cmp < 0) return LESSER_THAN;
+		else if (cmp > 0) return GREATER_THAN;
+		else return EQUAL;
 	}
 
-	@Override
-	public T next() {
-		return iterator.next();
-	}
-
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException();
+	public int toTotalOrderComparison() {
+		switch (this) {
+			case EQUAL: return 0;
+			case LESSER_THAN: return -1;
+			case GREATER_THAN: return +1;
+			default: throw new IllegalArgumentException("Not comparable");
+		}
 	}
 
 }

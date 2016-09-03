@@ -16,10 +16,11 @@
 
 package net.sandius.rembulan.compiler.analysis.types
 
-import net.sandius.rembulan.util.ReadOnlyArray
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
+
+import scala.collection.JavaConverters._
 
 @RunWith(classOf[JUnitRunner])
 class TypeSpec extends FunSpec with MustMatchers {
@@ -84,7 +85,7 @@ class TypeSpec extends FunSpec with MustMatchers {
   }
 
   object T {
-    def apply(ts: Type*): TypeSeq = TypeSeq.of(ReadOnlyArray.wrap(ts.toArray), false)
+    def apply(ts: Type*): TypeSeq = TypeSeq.of(ts.asJava, false)
   }
 
   def equivalent(l: Type, r: Type) {

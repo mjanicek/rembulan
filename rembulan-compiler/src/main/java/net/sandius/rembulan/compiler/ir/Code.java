@@ -18,7 +18,6 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.parser.util.Util;
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.UnmodifiableIterator;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -122,7 +121,7 @@ public class Code {
 	}
 
 	public Iterator<BasicBlock> blockIterator() {
-		return new UnmodifiableIterator<>(blocks.iterator());
+		return blocks.iterator();
 	}
 
 }

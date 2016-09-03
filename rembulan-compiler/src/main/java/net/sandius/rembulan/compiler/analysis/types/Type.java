@@ -17,7 +17,6 @@
 package net.sandius.rembulan.compiler.analysis.types;
 
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.PartialOrderComparisonResult;
 
 public abstract class Type implements GradualTypeLike<Type> {
 

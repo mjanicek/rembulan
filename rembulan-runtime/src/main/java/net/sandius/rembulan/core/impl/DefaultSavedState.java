@@ -17,20 +17,20 @@
 package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.ReadOnlyArray;
 
-import java.io.Serializable;
+import java.util.Arrays;
 
-public class DefaultSavedState implements Serializable {
+public class DefaultSavedState {
 
 	private final int resumptionPoint;
-	private final ReadOnlyArray<Object> registers;
-	private final ReadOnlyArray<Object> varargs;
+	private final Object[] registers;
+	private final Object[] varargs;  // may be null
 
 	public DefaultSavedState(int resumptionPoint, Object[] registers, Object[] varargs) {
+		Check.notNull(registers);
 		this.resumptionPoint = resumptionPoint;
-		this.registers = ReadOnlyArray.copyFrom(Check.notNull(registers));
-		this.varargs = varargs != null ? ReadOnlyArray.copyFrom(varargs) : null;
+		this.registers = Arrays.copyOf(registers, registers.length);
+		this.varargs = varargs != null ? Arrays.copyOf(varargs, varargs.length) : null;
 	}
 
 	public DefaultSavedState(int resumptionPoint, Object[] registers) {
@@ -42,11 +42,11 @@ public class DefaultSavedState implements Serializable {
 	}
 
 	public Object[] registers() {
-		return registers.copyToNewArray();
+		return registers;
 	}
 
 	public Object[] varargs() {
-		return varargs != null ? varargs.copyToNewArray() : null;
+		return varargs != null ? varargs : null;
 	}
 
 }

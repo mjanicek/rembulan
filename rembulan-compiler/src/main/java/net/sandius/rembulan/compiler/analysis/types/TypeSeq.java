@@ -17,18 +17,19 @@
 package net.sandius.rembulan.compiler.analysis.types;
 
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.PartialOrderComparisonResult;
-import net.sandius.rembulan.util.ReadOnlyArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
-	protected final ReadOnlyArray<Type> fixed;
+	protected final List<Type> fixed;
 	protected final Type tailType;
 
-	public TypeSeq(ReadOnlyArray<Type> fixed, Type tailType) {
+	TypeSeq(List<Type> fixed, Type tailType) {
 		this.fixed = Check.notNull(fixed);
 		this.tailType = Check.notNull(tailType);
 	}
@@ -47,10 +48,10 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	}
 
 	public static TypeSeq of(Type... fixed) {
-		return of(ReadOnlyArray.wrap(fixed), false);
+		return of(Arrays.asList(fixed), false);
 	}
 
-	public static TypeSeq of(ReadOnlyArray<Type> fixed, boolean vararg) {
+	public static TypeSeq of(List<Type> fixed, boolean vararg) {
 		return new TypeSeq(fixed, vararg ? LuaTypes.ANY : LuaTypes.NIL);
 	}
 
@@ -70,7 +71,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
 	@Override
 	public int hashCode() {
-		int result = fixed.shallowHashCode();
+		int result = fixed.hashCode();
 		result = 31 * result + tailType.hashCode();
 		return result;
 	}
@@ -101,7 +102,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		return bld.toString();
 	}
 
-	public ReadOnlyArray<Type> fixed() {
+	public List<Type> fixed() {
 		return fixed;
 	}
 
@@ -116,11 +117,10 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
 	public TypeSeq prefixedBy(Type[] types) {
 		Check.notNull(types);
-
-		Type[] newFixed = new Type[types.length + fixed.size()];
-		System.arraycopy(types, 0, newFixed, 0, types.length);
-		System.arraycopy(fixed.copyToNewArray(), 0, newFixed, types.length, fixed.size());
-		return new TypeSeq(ReadOnlyArray.wrap(newFixed), this.tailType);
+		List<Type> ts = new ArrayList<>(types.length + fixed.size());
+		ts.addAll(Arrays.asList(types));
+		ts.addAll(fixed);
+		return new TypeSeq(Collections.unmodifiableList(ts), this.tailType);
 	}
 
 	public boolean isSubsumedBy(TypeSeq that) {
@@ -155,7 +155,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		Type tt = this.tailType.join(that.tailType);
 
 		if (tt != null) {
-			return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, fix), tt);
+			return new TypeSeq(Collections.unmodifiableList(fix), tt);
 		}
 		else {
 			return null;
@@ -181,7 +181,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 		Type tt = this.tailType.meet(that.tailType);
 
 		if (tt != null) {
-			return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, fix), tt);
+			return new TypeSeq(Collections.unmodifiableList(fix), tt);
 		}
 		else {
 			return null;
@@ -254,7 +254,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 			ts.add(this.get(i).restrict(that.get(i)));
 		}
 
-		return new TypeSeq(ReadOnlyArray.fromCollection(Type.class, ts), this.tailType.restrict(that.tailType));
+		return new TypeSeq(Collections.unmodifiableList(ts), this.tailType.restrict(that.tailType));
 	}
 
 	@Override
