@@ -16,11 +16,7 @@
 
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.util.IntBuffer
-
 object Util {
-
-  def intBufferToSeq(ib: IntBuffer): IndexedSeq[Int] = for (i <- 0 to ib.length() - 1) yield ib.get(i)
 
   def fillStr(pattern: String, width: Int): String = {
     val bld = new StringBuilder()

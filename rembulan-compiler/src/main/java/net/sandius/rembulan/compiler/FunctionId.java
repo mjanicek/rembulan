@@ -18,19 +18,22 @@ package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.compiler.gen.ClassNameTranslator;
 import net.sandius.rembulan.util.Check;
-import net.sandius.rembulan.util.IntVector;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 
 public class FunctionId {
 
-	private final IntVector indices;
+	private final List<Integer> indices;
 
 	public static final Comparator<FunctionId> LEXICOGRAPHIC_COMPARATOR = new Comparator<FunctionId>() {
 		@Override
 		public int compare(FunctionId a, FunctionId b) {
-			int la = a.indices.length();
-			int lb = b.indices.length();
+			int la = a.indices.size();
+			int lb = b.indices.size();
 
 			int len = Math.min(la, lb);
 			for (int i = 0; i < len; i++) {
@@ -47,7 +50,7 @@ public class FunctionId {
 		}
 	};
 
-	private FunctionId(IntVector indices) {
+	private FunctionId(List<Integer> indices) {
 		this.indices = Check.notNull(indices);
 	}
 
@@ -66,23 +69,33 @@ public class FunctionId {
 		return indices.hashCode();
 	}
 
-	private final static FunctionId ROOT = new FunctionId(IntVector.EMPTY);
+	private final static FunctionId ROOT = new FunctionId(Collections.<Integer>emptyList());
 
 	public static FunctionId root() {
 		return ROOT;
 	}
 
-	public static FunctionId fromIndices(IntVector indices) {
+	public static FunctionId fromIndices(List<Integer> indices) {
 		Check.notNull(indices);
 		return indices.isEmpty() ? root() : new FunctionId(indices);
 	}
 
 	@Override
 	public String toString() {
-		return "/" + indices.toString("/");
+		StringBuilder bld = new StringBuilder();
+		Iterator<Integer> it = indices.iterator();
+		bld.append("/");
+		while (it.hasNext()) {
+			int i = it.next();
+			bld.append(i);
+			if (it.hasNext()) {
+				bld.append("/");
+			}
+		}
+		return bld.toString();
 	}
 
-	public IntVector indices() {
+	public List<Integer> indices() {
 		return indices;
 	}
 
@@ -92,12 +105,10 @@ public class FunctionId {
 
 	public FunctionId child(int index) {
 		Check.nonNegative(index);
-
-		int[] newIndices = new int[indices.length() + 1];
-		indices.copyToArray(newIndices, 0);
-		newIndices[indices.length()] = index;
-
-		return new FunctionId(IntVector.wrap(newIndices));
+		List<Integer> childIndices = new ArrayList<>(indices.size() + 1);
+		childIndices.addAll(indices);
+		childIndices.add(index);
+		return new FunctionId(Collections.unmodifiableList(childIndices));
 	}
 
 	public FunctionId parent() {
@@ -105,16 +116,15 @@ public class FunctionId {
 			return null;
 		}
 		else {
-			int[] newIndices = new int[indices.length() - 1];
-			indices.copyToArray(newIndices, 0, indices.length() - 1);
-			return new FunctionId(IntVector.wrap(newIndices));
+			List<Integer> subIndices = indices.subList(0, indices.size() - 1);
+			return new FunctionId(subIndices);
 		}
 	}
 
 	public String toClassName(ClassNameTranslator tr) {
 		Check.notNull(tr);
-		for (int i = 0; i < indices.length(); i++) {
-			tr = tr.child(indices.get(i));
+		for (Integer index : indices) {
+			tr = tr.child(index);
 		}
 		return tr.className();
 	}
