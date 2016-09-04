@@ -22,6 +22,7 @@ import net.sandius.rembulan.IllegalOperationAttemptException;
 import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.impl.ReturnBuffers;
+import net.sandius.rembulan.runtime.AsyncTask;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ReturnBuffer;

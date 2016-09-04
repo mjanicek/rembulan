@@ -18,8 +18,6 @@ package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.LuaState;
-import net.sandius.rembulan.core.AsyncTask;
-import net.sandius.rembulan.core.ContinueCallback;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
 

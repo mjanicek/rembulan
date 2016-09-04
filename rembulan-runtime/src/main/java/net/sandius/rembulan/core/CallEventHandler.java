@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.runtime.AsyncTask;
+
 public interface CallEventHandler {
 
 	void returned(Call c, Object[] result);
