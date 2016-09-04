@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.exec;
 
+import net.sandius.rembulan.Dispatch;
 import net.sandius.rembulan.load.ChunkClassLoader;
-import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;

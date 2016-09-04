@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.exec;
 
+import net.sandius.rembulan.AsyncTask;
 import net.sandius.rembulan.Resumable;
-import net.sandius.rembulan.runtime.AsyncTask;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 

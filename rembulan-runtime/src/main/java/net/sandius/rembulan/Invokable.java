@@ -17,7 +17,6 @@
 package net.sandius.rembulan;
 
 import net.sandius.rembulan.exec.ControlThrowable;
-import net.sandius.rembulan.runtime.ExecutionContext;
 
 /**
  * An invokable object, corresponding to the Lua {@code function} type.

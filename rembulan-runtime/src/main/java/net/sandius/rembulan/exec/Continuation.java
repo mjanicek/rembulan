@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.runtime.SchedulingContext;
+import net.sandius.rembulan.SchedulingContext;
 
 public interface Continuation {
 

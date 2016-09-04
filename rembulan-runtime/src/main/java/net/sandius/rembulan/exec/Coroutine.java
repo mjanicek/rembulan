@@ -16,9 +16,9 @@
 
 package net.sandius.rembulan.exec;
 
+import net.sandius.rembulan.Dispatch;
+import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Resumable;
-import net.sandius.rembulan.runtime.Dispatch;
-import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 

@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.runtime;
+package net.sandius.rembulan;
 
-import net.sandius.rembulan.*;
 import net.sandius.rembulan.exec.ControlThrowable;
 
 /**

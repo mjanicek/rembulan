@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.runtime.AsyncTask;
+import net.sandius.rembulan.AsyncTask;
 
 public interface CallEventHandler {
 

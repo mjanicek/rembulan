@@ -16,7 +16,9 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
+import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.LuaState;
+import net.sandius.rembulan.ReturnBuffer;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerSettings;
@@ -34,8 +36,6 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.ReturnBufferMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.TableMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.compiler.ir.*;
-import net.sandius.rembulan.runtime.ExecutionContext;
-import net.sandius.rembulan.runtime.ReturnBuffer;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;

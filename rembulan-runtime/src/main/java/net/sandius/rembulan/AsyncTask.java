@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.runtime;
+package net.sandius.rembulan;
 
 public interface AsyncTask {
 

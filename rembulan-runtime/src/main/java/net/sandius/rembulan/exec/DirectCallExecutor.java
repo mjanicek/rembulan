@@ -16,11 +16,11 @@
 
 package net.sandius.rembulan.exec;
 
+import net.sandius.rembulan.AsyncTask;
+import net.sandius.rembulan.ContinueCallback;
 import net.sandius.rembulan.LuaState;
+import net.sandius.rembulan.SchedulingContext;
 import net.sandius.rembulan.impl.SchedulingContexts;
-import net.sandius.rembulan.runtime.AsyncTask;
-import net.sandius.rembulan.runtime.ContinueCallback;
-import net.sandius.rembulan.runtime.SchedulingContext;
 import net.sandius.rembulan.util.Check;
 
 import java.util.concurrent.CountDownLatch;

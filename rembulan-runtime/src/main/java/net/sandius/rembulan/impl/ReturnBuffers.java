@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.impl;
 
-import net.sandius.rembulan.runtime.ReturnBuffer;
+import net.sandius.rembulan.ReturnBuffer;
 
 /**
  * A static factory for instantiating return buffers.

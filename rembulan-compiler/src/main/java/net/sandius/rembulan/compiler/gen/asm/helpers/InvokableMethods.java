@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
+import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Invokable;
-import net.sandius.rembulan.runtime.ExecutionContext;
 import org.objectweb.asm.tree.AbstractInsnNode;
 
 public class InvokableMethods {
