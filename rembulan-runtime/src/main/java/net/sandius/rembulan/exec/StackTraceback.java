@@ -37,7 +37,7 @@ public class StackTraceback {
 		this.entries = Check.notNull(entries);
 	}
 
-	public static StackTraceback fromCollection(Collection<Entry> entries) {
+	private static StackTraceback fromCollection(Collection<Entry> entries) {
 		return new StackTraceback(Check.notNull(entries.toArray(new Entry[entries.size()])));
 	}
 
@@ -70,7 +70,11 @@ public class StackTraceback {
 				&& chunkClassLoader.isInstalled(className);
 	}
 
-	public static StackTraceback getStackTraceback(Throwable throwable, StackTraceElement[] currentStackTrace, ChunkClassLoader chunkClassLoader, String[] suppress) {
+	public static StackTraceback getStackTraceback(
+			Throwable throwable,
+			StackTraceElement[] currentStackTrace,
+			ChunkClassLoader chunkClassLoader,
+			String[] suppress) {
 
 		Deque<Entry> entries = new ArrayDeque<>();
 
@@ -163,12 +167,11 @@ public class StackTraceback {
 		return StackTraceback.fromCollection(entries);
 	}
 
-
-	public static abstract class Entry {
+	private static abstract class Entry {
 
 	}
 
-	public static class JavaCallEntry extends Entry {
+	private static class JavaCallEntry extends Entry {
 
 		private final StackTraceElement stackTraceElement;
 
@@ -187,7 +190,7 @@ public class StackTraceback {
 
 	}
 
-	public static class MiscJavaEntry extends Entry {
+	private static class MiscJavaEntry extends Entry {
 
 		private final String s;
 
@@ -225,7 +228,7 @@ public class StackTraceback {
 
 	}
 
-	public static class LuaCallEntry extends Entry {
+	private static class LuaCallEntry extends Entry {
 
 		private final String sourceFileName;  // may be null
 		private final int sourceLine;
@@ -252,7 +255,7 @@ public class StackTraceback {
 
 	}
 
-	public static class MiscEntry extends Entry {
+	private static class MiscEntry extends Entry {
 
 		private final String s;
 
