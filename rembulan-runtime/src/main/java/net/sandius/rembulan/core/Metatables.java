@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.core;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Objects;
 
 /**
@@ -209,8 +207,8 @@ public final class Metatables {
 	 * @throws NullPointerException  if {@code metatableProvider} or {@code event} is {@code null}
 	 */
 	public static Object binaryHandlerFor(MetatableProvider metatableProvider, String event, Object a, Object b) {
-		Check.notNull(metatableProvider);
-		Check.notNull(event);
+		Objects.requireNonNull(metatableProvider);
+		Objects.requireNonNull(event);
 		Object ma = Metatables.getMetamethod(metatableProvider, event, a);
 		return ma != null ? ma : Metatables.getMetamethod(metatableProvider, event, b);
 	}
