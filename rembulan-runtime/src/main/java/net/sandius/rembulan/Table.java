@@ -51,9 +51,6 @@ public abstract class Table extends LuaObject {
 		return rawget((long) idx);
 	}
 
-	// must throw an exception when key is nil or NaN
-	// must convert floats to ints if possible
-
 	/**
 	 * Sets the value associated with the key {@code key} to {@code value}. When {@code value}
 	 * is {@code null}, removes {@code key} from the table.
