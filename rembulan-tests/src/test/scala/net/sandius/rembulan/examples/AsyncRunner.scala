@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.examples
 
-import net.sandius.rembulan.core.exec.DirectCallExecutor
 import net.sandius.rembulan.core.impl.DefaultLuaState
+import net.sandius.rembulan.exec.DirectCallExecutor
 
 object AsyncRunner {
 

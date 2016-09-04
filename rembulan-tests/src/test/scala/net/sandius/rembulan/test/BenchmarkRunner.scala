@@ -21,8 +21,8 @@ import java.util.Scanner
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
-import net.sandius.rembulan.core.exec.DirectCallExecutor
 import net.sandius.rembulan.core.impl.DefaultLuaState
+import net.sandius.rembulan.exec.DirectCallExecutor
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.{Function, LuaState, Table, Variable, core => lua}
