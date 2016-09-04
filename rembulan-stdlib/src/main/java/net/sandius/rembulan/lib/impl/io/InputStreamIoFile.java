@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.lib.impl.io;
 
-import net.sandius.rembulan.core.Table;
+import net.sandius.rembulan.Table;
 import net.sandius.rembulan.lib.impl.IoFile;
 import net.sandius.rembulan.util.Check;
 

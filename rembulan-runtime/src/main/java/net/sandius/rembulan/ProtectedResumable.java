@@ -14,8 +14,13 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-public abstract class Function implements Invokable, Resumable {
+import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.ExecutionContext;
+
+public interface ProtectedResumable extends Resumable {
+
+	void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable;
 
 }

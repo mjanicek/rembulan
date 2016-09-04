@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.test.fragments
 
-import net.sandius.rembulan.core.{Table, Userdata, Variable}
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
-import net.sandius.rembulan.{core => lua}
+import net.sandius.rembulan.{Function, Table, Userdata, Variable, core => lua}
 
 object DebugLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
@@ -71,7 +70,7 @@ object DebugLibFragments extends FragmentBundle with FragmentExpectations with O
           |return nf, vf, ng, vg, vg == f
         """
       }
-      TwoNonENVFunctions in thisContext succeedsWith (null, null, "f", classOf[lua.Function], true)
+      TwoNonENVFunctions in thisContext succeedsWith (null, null, "f", classOf[Function], true)
 
     }
 

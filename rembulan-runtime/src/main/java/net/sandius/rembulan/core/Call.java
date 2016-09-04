@@ -16,6 +16,10 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.IllegalOperationAttemptException;
+import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 

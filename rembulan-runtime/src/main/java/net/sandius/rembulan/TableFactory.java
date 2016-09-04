@@ -14,12 +14,29 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-public abstract class LuaObject {
+/**
+ * A factory for {@link Table} instances.
+ */
+public interface TableFactory {
 
-	public abstract Table getMetatable();
+	/**
+	 * Creates a new empty table. This is functionally equivalent to {@code newTable(0, 0)}.
+	 *
+	 * @return new empty table
+	 * @see #newTable(int, int)
+	 */
+	Table newTable();
 
-	public abstract Table setMetatable(Table mt);
+	/**
+	 * Creates a new empty table with the given initial capacities for its array and hash
+	 * parts.
+	 *
+	 * @param array  initial capacity for the array part
+	 * @param hash  initial capacity for the hash part
+	 * @return new empty table
+	 */
+	Table newTable(int array, int hash);
 
 }

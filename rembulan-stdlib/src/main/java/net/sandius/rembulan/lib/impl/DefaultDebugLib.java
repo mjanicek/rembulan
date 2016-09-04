@@ -16,13 +16,13 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.LuaRuntimeException;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.Userdata;
+import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.LuaRuntimeException;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Userdata;
-import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;

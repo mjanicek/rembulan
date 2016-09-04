@@ -14,13 +14,8 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-// full userdata
-public abstract class Userdata extends LuaObject {
-
-	public abstract Object getUserValue();
-
-	public abstract Object setUserValue(Object value);
+public abstract class Function implements Invokable, Resumable {
 
 }

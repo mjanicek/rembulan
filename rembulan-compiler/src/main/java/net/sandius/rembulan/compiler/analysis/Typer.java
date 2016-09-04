@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.compiler.analysis;
 
+import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaMathOperators;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.analysis.types.LiteralType;
@@ -23,7 +24,6 @@ import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.UnOp;
-import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.Ordering;
 

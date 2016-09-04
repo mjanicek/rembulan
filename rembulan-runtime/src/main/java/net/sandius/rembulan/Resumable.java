@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-public interface ProtectedResumable extends Resumable {
+import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.ExecutionContext;
 
-	void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable;
+public interface Resumable {
+
+	void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable;
 
 }

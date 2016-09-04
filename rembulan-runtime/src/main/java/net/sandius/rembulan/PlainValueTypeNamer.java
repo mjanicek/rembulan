@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
-
-import net.sandius.rembulan.LuaType;
+package net.sandius.rembulan;
 
 import static net.sandius.rembulan.LuaFormat.TYPENAME_BOOLEAN;
 import static net.sandius.rembulan.LuaFormat.TYPENAME_FUNCTION;

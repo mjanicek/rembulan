@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
+
+import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.core.ExecutionContext;
 
 public interface Invokable {
 

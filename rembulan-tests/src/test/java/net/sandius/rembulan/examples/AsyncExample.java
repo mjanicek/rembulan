@@ -16,12 +16,12 @@
 
 package net.sandius.rembulan.examples;
 
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.core.AsyncTask;
 import net.sandius.rembulan.core.ContinueCallback;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.impl.AbstractFunction1;
 
 public class AsyncExample extends AbstractFunction1 {

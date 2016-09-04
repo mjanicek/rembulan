@@ -17,12 +17,12 @@
 package net.sandius.rembulan.standalone;
 
 import jline.console.ConsoleReader;
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
-import net.sandius.rembulan.core.Conversions;
-import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.core.exec.CallException;
 import net.sandius.rembulan.core.exec.CallInterruptedException;
 import net.sandius.rembulan.core.exec.DirectCallExecutor;

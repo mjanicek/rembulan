@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
+import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerSettings;
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.IRFunc;
@@ -31,7 +32,6 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.InvokeKind;
 import net.sandius.rembulan.compiler.ir.AbstractVar;
 import net.sandius.rembulan.compiler.ir.UpVar;
 import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.ClassReader;

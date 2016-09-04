@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
+import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.ir.UpVar;
-import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;

@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerSettings;
 import net.sandius.rembulan.compiler.FunctionId;
 import net.sandius.rembulan.compiler.analysis.SlotAllocInfo;
@@ -34,8 +36,6 @@ import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.ReturnBuffer;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Variable;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;

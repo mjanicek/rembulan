@@ -43,10 +43,10 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
-import net.sandius.rembulan.core.Userdata;
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.TableFactory;
+import net.sandius.rembulan.Userdata;
 
 /**
  * <p>The I/O library provides two different styles for file manipulation. The first one uses

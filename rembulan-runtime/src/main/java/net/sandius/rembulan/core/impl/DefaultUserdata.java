@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Userdata;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.Userdata;
 
 public abstract class DefaultUserdata extends Userdata {
 

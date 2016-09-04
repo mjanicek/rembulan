@@ -14,10 +14,19 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-public interface Resumable {
+/**
+ * A mapping from values to a string representation of their type.
+ */
+public interface ValueTypeNamer {
 
-	void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable;
+	/**
+	 * Returns the type name (a string) of the value {@code instance}.
+	 *
+	 * @param instance  the object in question, may be {@code null}
+	 * @return  the type name of {@code instance}
+	 */
+	String typeNameOf(Object instance);
 
 }

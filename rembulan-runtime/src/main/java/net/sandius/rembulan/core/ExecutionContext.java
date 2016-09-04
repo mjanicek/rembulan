@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.Function;
+
 /**
  * An interface to the execution context of a Lua call.
  *

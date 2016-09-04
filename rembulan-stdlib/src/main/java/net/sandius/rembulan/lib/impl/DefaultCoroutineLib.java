@@ -16,11 +16,11 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
 import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.ProtectedResumable;
 import net.sandius.rembulan.core.ReturnBuffer;
 import net.sandius.rembulan.core.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.lib.CoroutineLib;

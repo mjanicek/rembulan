@@ -16,9 +16,9 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.Conversions;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.TableFactory;
 
 import java.util.HashMap;
 import java.util.Iterator;

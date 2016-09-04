@@ -16,7 +16,10 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.LuaObject;
 import net.sandius.rembulan.LuaType;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.TableFactory;
 
 public abstract class LuaState implements MetatableProvider, TableFactory {
 

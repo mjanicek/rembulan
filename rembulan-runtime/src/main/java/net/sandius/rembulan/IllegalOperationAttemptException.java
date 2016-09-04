@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
 public class IllegalOperationAttemptException extends LuaRuntimeException {
 

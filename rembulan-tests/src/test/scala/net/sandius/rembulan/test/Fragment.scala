@@ -16,8 +16,7 @@
 
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.LuaFormat
-import net.sandius.rembulan.core.LuaRuntimeException
+import net.sandius.rembulan.{LuaFormat, LuaRuntimeException}
 import org.scalatest.FunSpec
 
 import scala.collection.mutable

@@ -16,10 +16,9 @@
 
 package net.sandius.rembulan.compiler
 
-import net.sandius.rembulan.core.Variable
 import net.sandius.rembulan.core.load.ChunkClassLoader
 import net.sandius.rembulan.test.fragments.BasicFragments
-import net.sandius.rembulan.{core => lua}
+import net.sandius.rembulan.{Function, Variable, core => lua}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
@@ -73,7 +72,7 @@ class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
           }
 
           val name = classLoader.install(cm)
-          val clazz = classLoader.loadClass(name).asInstanceOf[Class[lua.Function]]
+          val clazz = classLoader.loadClass(name).asInstanceOf[Class[Function]]
 
           val f = try {
             clazz.getConstructor(classOf[Variable]).newInstance(new Variable(null))

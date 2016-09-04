@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.Table;
+
 /**
  * An interface for obtaining metatables for arbitrary values.
  *

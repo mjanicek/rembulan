@@ -16,7 +16,13 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.IllegalOperationAttemptException;
+import net.sandius.rembulan.Invokable;
 import net.sandius.rembulan.LuaMathOperators;
+import net.sandius.rembulan.Resumable;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.Userdata;
 
 /**
  * A static class for dispatching operations according to the semantics of Lua 5.3.

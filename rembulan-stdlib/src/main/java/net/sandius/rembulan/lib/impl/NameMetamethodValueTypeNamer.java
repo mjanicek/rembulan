@@ -17,10 +17,10 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.LuaType;
+import net.sandius.rembulan.PlainValueTypeNamer;
+import net.sandius.rembulan.ValueTypeNamer;
 import net.sandius.rembulan.core.MetatableProvider;
 import net.sandius.rembulan.core.Metatables;
-import net.sandius.rembulan.core.PlainValueTypeNamer;
-import net.sandius.rembulan.core.ValueTypeNamer;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.util.Check;
 

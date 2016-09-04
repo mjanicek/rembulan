@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.Function;
 import net.sandius.rembulan.core.impl.AbstractFunction0;
 import net.sandius.rembulan.core.impl.AbstractFunction1;
 import net.sandius.rembulan.core.impl.AbstractFunction2;

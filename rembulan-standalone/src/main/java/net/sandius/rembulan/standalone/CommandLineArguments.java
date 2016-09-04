@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.standalone;
 
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;

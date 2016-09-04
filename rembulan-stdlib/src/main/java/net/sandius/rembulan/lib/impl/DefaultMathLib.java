@@ -16,11 +16,11 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.Function;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Conversions;
 import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
-import net.sandius.rembulan.core.Function;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.MathLib;
 import net.sandius.rembulan.util.Check;

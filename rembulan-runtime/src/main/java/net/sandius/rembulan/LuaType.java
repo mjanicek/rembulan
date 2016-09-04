@@ -17,9 +17,6 @@
 package net.sandius.rembulan;
 
 import net.sandius.rembulan.core.Coroutine;
-import net.sandius.rembulan.core.Invokable;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.Userdata;
 
 /**
  * An enum representing a Lua type.
@@ -56,7 +53,7 @@ import net.sandius.rembulan.core.Userdata;
  *
  * <p>For numeric values, the <i>canonical representation</i> is the default, full-precision
  * representation of the number as either a float or integer. To convert a number to its
- * canonical value, use {@link net.sandius.rembulan.core.Conversions#toCanonicalNumber(Number)}.</p>
+ * canonical value, use {@link Conversions#toCanonicalNumber(Number)}.</p>
  *
  */
 public enum LuaType {

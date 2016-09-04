@@ -43,10 +43,10 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.core.LuaState;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
 
 public abstract class BasicLib extends Lib {
 

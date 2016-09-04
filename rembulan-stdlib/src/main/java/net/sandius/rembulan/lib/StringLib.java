@@ -43,11 +43,11 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.Metatables;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
 
 /**
  * <p>This library provides generic functions for string manipulation, such as finding

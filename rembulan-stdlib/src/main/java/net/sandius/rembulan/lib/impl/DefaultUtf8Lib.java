@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.core.Function;
+import net.sandius.rembulan.Function;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Utf8Lib;
 

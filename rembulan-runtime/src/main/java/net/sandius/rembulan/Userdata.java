@@ -14,19 +14,13 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-/**
- * A mapping from values to a string representation of their type.
- */
-public interface ValueTypeNamer {
+// full userdata
+public abstract class Userdata extends LuaObject {
 
-	/**
-	 * Returns the type name (a string) of the value {@code instance}.
-	 *
-	 * @param instance  the object in question, may be {@code null}
-	 * @return  the type name of {@code instance}
-	 */
-	String typeNameOf(Object instance);
+	public abstract Object getUserValue();
+
+	public abstract Object setUserValue(Object value);
 
 }

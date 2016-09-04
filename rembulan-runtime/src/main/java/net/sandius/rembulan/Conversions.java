@@ -14,10 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
-
-import net.sandius.rembulan.LuaFormat;
-import net.sandius.rembulan.LuaMathOperators;
+package net.sandius.rembulan;
 
 /**
  * Static methods implementing Lua value conversions.

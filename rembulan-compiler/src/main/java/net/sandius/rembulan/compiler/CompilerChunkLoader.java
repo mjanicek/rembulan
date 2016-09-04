@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.Variable;
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.core.load.ChunkClassLoader;
 import net.sandius.rembulan.core.load.ChunkLoader;
 import net.sandius.rembulan.core.load.LoaderException;

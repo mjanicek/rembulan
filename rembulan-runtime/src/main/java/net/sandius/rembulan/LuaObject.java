@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-public class NoIntegerRepresentationException extends ConversionException {
+public abstract class LuaObject {
 
-	public NoIntegerRepresentationException() {
-		super("number has no integer representation");
-	}
+	public abstract Table getMetatable();
+
+	public abstract Table setMetatable(Table mt);
 
 }

@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.test.fragments
 
-import net.sandius.rembulan.core.Table
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
-import net.sandius.rembulan.{core => lua}
+import net.sandius.rembulan.{Function, Table, core => lua}
 
 object BasicLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
@@ -347,7 +346,7 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("return load(42)") succeedsWith (null, classOf[String])
       program ("return load(42, 42, 42)") succeedsWith (null, "attempt to load a text chunk (mode is '42')")
 
-      program ("return load('return nil', nil)") succeedsWith (classOf[lua.Function])
+      program ("return load('return nil', nil)") succeedsWith (classOf[Function])
 
       program ("return load('return 1 + 2')()") succeedsWith (3)
 

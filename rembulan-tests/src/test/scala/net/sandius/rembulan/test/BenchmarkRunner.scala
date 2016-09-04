@@ -26,7 +26,7 @@ import net.sandius.rembulan.core.exec.DirectCallExecutor
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.lib.impl._
-import net.sandius.rembulan.{core => lua}
+import net.sandius.rembulan.{Function, Table, Variable, core => lua}
 
 import scala.util.Try
 
@@ -111,7 +111,7 @@ object BenchmarkRunner {
     env
   }
 
-  case class EnvWithMainChunk(state: LuaState, fn: lua.Function)
+  case class EnvWithMainChunk(state: LuaState, fn: Function)
 
   def init(settings: CompilerSettings, filename: String, args: String*) = {
     val resourceStream = getClass.getResourceAsStream(filename)

@@ -27,7 +27,7 @@ import net.sandius.rembulan.core.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.lib.Lib
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.test.FragmentExpectations.Env
-import net.sandius.rembulan.{core => lua}
+import net.sandius.rembulan.{Conversions, Table, Variable, core => lua}
 import org.scalatest.{FunSpec, MustMatchers}
 
 import scala.util.{Failure, Success}

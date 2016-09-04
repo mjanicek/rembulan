@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.Invokable;
 import net.sandius.rembulan.LuaMathOperators;
 
 import java.util.Comparator;

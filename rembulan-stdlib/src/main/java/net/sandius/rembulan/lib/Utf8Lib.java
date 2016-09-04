@@ -43,9 +43,9 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.core.Function;
-import net.sandius.rembulan.core.Table;
-import net.sandius.rembulan.core.TableFactory;
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.TableFactory;
 
 /**
  * <p>This library provides basic support for UTF-8 encoding. It provides all its functions

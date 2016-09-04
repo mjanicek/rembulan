@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.Function;
+
 public class NonsuspendableFunctionException extends UnsupportedOperationException {
 
 	public NonsuspendableFunctionException(Class<? extends Function> clazz) {

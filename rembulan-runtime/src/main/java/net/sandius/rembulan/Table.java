@@ -14,29 +14,28 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-/**
- * A factory for {@link Table} instances.
- */
-public interface TableFactory {
+public abstract class Table extends LuaObject {
 
-	/**
-	 * Creates a new empty table. This is functionally equivalent to {@code newTable(0, 0)}.
-	 *
-	 * @return new empty table
-	 * @see #newTable(int, int)
-	 */
-	Table newTable();
+	public abstract Object rawget(Object key);
 
-	/**
-	 * Creates a new empty table with the given initial capacities for its array and hash
-	 * parts.
-	 *
-	 * @param array  initial capacity for the array part
-	 * @param hash  initial capacity for the hash part
-	 * @return new empty table
-	 */
-	Table newTable(int array, int hash);
+	public Object rawget(int idx) {
+		return rawget((long) idx);
+	}
+
+	// must throw an exception when key is nil or NaN
+	// must convert floats to ints if possible
+	public abstract void rawset(Object key, Object value);
+
+	public void rawset(int idx, Object value) {
+		rawset((long) idx, value);
+	}
+
+	public abstract int rawlen();
+
+	public abstract Object initialIndex();
+
+	public abstract Object nextIndex(Object key);
 
 }

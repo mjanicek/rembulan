@@ -14,28 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan;
 
-public abstract class Table extends LuaObject {
+public class ConversionException extends LuaRuntimeException {
 
-	public abstract Object rawget(Object key);
-
-	public Object rawget(int idx) {
-		return rawget((long) idx);
+	public ConversionException(String message) {
+		super(message);
 	}
-
-	// must throw an exception when key is nil or NaN
-	// must convert floats to ints if possible
-	public abstract void rawset(Object key, Object value);
-
-	public void rawset(int idx, Object value) {
-		rawset((long) idx, value);
-	}
-
-	public abstract int rawlen();
-
-	public abstract Object initialIndex();
-
-	public abstract Object nextIndex(Object key);
 
 }
