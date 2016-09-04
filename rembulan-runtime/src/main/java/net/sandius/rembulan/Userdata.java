@@ -16,11 +16,28 @@
 
 package net.sandius.rembulan;
 
-// full userdata
+/**
+ * Full userdata.
+ *
+ * <p>Instances of this class may have a <i>user value</i> attached to them,
+ * accessible using the methods {@link #getUserValue()} and {@link #setUserValue(Object)}.</p>
+ */
 public abstract class Userdata extends LuaObject {
 
+	/**
+	 * Returns the user value attached to this full userdata.
+	 *
+	 * @return  the user value attached to this full userdata
+	 */
 	public abstract Object getUserValue();
 
+	/**
+	 * Sets the user value attached to this full userdata to {@code value}, returning
+	 * the old user value.
+	 *
+	 * @param value  new user value, may be {@code null}
+	 * @return  old user value
+	 */
 	public abstract Object setUserValue(Object value);
 
 }
