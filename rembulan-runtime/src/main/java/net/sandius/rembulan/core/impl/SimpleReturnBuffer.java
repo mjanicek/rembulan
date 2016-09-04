@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.core.impl;
 
-import net.sandius.rembulan.core.ReturnBuffer;
+import net.sandius.rembulan.runtime.ReturnBuffer;
 
 import java.util.Arrays;
 import java.util.Collection;

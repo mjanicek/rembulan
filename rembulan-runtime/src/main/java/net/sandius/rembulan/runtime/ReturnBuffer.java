@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.core.ReturnBuffers;
 
 import java.util.Collection;
 

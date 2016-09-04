@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.runtime.SchedulingContext;
 import net.sandius.rembulan.util.Check;
 
 public final class SchedulingContexts {

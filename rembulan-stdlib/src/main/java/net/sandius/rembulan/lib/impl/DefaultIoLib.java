@@ -21,7 +21,6 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BasicLib;
@@ -30,6 +29,7 @@ import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.io.InputStreamIoFile;
 import net.sandius.rembulan.lib.impl.io.OutputStreamIoFile;
 import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 
 import java.io.InputStream;

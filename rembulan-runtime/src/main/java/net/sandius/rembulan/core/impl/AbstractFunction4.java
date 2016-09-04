@@ -18,7 +18,7 @@ package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.runtime.ExecutionContext;
 
 public abstract class AbstractFunction4 extends Function {
 

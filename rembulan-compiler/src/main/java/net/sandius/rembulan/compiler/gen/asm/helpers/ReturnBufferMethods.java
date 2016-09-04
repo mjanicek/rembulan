@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.core.ReturnBuffer;
+import net.sandius.rembulan.runtime.ReturnBuffer;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;

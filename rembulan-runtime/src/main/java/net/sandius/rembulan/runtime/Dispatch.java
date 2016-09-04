@@ -25,12 +25,10 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.core.Arithmetic;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.core.MetatableProvider;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Ordering;
-import net.sandius.rembulan.core.ReturnBuffer;
 
 /**
  * A static class for dispatching operations according to the semantics of Lua 5.3.

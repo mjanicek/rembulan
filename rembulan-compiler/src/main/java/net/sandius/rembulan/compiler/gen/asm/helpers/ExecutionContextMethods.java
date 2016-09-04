@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
 

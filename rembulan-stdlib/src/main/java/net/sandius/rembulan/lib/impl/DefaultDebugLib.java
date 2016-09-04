@@ -22,10 +22,10 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 
 import java.lang.reflect.Field;

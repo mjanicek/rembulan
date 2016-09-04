@@ -20,7 +20,7 @@ import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.core.ExecutionContext;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;

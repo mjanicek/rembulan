@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.core;
 
+import net.sandius.rembulan.runtime.SchedulingContext;
+
 public interface Continuation {
 
 	void resume(CallEventHandler handler, SchedulingContext schedulingContext);

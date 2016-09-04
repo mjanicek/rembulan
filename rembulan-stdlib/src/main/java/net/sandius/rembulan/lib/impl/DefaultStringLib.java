@@ -24,13 +24,13 @@ import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.impl.AbstractFunction0;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;

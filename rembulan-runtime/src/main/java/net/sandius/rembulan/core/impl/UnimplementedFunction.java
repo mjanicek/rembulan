@@ -17,8 +17,8 @@
 package net.sandius.rembulan.core.impl;
 
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 
 public final class UnimplementedFunction extends AbstractFunction0 {

@@ -21,6 +21,9 @@ import net.sandius.rembulan.Function;
 import net.sandius.rembulan.IllegalOperationAttemptException;
 import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.ExecutionContext;
+import net.sandius.rembulan.runtime.ReturnBuffer;
+import net.sandius.rembulan.runtime.SchedulingContext;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 

@@ -17,9 +17,9 @@
 package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
-import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.impl.DefaultSavedState;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;

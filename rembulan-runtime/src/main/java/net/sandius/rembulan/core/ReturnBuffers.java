@@ -17,6 +17,7 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.core.impl.PairCachingReturnBuffer;
+import net.sandius.rembulan.runtime.ReturnBuffer;
 
 /**
  * A static factory for instantiating return buffers.

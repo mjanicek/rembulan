@@ -17,9 +17,9 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
 import net.sandius.rembulan.core.impl.AbstractFunctionAnyArg;
+import net.sandius.rembulan.runtime.ExecutionContext;
 
 public abstract class AbstractLibFunction extends AbstractFunctionAnyArg {
 

@@ -19,10 +19,10 @@ package net.sandius.rembulan.lib.impl;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.MathLib;
 import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Random;
