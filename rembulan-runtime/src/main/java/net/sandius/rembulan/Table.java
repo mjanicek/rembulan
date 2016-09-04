@@ -26,7 +26,7 @@ public abstract class Table extends LuaObject {
 	 * when {@code key} has no value associated with it.
 	 *
 	 * <p>Implementations of this method must ensure that the Lua rules for valid
-	 * table keys are honoured, e.g. by normalising keys them using
+	 * table keys are honoured, e.g. by normalising keys using
 	 * {@link Conversions#normaliseKey(Object)}.</p>
 	 *
 	 * @param key  the key, may be {@code null}
@@ -62,7 +62,7 @@ public abstract class Table extends LuaObject {
 	 * an {@link IllegalArgumentException} is thrown.</p>
 	 *
 	 * <p>Implementations of this method must ensure that the Lua rules for valid
-	 * table keys are honoured, e.g. by normalising keys them using
+	 * table keys are honoured, e.g. by normalising keys using
 	 * {@link Conversions#normaliseKey(Object)}.</p>
 	 *
 	 * @param key  the key, must not be {@code null} or <i>NaN</i>
