@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.core.SchedulingContexts;
-
 /**
  * An interface to the cooperative scheduler used in executing Lua programs.
  *
@@ -27,7 +25,7 @@ import net.sandius.rembulan.core.SchedulingContexts;
  * should be paused.</p>
  *
  * <p>For basic implementations of this interface, see the utility class
- * {@link SchedulingContexts}.</p>
+ * {@link net.sandius.rembulan.impl.SchedulingContexts}.</p>
  */
 public interface SchedulingContext {
 

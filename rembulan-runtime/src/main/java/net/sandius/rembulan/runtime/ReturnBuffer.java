@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.core.ReturnBuffers;
-
 import java.util.Collection;
 
 /**
@@ -40,7 +38,7 @@ import java.util.Collection;
  * be tail-called) is accessible using {@link #getCallTarget()}.</p>
  *
  * <p>New return buffer instances may be created using the methods provided by the static
- * factory class {@link ReturnBuffers}.</p>
+ * factory class {@link net.sandius.rembulan.impl.ReturnBuffers}.</p>
  */
 public interface ReturnBuffer {
 
