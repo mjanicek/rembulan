@@ -17,6 +17,7 @@
 package net.sandius.rembulan.core;
 
 import net.sandius.rembulan.Resumable;
+import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 

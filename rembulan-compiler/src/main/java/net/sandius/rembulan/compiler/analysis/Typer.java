@@ -24,8 +24,8 @@ import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.ir.BinOp;
 import net.sandius.rembulan.compiler.ir.UnOp;
-import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.Ordering;
+import net.sandius.rembulan.runtime.Dispatch;
 
 public class Typer {
 

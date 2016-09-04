@@ -25,7 +25,6 @@ import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Dispatch;
 import net.sandius.rembulan.core.ExecutionContext;
 import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.Ordering;
@@ -36,6 +35,7 @@ import net.sandius.rembulan.core.load.LoaderException;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
+import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;
