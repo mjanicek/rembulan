@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.test.fragments
 
-import net.sandius.rembulan.core._
+import net.sandius.rembulan.exec.Coroutine
 import net.sandius.rembulan.lib.AssertionFailedException
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations}
 import net.sandius.rembulan.{Function, IllegalOperationAttemptException, core => lua}

@@ -18,7 +18,7 @@ package net.sandius.rembulan.examples;
 
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Variable;
-import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.exec.ControlThrowable;
 import net.sandius.rembulan.impl.AbstractFunction1;
 import net.sandius.rembulan.runtime.AsyncTask;
 import net.sandius.rembulan.runtime.ContinueCallback;

@@ -14,24 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.Resumable;
-import net.sandius.rembulan.runtime.ExecutionContext;
-import net.sandius.rembulan.util.Check;
+class IllegalCoroutineStateException extends IllegalStateException {
 
-public class ResumeInfo {
-
-	public final Resumable resumable;
-	public final Object savedState;
-
-	public ResumeInfo(Resumable resumable, Object savedState) {
-		this.resumable = Check.notNull(resumable);
-		this.savedState = savedState;
-	}
-
-	public void resume(ExecutionContext context) throws ControlThrowable {
-		resumable.resume(context, savedState);
+	public IllegalCoroutineStateException(String message) {
+		super(message);
 	}
 
 }

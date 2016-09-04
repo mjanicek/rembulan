@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.impl;
 
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.NonsuspendableFunctionException;
+import net.sandius.rembulan.exec.ControlThrowable;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 

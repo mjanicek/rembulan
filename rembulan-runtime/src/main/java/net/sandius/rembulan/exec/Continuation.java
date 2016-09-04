@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.exec;
 
-class IllegalCoroutineStateException extends IllegalStateException {
+import net.sandius.rembulan.runtime.SchedulingContext;
 
-	public IllegalCoroutineStateException(String message) {
-		super(message);
-	}
+public interface Continuation {
+
+	void resume(CallEventHandler handler, SchedulingContext schedulingContext);
 
 }

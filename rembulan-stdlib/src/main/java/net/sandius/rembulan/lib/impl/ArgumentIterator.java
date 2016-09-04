@@ -21,7 +21,7 @@ import net.sandius.rembulan.Function;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.ValueTypeNamer;
-import net.sandius.rembulan.core.Coroutine;
+import net.sandius.rembulan.exec.Coroutine;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.util.Check;

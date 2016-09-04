@@ -18,8 +18,8 @@ package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.*;
 import net.sandius.rembulan.core.Arithmetic;
-import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Ordering;
+import net.sandius.rembulan.exec.ControlThrowable;
 
 /**
  * A static class for dispatching operations according to the semantics of Lua 5.3.

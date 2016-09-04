@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.core.Continuation;
 import net.sandius.rembulan.util.Check;
 
 public class CallInterruptedException extends Exception {

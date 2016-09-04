@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
+package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Function;

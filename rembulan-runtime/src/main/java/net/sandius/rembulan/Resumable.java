@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.exec.ControlThrowable;
 import net.sandius.rembulan.runtime.ExecutionContext;
 
 public interface Resumable {

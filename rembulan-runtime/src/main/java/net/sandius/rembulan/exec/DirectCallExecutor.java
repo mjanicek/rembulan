@@ -17,9 +17,6 @@
 package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.LuaState;
-import net.sandius.rembulan.core.Call;
-import net.sandius.rembulan.core.CallEventHandler;
-import net.sandius.rembulan.core.Continuation;
 import net.sandius.rembulan.impl.SchedulingContexts;
 import net.sandius.rembulan.runtime.AsyncTask;
 import net.sandius.rembulan.runtime.ContinueCallback;

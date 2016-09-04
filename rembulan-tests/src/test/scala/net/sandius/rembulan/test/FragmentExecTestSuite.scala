@@ -20,8 +20,7 @@ import java.io.PrintStream
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
-import net.sandius.rembulan.core._
-import net.sandius.rembulan.exec.{CallException, CallInterruptedException, DirectCallExecutor}
+import net.sandius.rembulan.exec._
 import net.sandius.rembulan.impl.DefaultLuaState
 import net.sandius.rembulan.lib.Lib
 import net.sandius.rembulan.lib.impl._

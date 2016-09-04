@@ -17,7 +17,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.core.ControlThrowable;
+import net.sandius.rembulan.exec.ControlThrowable;
 import net.sandius.rembulan.impl.DefaultUserdata;
 import net.sandius.rembulan.runtime.ExecutionContext;
 
