@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
-
-import net.sandius.rembulan.LuaMathOperators;
+package net.sandius.rembulan;
 
 /**
  * A representation of one of the two arithmetic modes (integer or float).

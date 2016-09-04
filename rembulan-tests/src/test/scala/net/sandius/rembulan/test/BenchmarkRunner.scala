@@ -25,7 +25,7 @@ import net.sandius.rembulan.exec.DirectCallExecutor
 import net.sandius.rembulan.impl.DefaultLuaState
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
-import net.sandius.rembulan.{Function, LuaState, Table, Variable, core => lua}
+import net.sandius.rembulan.{Function, LuaState, Table, Variable}
 
 import scala.util.Try
 

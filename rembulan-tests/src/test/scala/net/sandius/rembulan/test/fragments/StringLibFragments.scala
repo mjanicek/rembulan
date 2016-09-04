@@ -17,7 +17,7 @@
 package net.sandius.rembulan.test.fragments
 
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
-import net.sandius.rembulan.{LuaFormat, Table, core => lua}
+import net.sandius.rembulan.{LuaFormat, Table}
 
 object StringLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 

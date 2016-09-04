@@ -18,7 +18,7 @@ package net.sandius.rembulan.compiler
 
 import net.sandius.rembulan.load.ChunkClassLoader
 import net.sandius.rembulan.test.fragments.BasicFragments
-import net.sandius.rembulan.{Function, Variable, core => lua}
+import net.sandius.rembulan.{Function, Variable}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
