@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core.impl;
+package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.util.Check;
 

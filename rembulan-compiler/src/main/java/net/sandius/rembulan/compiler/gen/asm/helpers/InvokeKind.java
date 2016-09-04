@@ -17,13 +17,13 @@
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
 import net.sandius.rembulan.Function;
-import net.sandius.rembulan.core.impl.AbstractFunction0;
-import net.sandius.rembulan.core.impl.AbstractFunction1;
-import net.sandius.rembulan.core.impl.AbstractFunction2;
-import net.sandius.rembulan.core.impl.AbstractFunction3;
-import net.sandius.rembulan.core.impl.AbstractFunction4;
-import net.sandius.rembulan.core.impl.AbstractFunction5;
-import net.sandius.rembulan.core.impl.AbstractFunctionAnyArg;
+import net.sandius.rembulan.impl.AbstractFunction0;
+import net.sandius.rembulan.impl.AbstractFunction1;
+import net.sandius.rembulan.impl.AbstractFunction2;
+import net.sandius.rembulan.impl.AbstractFunction3;
+import net.sandius.rembulan.impl.AbstractFunction4;
+import net.sandius.rembulan.impl.AbstractFunction5;
+import net.sandius.rembulan.impl.AbstractFunctionAnyArg;
 
 public abstract class InvokeKind {
 

@@ -14,42 +14,42 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core.impl;
+package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.runtime.ExecutionContext;
 
-public abstract class AbstractFunctionAnyArg extends Function {
-
-	@Override
-	public void invoke(ExecutionContext context) throws ControlThrowable {
-		invoke(context, new Object[] { });
-	}
+public abstract class AbstractFunction0 extends Function {
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
-		invoke(context, new Object[] { arg1 });
+		invoke(context);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ControlThrowable {
-		invoke(context, new Object[] { arg1, arg2 });
+		invoke(context);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3 });
+		invoke(context);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3, arg4 });
+		invoke(context);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
-		invoke(context, new Object[] { arg1, arg2, arg3, arg4, arg5 });
+		invoke(context);
+	}
+
+	@Override
+	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+		invoke(context);
 	}
 
 }

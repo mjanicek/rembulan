@@ -21,7 +21,7 @@ import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.core.AsyncTask;
 import net.sandius.rembulan.core.ContinueCallback;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.impl.AbstractFunction1;
+import net.sandius.rembulan.impl.AbstractFunction1;
 import net.sandius.rembulan.runtime.ExecutionContext;
 
 public class AsyncExample extends AbstractFunction1 {

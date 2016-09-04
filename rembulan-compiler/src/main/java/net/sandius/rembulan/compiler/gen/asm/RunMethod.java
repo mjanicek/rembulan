@@ -20,7 +20,7 @@ import net.sandius.rembulan.Resumable;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.impl.DefaultSavedState;
+import net.sandius.rembulan.impl.DefaultSavedState;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;

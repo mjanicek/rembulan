@@ -22,7 +22,7 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.impl.UnimplementedFunction;
+import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IoLib;
 import net.sandius.rembulan.lib.Lib;
