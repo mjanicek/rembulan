@@ -67,7 +67,7 @@ public class PlainValueTypeNamer implements ValueTypeNamer {
 
 	@Override
 	public String typeNameOf(Object instance) {
-		return luaTypeToName(Values.typeOf(instance));
+		return luaTypeToName(LuaType.typeOf(instance));
 	}
 
 }

@@ -34,7 +34,7 @@ public abstract class LuaState implements MetatableProvider, TableFactory {
 			return ((LuaObject) o).getMetatable();
 		}
 		else {
-			LuaType type = Values.typeOf(o);
+			LuaType type = LuaType.typeOf(o);
 			switch (type) {
 				case NIL: return nilMetatable();
 				case BOOLEAN: return booleanMetatable();
@@ -61,7 +61,7 @@ public abstract class LuaState implements MetatableProvider, TableFactory {
 			return ((LuaObject) o).setMetatable(table);
 		}
 		else {
-			LuaType type = Values.typeOf(o);
+			LuaType type = LuaType.typeOf(o);
 			switch (type) {
 				case NIL: return setNilMetatable(table);
 				case BOOLEAN: return setBooleanMetatable(table);

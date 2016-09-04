@@ -19,12 +19,10 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaMathOperators;
 
-/*
- * "to" conversions always succeed (they never return null),
- * "as" conversions are successful if they return a non-null result, and signal failure
- * by returning null.
+/**
+ * Static methods implementing Lua value conversions.
  */
-public abstract class Conversions {
+public final class Conversions {
 
 	private Conversions() {
 		// not to be instantiated
@@ -37,13 +35,15 @@ public abstract class Conversions {
 	 * <p>If {@code s} is a valid Lua integer literal with optional sign, the numerical
 	 * value is the corresponding integer; if {@code s} is a valid Lua float literal with
 	 * optional sign, the numerical value is the corresponding float. Otherwise, the {@code s}
-	 * does not have a numerical value.
+	 * does not have a numerical value.</p>
 	 *
-	 * <p>Leading and trailing whitespace in {@code s} is ignored by this method.
+	 * <p>Leading and trailing whitespace in {@code s} is ignored by this method.</p>
+	 *
+	 * <p>Numbers returned by this method are in the canonical representation.</p>
 	 *
 	 * @param s  string to convert to numerical value, may be {@code null}
-	 * @return number representing the numerical value of {@code s},
-	 *         or {@code null} if {@code s} does not have a numerical value
+	 * @return  a number representing the numerical value of {@code s} (in the canonical
+	 *          representation), or {@code null} if {@code s} does not have a numerical value
 	 */
 	public static Number numericalValueOf(String s) {
 		String trimmed = s.trim();
@@ -66,15 +66,18 @@ public abstract class Conversions {
 	 *
 	 * <p>If {@code o} is already a number, returns {@code o} cast to number. If {@code o}
 	 * is a string, returns its numerical value (see {@link #numericalValueOf(String)}).
-	 * Otherwise, returns {@code null}.
+	 * Otherwise, returns {@code null}.</p>
 	 *
 	 * <p>This method differs from {@link #arithmeticValueOf(Object)} in that it
 	 * preserves the numerical value representation of coerced strings. For use in arithmetic
-	 * operations following Lua's argument conversion rules, use that method instead.
+	 * operations following Lua's argument conversion rules, use that method instead.</p>
+	 *
+	 * <p>Numbers returned by this method are not necessarily in the canonical representation.</p>
 	 *
 	 * @param o  object to convert to numerical value, may be {@code null}
-	 * @return number representing the numerical value of {@code o},
-	 *         of {@code null} if {@code o} does not have a numerical value
+	 * @return number representing the numerical value of {@code o} (not necessarily in
+	 *         the canonical representation), of {@code null} if {@code o} does not have
+	 *         a numerical value
 	 *
 	 * @see #arithmeticValueOf(Object)
 	 */
@@ -91,12 +94,15 @@ public abstract class Conversions {
 	 * if {@code o} does not have a numerical value.
 	 *
 	 * <p>The conversion rules are those of {@link #numericalValueOf(Object)}; the only difference
-	 * is that this method throws an exception rather than returning {@code null} to signal errors.
+	 * is that this method throws an exception rather than returning {@code null} to signal
+	 * errors.</p>
+	 *
+	 * <p>Numbers returned by this method are not necessarily in the canonical representation.</p>
 	 *
 	 * @param o  object to convert to numerical value, may be {@code null}
 	 * @param name  value name for error reporting, may be {@code null}
-	 * @return number representing the numerical value of {@code o},
-	 *         guaranteed to be non-{@code null}
+	 * @return number representing the numerical value of {@code o} (not necessarily in
+	 *         the canonical representation), guaranteed to be non-{@code null}
 	 *
 	 * @throws ConversionException if {@code o} is not a number or string convertible
 	 *                             to number.
@@ -148,7 +154,8 @@ public abstract class Conversions {
 	 * table.
 	 *
 	 * <p>If {@code n} has an integer value <i>i</i>, returns the canonical representation
-	 * of <i>i</i>; otherwise, returns the canonical representation of {@code n}.
+	 * of <i>i</i>; otherwise, returns the canonical representation of {@code n}
+	 * (see {@link #toCanonicalNumber(Number)}).</p>
 	 *
 	 * @param n  number to normalise, must not be {@code null}
 	 * @return  an canonical integer if {@code n} has an integer value,
@@ -166,7 +173,7 @@ public abstract class Conversions {
 	 * in a Lua table.
 	 *
 	 * <p>If {@code o} is a number, returns the number normalised (see {@link #normaliseKey(Number)}.
-	 * Otherwise, returns {@code o}.
+	 * Otherwise, returns {@code o}.</p>
 	 *
 	 * @param o  object to normalise, may be {@code null}
 	 * @return  normalised number if {@code o} is a number, {@code o} otherwise
@@ -182,25 +189,28 @@ public abstract class Conversions {
 	 * <p>If {@code o} is a number, then that number is its arithmetic value. If {@code o}
 	 * is a string that has a numerical value (see {@link #numericalValueOf(String)}),
 	 * its arithmetic value is the numerical value converted to a float. Otherwise,
-	 * {@code o} does not have an arithmetic value.
+	 * {@code o} does not have an arithmetic value.</p>
 	 *
 	 * <p>Note that this method differs from {@link #numericalValueOf(Object)} in that it
 	 * coerces strings convertible to numbers into into floats rather than preserving
 	 * their numerical value representation, and also note that this conversion happens
-	 * <i>after</i> the numerical value has been determined. Most significantly,
+	 * <i>after</i> the numerical value has been determined. Most significantly,</p>
 	 *
 	 * <pre>
 	 *     Conversions.arithmeticValueOf("-0")
 	 * </pre>
 	 *
-	 * yields {@code 0.0} rather than {@code 0} (as would be the case with
+	 * <p>yields {@code 0.0} rather than {@code 0} (as would be the case with
 	 * {@code numericalValueOf("-0")}), or {@code -0.0} (it would in the case if the string
-	 * was parsed directly as a float).
+	 * was parsed directly as a float).</p>
+	 *
+	 * <p>Numbers returned by this method are not necessarily in the canonical representation.</p>
 	 *
 	 * @param o  object to convert to arithmetic value, may be {@code null}
 	 *
-	 * @return number representing the arithmetic value of {@code o},
-	 *         or {@code null} if {@code o} does not have an arithmetic value
+	 * @return number representing the arithmetic value of {@code o} (not necessarily in
+	 *         the canonical representation), or {@code null} if {@code o} does not have
+	 *         an arithmetic value
 	 *
 	 * @see #numericalValueOf(Object)
 	 */
@@ -224,11 +234,11 @@ public abstract class Conversions {
 	 * <p>{@code n} has an integer value if and only if the number it denotes can be represented
 	 * as a signed 64-bit integer. That integer is then the integer value of {@code n}.
 	 * In other words, if {@code n} is a float, it has an integer value if and only if
-	 * it can be converted to a {@code long} without loss of precision.
+	 * it can be converted to a {@code long} without loss of precision.</p>
 	 *
 	 * @param n  number to convert to integer, must not be {@code null}
 	 * @return a {@code Long} representing the integer value of {@code n},
-	 *         or {@code null} if {@code n} does not have integer value
+	 *         or {@code null} if {@code n} does not have an integer value
 	 *
 	 * @throws NullPointerException if {@code n} is {@code null}
 	 * @see LuaMathOperators#hasExactIntegerRepresentation(double)
@@ -252,7 +262,8 @@ public abstract class Conversions {
 	 *
 	 * <p>This is a variant of {@link #integerValueOf(Number)}; the difference is that
 	 * this method throws an exception rather than returning {@code null} to signal that
-	 * {@code n} does not have an integer value.
+	 * {@code n} does not have an integer value, and that this method returns the unboxed
+	 * integer value of {@code n} (as a {@code long}).</p>
 	 *
 	 * @param n  object to be converted to integer, must not be {@code null}
 	 * @return integer value of {@code n}
@@ -275,7 +286,7 @@ public abstract class Conversions {
 	 * does not have an integer value.
 	 *
 	 * <p>The integer value of {@code o} is the integer value of its numerical value
-	 * (see {@link #numericalValueOf(Object)}), when it exists.
+	 * (see {@link #numericalValueOf(Object)}), when it exists.</p>
 	 *
 	 * @param o  object to be converted to integer, may be {@code null}
 	 * @return a {@code Long} representing the integer value of {@code o},
@@ -294,7 +305,8 @@ public abstract class Conversions {
 	 *
 	 * <p>This is a variant of {@link #integerValueOf(Object)}; the difference is that
 	 * this method throws an exception rather than returning {@code null} to signal that
-	 * {@code o} does not have an integer value.
+	 * {@code o} does not have an integer value, and that this method returns the unboxed
+	 * integer value of {@code o} (as a {@code long}).</p>
 	 *
 	 * @param o  object to be converted to integer, may be {@code null}
 	 * @return integer value of {@code n}
@@ -314,7 +326,7 @@ public abstract class Conversions {
 	/**
 	 * Returns the float value of the number {@code n}.
 	 *
-	 * <p>The float value of {@code n} is its numerical value converted to {@code double}.
+	 * <p>The float value of {@code n} is its numerical value converted to a Lua float.</p>
 	 *
 	 * @param n  the number to convert to float, must not be {@code null}
 	 * @return the float value of {@code n},
@@ -391,7 +403,6 @@ public abstract class Conversions {
 	 * <ul>
 	 *   <li>If {@code o} is a {@code string} or {@code number}, returns the string value
 	 *       of {@code o};</li>
-	 *   <li>if {@code o} is a {@code number}, returns its string value;</li>
 	 *   <li>if {@code o} is <b>nil</b> (i.e., {@code null}), returns {@code "nil"};</li>
 	 *   <li>if {@code o} is a {@code boolean}, returns {@code "true"} if {@code o} is <b>true</b>
 	 *       or {@code "false"} if {@code o} is <b>false</b>;</li>
