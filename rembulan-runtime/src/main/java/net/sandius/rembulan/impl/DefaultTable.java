@@ -99,13 +99,13 @@ public class DefaultTable extends Table {
 	}
 
 	@Override
-	public Object initialIndex() {
+	public Object initialKey() {
 		Iterator<Object> it = values.keySet().iterator();
 		return next(it);
 	}
 
 	@Override
-	public Object nextIndex(Object key) {
+	public Object successorKeyOf(Object key) {
 		// FIXME: extremely inefficient!
 		Iterator<Object> it = values.keySet().iterator();
 

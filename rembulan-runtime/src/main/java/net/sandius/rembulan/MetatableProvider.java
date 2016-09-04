@@ -17,7 +17,7 @@
 package net.sandius.rembulan;
 
 /**
- * An interface for obtaining metatables for arbitrary values.
+ * An interface for obtaining metatables.
  *
  * <p>In Lua, only tables and (full) userdata carry their own metatables; for all other
  * types of values <i>T</i>, all values of type <i>T</i> share a metatable. This interface

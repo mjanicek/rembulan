@@ -258,10 +258,10 @@ public class DefaultBasicLib extends BasicLib {
 			final Object nxt;
 
 			if (index != null) {
-				nxt = table.nextIndex(index);
+				nxt = table.successorKeyOf(index);
 			}
 			else {
-				nxt = table.initialIndex();
+				nxt = table.initialKey();
 			}
 
 			if (nxt == null) {
