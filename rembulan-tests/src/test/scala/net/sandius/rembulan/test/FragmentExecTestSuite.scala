@@ -23,9 +23,9 @@ import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.exec.{CallException, CallInterruptedException, DirectCallExecutor}
 import net.sandius.rembulan.core.impl.DefaultLuaState
-import net.sandius.rembulan.core.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.lib.Lib
 import net.sandius.rembulan.lib.impl._
+import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{Conversions, LuaState, Table, Variable, core => lua}
 import org.scalatest.{FunSpec, MustMatchers}

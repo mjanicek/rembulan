@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core.load;
+package net.sandius.rembulan.load;
 
-import net.sandius.rembulan.Function;
-import net.sandius.rembulan.Variable;
+import net.sandius.rembulan.util.ByteVector;
 
-public interface ChunkLoader {
+import java.util.Map;
 
-	Function loadTextChunk(Variable env, String chunkName, String chunk) throws LoaderException;
+public interface CompiledChunk {
 
-	Function loadBinaryChunk(Variable env, String chunkName, byte[] chunk, int offset, int len) throws LoaderException;
+	Map<String, ByteVector> classMap();
+
+	String mainClassName();
 
 }

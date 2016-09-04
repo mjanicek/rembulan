@@ -27,9 +27,9 @@ import net.sandius.rembulan.core.exec.CallException;
 import net.sandius.rembulan.core.exec.CallInterruptedException;
 import net.sandius.rembulan.core.exec.DirectCallExecutor;
 import net.sandius.rembulan.core.impl.DefaultLuaState;
-import net.sandius.rembulan.core.load.LoaderException;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
+import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;

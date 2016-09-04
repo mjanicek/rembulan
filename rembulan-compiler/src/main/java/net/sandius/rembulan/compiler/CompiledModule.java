@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.core.load.CompiledChunk;
+import net.sandius.rembulan.load.CompiledChunk;
 import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 

@@ -18,9 +18,9 @@ package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.Variable;
-import net.sandius.rembulan.core.load.ChunkClassLoader;
-import net.sandius.rembulan.core.load.ChunkLoader;
-import net.sandius.rembulan.core.load.LoaderException;
+import net.sandius.rembulan.load.ChunkClassLoader;
+import net.sandius.rembulan.load.ChunkLoader;
+import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.TokenMgrError;

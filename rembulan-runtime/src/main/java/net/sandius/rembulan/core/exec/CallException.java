@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.core.exec;
 
-import net.sandius.rembulan.core.load.ChunkClassLoader;
+import net.sandius.rembulan.load.ChunkClassLoader;
 
 import java.io.PrintStream;
 
