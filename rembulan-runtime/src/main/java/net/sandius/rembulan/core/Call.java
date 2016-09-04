@@ -19,6 +19,7 @@ package net.sandius.rembulan.core;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.IllegalOperationAttemptException;
+import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;

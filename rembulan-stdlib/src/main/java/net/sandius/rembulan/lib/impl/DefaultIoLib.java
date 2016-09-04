@@ -17,11 +17,11 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.Function;
+import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.core.ControlThrowable;
-import net.sandius.rembulan.core.Metatables;
 import net.sandius.rembulan.core.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IoLib;

@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.core;
-
-import net.sandius.rembulan.Table;
+package net.sandius.rembulan;
 
 /**
  * An interface for obtaining metatables for arbitrary values.

@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
+import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.core.LuaState;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;

@@ -16,9 +16,9 @@
 
 package net.sandius.rembulan.lib;
 
+import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.core.LuaState;
 
 public abstract class Lib {
 

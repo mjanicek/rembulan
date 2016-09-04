@@ -21,12 +21,11 @@ import java.util.Scanner
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
-import net.sandius.rembulan.core._
 import net.sandius.rembulan.core.exec.DirectCallExecutor
 import net.sandius.rembulan.core.impl.DefaultLuaState
 import net.sandius.rembulan.core.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.lib.impl._
-import net.sandius.rembulan.{Function, Table, Variable, core => lua}
+import net.sandius.rembulan.{Function, LuaState, Table, Variable, core => lua}
 
 import scala.util.Try
 

@@ -17,11 +17,11 @@
 package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.Function;
+import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.core.AsyncTask;
 import net.sandius.rembulan.core.ContinueCallback;
 import net.sandius.rembulan.core.ControlThrowable;
 import net.sandius.rembulan.core.Coroutine;
-import net.sandius.rembulan.core.LuaState;
 
 /**
  * An interface to the execution context of a Lua call.

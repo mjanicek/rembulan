@@ -16,9 +16,9 @@
 
 package net.sandius.rembulan.core.impl;
 
+import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.core.LuaState;
 import net.sandius.rembulan.util.Check;
 
 public class DefaultLuaState extends LuaState {
