@@ -44,6 +44,7 @@ import org.objectweb.asm.tree.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -58,23 +59,36 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	private final SlotAllocInfo slots;
 	private final TypeInfo types;
 
-	private final Map<Object, LabelNode> labels;
+	private final int segmentIdx;
+	private final RunMethod.LabelResolver resolver;
+
+	final Map<Object, LabelNode> labels;
 	private final ArrayList<LabelNode> resumptionPoints;
 
 	private final InsnList il;
 	private final List<LocalVariableNode> locals;
 
-	private int closureIdx;
 	private final List<RunMethod.ClosureFieldInstance> instanceLevelClosures;
 
-	private int constIdx;
 	private final List<RunMethod.ConstFieldInstance> constFields;
 
-	public BytecodeEmitVisitor(ASMBytecodeEmitter context, RunMethod runMethod, SlotAllocInfo slots, TypeInfo types) {
+	public BytecodeEmitVisitor(
+			ASMBytecodeEmitter context,
+			RunMethod runMethod,
+			SlotAllocInfo slots,
+			TypeInfo types,
+			List<RunMethod.ClosureFieldInstance> instanceLevelClosures,
+			List<RunMethod.ConstFieldInstance> constFields,
+			int segmentIdx,
+			RunMethod.LabelResolver resolver) {
+
 		this.context = Check.notNull(context);
 		this.runMethod = Check.notNull(runMethod);
 		this.slots = Check.notNull(slots);
 		this.types = Check.notNull(types);
+
+		this.segmentIdx = segmentIdx;
+		this.resolver = Check.notNull(resolver);
 
 		this.labels = new HashMap<>();
 		this.resumptionPoints = new ArrayList<>();
@@ -82,11 +96,12 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		this.il = new InsnList();
 		this.locals = new ArrayList<>();
 
-		this.closureIdx = 0;
-		this.instanceLevelClosures = new ArrayList<>();
+		this.instanceLevelClosures = Check.notNull(instanceLevelClosures);
+		this.constFields = Check.notNull(constFields);
+	}
 
-		this.constIdx = 0;
-		this.constFields = new ArrayList<>();
+	private boolean isSub() {
+		return segmentIdx >= 0;
 	}
 
 	public InsnList instructions() {
@@ -130,10 +145,10 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		}
 	}
 
-	private RunMethod.ConstFieldInstance newConstFieldInstance(Object constValue) {
+	private RunMethod.ConstFieldInstance newConstFieldInstance(Object constValue, int idx) {
 		Check.notNull(constValue);
 
-		String fieldName = "_k_" + (constIdx++);
+		String fieldName = "_k_" + idx;
 
 		final Type t;
 		if (constValue instanceof Double) {
@@ -156,7 +171,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 			}
 		}
 
-		RunMethod.ConstFieldInstance cfi = newConstFieldInstance(constValue);
+		RunMethod.ConstFieldInstance cfi = newConstFieldInstance(constValue, constFields.size());
 		constFields.add(cfi);
 		return cfi.accessInsns();
 	}
@@ -208,6 +223,21 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		return il;
 	}
 
+	private InsnList saveState(int state) {
+		InsnList il = new InsnList();
+		il.add(ASMUtils.loadInt(state));
+		il.add(new VarInsnNode(ISTORE, runMethod.LV_RESUME));
+		return il;
+	}
+
+	public void visitBlocks(List<BasicBlock> blocks) {
+		Iterator<BasicBlock> it = blocks.iterator();
+		while (it.hasNext()) {
+			BasicBlock b = it.next();
+			visit(b);
+		}
+	}
+
 	class ResumptionPoint {
 
 		public final int index;
@@ -221,10 +251,10 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		}
 
 		public InsnList save() {
-			InsnList il = new InsnList();
-			il.add(ASMUtils.loadInt(index + 1));
-			il.add(new VarInsnNode(ISTORE, runMethod.LV_RESUME));
-			return il;
+			int st = !isSub()
+					? index + 1
+					: segmentIdx << RunMethod.ST_SHIFT_SEGMENT | (index + 1);
+			return saveState(st);
 		}
 
 		public InsnList resume() {
@@ -245,11 +275,54 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	}
 
 	public boolean isResumable() {
-		return resumptionPoints.size() > 0;
+		return isSub() || resumptionPoints.size() > 0;
 	}
 
 	public List<LabelNode> resumptionLabels() {
 		return resumptionPoints;
+	}
+
+	private InsnList _return() {
+		InsnList il = new InsnList();
+		if (!isSub()) {
+			il.add(new InsnNode(RETURN));
+		}
+		else {
+			il.add(new InsnNode(ACONST_NULL));
+			il.add(new InsnNode(ARETURN));
+		}
+		return il;
+	}
+
+	private InsnList _nonLocalGoto(Label label) {
+		InsnList il = new InsnList();
+		int st = resolver.labelStateIndex(label);
+		il.add(saveState(st));
+		il.add(runMethod.createSnapshot());
+		il.add(new InsnNode(ARETURN));
+		return il;
+	}
+
+	private InsnList _goto(Label label) {
+		InsnList il = new InsnList();
+		if (!isSub() || resolver.isLocalLabel(label)) {
+			il.add(new JumpInsnNode(GOTO, l(label)));
+		}
+		else {
+			il.add(_nonLocalGoto(label));
+		}
+		return il;
+	}
+
+	private InsnList _next(Label label) {
+		InsnList il = new InsnList();
+		if (!isSub() || resolver.isLocalLabel(label)) {
+			// no-op
+		}
+		else {
+			il.add(_nonLocalGoto(label));
+		}
+		return il;
 	}
 
 	@Override
@@ -694,7 +767,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(loadReturnBuffer());
 		int kind = loadVList(node.args(), ReturnBufferMethods.MAX_SETTO_KIND);  // values
 		il.add(ReturnBufferMethods.setTo(kind));
-		il.add(new InsnNode(RETURN));
+		il.add(_return());
 	}
 
 	@Override
@@ -704,7 +777,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(new VarInsnNode(ALOAD, slot(node.target())));  // call target
 		int kind = loadVList(node.args(), ReturnBufferMethods.MAX_TAILCALL_KIND);  // call args
 		il.add(ReturnBufferMethods.tailCall(kind));
-		il.add(new InsnNode(RETURN));
+		il.add(_return());
 	}
 
 	@Override
@@ -736,7 +809,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(Jmp node) {
-		il.add(new JumpInsnNode(GOTO, l(node.jmpDest())));
+		il.add(_goto(node.jmpDest()));
 	}
 
 	private class ClosureUse {
@@ -746,12 +819,12 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 		private final String fieldName;  // may be null
 
-		private ClosureUse(FunctionId id, List<AbstractVar> upvals) {
+		private ClosureUse(FunctionId id, List<AbstractVar> upvals, int idx) {
 			this.id = Check.notNull(id);
 			this.upvals = Check.notNull(upvals);
 
 			if (isClosed() && !isPure()) {
-				this.fieldName = context.addFieldName("c_" + (closureIdx++));
+				this.fieldName = context.addFieldName("c_" + idx);
 			}
 			else {
 				this.fieldName = null;
@@ -865,7 +938,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(Closure node) {
-		ClosureUse cu = new ClosureUse(node.id(), node.args());
+		ClosureUse cu = new ClosureUse(node.id(), node.args(), instanceLevelClosures.size());
 
 		if (cu.isClosed() && !cu.isPure()) {
 			instanceLevelClosures.add(cu.toClosureFieldInstance());
@@ -884,41 +957,68 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(ToNext node) {
-		// no-op
+		il.add(_next(node.label()));
 	}
 
-	private LabelNode dest;
+	private Label destLabel;
 
 	@Override
 	public void visit(Branch branch) {
-		assert (dest == null);
+		assert (destLabel == null);
+
 		try {
-			dest = l(branch.jmpDest());
+			destLabel = branch.jmpDest();
 			branch.condition().accept(this);
+			il.add(_next(branch.next()));
 		}
 		finally {
-			dest = null;
+			destLabel = null;
 		}
 	}
 
 	@Override
 	public void visit(Branch.Condition.Nil cond) {
-		assert (dest != null);
+		assert (destLabel != null);
 		il.add(new VarInsnNode(ALOAD, slot(cond.addr())));
-		il.add(new JumpInsnNode(IFNULL, dest));
+
+		if (!isSub() || resolver.isLocalLabel(destLabel)) {
+			// local jump
+			il.add(new JumpInsnNode(IFNULL, l(destLabel)));
+		}
+		else {
+			// non-local jump
+			LabelNode l_nojump = new LabelNode();
+			il.add(new JumpInsnNode(IFNONNULL, l_nojump));
+			il.add(_nonLocalGoto(destLabel));
+			il.add(l_nojump);
+			il.add(new FrameNode(F_SAME, 0, null, 0, null));
+		}
 	}
 
 	@Override
 	public void visit(Branch.Condition.Bool cond) {
-		assert (dest != null);
+		assert (destLabel != null);
 		il.add(new VarInsnNode(ALOAD, slot(cond.addr())));
 		il.add(ConversionMethods.booleanValueOf());
-		il.add(new JumpInsnNode(cond.expected() ? IFNE : IFEQ, dest));
+
+		if (!isSub() || resolver.isLocalLabel(destLabel)) {
+			// local jump
+			il.add(new JumpInsnNode(cond.expected() ? IFNE : IFEQ, l(destLabel)));
+		}
+		else {
+			// non-local jump
+			LabelNode l_nojump = new LabelNode();
+			il.add(new JumpInsnNode(cond.expected() ? IFEQ : IFNE, l_nojump));
+			il.add(_nonLocalGoto(destLabel));
+			il.add(l_nojump);
+			il.add(new FrameNode(F_SAME, 0, null, 0, null));
+		}
+
 	}
 
 	@Override
 	public void visit(Branch.Condition.NumLoopEnd cond) {
-		assert (dest != null);
+		assert (destLabel != null);
 		il.add(new VarInsnNode(ALOAD, slot(cond.var())));
 		il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Number.class)));
 		il.add(new VarInsnNode(ALOAD, slot(cond.limit())));
@@ -926,7 +1026,19 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(new VarInsnNode(ALOAD, slot(cond.step())));
 		il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Number.class)));
 		il.add(DispatchMethods.continueLoop());
-		il.add(new JumpInsnNode(IFEQ, dest));
+
+		if (!isSub() || resolver.isLocalLabel(destLabel)) {
+			// local jump
+			il.add(new JumpInsnNode(IFEQ, l(destLabel)));
+		}
+		else {
+			// non-local jump
+			LabelNode l_nojump = new LabelNode();
+			il.add(new JumpInsnNode(IFNE, l_nojump));
+			il.add(_nonLocalGoto(destLabel));
+			il.add(l_nojump);
+			il.add(new FrameNode(F_SAME, 0, null, 0, null));
+		}
 	}
 
 	private void staticCpuWithdraw(int cost) {

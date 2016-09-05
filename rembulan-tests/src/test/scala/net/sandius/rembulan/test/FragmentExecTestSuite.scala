@@ -122,7 +122,11 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
       case true => "t"
       case false => "f"
     }
-    cpu + cfold + ccache
+    val nlimit = settings.nodeSizeLimit() match {
+      case 0 => "0"
+      case n => n.toString
+    }
+    cpu + cfold + ccache + "_" + nlimit
   }
 
   case class RembulanChkLoader(settings: CompilerSettings) extends ChkLoader {
@@ -135,15 +139,19 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   }
   object CompilerConfigs {
     val bools = Seq(true, false)
+    val limits = Seq(0, 10)
+//    val limits = Seq(0)
 
     val allConfigs = for (
       cpu <- CPUAccountingMode.values();
       cfold <- bools;
-      ccache <- bools
+      ccache <- bools;
+      nlimit <- limits
     ) yield CompilerSettings.defaultSettings()
         .withCPUAccountingMode(cpu)
         .withConstFolding(cfold)
         .withConstCaching(ccache)
+        .withNodeSizeLimit(nlimit)
 
     case object DefaultOnly extends CompilerConfigs(Seq(CompilerSettings.defaultSettings()))
     case object All extends CompilerConfigs(allConfigs)

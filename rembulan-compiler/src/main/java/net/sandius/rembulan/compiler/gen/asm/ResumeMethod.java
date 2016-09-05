@@ -52,7 +52,7 @@ class ResumeMethod {
 				Type.getMethodType(
 						Type.VOID_TYPE,
 						Type.getType(ExecutionContext.class),
-						context.savedStateClassType()).getDescriptor(),
+						Type.getType(Object.class)).getDescriptor(),
 						null,
 				runMethod.throwsExceptions());
 

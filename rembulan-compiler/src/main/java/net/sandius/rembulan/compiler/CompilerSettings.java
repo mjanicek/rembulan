@@ -28,19 +28,23 @@ public class CompilerSettings {
 	public static final CPUAccountingMode DEFAULT_CPU_ACCOUNTING_MODE = CPUAccountingMode.IN_EVERY_BASIC_BLOCK;
 	public static final boolean DEFAULT_CONST_FOLDING_MODE = true;
 	public static final boolean DEFAULT_CONST_CACHING_MODE = true;
+	public static final int DEFAULT_NODE_SIZE_LIMIT = 2000;
 
 	private final CPUAccountingMode cpuAccountingMode;
 	private final boolean constFolding;
 	private final boolean constCaching;
+	private final int nodeSizeLimit;
 
 	CompilerSettings(
 			CPUAccountingMode cpuAccountingMode,
 			boolean constFolding,
-			boolean constCaching) {
+			boolean constCaching,
+			int nodeSizeLimit) {
 
 		this.cpuAccountingMode = Check.notNull(cpuAccountingMode);
 		this.constFolding = constFolding;
 		this.constCaching = constCaching;
+		this.nodeSizeLimit = nodeSizeLimit;
 	}
 
 	@Override
@@ -52,7 +56,8 @@ public class CompilerSettings {
 
 		return this.cpuAccountingMode == that.cpuAccountingMode
 				&& this.constFolding == that.constFolding
-				&& this.constCaching == that.constCaching;
+				&& this.constCaching == that.constCaching
+				&& this.nodeSizeLimit == that.nodeSizeLimit;
 	}
 
 	@Override
@@ -60,6 +65,7 @@ public class CompilerSettings {
 		int result = cpuAccountingMode.hashCode();
 		result = 31 * result + (constFolding ? 1 : 0);
 		result = 31 * result + (constCaching ? 1 : 0);
+		result = 31 * result + nodeSizeLimit;
 		return result;
 	}
 
@@ -67,7 +73,8 @@ public class CompilerSettings {
 		return new CompilerSettings(
 				DEFAULT_CPU_ACCOUNTING_MODE,
 				DEFAULT_CONST_FOLDING_MODE,
-				DEFAULT_CONST_CACHING_MODE);
+				DEFAULT_CONST_CACHING_MODE,
+				DEFAULT_NODE_SIZE_LIMIT);
 	}
 
 	public CPUAccountingMode cpuAccountingMode() {
@@ -82,21 +89,31 @@ public class CompilerSettings {
 		return constCaching;
 	}
 
+	public int nodeSizeLimit() {
+		return nodeSizeLimit;
+	}
+
 	public CompilerSettings withCPUAccountingMode(CPUAccountingMode mode) {
 		return mode != this.cpuAccountingMode
-				? new CompilerSettings(mode, constFolding, constCaching)
+				? new CompilerSettings(mode, constFolding, constCaching, nodeSizeLimit)
 				: this;
 	}
 
 	public CompilerSettings withConstFolding(boolean mode) {
 		return mode != this.constFolding
-				? new CompilerSettings(cpuAccountingMode, mode, constCaching)
+				? new CompilerSettings(cpuAccountingMode, mode, constCaching, nodeSizeLimit)
 				: this;
 	}
 
 	public CompilerSettings withConstCaching(boolean mode) {
 		return mode != this.constCaching
-				? new CompilerSettings(cpuAccountingMode, constFolding, mode)
+				? new CompilerSettings(cpuAccountingMode, constFolding, mode, nodeSizeLimit)
+				: this;
+	}
+
+	public CompilerSettings withNodeSizeLimit(int limit) {
+		return limit != this.nodeSizeLimit
+				? new CompilerSettings(cpuAccountingMode, constFolding, constCaching, limit)
 				: this;
 	}
 

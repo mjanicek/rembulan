@@ -32,6 +32,7 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.InvokeKind;
 import net.sandius.rembulan.compiler.ir.AbstractVar;
 import net.sandius.rembulan.compiler.ir.UpVar;
 import net.sandius.rembulan.compiler.ir.Var;
+import net.sandius.rembulan.impl.DefaultSavedState;
 import net.sandius.rembulan.util.ByteVector;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.ClassReader;
@@ -130,7 +131,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 	}
 
 	public Type savedStateClassType() {
-		return Type.getType(Object.class);
+		return Type.getType(DefaultSavedState.class);
 	}
 
 	Type invokeMethodType() {
@@ -295,7 +296,7 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 		classNode.methods.add(ctor.methodNode());
 		classNode.methods.add(new InvokeMethod(this, runMethod).methodNode());
 		classNode.methods.add(new ResumeMethod(this, runMethod).methodNode());
-		classNode.methods.add(runMethod.methodNode());
+		classNode.methods.addAll(runMethod.methodNodes());
 
 		if (runMethod.usesSnapshotMethod()) {
 			classNode.methods.add(runMethod.snapshotMethodNode());

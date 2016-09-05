@@ -18,6 +18,8 @@ package net.sandius.rembulan.compiler.ir;
 
 public class Label {
 
+	// TODO: get rid of the index
+
 	private final int idx;
 
 	public Label(int idx) {

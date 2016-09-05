@@ -50,6 +50,8 @@ class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
 
       describe (fragment.description) {
 
+        val settings = CompilerSettings.defaultSettings()
+
         it ("can be compiled to Java bytecode") {
           println("-- CODE BEGIN --")
           println(fragment.code)
@@ -57,7 +59,7 @@ class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
           println()
 
           withProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true") {
-            val compiler = new Compiler()
+            val compiler = new Compiler(settings)
             val cm = compiler.compile(fragment.code, "stdin", "test")
             cm must not be null
           }
@@ -67,7 +69,7 @@ class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
           val classLoader = new ChunkClassLoader()
 
           val cm = withProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true") {
-            val compiler = new Compiler()
+            val compiler = new Compiler(settings)
             compiler.compile(fragment.code, "stdin", "test")
           }
 
