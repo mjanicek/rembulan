@@ -31,7 +31,7 @@ public abstract class Table extends LuaObject {
 	 *
 	 * <p>This method provides <i>raw</i> access to the table. For non-raw access
 	 * (i.e., handling the {@code __index} metamethod), use
-	 * {@link Dispatch#index(ExecutionContext, Object, Object)}.</p>
+	 * {@link Dispatch#index(ExecutionContext, Table, Object)}.</p>
 	 *
 	 * @param key  the key, may be {@code null}
 	 * @return  the value associated with {@code key}, or {@code null} when there is no
@@ -49,7 +49,7 @@ public abstract class Table extends LuaObject {
 	 *
 	 * <p>This method provides <i>raw</i> access to the table. For non-raw access
 	 * (i.e., handling the {@code __index} metamethod), use
-	 * {@link Dispatch#index(ExecutionContext, Object, Object)}.</p>
+	 * {@link Dispatch#index(ExecutionContext, Table, Object)}.</p>
 	 *
 	 * @param idx  the integer key
 	 * @return  the value associated with {@code idx}, or {@code null} when there is no
@@ -72,7 +72,7 @@ public abstract class Table extends LuaObject {
 	 *
 	 * <p>This method provides <i>raw</i> access to the table. For non-raw access
 	 * (i.e., handling the {@code __newindex} metamethod), use
-	 * {@link Dispatch#setindex(ExecutionContext, Object, Object, Object)}.</p>
+	 * {@link Dispatch#setindex(ExecutionContext, Table, Object, Object)}.</p>
 	 *
 	 * @param key  the key, must not be {@code null} or <i>NaN</i>
 	 * @param value  the value to associate with {@code key}, may be {@code null}
@@ -91,7 +91,7 @@ public abstract class Table extends LuaObject {
 	 *
 	 * <p>This method provides <i>raw</i> access to the table. For non-raw access
 	 * (i.e., handling the {@code __newindex} metamethod), use
-	 * {@link Dispatch#setindex(ExecutionContext, Object, Object, Object)}.</p>
+	 * {@link Dispatch#setindex(ExecutionContext, Table, Object, Object)}.</p>
 	 *
 	 * @param idx  the integer key
 	 * @param value  the value to associate with {@code idx}, may be {@code null}

@@ -18,6 +18,8 @@ package net.sandius.rembulan;
 
 import net.sandius.rembulan.exec.ControlThrowable;
 
+import java.util.Objects;
+
 /**
  * A static class for dispatching operations according to the semantics of Lua 5.3.
  */
@@ -1281,6 +1283,31 @@ public final class Dispatch {
 	}
 
 	/**
+	 * Evaluates the Lua expression {@code table[key]} (in non-assignment context) including
+	 * the handling of metamethods, and stores the result to the return buffer associated with
+	 * {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should
+	 * be caught, handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This method differs from {@link #index(ExecutionContext, Object, Object)}
+	 * in that the {@code table} argument is required to be a non-{@code null} table.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param table  the table, must not be {@code null}
+	 * @param key  the key, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code table} is {@code null}
+	 */
+	@SuppressWarnings("unused")
+	public static void index(ExecutionContext context, Table table, Object key) throws ControlThrowable {
+		// TODO: don't just delegate to the generic case
+		index(context, (Object) Objects.requireNonNull(table), key);
+	}
+
+	/**
 	 * Executes the Lua statement {@code table[key] = value}, including the handling of
 	 * metamethods, and stores the result to the return buffer associated with {@code context}.
 	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should
@@ -1329,6 +1356,30 @@ public final class Dispatch {
 		else {
 			throw IllegalOperationAttemptException.index(table, key);
 		}
+	}
+
+	/**
+	 * Executes the Lua statement {@code table[key] = value}, including the handling of
+	 * metamethods, and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should
+	 * be caught, handled and re-thrown by the caller of this method.
+	 *
+	 * <p>This method differs from {@link #setindex(ExecutionContext, Object, Object, Object)}
+	 * in that the {@code table} argument is required to be a non-{@code null} table.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param table  the target, must not be {@code null}
+	 * @param key  the key, may be any value
+	 * @param value  the value, may be any value
+	 *
+	 * @throws ControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} or {@code table} is {@code null}
+	 */
+	@SuppressWarnings("unused")
+	public static void setindex(ExecutionContext context, Table table, Object key, Object value) throws ControlThrowable {
+		// TODO: don't just delegate to the generic case
+		setindex(context, (Object) Objects.requireNonNull(table), key, value);
 	}
 
 	private static final Long ZERO = Long.valueOf(0L);
