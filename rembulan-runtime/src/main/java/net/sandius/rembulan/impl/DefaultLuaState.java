@@ -21,24 +21,65 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.util.Check;
 
+/**
+ * The default implementation of Lua states.
+ */
 public class DefaultLuaState extends LuaState {
 
 	private final TableFactory tableFactory;
 
+	/**
+	 * The {@code nil} metatable.
+	 */
 	protected Table nilMetatable;
+
+	/**
+	 * The {@code boolean} metatable.
+	 */
 	protected Table booleanMetatable;
+
+	/**
+	 * The {@code number} metatable.
+	 */
 	protected Table numberMetatable;
+
+	/**
+	 * The {@code string} metatable.
+	 */
 	protected Table stringMetatable;
+
+	/**
+	 * The {@code function} metatable.
+	 */
 	protected Table functionMetatable;
+
+	/**
+	 * The {@code thread} metatable.
+	 */
 	protected Table threadMetatable;
+
+	/**
+	 * The light userdata metatable.
+	 */
 	protected Table lightuserdataMetatable;
 
+	/**
+	 * Constructs a new {@code DefaultLuaState} with the specified table factory
+	 * {@code tableFactory}.
+	 *
+	 * @param tableFactory  table factory to be used by this state, must not be {@code null}
+	 *
+	 * @throws IllegalArgumentException  if {@code tableFactory} is {@code null}
+	 */
 	public DefaultLuaState(TableFactory tableFactory) {
 		this.tableFactory = Check.notNull(tableFactory);
 	}
 
+	/**
+	 * Constructs a new {@code DefaultLuaState} with the default table factory.
+	 */
 	public DefaultLuaState() {
-		this(DefaultTable.FACTORY_INSTANCE);
+		this(DefaultTable.factory());
 	}
 
 	@Override

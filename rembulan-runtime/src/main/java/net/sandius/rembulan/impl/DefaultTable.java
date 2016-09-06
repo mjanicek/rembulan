@@ -24,6 +24,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * The default implementation of the Lua table storing all key-value pairs in
+ * a hashmap.
+ */
 public class DefaultTable extends Table {
 
 	private Table mt;
@@ -45,7 +49,15 @@ public class DefaultTable extends Table {
 		}
 	}
 
-	public static final TableFactory FACTORY_INSTANCE = new Factory();
+	private static final TableFactory FACTORY_INSTANCE = new Factory();
+
+	/**
+	 * Returns the table factory for constructing instances of {@code DefaultTable}.
+	 * @return
+	 */
+	public static TableFactory factory() {
+		return FACTORY_INSTANCE;
+	}
 
 	@Override
 	public Table getMetatable() {
