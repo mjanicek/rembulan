@@ -315,9 +315,12 @@ public final class Dispatch {
 	 * to {@code (args.length - 1)}, including metamethod handling and tail call evaluation.
 	 * Consequently, {@code target} may be any value (i.e., is not required to be a function).</p>
 	 *
-	 * <p>Note that the array {@code args} is passed to the called function, and the function
-	 * may modify its contents. It is therefore not safe to assume that the contents of
-	 * {@code args} will be the same after this method has returned.</p>
+	 * <p>Following the contract of {@link Invokable#invoke(ExecutionContext, Object[])},
+	 * the array {@code args} passed to the called function may not be modified by
+	 * the function and the reference to {@code args} must not be retained by the function beyond
+	 * the scope of this method's invocation. It is therefore safe to assume that the contents of
+	 * {@code args} will be the same after this method has returned. (No need for a defensive
+	 * copy.)</p>
 	 *
 	 * <p>The results of the call will be stored in the return buffer associated with
 	 * {@code context}.</p>
