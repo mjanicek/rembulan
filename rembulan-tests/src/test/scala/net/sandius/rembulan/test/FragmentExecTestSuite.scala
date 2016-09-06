@@ -195,7 +195,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           val callExecutor = DirectCallExecutor.newExecutorWithCpuLimit(state, s)
 
           var resultValues: Array[AnyRef] = null
-          var continuation: OneShotContinuation = Call.init(state, func).currentContinuation()
+          var continuation: OneShotContinuation = Call.init(state, func).getCurrentContinuation()
           var error: CallException = null
 
           do {

@@ -16,9 +16,14 @@
 
 package net.sandius.rembulan.exec;
 
-public class OutdatedContinuationException extends RuntimeException {
+/**
+ * An exception thrown to indicate that an attempt to resume a continuation has failed
+ * due to the fact that the continuation object is invalid (e.g. has already been resumed
+ * once).
+ */
+public class InvalidContinuationException extends RuntimeException {
 
-	public OutdatedContinuationException(String message) {
+	public InvalidContinuationException(String message) {
 		super(message);
 	}
 

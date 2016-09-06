@@ -153,7 +153,7 @@ public class DirectCallExecutor {
 			throws CallException, CallInterruptedException, InterruptedException {
 
 		Call call = Call.init(state, fn, args);
-		return resume(call.currentContinuation());
+		return resume(call.getCurrentContinuation());
 	}
 
 	public Object[] resume(OneShotContinuation continuation)

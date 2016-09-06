@@ -23,10 +23,14 @@ import net.sandius.rembulan.util.Cons;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * An object representing a (potentially paused) Lua function call.
+ */
 public class Call {
 
 	private final LuaState state;
@@ -44,15 +48,28 @@ public class Call {
 			ReturnBuffer returnBuffer,
 			Coroutine mainCoroutine) {
 
-		this.state = Check.notNull(state);
-		this.returnBuffer = Check.notNull(returnBuffer);
+		this.state = Objects.requireNonNull(state);
+		this.returnBuffer = Objects.requireNonNull(returnBuffer);
 
-		this.coroutineStack = new Cons<>(Check.notNull(mainCoroutine));
+		this.coroutineStack = new Cons<>(Objects.requireNonNull(mainCoroutine));
 
 		int startingVersion = newPausedVersion(0);
 		this.currentVersion = new AtomicInteger(startingVersion);
 	}
 
+	/**
+	 * Constructs a new {@code Call} object representing the call to the object {@code fn}
+	 * with the arguments stored in {@code args}, in the context of the Lua state {@code state}.
+	 *
+	 * <p>The call will be initialised in the {@link State#PAUSED paused state}.</p>
+	 *
+	 * @param state  the Lua state context, must not be {@code null}
+	 * @param fn  the call target, may be any value
+	 * @param args  the array of call arguments, must not be {@code null}
+	 * @return  a new {@code Call} object
+	 *
+	 * @throws NullPointerException  if {@code state} is {@code null}
+	 */
 	public static Call init(
 			LuaState state,
 			Object fn,
@@ -64,10 +81,28 @@ public class Call {
 		return new Call(state, returnBuffer, c);
 	}
 
+	/**
+	 * An enum representing the state of the call.
+	 */
 	public enum State {
+
+		/**
+		 * Paused state. When a call is in a paused state, it can be resumed, and it has
+		 * a current continuation accessible using {@link #getCurrentContinuation()}.
+		 *
+		 */
 		PAUSED,
+
+		/**
+		 * Running state. The call is currently executing.
+		 */
 		RUNNING,
+
+		/**
+		 * Terminated state. The call has terminated.
+		 */
 		TERMINATED
+
 	}
 
 	private static int newPausedVersion(int oldVersion) {
@@ -92,7 +127,12 @@ public class Call {
 		}
 	}
 
-	public State state() {
+	/**
+	 * Returns the current state of the call.
+	 *
+	 * @return  the state of the call
+	 */
+	public State getState() {
 		return versionToState(currentVersion.get());
 	}
 
@@ -132,7 +172,17 @@ public class Call {
 
 	}
 
-	public OneShotContinuation currentContinuation() {
+	/**
+	 * Returns the current continuation of this call.
+	 *
+	 * <p>The call must be in the paused state; otherwise, an {@link IllegalStateException} is
+	 * thrown.</p>
+	 *
+	 * @return  the current continuation of the call
+	 *
+	 * @throws IllegalStateException  if this call is not in the paused state
+	 */
+	public OneShotContinuation getCurrentContinuation() {
 		int version = currentVersion.get();
 
 		if (!isPaused(version)) {
@@ -154,7 +204,7 @@ public class Call {
 
 		// claim this version
 		if (!currentVersion.compareAndSet(version, VERSION_RUNNING)) {
-			throw new OutdatedContinuationException("Cannot resume call: not in the expected state (0x"
+			throw new InvalidContinuationException("Cannot resume call: not in the expected state (0x"
 					+ Integer.toHexString(version) + ")");
 		}
 

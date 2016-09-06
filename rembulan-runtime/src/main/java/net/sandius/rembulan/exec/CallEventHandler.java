@@ -18,14 +18,45 @@ package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.AsyncTask;
 
+/**
+ * A callback object used to process control-related events during call execution.
+ */
 public interface CallEventHandler {
 
+	/**
+	 * The callback triggered by the normal termination of the main function of the call
+	 * {@code c}.
+	 *
+	 * @param c  the call, must not be {@code null}
+	 * @param result  the return values, must not be {@code null}
+	 */
 	void returned(Call c, Object[] result);
 
+	/**
+	 * The callback triggered by an abnormal (error) termination of the main function of
+	 * the call {@code c}.
+	 *
+	 * @param c  the call, must not be {@code null}
+	 * @param error  the error that caused the abnormal termination, must not be {@code null}
+	 */
 	void failed(Call c, Throwable error);
 
+	/**
+	 * The callback triggered when the execution of the call {@code c} is paused.
+	 *
+	 * @param c  the call, must not be {@code null}
+	 * @param cont  the call continuation, must not be {@code null}
+	 */
 	void paused(Call c, OneShotContinuation cont);
 
+	/**
+	 * The callback triggered by a request by {@code c} to be resumed after the task
+	 * {@code task} has been completed.
+	 *
+	 * @param c  the call, must not be {@code null}
+	 * @param cont  the call continuation, must not be {@code null}
+	 * @param task  the task, must not be {@code null}
+	 */
 	void async(Call c, OneShotContinuation cont, AsyncTask task);
 
 }
