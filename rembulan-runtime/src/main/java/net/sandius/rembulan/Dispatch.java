@@ -1290,7 +1290,8 @@ public final class Dispatch {
 	 * be caught, handled and re-thrown by the caller of this method.
 	 *
 	 * <p>This method differs from {@link #index(ExecutionContext, Object, Object)}
-	 * in that the {@code table} argument is required to be a non-{@code null} table.</p>
+	 * in that the {@code table} argument is required to be a non-{@code null} reference
+	 * to a {@link Table}.</p>
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param table  the table, must not be {@code null}
@@ -1365,7 +1366,8 @@ public final class Dispatch {
 	 * be caught, handled and re-thrown by the caller of this method.
 	 *
 	 * <p>This method differs from {@link #setindex(ExecutionContext, Object, Object, Object)}
-	 * in that the {@code table} argument is required to be a non-{@code null} table.</p>
+	 * in that the {@code table} argument is required to be a non-{@code null} reference
+	 * to a {@link Table}.</p>
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param table  the target, must not be {@code null}
