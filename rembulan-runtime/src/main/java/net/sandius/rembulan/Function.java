@@ -16,6 +16,9 @@
 
 package net.sandius.rembulan;
 
+/**
+ * An abstract function object.
+ */
 public abstract class Function implements Invokable, Resumable {
 
 }
