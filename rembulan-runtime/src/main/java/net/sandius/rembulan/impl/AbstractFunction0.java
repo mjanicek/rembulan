@@ -20,6 +20,9 @@ import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.exec.ControlThrowable;
 
+/**
+ * Abstract function without arguments.
+ */
 public abstract class AbstractFunction0 extends Function {
 
 	@Override

@@ -20,10 +20,22 @@ import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.exec.ControlThrowable;
 import net.sandius.rembulan.util.Check;
 
+/**
+ * A function that throws an {@link UnsupportedOperationException} when invoked,
+ * for use as a placeholder for unimplemented functions.
+ */
 public final class UnimplementedFunction extends AbstractFunction0 {
 
 	private final String name;
 
+	/**
+	 * Constructs a new instance of {@code UnimplementedFunction} with the given name
+	 * for error reporting.
+	 *
+	 * @param name  function name for error reporting, must not be {@code null}
+	 *
+	 * @throws IllegalArgumentException  if {@code name} is {@code null}
+	 */
 	public UnimplementedFunction(String name) {
 		this.name = Check.notNull(name);
 	}

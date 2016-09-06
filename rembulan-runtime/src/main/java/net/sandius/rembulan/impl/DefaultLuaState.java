@@ -22,7 +22,7 @@ import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.util.Check;
 
 /**
- * The default implementation of Lua states.
+ * Default implementation of Lua states.
  */
 public class DefaultLuaState extends LuaState {
 

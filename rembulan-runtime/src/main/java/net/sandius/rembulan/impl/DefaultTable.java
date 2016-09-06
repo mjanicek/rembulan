@@ -25,8 +25,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * The default implementation of the Lua table storing all key-value pairs in
- * a hashmap.
+ * Default implementation of the Lua table storing all key-value pairs in a hashmap.
  */
 public class DefaultTable extends Table {
 

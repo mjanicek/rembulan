@@ -19,7 +19,7 @@ package net.sandius.rembulan.impl;
 import net.sandius.rembulan.Function;
 
 /**
- * An exception thrown to indicate that a function is not suspendable.
+ * Exception thrown to indicate that a function is not suspendable.
  */
 public class NonsuspendableFunctionException extends UnsupportedOperationException {
 

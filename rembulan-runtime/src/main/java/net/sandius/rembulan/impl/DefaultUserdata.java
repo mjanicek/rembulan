@@ -19,11 +19,21 @@ package net.sandius.rembulan.impl;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 
+/**
+ * Default implementation of full userdata.
+ */
 public abstract class DefaultUserdata extends Userdata {
 
 	private Table mt;
 	private Object userValue;
 
+	/**
+	 * Constructs a new instance of this userdata with the specified initial {@code metatable}
+	 * and {@code userValue}.
+	 *
+	 * @param metatable  initial metatable, may be {@code null}
+	 * @param userValue  initial user value, may be {@code null}
+	 */
 	public DefaultUserdata(Table metatable, Object userValue) {
 		this.mt = metatable;
 		this.userValue = userValue;
