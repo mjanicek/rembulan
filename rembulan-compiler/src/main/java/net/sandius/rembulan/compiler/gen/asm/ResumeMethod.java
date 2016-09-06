@@ -86,20 +86,8 @@ class ResumeMethod {
 					false
 			));  // resumption point
 
-			if (context.isVararg()) {
-				il.add(new VarInsnNode(ALOAD, 3));
-				il.add(new MethodInsnNode(
-						INVOKEVIRTUAL,
-						Type.getInternalName(DefaultSavedState.class),
-						"varargs",
-						Type.getMethodDescriptor(
-								ASMUtils.arrayTypeFor(Object.class)),
-						false
-				));
-			}
-
 			// registers
-			if (runMethod.numOfRegisters() > 0) {
+			if (context.isVararg() || runMethod.numOfRegisters() > 0) {
 				il.add(new VarInsnNode(ALOAD, 3));
 				il.add(new MethodInsnNode(
 						INVOKEVIRTUAL,
@@ -110,17 +98,24 @@ class ResumeMethod {
 						false
 				));
 
-				for (int i = 0; i < runMethod.numOfRegisters(); i++) {
+				// varargs stored as the 0th element
+				int numRegs = runMethod.numOfRegisters() + (context.isVararg() ? 1 : 0);
+
+				for (int i = 0; i < numRegs; i++) {
 
 					// Note: it might be more elegant to use a local variable
 					// to store the array instead of having to perform SWAPs
 
-					if (i + 1 < runMethod.numOfRegisters()) {
+					if (i + 1 < numRegs) {
 						il.add(new InsnNode(DUP));
 					}
 					il.add(ASMUtils.loadInt(i));
 					il.add(new InsnNode(AALOAD));
-					if (i + 1 < runMethod.numOfRegisters()) {
+					if (i == 0 && context.isVararg()) {
+						il.add(new TypeInsnNode(CHECKCAST, ASMUtils.arrayTypeFor(Object.class).getInternalName()));
+					}
+
+					if (i + 1 < numRegs) {
 						il.add(new InsnNode(SWAP));
 					}
 				}

@@ -16,23 +16,23 @@
 
 package net.sandius.rembulan.impl;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Arrays;
 
 /**
- * Default implementation of a suspended function call state, used primarily by compiled
- * Lua functions.
+ * A generic, immutable implementation of a suspended state of a function call, used primarily
+ * by compiled Lua functions.
  *
  * <p>The class provides a uniform structured representation of the saved state consisting
  * of</p>
  * <ul>
- *     <li>a <i>resumption point</i>, an integer value, typically used to select the
- *       appropriate continuation point</li>
- *     <li><i>register state</i>, an array of arbitrary objects, typically used to restore
- *       the local variables</li>
- *     <li>additional call arguments (<i>varargs</i>) to the call</li>
+ *     <li>a <i>resumption point</i>, an integer value, used to select the appropriate
+ *       continuation point;</li>
+ *     <li>the <i>register state</i>, a sequence of arbitrary objects, typically used to restore
+ *       the local variables of the call.</li>
  * </ul>
+ *
+ * <p>The exact meaning of the values stored in these fields is left to the discretion
+ * of the class instantiating this object.</p>
  */
 @SuppressWarnings("unused")
 public class DefaultSavedState {
@@ -40,40 +40,17 @@ public class DefaultSavedState {
 	private final int resumptionPoint;
 	private final Object[] registers;
 
-	// TODO: remove: can store varargs in the registers
-	private final Object[] varargs;  // may be null
-
 	/**
 	 * Constructs a new instance of {@code DefaultSavedState} with the specified
-	 * {@code resumptionPoint}, {@code registers} and {@code varargs}.
+	 * {@code resumptionPoint} and {@code registers}.
 	 *
 	 * @param resumptionPoint  the resumption point
-	 * @param registers  the registers, must not be {@code null}
-	 * @param varargs  varargs, may be {@code null}
-	 *
-	 * @throws IllegalArgumentException  if {@code registers} is {@code null}
-	 */
-	@Deprecated
-	@SuppressWarnings("unused")
-	public DefaultSavedState(int resumptionPoint, Object[] registers, Object[] varargs) {
-		Check.notNull(registers);
-		this.resumptionPoint = resumptionPoint;
-		this.registers = Arrays.copyOf(registers, registers.length);
-		this.varargs = varargs != null ? Arrays.copyOf(varargs, varargs.length) : null;
-	}
-
-	/**
-	 * Constructs a new instance of {@code DefaultSavedState} with the specified
-	 * {@code resumptionPoint} and {@code registers} and without varargs.
-	 *
-	 * @param resumptionPoint  the resumption point
-	 * @param registers  the registers, must not be {@code null}
-	 *
-	 * @throws IllegalArgumentException  if {@code registers} is {@code null}
+	 * @param registers  the registers, may be {@code null}
 	 */
 	@SuppressWarnings("unused")
 	public DefaultSavedState(int resumptionPoint, Object[] registers) {
-		this(resumptionPoint, registers, null);
+		this.resumptionPoint = resumptionPoint;
+		this.registers = registers != null ? Arrays.copyOf(registers, registers.length) : null;
 	}
 
 	/**
@@ -87,25 +64,16 @@ public class DefaultSavedState {
 	}
 
 	/**
-	 * Returns the register state stored in this saved state.
+	 * Returns a copy of the register state stored in this saved state, or {@code null}
+	 * if the register state array stored in this saved state was {@code null}.
 	 *
-	 * @return  the registers stored in this saved state
+	 * @return  the registers stored in this saved state, possibly {@code null}
 	 */
 	@SuppressWarnings("unused")
 	public Object[] registers() {
-		// TODO: return a copy
-		return registers;
-	}
-
-	/**
-	 * Returns the varargs stored in this saved state.
-	 *
-	 * @return  the varargs stored in this saved state
-	 */
-	@Deprecated
-	@SuppressWarnings("unused")
-	public Object[] varargs() {
-		return varargs;
+		return registers != null
+				? Arrays.copyOf(registers, registers.length)
+				: null;
 	}
 
 }

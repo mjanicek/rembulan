@@ -189,40 +189,28 @@ class RunMethod {
 		il.add(new TypeInsnNode(NEW, Type.getInternalName(DefaultSavedState.class)));
 		il.add(new InsnNode(DUP));
 
-		int regOffset = context.isVararg() ? 3 : 2;
-
 		// resumption point
 		il.add(new VarInsnNode(ILOAD, 1));
 
 		// registers
-		int numRegs = numOfRegisters();
+		int numRegs = numOfRegisters() + (context.isVararg() ? 1 : 0);
+		int regOffset = context.isVararg() ? 3 : 2;
+
 		il.add(ASMUtils.loadInt(numRegs));
 		il.add(new TypeInsnNode(ANEWARRAY, Type.getInternalName(Object.class)));
-		for (int i = 0; i < numRegs; i++) {
-			il.add(new InsnNode(DUP));
-			il.add(ASMUtils.loadInt(i));
-			il.add(new VarInsnNode(ALOAD, regOffset + i));
-			il.add(new InsnNode(AASTORE));
+		{
+			for (int i = 0; i < numRegs; i++) {
+				il.add(new InsnNode(DUP));
+				il.add(ASMUtils.loadInt(i));
+				il.add(new VarInsnNode(ALOAD, 2 + i));
+				il.add(new InsnNode(AASTORE));
+			}
 		}
 
-		// varargs
-		if (context.isVararg()) {
-			il.add(new VarInsnNode(ALOAD, 2));
-		}
-
-		if (context.isVararg()) {
-			il.add(ASMUtils.ctor(
-					Type.getType(DefaultSavedState.class),
-					Type.INT_TYPE,
-					ASMUtils.arrayTypeFor(Object.class),
-					ASMUtils.arrayTypeFor(Object.class)));
-		}
-		else {
-			il.add(ASMUtils.ctor(
-					Type.getType(DefaultSavedState.class),
-					Type.INT_TYPE,
-					ASMUtils.arrayTypeFor(Object.class)));
-		}
+		il.add(ASMUtils.ctor(
+				Type.getType(DefaultSavedState.class),
+				Type.INT_TYPE,
+				ASMUtils.arrayTypeFor(Object.class)));
 
 		il.add(new InsnNode(ARETURN));
 
@@ -675,21 +663,8 @@ class RunMethod {
 		));  // resumption point
 		il.add(new VarInsnNode(ISTORE, LV_RESUME));
 
-		if (context.isVararg()) {
-			il.add(new VarInsnNode(ALOAD, lv_savedState));
-			il.add(new MethodInsnNode(
-					INVOKEVIRTUAL,
-					Type.getInternalName(DefaultSavedState.class),
-					"varargs",
-					Type.getMethodDescriptor(
-							ASMUtils.arrayTypeFor(Object.class)),
-					false
-			));
-			il.add(new VarInsnNode(ASTORE, LV_VARARGS));
-		}
-
 		// registers
-		if (numOfRegisters() > 0) {
+		if (context.isVararg() || numOfRegisters() > 0) {
 			il.add(new VarInsnNode(ALOAD, lv_savedState));
 			il.add(new MethodInsnNode(
 					INVOKEVIRTUAL,
@@ -700,13 +675,18 @@ class RunMethod {
 					false
 			));
 
-			for (int i = 0; i < numOfRegisters(); i++) {
-				if (i + 1 < numOfRegisters()) {
+			int numRegs = numOfRegisters() + (context.isVararg() ? 1 : 0);
+
+			for (int i = 0; i < numRegs; i++) {
+				if (i + 1 < numRegs) {
 					il.add(new InsnNode(DUP));
 				}
 				il.add(ASMUtils.loadInt(i));
 				il.add(new InsnNode(AALOAD));
-				il.add(new VarInsnNode(ASTORE, slotOffset() + i));
+				if (i == 0 && context.isVararg()) {
+					il.add(new TypeInsnNode(CHECKCAST, ASMUtils.arrayTypeFor(Object.class).getInternalName()));
+				}
+				il.add(new VarInsnNode(ASTORE, LV_VARARGS + i));
 			}
 		}
 
