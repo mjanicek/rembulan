@@ -16,27 +16,35 @@
 
 package net.sandius.rembulan;
 
+/**
+ * An exception thrown by the runtime when an attempt to perform an illegal operation.
+ */
 public class IllegalOperationAttemptException extends LuaRuntimeException {
 
+	/**
+	 * Constructs a new {@code IllegalOperationAttemptException} with the given error message.
+	 *
+	 * @param message  the error message
+	 */
 	public IllegalOperationAttemptException(String message) {
 		super(message);
 	}
 
-	public IllegalOperationAttemptException(String opName, String target) {
+	IllegalOperationAttemptException(String opName, String target) {
 		this("attempt to " + opName + " a " + target + " value");
 	}
 
-	public static IllegalOperationAttemptException arithmetic(Object a, Object b) {
+	static IllegalOperationAttemptException arithmetic(Object a, Object b) {
 		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.numericalValueOf(a) == null ? a : b);
 		return new IllegalOperationAttemptException("perform arithmetic on", typeName);
 	}
 
-	public static IllegalOperationAttemptException arithmetic(Object o) {
+	static IllegalOperationAttemptException arithmetic(Object o) {
 		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
 		return new IllegalOperationAttemptException("perform arithmetic on", typeName);
 	}
 
-	public static IllegalOperationAttemptException comparison(Object a, Object b) {
+	static IllegalOperationAttemptException comparison(Object a, Object b) {
 		String ta = PlainValueTypeNamer.INSTANCE.typeNameOf(a);
 		String tb = PlainValueTypeNamer.INSTANCE.typeNameOf(b);
 		String message = ta.equals(tb)
@@ -45,16 +53,16 @@ public class IllegalOperationAttemptException extends LuaRuntimeException {
 		return new IllegalOperationAttemptException(message);
 	}
 
-	public static IllegalOperationAttemptException call(Object o) {
+	static IllegalOperationAttemptException call(Object o) {
 		return new IllegalOperationAttemptException("call", PlainValueTypeNamer.INSTANCE.typeNameOf(o));
 	}
 
-	public static IllegalOperationAttemptException index(Object table, Object key) {
+	static IllegalOperationAttemptException index(Object table, Object key) {
 		Object o = table instanceof Table ? key : table;
 		return new IllegalOperationAttemptException("index", PlainValueTypeNamer.INSTANCE.typeNameOf(o));
 	}
 
-	public static IllegalOperationAttemptException bitwise(Object a, Object b) {
+	static IllegalOperationAttemptException bitwise(Object a, Object b) {
 		Object nonNumeric = Conversions.numericalValueOf(a) == null ? a : b;
 
 		if (Conversions.numericalValueOf(nonNumeric) == null) {
@@ -67,7 +75,7 @@ public class IllegalOperationAttemptException extends LuaRuntimeException {
 		}
 	}
 
-	public static IllegalOperationAttemptException bitwise(Object o) {
+	static IllegalOperationAttemptException bitwise(Object o) {
 		if (Conversions.numericalValueOf(o) == null) {
 			// indeed it's not a number
 			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
@@ -78,12 +86,12 @@ public class IllegalOperationAttemptException extends LuaRuntimeException {
 		}
 	}
 
-	public static IllegalOperationAttemptException length(Object o) {
+	static IllegalOperationAttemptException length(Object o) {
 		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
 		return new IllegalOperationAttemptException("attempt to get length of a " + typeName + " value");
 	}
 
-	public static IllegalOperationAttemptException concatenate(Object a, Object b) {
+	static IllegalOperationAttemptException concatenate(Object a, Object b) {
 		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.stringValueOf(a) == null ? a : b);
 		return new IllegalOperationAttemptException("concatenate", typeName);
 	}

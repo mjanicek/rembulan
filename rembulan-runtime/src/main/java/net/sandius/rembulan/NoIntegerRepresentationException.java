@@ -16,8 +16,15 @@
 
 package net.sandius.rembulan;
 
+/**
+ * An exception thrown to indicate an unsuccessful conversion of a number to an integer,
+ * i.e., when a number has no integer represenation.
+ */
 public class NoIntegerRepresentationException extends ConversionException {
 
+	/**
+	 * Constructs a new instance.
+	 */
 	public NoIntegerRepresentationException() {
 		super("number has no integer representation");
 	}

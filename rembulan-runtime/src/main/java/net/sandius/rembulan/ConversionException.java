@@ -16,8 +16,16 @@
 
 package net.sandius.rembulan;
 
+/**
+ * An exception thrown to indicate an unsuccessful value conversion.
+ */
 public class ConversionException extends LuaRuntimeException {
 
+	/**
+	 * Constructs a new instance with the given error message.
+	 *
+	 * @param message  error message
+	 */
 	public ConversionException(String message) {
 		super(message);
 	}
