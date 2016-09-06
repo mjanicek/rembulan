@@ -19,7 +19,7 @@ package net.sandius.rembulan.impl;
 import java.util.Arrays;
 
 /**
- * A generic, immutable implementation of a suspended state of a function call, used primarily
+ * A generic, immutable implementation of the suspended state of a function call, used primarily
  * by compiled Lua functions.
  *
  * <p>The class provides a uniform structured representation of the saved state consisting
