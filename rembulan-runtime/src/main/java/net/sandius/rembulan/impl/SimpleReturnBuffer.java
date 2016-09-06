@@ -25,7 +25,7 @@ import java.util.Collection;
  * A return buffer implementation that stores values in an array freshly reallocated
  * on every assignment.
  */
-public class SimpleReturnBuffer implements ReturnBuffer {
+class SimpleReturnBuffer implements ReturnBuffer {
 
 	private static final Object[] EMPTY_ARRAY = new Object[0];
 

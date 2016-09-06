@@ -25,7 +25,7 @@ import java.util.Iterator;
  * A return buffer implementation that stores the first two values in private fields,
  * and the remaining values in a re-sizable array.
  */
-public class PairCachingReturnBuffer implements ReturnBuffer {
+class PairCachingReturnBuffer implements ReturnBuffer {
 
 	private static final Object[] EMPTY_ARRAY = new Object[0];
 
