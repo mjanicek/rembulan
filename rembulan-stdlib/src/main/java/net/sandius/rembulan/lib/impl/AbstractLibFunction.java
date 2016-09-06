@@ -21,13 +21,18 @@ import net.sandius.rembulan.exec.ControlThrowable;
 import net.sandius.rembulan.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 
+import java.util.Arrays;
+
 public abstract class AbstractLibFunction extends AbstractFunctionAnyArg {
 
 	protected abstract String name();
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
-		ArgumentIterator callArgs = new ArgumentIterator(new NameMetamethodValueTypeNamer(context.getState()), name(), args);
+		ArgumentIterator callArgs = new ArgumentIterator(
+				new NameMetamethodValueTypeNamer(context.getState()),
+				name(),
+				Arrays.copyOf(args, args.length));
 		invoke(context, callArgs);
 	}
 
