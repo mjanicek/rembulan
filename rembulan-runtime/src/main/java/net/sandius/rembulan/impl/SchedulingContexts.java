@@ -43,7 +43,7 @@ public final class SchedulingContexts {
 	}
 
 	/**
-	 * Returns a scheduling context that always returns {@code false} from
+	 * Returns a scheduling context that always returns {@code true} from
 	 * {@link SchedulingContext#shouldYield()}, i.e., that <i>always</i> indicates
 	 * that the caller should yield.
 	 *
