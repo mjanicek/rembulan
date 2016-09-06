@@ -19,7 +19,7 @@ package net.sandius.rembulan.impl;
 import net.sandius.rembulan.ReturnBuffer;
 
 /**
- * A static factory for instantiating return buffers.
+ * Static factory for instantiating return buffers.
  *
  * <p>To obtain a new instance of the default return buffer implementation,
  * use {@link ReturnBuffers#newDefaultReturnBuffer()}.</p>
