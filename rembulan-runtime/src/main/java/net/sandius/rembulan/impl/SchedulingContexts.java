@@ -19,6 +19,9 @@ package net.sandius.rembulan.impl;
 import net.sandius.rembulan.SchedulingContext;
 import net.sandius.rembulan.util.Check;
 
+/**
+ * Static factory for instantiating scheduling contexts.
+ */
 public final class SchedulingContexts {
 
 	private SchedulingContexts() {
@@ -28,14 +31,43 @@ public final class SchedulingContexts {
 	private static final SchedulingContext NEVER_INSTANCE = new Never();
 	private static final SchedulingContext ALWAYS_INSTANCE = new Always();
 
+	/**
+	 * Returns a scheduling context that always returns {@code false} from
+	 * {@link SchedulingContext#shouldYield()}, i.e., that <i>never</i> indicates
+	 * that the caller should yield.
+	 *
+	 * @return  a scheduling context that never indicates that the caller should yield
+	 */
 	public static SchedulingContext never() {
 		return NEVER_INSTANCE;
 	}
 
+	/**
+	 * Returns a scheduling context that always returns {@code false} from
+	 * {@link SchedulingContext#shouldYield()}, i.e., that <i>always</i> indicates
+	 * that the caller should yield.
+	 *
+	 * @return  a scheduling context that always indicates that the caller should yield
+	 */
 	public static SchedulingContext always() {
 		return ALWAYS_INSTANCE;
 	}
 
+	/**
+	 * Returns a scheduling context with an internal tick counter (initialised to
+	 * {@code max}).
+	 *
+	 * <p>Every call to {@link SchedulingContext#registerTicks(int)} with
+	 * a positive argument decreases the counter accordingly. The scheduling context
+	 * returns {@code true} from {@link SchedulingContext#shouldYield()} if and only if
+	 * counter is lesser than or equal to 0.</p>
+	 *
+	 * @param max  the initial counter value, must be non-negative
+	 * @return  a scheduling context that starts indicating that the caller should yield
+	 *          once the counter is lesser than or equal to 0
+	 *
+	 * @throws IllegalArgumentException  when {@code max} is negative
+	 */
 	public static SchedulingContext upTo(long max) {
 		return new UpTo(max);
 	}
