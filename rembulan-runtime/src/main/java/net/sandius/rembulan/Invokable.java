@@ -174,8 +174,10 @@ public interface Invokable {
 	 * instead.</p>
 	 *
 	 * <p>The contents of the array {@code args} must not be modified by this method,
-	 * and the reference to {@code args} must not be retained by the invokable after
-	 * beyond the scope of this method's invocation.</p>
+	 * and the reference to {@code args} must not be retained by the invokable or any other
+	 * objects the invokable interacts with beyond the scope of this method's invocation.
+	 * In particular, the array reference must not be part of the suspended state created
+	 * on a non-local control change.</p>
 	 *
 	 * <p>The behaviour of this method is undefined when {@code context} or {@code args}
 	 * is {@code null}.</p>
