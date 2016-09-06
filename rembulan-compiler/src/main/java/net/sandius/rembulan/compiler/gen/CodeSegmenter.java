@@ -20,6 +20,7 @@ import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.Label;
+import net.sandius.rembulan.compiler.ir.Line;
 import net.sandius.rembulan.compiler.ir.ToNext;
 import net.sandius.rembulan.util.Check;
 
@@ -50,14 +51,33 @@ public final class CodeSegmenter {
 
 	}
 
+	private static int lastLine(List<BodyNode> nodes) {
+		int line = -1;
+		for (BodyNode n : nodes) {
+			if (n instanceof Line) {
+				line = ((Line) n).lineNumber();
+			}
+		}
+		return line;
+	}
+
 	private static BlockSplit splitBlockAt(BasicBlock blk, int index, int splitIdx) {
 		List<BodyNode> predBody = blk.body().subList(0, index);
-		List<BodyNode> succBody = blk.body().subList(index, blk.body().size());
+		List<BodyNode> succBody = new ArrayList<>();
+
+		// carry line info over to succ
+		int firstSuccLine = lastLine(predBody);
+		if (firstSuccLine != -1) {
+			succBody.add(new Line(firstSuccLine));
+		}
+
+		// append nodes to succ
+		succBody.addAll(blk.body().subList(index, blk.body().size()));
 
 		Label succLabel = new Label(-(splitIdx + 1));
 
 		BasicBlock pred = new BasicBlock(blk.label(), predBody, new ToNext(succLabel));
-		BasicBlock succ = new BasicBlock(succLabel, succBody, blk.end());
+		BasicBlock succ = new BasicBlock(succLabel, Collections.unmodifiableList(succBody), blk.end());
 
 		return new BlockSplit(pred, succ);
 	}
