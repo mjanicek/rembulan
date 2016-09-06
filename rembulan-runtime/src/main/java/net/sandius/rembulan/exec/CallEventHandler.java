@@ -24,9 +24,9 @@ public interface CallEventHandler {
 
 	void failed(Call c, Throwable error);
 
-	void paused(Call c, Continuation cont);
+	void paused(Call c, OneShotContinuation cont);
 
-	void async(Call c, Continuation cont, AsyncTask task);
+	void async(Call c, OneShotContinuation cont, AsyncTask task);
 
 }
 

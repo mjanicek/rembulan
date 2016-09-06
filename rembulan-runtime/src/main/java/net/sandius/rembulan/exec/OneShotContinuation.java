@@ -18,7 +18,7 @@ package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.SchedulingContext;
 
-public interface Continuation {
+public interface OneShotContinuation {
 
 	void resume(CallEventHandler handler, SchedulingContext schedulingContext);
 

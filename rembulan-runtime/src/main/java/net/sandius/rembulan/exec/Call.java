@@ -96,7 +96,7 @@ public class Call {
 		return versionToState(currentVersion.get());
 	}
 
-	private class CallContinuation implements Continuation {
+	private class CallContinuation implements OneShotContinuation {
 
 		private final int version;
 
@@ -132,7 +132,7 @@ public class Call {
 
 	}
 
-	public Continuation currentContinuation() {
+	public OneShotContinuation currentContinuation() {
 		int version = currentVersion.get();
 
 		if (!isPaused(version)) {
@@ -160,7 +160,7 @@ public class Call {
 
 		int newVersion = VERSION_TERMINATED;
 		ResumeResult rr = null;
-		Continuation cont = null;
+		OneShotContinuation cont = null;
 		try {
 			Resumer resumer = new Resumer(schedulingContext);
 			rr = resumer.resume();
@@ -238,7 +238,7 @@ public class Call {
 			}
 		}
 
-		void fire(CallEventHandler handler, Call c, Continuation cont) {
+		void fire(CallEventHandler handler, Call c, OneShotContinuation cont) {
 			if (pause) {
 				handler.paused(c, Check.notNull(cont));
 			}

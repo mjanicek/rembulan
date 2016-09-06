@@ -50,7 +50,7 @@ public class DirectCallExecutor {
 		// if wasSet.get() == true, then at most one of the next three fields may be null;
 		// otherwise, all must be null.
 
-		private Continuation cont;
+		private OneShotContinuation cont;
 		private Object[] values;
 		private Throwable error;
 
@@ -96,7 +96,7 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public void paused(Call c, Continuation cont) {
+		public void paused(Call c, OneShotContinuation cont) {
 			if (cont != null) {
 				if (wasSet.compareAndSet(false, true)) {
 					this.cont = cont;
@@ -111,7 +111,7 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public void async(Call c, final Continuation cont, AsyncTask task) {
+		public void async(Call c, final OneShotContinuation cont, AsyncTask task) {
 			if (cont != null && task != null) {
 				if (wasSet.compareAndSet(false, true)) {
 					this.cont = cont;
@@ -156,7 +156,7 @@ public class DirectCallExecutor {
 		return resume(call.currentContinuation());
 	}
 
-	public Object[] resume(Continuation continuation)
+	public Object[] resume(OneShotContinuation continuation)
 			throws CallException, CallInterruptedException, InterruptedException {
 
 		while (true) {
