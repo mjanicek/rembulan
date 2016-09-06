@@ -18,10 +18,32 @@ package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.Function;
 
+/**
+ * An exception thrown to indicate that a function is not suspendable.
+ */
 public class NonsuspendableFunctionException extends UnsupportedOperationException {
 
+	/**
+	 * Constructs a new instance of {@code NonsuspendableFunctionException} with the argument
+	 * {@code clazz} indicating the class of the function (for inclusion in the error message).
+	 *
+	 * <p>The argument may be {@code null}, in which case the function class name is not
+	 * included in the error message.</p>
+	 *
+	 * @param clazz  class of the function, may be {@code null}
+	 */
 	public NonsuspendableFunctionException(Class<? extends Function> clazz) {
-		super("Function is not suspendable: " + clazz.getName());
+		super("Function is not suspendable" + (clazz != null
+				? ": " + clazz.getName()
+				: ""));
+	}
+
+	/**
+	 * Constructs a new instance of {@code NonsuspendableFunctionException} without
+	 * indicating the function class.
+	 */
+	public NonsuspendableFunctionException() {
+		this(null);
 	}
 
 }
