@@ -18,8 +18,7 @@ package net.sandius.rembulan.exec;
 
 /**
  * An exception thrown to indicate that an attempt to resume a continuation has failed
- * due to the fact that the continuation object is invalid (e.g. has already been resumed
- * once).
+ * because the continuation object is invalid.
  */
 public class InvalidContinuationException extends RuntimeException {
 
