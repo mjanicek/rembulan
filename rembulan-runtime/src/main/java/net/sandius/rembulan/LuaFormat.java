@@ -16,7 +16,10 @@
 
 package net.sandius.rembulan;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * Static methods for parsing and generating lexical strings following the Lua lexical
@@ -378,5 +381,68 @@ public final class LuaFormat {
 		bld.append('"');
 		return bld.toString();
 	}
+
+	private static final Set<String> keywords;
+
+	static {
+		Set<String> ks = new HashSet<>();
+		Collections.addAll(ks,
+				"and", "break", "do", "else", "elseif", "end", "false", "for",
+				"function", "goto", "if", "in", "local", "nil", "not", "or",
+				"repeat", "return", "then", "true", "until", "while");
+		keywords = Collections.unmodifiableSet(ks);
+	}
+
+	/**
+	 * Returns {@code true} iff the string {@code s} is a keyword in Lua.
+	 * 
+	 * <p>A keyword in Lua is one of the following strings:
+	 * {@code "and"}, {@code "break"}, {@code "do"}, {@code "else"}, {@code "elseif"},
+	 * {@code "end"}, {@code "false"}, {@code "for"}, {@code "function"}, {@code "goto"},
+	 * {@code "if"}, {@code "in"}, {@code "local"}, {@code "nil"}, {@code "not"},
+	 * {@code "or"}, {@code "repeat"}, {@code "return"}, {@code "then"}, {@code "true"},
+	 * {@code "until"}, {@code "while"}.</p>
+	 *
+	 * @param s  the string to be examined, may be {@code null}
+	 * @return  {@code true} if {@code s} is a Lua keyword; {@code false} otherwise
+	 */
+	public static boolean isKeyword(String s) {
+		return s != null && keywords.contains(s);
+	}
+
+	/**
+	 * Returns {@code true} iff the string {@code s} is a valid Lua name.
+	 *
+	 * <p>According to §3.1 of the Lua Reference Manual,</p>
+	 *
+	 * <blockquote>
+	 *     Names (also called identifiers) in Lua can be any string of letters, digits,
+	 *     and underscores, not beginning with a digit and not being a reserved word.
+	 * </blockquote>
+	 *
+	 * <p>This implementation treats letters as characters in the ranges
+	 * {@code 'a'}...{@code 'z'} and {@code 'A'}...{@code 'Z'}, and numbers as characters in
+	 * the range {@code '0'}...{@code '9'}.</p>
+	 *
+	 * @param s  the string to be checked for being a valid name, may be {@code null}
+	 * @return  {@code true} if {@code s} is a valid name in Lua; {@code false} otherwise
+	 */
+	public static boolean isValidName(String s) {
+		if (s == null || s.isEmpty() || isKeyword(s)) {
+			return false;
+		}
+
+		char c = s.charAt(0);
+
+		if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && (c != '_')) return false;
+
+		for (int i = 1; i < s.length(); i++) {
+			c = s.charAt(i);
+			if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && (c != '_') && (c < '0' || c > '9')) return false;
+		}
+
+		return true;
+	}
+
 
 }

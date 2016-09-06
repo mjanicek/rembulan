@@ -16,10 +16,9 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import java.util.Collections;
-import java.util.HashSet;
+import net.sandius.rembulan.LuaFormat;
+
 import java.util.Objects;
-import java.util.Set;
 
 public final class Name {
 
@@ -46,40 +45,8 @@ public final class Name {
 		return Objects.hash(value);
 	}
 
-	private static final Set<String> keywords;
-	
-	static {
-		Set<String> ks = new HashSet<>();
-		Collections.addAll(ks,
-				"and", "break", "do", "else", "elseif", "end", "false", "for",
-				"function", "goto", "if", "in", "local", "nil", "not", "or",
-				"repeat", "return", "then", "true", "until", "while");
-		keywords = Collections.unmodifiableSet(ks);
-	}
-
-	public static boolean isKeyword(String s) {
-		return s != null && keywords.contains(s);
-	}
-
-	public static boolean isValidName(String s) {
-		if (s == null || s.isEmpty() || isKeyword(s)) {
-			return false;
-		}
-
-		char c = s.charAt(0);
-
-		if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && (c != '_')) return false;
-
-		for (int i = 1; i < s.length(); i++) {
-			c = s.charAt(i);
-			if ((c < 'a' || c > 'z') && (c < 'A' || c > 'Z') && (c != '_') && (c < '0' || c > '9')) return false;
-		}
-
-		return true;
-	}
-
 	public static String checkValidName(String s) {
-		if (!isValidName(s)) {
+		if (!LuaFormat.isValidName(s)) {
 			throw new IllegalArgumentException("Not a valid name: " + s);
 		}
 		else {
