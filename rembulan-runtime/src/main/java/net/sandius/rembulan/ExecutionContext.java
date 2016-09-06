@@ -134,7 +134,7 @@ public interface ExecutionContext {
 	 * handled and re-thrown by the caller of this method.
 	 *
 	 * <p>In order to mark {@code task} as completed, the task must call
-	 * {@link ContinueCallback#finished()}.</p>
+	 * {@link AsyncTask.ContinueCallback#finished()}.</p>
 	 *
 	 * @param task  the task to be executed, must not be {@code null}
 	 *

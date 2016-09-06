@@ -17,7 +17,6 @@
 package net.sandius.rembulan.examples;
 
 import net.sandius.rembulan.AsyncTask;
-import net.sandius.rembulan.ContinueCallback;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Variable;

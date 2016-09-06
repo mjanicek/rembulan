@@ -17,7 +17,6 @@
 package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.AsyncTask;
-import net.sandius.rembulan.ContinueCallback;
 import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.SchedulingContext;
 import net.sandius.rembulan.impl.SchedulingContexts;
@@ -168,7 +167,7 @@ public class DirectCallExecutor {
 				// an asynchronous task
 
 				final CountDownLatch latch = new CountDownLatch(1);
-				ContinueCallback callback = new ContinueCallback() {
+				AsyncTask.ContinueCallback callback = new AsyncTask.ContinueCallback() {
 					@Override
 					public void finished() {
 						latch.countDown();
