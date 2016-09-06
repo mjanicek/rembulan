@@ -16,39 +16,136 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
-public class LuaFormat {
+/**
+ * Static methods for parsing and generating lexical strings following the Lua lexical
+ * conventions.
+ */
+public final class LuaFormat {
 
+	private LuaFormat() {
+		// not to be instantiated
+	}
+
+	/**
+	 * String representation of <b>nil</b>.
+	 */
 	public static final String NIL = "nil";
+
+	/**
+	 * String representation of <b>true</b>.
+	 */
 	public static final String TRUE = "true";
+
+	/**
+	 * String representation of <b>false</b>.
+	 */
 	public static final String FALSE = "false";
 
+	/**
+	 * String representation of positive infinity.
+	 */
 	public static final String POS_INF = "inf";
+
+	/**
+	 * String representation of negative infinity.
+	 */
 	public static final String NEG_INF = "-inf";
+
+	/**
+	 * String representation of <i>NaN</i>.
+	 */
 	public static final String NAN = "nan";
 
+
+	/**
+	 * String representation of the Lua {@code nil} type.
+	 *
+	 * @see LuaType#NIL
+	 */
 	public static final String TYPENAME_NIL = NIL;
+
+	/**
+	 * String representation of the Lua {@code boolean} type.
+	 *
+	 * @see LuaType#BOOLEAN
+	 */
 	public static final String TYPENAME_BOOLEAN = "boolean";
+
+	/**
+	 * String representation of the Lua {@code number} type.
+	 *
+	 * @see LuaType#NUMBER
+	 */
 	public static final String TYPENAME_NUMBER = "number";
+
+	/**
+	 * String representation of the Lua {@code string} type.
+	 *
+	 * @see LuaType#STRING
+	 */
 	public static final String TYPENAME_STRING = "string";
+
+	/**
+	 * String representation of the Lua {@code table} type.
+	 *
+	 * @see LuaType#TABLE
+	 */
 	public static final String TYPENAME_TABLE = "table";
+
+	/**
+	 * String representation of the Lua {@code function} type.
+	 *
+	 * @see LuaType#FUNCTION
+	 */
 	public static final String TYPENAME_FUNCTION = "function";
+
+	/**
+	 * String representation of the Lua {@code userdata} type.
+	 *
+	 * @see LuaType#USERDATA
+	 */
 	public static final String TYPENAME_USERDATA = "userdata";
+
+	/**
+	 * String representation of the Lua {@code thread} type.
+	 *
+	 * @see LuaType#THREAD
+	 */
 	public static final String TYPENAME_THREAD = "thread";
 
+
+	/**
+	 * Returns the Lua format string representation of the boolean value {@code b}.
+	 *
+	 * @param b  the boolean value
+	 * @return  string representation of {@code b}
+	 */
 	public static String toString(boolean b) {
 		return b ? TRUE : FALSE;
 	}
 
+	/**
+	 * Returns the Lua format string representation of the integer value {@code l}.
+	 *
+	 * @param l  the integer value
+	 * @return  string representation of {@code l}
+	 */
 	public static String toString(long l) {
 		return Long.toString(l);
 	}
 
-	public static String toString(double d) {
-		if (Double.isNaN(d)) return NAN;
-		else if (Double.isInfinite(d)) return d > 0 ? POS_INF : NEG_INF;
-		else return Double.toString(d).toLowerCase();  // TODO: check precision used in Lua
+	/**
+	 * Returns the Lua format string representation of the float value {@code f}.
+	 *
+	 * @param f  the float value
+	 * @return  string representation of {@code f}
+	 */
+	public static String toString(double f) {
+		if (Double.isNaN(f)) return NAN;
+		else if (Double.isInfinite(f)) return f > 0 ? POS_INF : NEG_INF;
+		else return Double.toString(f).toLowerCase();  // TODO: check precision used in Lua
 	}
 
 	private static int hexValue(int c) {
@@ -66,6 +163,19 @@ public class LuaFormat {
 		}
 	}
 
+	/**
+	 * Parses the string {@code s} as an integer according to the Lua lexer rules.
+	 * When {@code s} is not an integer numeral, throws a {@link NumberFormatException}.
+	 *
+	 * <p>This method ignores leading and trailing whitespace in {@code s}.</p>
+	 *
+	 * @param s  string to be parsed, must not be {@code null}
+	 * @return  the integer value represented by {@code s}
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 * @throws NumberFormatException  if {@code s} is not a valid Lua format string representing
+	 *                                an integer value
+	 */
 	public static long parseInteger(String s) throws NumberFormatException {
 		s = s.trim();
 		if (s.startsWith("0x") || s.startsWith("0X")) {
@@ -94,9 +204,20 @@ public class LuaFormat {
 		}
 	}
 
+	/**
+	 * Parses the string {@code s} as a float according to the Lua lexer rules.
+	 * When {@code s} is not a float numeral, throws a {@link NumberFormatException}.
+	 *
+	 * <p>This method ignores leading and trailing whitespace in {@code s}.</p>
+	 *
+	 * @param s  the string to be parsed, must not be {@code null}
+	 * @return  the float value represented by {@code s}
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 * @throws NumberFormatException  if {@code s} is not a valid Lua format string representing
+	 *                                a float value
+	 */
 	public static double parseFloat(String s) throws NumberFormatException {
-		Check.notNull(s);
-
 		try {
 			return Double.parseDouble(s);
 		}
@@ -111,6 +232,20 @@ public class LuaFormat {
 		}
 	}
 
+	/**
+	 * Parses {@code s} as an integer following the Lua lexer rules. When {@code s} is
+	 * an integer numeral, returns its value boxed as a {@link Long}. Otherwise, returns
+	 * {@code null}.
+	 *
+	 * <p>This is a variant of {@link #parseInteger(String)} that signals invalid input
+	 * by returning {@code null} rather than throwing a {@code NumberFormatException}.</p>
+	 *
+	 * @param s  the string to be parsed, must not be {@code null}
+	 * @return  the (boxed) integer value represented by {@code s} if {@code s} is an integer
+	 *          numeral; {@code null} otherwise
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 */
 	public static Long tryParseInteger(String s) {
 		try {
 			return parseInteger(s);
@@ -120,6 +255,20 @@ public class LuaFormat {
 		}
 	}
 
+	/**
+	 * Parses {@code s} as a float following the Lua lexer rules. When {@code s} is
+	 * a float numeral, returns its value boxed as a {@link Double}. Otherwise, returns
+	 * {@code null}.
+	 *
+	 * <p>This is a variant of {@link #parseFloat(String)} that signals invalid input
+	 * by returning {@code null} rather than throwing a {@code NumberFormatException}.</p>
+	 *
+	 * @param s  the string to be parsed, must not be {@code null}
+	 * @return  the (boxed) float value represented by {@code s} if {@code s} is an float
+	 *          numeral; {@code null} otherwise
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 */
 	public static Double tryParseFloat(String s) {
 		try {
 			return parseFloat(s);
@@ -129,6 +278,20 @@ public class LuaFormat {
 		}
 	}
 
+	/**
+	 * Parses {@code s} as a number following the Lua lexer rules. When {@code s} is
+	 * a numeral, returns its value boxed either as a {@link Long} (for integer numerals)
+	 * or a {@link Double} (for float numerals). Otherwise, returns {@code null}.
+	 *
+	 * <p>Note an integer numeral is also a float numeral, but not all float numerals are
+	 * integer numerals. This method returns the "most canonical" representation of the numeric
+	 * value represented by {@code s}: it first tries to parse {@code s} as an integer,
+	 * attempting to parse {@code s} as a float only when {@code s} is not an integer numeral.</p>
+	 *
+	 * @param s  the string to be parsed, must not be {@code null}
+	 * @return  the numeric value represented by {@code s}, or {@code null} if {@code s}
+	 *          is not a numeral
+	 */
 	public static Number tryParseNumeral(String s) {
 		Long l = tryParseInteger(s);
 		return l != null ? l : (Number) tryParseFloat(s);
@@ -158,6 +321,7 @@ public class LuaFormat {
 			case '\r': return 'r';
 			case '\t': return 't';
 			case CHAR_VERTICAL_TAB: return 'v';
+			case '"': return '"';
 			default: return -1;
 		}
 	}
@@ -167,15 +331,26 @@ public class LuaFormat {
 		return i < 0xa ? (char) ((int) '0' + i) : (char) ((int) 'a' + i - 0xa);
 	}
 
+	/**
+	 * Returns a string {@code esc} formed from the character sequence {@code s} such that
+	 * when {@code esc} is read by a Lua lexer as a string literal, it evaluates to a string equal
+	 * to {@code s}. The resulting string is enclosed in double quotes ({@code "}).
+	 *
+	 * @param s  the character sequence to escape, must not be {@code null}
+	 * @return  a Lua string literal representing {@code s}
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 */
 	public static String escape(CharSequence s) {
-		Check.notNull(s);
+		Objects.requireNonNull(s);
+
 		StringBuilder bld = new StringBuilder();
 		bld.append('"');
 
 		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
 
-			if (c != '\\' && isASCIIPrintable(c)) {
+			if (c != '\\' && c != '"' && isASCIIPrintable(c)) {
 				bld.append(c);
 			}
 			else {

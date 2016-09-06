@@ -55,6 +55,9 @@ import net.sandius.rembulan.exec.Coroutine;
  * representation of the number as either a float or integer. To convert a number to its
  * canonical value, use {@link Conversions#toCanonicalNumber(Number)}.</p>
  *
+ * <p>To retrieve the name of the type of a Lua value, use the {@link ValueTypeNamer}
+ * interface (for names based on the type only, without taking into account the {@code __name}
+ * metamethod, use {@link PlainValueTypeNamer}).</p>
  */
 public enum LuaType {
 
