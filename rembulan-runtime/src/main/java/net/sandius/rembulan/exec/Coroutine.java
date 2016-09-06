@@ -52,12 +52,7 @@ public final class Coroutine {
 		return getStatus() == Status.DEAD;
 	}
 
-	@Override
-	public String toString() {
-		return "thread: 0x" + Integer.toHexString(hashCode());
-	}
-
-	protected static class BootstrapResumable implements Resumable {
+	private static class BootstrapResumable implements Resumable {
 
 		static final BootstrapResumable INSTANCE = new BootstrapResumable();
 
