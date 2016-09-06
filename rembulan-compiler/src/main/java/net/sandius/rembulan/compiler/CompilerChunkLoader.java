@@ -26,6 +26,8 @@ import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.TokenMgrError;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Objects;
+
 public class CompilerChunkLoader implements ChunkLoader {
 
 	private final ChunkClassLoader chunkClassLoader;
@@ -58,6 +60,10 @@ public class CompilerChunkLoader implements ChunkLoader {
 
 	@Override
 	public Function loadTextChunk(Variable env, String chunkName, String sourceText) throws LoaderException {
+		Objects.requireNonNull(env);
+		Objects.requireNonNull(chunkName);
+		Objects.requireNonNull(sourceText);
+
 		String rootClassName = rootClassPrefix + (idx++);
 		try {
 			CompiledModule result = compiler.compile(sourceText, chunkName, rootClassName);
@@ -87,9 +93,9 @@ public class CompilerChunkLoader implements ChunkLoader {
 		}
 	}
 
-	@Override
-	public Function loadBinaryChunk(Variable env, String chunkName, byte[] bytes, int offset, int len) throws LoaderException {
-		throw new UnsupportedOperationException();  // TODO
-	}
+//	@Override
+//	public Function loadBinaryChunk(Variable env, String chunkName, byte[] bytes, int offset, int len) throws LoaderException {
+//		throw new UnsupportedOperationException();  // TODO
+//	}
 
 }

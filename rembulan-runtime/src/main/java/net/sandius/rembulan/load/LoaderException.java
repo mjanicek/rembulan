@@ -16,12 +16,32 @@
 
 package net.sandius.rembulan.load;
 
+/**
+ * An exception thrown when loading Lua chunks to indicate that the input cannot be parsed,
+ * compiled or loaded as a function.
+ */
 public class LoaderException extends Exception {
 
 	private final String sourceFileName;
 	private final int sourceLine;
 	private final boolean partialInput;
 
+	/**
+	 * Constructs a new {@code LoaderException} with the specified {@code cause},
+	 * the file name {@code sourceFileName}, the line {@code sourceLine} where the error
+	 * occurred, and indicating in the flag {@code partialInput} whether the cause of the
+	 * error may have been caused by a partial input (i.e., an unexpected EOF).
+	 *
+	 * @param cause  the cause of the error, must not be {@code null}
+	 * @param sourceFileName  source file name, may be {@code null} when source file information
+	 *                        is omitted
+	 * @param sourceLine  the line in the source where the error occurred, may be non-positive
+	 *                    when this information is omitted
+	 * @param partialInput  a flag indicating whether the cause of the error may have been
+	 *                      an unexpected EOF
+	 *
+	 * @throws NullPointerException  if {@code cause} is {@code null}
+	 */
 	public LoaderException(Throwable cause, String sourceFileName, int sourceLine, boolean partialInput) {
 		super(cause);
 		this.sourceFileName = sourceFileName;  // may be null
@@ -29,6 +49,16 @@ public class LoaderException extends Exception {
 		this.partialInput = partialInput;
 	}
 
+	/**
+	 * Constructs a new {@code LoaderException} without line information or the indication
+	 * that the cause of this error may have been a partial input.
+	 *
+	 * @param cause  the cause of the error, must not be {@code null}
+	 * @param sourceFileName  source file name, may be {@code null} when source file information
+	 *                        is omitted
+	 *
+	 * @throws NullPointerException  if {@code cause} is {@code null}
+	 */
 	public LoaderException(Throwable cause, String sourceFileName) {
 		this(cause, sourceFileName, 0, false);
 	}
@@ -65,6 +95,19 @@ public class LoaderException extends Exception {
 		return sourceLine;
 	}
 
+	/**
+	 * Returns a Lua-style error message for this loader exception.
+	 *
+	 * <p>The format of this error message is:</p>
+	 * <pre>
+	 *     "SourceFileName:SourceLine: CauseClass: CauseMessage"
+	 * </pre>
+	 * <p>When no source file name is available, the source information prefix is omitted;
+	 * when no source line information is available, the {@code SourceLine} string is
+	 * equal to "?".</p>
+	 *
+	 * @return  a Lua-style error message for this loader exception
+	 */
 	public String getLuaStyleErrorMessage() {
 		Throwable cause = getCause();
 
