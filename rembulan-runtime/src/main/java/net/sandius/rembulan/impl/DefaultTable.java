@@ -53,7 +53,7 @@ public class DefaultTable extends Table {
 
 	/**
 	 * Returns the table factory for constructing instances of {@code DefaultTable}.
-	 * @return
+	 * @return  the table factory for {@code DefaultTable}s
 	 */
 	public static TableFactory factory() {
 		return FACTORY_INSTANCE;
