@@ -20,7 +20,7 @@ import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Resumable;
 import net.sandius.rembulan.util.Check;
 
-public class ResumeInfo {
+class ResumeInfo {
 
 	public final Resumable resumable;
 	public final Object savedState;
