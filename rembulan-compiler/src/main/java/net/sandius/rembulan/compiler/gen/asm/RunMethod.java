@@ -327,7 +327,7 @@ class RunMethod {
 		il.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
 				Type.getInternalName(UnresolvedControlThrowable.class),
-				"push",
+				"resolve",
 				Type.getMethodType(
 						Type.getType(ResolvedControlThrowable.class),
 						Type.getType(Resumable.class),

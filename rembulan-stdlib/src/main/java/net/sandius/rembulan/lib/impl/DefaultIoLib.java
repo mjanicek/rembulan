@@ -275,7 +275,7 @@ public class DefaultIoLib extends IoLib {
 				Dispatch.call(context, IoFile.Close.INSTANCE, file);
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, null);
+				throw ct.resolve(this, null);
 			}
 		}
 
@@ -307,7 +307,7 @@ public class DefaultIoLib extends IoLib {
 				Dispatch.call(context, IoFile.Flush.INSTANCE);
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, outFile);
+				throw ct.resolve(this, outFile);
 			}
 
 			resume(context, outFile);
@@ -489,7 +489,7 @@ public class DefaultIoLib extends IoLib {
 				Dispatch.call(context, IoFile.Read.INSTANCE, callArgs.toArray());
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, null);
+				throw ct.resolve(this, null);
 			}
 
 			resume(context, file);
@@ -556,7 +556,7 @@ public class DefaultIoLib extends IoLib {
 				Dispatch.call(context, IoFile.Write.INSTANCE, callArgs.toArray());
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, null);
+				throw ct.resolve(this, null);
 			}
 
 			resume(context, file);

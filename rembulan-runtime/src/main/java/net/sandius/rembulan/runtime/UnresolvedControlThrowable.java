@@ -35,7 +35,7 @@ public final class UnresolvedControlThrowable extends Throwable {
 		this(payload, null);
 	}
 
-	public ResolvedControlThrowable push(Resumable resumable, Object suspendedState) {
+	public ResolvedControlThrowable resolve(Resumable resumable, Object suspendedState) {
 		return new ResolvedControlThrowable(payload,
 				new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack));
 	}

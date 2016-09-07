@@ -260,7 +260,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, args, sep, i, j, k, bld));
+				throw ct.resolve(this, new SuspendedState(state, t, args, sep, i, j, k, bld));
 			}
 		}
 
@@ -395,7 +395,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, args, 0, 0, null));
+				throw ct.resolve(this, new SuspendedState(state, t, args, 0, 0, null));
 			}
 
 			// next: process the arguments
@@ -477,7 +477,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, null, pos, k, value));
+				throw ct.resolve(this, new SuspendedState(state, t, null, pos, k, value));
 			}
 
 			// continue into the last stage
@@ -502,7 +502,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, null, pos, -1, value));
+				throw ct.resolve(this, new SuspendedState(state, t, null, pos, -1, value));
 			}
 
 			// finished!
@@ -656,7 +656,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, args, 0, 0, null));
+				throw ct.resolve(this, new SuspendedState(state, t, args, 0, 0, null));
 			}
 
 			// next: process the arguments
@@ -719,7 +719,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, null, pos, len, null));
+				throw ct.resolve(this, new SuspendedState(state, t, null, pos, len, null));
 			}
 
 
@@ -765,7 +765,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, t, null, k, len, result));
+				throw ct.resolve(this, new SuspendedState(state, t, null, k, len, result));
 			}
 
 			// erase the last element, return the result
@@ -791,7 +791,7 @@ public class DefaultTableLib extends TableLib {
 			}
 			catch (UnresolvedControlThrowable ct) {
 				// no need to carry any information but the result around
-				throw ct.push(this, new SuspendedState(state, null, null, 0, 0, result));
+				throw ct.resolve(this, new SuspendedState(state, null, null, 0, 0, result));
 			}
 
 			// finished, set the result
@@ -913,7 +913,7 @@ public class DefaultTableLib extends TableLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SuspendedState(state, obj, i, j, k, result));
+				throw ct.resolve(this, new SuspendedState(state, obj, i, j, k, result));
 			}
 		}
 

@@ -39,7 +39,7 @@ public interface ProtectedResumable extends Resumable {
 	 * <p>As with {@link Resumable#resume(ExecutionContext, Object)}, the execution context
 	 * {@code context} may differ from the execution context used before, and {@code suspendedState}
 	 * is guaranteed by the executor to be <i>equivalent</i> to the suspended state registered
-	 * by the call to {@link UnresolvedControlThrowable#push(Resumable, Object)}. Equivalence here
+	 * by the call to {@link UnresolvedControlThrowable#resolve(Resumable, Object)}. Equivalence here
 	 * means that the class will be equal to that of the state object previously registered;
 	 * however, the actual instance passed to this method may be a clone or a (serialised
 	 * and) de-serialised version of the original object.</p>

@@ -58,7 +58,7 @@ public class AsyncExample extends AbstractFunction1 {
 			throw new AssertionError();
 		}
 		catch (UnresolvedControlThrowable ct) {
-			throw ct.push(this, v);
+			throw ct.resolve(this, v);
 		}
 	}
 

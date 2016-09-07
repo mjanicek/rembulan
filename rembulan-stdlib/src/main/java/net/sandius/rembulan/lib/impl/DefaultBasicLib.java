@@ -192,7 +192,7 @@ public class DefaultBasicLib extends BasicLib {
 					Dispatch.call(context, ToString.INSTANCE, a);
 				}
 				catch (UnresolvedControlThrowable ct) {
-					throw ct.push(this, Arrays.copyOfRange(args, i + 1, args.length));
+					throw ct.resolve(this, Arrays.copyOfRange(args, i + 1, args.length));
 				}
 
 				Object s = context.getReturnBuffer().get0();
@@ -323,7 +323,7 @@ public class DefaultBasicLib extends BasicLib {
 					Dispatch.call(context, metamethod, t);
 				}
 				catch (UnresolvedControlThrowable ct) {
-					throw ct.push(this, null);
+					throw ct.resolve(this, null);
 				}
 
 				ReturnBuffer rbuf = context.getReturnBuffer();
@@ -379,7 +379,7 @@ public class DefaultBasicLib extends BasicLib {
 					Dispatch.call(context, meta, arg);
 				}
 				catch (UnresolvedControlThrowable ct) {
-					throw ct.push(this, null);
+					throw ct.resolve(this, null);
 				}
 
 				// resume
@@ -569,7 +569,7 @@ public class DefaultBasicLib extends BasicLib {
 				Dispatch.call(context, callTarget, callArgs);
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, null);
+				throw ct.resolve(this, null);
 			}
 			catch (Exception ex) {
 				resumeError(context, null, Conversions.toErrorObject(ex));
@@ -643,7 +643,7 @@ public class DefaultBasicLib extends BasicLib {
 					isError = false;
 				}
 				catch (UnresolvedControlThrowable ct) {
-					throw ct.push(this, new SavedState(handler, depth));
+					throw ct.resolve(this, new SavedState(handler, depth));
 				}
 				catch (Exception e) {
 					errorObject = Conversions.toErrorObject(e);
@@ -674,7 +674,7 @@ public class DefaultBasicLib extends BasicLib {
 				Dispatch.call(context, callTarget, callArgs);
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new SavedState(handler, 0));
+				throw ct.resolve(this, new SavedState(handler, 0));
 			}
 			catch (Exception e) {
 				errorObject = Conversions.toErrorObject(e);
@@ -983,7 +983,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new State(chunkName, env, bld, fn));
+				throw ct.resolve(this, new State(chunkName, env, bld, fn));
 			}
 
 			assert (chunkText != null);

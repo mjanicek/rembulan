@@ -1057,7 +1057,7 @@ public final class Dispatch {
 		}
 		catch (UnresolvedControlThrowable ct) {
 			// suspended in the metamethod call
-			throw ct.push(cmpResultResumable(cmpTo), null).unresolve();
+			throw ct.resolve(cmpResultResumable(cmpTo), null).unresolve();
 		}
 		// not suspended: set the result, possibly flipping it
 		ReturnBuffer result = context.getReturnBuffer();

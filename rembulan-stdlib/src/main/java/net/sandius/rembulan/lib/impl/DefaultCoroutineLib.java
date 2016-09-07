@@ -105,7 +105,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 				context.resume(coroutine, resumeArgs);
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, null);
+				throw ct.resolve(this, null);
 			}
 		}
 
@@ -140,7 +140,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 				context.yield(args.getAll());
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, null);
+				throw ct.resolve(this, null);
 			}
 		}
 
@@ -240,7 +240,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 					context.resume(coroutine, args);
 				}
 				catch (UnresolvedControlThrowable ct) {
-					throw ct.push(this, null);
+					throw ct.resolve(this, null);
 				}
 			}
 

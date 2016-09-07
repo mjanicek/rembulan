@@ -471,7 +471,7 @@ public class DefaultMathLib extends MathLib {
 					}
 				}
 				catch (UnresolvedControlThrowable ct) {
-					throw ct.push(this, new State(args, idx, best));
+					throw ct.resolve(this, new State(args, idx, best));
 				}
 
 				if (Conversions.booleanValueOf(context.getReturnBuffer().get0())) {

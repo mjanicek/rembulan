@@ -949,7 +949,7 @@ public class DefaultStringLib extends StringLib {
 				}
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.push(this, new State(str, pat, count, num, repl, bld, fullMatch, idx));
+				throw ct.resolve(this, new State(str, pat, count, num, repl, bld, fullMatch, idx));
 			}
 			resumeReplace(context, bld, fullMatch);
 		}
