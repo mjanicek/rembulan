@@ -32,11 +32,6 @@ public final class ResolvedControlThrowable extends Throwable {
 		this.resumeStack = resumeStack;
 	}
 
-	@Override
-	public synchronized Throwable fillInStackTrace() {
-		return null;
-	}
-
 	ControlThrowablePayload payload() {
 		return payload;
 	}

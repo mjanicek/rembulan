@@ -35,11 +35,6 @@ public final class UnresolvedControlThrowable extends Throwable {
 		this(payload, null);
 	}
 
-	@Override
-	public synchronized Throwable fillInStackTrace() {
-		return null;
-	}
-
 	public ResolvedControlThrowable push(Resumable resumable, Object suspendedState) {
 		return new ResolvedControlThrowable(payload,
 				new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack));
