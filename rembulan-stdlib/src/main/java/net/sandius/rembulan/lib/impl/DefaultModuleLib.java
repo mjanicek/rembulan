@@ -16,12 +16,12 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.ModuleLib;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.util.Check;

@@ -14,25 +14,27 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan;
-
-import net.sandius.rembulan.runtime.ResolvedControlThrowable;
-import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
+package net.sandius.rembulan.runtime;
 
 /**
- * An interface for resuming suspended Lua function calls.
+ * An interface for resuming suspended protected Lua function calls.
  */
-public interface Resumable {
+public interface ProtectedResumable extends Resumable {
 
 	/**
-	 * Resumes this resumable in the given execution context {@code context}, passing
-	 * the suspended state {@code suspendedState} to it.
+	 * Resumes this protected resumable in the given execution context {@code context},
+	 * passing the suspended state {@code suspendedState} and an error object {@code error}
+	 * to it.
 	 * <b>This method throws a {@link ResolvedControlThrowable}</b>:
 	 * this method is expected to have resolved non-local control changes up to the point
 	 * of its invocation.
 	 *
 	 * <p>This method is called by the call executor when resuming a previously suspended
-	 * function call, possibly with a different execution context. {@code suspendedState}
+	 * protected function call while unrolling the call stack after an error has occurred.
+	 * The error, passed in the {@code error} argument, may be {@code null}.</p>
+	 *
+	 * <p>As with {@link Resumable#resume(ExecutionContext, Object)}, the execution context
+	 * {@code context} may differ from the execution context used before, and {@code suspendedState}
 	 * is guaranteed by the executor to be <i>equivalent</i> to the suspended state registered
 	 * by the call to {@link UnresolvedControlThrowable#resolve(Resumable, Object)}. Equivalence here
 	 * means that the class will be equal to that of the state object previously registered;
@@ -45,9 +47,11 @@ public interface Resumable {
 	 * @param context  execution context, non-{@code null} when called by a call executor
 	 * @param suspendedState  suspended state, equivalent to the suspended state registered
 	 *                        with the call executor
+	 * @param error  error object, may be {@code null}
 	 *
 	 * @throws ResolvedControlThrowable  if the resumed call initiates a non-local control change
 	 */
-	void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable;
+	void resumeError(ExecutionContext context, Object suspendedState, Object error)
+			throws ResolvedControlThrowable;
 
 }

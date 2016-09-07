@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.ExecutionContext;
-
 /**
  * Abstract function of two arguments.
  */

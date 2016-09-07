@@ -17,6 +17,7 @@
 package net.sandius.rembulan;
 
 import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.ExecutionContext;
 
 /**
  * An abstract class representing a Lua table.

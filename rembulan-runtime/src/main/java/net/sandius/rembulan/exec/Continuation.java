@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.SchedulingContext;
+import net.sandius.rembulan.runtime.SchedulingContext;
 
 /**
  * Reified, resumable state of computation.

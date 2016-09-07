@@ -17,7 +17,6 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.Conversions;
-import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.PlainValueTypeNamer;
@@ -28,6 +27,7 @@ import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.runtime.AbstractFunction0;
 import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.IllegalOperationAttemptException;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;

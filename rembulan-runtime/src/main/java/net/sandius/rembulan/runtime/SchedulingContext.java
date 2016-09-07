@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan;
+package net.sandius.rembulan.runtime;
 
 /**
  * An interface to the cooperative scheduler used in executing Lua programs.

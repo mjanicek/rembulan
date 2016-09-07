@@ -14,11 +14,9 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan;
+package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.runtime.Coroutine;
-import net.sandius.rembulan.runtime.LuaFunction;
-import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
+import net.sandius.rembulan.LuaState;
 
 /**
  * An interface to the execution context of a Lua call.

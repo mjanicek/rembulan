@@ -16,14 +16,14 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.ProtectedResumable;
-import net.sandius.rembulan.ReturnBuffer;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.runtime.AbstractFunctionAnyArg;
 import net.sandius.rembulan.runtime.Coroutine;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
+import net.sandius.rembulan.runtime.ProtectedResumable;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.ReturnBuffer;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 

@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
@@ -24,6 +23,7 @@ import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.util.Check;

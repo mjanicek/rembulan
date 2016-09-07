@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Resumable;
 import net.sandius.rembulan.compiler.gen.CodeSegmenter;
 import net.sandius.rembulan.compiler.gen.SegmentedCode;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
@@ -25,7 +23,9 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.impl.DefaultSavedState;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.Resumable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;

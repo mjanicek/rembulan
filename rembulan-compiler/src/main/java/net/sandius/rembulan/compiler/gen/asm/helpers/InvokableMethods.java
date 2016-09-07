@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.ExecutionContext;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import org.objectweb.asm.tree.AbstractInsnNode;
 

@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.AsyncTask;
-
 abstract class ControlThrowablePayload {
 
 	abstract void accept(Visitor visitor);

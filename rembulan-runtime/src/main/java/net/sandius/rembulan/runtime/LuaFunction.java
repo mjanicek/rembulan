@@ -16,9 +16,6 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Resumable;
-
 /**
  * An abstract function object.
  */

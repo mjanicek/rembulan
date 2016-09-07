@@ -16,9 +16,9 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.runtime.AbstractFunctionAnyArg;
+import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 import java.util.Arrays;

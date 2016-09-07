@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.impl;
 
-import net.sandius.rembulan.SchedulingContext;
+import net.sandius.rembulan.runtime.SchedulingContext;
 import net.sandius.rembulan.util.Check;
 
 /**

@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.AsyncTask;
+import net.sandius.rembulan.runtime.AsyncTask;
 
 /**
  * A callback object used to process control-related events during call execution.

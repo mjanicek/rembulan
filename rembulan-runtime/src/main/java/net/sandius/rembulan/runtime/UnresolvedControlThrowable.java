@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.Resumable;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 

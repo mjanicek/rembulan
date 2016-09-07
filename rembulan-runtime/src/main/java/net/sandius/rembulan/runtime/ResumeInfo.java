@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Resumable;
 import net.sandius.rembulan.util.Check;
 
 class ResumeInfo {
