@@ -14,45 +14,50 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.impl;
+package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.runtime.LuaFunction;
-import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 /**
- * Abstract function without arguments.
+ * Abstract function of two arguments.
  */
-public abstract class AbstractFunction0 extends LuaFunction {
+public abstract class AbstractFunction2 extends LuaFunction {
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
-		invoke(context);
+	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+		invoke(context, null, null);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ResolvedControlThrowable {
-		invoke(context);
+	public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
+		invoke(context, arg1, null);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
-		invoke(context);
+		invoke(context, arg1, arg2);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
-		invoke(context);
+		invoke(context, arg1, arg2);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
-		invoke(context);
+		invoke(context, arg1, arg2);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
-		invoke(context);
+		Object a = null, b = null;
+		switch (args.length) {
+			default:
+			case 2: b = args[1];
+			case 1: a = args[0];
+			case 0:
+		}
+		invoke(context, a, b);
 	}
 
 }

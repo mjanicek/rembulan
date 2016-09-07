@@ -14,55 +14,43 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.impl;
+package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.runtime.LuaFunction;
-import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 /**
- * Abstract function of five arguments.
+ * Abstract function of an arbitrary number of arguments.
  */
-public abstract class AbstractFunction5 extends LuaFunction {
+public abstract class AbstractFunctionAnyArg extends LuaFunction {
 
 	@Override
 	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-		invoke(context, null, null, null, null, null);
+		invoke(context, new Object[] { });
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
-		invoke(context, arg1, null, null, null, null);
+		invoke(context, new Object[] { arg1 });
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2, null, null, null);
+		invoke(context, new Object[] { arg1, arg2 });
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2, arg3, null, null);
+		invoke(context, new Object[] { arg1, arg2, arg3 });
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2, arg3, arg4, null);
+		invoke(context, new Object[] { arg1, arg2, arg3, arg4 });
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
-		Object a = null, b = null, c = null, d = null, e = null;
-		switch (args.length) {
-			default:
-			case 5: e = args[4];
-			case 4: d = args[3];
-			case 3: c = args[2];
-			case 2: b = args[1];
-			case 1: a = args[0];
-			case 0:
-		}
-		invoke(context, a, b, c, d, e);
+	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
+		invoke(context, new Object[] { arg1, arg2, arg3, arg4, arg5 });
 	}
 
 }

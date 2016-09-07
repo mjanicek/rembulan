@@ -14,54 +14,51 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.impl;
+package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.runtime.LuaFunction;
-import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 /**
- * Abstract function of four arguments.
+ * Abstract function of three arguments.
  */
-public abstract class AbstractFunction4 extends LuaFunction {
+public abstract class AbstractFunction3 extends LuaFunction {
 
 	@Override
 	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-		invoke(context, null, null, null, null);
+		invoke(context, null, null, null);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
-		invoke(context, arg1, null, null, null);
+		invoke(context, arg1, null, null);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2, null, null);
+		invoke(context, arg1, arg2, null);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2, arg3, null);
+	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
+		invoke(context, arg1, arg2, arg3);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
-		invoke(context, arg1, arg2, arg3, arg4);
+		invoke(context, arg1, arg2, arg3);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
-		Object a = null, b = null, c = null, d = null;
+		Object a = null, b = null, c = null;
 		switch (args.length) {
 			default:
-			case 4: d = args[3];
 			case 3: c = args[2];
 			case 2: b = args[1];
 			case 1: a = args[0];
 			case 0:
 		}
-		invoke(context, a, b, c, d);
+		invoke(context, a, b, c);
 	}
 
 }
