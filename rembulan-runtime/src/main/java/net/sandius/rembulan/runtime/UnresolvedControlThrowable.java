@@ -40,7 +40,7 @@ public final class UnresolvedControlThrowable extends Throwable {
 				new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack));
 	}
 
-	public ResolvedControlThrowable ignoreFrame() {
+	ResolvedControlThrowable resolve() {
 		return new ResolvedControlThrowable(payload, resumeStack);
 	}
 

@@ -61,7 +61,7 @@ public final class Coroutine {
 				Dispatch.call(context, target, context.getReturnBuffer().getAsArray());
 			}
 			catch (UnresolvedControlThrowable ct) {
-				throw ct.ignoreFrame();
+				throw ct.resolve();
 			}
 		}
 
