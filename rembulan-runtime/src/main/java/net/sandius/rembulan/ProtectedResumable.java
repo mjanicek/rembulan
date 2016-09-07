@@ -28,6 +28,9 @@ public interface ProtectedResumable extends Resumable {
 	 * Resumes this protected resumable in the given execution context {@code context},
 	 * passing the suspended state {@code suspendedState} and an error object {@code error}
 	 * to it.
+	 * <b>This method throws a {@link ResolvedControlThrowable}</b>:
+	 * this method is expected to have resolved non-local control changes up to the point
+	 * of its invocation.
 	 *
 	 * <p>This method is called by the call executor when resuming a previously suspended
 	 * protected function call while unrolling the call stack after an error has occurred.

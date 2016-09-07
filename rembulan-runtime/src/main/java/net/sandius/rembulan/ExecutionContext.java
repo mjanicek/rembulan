@@ -99,8 +99,8 @@ public interface ExecutionContext {
 	/**
 	 * Resumes the given coroutine {@code coroutine}, passing the arguments {@code args}
 	 * to it.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>The reference to the array {@code args} is not retained by the execution context;
 	 * {@code args} may therefore be freely re-used by the caller.</p>
@@ -116,8 +116,8 @@ public interface ExecutionContext {
 	/**
 	 * Yields control to the coroutine resuming the current coroutine, passing the
 	 * arguments {@code args} to it.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>The reference to the array {@code args} is not retained by the execution context;
 	 * {@code args} may therefore be freely re-used by the caller.</p>
@@ -131,8 +131,8 @@ public interface ExecutionContext {
 
 	/**
 	 * Resumes the current call after the asynchronous task {@code task} has been completed.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>In order to mark {@code task} as completed, the task must call
 	 * {@link AsyncTask.ContinueCallback#finished()}.</p>
@@ -155,8 +155,8 @@ public interface ExecutionContext {
 
 	/**
 	 * Pauses the execution if the according to the scheduler this call should be paused.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>To pause execution unconditionally, use {@link #pause()}.</p>
 	 *
@@ -167,8 +167,8 @@ public interface ExecutionContext {
 
 	/**
 	 * (Unconditionally) pauses the execution.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @throws UnresolvedControlThrowable  the control throwable for this control change
 	 */

@@ -97,8 +97,9 @@ public final class Dispatch {
 	/**
 	 * Evaluates tail calls stored in the return buffer associated with the execution
 	 * context {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws a {@link ResolvedControlThrowable}</b>:
+	 * this method is expected to have resolved non-local control changes up to the point
+	 * of its invocation.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 *
@@ -106,7 +107,7 @@ public final class Dispatch {
 	 * @throws NullPointerException  if {@code context} is {@code null}
 	 */
 	@SuppressWarnings("unused")
-	public static void evaluateTailCalls(ExecutionContext context) throws ResolvedControlThrowable {
+	static void evaluateTailCalls(ExecutionContext context) throws ResolvedControlThrowable {
 		ReturnBuffer r = context.getReturnBuffer();
 		while (r.isCall()) {
 			Object target = r.getCallTarget();
@@ -124,8 +125,8 @@ public final class Dispatch {
 
 	/**
 	 * Calls the object {@code target} with no arguments.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This is the equivalent of the Lua expression</p>
 	 * <pre>
@@ -144,7 +145,8 @@ public final class Dispatch {
 	 * @throws NullPointerException  if {@code context} is {@code null}
 	 */
 	@SuppressWarnings("unused")
-	public static void call(ExecutionContext context, Object target) throws UnresolvedControlThrowable {
+	public static void call(ExecutionContext context, Object target)
+			throws UnresolvedControlThrowable {
 		try {
 			mt_invoke(context, target);
 			evaluateTailCalls(context);
@@ -156,8 +158,8 @@ public final class Dispatch {
 
 	/**
 	 * Calls the object {@code target} with a single argument {@code arg1}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This is the equivalent of the Lua expression</p>
 	 * <pre>
@@ -177,7 +179,8 @@ public final class Dispatch {
 	 * @throws NullPointerException  if {@code context} is {@code null}
 	 */
 	@SuppressWarnings("unused")
-	public static void call(ExecutionContext context, Object target, Object arg1) throws UnresolvedControlThrowable {
+	public static void call(ExecutionContext context, Object target, Object arg1)
+			throws UnresolvedControlThrowable {
 		try {
 			mt_invoke(context, target, arg1);
 			evaluateTailCalls(context);
@@ -189,8 +192,8 @@ public final class Dispatch {
 
 	/**
 	 * Calls the object {@code target} with the arguments {@code arg1} and {@code arg2}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This is the equivalent of the Lua expression</p>
 	 * <pre>
@@ -211,7 +214,8 @@ public final class Dispatch {
 	 * @throws NullPointerException  if {@code context} is {@code null}
 	 */
 	@SuppressWarnings("unused")
-	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2) throws UnresolvedControlThrowable {
+	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2)
+			throws UnresolvedControlThrowable {
 		try {
 			mt_invoke(context, target, arg1, arg2);
 			evaluateTailCalls(context);
@@ -224,8 +228,8 @@ public final class Dispatch {
 	/**
 	 * Calls the object {@code target} with the arguments {@code arg1}, {@code arg2} and
 	 * {@code arg3}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This is the equivalent of the Lua expression</p>
 	 * <pre>
@@ -247,7 +251,8 @@ public final class Dispatch {
 	 * @throws NullPointerException  if {@code context} is {@code null}
 	 */
 	@SuppressWarnings("unused")
-	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws UnresolvedControlThrowable {
+	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3)
+			throws UnresolvedControlThrowable {
 		try {
 			mt_invoke(context, target, arg1, arg2, arg3);
 			evaluateTailCalls(context);
@@ -260,8 +265,8 @@ public final class Dispatch {
 	/**
 	 * Calls the object {@code target} with the arguments {@code arg1}, {@code arg2},
 	 * {@code arg3} and {@code arg4}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This is the equivalent of the Lua expression</p>
 	 * <pre>
@@ -284,7 +289,8 @@ public final class Dispatch {
 	 * @throws NullPointerException  if {@code context} is {@code null}
 	 */
 	@SuppressWarnings("unused")
-	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws UnresolvedControlThrowable {
+	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4)
+			throws UnresolvedControlThrowable {
 		try {
 			mt_invoke(context, target, arg1, arg2, arg3, arg4);
 			evaluateTailCalls(context);
@@ -297,8 +303,8 @@ public final class Dispatch {
 	/**
 	 * Calls the object {@code target} with the arguments {@code arg1}, {@code arg2},
 	 * {@code arg3}, {@code arg4} and {@code arg5}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This is the equivalent of the Lua expression</p>
 	 * <pre>
@@ -322,7 +328,8 @@ public final class Dispatch {
 	 * @throws NullPointerException  if {@code context} is {@code null}
 	 */
 	@SuppressWarnings("unused")
-	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws UnresolvedControlThrowable {
+	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
+			throws UnresolvedControlThrowable {
 		try {
 			mt_invoke(context, target, arg1, arg2, arg3, arg4, arg5);
 			evaluateTailCalls(context);
@@ -334,8 +341,8 @@ public final class Dispatch {
 
 	/**
 	 * Calls the object {@code target} with the arguments passed in the array {@code args}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This is the equivalent of the Lua expression</p>
 	 * <pre>
@@ -365,7 +372,8 @@ public final class Dispatch {
 	 * @throws NullPointerException  if {@code context} is {@code null}
 	 */
 	@SuppressWarnings("unused")
-	public static void call(ExecutionContext context, Object target, Object[] args) throws UnresolvedControlThrowable {
+	public static void call(ExecutionContext context, Object target, Object[] args)
+			throws UnresolvedControlThrowable {
 		try {
 			mt_invoke(context, target, args);
 			evaluateTailCalls(context);
@@ -400,8 +408,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a + b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -446,8 +454,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a - b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -491,8 +499,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a * b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -536,8 +544,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a / b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -581,8 +589,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a % b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -626,8 +634,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a // b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -671,8 +679,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a ^ b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -738,8 +746,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a & b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -765,8 +773,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a | b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -792,8 +800,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a ~ b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -819,8 +827,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a << b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -846,8 +854,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a >> b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -873,8 +881,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code -a}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param o  the argument, may be any value
@@ -914,8 +922,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code ~o}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param o  the argument, may be any value
@@ -955,8 +963,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code #o}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param o  the argument, may be any value
@@ -987,8 +995,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a .. b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -1066,8 +1074,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a == b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -1085,8 +1093,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a != b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -1122,8 +1130,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a < b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -1192,8 +1200,8 @@ public final class Dispatch {
 	/**
 	 * Evaluates the Lua expression {@code a <= b}, including the handling of metamethods,
 	 * and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
-	 * handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param a  the first operand, may be any value
@@ -1273,8 +1281,8 @@ public final class Dispatch {
 	 * Evaluates the Lua expression {@code table[key]} (in non-assignment context) including
 	 * the handling of metamethods, and stores the result to the return buffer associated with
 	 * {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should
-	 * be caught, handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param table  the target, may be any value
@@ -1329,8 +1337,8 @@ public final class Dispatch {
 	 * Evaluates the Lua expression {@code table[key]} (in non-assignment context) including
 	 * the handling of metamethods, and stores the result to the return buffer associated with
 	 * {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should
-	 * be caught, handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This method differs from {@link #index(ExecutionContext, Object, Object)}
 	 * in that the {@code table} argument is required to be a non-{@code null} reference
@@ -1354,8 +1362,8 @@ public final class Dispatch {
 	/**
 	 * Executes the Lua statement {@code table[key] = value}, including the handling of
 	 * metamethods, and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should
-	 * be caught, handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * @param context  execution context, must not be {@code null}
 	 * @param table  the target, may be any value
@@ -1410,8 +1418,8 @@ public final class Dispatch {
 	/**
 	 * Executes the Lua statement {@code table[key] = value}, including the handling of
 	 * metamethods, and stores the result to the return buffer associated with {@code context}.
-	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should
-	 * be caught, handled and re-thrown by the caller of this method.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
 	 *
 	 * <p>This method differs from {@link #setindex(ExecutionContext, Object, Object, Object)}
 	 * in that the {@code table} argument is required to be a non-{@code null} reference
