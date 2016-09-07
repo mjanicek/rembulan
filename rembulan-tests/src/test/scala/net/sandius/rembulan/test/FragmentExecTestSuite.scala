@@ -21,10 +21,10 @@ import java.io.PrintStream
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.exec._
-import net.sandius.rembulan.impl.DefaultLuaState
 import net.sandius.rembulan.lib.Lib
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
+import net.sandius.rembulan.runtime.DefaultLuaState
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.{Conversions, LuaState, Table, Variable}
 import org.scalatest.{FunSpec, MustMatchers}
@@ -195,7 +195,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           val callExecutor = DirectCallExecutor.newExecutorWithCpuLimit(state, s)
 
           var resultValues: Array[AnyRef] = null
-          var continuation: OneShotContinuation = Call.init(state, func).getCurrentContinuation()
+          var continuation: Continuation = state.newCall(func)
           var error: CallException = null
 
           do {

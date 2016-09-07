@@ -17,14 +17,16 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.*;
-import net.sandius.rembulan.exec.ResolvedControlThrowable;
-import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
+import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.IllegalOperationAttemptException;
+import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 
 import java.io.PrintStream;

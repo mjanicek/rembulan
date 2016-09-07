@@ -19,17 +19,16 @@ package net.sandius.rembulan.standalone;
 import jline.console.ConsoleReader;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Function;
-import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
 import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallInterruptedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
-import net.sandius.rembulan.impl.DefaultLuaState;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.load.LoaderException;
+import net.sandius.rembulan.runtime.DefaultLuaState;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
@@ -45,7 +44,7 @@ public class RembulanConsole {
 	private final PrintStream out;
 	private final PrintStream err;
 
-	private final LuaState state;
+//	private final LuaState state;
 	private final Table env;
 
 	private final CompilerChunkLoader loader;
@@ -75,7 +74,7 @@ public class RembulanConsole {
 		this.out = Check.notNull(out);
 		this.err = Check.notNull(err);
 
-		this.state = new DefaultLuaState();
+		DefaultLuaState state = new DefaultLuaState();
 		this.env = state.newTable();
 
 		this.callExecutor = DirectCallExecutor.newExecutor(state);

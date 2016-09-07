@@ -14,17 +14,20 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.impl;
+package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
+import net.sandius.rembulan.exec.CallInitialiser;
+import net.sandius.rembulan.exec.OneShotContinuation;
+import net.sandius.rembulan.impl.DefaultTable;
 import net.sandius.rembulan.util.Check;
 
 /**
- * Default implementation of Lua states.
+ * Default implementation of Lua states that is also a call initialiser.
  */
-public class DefaultLuaState extends LuaState {
+public class DefaultLuaState extends LuaState implements CallInitialiser {
 
 	private final TableFactory tableFactory;
 
@@ -169,6 +172,11 @@ public class DefaultLuaState extends LuaState {
 	@Override
 	public TableFactory tableFactory() {
 		return tableFactory;
+	}
+
+	@Override
+	public OneShotContinuation newCall(Object fn, Object... args) {
+		return Call.init(this, fn, args).getCurrentContinuation();
 	}
 
 }

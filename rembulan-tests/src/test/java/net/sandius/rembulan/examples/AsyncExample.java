@@ -20,9 +20,9 @@ import net.sandius.rembulan.AsyncTask;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Variable;
-import net.sandius.rembulan.exec.ResolvedControlThrowable;
-import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.AbstractFunction1;
+import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 public class AsyncExample extends AbstractFunction1 {
 

@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan;
+package net.sandius.rembulan.runtime;
+
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.LuaRuntimeException;
+import net.sandius.rembulan.PlainValueTypeNamer;
+import net.sandius.rembulan.Table;
 
 /**
  * An exception thrown by the runtime when an attempt to perform an illegal operation.

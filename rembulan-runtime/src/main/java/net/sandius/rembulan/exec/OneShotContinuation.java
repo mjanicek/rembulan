@@ -16,25 +16,19 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.SchedulingContext;
-
 /**
  * A one-shot continuation, i.e., a continuation that may be resumed at most once.
  */
-public interface OneShotContinuation {
+public interface OneShotContinuation extends Continuation {
 
 	/**
-	 * Resumes the continuation with the given event handler {@code handler} in the scheduling
-	 * context {@code schedulingContext}.
+	 * Returns {@code true} if this continuation is current, i.e. can be resumed.
 	 *
-	 * @param handler  the call event handler, must not be {@code null}
-	 * @param schedulingContext  the scheduling context, must not be {@code null}
+	 * <p>In other words, returns {@code false} if an attempt to resume the continuation
+	 * would throw a {@link InvalidContinuationException}.</p>
 	 *
-	 * @throws NullPointerException  if {@code handler} or {@code schedulingContext}
-	 *                               is {@code null}
-	 * @throws InvalidContinuationException  when the continuation is invalid,
-	 *                                       typically when it has already been resumed once
+	 * @return  {@code true} if this continuation is valid, {@code false} otherwise
 	 */
-	void resume(CallEventHandler handler, SchedulingContext schedulingContext);
+	boolean isCurrent();
 
 }

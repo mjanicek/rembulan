@@ -20,14 +20,14 @@ import net.sandius.rembulan.util.Check;
 
 public class CallInterruptedException extends Exception {
 
-	private final OneShotContinuation continuation;
+	private final Continuation continuation;
 
-	CallInterruptedException(OneShotContinuation continuation) {
+	CallInterruptedException(Continuation continuation) {
 		super("Call interrupted");
 		this.continuation = Check.notNull(continuation);
 	}
 
-	public OneShotContinuation getContinuation() {
+	public Continuation getContinuation() {
 		return continuation;
 	}
 

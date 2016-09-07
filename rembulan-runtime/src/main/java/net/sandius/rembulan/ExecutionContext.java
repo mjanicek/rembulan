@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.exec.Coroutine;
-import net.sandius.rembulan.exec.UnresolvedControlThrowable;
+import net.sandius.rembulan.runtime.Coroutine;
+import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 /**
  * An interface to the execution context of a Lua call.

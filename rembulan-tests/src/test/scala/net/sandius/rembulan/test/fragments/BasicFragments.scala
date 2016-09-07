@@ -17,8 +17,9 @@
 package net.sandius.rembulan.test.fragments
 
 import net.sandius.rembulan
+import net.sandius.rembulan.runtime.IllegalOperationAttemptException
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
-import net.sandius.rembulan.{ConversionException, IllegalOperationAttemptException, LuaRuntimeException, Table}
+import net.sandius.rembulan.{ConversionException, LuaRuntimeException, Table}
 
 object BasicFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 

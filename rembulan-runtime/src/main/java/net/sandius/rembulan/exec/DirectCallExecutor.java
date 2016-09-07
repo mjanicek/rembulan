@@ -17,30 +17,30 @@
 package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.AsyncTask;
-import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.SchedulingContext;
 import net.sandius.rembulan.impl.SchedulingContexts;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DirectCallExecutor {
 
-	private final LuaState state;
+	private final CallInitialiser initialiser;
 	private final int cpuLimit;
 
-	DirectCallExecutor(LuaState state, int cpuLimit) {
-		this.state = Check.notNull(state);
+	DirectCallExecutor(CallInitialiser initialiser, int cpuLimit) {
+		this.initialiser = Objects.requireNonNull(initialiser);
 		this.cpuLimit = cpuLimit;
 	}
 
-	public static DirectCallExecutor newExecutor(LuaState state) {
-		return new DirectCallExecutor(state, -1);
+	public static DirectCallExecutor newExecutor(CallInitialiser initialiser) {
+		return new DirectCallExecutor(initialiser, -1);
 	}
 
-	public static DirectCallExecutor newExecutorWithCpuLimit(LuaState state, int cpuLimit) {
-		return new DirectCallExecutor(state, Check.positive(cpuLimit));
+	public static DirectCallExecutor newExecutorWithCpuLimit(CallInitialiser initialiser, int cpuLimit) {
+		return new DirectCallExecutor(initialiser, Check.positive(cpuLimit));
 	}
 
 	private static class Result implements CallEventHandler {
@@ -50,7 +50,7 @@ public class DirectCallExecutor {
 		// if wasSet.get() == true, then at most one of the next three fields may be null;
 		// otherwise, all must be null.
 
-		private OneShotContinuation cont;
+		private Continuation cont;
 		private Object[] values;
 		private Throwable error;
 
@@ -66,7 +66,7 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public void returned(Call c, Object[] result) {
+		public void returned(Object id, Object[] result) {
 			if (result != null) {
 				if (wasSet.compareAndSet(false, true)) {
 					this.values = result;
@@ -81,7 +81,7 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public void failed(Call c, Throwable error) {
+		public void failed(Object id, Throwable error) {
 			if (error != null) {
 				if (wasSet.compareAndSet(false, true)) {
 					this.error = error;
@@ -96,7 +96,7 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public void paused(Call c, OneShotContinuation cont) {
+		public void paused(Object id, Continuation cont) {
 			if (cont != null) {
 				if (wasSet.compareAndSet(false, true)) {
 					this.cont = cont;
@@ -111,7 +111,7 @@ public class DirectCallExecutor {
 		}
 
 		@Override
-		public void async(Call c, final OneShotContinuation cont, AsyncTask task) {
+		public void async(Object id, final Continuation cont, AsyncTask task) {
 			if (cont != null && task != null) {
 				if (wasSet.compareAndSet(false, true)) {
 					this.cont = cont;
@@ -152,11 +152,10 @@ public class DirectCallExecutor {
 	public Object[] call(Object fn, Object... args)
 			throws CallException, CallInterruptedException, InterruptedException {
 
-		Call call = Call.init(state, fn, args);
-		return resume(call.getCurrentContinuation());
+		return resume(initialiser.newCall(fn, args));
 	}
 
-	public Object[] resume(OneShotContinuation continuation)
+	public Object[] resume(Continuation continuation)
 			throws CallException, CallInterruptedException, InterruptedException {
 
 		while (true) {

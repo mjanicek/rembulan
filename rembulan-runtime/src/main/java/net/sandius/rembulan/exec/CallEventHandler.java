@@ -24,40 +24,41 @@ import net.sandius.rembulan.AsyncTask;
 public interface CallEventHandler {
 
 	/**
-	 * The callback triggered by the normal termination of the main function of the call
-	 * {@code c}.
+	 * Callback triggered by the normal termination of the main function of the call
+	 * with the identifier {@code id}.
 	 *
-	 * @param c  the call, must not be {@code null}
+	 * @param id  the call identifier, must not be {@code null}
 	 * @param result  the return values, must not be {@code null}
 	 */
-	void returned(Call c, Object[] result);
+	void returned(Object id, Object[] result);
 
 	/**
-	 * The callback triggered by an abnormal (error) termination of the main function of
-	 * the call {@code c}.
+	 * Callback triggered by an abnormal (error) termination of the main function of
+	 * the call with the identifier {@code id}.
 	 *
-	 * @param c  the call, must not be {@code null}
+	 * @param id  the call identifier, must not be {@code null}
 	 * @param error  the error that caused the abnormal termination, must not be {@code null}
 	 */
-	void failed(Call c, Throwable error);
+	void failed(Object id, Throwable error);
 
 	/**
-	 * The callback triggered when the execution of the call {@code c} is paused.
+	 * Callback triggered when the execution of the call with the identifier {@code id}
+	 * is paused.
 	 *
-	 * @param c  the call, must not be {@code null}
+	 * @param id  the call identifier, must not be {@code null}
 	 * @param cont  the call continuation, must not be {@code null}
 	 */
-	void paused(Call c, OneShotContinuation cont);
+	void paused(Object id, Continuation cont);
 
 	/**
-	 * The callback triggered by a request by {@code c} to be resumed after the task
-	 * {@code task} has been completed.
+	 * Callback triggered by a request by the call with the identifier {@code id} to be
+	 * resumed after the task {@code task} has been completed.
 	 *
-	 * @param c  the call, must not be {@code null}
+	 * @param id  the call identifier, must not be {@code null}
 	 * @param cont  the call continuation, must not be {@code null}
 	 * @param task  the task, must not be {@code null}
 	 */
-	void async(Call c, OneShotContinuation cont, AsyncTask task);
+	void async(Object id, Continuation cont, AsyncTask task);
 
 }
 

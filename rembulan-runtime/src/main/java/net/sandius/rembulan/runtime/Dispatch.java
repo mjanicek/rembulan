@@ -14,10 +14,9 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan;
+package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.exec.ResolvedControlThrowable;
-import net.sandius.rembulan.exec.UnresolvedControlThrowable;
+import net.sandius.rembulan.*;
 
 import java.util.Objects;
 

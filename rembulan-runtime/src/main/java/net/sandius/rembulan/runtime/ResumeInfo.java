@@ -14,24 +14,24 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.exec;
+package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.AsyncTask;
+import net.sandius.rembulan.ExecutionContext;
+import net.sandius.rembulan.Resumable;
+import net.sandius.rembulan.util.Check;
 
-abstract class ControlThrowablePayload {
+class ResumeInfo {
 
-	abstract void accept(Visitor visitor);
+	public final Resumable resumable;
+	public final Object savedState;
 
-	interface Visitor {
+	public ResumeInfo(Resumable resumable, Object savedState) {
+		this.resumable = Check.notNull(resumable);
+		this.savedState = savedState;
+	}
 
-		void preempted();
-
-		void coroutineYield(Object[] values);
-
-		void coroutineResume(Coroutine target, Object[] values);
-
-		void async(AsyncTask task);
-
+	public void resume(ExecutionContext context) throws ResolvedControlThrowable {
+		resumable.resume(context, savedState);
 	}
 
 }

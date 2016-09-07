@@ -22,9 +22,9 @@ import java.util.Scanner
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.exec.DirectCallExecutor
-import net.sandius.rembulan.impl.DefaultLuaState
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
+import net.sandius.rembulan.runtime.DefaultLuaState
 import net.sandius.rembulan.{Function, LuaState, Table, Variable}
 
 import scala.util.Try
@@ -110,7 +110,7 @@ object BenchmarkRunner {
     env
   }
 
-  case class EnvWithMainChunk(state: LuaState, fn: Function)
+  case class EnvWithMainChunk(state: DefaultLuaState, fn: Function)
 
   def init(settings: CompilerSettings, filename: String, args: String*) = {
     val resourceStream = getClass.getResourceAsStream(filename)

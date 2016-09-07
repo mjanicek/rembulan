@@ -16,22 +16,8 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Resumable;
-import net.sandius.rembulan.util.Check;
+public interface CallInitialiser {
 
-class ResumeInfo {
-
-	public final Resumable resumable;
-	public final Object savedState;
-
-	public ResumeInfo(Resumable resumable, Object savedState) {
-		this.resumable = Check.notNull(resumable);
-		this.savedState = savedState;
-	}
-
-	public void resume(ExecutionContext context) throws ResolvedControlThrowable {
-		resumable.resume(context, savedState);
-	}
+	Continuation newCall(Object fn, Object... args);
 
 }

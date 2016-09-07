@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.exec;
+package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.Resumable;
 import net.sandius.rembulan.util.Check;

@@ -16,8 +16,9 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.exec.ResolvedControlThrowable;
-import net.sandius.rembulan.exec.UnresolvedControlThrowable;
+import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 /**
  * An invokable object, corresponding to the Lua {@code function} type.

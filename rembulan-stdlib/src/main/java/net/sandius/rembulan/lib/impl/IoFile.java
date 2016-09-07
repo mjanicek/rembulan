@@ -18,8 +18,8 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.exec.ResolvedControlThrowable;
 import net.sandius.rembulan.impl.DefaultUserdata;
+import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 import java.io.IOException;
 

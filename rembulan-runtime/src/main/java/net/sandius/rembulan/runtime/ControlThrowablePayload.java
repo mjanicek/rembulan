@@ -14,12 +14,24 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.exec;
+package net.sandius.rembulan.runtime;
 
-class IllegalCoroutineStateException extends IllegalStateException {
+import net.sandius.rembulan.AsyncTask;
 
-	public IllegalCoroutineStateException(String message) {
-		super(message);
+abstract class ControlThrowablePayload {
+
+	abstract void accept(Visitor visitor);
+
+	interface Visitor {
+
+		void preempted();
+
+		void coroutineYield(Object[] values);
+
+		void coroutineResume(Coroutine target, Object[] values);
+
+		void async(AsyncTask task);
+
 	}
 
 }

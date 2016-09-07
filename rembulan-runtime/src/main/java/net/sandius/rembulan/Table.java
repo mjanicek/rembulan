@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.runtime.Dispatch;
+
 /**
  * An abstract class representing a Lua table.
  */

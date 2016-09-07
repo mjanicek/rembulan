@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.runtime.Dispatch;
+
 import java.util.Collection;
 
 /**

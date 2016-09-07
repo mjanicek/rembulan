@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.Dispatch;
 import net.sandius.rembulan.load.ChunkClassLoader;
+import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
@@ -25,7 +25,7 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.Objects;
 
-public class StackTraceback {
+class StackTraceback {
 
 	public static final Entry TAIL_CALLS = MiscEntry.fromString("...tail calls...");
 

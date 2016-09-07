@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.exec.Coroutine;
+import net.sandius.rembulan.runtime.Coroutine;
 
 /**
  * An enum representing a Lua type.

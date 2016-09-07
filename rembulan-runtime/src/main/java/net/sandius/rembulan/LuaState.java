@@ -20,6 +20,7 @@ package net.sandius.rembulan;
  * A Lua state, the global context holding shared metatables and providing methods
  * for instantiating new tables.
  */
+@Deprecated
 public abstract class LuaState implements MetatableProvider, TableFactory {
 
 	// TODO: registry

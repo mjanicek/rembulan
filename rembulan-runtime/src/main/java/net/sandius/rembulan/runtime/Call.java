@@ -14,9 +14,19 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.exec;
+package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.*;
+import net.sandius.rembulan.AsyncTask;
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.ExecutionContext;
+import net.sandius.rembulan.Function;
+import net.sandius.rembulan.LuaState;
+import net.sandius.rembulan.ProtectedResumable;
+import net.sandius.rembulan.ReturnBuffer;
+import net.sandius.rembulan.SchedulingContext;
+import net.sandius.rembulan.exec.CallEventHandler;
+import net.sandius.rembulan.exec.InvalidContinuationException;
+import net.sandius.rembulan.exec.OneShotContinuation;
 import net.sandius.rembulan.impl.ReturnBuffers;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
@@ -31,7 +41,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * An object representing a (potentially paused) Lua function call.
  */
-public class Call {
+class Call {
 
 	private final LuaState state;
 	private final ReturnBuffer returnBuffer;
@@ -166,8 +176,18 @@ public class Call {
 		}
 
 		@Override
+		public Object callIdentifier() {
+			return outer();
+		}
+
+		@Override
 		public void resume(CallEventHandler handler, SchedulingContext schedulingContext) {
 			Call.this.resume(handler, schedulingContext, version);
+		}
+
+		@Override
+		public boolean isCurrent() {
+			return this.version == Call.this.currentVersion.get();
 		}
 
 	}

@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.examples
+package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.exec.DirectCallExecutor
-import net.sandius.rembulan.runtime.DefaultLuaState
+public class IllegalCoroutineStateException extends IllegalStateException {
 
-object AsyncRunner {
-
-  def main(args: Array[String]): Unit = {
-
-    val state = new DefaultLuaState()
-    val executor = DirectCallExecutor.newExecutor(state)
-
-    System.out.println("Calling...")
-    val result = executor.call(new AsyncExample, java.lang.Long.valueOf(1000))
-    System.out.println(result.mkString("Returned: [", ", ", "]"))
-
-  }
+	public IllegalCoroutineStateException(String message) {
+		super(message);
+	}
 
 }

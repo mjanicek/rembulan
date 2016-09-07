@@ -17,21 +17,21 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.Conversions;
-import net.sandius.rembulan.Dispatch;
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Function;
-import net.sandius.rembulan.IllegalOperationAttemptException;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.exec.ResolvedControlThrowable;
-import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.AbstractFunction0;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.StringLib;
+import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.IllegalOperationAttemptException;
+import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;

@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.exec.ResolvedControlThrowable;
-import net.sandius.rembulan.exec.UnresolvedControlThrowable;
+import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 /**
  * An interface for resuming suspended Lua function calls.

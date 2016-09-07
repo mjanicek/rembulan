@@ -17,7 +17,6 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.Conversions;
-import net.sandius.rembulan.Dispatch;
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.LuaRuntimeException;
@@ -25,11 +24,12 @@ import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.ReturnBuffer;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.exec.ResolvedControlThrowable;
-import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.TableLib;
+import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 import java.util.ArrayList;
 

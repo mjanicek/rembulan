@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.exec;
+package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
@@ -42,11 +42,11 @@ public final class ResolvedControlThrowable extends Throwable {
 	}
 
 	// LIFO iterator
-	public Iterator<ResumeInfo> frames() {
+	Iterator<ResumeInfo> frames() {
 		return Cons.newIterator(resumeStack);
 	}
 
-	public UnresolvedControlThrowable unresolve() {
+	UnresolvedControlThrowable unresolve() {
 		return new UnresolvedControlThrowable(payload, resumeStack);
 	}
 
