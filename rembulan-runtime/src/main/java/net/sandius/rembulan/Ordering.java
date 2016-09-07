@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.runtime.LuaFunction;
+
 import java.util.Comparator;
 
 /**
@@ -150,7 +152,7 @@ public abstract class Ordering<T> implements Comparator<T> {
 		else if (a instanceof String && b instanceof String) {
 			return Ordering.STRING.eq((String) a, (String) b);
 		}
-		else if (a instanceof Boolean || a instanceof Invokable) {
+		else if (a instanceof Boolean || a instanceof LuaFunction) {
 			// value-based equality
 			return a.equals(b);
 		}

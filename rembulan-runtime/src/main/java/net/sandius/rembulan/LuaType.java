@@ -17,6 +17,7 @@
 package net.sandius.rembulan;
 
 import net.sandius.rembulan.runtime.Coroutine;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * An enum representing a Lua type.
@@ -39,7 +40,7 @@ import net.sandius.rembulan.runtime.Coroutine;
  *       </ul>
  *     </li>
  *     <li>{@link #STRING} ... instances of {@link String java.lang.String}</li>
- *     <li>{@link #FUNCTION} ... {@link Invokable}</li>
+ *     <li>{@link #FUNCTION} ... {@link LuaFunction}</li>
  *     <li>{@link #USERDATA}:
  *       <ul>
  *           <li><i>full userdata</i> ... {@link Userdata}</li>
@@ -88,7 +89,7 @@ public enum LuaType {
 	STRING,
 
 	/**
-	 * The Lua {@code function} type, corresponding to instances of {@link Invokable}.
+	 * The Lua {@code function} type, corresponding to instances of {@link LuaFunction}.
 	 */
 	FUNCTION,
 
@@ -121,7 +122,7 @@ public enum LuaType {
 		else if (o instanceof Number) return LuaType.NUMBER;
 		else if (o instanceof String) return LuaType.STRING;
 		else if (o instanceof Table) return LuaType.TABLE;
-		else if (o instanceof Invokable) return LuaType.FUNCTION;
+		else if (o instanceof LuaFunction) return LuaType.FUNCTION;
 		else if (o instanceof Coroutine) return LuaType.THREAD;
 		else return LuaType.USERDATA;
 	}
@@ -207,13 +208,13 @@ public enum LuaType {
 	 * Returns {@code true} iff {@code o} is a Lua function.
 	 *
 	 * <p>{@code o} is a Lua function if and only if {@code o} is an instance of
-	 * {@link Invokable}.</p>
+	 * {@link LuaFunction}.</p>
 	 *
 	 * @param o  the object to test for being a function, may be {@code null}
 	 * @return  {@code true} iff {@code o} is a Lua function
 	 */
 	public static boolean isFunction(Object o) {
-		return o instanceof Invokable;
+		return o instanceof LuaFunction;
 	}
 
 	/**

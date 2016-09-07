@@ -29,15 +29,15 @@ public final class Dispatch {
 		// not to be instantiated
 	}
 
-	static Invokable callTarget(MetatableProvider metatableProvider, Object target) {
-		if (target instanceof Invokable) {
-			return (Invokable) target;
+	static LuaFunction callTarget(MetatableProvider metatableProvider, Object target) {
+		if (target instanceof LuaFunction) {
+			return (LuaFunction) target;
 		}
 		else {
 			Object handler = Metatables.getMetamethod(metatableProvider, Metatables.MT_CALL, target);
 
-			if (handler instanceof Invokable) {
-				return (Invokable) handler;
+			if (handler instanceof LuaFunction) {
+				return (LuaFunction) handler;
 			}
 			else {
 				throw IllegalOperationAttemptException.call(target);
@@ -46,43 +46,43 @@ public final class Dispatch {
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target) throws ResolvedControlThrowable {
-		Invokable fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context);
 		else fn.invoke(context, target);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1) throws ResolvedControlThrowable {
-		Invokable fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1);
 		else fn.invoke(context, target, arg1);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2) throws ResolvedControlThrowable {
-		Invokable fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1, arg2);
 		else fn.invoke(context, target, arg1, arg2);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
-		Invokable fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3);
 		else fn.invoke(context, target, arg1, arg2, arg3);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
-		Invokable fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4);
 		else fn.invoke(context, target, arg1, arg2, arg3, arg4);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
-		Invokable fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context.getState(), target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4, arg5);
 		else fn.invoke(context, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object[] args) throws ResolvedControlThrowable {
-		Invokable fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context.getState(), target);
 		if (fn == target) {
 			fn.invoke(context, args);
 		}
@@ -345,7 +345,7 @@ public final class Dispatch {
 	 * to {@code (args.length - 1)}, including metamethod handling and tail call evaluation.
 	 * Consequently, {@code target} may be any value (i.e., is not required to be a function).</p>
 	 *
-	 * <p>Following the contract of {@link Invokable#invoke(ExecutionContext, Object[])},
+	 * <p>Following the contract of {@link LuaFunction#invoke(ExecutionContext, Object[])},
 	 * the array {@code args} passed to the called function may not be modified by
 	 * the function and the reference to {@code args} must not be retained by the function beyond
 	 * the scope of this method's invocation. It is therefore safe to assume that the contents of
@@ -1304,9 +1304,9 @@ public final class Dispatch {
 			context.getReturnBuffer().setTo(null);
 			return;
 		}
-		if (handler instanceof Invokable) {
+		if (handler instanceof LuaFunction) {
 			// call the handler
-			Invokable fn = (Invokable) handler;
+			LuaFunction fn = (LuaFunction) handler;
 
 			try {
 				fn.invoke(context, table, key);
@@ -1386,9 +1386,9 @@ public final class Dispatch {
 			return;
 		}
 
-		if (handler instanceof Invokable) {
+		if (handler instanceof LuaFunction) {
 			// call the handler
-			Invokable fn = (Invokable) handler;
+			LuaFunction fn = (LuaFunction) handler;
 
 			try {
 				fn.invoke(context, table, key, value);

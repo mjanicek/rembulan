@@ -17,7 +17,7 @@
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Invokable;
+import net.sandius.rembulan.runtime.LuaFunction;
 import org.objectweb.asm.tree.AbstractInsnNode;
 
 public class InvokableMethods {
@@ -28,7 +28,7 @@ public class InvokableMethods {
 
 	public static ReflectionUtils.Method invoke_method(int kind) {
 		return ReflectionUtils.virtualArgListMethodFromKind(
-				Invokable.class, "invoke", new Class[] { ExecutionContext.class }, kind);
+				LuaFunction.class, "invoke", new Class[] { ExecutionContext.class }, kind);
 	}
 
 	public static AbstractInsnNode invoke(int kind) {
