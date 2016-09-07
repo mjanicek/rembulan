@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.impl;
 
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * Exception thrown to indicate that a function is not suspendable.
@@ -32,7 +32,7 @@ public class NonsuspendableFunctionException extends UnsupportedOperationExcepti
 	 *
 	 * @param clazz  class of the function, may be {@code null}
 	 */
-	public NonsuspendableFunctionException(Class<? extends Function> clazz) {
+	public NonsuspendableFunctionException(Class<? extends LuaFunction> clazz) {
 		super("Function is not suspendable" + (clazz != null
 				? ": " + clazz.getName()
 				: ""));

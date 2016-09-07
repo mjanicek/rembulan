@@ -17,13 +17,13 @@
 package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 /**
  * Abstract function without arguments.
  */
-public abstract class AbstractFunction0 extends Function {
+public abstract class AbstractFunction0 extends LuaFunction {
 
 	@Override
 	public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {

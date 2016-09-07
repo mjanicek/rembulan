@@ -45,7 +45,7 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 public abstract class CoroutineLib extends Lib {
 
@@ -75,7 +75,7 @@ public abstract class CoroutineLib extends Lib {
 	 *
 	 * @return the {@code coroutine.create} function
 	 */
-	protected abstract Function _create();
+	protected abstract LuaFunction _create();
 
 	/**
 	 * {@code coroutine.resume (co [, val1, ···])}
@@ -92,7 +92,7 @@ public abstract class CoroutineLib extends Lib {
 	 *
 	 * @return the {@code coroutine.resume} function
 	 */
-	protected abstract Function _resume();
+	protected abstract LuaFunction _resume();
 
 	/**
 	 * {@code coroutine.yield (···)}
@@ -102,7 +102,7 @@ public abstract class CoroutineLib extends Lib {
 	 *
 	 * @return the {@code coroutine.yield} function
 	 */
-	protected abstract Function _yield();
+	protected abstract LuaFunction _yield();
 
 	/**
 	 * {@code coroutine.isyieldable ()}
@@ -114,7 +114,7 @@ public abstract class CoroutineLib extends Lib {
 	 *
 	 * @return the {@code coroutine.isyieldable} function
 	 */
-	protected abstract Function _isyieldable();
+	protected abstract LuaFunction _isyieldable();
 
 	/**
 	 * {@code coroutine.status (co)}
@@ -128,7 +128,7 @@ public abstract class CoroutineLib extends Lib {
 	 *
 	 * @return the {@code coroutine.status} function
 	 */
-	protected abstract Function _status();
+	protected abstract LuaFunction _status();
 
 	/**
 	 * {@code coroutine.running ()}
@@ -138,7 +138,7 @@ public abstract class CoroutineLib extends Lib {
 	 *
 	 * @return the {@code coroutine.running} function
 	 */
-	protected abstract Function _running();
+	protected abstract LuaFunction _running();
 
 	/**
 	 * {@code coroutine.wrap (f)}
@@ -151,6 +151,6 @@ public abstract class CoroutineLib extends Lib {
 	 *
 	 * @return the {@code coroutine.wrap} function
 	 */
-	protected abstract Function _wrap();
+	protected abstract LuaFunction _wrap();
 
 }

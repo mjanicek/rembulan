@@ -17,7 +17,7 @@
 package net.sandius.rembulan.test.fragments
 
 import net.sandius.rembulan.lib.AssertionFailedException
-import net.sandius.rembulan.runtime.{Coroutine, Function, IllegalOperationAttemptException}
+import net.sandius.rembulan.runtime.{Coroutine, IllegalOperationAttemptException, LuaFunction}
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations}
 
 object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
@@ -114,7 +114,7 @@ object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
       |return w
     """
   }
-  WrapReturnsAFunction in CoroContext succeedsWith (classOf[Function])
+  WrapReturnsAFunction in CoroContext succeedsWith (classOf[LuaFunction])
 
   val RunningCoroutineStatus = fragment ("RunningCoroutineStatus") {
     """local c = coroutine.running()

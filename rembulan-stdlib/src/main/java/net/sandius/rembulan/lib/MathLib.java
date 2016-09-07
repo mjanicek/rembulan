@@ -45,7 +45,7 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * This library provides basic mathematical functions. It provides all its functions and constants
@@ -102,7 +102,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.abs} function
 	 */
-	public abstract Function _abs();
+	public abstract LuaFunction _abs();
 
 	/**
 	 * {@code math.acos (x)}
@@ -111,7 +111,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.acos} function
 	 */
-	public abstract Function _acos();
+	public abstract LuaFunction _acos();
 
 	/**
 	 * {@code math.asin (x)}
@@ -120,7 +120,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.asin} function
 	 */
-	public abstract Function _asin();
+	public abstract LuaFunction _asin();
 
 	/**
 	 * {@code math.atan (x)}
@@ -134,7 +134,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.atan} function
 	 */
-	public abstract Function _atan();
+	public abstract LuaFunction _atan();
 
 	/**
 	 * {@code math.ceil (x)}
@@ -143,7 +143,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.ceil} function
 	 */
-	public abstract Function _ceil();
+	public abstract LuaFunction _ceil();
 
 	/**
 	 * {@code math.cos (x)}
@@ -152,7 +152,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.cos} function
 	 */
-	public abstract Function _cos();
+	public abstract LuaFunction _cos();
 
 	/**
 	 * {@code math.deg (x)}
@@ -161,7 +161,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.deg} function
 	 */
-	public abstract Function _deg();
+	public abstract LuaFunction _deg();
 
 	/**
 	 * {@code math.exp (x)}
@@ -171,7 +171,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.exp} function
 	 */
-	public abstract Function _exp();
+	public abstract LuaFunction _exp();
 
 	/**
 	 * {@code math.floor (x)}
@@ -180,7 +180,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.floor} function
 	 */
-	public abstract Function _floor();
+	public abstract LuaFunction _floor();
 
 	/**
 	 * {@code math.fmod (x, y)}
@@ -190,7 +190,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.fmod} function
 	 */
-	public abstract Function _fmod();
+	public abstract LuaFunction _fmod();
 
 	/**
 	 * {@code math.huge}
@@ -210,7 +210,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.log} function
 	 */
-	public abstract Function _log();
+	public abstract LuaFunction _log();
 
 	/**
 	 * {@code math.max (x, ···)}
@@ -220,7 +220,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.max} function
 	 */
-	public abstract Function _max();
+	public abstract LuaFunction _max();
 
 	/**
 	 * An integer with the maximum value for an integer.
@@ -237,7 +237,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.min} function
 	 */
-	public abstract Function _min();
+	public abstract LuaFunction _min();
 
 	/**
 	 * An integer with the minimum value for an integer.
@@ -254,7 +254,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.modf} function
 	 */
-	public abstract Function _modf();
+	public abstract LuaFunction _modf();
 
 	/**
 	 * {@code math.pi}
@@ -272,7 +272,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.rad} function
 	 */
-	public abstract Function _rad();
+	public abstract LuaFunction _rad();
 
 	/**
 	 * {@code math.random ([m [, n]])}
@@ -290,7 +290,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.random} function
 	 */
-	public abstract Function _random();
+	public abstract LuaFunction _random();
 
 	/**
 	 * {@code math.randomseed (x)}
@@ -300,7 +300,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.randomseed} function
 	 */
-	public abstract Function _randomseed();
+	public abstract LuaFunction _randomseed();
 
 	/**
 	 * {@code math.sin (x)}
@@ -309,7 +309,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.sin} function
 	 */
-	public abstract Function _sin();
+	public abstract LuaFunction _sin();
 
 	/**
 	 * {@code math.sqrt (x)}
@@ -319,7 +319,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.sqrt} function
 	 */
-	public abstract Function _sqrt();
+	public abstract LuaFunction _sqrt();
 
 	/**
 	 * {@code math.tan (x)}
@@ -328,7 +328,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.tan} function
 	 */
-	public abstract Function _tan();
+	public abstract LuaFunction _tan();
 
 	/**
 	 * {@code math.tointeger (x)}
@@ -338,7 +338,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.tointeger} function
 	*/
-	public abstract Function _tointeger();
+	public abstract LuaFunction _tointeger();
 
 	/**
 	 * {@code math.type (x)}
@@ -348,7 +348,7 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.type} function
 	 */
-	public abstract Function _type();
+	public abstract LuaFunction _type();
 
 	/**
 	 * {@code math.ult (m, n)}
@@ -358,6 +358,6 @@ public abstract class MathLib extends Lib {
 	 *
 	 * @return the {@code math.ult} function
 	 */
-	public abstract Function _ult();
+	public abstract LuaFunction _ult();
 
 }

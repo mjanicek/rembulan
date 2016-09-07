@@ -23,7 +23,7 @@ import net.sandius.rembulan.ValueTypeNamer;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.runtime.Coroutine;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Arrays;
@@ -325,8 +325,8 @@ public class ArgumentIterator implements Iterator<Object> {
 		return hasNext() ? nextString() : defaultValue;
 	}
 
-	public Function nextFunction() {
-		return nextStrict(TYPENAME_FUNCTION, Function.class);
+	public LuaFunction nextFunction() {
+		return nextStrict(TYPENAME_FUNCTION, LuaFunction.class);
 	}
 
 	public Table nextTable() {

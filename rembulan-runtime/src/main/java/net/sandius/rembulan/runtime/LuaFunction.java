@@ -22,6 +22,6 @@ import net.sandius.rembulan.Resumable;
 /**
  * An abstract function object.
  */
-public abstract class Function implements Invokable, Resumable {
+public abstract class LuaFunction implements Invokable, Resumable {
 
 }

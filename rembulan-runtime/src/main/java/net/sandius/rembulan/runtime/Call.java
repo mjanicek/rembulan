@@ -359,7 +359,7 @@ class Call {
 		}
 
 		@Override
-		public Coroutine newCoroutine(Function function) {
+		public Coroutine newCoroutine(LuaFunction function) {
 			return new Coroutine(function);
 		}
 

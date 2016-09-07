@@ -17,7 +17,7 @@
 package net.sandius.rembulan;
 
 import net.sandius.rembulan.runtime.Coroutine;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 /**
@@ -94,7 +94,7 @@ public interface ExecutionContext {
 	 * @return  a new (suspended) coroutine with the body {@code function}
 	 */
 	@SuppressWarnings("unused")
-	Coroutine newCoroutine(Function function);
+	Coroutine newCoroutine(LuaFunction function);
 
 	/**
 	 * Resumes the given coroutine {@code coroutine}, passing the arguments {@code args}

@@ -46,7 +46,7 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 public abstract class BasicLib extends Lib {
 
@@ -124,7 +124,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code print} function
 	 */
-	public abstract Function _print();
+	public abstract LuaFunction _print();
 
 	/**
 	 * {@code type (v)}
@@ -137,7 +137,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code type} function
 	 */
-	public abstract Function _type();
+	public abstract LuaFunction _type();
 
 	/**
 	 * {@code tostring (v)}
@@ -151,7 +151,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code tostring} function
 	 */
-	public abstract Function _tostring();
+	public abstract LuaFunction _tostring();
 
 	/**
 	 * {@code tonumber (e [, base])}
@@ -170,7 +170,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code tonumber} function
 	 */
-	public abstract Function _tonumber();
+	public abstract LuaFunction _tonumber();
 
 	/**
 	 * {@code error (message [, level])}
@@ -187,7 +187,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code error} function
 	 */
-	public abstract Function _error();
+	public abstract LuaFunction _error();
 
 	/**
 	 * {@code assert (v [, message])}
@@ -199,7 +199,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code assert} function
 	 */
-	public abstract Function _assert();
+	public abstract LuaFunction _assert();
 
 
 	/**
@@ -211,7 +211,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code getmetatable} function
 	 */
-	public abstract Function _getmetatable();
+	public abstract LuaFunction _getmetatable();
 
 	/**
 	 * {@code setmetatable (table, metatable)}
@@ -226,7 +226,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code setmetatable} function
 	 */
-	public abstract Function _setmetatable();
+	public abstract LuaFunction _setmetatable();
 
 
 	/**
@@ -249,7 +249,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code next} function
 	 */
-	public abstract Function _next();
+	public abstract LuaFunction _next();
 
 	/**
 	 * {@code pairs (t)}
@@ -269,7 +269,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code pairs} function
 	 */
-	public abstract Function _pairs();
+	public abstract LuaFunction _pairs();
 
 	/**
 	 * {@code ipairs (t)}
@@ -284,7 +284,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code ipairs} function
 	 */
-	public abstract Function _ipairs();
+	public abstract LuaFunction _ipairs();
 
 
 	/**
@@ -299,7 +299,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code pcall} function
 	 */
-	public abstract Function _pcall();
+	public abstract LuaFunction _pcall();
 
 	/**
 	 * {@code xpcall (f, msgh [, arg1, ···])}
@@ -309,7 +309,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code xpcall} function
 	 */
-	public abstract Function _xpcall();
+	public abstract LuaFunction _xpcall();
 
 
 	/**
@@ -320,7 +320,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code rawequal} function
 	 */
-	public abstract Function _rawequal();
+	public abstract LuaFunction _rawequal();
 
 	/**
 	 * {@code rawget (table, index)}
@@ -330,7 +330,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code rawget} function
 	 */
-	public abstract Function _rawget();
+	public abstract LuaFunction _rawget();
 
 	/**
 	 * {@code rawset (table, index, value)}
@@ -343,7 +343,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code rawset} function
 	 */
-	public abstract Function _rawset();
+	public abstract LuaFunction _rawset();
 
 	/**
 	 * {@code rawlen (v)}
@@ -353,7 +353,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code rawlen} function
 	 */
-	public abstract Function _rawlen();
+	public abstract LuaFunction _rawlen();
 
 	/**
 	 * {@code select (index, ···)}
@@ -365,7 +365,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code select} function
 	 */
-	public abstract Function _select();
+	public abstract LuaFunction _select();
 
 	/**
 	 * {@code collectgarbage ([opt [, arg]])}
@@ -404,7 +404,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code collectgarbage} function
 	 */
-	public abstract Function _collectgarbage();
+	public abstract LuaFunction _collectgarbage();
 
 	/**
 	 * {@code dofile ([filename])}
@@ -417,7 +417,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code dofile} function
 	 */
-	public abstract Function _dofile();
+	public abstract LuaFunction _dofile();
 
 	/**
 	 * {@code load (chunk [, chunkname [, mode [, env]]])}
@@ -455,7 +455,7 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code load} function
 	 */
-	public abstract Function _load();
+	public abstract LuaFunction _load();
 
 	/**
 	 * {@code loadfile ([filename [, mode [, env]]])}
@@ -465,6 +465,6 @@ public abstract class BasicLib extends Lib {
 	 *
 	 * @return the {@code loadfile} function
 	 */
-	public abstract Function _loadfile();
+	public abstract LuaFunction _loadfile();
 	
 }

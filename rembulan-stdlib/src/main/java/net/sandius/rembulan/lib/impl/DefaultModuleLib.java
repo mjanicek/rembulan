@@ -22,7 +22,7 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.ModuleLib;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 
@@ -33,9 +33,9 @@ public class DefaultModuleLib extends ModuleLib {
 
 	private final Table _loaded;
 
-	private final Function _require;
-	private final Function _loadlib;
-	private final Function _searchpath;
+	private final LuaFunction _require;
+	private final LuaFunction _loadlib;
+	private final LuaFunction _searchpath;
 
 	public DefaultModuleLib(LuaState state, Table env) {
 		this.state = Check.notNull(state);
@@ -67,7 +67,7 @@ public class DefaultModuleLib extends ModuleLib {
 	}
 
 	@Override
-	public Function _require() {
+	public LuaFunction _require() {
 		return _require;
 	}
 
@@ -87,7 +87,7 @@ public class DefaultModuleLib extends ModuleLib {
 	}
 
 	@Override
-	public Function _loadlib() {
+	public LuaFunction _loadlib() {
 		return _loadlib;
 	}
 
@@ -107,7 +107,7 @@ public class DefaultModuleLib extends ModuleLib {
 	}
 
 	@Override
-	public Function _searchpath() {
+	public LuaFunction _searchpath() {
 		return _searchpath;
 	}
 

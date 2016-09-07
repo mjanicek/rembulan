@@ -28,8 +28,8 @@ import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.runtime.Dispatch;
-import net.sandius.rembulan.runtime.Function;
 import net.sandius.rembulan.runtime.IllegalOperationAttemptException;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
@@ -41,9 +41,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class DefaultStringLib extends StringLib {
 
-	private final Function _pack;
-	private final Function _packsize;
-	private final Function _unpack;
+	private final LuaFunction _pack;
+	private final LuaFunction _packsize;
+	private final LuaFunction _unpack;
 
 	public DefaultStringLib() {
 		this._pack = new UnimplementedFunction("string.pack");  // TODO
@@ -52,87 +52,87 @@ public class DefaultStringLib extends StringLib {
 	}
 
 	@Override
-	public Function _byte() {
+	public LuaFunction _byte() {
 		return Byte.INSTANCE;
 	}
 
 	@Override
-	public Function _char() {
+	public LuaFunction _char() {
 		return Char.INSTANCE;
 	}
 
 	@Override
-	public Function _dump() {
+	public LuaFunction _dump() {
 		return Dump.INSTANCE;
 	}
 
 	@Override
-	public Function _find() {
+	public LuaFunction _find() {
 		return Find.INSTANCE;
 	}
 
 	@Override
-	public Function _format() {
+	public LuaFunction _format() {
 		return Format.INSTANCE;
 	}
 
 	@Override
-	public Function _gmatch() {
+	public LuaFunction _gmatch() {
 		return GMatch.INSTANCE;
 	}
 
 	@Override
-	public Function _gsub() {
+	public LuaFunction _gsub() {
 		return GSub.INSTANCE;
 	}
 
 	@Override
-	public Function _len() {
+	public LuaFunction _len() {
 		return Len.INSTANCE;
 	}
 
 	@Override
-	public Function _lower() {
+	public LuaFunction _lower() {
 		return Lower.INSTANCE;
 	}
 
 	@Override
-	public Function _match() {
+	public LuaFunction _match() {
 		return Match.INSTANCE;
 	}
 
 	@Override
-	public Function _pack() {
+	public LuaFunction _pack() {
 		return _pack;
 	}
 
 	@Override
-	public Function _packsize() {
+	public LuaFunction _packsize() {
 		return _packsize;
 	}
 
 	@Override
-	public Function _rep() {
+	public LuaFunction _rep() {
 		return Rep.INSTANCE;
 	}
 
 	@Override
-	public Function _reverse() {
+	public LuaFunction _reverse() {
 		return Reverse.INSTANCE;
 	}
 
 	@Override
-	public Function _sub() {
+	public LuaFunction _sub() {
 		return Sub.INSTANCE;
 	}
 
 	@Override
-	public Function _unpack() {
+	public LuaFunction _unpack() {
 		return _unpack;
 	}
 
 	@Override
-	public Function _upper() {
+	public LuaFunction _upper() {
 		return Upper.INSTANCE;
 	}
 
@@ -211,7 +211,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Function f = args.nextFunction();
+			LuaFunction f = args.nextFunction();
 			boolean strip = args.optNextBoolean(false);
 
 			throw new IllegalOperationAttemptException("unable to dump given function");
@@ -759,7 +759,7 @@ public class DefaultStringLib extends StringLib {
 
 			StringPattern pat = StringPattern.fromString(pattern, true);
 
-			Function f = new IteratorFunction(s, pat);
+			LuaFunction f = new IteratorFunction(s, pat);
 
 			context.getReturnBuffer().setTo(f);
 		}
@@ -794,7 +794,7 @@ public class DefaultStringLib extends StringLib {
 				if (replStr != null) {
 					repl = replStr;
 				}
-				else if (o instanceof Table || o instanceof Function) {
+				else if (o instanceof Table || o instanceof LuaFunction) {
 					repl = o;
 				}
 				else {
@@ -941,8 +941,8 @@ public class DefaultStringLib extends StringLib {
 				if (repl instanceof Table) {
 					Dispatch.index(context, (Table) repl, cap);
 				}
-				else if (repl instanceof Function) {
-					Dispatch.call(context, (Function) repl, (Object[]) captures.toArray());
+				else if (repl instanceof LuaFunction) {
+					Dispatch.call(context, (LuaFunction) repl, (Object[]) captures.toArray());
 				}
 				else {
 					throw new IllegalStateException("Illegal replacement: " + repl);

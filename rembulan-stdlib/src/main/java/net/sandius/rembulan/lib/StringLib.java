@@ -47,7 +47,7 @@ import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * <p>This library provides generic functions for string manipulation, such as finding
@@ -113,7 +113,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.byte} function
 	 */
-	public abstract Function _byte();
+	public abstract LuaFunction _byte();
 
 	/**
 	 * {@code string.char (···)}
@@ -126,7 +126,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.char} function
 	 */
-	public abstract Function _char();
+	public abstract LuaFunction _char();
 
 	/**
 	 * {@code string.dump (function [, strip])}
@@ -144,7 +144,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.dump} function
 	 */
-	public abstract Function _dump();
+	public abstract LuaFunction _dump();
 
 	/**
 	 * {@code string.find (s, pattern [, init [, plain]])}
@@ -163,7 +163,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.find} function
 	 */
-	public abstract Function _find();
+	public abstract LuaFunction _find();
 
 	/**
 	 * {@code string.format (formatstring, ···)}
@@ -204,7 +204,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.format} function
 	 */
-	public abstract Function _format();
+	public abstract LuaFunction _format();
 
 	/**
 	 * {@code string.gmatch (s, pattern)}
@@ -243,7 +243,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.gmatch} function
 	 */
-	public abstract Function _gmatch();
+	public abstract LuaFunction _gmatch();
 
 	/**
 	 * {@code string.gsub (s, pattern, repl [, n])}
@@ -323,7 +323,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.gsub} function
 	 */
-	public abstract Function _gsub();
+	public abstract LuaFunction _gsub();
 
 	/**
 	 * {@code string.len (s)}
@@ -333,7 +333,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.len} function
 	 */
-	public abstract Function _len();
+	public abstract LuaFunction _len();
 
 	/**
 	 * {@code string.lower (s)}
@@ -344,7 +344,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.lower} function
 	 */
-	public abstract Function _lower();
+	public abstract LuaFunction _lower();
 
 	/**
 	 * {@code string.match (s, pattern [, init])}
@@ -357,7 +357,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.match} function
 	 */
-	public abstract Function _match();
+	public abstract LuaFunction _match();
 
 	/**
 	 * {@code string.pack (fmt, v1, v2, ···)}
@@ -368,7 +368,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.pack} function
 	 */
-	public abstract Function _pack();
+	public abstract LuaFunction _pack();
 
 	/**
 	 * {@code string.packsize (fmt)}
@@ -379,7 +379,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.packsize} function
 	 */
-	public abstract Function _packsize();
+	public abstract LuaFunction _packsize();
 
 	/**
 	 * {@code string.rep (s, n [, sep])}
@@ -393,7 +393,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.rep} function
 	 */
-	public abstract Function _rep();
+	public abstract LuaFunction _rep();
 
 	/**
 	 * {@code string.reverse (s)}
@@ -402,7 +402,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.reverse} function
 	 */
-	public abstract Function _reverse();
+	public abstract LuaFunction _reverse();
 
 	/**
 	 * {@code string.sub (s, i [, j])}
@@ -420,7 +420,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.sub} function
 	 */
-	public abstract Function _sub();
+	public abstract LuaFunction _sub();
 
 	/**
 	 * {@code string.unpack (fmt, s [, pos])}
@@ -433,7 +433,7 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.unpack} function
 	 */
-	public abstract Function _unpack();
+	public abstract LuaFunction _unpack();
 
 	/**
 	 * {@code string.upper (s)}
@@ -444,6 +444,6 @@ public abstract class StringLib extends Lib {
 	 *
 	 * @return the {@code string.upper} function
 	 */
-	public abstract Function _upper();
+	public abstract LuaFunction _upper();
 
 }

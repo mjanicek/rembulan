@@ -18,21 +18,21 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.OsLib;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 public class DefaultOsLib extends OsLib {
 
-	private final Function _clock;
-	private final Function _date;
-	private final Function _difftime;
-	private final Function _execute;
-	private final Function _exit;
-	private final Function _getenv;
-	private final Function _remove;
-	private final Function _rename;
-	private final Function _setlocale;
-	private final Function _time;
-	private final Function _tmpname;
+	private final LuaFunction _clock;
+	private final LuaFunction _date;
+	private final LuaFunction _difftime;
+	private final LuaFunction _execute;
+	private final LuaFunction _exit;
+	private final LuaFunction _getenv;
+	private final LuaFunction _remove;
+	private final LuaFunction _rename;
+	private final LuaFunction _setlocale;
+	private final LuaFunction _time;
+	private final LuaFunction _tmpname;
 	
 	public DefaultOsLib() {
 		this._clock = new UnimplementedFunction("os.clock");  // TODO
@@ -49,57 +49,57 @@ public class DefaultOsLib extends OsLib {
 	}
 	
 	@Override
-	public Function _clock() {
+	public LuaFunction _clock() {
 		return _clock;
 	}
 
 	@Override
-	public Function _date() {
+	public LuaFunction _date() {
 		return _date;
 	}
 
 	@Override
-	public Function _difftime() {
+	public LuaFunction _difftime() {
 		return _difftime;
 	}
 
 	@Override
-	public Function _execute() {
+	public LuaFunction _execute() {
 		return _execute;
 	}
 
 	@Override
-	public Function _exit() {
+	public LuaFunction _exit() {
 		return _exit;
 	}
 
 	@Override
-	public Function _getenv() {
+	public LuaFunction _getenv() {
 		return _getenv;
 	}
 
 	@Override
-	public Function _remove() {
+	public LuaFunction _remove() {
 		return _remove;
 	}
 
 	@Override
-	public Function _rename() {
+	public LuaFunction _rename() {
 		return _rename;
 	}
 
 	@Override
-	public Function _setlocale() {
+	public LuaFunction _setlocale() {
 		return _setlocale;
 	}
 
 	@Override
-	public Function _time() {
+	public LuaFunction _time() {
 		return _time;
 	}
 
 	@Override
-	public Function _tmpname() {
+	public LuaFunction _tmpname() {
 		return _tmpname;
 	}
 	

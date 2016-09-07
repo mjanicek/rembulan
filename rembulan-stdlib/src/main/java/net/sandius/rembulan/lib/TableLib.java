@@ -45,7 +45,7 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * <p>This library provides generic functions for table manipulation. It provides all its functions
@@ -85,7 +85,7 @@ public abstract class TableLib extends Lib {
 	 *
 	 * @return the {@code table.concat} function
 	 */
-	public abstract Function _concat();
+	public abstract LuaFunction _concat();
 
 	/**
 	 * {@code table.insert (list, [pos,] value)}
@@ -97,7 +97,7 @@ public abstract class TableLib extends Lib {
 	 *
 	 * @return the {@code table.insert} function
 	 */
-	public abstract Function _insert();
+	public abstract LuaFunction _insert();
 
 	/**
 	 * {@code table.move (a1, f, e, t [,a2])}
@@ -110,7 +110,7 @@ public abstract class TableLib extends Lib {
 	 *
 	 * @return the {@code table.move} function
 	 */
-	public abstract Function _move();
+	public abstract LuaFunction _move();
 
 	/**
 	 * {@code table.pack (···)}
@@ -121,7 +121,7 @@ public abstract class TableLib extends Lib {
 	 *
 	 * @return the {@code table.pack} function
 	 */
-	public abstract Function _pack();
+	public abstract LuaFunction _pack();
 
 	/**
 	 * {@code table.remove (list [, pos])}
@@ -138,7 +138,7 @@ public abstract class TableLib extends Lib {
 	 *
 	 * @return the {@code table.remove} function
 	 */
-	public abstract Function _remove();
+	public abstract LuaFunction _remove();
 
 	/**
 	 * {@code table.sort (list [, comp])}
@@ -159,7 +159,7 @@ public abstract class TableLib extends Lib {
 	 *
 	 * @return the {@code table.sort} function
 	 */
-	public abstract Function _sort();
+	public abstract LuaFunction _sort();
 
 	/**
 	 * {@code table.unpack (list [, i [, j]])}
@@ -174,6 +174,6 @@ public abstract class TableLib extends Lib {
 	 *
 	 * @return the {@code table.unpack} function
 	 */
-	public abstract Function _unpack();
+	public abstract LuaFunction _unpack();
 
 }

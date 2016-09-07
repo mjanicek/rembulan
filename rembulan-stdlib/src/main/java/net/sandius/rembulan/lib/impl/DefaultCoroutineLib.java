@@ -22,7 +22,7 @@ import net.sandius.rembulan.ReturnBuffer;
 import net.sandius.rembulan.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.runtime.Coroutine;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
@@ -33,37 +33,37 @@ import java.util.Arrays;
 public class DefaultCoroutineLib extends CoroutineLib {
 
 	@Override
-	protected Function _create() {
+	protected LuaFunction _create() {
 		return Create.INSTANCE;
 	}
 
 	@Override
-	protected Function _resume() {
+	protected LuaFunction _resume() {
 		return Resume.INSTANCE;
 	}
 
 	@Override
-	protected Function _yield() {
+	protected LuaFunction _yield() {
 		return Yield.INSTANCE;
 	}
 
 	@Override
-	protected Function _isyieldable() {
+	protected LuaFunction _isyieldable() {
 		return IsYieldable.INSTANCE;
 	}
 
 	@Override
-	protected Function _status() {
+	protected LuaFunction _status() {
 		return Status.INSTANCE;
 	}
 
 	@Override
-	protected Function _running() {
+	protected LuaFunction _running() {
 		return Running.INSTANCE;
 	}
 
 	@Override
-	protected Function _wrap() {
+	protected LuaFunction _wrap() {
 		return Wrap.INSTANCE;
 	}
 
@@ -78,7 +78,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Function func = args.nextFunction();
+			LuaFunction func = args.nextFunction();
 			Coroutine c = context.newCoroutine(func);
 			context.getReturnBuffer().setTo(c);
 		}
@@ -227,7 +227,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 			private final Coroutine coroutine;
 
-			public WrappedCoroutine(Function function, ExecutionContext context) {
+			public WrappedCoroutine(LuaFunction function, ExecutionContext context) {
 				Check.notNull(function);
 				Check.notNull(context);
 				this.coroutine = context.newCoroutine(function);
@@ -258,8 +258,8 @@ public class DefaultCoroutineLib extends CoroutineLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Function f = args.nextFunction();
-			Function result = new WrappedCoroutine(f, context);
+			LuaFunction f = args.nextFunction();
+			LuaFunction result = new WrappedCoroutine(f, context);
 			context.getReturnBuffer().setTo(result);
 		}
 

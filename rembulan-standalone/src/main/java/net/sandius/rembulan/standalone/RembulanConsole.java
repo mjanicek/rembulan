@@ -28,7 +28,7 @@ import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.DefaultLuaState;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class RembulanConsole {
 
 	private int chunkIndex;
 
-	private final Function requireFunction;
+	private final LuaFunction requireFunction;
 
 	private final boolean javaTraceback;
 	private final boolean stackTraceForCompileErrors;
@@ -123,7 +123,7 @@ public class RembulanConsole {
 		out.println("  -        stop handling options and execute stdin");
 	}
 
-	private Object[] callFunction(Function fn, Object... args)
+	private Object[] callFunction(LuaFunction fn, Object... args)
 			throws CallException {
 
 		try {
@@ -141,7 +141,7 @@ public class RembulanConsole {
 		Check.notNull(sourceFileName);
 		Check.notNull(args);
 
-		Function fn = loader.loadTextChunk(new Variable(env), sourceFileName, sourceText);
+		LuaFunction fn = loader.loadTextChunk(new Variable(env), sourceFileName, sourceText);
 
 		Object[] callArgs = new Object[args.length];
 		System.arraycopy(args, 0, callArgs, 0, args.length);
@@ -182,7 +182,7 @@ public class RembulanConsole {
 		callFunction(requireFunction, Check.notNull(moduleName));
 	}
 
-	private void execute(Function fn) throws CallException {
+	private void execute(LuaFunction fn) throws CallException {
 		Object[] results = callFunction(fn);
 		if (results.length > 0) {
 			callFunction(new DefaultBasicLib.Print(out), results);
@@ -273,7 +273,7 @@ public class RembulanConsole {
 		while ((line = reader.readLine()) != null) {
 			out.print("");
 
-			Function fn = null;
+			LuaFunction fn = null;
 
 			boolean firstLine = codeBuffer.length() == 0;
 			boolean emptyInput = line.trim().isEmpty();

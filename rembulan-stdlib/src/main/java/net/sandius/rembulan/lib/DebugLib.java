@@ -45,7 +45,7 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * This library provides the functionality of the debug interface (see §4.9 of the Lua
@@ -102,7 +102,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.debug} function
 	 */
-	public abstract Function _debug();
+	public abstract LuaFunction _debug();
 
 	/**
 	 * {@code debug.gethook ([thread])}
@@ -113,7 +113,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.gethook} function
 	 */
-	public abstract Function _gethook();
+	public abstract LuaFunction _gethook();
 
 	/**
 	 * {@code debug.getinfo ([thread,] f [, what])}
@@ -140,7 +140,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.getinfo} function
 	 */
-	public abstract Function _getinfo();
+	public abstract LuaFunction _getinfo();
 
 	/**
 	 * {@code debug.getlocal ([thread,] f, local)}
@@ -166,7 +166,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.getlocal} function
 	 */
-	public abstract Function _getlocal();
+	public abstract LuaFunction _getlocal();
 
 	/**
 	 * {@code debug.getmetatable (value)}
@@ -176,7 +176,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.getmetatable} function
 	 */
-	public abstract Function _getmetatable();
+	public abstract LuaFunction _getmetatable();
 
 	/**
 	 * {@code debug.getregistry ()}
@@ -185,7 +185,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.getregistry} function
 	 */
-	public abstract Function _getregistry();
+	public abstract LuaFunction _getregistry();
 
 	/**
 	 * {@code debug.getupvalue (f, up)}
@@ -199,7 +199,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.getupvalue} function
 	 */
-	public abstract Function _getupvalue();
+	public abstract LuaFunction _getupvalue();
 
 	/**
 	 * {@code debug.getuservalue (u)}
@@ -209,7 +209,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.getuservalue} function
 	 */
-	public abstract Function _getuservalue();
+	public abstract LuaFunction _getuservalue();
 
 	/**
 	 * {@code debug.sethook ([thread,] hook, mask [, count])}
@@ -238,7 +238,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.sethook} function
 	 */
-	public abstract Function _sethook();
+	public abstract LuaFunction _sethook();
 
 	/**
 	 * {@code debug.setlocal ([thread,] level, local, value)}
@@ -255,7 +255,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.setlocal} function
 	 */
-	public abstract Function _setlocal();
+	public abstract LuaFunction _setlocal();
 
 	/**
 	 * {@code debug.setmetatable (value, table)}
@@ -265,7 +265,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.setmetatable} function
 	 */
-	public abstract Function _setmetatable();
+	public abstract LuaFunction _setmetatable();
 
 	/**
 	 * {@code debug.setupvalue (f, up, value)}
@@ -276,7 +276,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.setupvalue} function
 	 */
-	public abstract Function _setupvalue();
+	public abstract LuaFunction _setupvalue();
 
 	/**
 	 * {@code debug.setuservalue (udata, value)}
@@ -288,7 +288,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.setuservalue} function
 	 */
-	public abstract Function _setuservalue();
+	public abstract LuaFunction _setuservalue();
 
 	/**
 	 * {@code debug.traceback ([thread,] [message [, level]])}
@@ -301,7 +301,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.traceback} function
 	 */
-	public abstract Function _traceback();
+	public abstract LuaFunction _traceback();
 
 	/**
 	 * {@code debug.upvalueid (f, n)}
@@ -315,7 +315,7 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.upvalueid} function
 	 */
-	public abstract Function _upvalueid();
+	public abstract LuaFunction _upvalueid();
 
 	/**
 	 * {@code debug.upvaluejoin (f1, n1, f2, n2)}
@@ -325,6 +325,6 @@ public abstract class DebugLib extends Lib {
 	 *
 	 * @return the {@code debug.upvaluejoin} function
 	 */
-	public abstract Function _upvaluejoin();
+	public abstract LuaFunction _upvaluejoin();
 
 }

@@ -18,15 +18,15 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Utf8Lib;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 public class DefaultUtf8Lib extends Utf8Lib {
 
-	private final Function _char;
-	private final Function _codes;
-	private final Function _codepoint;
-	private final Function _len;
-	private final Function _offset;
+	private final LuaFunction _char;
+	private final LuaFunction _codes;
+	private final LuaFunction _codepoint;
+	private final LuaFunction _len;
+	private final LuaFunction _offset;
 	
 	public DefaultUtf8Lib() {
 		this._char = new UnimplementedFunction("utf8.char");  // TODO
@@ -37,7 +37,7 @@ public class DefaultUtf8Lib extends Utf8Lib {
 	}
 
 	@Override
-	public Function _char() {
+	public LuaFunction _char() {
 		return _char;
 	}
 
@@ -47,22 +47,22 @@ public class DefaultUtf8Lib extends Utf8Lib {
 	}
 
 	@Override
-	public Function _codes() {
+	public LuaFunction _codes() {
 		return _codes;
 	}
 
 	@Override
-	public Function _codepoint() {
+	public LuaFunction _codepoint() {
 		return _codepoint;
 	}
 
 	@Override
-	public Function _len() {
+	public LuaFunction _len() {
 		return _len;
 	}
 
 	@Override
-	public Function _offset() {
+	public LuaFunction _offset() {
 		return _offset;
 	}
 

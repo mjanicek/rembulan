@@ -17,17 +17,17 @@
 package net.sandius.rembulan.load;
 
 import net.sandius.rembulan.Variable;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * Lua chunk loader, an object that converts the textual representation of Lua programs
- * into instances of {@code Function}.
+ * into instances of {@code LuaFunction}.
  */
 public interface ChunkLoader {
 
 	/**
 	 * Loads the text chunk {@code chunk} (a string containing a Lua program) and returns
-	 * it as an instance of {@link Function}, supplying {@code env} as the chunk's sole
+	 * it as an instance of {@link LuaFunction}, supplying {@code env} as the chunk's sole
 	 * upvalue.
 	 *
 	 * <p>The argument {@code chunkName}, typically the file name of the file containing
@@ -46,9 +46,9 @@ public interface ChunkLoader {
 	 * @throws NullPointerException  if {@code env}, {@code chunkName} or {@code chunk}
 	 *                               is {@code null}
 	 */
-	Function loadTextChunk(Variable env, String chunkName, String chunk) throws LoaderException;
+	LuaFunction loadTextChunk(Variable env, String chunkName, String chunk) throws LoaderException;
 
 	// TODO: binary chunks
-//	Function loadBinaryChunk(Variable env, String chunkName, byte[] chunk, int offset, int len) throws LoaderException;
+//	LuaFunction loadBinaryChunk(Variable env, String chunkName, byte[] chunk, int offset, int len) throws LoaderException;
 
 }

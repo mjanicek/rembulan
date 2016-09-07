@@ -46,7 +46,7 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * The package library provides basic facilities for loading modules in Lua. It exports
@@ -115,7 +115,7 @@ public abstract class ModuleLib extends Lib {
 	 *
 	 * @return the {@code require} function
 	 */
-	public abstract Function _require();
+	public abstract LuaFunction _require();
 
 	 /**
 	 * {@code package.config}
@@ -193,7 +193,7 @@ public abstract class ModuleLib extends Lib {
 	 *
 	 * @return the {@code package.loadlib} function
 	 */
-	public abstract Function _loadlib();
+	public abstract LuaFunction _loadlib();
 
 	/**
 	 * {@code package.path}
@@ -302,6 +302,6 @@ public abstract class ModuleLib extends Lib {
 	 *
 	 * @return the {@code package.searchpath} function
 	 */
-	public abstract Function _searchpath();
+	public abstract LuaFunction _searchpath();
 
 }

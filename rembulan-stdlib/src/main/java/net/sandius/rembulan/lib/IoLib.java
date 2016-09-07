@@ -46,7 +46,7 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.Userdata;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * <p>The I/O library provides two different styles for file manipulation. The first one uses
@@ -104,7 +104,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.close} function
 	 */
-	public abstract Function _close();
+	public abstract LuaFunction _close();
 
 	/**
 	 * {@code io.flush ()}
@@ -113,7 +113,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.flush} function
 	 */
-	public abstract Function _flush();
+	public abstract LuaFunction _flush();
 
 	/**
 	 * {@code io.input ([file])}
@@ -127,7 +127,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.input} function
 	 */
-	public abstract Function _input();
+	public abstract LuaFunction _input();
 
 	/**
 	 * {@code io.lines ([filename, ···])}
@@ -145,7 +145,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.lines} function
 	 */
-	public abstract Function _lines();
+	public abstract LuaFunction _lines();
 
 	/**
 	 * {@code io.open (filename [, mode])}
@@ -169,7 +169,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.open} function
 	 */
-	public abstract Function _open();
+	public abstract LuaFunction _open();
 
 	/**
 	 * {@code io.output ([file])}
@@ -178,7 +178,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.output} function
 	 */
-	public abstract Function _output();
+	public abstract LuaFunction _output();
 
 	/**
 	 * {@code io.popen (prog [, mode])}
@@ -191,7 +191,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.popen} function
 	 */
-	public abstract Function _popen();
+	public abstract LuaFunction _popen();
 
 	/**
 	 * {@code io.read (···)}
@@ -200,7 +200,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.read} function
 	 */
-	public abstract Function _read();
+	public abstract LuaFunction _read();
 
 	/**
 	 * {@code io.tmpfile ()}
@@ -210,7 +210,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.tmpfile} function
 	 */
-	public abstract Function _tmpfile();
+	public abstract LuaFunction _tmpfile();
 
 	/**
 	 * {@code io.type (obj)}
@@ -221,7 +221,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.type} function
 	 */
-	public abstract Function _type();
+	public abstract LuaFunction _type();
 
 	/**
 	 * {@code io.write (···)}
@@ -230,7 +230,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code io.write} function
 	 */
-	public abstract Function _write();
+	public abstract LuaFunction _write();
 
 	/**
 	 * {@code io.stdin}
@@ -270,7 +270,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code file:close} function
 	 */
-	public abstract Function _file_close();
+	public abstract LuaFunction _file_close();
 
 	/**
 	 * {@code file:flush ()}
@@ -279,7 +279,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code file:flush} function
 	 */
-	public abstract Function _file_flush();
+	public abstract LuaFunction _file_flush();
 
 	/**
 	 * {@code file:lines (···)}
@@ -302,7 +302,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code file:lines} function
 	 */
-	public abstract Function _file_lines();
+	public abstract LuaFunction _file_lines();
 
 	/**
 	 * {@code file:read (···)}
@@ -335,7 +335,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code file:read} function
 	 */
-	public abstract Function _file_read();
+	public abstract LuaFunction _file_read();
 
 	/**
 	 * {@code file:seek ([whence [, offset]])}
@@ -361,7 +361,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code file:seek} function
 	 */
-	public abstract Function _file_seek();
+	public abstract LuaFunction _file_seek();
 
 	/**
 	 * {@code file:setvbuf (mode [, size])}
@@ -381,7 +381,7 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code file:setvbuf} function
 	 */
-	public abstract Function _file_setvbuf();
+	public abstract LuaFunction _file_setvbuf();
 
 	/**
 	 * {@code file:write (···)}
@@ -394,6 +394,6 @@ public abstract class IoLib extends Lib {
 	 *
 	 * @return the {@code file:write} function
 	 */
-	public abstract Function _file_write();
+	public abstract LuaFunction _file_write();
 
 }

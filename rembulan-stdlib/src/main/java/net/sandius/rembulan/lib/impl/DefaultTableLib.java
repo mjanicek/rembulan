@@ -27,7 +27,7 @@ import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.TableLib;
 import net.sandius.rembulan.runtime.Dispatch;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
@@ -35,8 +35,8 @@ import java.util.ArrayList;
 
 public class DefaultTableLib extends TableLib {
 
-	private final Function _move;
-	private final Function _sort;
+	private final LuaFunction _move;
+	private final LuaFunction _sort;
 
 	public DefaultTableLib() {
 		this._move = new UnimplementedFunction("table.move");  // TODO
@@ -44,37 +44,37 @@ public class DefaultTableLib extends TableLib {
 	}
 
 	@Override
-	public Function _concat() {
+	public LuaFunction _concat() {
 		return Concat.INSTANCE;
 	}
 
 	@Override
-	public Function _insert() {
+	public LuaFunction _insert() {
 		return Insert.INSTANCE;
 	}
 
 	@Override
-	public Function _move() {
+	public LuaFunction _move() {
 		return _move;
 	}
 
 	@Override
-	public Function _pack() {
+	public LuaFunction _pack() {
 		return Pack.INSTANCE;
 	}
 
 	@Override
-	public Function _remove() {
+	public LuaFunction _remove() {
 		return Remove.INSTANCE;
 	}
 
 	@Override
-	public Function _sort() {
+	public LuaFunction _sort() {
 		return _sort;
 	}
 
 	@Override
-	public Function _unpack() {
+	public LuaFunction _unpack() {
 		return Unpack.INSTANCE;
 	}
 

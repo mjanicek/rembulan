@@ -45,7 +45,7 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * <p>This library provides basic support for UTF-8 encoding. It provides all its functions
@@ -85,7 +85,7 @@ public abstract class Utf8Lib extends Lib {
 	 *
 	 * @return the {@code utf8.char} function
 	 */
-	public abstract Function _char();
+	public abstract LuaFunction _char();
 
 	/**
 	 * {@code utf8.charpattern}
@@ -113,7 +113,7 @@ public abstract class Utf8Lib extends Lib {
 	 *
 	 * @return the {@code utf8.codes} function
 	 */
-	public abstract Function _codes();
+	public abstract LuaFunction _codes();
 
 	/**
 	 * {@code utf8.codepoint (s [, i [, j]])}
@@ -125,7 +125,7 @@ public abstract class Utf8Lib extends Lib {
 	 *
 	 * @return the {@code utf8.codepoint} function
 	 */
-	public abstract Function _codepoint();
+	public abstract LuaFunction _codepoint();
 
 	/**
 	 * {@code utf8.len (s [, i [, j]])}
@@ -137,7 +137,7 @@ public abstract class Utf8Lib extends Lib {
 	 *
 	 * @return the {@code utf8.len} function
 	 */
-	public abstract Function _len();
+	public abstract LuaFunction _len();
 
 	/**
 	 * {@code utf8.offset (s, n [, i])}
@@ -157,6 +157,6 @@ public abstract class Utf8Lib extends Lib {
 	 *
 	 * @return the {@code utf8.offset} function
 	 */
-	public abstract Function _offset();
+	public abstract LuaFunction _offset();
 
 }

@@ -23,7 +23,7 @@ import net.sandius.rembulan.impl.AbstractFunction3;
 import net.sandius.rembulan.impl.AbstractFunction4;
 import net.sandius.rembulan.impl.AbstractFunction5;
 import net.sandius.rembulan.impl.AbstractFunctionAnyArg;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 public abstract class InvokeKind {
 
@@ -41,7 +41,7 @@ public abstract class InvokeKind {
 		return kind > 0 ? (nativeClassForKind(kind) != null ? kind : 0) : 0;
 	}
 
-	public static Class<? extends Function> nativeClassForKind(int kind) {
+	public static Class<? extends LuaFunction> nativeClassForKind(int kind) {
 		switch (kind) {
 			case 0:  return AbstractFunctionAnyArg.class;
 			case 1:  return AbstractFunction0.class;

@@ -21,7 +21,7 @@ import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.MathLib;
 import net.sandius.rembulan.runtime.Dispatch;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
@@ -30,8 +30,8 @@ import java.util.Random;
 
 public class DefaultMathLib extends MathLib {
 
-	private final Function _random;
-	private final Function _randomseed;
+	private final LuaFunction _random;
+	private final LuaFunction _randomseed;
 
 	public DefaultMathLib(Random random) {
 		Check.notNull(random);
@@ -44,52 +44,52 @@ public class DefaultMathLib extends MathLib {
 	}
 
 	@Override
-	public Function _abs() {
+	public LuaFunction _abs() {
 		return Abs.INSTANCE;
 	}
 
 	@Override
-	public Function _acos() {
+	public LuaFunction _acos() {
 		return ACos.INSTANCE;
 	}
 
 	@Override
-	public Function _asin() {
+	public LuaFunction _asin() {
 		return ASin.INSTANCE;
 	}
 
 	@Override
-	public Function _atan() {
+	public LuaFunction _atan() {
 		return ATan.INSTANCE;
 	}
 
 	@Override
-	public Function _ceil() {
+	public LuaFunction _ceil() {
 		return Ceil.INSTANCE;
 	}
 
 	@Override
-	public Function _cos() {
+	public LuaFunction _cos() {
 		return Cos.INSTANCE;
 	}
 
 	@Override
-	public Function _deg() {
+	public LuaFunction _deg() {
 		return Deg.INSTANCE;
 	}
 
 	@Override
-	public Function _exp() {
+	public LuaFunction _exp() {
 		return Exp.INSTANCE;
 	}
 
 	@Override
-	public Function _floor() {
+	public LuaFunction _floor() {
 		return Floor.INSTANCE;
 	}
 
 	@Override
-	public Function _fmod() {
+	public LuaFunction _fmod() {
 		return FMod.INSTANCE;
 	}
 
@@ -99,12 +99,12 @@ public class DefaultMathLib extends MathLib {
 	}
 
 	@Override
-	public Function _log() {
+	public LuaFunction _log() {
 		return Log.INSTANCE;
 	}
 
 	@Override
-	public Function _max() {
+	public LuaFunction _max() {
 		return MaxMin.MAX_INSTANCE;
 	}
 
@@ -114,7 +114,7 @@ public class DefaultMathLib extends MathLib {
 	}
 
 	@Override
-	public Function _min() {
+	public LuaFunction _min() {
 		return MaxMin.MIN_INSTANCE;
 	}
 
@@ -124,7 +124,7 @@ public class DefaultMathLib extends MathLib {
 	}
 
 	@Override
-	public Function _modf() {
+	public LuaFunction _modf() {
 		return ModF.INSTANCE;
 	}
 
@@ -134,47 +134,47 @@ public class DefaultMathLib extends MathLib {
 	}
 
 	@Override
-	public Function _rad() {
+	public LuaFunction _rad() {
 		return Rad.INSTANCE;
 	}
 
 	@Override
-	public Function _random() {
+	public LuaFunction _random() {
 		return _random;
 	}
 
 	@Override
-	public Function _randomseed() {
+	public LuaFunction _randomseed() {
 		return _randomseed;
 	}
 
 	@Override
-	public Function _sin() {
+	public LuaFunction _sin() {
 		return Sin.INSTANCE;
 	}
 
 	@Override
-	public Function _sqrt() {
+	public LuaFunction _sqrt() {
 		return Sqrt.INSTANCE;
 	}
 
 	@Override
-	public Function _tan() {
+	public LuaFunction _tan() {
 		return Tan.INSTANCE;
 	}
 
 	@Override
-	public Function _tointeger() {
+	public LuaFunction _tointeger() {
 		return ToInteger.INSTANCE;
 	}
 
 	@Override
-	public Function _type() {
+	public LuaFunction _type() {
 		return Type.INSTANCE;
 	}
 
 	@Override
-	public Function _ult() {
+	public LuaFunction _ult() {
 		return ULt.INSTANCE;
 	}
 

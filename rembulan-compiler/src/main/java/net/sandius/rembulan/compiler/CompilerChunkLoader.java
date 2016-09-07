@@ -23,7 +23,7 @@ import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
 import net.sandius.rembulan.parser.TokenMgrError;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Objects;
@@ -59,7 +59,7 @@ public class CompilerChunkLoader implements ChunkLoader {
 	}
 
 	@Override
-	public Function loadTextChunk(Variable env, String chunkName, String sourceText) throws LoaderException {
+	public LuaFunction loadTextChunk(Variable env, String chunkName, String sourceText) throws LoaderException {
 		Objects.requireNonNull(env);
 		Objects.requireNonNull(chunkName);
 		Objects.requireNonNull(sourceText);
@@ -71,7 +71,7 @@ public class CompilerChunkLoader implements ChunkLoader {
 			String mainClassName = chunkClassLoader.install(result);
 			Class<?> clazz = chunkClassLoader.loadClass(mainClassName);
 
-			return (Function) clazz.getConstructor(Variable.class).newInstance(env);
+			return (LuaFunction) clazz.getConstructor(Variable.class).newInstance(env);
 		}
 		catch (TokenMgrError ex) {
 			String msg = ex.getMessage();
@@ -94,7 +94,7 @@ public class CompilerChunkLoader implements ChunkLoader {
 	}
 
 //	@Override
-//	public Function loadBinaryChunk(Variable env, String chunkName, byte[] bytes, int offset, int len) throws LoaderException {
+//	public LuaFunction loadBinaryChunk(Variable env, String chunkName, byte[] bytes, int offset, int len) throws LoaderException {
 //		throw new UnsupportedOperationException();  // TODO
 //	}
 

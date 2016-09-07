@@ -28,7 +28,7 @@ import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.io.InputStreamIoFile;
 import net.sandius.rembulan.lib.impl.io.OutputStreamIoFile;
 import net.sandius.rembulan.runtime.Dispatch;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
@@ -43,16 +43,16 @@ import java.util.Arrays;
 
 public class DefaultIoLib extends IoLib {
 
-	private final Function _close;
-	private final Function _flush;
-	private final Function _input;
-	private final Function _lines;
-	private final Function _open;
-	private final Function _output;
-	private final Function _popen;
-	private final Function _read;
-	private final Function _tmpfile;
-	private final Function _write;
+	private final LuaFunction _close;
+	private final LuaFunction _flush;
+	private final LuaFunction _input;
+	private final LuaFunction _lines;
+	private final LuaFunction _open;
+	private final LuaFunction _output;
+	private final LuaFunction _popen;
+	private final LuaFunction _read;
+	private final LuaFunction _tmpfile;
+	private final LuaFunction _write;
 
 	private final Table fileMetatable;
 
@@ -117,57 +117,57 @@ public class DefaultIoLib extends IoLib {
 	}
 
 	@Override
-	public Function _close() {
+	public LuaFunction _close() {
 		return _close;
 	}
 
 	@Override
-	public Function _flush() {
+	public LuaFunction _flush() {
 		return _flush;
 	}
 
 	@Override
-	public Function _input() {
+	public LuaFunction _input() {
 		return _input;
 	}
 
 	@Override
-	public Function _lines() {
+	public LuaFunction _lines() {
 		return _lines;
 	}
 
 	@Override
-	public Function _open() {
+	public LuaFunction _open() {
 		return _open;
 	}
 
 	@Override
-	public Function _output() {
+	public LuaFunction _output() {
 		return _output;
 	}
 
 	@Override
-	public Function _popen() {
+	public LuaFunction _popen() {
 		return _popen;
 	}
 
 	@Override
-	public Function _read() {
+	public LuaFunction _read() {
 		return _read;
 	}
 
 	@Override
-	public Function _tmpfile() {
+	public LuaFunction _tmpfile() {
 		return _tmpfile;
 	}
 
 	@Override
-	public Function _type() {
+	public LuaFunction _type() {
 		return Type.INSTANCE;
 	}
 
 	@Override
-	public Function _write() {
+	public LuaFunction _write() {
 		return _write;
 	}
 
@@ -187,41 +187,41 @@ public class DefaultIoLib extends IoLib {
 	}
 
 	@Override
-	public Function _file_close() {
+	public LuaFunction _file_close() {
 		return IoFile.Close.INSTANCE;
 	}
 
 	@Override
-	public Function _file_flush() {
+	public LuaFunction _file_flush() {
 		return IoFile.Flush.INSTANCE;
 	}
 
 	@Override
-	public Function _file_lines() {
+	public LuaFunction _file_lines() {
 		return IoFile.Lines.INSTANCE;
 	}
 
 	@Override
-	public Function _file_read() {
+	public LuaFunction _file_read() {
 		return IoFile.Read.INSTANCE;
 	}
 
 	@Override
-	public Function _file_seek() {
+	public LuaFunction _file_seek() {
 		return IoFile.Seek.INSTANCE;
 	}
 
 	@Override
-	public Function _file_setvbuf() {
+	public LuaFunction _file_setvbuf() {
 		return IoFile.SetVBuf.INSTANCE;
 	}
 
 	@Override
-	public Function _file_write() {
+	public LuaFunction _file_write() {
 		return IoFile.Write.INSTANCE;
 	}
 
-	public Function _file_tostring() {
+	public LuaFunction _file_tostring() {
 		return IoFile.ToString.INSTANCE;
 	}
 

@@ -24,8 +24,8 @@ import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.Dispatch;
-import net.sandius.rembulan.runtime.Function;
 import net.sandius.rembulan.runtime.IllegalOperationAttemptException;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
@@ -36,10 +36,10 @@ import java.util.Arrays;
 
 public class DefaultBasicLib extends BasicLib {
 
-	private final Function _print;
-	private final Function _dofile;
-	private final Function _load;
-	private final Function _loadfile;
+	private final LuaFunction _print;
+	private final LuaFunction _dofile;
+	private final LuaFunction _load;
+	private final LuaFunction _loadfile;
 
 	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Object defaultEnv) {
 		this._print = new Print(out);
@@ -62,112 +62,112 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 	@Override
-	public Function _print() {
+	public LuaFunction _print() {
 		return _print;
 	}
 
 	@Override
-	public Function _type() {
+	public LuaFunction _type() {
 		return Type.INSTANCE;
 	}
 
 	@Override
-	public Function _next() {
+	public LuaFunction _next() {
 		return Next.INSTANCE;
 	}
 
 	@Override
-	public Function _pairs() {
+	public LuaFunction _pairs() {
 		return Pairs.INSTANCE;
 	}
 
 	@Override
-	public Function _ipairs() {
+	public LuaFunction _ipairs() {
 		return IPairs.INSTANCE;
 	}
 
 	@Override
-	public Function _tostring() {
+	public LuaFunction _tostring() {
 		return ToString.INSTANCE;
 	}
 
 	@Override
-	public Function _tonumber() {
+	public LuaFunction _tonumber() {
 		return ToNumber.INSTANCE;
 	}
 
 	@Override
-	public Function _error() {
+	public LuaFunction _error() {
 		return Error.INSTANCE;
 	}
 
 	@Override
-	public Function _assert() {
+	public LuaFunction _assert() {
 		return Assert.INSTANCE;
 	}
 
 	@Override
-	public Function _getmetatable() {
+	public LuaFunction _getmetatable() {
 		return GetMetatable.INSTANCE;
 	}
 
 	@Override
-	public Function _setmetatable() {
+	public LuaFunction _setmetatable() {
 		return SetMetatable.INSTANCE;
 	}
 
 	@Override
-	public Function _pcall() {
+	public LuaFunction _pcall() {
 		return PCall.INSTANCE;
 	}
 
 	@Override
-	public Function _xpcall() {
+	public LuaFunction _xpcall() {
 		return XPCall.INSTANCE;
 	}
 
 	@Override
-	public Function _rawequal() {
+	public LuaFunction _rawequal() {
 		return RawEqual.INSTANCE;
 	}
 
 	@Override
-	public Function _rawget() {
+	public LuaFunction _rawget() {
 		return RawGet.INSTANCE;
 	}
 
 	@Override
-	public Function _rawset() {
+	public LuaFunction _rawset() {
 		return RawSet.INSTANCE;
 	}
 
 	@Override
-	public Function _rawlen() {
+	public LuaFunction _rawlen() {
 		return RawLen.INSTANCE;
 	}
 
 	@Override
-	public Function _select() {
+	public LuaFunction _select() {
 		return Select.INSTANCE;
 	}
 
 	@Override
-	public Function _collectgarbage() {
+	public LuaFunction _collectgarbage() {
 		return CollectGarbage.INSTANCE;
 	}
 
 	@Override
-	public Function _dofile() {
+	public LuaFunction _dofile() {
 		return _dofile;
 	}
 
 	@Override
-	public Function _load() {
+	public LuaFunction _load() {
 		return _load;
 	}
 
 	@Override
-	public Function _loadfile() {
+	public LuaFunction _loadfile() {
 		return _loadfile;
 	}
 
@@ -608,10 +608,10 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		private static class SavedState {
-			public final Function handler;
+			public final LuaFunction handler;
 			public final int depth;
 
-			private SavedState(Function handler, int depth) {
+			private SavedState(LuaFunction handler, int depth) {
 				this.handler = handler;
 				this.depth = depth;
 			}
@@ -631,7 +631,7 @@ public class DefaultBasicLib extends BasicLib {
 			rbuf.setTo(Boolean.FALSE, errorObject);
 		}
 
-		private void handleError(ExecutionContext context, Function handler, int depth, Object errorObject) throws ResolvedControlThrowable {
+		private void handleError(ExecutionContext context, LuaFunction handler, int depth, Object errorObject) throws ResolvedControlThrowable {
 			// we want to be able to handle nil error objects, so we need a separate flag
 			boolean isError = true;
 
@@ -664,7 +664,7 @@ public class DefaultBasicLib extends BasicLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object callTarget = args.peekOrNil();
 			args.skip();
-			Function handler = args.nextFunction();
+			LuaFunction handler = args.nextFunction();
 			Object[] callArgs = args.getTail();
 
 			Object errorObject = null;
@@ -911,7 +911,7 @@ public class DefaultBasicLib extends BasicLib {
 					loadFromString(context, chunkName, env, (String) chunk);
 				}
 				else {
-					Function fn = (Function) chunk;
+					LuaFunction fn = (LuaFunction) chunk;
 					loadFromFunction(context, false, chunkName, env, new StringBuilder(), fn);
 				}
 			}
@@ -919,7 +919,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		private void loadFromString(ExecutionContext context, String chunkName, Object env, String chunkText) {
-			final Function fn;
+			final LuaFunction fn;
 			try {
 				fn = loader.loadTextChunk(new Variable(env), chunkName, chunkText);
 			}
@@ -942,9 +942,9 @@ public class DefaultBasicLib extends BasicLib {
 			public final String chunkName;
 			public final Object env;
 			public final StringBuilder bld;
-			public final Function fn;
+			public final LuaFunction fn;
 
-			private State(String chunkName, Object env, StringBuilder bld, Function fn) {
+			private State(String chunkName, Object env, StringBuilder bld, LuaFunction fn) {
 				this.chunkName = chunkName;
 				this.env = env;
 				this.bld = bld;
@@ -953,7 +953,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		}
 
-		private void loadFromFunction(ExecutionContext context, boolean resuming, String chunkName, Object env, StringBuilder bld, Function fn)
+		private void loadFromFunction(ExecutionContext context, boolean resuming, String chunkName, Object env, StringBuilder bld, LuaFunction fn)
 				throws ResolvedControlThrowable {
 
 			String chunkText = null;

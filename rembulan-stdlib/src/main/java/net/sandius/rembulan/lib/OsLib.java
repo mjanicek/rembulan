@@ -45,7 +45,7 @@ package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
  * This library is implemented through table {@code os}.
@@ -81,7 +81,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.clock} function
 	 */
-	public abstract Function _clock();
+	public abstract LuaFunction _clock();
 
 	/**
 	 * {@code os.date ([format [, time]])}
@@ -113,7 +113,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.date} function
 	 */
-	public abstract Function _date();
+	public abstract LuaFunction _date();
 
 	/**
 	 * {@code os.difftime (t2, t1)}
@@ -124,7 +124,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.difftime} function
 	 */
-	public abstract Function _difftime();
+	public abstract LuaFunction _difftime();
 
 	/**
 	 * {@code os.execute ([command])}
@@ -144,7 +144,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.execute} function
 	 */
-	public abstract Function _execute();
+	public abstract LuaFunction _execute();
 
 	/**
 	 * {@code os.exit ([code [, close]])}
@@ -159,7 +159,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.exit} function
 	 */
-	public abstract Function _exit();
+	public abstract LuaFunction _exit();
 
 	/**
 	 * {@code os.getenv (varname)}
@@ -169,7 +169,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.getenv} function
 	 */
-	public abstract Function _getenv();
+	public abstract LuaFunction _getenv();
 
 	/**
 	 * {@code os.remove (filename)}
@@ -180,7 +180,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.remove} function
 	 */
-	public abstract Function _remove();
+	public abstract LuaFunction _remove();
 
 	/**
 	 * {@code os.rename (oldname, newname)}
@@ -190,7 +190,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.rename} function
 	 */
-	public abstract Function _rename();
+	public abstract LuaFunction _rename();
 
 	/**
 	 * {@code os.setlocale (locale [, category])}
@@ -214,7 +214,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.setlocale} function
 	 */
-	public abstract Function _setlocale();
+	public abstract LuaFunction _setlocale();
 
 	/**
 	 * {@code os.time ([table])}
@@ -239,7 +239,7 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.time} function
 	 */
-	public abstract Function _time();
+	public abstract LuaFunction _time();
 
 	/**
 	 * {@code os.tmpname ()}
@@ -258,6 +258,6 @@ public abstract class OsLib extends Lib {
 	 *
 	 * @return the {@code os.tmpname} function
 	 */
-	public abstract Function _tmpname();
+	public abstract LuaFunction _tmpname();
 
 }

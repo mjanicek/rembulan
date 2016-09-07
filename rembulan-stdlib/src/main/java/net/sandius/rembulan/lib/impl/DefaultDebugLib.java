@@ -24,7 +24,7 @@ import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;
-import net.sandius.rembulan.runtime.Function;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 
@@ -32,14 +32,14 @@ import java.lang.reflect.Field;
 
 public class DefaultDebugLib extends DebugLib {
 
-	private final Function _debug;
-	private final Function _gethook;
-	private final Function _getinfo;
-	private final Function _getlocal;
-	private final Function _getregistry;
-	private final Function _sethook;
-	private final Function _setlocal;
-	private final Function _traceback;
+	private final LuaFunction _debug;
+	private final LuaFunction _gethook;
+	private final LuaFunction _getinfo;
+	private final LuaFunction _getlocal;
+	private final LuaFunction _getregistry;
+	private final LuaFunction _sethook;
+	private final LuaFunction _setlocal;
+	private final LuaFunction _traceback;
 
 	public DefaultDebugLib() {
 		this._debug = new UnimplementedFunction("debug.debug");  // TODO
@@ -53,82 +53,82 @@ public class DefaultDebugLib extends DebugLib {
 	}
 
 	@Override
-	public Function _debug() {
+	public LuaFunction _debug() {
 		return _debug;
 	}
 
 	@Override
-	public Function _gethook() {
+	public LuaFunction _gethook() {
 		return _gethook;
 	}
 
 	@Override
-	public Function _getinfo() {
+	public LuaFunction _getinfo() {
 		return _getinfo;
 	}
 
 	@Override
-	public Function _getlocal() {
+	public LuaFunction _getlocal() {
 		return _getlocal;
 	}
 
 	@Override
-	public Function _getmetatable() {
+	public LuaFunction _getmetatable() {
 		return GetMetatable.INSTANCE;
 	}
 
 	@Override
-	public Function _getregistry() {
+	public LuaFunction _getregistry() {
 		return _getregistry;
 	}
 
 	@Override
-	public Function _getupvalue() {
+	public LuaFunction _getupvalue() {
 		return GetUpvalue.INSTANCE;
 	}
 
 	@Override
-	public Function _getuservalue() {
+	public LuaFunction _getuservalue() {
 		return GetUserValue.INSTANCE;
 	}
 
 	@Override
-	public Function _sethook() {
+	public LuaFunction _sethook() {
 		return _sethook;
 	}
 
 	@Override
-	public Function _setlocal() {
+	public LuaFunction _setlocal() {
 		return _setlocal;
 	}
 
 	@Override
-	public Function _setmetatable() {
+	public LuaFunction _setmetatable() {
 		return SetMetatable.INSTANCE;
 	}
 
 	@Override
-	public Function _setupvalue() {
+	public LuaFunction _setupvalue() {
 		return SetUpvalue.INSTANCE;
 	}
 
 	@Override
-	public Function _setuservalue() {
+	public LuaFunction _setuservalue() {
 		return SetUserValue.INSTANCE;
 	}
 
 	@Override
-	public Function _traceback() {
+	public LuaFunction _traceback() {
 		return _traceback;
 	}
 
 	@Override
-	public Function _upvalueid() {
+	public LuaFunction _upvalueid() {
 		return UpvalueId.INSTANCE;
 	}
 
 	@Override
-	public Function _upvaluejoin() {
+	public LuaFunction _upvaluejoin() {
 		return UpvalueJoin.INSTANCE;
 	}
 
@@ -136,17 +136,17 @@ public class DefaultDebugLib extends DebugLib {
 	private static class UpvalueRef {
 
 		private final int index;
-		private final Function function;
+		private final LuaFunction function;
 		private final Field field;
 
-		public UpvalueRef(int index, Function function, Field field) {
+		public UpvalueRef(int index, LuaFunction function, Field field) {
 			this.index = index;
 			this.function = Check.notNull(function);
 			this.field = Check.notNull(field);
 		}
 
 		// index is 0-based
-		public static UpvalueRef find(Function f, int index) {
+		public static UpvalueRef find(LuaFunction f, int index) {
 			Check.notNull(f);
 
 			// find the index-th upvalue field
@@ -243,7 +243,7 @@ public class DefaultDebugLib extends DebugLib {
 			args.skip();
 			int index = args.nextInt();
 			args.rewind();
-			Function f = args.nextFunction();
+			LuaFunction f = args.nextFunction();
 
 			UpvalueRef uvRef = UpvalueRef.find(f, index - 1);
 
@@ -290,7 +290,7 @@ public class DefaultDebugLib extends DebugLib {
 			args.skip();
 			int index = args.nextInt();
 			args.rewind();
-			Function f = args.nextFunction();
+			LuaFunction f = args.nextFunction();
 
 			UpvalueRef uvRef = UpvalueRef.find(f, index - 1);
 
@@ -329,7 +329,7 @@ public class DefaultDebugLib extends DebugLib {
 			args.goTo(1);
 			int n = args.nextInt();
 			args.goTo(0);
-			Function f = args.nextFunction();
+			LuaFunction f = args.nextFunction();
 
 			UpvalueRef uvRef = UpvalueRef.find(f, n - 1);
 			if (uvRef == null) {
@@ -365,7 +365,7 @@ public class DefaultDebugLib extends DebugLib {
 			args.goTo(1);
 			int n1 = args.nextInt();
 			args.goTo(0);
-			Function f1 = args.nextFunction();
+			LuaFunction f1 = args.nextFunction();
 
 			UpvalueRef uvRef1 = UpvalueRef.find(f1, n1 - 1);
 			if (uvRef1 == null) {
@@ -376,7 +376,7 @@ public class DefaultDebugLib extends DebugLib {
 			args.goTo(3);
 			int n2 = args.nextInt();
 			args.goTo(2);
-			Function f2 = args.nextFunction();
+			LuaFunction f2 = args.nextFunction();
 
 			UpvalueRef uvRef2 = UpvalueRef.find(f2, n2 - 1);
 			if (uvRef2 == null) {
