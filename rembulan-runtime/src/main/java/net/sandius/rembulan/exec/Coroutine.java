@@ -57,8 +57,13 @@ public final class Coroutine {
 		static final BootstrapResumable INSTANCE = new BootstrapResumable();
 
 		@Override
-		public void resume(ExecutionContext context, Object target) throws ControlThrowable {
-			Dispatch.call(context, target, context.getReturnBuffer().getAsArray());
+		public void resume(ExecutionContext context, Object target) throws ResolvedControlThrowable {
+			try {
+				Dispatch.call(context, target, context.getReturnBuffer().getAsArray());
+			}
+			catch (UnresolvedControlThrowable ct) {
+				throw ct.ignoreFrame();
+			}
 		}
 
 	}

@@ -25,7 +25,8 @@ import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.ReturnBuffer;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.TableLib;
@@ -172,7 +173,7 @@ public class DefaultTableLib extends TableLib {
 		private static final int STATE_LOOP = 3;
 
 		private void run(ExecutionContext context, int state, Table t, ArgumentIterator args, String sep, int i, int j, int k, StringBuilder bld)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			try {
 				switch (state) {
@@ -258,13 +259,13 @@ public class DefaultTableLib extends TableLib {
 						throw new IllegalStateException("Illegal state: " + state);
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new SuspendedState(state, t, args, sep, i, j, k, bld));
 			}
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final Table t = args.nextTable();
 			final int state;
 			final int k;
@@ -284,7 +285,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			SuspendedState ss = (SuspendedState) suspendedState;
 			run(context, ss.state, ss.t, ss.args, ss.sep, ss.i, ss.j, ss.k, ss.bld);
 		}
@@ -349,7 +350,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
 
 			if (!hasLenMetamethod(context, t)) {
@@ -361,7 +362,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			SuspendedState ss = (SuspendedState) suspendedState;
 			switch (ss.state >> PHASE_SHIFT) {
 				case _LEN:  _len(context, ss.state, ss.t, ss.args); break;
@@ -372,7 +373,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void _len(ExecutionContext context, int state, Table t, ArgumentIterator args)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			// __len is defined, must go through Dispatch
 
@@ -393,7 +394,7 @@ public class DefaultTableLib extends TableLib {
 						throw new IllegalStateException("Illegal state: " + state);
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new SuspendedState(state, t, args, 0, 0, null));
 			}
 
@@ -402,7 +403,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void run_args(ExecutionContext context, Table t, ArgumentIterator args, int len)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			final int pos;
 			final Object value;
@@ -427,7 +428,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void start_loop(ExecutionContext context, Table t, int pos, int len, Object value)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			// check whether we can use raw accesses instead of having to go through
 			// Dispatch and potential metamethods
@@ -445,7 +446,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void _loop(ExecutionContext context, int state, Table t, int pos, int k, Object value)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			// came from start_loop in the invoke path
 
@@ -475,7 +476,7 @@ public class DefaultTableLib extends TableLib {
 					}
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new SuspendedState(state, t, null, pos, k, value));
 			}
 
@@ -485,7 +486,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void _end(ExecutionContext context, int state, Table t, int pos, Object value)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 			try {
 				switch (state) {
 
@@ -500,7 +501,7 @@ public class DefaultTableLib extends TableLib {
 						throw new IllegalStateException("Illegal state: " + state);
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new SuspendedState(state, t, null, pos, -1, value));
 			}
 
@@ -520,7 +521,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table table = context.getState().newTable();
 
 			int n = 0;
@@ -609,7 +610,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
 
 			if (!hasLenMetamethod(context, t)) {
@@ -621,7 +622,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			SuspendedState ss = (SuspendedState) suspendedState;
 			switch (ss.state >> PHASE_SHIFT) {
 				case _LEN:   _len(context, ss.state, ss.t, ss.args); break;
@@ -633,7 +634,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void _len(ExecutionContext context, int state, Table t, ArgumentIterator args)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			// __len is defined, must go through Dispatch
 
@@ -654,7 +655,7 @@ public class DefaultTableLib extends TableLib {
 						throw new IllegalStateException("Illegal state: " + state);
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new SuspendedState(state, t, args, 0, 0, null));
 			}
 
@@ -663,7 +664,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void run_args(ExecutionContext context, Table t, ArgumentIterator args, int len)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			final int pos;
 
@@ -682,7 +683,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void start_loop(ExecutionContext context, Table t, int pos, int len)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			// check whether we can use raw accesses instead of having to go through
 			// Dispatch and potential metamethods
@@ -700,7 +701,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void _get_result(ExecutionContext context, int state, Table t, int pos, int len)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			final Object result;
 			try {
@@ -717,7 +718,7 @@ public class DefaultTableLib extends TableLib {
 						throw new IllegalStateException("Illegal state: " + state);
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new SuspendedState(state, t, null, pos, len, null));
 			}
 
@@ -733,7 +734,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void _loop(ExecutionContext context, int state, Table t, int k, int len, Object result)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			// came from start_loop in the invoke path
 
@@ -763,7 +764,7 @@ public class DefaultTableLib extends TableLib {
 					}
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new SuspendedState(state, t, null, k, len, result));
 			}
 
@@ -772,7 +773,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private void _erase(ExecutionContext context, int state, Table t, int idx, Object result)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			try {
 				switch (state) {
@@ -788,7 +789,7 @@ public class DefaultTableLib extends TableLib {
 						throw new IllegalStateException("Illegal state: " + state);
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				// no need to carry any information but the result around
 				throw ct.push(this, new SuspendedState(state, null, null, 0, 0, result));
 			}
@@ -842,7 +843,9 @@ public class DefaultTableLib extends TableLib {
 		private static final int STATE_BEFORE_LOOP = 2;
 		private static final int STATE_LOOP = 3;
 
-		private void run(ExecutionContext context, int state, Object obj, int i, int j, int k, ArrayList<Object> result) throws ControlThrowable {
+		private void run(ExecutionContext context, int state, Object obj, int i, int j, int k, ArrayList<Object> result)
+				throws ResolvedControlThrowable {
+
 			try {
 				switch (state) {
 
@@ -909,13 +912,13 @@ public class DefaultTableLib extends TableLib {
 						throw new IllegalStateException("Illegal state: " + state);
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new SuspendedState(state, obj, i, j, k, result));
 			}
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object obj = args.peekOrNil();
 			args.skip();
 			int i = args.optNextInt(1);
@@ -940,7 +943,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			SuspendedState ss = (SuspendedState) suspendedState;
 			run(context, ss.state, ss.obj, ss.i, ss.j, ss.k, ss.result);
 		}

@@ -230,7 +230,7 @@ public class Call {
 		rr.fire(handler, this, cont);
 	}
 
-	private static class ControlPayload implements ControlThrowable.Payload {
+	private static class ControlPayload extends ControlThrowablePayload {
 
 		private final boolean preempted;
 		private final Coroutine target;
@@ -253,7 +253,7 @@ public class Call {
 		}
 
 		@Override
-		public void accept(ControlThrowable.Visitor visitor) {
+		public void accept(ControlThrowablePayload.Visitor visitor) {
 			if (preempted) visitor.preempted();
 			else if (target != null && values != null) visitor.coroutineResume(target, values);
 			else if (target == null && values != null) visitor.coroutineYield(values);
@@ -310,7 +310,7 @@ public class Call {
 
 	private static final ResumeResult PAUSE_RESULT = new ResumeResult(true, null, null, null);
 
-	class Resumer implements ExecutionContext, ControlThrowable.Visitor {
+	class Resumer implements ExecutionContext, ControlThrowablePayload.Visitor {
 
 		private final SchedulingContext schedulingContext;
 
@@ -350,18 +350,18 @@ public class Call {
 		}
 
 		@Override
-		public void resume(Coroutine coroutine, Object[] args) throws ControlThrowable {
-			throw new ControlThrowable(new ControlPayload(false, coroutine, args, null));
+		public void resume(Coroutine coroutine, Object[] args) throws UnresolvedControlThrowable {
+			throw new UnresolvedControlThrowable(new ControlPayload(false, coroutine, args, null));
 		}
 
 		@Override
-		public void yield(Object[] args) throws ControlThrowable {
-			throw new ControlThrowable(new ControlPayload(false, null, args, null));
+		public void yield(Object[] args) throws UnresolvedControlThrowable {
+			throw new UnresolvedControlThrowable(new ControlPayload(false, null, args, null));
 		}
 
 		@Override
-		public void resumeAfter(AsyncTask task) throws ControlThrowable {
-			throw new ControlThrowable(new ControlPayload(false, null, null, task));
+		public void resumeAfter(AsyncTask task) throws UnresolvedControlThrowable {
+			throw new UnresolvedControlThrowable(new ControlPayload(false, null, null, task));
 		}
 
 		@Override
@@ -370,15 +370,15 @@ public class Call {
 		}
 
 		@Override
-		public void checkCallYield() throws ControlThrowable {
+		public void checkCallYield() throws UnresolvedControlThrowable {
 			if (schedulingContext.shouldYield()) {
 				pause();
 			}
 		}
 
 		@Override
-		public void pause() throws ControlThrowable {
-			throw new ControlThrowable(PAUSED_PAYLOAD);
+		public void pause() throws UnresolvedControlThrowable {
+			throw new UnresolvedControlThrowable(PAUSED_PAYLOAD);
 		}
 
 		@Override
@@ -472,7 +472,7 @@ public class Call {
 			result = new ResumeResult(false, null, null, task);
 		}
 
-		private void saveFrames(ControlThrowable ct) {
+		private void saveFrames(ResolvedControlThrowable ct) {
 			Iterator<ResumeInfo> it = ct.frames();
 			while (it.hasNext()) {
 				callStack = new Cons<>(it.next(), callStack);
@@ -506,9 +506,9 @@ public class Call {
 						}
 					}
 				}
-				catch (ControlThrowable ct) {
+				catch (ResolvedControlThrowable ct) {
 					saveFrames(ct);
-					ct.accept(this);
+					ct.payload().accept(this);
 					return;
 				}
 				catch (Exception ex) {

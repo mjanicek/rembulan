@@ -25,7 +25,8 @@ import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.AbstractFunction0;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.UnimplementedFunction;
@@ -155,7 +156,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			int i = args.optNextInt(1);
 			int j = args.optNextInt(i);
@@ -186,7 +187,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			char[] chars = new char[args.size()];
 
 			for (int i = 0; i < chars.length; i++) {
@@ -209,7 +210,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Function f = args.nextFunction();
 			boolean strip = args.optNextBoolean(false);
 
@@ -228,7 +229,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			String pattern = args.nextString();
 			int init = args.optNextInt(1);
@@ -663,7 +664,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String fmt = args.nextString();
 
 			StringBuilder bld = new StringBuilder();
@@ -680,7 +681,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			// TODO: needed for tostring
 			super.resume(context, suspendedState);
 		}
@@ -704,7 +705,7 @@ public class DefaultStringLib extends StringLib {
 			}
 
 			@Override
-			public void invoke(ExecutionContext context) throws ControlThrowable {
+			public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
 
 				int idx = index.get();
 
@@ -741,7 +742,7 @@ public class DefaultStringLib extends StringLib {
 			}
 
 			@Override
-			public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 				throw new NonsuspendableFunctionException(this.getClass());
 			}
 		}
@@ -752,7 +753,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			String pattern = args.nextString();
 
@@ -777,7 +778,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			String pattern = args.nextString();
 
@@ -835,7 +836,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		private void run(ExecutionContext context, String str, int idx, StringBuilder bld, StringPattern pat, int count, int num, Object repl)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			while (count < num) {
 				StringPattern.Match m = pat.match(str, idx);
@@ -930,7 +931,7 @@ public class DefaultStringLib extends StringLib {
 				Object repl,
 				String fullMatch,
 				List<Object> captures)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			assert (!captures.isEmpty());
 
@@ -947,7 +948,7 @@ public class DefaultStringLib extends StringLib {
 					throw new IllegalStateException("Illegal replacement: " + repl);
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new State(str, pat, count, num, repl, bld, fullMatch, idx));
 			}
 			resumeReplace(context, bld, fullMatch);
@@ -973,7 +974,7 @@ public class DefaultStringLib extends StringLib {
 
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			State state = (State) suspendedState;
 			resumeReplace(context, state.bld, state.fullMatch);
 			run(context, state.str, state.idx, state.bld, state.pat, state.count, state.num, state.repl);
@@ -991,7 +992,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			context.getReturnBuffer().setTo((long) s.length());
 		}
@@ -1008,7 +1009,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			context.getReturnBuffer().setTo(s.toLowerCase());
 		}
@@ -1025,7 +1026,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			String pattern = args.nextString();
 			int init = args.optNextInt(1);
@@ -1061,7 +1062,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			int n = args.nextInt();
 			String sep = args.optNextString("");
@@ -1098,7 +1099,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 
 			int len = s.length();
@@ -1125,7 +1126,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			int i = args.nextInt();
 			int j = args.optNextInt(-1);
@@ -1151,7 +1152,7 @@ public class DefaultStringLib extends StringLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString();
 			context.getReturnBuffer().setTo(s.toUpperCase());
 		}

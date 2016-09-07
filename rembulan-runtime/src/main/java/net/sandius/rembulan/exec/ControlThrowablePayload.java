@@ -16,22 +16,22 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Resumable;
-import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.AsyncTask;
 
-class ResumeInfo {
+abstract class ControlThrowablePayload {
 
-	public final Resumable resumable;
-	public final Object savedState;
+	abstract void accept(Visitor visitor);
 
-	public ResumeInfo(Resumable resumable, Object savedState) {
-		this.resumable = Check.notNull(resumable);
-		this.savedState = savedState;
-	}
+	interface Visitor {
 
-	public void resume(ExecutionContext context) throws ResolvedControlThrowable {
-		resumable.resume(context, savedState);
+		void preempted();
+
+		void coroutineYield(Object[] values);
+
+		void coroutineResume(Coroutine target, Object[] values);
+
+		void async(AsyncTask task);
+
 	}
 
 }

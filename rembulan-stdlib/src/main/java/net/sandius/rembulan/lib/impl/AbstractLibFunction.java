@@ -17,7 +17,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
 import net.sandius.rembulan.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 
@@ -28,7 +28,7 @@ public abstract class AbstractLibFunction extends AbstractFunctionAnyArg {
 	protected abstract String name();
 
 	@Override
-	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
 		ArgumentIterator callArgs = new ArgumentIterator(
 				new NameMetamethodValueTypeNamer(context.getState()),
 				name(),
@@ -36,10 +36,10 @@ public abstract class AbstractLibFunction extends AbstractFunctionAnyArg {
 		invoke(context, callArgs);
 	}
 
-	protected abstract void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable;
+	protected abstract void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable;
 
 	@Override
-	public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+	public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 		throw new NonsuspendableFunctionException(this.getClass());
 	}
 

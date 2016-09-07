@@ -20,8 +20,9 @@ import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.ReturnBuffer;
-import net.sandius.rembulan.exec.ControlThrowable;
 import net.sandius.rembulan.exec.Coroutine;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.util.Check;
@@ -76,7 +77,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Function func = args.nextFunction();
 			Coroutine c = context.newCoroutine(func);
 			context.getReturnBuffer().setTo(c);
@@ -94,7 +95,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Coroutine coroutine = args.nextCoroutine();
 			Object[] resumeArgs = args.getTail();
 
@@ -103,13 +104,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			try {
 				context.resume(coroutine, resumeArgs);
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, null);
 			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			ReturnBuffer rbuf = context.getReturnBuffer();
 			ArrayList<Object> result = new ArrayList<>();
 			result.add(Boolean.TRUE);
@@ -118,7 +119,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
+		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ResolvedControlThrowable {
 			context.getReturnBuffer().setTo(Boolean.FALSE, error);
 		}
 
@@ -134,17 +135,17 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			try {
 				context.yield(args.getAll());
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, null);
 			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			// no-op, the resume arguments are on the stack already
 		}
 
@@ -160,7 +161,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			context.getReturnBuffer().setTo(context.isInMainCoroutine());
 		}
 
@@ -194,7 +195,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Coroutine coroutine = args.nextCoroutine();
 			context.getReturnBuffer().setTo(status(context, coroutine));
 		}
@@ -211,7 +212,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Coroutine c = context.getCurrentCoroutine();
 			context.getReturnBuffer().setTo(c, !context.isInMainCoroutine());
 		}
@@ -233,18 +234,18 @@ public class DefaultCoroutineLib extends CoroutineLib {
 			}
 
 			@Override
-			public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+			public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
 				context.getReturnBuffer().setTo();
 				try {
 					context.resume(coroutine, args);
 				}
-				catch (ControlThrowable ct) {
+				catch (UnresolvedControlThrowable ct) {
 					throw ct.push(this, null);
 				}
 			}
 
 			@Override
-			public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+			public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 				// no-op
 			}
 
@@ -256,7 +257,7 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Function f = args.nextFunction();
 			Function result = new WrappedCoroutine(f, context);
 			context.getReturnBuffer().setTo(result);

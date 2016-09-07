@@ -20,13 +20,14 @@ import net.sandius.rembulan.AsyncTask;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Variable;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.AbstractFunction1;
 
 public class AsyncExample extends AbstractFunction1 {
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg) throws ControlThrowable {
+	public void invoke(ExecutionContext context, Object arg) throws ResolvedControlThrowable {
 		final long millis = Conversions.toIntegerValue(arg);
 		final Variable v = new Variable(null);
 		try {
@@ -56,13 +57,13 @@ public class AsyncExample extends AbstractFunction1 {
 			// control should never reach this point
 			throw new AssertionError();
 		}
-		catch (ControlThrowable ct) {
+		catch (UnresolvedControlThrowable ct) {
 			throw ct.push(this, v);
 		}
 	}
 
 	@Override
-	public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+	public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 		Variable v = (Variable) suspendedState;
 		context.getReturnBuffer().setTo(v.get());
 	}

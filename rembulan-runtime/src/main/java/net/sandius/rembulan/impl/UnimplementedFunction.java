@@ -17,7 +17,7 @@
 package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 
 /**
@@ -41,12 +41,12 @@ public final class UnimplementedFunction extends AbstractFunction0 {
 	}
 
 	@Override
-	public void invoke(ExecutionContext context) throws ControlThrowable {
+	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
 		throw new UnsupportedOperationException("function not implemented: " + name);
 	}
 
 	@Override
-	public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+	public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 		throw new NonsuspendableFunctionException(this.getClass());
 	}
 

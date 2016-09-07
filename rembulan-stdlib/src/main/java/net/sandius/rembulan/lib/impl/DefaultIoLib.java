@@ -23,7 +23,8 @@ import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.Userdata;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.IoLib;
@@ -265,7 +266,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final IoFile file = args.hasNext()
 					? args.nextUserdata(IoFile.typeName(), IoFile.class)
 					: lib.getDefaultOutputFile();
@@ -273,13 +274,13 @@ public class DefaultIoLib extends IoLib {
 			try {
 				Dispatch.call(context, IoFile.Close.INSTANCE, file);
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, null);
 			}
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			// results already on stack, this is a no-op
 		}
 
@@ -299,13 +300,13 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			IoFile outFile = lib.getDefaultOutputFile();
 
 			try {
 				Dispatch.call(context, IoFile.Flush.INSTANCE);
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, outFile);
 			}
 
@@ -313,7 +314,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			// results are already on the stack, this is a no-op
 		}
 
@@ -333,7 +334,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.hasNext()) {
 				// open the argument for reading and set it as the default input file
 				String filename = args.nextString();
@@ -388,7 +389,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String filename = args.nextString();
 
 			final boolean binary;
@@ -445,7 +446,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.hasNext()) {
 				// open the argument for writing and set it as the default output file
 				String filename = args.nextString();
@@ -477,7 +478,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			IoFile file = lib.getDefaultInputFile();
 
 			ArrayList<Object> callArgs = new ArrayList<>();
@@ -487,7 +488,7 @@ public class DefaultIoLib extends IoLib {
 			try {
 				Dispatch.call(context, IoFile.Read.INSTANCE, callArgs.toArray());
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, null);
 			}
 
@@ -495,7 +496,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			// results are already on the stack, this is a no-op
 		}
 
@@ -511,7 +512,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object o = args.nextAny();
 
 			final String result;
@@ -544,7 +545,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			IoFile file = lib.getDefaultOutputFile();
 
 			ArrayList<Object> callArgs = new ArrayList<>();
@@ -554,7 +555,7 @@ public class DefaultIoLib extends IoLib {
 			try {
 				Dispatch.call(context, IoFile.Write.INSTANCE, callArgs.toArray());
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, null);
 			}
 
@@ -562,7 +563,7 @@ public class DefaultIoLib extends IoLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			// results are already on the stack, this is a no-op
 		}
 

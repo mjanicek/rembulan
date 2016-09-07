@@ -22,7 +22,7 @@ import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.Variable;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.DebugLib;
@@ -197,7 +197,7 @@ public class DefaultDebugLib extends DebugLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object value = args.nextAny();
 			Table mt = context.getState().getMetatable(value);
 			context.getReturnBuffer().setTo(mt);
@@ -215,7 +215,7 @@ public class DefaultDebugLib extends DebugLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object value = args.peekOrNil();
 			args.skip();
 			Table mt = args.nextTableOrNil();
@@ -239,7 +239,7 @@ public class DefaultDebugLib extends DebugLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			args.skip();
 			int index = args.nextInt();
 			args.rewind();
@@ -282,7 +282,7 @@ public class DefaultDebugLib extends DebugLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			args.skip();
 			args.skip();
 			Object newValue = args.nextAny();
@@ -325,7 +325,7 @@ public class DefaultDebugLib extends DebugLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			args.goTo(1);
 			int n = args.nextInt();
 			args.goTo(0);
@@ -360,7 +360,7 @@ public class DefaultDebugLib extends DebugLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			// read f1, n1
 			args.goTo(1);
 			int n1 = args.nextInt();
@@ -405,7 +405,7 @@ public class DefaultDebugLib extends DebugLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object o = args.peekOrNil();
 
 			Object result = o instanceof Userdata ? ((Userdata) o).getUserValue() : null;
@@ -424,7 +424,7 @@ public class DefaultDebugLib extends DebugLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Userdata userdata = args.nextUserdata();
 			Object value = args.nextAny();
 

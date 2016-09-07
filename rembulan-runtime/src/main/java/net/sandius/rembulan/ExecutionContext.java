@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.exec.ControlThrowable;
 import net.sandius.rembulan.exec.Coroutine;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 
 /**
  * An interface to the execution context of a Lua call.
@@ -98,7 +98,7 @@ public interface ExecutionContext {
 	/**
 	 * Resumes the given coroutine {@code coroutine}, passing the arguments {@code args}
 	 * to it.
-	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
 	 * handled and re-thrown by the caller of this method.
 	 *
 	 * <p>The reference to the array {@code args} is not retained by the execution context;
@@ -107,15 +107,15 @@ public interface ExecutionContext {
 	 * @param coroutine  coroutine to be resumed, must not be {@code null}
 	 * @param args  arguments to be passed to {@code coroutine}, must not be {@code null}
 	 *
-	 * @throws ControlThrowable  the control throwable for this coroutine switch
+	 * @throws UnresolvedControlThrowable  the control throwable for this coroutine switch
 	 */
 	@SuppressWarnings("unused")
-	void resume(Coroutine coroutine, Object[] args) throws ControlThrowable;
+	void resume(Coroutine coroutine, Object[] args) throws UnresolvedControlThrowable;
 
 	/**
 	 * Yields control to the coroutine resuming the current coroutine, passing the
 	 * arguments {@code args} to it.
-	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
 	 * handled and re-thrown by the caller of this method.
 	 *
 	 * <p>The reference to the array {@code args} is not retained by the execution context;
@@ -123,14 +123,14 @@ public interface ExecutionContext {
 	 *
 	 * @param args  arguments to be passed to the resuming coroutine, must not be {@code null}
 	 *
-	 * @throws ControlThrowable  the control throwable for this coroutine switch
+	 * @throws UnresolvedControlThrowable  the control throwable for this coroutine switch
 	 */
 	@SuppressWarnings("unused")
-	void yield(Object[] args) throws ControlThrowable;
+	void yield(Object[] args) throws UnresolvedControlThrowable;
 
 	/**
 	 * Resumes the current call after the asynchronous task {@code task} has been completed.
-	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
 	 * handled and re-thrown by the caller of this method.
 	 *
 	 * <p>In order to mark {@code task} as completed, the task must call
@@ -138,10 +138,10 @@ public interface ExecutionContext {
 	 *
 	 * @param task  the task to be executed, must not be {@code null}
 	 *
-	 * @throws ControlThrowable  the control throwable for this control change
+	 * @throws UnresolvedControlThrowable  the control throwable for this control change
 	 */
 	@SuppressWarnings("unused")
-	void resumeAfter(AsyncTask task) throws ControlThrowable;
+	void resumeAfter(AsyncTask task) throws UnresolvedControlThrowable;
 
 	/**
 	 * Informs the scheduler that the current task is about to consume or has consumed
@@ -154,24 +154,24 @@ public interface ExecutionContext {
 
 	/**
 	 * Pauses the execution if the according to the scheduler this call should be paused.
-	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
 	 * handled and re-thrown by the caller of this method.
 	 *
 	 * <p>To pause execution unconditionally, use {@link #pause()}.</p>
 	 *
-	 * @throws ControlThrowable  the control throwable for this control change
+	 * @throws UnresolvedControlThrowable  the control throwable for this control change
 	 */
 	@SuppressWarnings("unused")
-	void checkCallYield() throws ControlThrowable;
+	void checkCallYield() throws UnresolvedControlThrowable;
 
 	/**
 	 * (Unconditionally) pauses the execution.
-	 * <b>This method throws a {@link ControlThrowable}</b>; the throwable should be caught,
+	 * <b>This method throws a {@link UnresolvedControlThrowable}</b>; the throwable should be caught,
 	 * handled and re-thrown by the caller of this method.
 	 *
-	 * @throws ControlThrowable  the control throwable for this control change
+	 * @throws UnresolvedControlThrowable  the control throwable for this control change
 	 */
 	@SuppressWarnings("unused")
-	void pause() throws ControlThrowable;
+	void pause() throws UnresolvedControlThrowable;
 
 }

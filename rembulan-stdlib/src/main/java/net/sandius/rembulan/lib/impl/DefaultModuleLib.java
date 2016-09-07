@@ -20,7 +20,7 @@ import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Function;
 import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.ModuleLib;
@@ -119,7 +119,7 @@ public class DefaultModuleLib extends ModuleLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String modName = args.nextString();
 
 			Object mod = _loaded.rawget(modName);

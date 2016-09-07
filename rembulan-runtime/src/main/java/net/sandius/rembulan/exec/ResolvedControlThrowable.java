@@ -16,27 +16,29 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.AsyncTask;
-import net.sandius.rembulan.Resumable;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 
 import java.util.Iterator;
 
-public final class ControlThrowable extends Throwable {
+public final class ResolvedControlThrowable extends Throwable {
 
-	private final Payload payload;
-	private Cons<ResumeInfo> resumeStack;
+	private final ControlThrowablePayload payload;
+	private final Cons<ResumeInfo> resumeStack;
 
-	ControlThrowable(Payload payload) {
+	ResolvedControlThrowable(ControlThrowablePayload payload, Cons<ResumeInfo> resumeStack) {
 		super(null, null, true, false);
 		this.payload = Check.notNull(payload);
-		this.resumeStack = null;
+		this.resumeStack = resumeStack;
 	}
 
-	public ControlThrowable push(Resumable resumable, Object suspendedState) {
-		resumeStack = new Cons<>(new ResumeInfo(resumable, suspendedState), resumeStack);
-		return this;
+	@Override
+	public synchronized Throwable fillInStackTrace() {
+		return null;
+	}
+
+	ControlThrowablePayload payload() {
+		return payload;
 	}
 
 	// LIFO iterator
@@ -44,26 +46,8 @@ public final class ControlThrowable extends Throwable {
 		return Cons.newIterator(resumeStack);
 	}
 
-	public void accept(Visitor visitor) {
-		payload.accept(visitor);
-	}
-
-	interface Payload {
-
-		void accept(Visitor visitor);
-
-	}
-
-	public interface Visitor {
-
-		void preempted();
-
-		void coroutineYield(Object[] values);
-
-		void coroutineResume(Coroutine target, Object[] values);
-
-		void async(AsyncTask task);
-
+	public UnresolvedControlThrowable unresolve() {
+		return new UnresolvedControlThrowable(payload, resumeStack);
 	}
 
 }

@@ -17,7 +17,8 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.*;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -181,13 +182,13 @@ public class DefaultBasicLib extends BasicLib {
 			return "print";
 		}
 
-		private void run(ExecutionContext context, Object[] args) throws ControlThrowable {
+		private void run(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
 			for (int i = 0; i < args.length; i++) {
 				Object a = args[i];
 				try {
 					Dispatch.call(context, ToString.INSTANCE, a);
 				}
-				catch (ControlThrowable ct) {
+				catch (UnresolvedControlThrowable ct) {
 					throw ct.push(this, Arrays.copyOfRange(args, i + 1, args.length));
 				}
 
@@ -210,12 +211,12 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			run(context, args.getAll());
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			run(context, (Object[]) suspendedState);
 		}
 
@@ -231,7 +232,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
 			context.getReturnBuffer().setTo(typeName);
 		}
@@ -248,7 +249,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table table = args.nextTable();
 			Object index = args.optNextAny();
 
@@ -283,7 +284,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table table = args.nextTable();
 			int index = args.nextInt();
 
@@ -310,7 +311,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
 			Object metamethod = Metatables.getMetamethod(context.getState(), MT_PAIRS, t);
 
@@ -318,7 +319,7 @@ public class DefaultBasicLib extends BasicLib {
 				try {
 					Dispatch.call(context, metamethod, t);
 				}
-				catch (ControlThrowable ct) {
+				catch (UnresolvedControlThrowable ct) {
 					throw ct.push(this, null);
 				}
 
@@ -332,7 +333,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			ReturnBuffer rbuf = context.getReturnBuffer();
 			rbuf.setTo(rbuf.get0(), rbuf.get1(), rbuf.get2());
 		}
@@ -349,7 +350,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
 			context.getReturnBuffer().setTo(INext.INSTANCE, t, 0L);
 		}
@@ -366,7 +367,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object arg = args.nextAny();
 
 			Object meta = Metatables.getMetamethod(context.getState(), MT_TOSTRING, arg);
@@ -374,7 +375,7 @@ public class DefaultBasicLib extends BasicLib {
 				try {
 					Dispatch.call(context, meta, arg);
 				}
-				catch (ControlThrowable ct) {
+				catch (UnresolvedControlThrowable ct) {
 					throw ct.push(this, null);
 				}
 
@@ -389,7 +390,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			// trim to single value
 			Object result = context.getReturnBuffer().get0();
 			context.getReturnBuffer().setTo(result);
@@ -416,7 +417,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.size() < 2) {
 				// no base
 				Object o = args.nextAny();
@@ -452,7 +453,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object arg = args.nextAny();
 			Object meta = Metatables.getMetamethod(context.getState(), MT_METATABLE, arg);
 
@@ -475,7 +476,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
 			Table mt = args.nextTableOrNil();
 
@@ -500,7 +501,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			// TODO: handle levels
 			Object arg1 = args.optNextAny();
 			throw new LuaRuntimeException(arg1);
@@ -518,7 +519,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (Conversions.booleanValueOf(args.nextAny())) {
 				context.getReturnBuffer().setToContentsOf(args.getAll());
 			}
@@ -557,14 +558,14 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object callTarget = args.nextAny();
 			Object[] callArgs = args.getTail();
 
 			try {
 				Dispatch.call(context, callTarget, callArgs);
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, null);
 			}
 			catch (Exception ex) {
@@ -576,7 +577,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			// success: prepend true
 			ReturnBuffer rbuf = context.getReturnBuffer();
 			ArrayList<Object> result = new ArrayList<>();
@@ -586,7 +587,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
+		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ResolvedControlThrowable {
 			context.getReturnBuffer().setTo(Boolean.FALSE, error);  // failure
 		}
 
@@ -627,7 +628,7 @@ public class DefaultBasicLib extends BasicLib {
 			rbuf.setTo(Boolean.FALSE, errorObject);
 		}
 
-		private void handleError(ExecutionContext context, Function handler, int depth, Object errorObject) throws ControlThrowable {
+		private void handleError(ExecutionContext context, Function handler, int depth, Object errorObject) throws ResolvedControlThrowable {
 			// we want to be able to handle nil error objects, so we need a separate flag
 			boolean isError = true;
 
@@ -638,7 +639,7 @@ public class DefaultBasicLib extends BasicLib {
 					Dispatch.call(context, handler, errorObject);
 					isError = false;
 				}
-				catch (ControlThrowable ct) {
+				catch (UnresolvedControlThrowable ct) {
 					throw ct.push(this, new SavedState(handler, depth));
 				}
 				catch (Exception e) {
@@ -657,7 +658,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object callTarget = args.peekOrNil();
 			args.skip();
 			Function handler = args.nextFunction();
@@ -669,7 +670,7 @@ public class DefaultBasicLib extends BasicLib {
 			try {
 				Dispatch.call(context, callTarget, callArgs);
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				ct.push(this, new SavedState(handler, 0));
 			}
 			catch (Exception e) {
@@ -686,7 +687,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			SavedState ss = (SavedState) suspendedState;
 			if (ss.depth == 0) {
 				prependTrue(context);
@@ -697,7 +698,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ControlThrowable {
+		public void resumeError(ExecutionContext context, Object suspendedState, Object error) throws ResolvedControlThrowable {
 			SavedState ss = (SavedState) suspendedState;
 			handleError(context, ss.handler, ss.depth, error);
 		}
@@ -714,7 +715,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object a = args.nextAny();
 			Object b = args.nextAny();
 			context.getReturnBuffer().setTo(Ordering.isRawEqual(a, b));
@@ -732,7 +733,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table table = args.nextTable();
 			Object key = args.nextAny();
 			context.getReturnBuffer().setTo(table.rawget(key));
@@ -750,7 +751,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table table = args.nextTable();
 			Object key = args.nextAny();
 			Object value = args.nextAny();
@@ -771,7 +772,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final long result;
 
 			// no need to distinguish missing value vs nil
@@ -804,7 +805,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object index = args.peekOrNil();
 
 			if (index instanceof String && ((String) index).startsWith("#")) {
@@ -842,7 +843,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.hasNext()) {
 				throw new UnsupportedOperationException();  // TODO
 			}
@@ -867,7 +868,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 
 			// chunk
 			final Object chunk = args.hasNext() && Conversions.stringValueOf(args.peek()) != null
@@ -950,7 +951,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		private void loadFromFunction(ExecutionContext context, boolean resuming, String chunkName, Object env, StringBuilder bld, Function fn)
-				throws ControlThrowable {
+				throws ResolvedControlThrowable {
 
 			String chunkText = null;
 
@@ -978,7 +979,7 @@ public class DefaultBasicLib extends BasicLib {
 					}
 				}
 			}
-			catch (ControlThrowable ct) {
+			catch (UnresolvedControlThrowable ct) {
 				throw ct.push(this, new State(chunkName, env, bld, fn));
 			}
 
@@ -988,7 +989,7 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			State state = (State) suspendedState;
 			loadFromFunction(context, true, state.chunkName, state.env, state.bld, state.fn);
 		}

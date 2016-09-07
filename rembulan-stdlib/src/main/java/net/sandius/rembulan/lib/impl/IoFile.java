@@ -18,7 +18,7 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
 import net.sandius.rembulan.impl.DefaultUserdata;
 
 import java.io.IOException;
@@ -64,7 +64,7 @@ public abstract class IoFile extends DefaultUserdata {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 
 			try {
@@ -90,7 +90,7 @@ public abstract class IoFile extends DefaultUserdata {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			try {
 				f.flush();
@@ -115,7 +115,7 @@ public abstract class IoFile extends DefaultUserdata {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			throw new UnsupportedOperationException();  // TODO
 		}
 
@@ -131,7 +131,7 @@ public abstract class IoFile extends DefaultUserdata {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			throw new UnsupportedOperationException();  // TODO
 		}
@@ -157,7 +157,7 @@ public abstract class IoFile extends DefaultUserdata {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			IoFile file = args.nextUserdata(typeName(), IoFile.class);
 
 			final Whence whence;
@@ -202,7 +202,7 @@ public abstract class IoFile extends DefaultUserdata {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			throw new UnsupportedOperationException();  // TODO
 		}
 
@@ -218,7 +218,7 @@ public abstract class IoFile extends DefaultUserdata {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			while (args.hasNext()) {
 				final String s = args.nextString();
@@ -246,7 +246,7 @@ public abstract class IoFile extends DefaultUserdata {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			context.getReturnBuffer().setTo(f.toString());
 		}

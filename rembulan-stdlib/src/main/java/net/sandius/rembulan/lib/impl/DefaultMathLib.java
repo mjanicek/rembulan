@@ -20,7 +20,8 @@ import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Dispatch;
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Function;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.MathLib;
 import net.sandius.rembulan.util.Check;
@@ -186,7 +187,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Number x = args.nextNumber();
 			Number result = x instanceof Float || x instanceof Double ? op(x.doubleValue()) : op(x.longValue());
 			context.getReturnBuffer().setTo(result);
@@ -369,7 +370,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Number x = args.nextNumber();
 			Number y = args.nextNumber();
 
@@ -407,7 +408,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Number x = args.nextNumber();
 			double ln = Math.log(x.doubleValue());
 			final double result;
@@ -457,7 +458,7 @@ public class DefaultMathLib extends MathLib {
 			return isMax ? "max" : "min";
 		}
 
-		private void run(ExecutionContext context, Object[] args, int idx, Object best) throws ControlThrowable {
+		private void run(ExecutionContext context, Object[] args, int idx, Object best) throws ResolvedControlThrowable {
 			for ( ; idx < args.length; idx++) {
 				Object o = args[idx];
 
@@ -469,7 +470,7 @@ public class DefaultMathLib extends MathLib {
 						Dispatch.lt(context, o, best);
 					}
 				}
-				catch (ControlThrowable ct) {
+				catch (UnresolvedControlThrowable ct) {
 					throw ct.push(this, new State(args, idx, best));
 				}
 
@@ -483,13 +484,13 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object initial = args.nextAny();
 			run(context, args.getAll(), 1, initial);
 		}
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable {
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			State ss = (State) suspendedState;
 
 			Object[] args = ss.args;
@@ -516,7 +517,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Number x = args.nextNumber();
 
 			final Number intPart;
@@ -594,7 +595,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final Number result;
 
 			if (!args.hasNext()) {
@@ -648,7 +649,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Number arg = args.nextNumber();
 
 			long seed = arg instanceof Double || arg instanceof Float
@@ -720,7 +721,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object x = args.nextAny();
 			context.getReturnBuffer().setTo(Conversions.integerValueOf(x));
 		}
@@ -737,7 +738,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object x = args.nextAny();
 
 			String result = x instanceof Number
@@ -761,7 +762,7 @@ public class DefaultMathLib extends MathLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			long x = args.nextInteger();
 			long y = args.nextInteger();
 			context.getReturnBuffer().setTo((x - y) < 0);

@@ -18,7 +18,7 @@ package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.ExecutionContext;
 import net.sandius.rembulan.Function;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
 
 /**
  * Abstract function of two arguments.
@@ -26,32 +26,32 @@ import net.sandius.rembulan.exec.ControlThrowable;
 public abstract class AbstractFunction2 extends Function {
 
 	@Override
-	public void invoke(ExecutionContext context) throws ControlThrowable {
+	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
 		invoke(context, null, null);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1) throws ControlThrowable {
+	public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
 		invoke(context, arg1, null);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ControlThrowable {
+	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
 		invoke(context, arg1, arg2);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ControlThrowable {
+	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
 		invoke(context, arg1, arg2);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ControlThrowable {
+	public void invoke(ExecutionContext context, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
 		invoke(context, arg1, arg2);
 	}
 
 	@Override
-	public void invoke(ExecutionContext context, Object[] args) throws ControlThrowable {
+	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
 		Object a = null, b = null;
 		switch (args.length) {
 			default:

@@ -24,7 +24,8 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 import net.sandius.rembulan.impl.DefaultSavedState;
 import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;
@@ -139,7 +140,7 @@ class RunMethod {
 	}
 
 	public String[] throwsExceptions() {
-		return new String[] { Type.getInternalName(ControlThrowable.class) };
+		return new String[] { Type.getInternalName(ResolvedControlThrowable.class) };
 	}
 
 	public boolean usesSnapshotMethod() {
@@ -318,17 +319,17 @@ class RunMethod {
 		InsnList il = new InsnList();
 
 		il.add(label);
-		il.add(ASMUtils.frameSame1(ControlThrowable.class));
+		il.add(ASMUtils.frameSame1(UnresolvedControlThrowable.class));
 
 		il.add(createSnapshot());
 
 		// register snapshot with the control exception
 		il.add(new MethodInsnNode(
 				INVOKEVIRTUAL,
-				Type.getInternalName(ControlThrowable.class),
+				Type.getInternalName(UnresolvedControlThrowable.class),
 				"push",
 				Type.getMethodType(
-						Type.getType(ControlThrowable.class),
+						Type.getType(ResolvedControlThrowable.class),
 						Type.getType(Resumable.class),
 						Type.getType(Object.class)).getDescriptor(),
 				false));
@@ -505,7 +506,7 @@ class RunMethod {
 			suffix.add(errorState(l_error_state));
 			suffix.add(resumptionHandler(l_handler_begin));
 
-			node.tryCatchBlocks.add(new TryCatchBlockNode(l_entry, l_error_state, l_handler_begin, Type.getInternalName(ControlThrowable.class)));
+			node.tryCatchBlocks.add(new TryCatchBlockNode(l_entry, l_error_state, l_handler_begin, Type.getInternalName(UnresolvedControlThrowable.class)));
 		}
 
 		insns.add(l_begin);

@@ -16,7 +16,8 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.exec.ControlThrowable;
+import net.sandius.rembulan.exec.ResolvedControlThrowable;
+import net.sandius.rembulan.exec.UnresolvedControlThrowable;
 
 /**
  * An interface for resuming suspended Lua function calls.
@@ -30,7 +31,7 @@ public interface Resumable {
 	 * <p>This method is called by the call executor when resuming a previously suspended
 	 * function call, possibly with a different execution context. {@code suspendedState}
 	 * is guaranteed by the executor to be <i>equivalent</i> to the suspended state registered
-	 * by the call to {@link ControlThrowable#push(Resumable, Object)}. Equivalence here
+	 * by the call to {@link UnresolvedControlThrowable#push(Resumable, Object)}. Equivalence here
 	 * means that the class will be equal to that of the state object previously registered;
 	 * however, the actual instance passed to this method may be a clone or a (serialised
 	 * and) de-serialised version of the original object.</p>
@@ -42,8 +43,8 @@ public interface Resumable {
 	 * @param suspendedState  suspended state, equivalent to the suspended state registered
 	 *                        with the call executor
 	 *
-	 * @throws ControlThrowable  if the resumed call initiates a non-local control change
+	 * @throws ResolvedControlThrowable  if the resumed call initiates a non-local control change
 	 */
-	void resume(ExecutionContext context, Object suspendedState) throws ControlThrowable;
+	void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable;
 
 }
