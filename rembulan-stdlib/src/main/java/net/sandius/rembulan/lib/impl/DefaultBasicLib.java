@@ -674,7 +674,7 @@ public class DefaultBasicLib extends BasicLib {
 				Dispatch.call(context, callTarget, callArgs);
 			}
 			catch (UnresolvedControlThrowable ct) {
-				ct.push(this, new SavedState(handler, 0));
+				throw ct.push(this, new SavedState(handler, 0));
 			}
 			catch (Exception e) {
 				errorObject = Conversions.toErrorObject(e);
