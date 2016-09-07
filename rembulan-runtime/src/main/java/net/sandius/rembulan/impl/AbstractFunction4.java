@@ -17,7 +17,7 @@
 package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Function;
+import net.sandius.rembulan.runtime.Function;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 /**

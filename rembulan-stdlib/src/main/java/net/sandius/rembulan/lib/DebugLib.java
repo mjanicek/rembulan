@@ -43,9 +43,9 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
+import net.sandius.rembulan.runtime.Function;
 
 /**
  * This library provides the functionality of the debug interface (see §4.9 of the Lua

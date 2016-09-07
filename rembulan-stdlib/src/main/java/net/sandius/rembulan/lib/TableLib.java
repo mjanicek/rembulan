@@ -43,9 +43,9 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
+import net.sandius.rembulan.runtime.Function;
 
 /**
  * <p>This library provides generic functions for table manipulation. It provides all its functions

@@ -16,9 +16,9 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.OsLib;
+import net.sandius.rembulan.runtime.Function;
 
 public class DefaultOsLib extends OsLib {
 

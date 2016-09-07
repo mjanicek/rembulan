@@ -16,9 +16,9 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Utf8Lib;
+import net.sandius.rembulan.runtime.Function;
 
 public class DefaultUtf8Lib extends Utf8Lib {
 

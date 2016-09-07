@@ -17,13 +17,13 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.Conversions;
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.ValueTypeNamer;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.runtime.Coroutine;
+import net.sandius.rembulan.runtime.Function;
 import net.sandius.rembulan.util.Check;
 
 import java.util.Arrays;

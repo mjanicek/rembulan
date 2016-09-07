@@ -14,7 +14,10 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan;
+package net.sandius.rembulan.runtime;
+
+import net.sandius.rembulan.Invokable;
+import net.sandius.rembulan.Resumable;
 
 /**
  * An abstract function object.

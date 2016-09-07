@@ -17,12 +17,12 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.ReturnBuffer;
 import net.sandius.rembulan.impl.AbstractFunctionAnyArg;
 import net.sandius.rembulan.lib.CoroutineLib;
 import net.sandius.rembulan.runtime.Coroutine;
+import net.sandius.rembulan.runtime.Function;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;

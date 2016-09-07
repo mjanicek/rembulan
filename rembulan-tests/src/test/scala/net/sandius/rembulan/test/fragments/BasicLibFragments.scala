@@ -16,8 +16,9 @@
 
 package net.sandius.rembulan.test.fragments
 
+import net.sandius.rembulan.Table
+import net.sandius.rembulan.runtime.Function
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
-import net.sandius.rembulan.{Function, Table}
 
 object BasicLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 

@@ -17,7 +17,6 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
@@ -29,6 +28,7 @@ import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.io.InputStreamIoFile;
 import net.sandius.rembulan.lib.impl.io.OutputStreamIoFile;
 import net.sandius.rembulan.runtime.Dispatch;
+import net.sandius.rembulan.runtime.Function;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;

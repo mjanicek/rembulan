@@ -19,7 +19,6 @@ package net.sandius.rembulan.runtime;
 import net.sandius.rembulan.AsyncTask;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.ExecutionContext;
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.ProtectedResumable;
 import net.sandius.rembulan.ReturnBuffer;

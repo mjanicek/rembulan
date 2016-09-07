@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.impl;
 
-import net.sandius.rembulan.Function;
+import net.sandius.rembulan.runtime.Function;
 
 /**
  * Exception thrown to indicate that a function is not suspendable.

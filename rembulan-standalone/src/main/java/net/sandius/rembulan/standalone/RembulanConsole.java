@@ -18,7 +18,6 @@ package net.sandius.rembulan.standalone;
 
 import jline.console.ConsoleReader;
 import net.sandius.rembulan.Conversions;
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
@@ -29,6 +28,7 @@ import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.lib.impl.*;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.DefaultLuaState;
+import net.sandius.rembulan.runtime.Function;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;

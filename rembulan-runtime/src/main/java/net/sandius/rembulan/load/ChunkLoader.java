@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.load;
 
-import net.sandius.rembulan.Function;
 import net.sandius.rembulan.Variable;
+import net.sandius.rembulan.runtime.Function;
 
 /**
  * Lua chunk loader, an object that converts the textual representation of Lua programs

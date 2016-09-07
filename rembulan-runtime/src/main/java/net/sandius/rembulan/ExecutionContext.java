@@ -17,6 +17,7 @@
 package net.sandius.rembulan;
 
 import net.sandius.rembulan.runtime.Coroutine;
+import net.sandius.rembulan.runtime.Function;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 /**
