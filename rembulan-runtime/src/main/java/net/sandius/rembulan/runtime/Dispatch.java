@@ -1025,14 +1025,28 @@ public final class Dispatch {
 		}
 	}
 
-	private static class ComparisonResumable implements Resumable {
+	private static final CmpResultResumable CMP_RESULT_RESUMABLE_TRUE = new CmpResultResumable(true);
+	private static final CmpResultResumable CMP_RESULT_RESUMABLE_FALSE = new CmpResultResumable(false);
+
+	private static Resumable cmpResultResumable(boolean cmpTo) {
+		return cmpTo
+				? CMP_RESULT_RESUMABLE_TRUE
+				: CMP_RESULT_RESUMABLE_FALSE;
+	}
+
+	private static class CmpResultResumable implements Resumable {
+
+		private final boolean cmpTo;
+
+		public CmpResultResumable(boolean cmpTo) {
+			this.cmpTo = cmpTo;
+		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			Boolean b = (Boolean) suspendedState;
 			ReturnBuffer result = context.getReturnBuffer();
 			boolean resultValue = Conversions.booleanValueOf(result.get0());
-			result.setTo(b == resultValue);
+			result.setTo(cmpTo == resultValue);
 		}
 
 	}
@@ -1043,12 +1057,11 @@ public final class Dispatch {
 		}
 		catch (UnresolvedControlThrowable ct) {
 			// suspended in the metamethod call
-			ct.push(new ComparisonResumable(), cmpTo);
-			throw ct;
+			throw ct.push(cmpResultResumable(cmpTo), null).unresolve();
 		}
 		// not suspended: set the result, possibly flipping it
 		ReturnBuffer result = context.getReturnBuffer();
-		result.setTo(Conversions.booleanValueOf(result.get0()) == cmpTo);
+		result.setTo(cmpTo == Conversions.booleanValueOf(result.get0()));
 	}
 
 	private static void eq(ExecutionContext context, boolean polarity, Object a, Object b) throws UnresolvedControlThrowable {
