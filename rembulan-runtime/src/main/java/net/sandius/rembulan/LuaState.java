@@ -21,7 +21,7 @@ package net.sandius.rembulan;
  * for instantiating new tables.
  */
 @Deprecated
-public abstract class LuaState implements MetatableProvider, TableFactory {
+public abstract class LuaState implements MetatableAccessor, TableFactory {
 
 	// TODO: registry
 
@@ -177,6 +177,7 @@ public abstract class LuaState implements MetatableProvider, TableFactory {
 	 * @param table  new metatable of {@code o}, may be {@code null}
 	 * @return  the previous metatable of {@code o}
 	 */
+	@Override
 	public Table setMetatable(Object o, Table table) {
 		if (o instanceof LuaObject) {
 			return ((LuaObject) o).setMetatable(table);
