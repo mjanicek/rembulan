@@ -176,7 +176,7 @@ public class DefaultLuaState extends LuaState implements CallInitialiser {
 
 	@Override
 	public OneShotContinuation newCall(Object fn, Object... args) {
-		return Call.init(this, fn, args).getCurrentContinuation();
+		return Call.init(tableFactory, this, fn, args).getCurrentContinuation();
 	}
 
 }
