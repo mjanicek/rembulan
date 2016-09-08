@@ -16,8 +16,10 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
+import net.sandius.rembulan.Table;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
@@ -51,6 +53,25 @@ public abstract class ExecutionContextMethods {
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE),
 				true);
+	}
+
+	public static InsnList newTable(int array, int hash) {
+		InsnList il = new InsnList();
+
+		il.add(ASMUtils.loadInt(array));
+		il.add(ASMUtils.loadInt(hash));
+
+		il.add(new MethodInsnNode(
+				INVOKEINTERFACE,
+				selfTpe().getInternalName(),
+				"newTable",
+				Type.getMethodType(
+						Type.getType(Table.class),
+						Type.INT_TYPE,
+						Type.INT_TYPE).getDescriptor(),
+				true));
+
+		return il;
 	}
 
 }

@@ -199,7 +199,7 @@ public class DefaultDebugLib extends DebugLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object value = args.nextAny();
-			Table mt = context.getState().getMetatable(value);
+			Table mt = context.getMetatable(value);
 			context.getReturnBuffer().setTo(mt);
 		}
 
@@ -221,7 +221,7 @@ public class DefaultDebugLib extends DebugLib {
 			Table mt = args.nextTableOrNil();
 
 			// set the new metatable
-			context.getState().setMetatable(value, mt);
+			context.setMetatable(value, mt);
 
 			// return value
 			context.getReturnBuffer().setTo(value);

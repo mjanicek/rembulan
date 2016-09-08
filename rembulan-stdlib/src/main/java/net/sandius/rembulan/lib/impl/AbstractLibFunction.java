@@ -30,7 +30,7 @@ public abstract class AbstractLibFunction extends AbstractFunctionAnyArg {
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
 		ArgumentIterator callArgs = new ArgumentIterator(
-				new NameMetamethodValueTypeNamer(context.getState()),
+				new NameMetamethodValueTypeNamer(context),
 				name(),
 				Arrays.copyOf(args, args.length));
 		invoke(context, callArgs);

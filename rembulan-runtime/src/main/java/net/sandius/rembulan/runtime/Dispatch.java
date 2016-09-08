@@ -16,7 +16,14 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.*;
+import net.sandius.rembulan.Arithmetic;
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.LuaMathOperators;
+import net.sandius.rembulan.MetatableProvider;
+import net.sandius.rembulan.Metatables;
+import net.sandius.rembulan.Ordering;
+import net.sandius.rembulan.Table;
+import net.sandius.rembulan.Userdata;
 
 import java.util.Objects;
 
@@ -46,43 +53,43 @@ public final class Dispatch {
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target) throws ResolvedControlThrowable {
-		LuaFunction fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context);
 		else fn.invoke(context, target);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1) throws ResolvedControlThrowable {
-		LuaFunction fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1);
 		else fn.invoke(context, target, arg1);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2) throws ResolvedControlThrowable {
-		LuaFunction fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1, arg2);
 		else fn.invoke(context, target, arg1, arg2);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3) throws ResolvedControlThrowable {
-		LuaFunction fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3);
 		else fn.invoke(context, target, arg1, arg2, arg3);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4) throws ResolvedControlThrowable {
-		LuaFunction fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4);
 		else fn.invoke(context, target, arg1, arg2, arg3, arg4);
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5) throws ResolvedControlThrowable {
-		LuaFunction fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context, target);
 		if (fn == target) fn.invoke(context, arg1, arg2, arg3, arg4, arg5);
 		else fn.invoke(context, new Object[] { target, arg1, arg2, arg3, arg4, arg5 });
 	}
 
 	static void mt_invoke(ExecutionContext context, Object target, Object[] args) throws ResolvedControlThrowable {
-		LuaFunction fn = callTarget(context.getState(), target);
+		LuaFunction fn = callTarget(context, target);
 		if (fn == target) {
 			fn.invoke(context, args);
 		}
@@ -384,7 +391,7 @@ public final class Dispatch {
 	}
 
 	private static void try_mt_arithmetic(ExecutionContext context, String event, Object a, Object b) throws UnresolvedControlThrowable {
-		Object handler = Metatables.binaryHandlerFor(context.getState(), event, a, b);
+		Object handler = Metatables.binaryHandlerFor(context, event, a, b);
 
 		if (handler != null) {
 			call(context, handler, a, b);
@@ -395,7 +402,7 @@ public final class Dispatch {
 	}
 
 	private static void try_mt_arithmetic(ExecutionContext context, String event, Object o) throws UnresolvedControlThrowable {
-		Object handler = Metatables.getMetamethod(context.getState(), event, o);
+		Object handler = Metatables.getMetamethod(context, event, o);
 
 		if (handler != null) {
 			call(context, handler, o);
@@ -722,7 +729,7 @@ public final class Dispatch {
 	}
 
 	private static void try_mt_bitwise(ExecutionContext context, String event, Object a, Object b) throws UnresolvedControlThrowable {
-		Object handler = Metatables.binaryHandlerFor(context.getState(), event, a, b);
+		Object handler = Metatables.binaryHandlerFor(context, event, a, b);
 
 		if (handler != null) {
 			call(context, handler, a, b);
@@ -733,7 +740,7 @@ public final class Dispatch {
 	}
 
 	private static void try_mt_bitwise(ExecutionContext context, String event, Object o) throws UnresolvedControlThrowable {
-		Object handler = Metatables.getMetamethod(context.getState(), event, o);
+		Object handler = Metatables.getMetamethod(context, event, o);
 
 		if (handler != null) {
 			call(context, handler, o);
@@ -979,7 +986,7 @@ public final class Dispatch {
 			context.getReturnBuffer().setTo(len((String) o));
 		}
 		else {
-			Object handler = Metatables.getMetamethod(context.getState(), Metatables.MT_LEN, o);
+			Object handler = Metatables.getMetamethod(context, Metatables.MT_LEN, o);
 			if (handler != null) {
 				call(context, handler, o);
 			}
@@ -1015,7 +1022,7 @@ public final class Dispatch {
 			context.getReturnBuffer().setTo(sa.concat(sb));
 		}
 		else {
-			Object handler = Metatables.binaryHandlerFor(context.getState(), Metatables.MT_CONCAT, a, b);
+			Object handler = Metatables.binaryHandlerFor(context, Metatables.MT_CONCAT, a, b);
 			if (handler != null) {
 				call(context, handler, a, b);
 			}
@@ -1071,7 +1078,7 @@ public final class Dispatch {
 				&& ((a instanceof Table && b instanceof Table)
 				|| (a instanceof Userdata && b instanceof Userdata))) {
 
-			Object handler = Metatables.binaryHandlerFor(context.getState(), Metatables.MT_EQ, a, b);
+			Object handler = Metatables.binaryHandlerFor(context, Metatables.MT_EQ, a, b);
 
 			if (handler != null) {
 				_call_comparison_mt(context, polarity, handler, a, b);
@@ -1163,7 +1170,7 @@ public final class Dispatch {
 			context.getReturnBuffer().setTo(result);
 		}
 		else {
-			Object handler = Metatables.binaryHandlerFor(context.getState(), Metatables.MT_LT, a, b);
+			Object handler = Metatables.binaryHandlerFor(context, Metatables.MT_LT, a, b);
 
 			if (handler != null) {
 				_call_comparison_mt(context, true, handler, a, b);
@@ -1233,15 +1240,14 @@ public final class Dispatch {
 			context.getReturnBuffer().setTo(result);
 		}
 		else {
-			LuaState state = context.getState();
-			Object le_handler = Metatables.binaryHandlerFor(state, Metatables.MT_LE, a, b);
+			Object le_handler = Metatables.binaryHandlerFor(context, Metatables.MT_LE, a, b);
 
 			if (le_handler != null) {
 				_call_comparison_mt(context, true, le_handler, a, b);
 			}
 			else {
 				// TODO: verify that (a, b) is the order in which the metamethod is looked up
-				Object lt_handler = Metatables.binaryHandlerFor(state, Metatables.MT_LT, a, b);
+				Object lt_handler = Metatables.binaryHandlerFor(context, Metatables.MT_LT, a, b);
 
 				if (lt_handler != null) {
 					// will be evaluating "not (b < a)"
@@ -1318,7 +1324,7 @@ public final class Dispatch {
 			// else fall through and check the __index a metamethod
 		}
 
-		Object handler = Metatables.getMetamethod(context.getState(), Metatables.MT_INDEX, table);
+		Object handler = Metatables.getMetamethod(context, Metatables.MT_INDEX, table);
 
 		if (handler == null && table instanceof Table) {
 			// key not found and no index metamethod, returning nil
@@ -1399,7 +1405,7 @@ public final class Dispatch {
 			}
 		}
 
-		Object handler = Metatables.getMetamethod(context.getState(), Metatables.MT_NEWINDEX, table);
+		Object handler = Metatables.getMetamethod(context, Metatables.MT_NEWINDEX, table);
 
 		if (handler == null && table instanceof Table) {
 			Table t = (Table) table;

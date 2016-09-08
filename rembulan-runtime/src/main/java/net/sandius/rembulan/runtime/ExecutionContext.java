@@ -16,7 +16,8 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.LuaState;
+import net.sandius.rembulan.MetatableAccessor;
+import net.sandius.rembulan.TableFactory;
 
 /**
  * An interface to the execution context of a Lua call.
@@ -33,15 +34,7 @@ import net.sandius.rembulan.LuaState;
  * <p><b>Note</b>: The behaviour of the methods in this interface is <i>undefined</i> when
  * invoked outside a Lua function invoke/resume.</p>
  */
-public interface ExecutionContext {
-
-	/**
-	 * Returns the Lua state used in this execution context.
-	 *
-	 * @return  the Lua state used in this execution context
-	 */
-	@SuppressWarnings("unused")
-	LuaState getState();
+public interface ExecutionContext extends MetatableAccessor, TableFactory {
 
 	/**
 	 * Returns the return buffer used in this execution context.

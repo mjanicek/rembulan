@@ -79,15 +79,15 @@ public class DefaultTableLib extends TableLib {
 	}
 
 	static boolean hasLenMetamethod(ExecutionContext context, Table t) {
-		return Metatables.getMetamethod(context.getState(), Metatables.MT_LEN, t) != null;
+		return Metatables.getMetamethod(context, Metatables.MT_LEN, t) != null;
 	}
 
 	static boolean hasIndexMetamethod(ExecutionContext context, Table t) {
-		return Metatables.getMetamethod(context.getState(), Metatables.MT_INDEX, t) != null;
+		return Metatables.getMetamethod(context, Metatables.MT_INDEX, t) != null;
 	}
 
 	static boolean hasNewIndexMetamethod(ExecutionContext context, Table t) {
-		return Metatables.getMetamethod(context.getState(), Metatables.MT_NEWINDEX, t) != null;
+		return Metatables.getMetamethod(context, Metatables.MT_NEWINDEX, t) != null;
 	}
 
 	static int getLength(ReturnBuffer rbuf) {
@@ -522,7 +522,7 @@ public class DefaultTableLib extends TableLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Table table = context.getState().newTable();
+			Table table = context.newTable();
 
 			int n = 0;
 			while (args.hasNext()) {

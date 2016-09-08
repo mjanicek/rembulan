@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerSettings;
@@ -29,7 +28,6 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ConversionMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.DispatchMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ExecutionContextMethods;
-import net.sandius.rembulan.compiler.gen.asm.helpers.LuaStateMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ReturnBufferMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.TableMethods;
 import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
@@ -178,16 +176,6 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	public AbstractInsnNode loadExecutionContext() {
 		return new VarInsnNode(ALOAD, runMethod.LV_CONTEXT);
-	}
-
-	static AbstractInsnNode loadState() {
-		return new MethodInsnNode(
-				INVOKEINTERFACE,
-				Type.getInternalName(ExecutionContext.class),
-				"getState",
-				Type.getMethodDescriptor(
-						Type.getType(LuaState.class)),
-				true);
 	}
 
 	static AbstractInsnNode loadReturnBuffer() {
@@ -512,8 +500,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	@Override
 	public void visit(TabNew node) {
 		il.add(loadExecutionContext());
-		il.add(loadState());
-		il.add(LuaStateMethods.newTable(node.array(), node.hash()));
+		il.add(ExecutionContextMethods.newTable(node.array(), node.hash()));
 		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
 

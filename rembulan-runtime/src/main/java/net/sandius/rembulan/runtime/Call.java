@@ -18,6 +18,7 @@ package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaState;
+import net.sandius.rembulan.Table;
 import net.sandius.rembulan.exec.CallEventHandler;
 import net.sandius.rembulan.exec.InvalidContinuationException;
 import net.sandius.rembulan.exec.OneShotContinuation;
@@ -339,8 +340,23 @@ class Call {
 		}
 
 		@Override
-		public LuaState getState() {
-			return state;
+		public Table getMetatable(Object instance) {
+			return state.getMetatable(instance);
+		}
+
+		@Override
+		public Table setMetatable(Object instance, Table table) {
+			return state.setMetatable(instance, table);
+		}
+
+		@Override
+		public Table newTable() {
+			return state.newTable();
+		}
+
+		@Override
+		public Table newTable(int array, int hash) {
+			return state.newTable(array, hash);
 		}
 
 		@Override
