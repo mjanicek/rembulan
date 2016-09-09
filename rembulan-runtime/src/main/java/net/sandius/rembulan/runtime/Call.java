@@ -21,10 +21,10 @@ import net.sandius.rembulan.MetatableAccessor;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.exec.CallEventHandler;
+import net.sandius.rembulan.exec.Continuation;
 import net.sandius.rembulan.exec.InvalidContinuationException;
 import net.sandius.rembulan.exec.OneShotContinuation;
 import net.sandius.rembulan.impl.ReturnBuffers;
-import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 
 import java.util.Arrays;
@@ -217,8 +217,8 @@ class Call {
 	}
 
 	private void resume(CallEventHandler handler, SchedulingContext schedulingContext, int version) {
-		Check.notNull(handler);
-		Check.notNull(schedulingContext);
+		Objects.requireNonNull(handler);
+		Objects.requireNonNull(schedulingContext);
 
 		if (version == VERSION_RUNNING || version == VERSION_TERMINATED) {
 			throw new IllegalArgumentException("Illegal version: " + version);
@@ -270,7 +270,8 @@ class Call {
 				this.task = task;
 			}
 			else {
-				throw new IllegalArgumentException();
+				throw new IllegalArgumentException("Illegal arguments: ("
+						+ preempted + ", " + target + ", " + Arrays.toString(values) + ", " + task + ")");
 			}
 		}
 
@@ -288,6 +289,7 @@ class Call {
 	private static final ControlPayload PAUSED_PAYLOAD = new ControlPayload(true, null, null, null);
 
 	private static final class ResumeResult {
+
 		private final boolean pause;
 		private final Object[] values;
 		private final Throwable error;
@@ -305,14 +307,15 @@ class Call {
 				this.asyncTask = asyncTask;
 			}
 			else {
-				throw new IllegalArgumentException("Illegal arguments: "
-						+ pause + ", " + Arrays.toString(values) + ", " + error);
+				throw new IllegalArgumentException("Illegal arguments: ("
+						+ pause + ", " + Arrays.toString(values) + ", " + error + ", " + asyncTask + ")");
 			}
 		}
 
-		void fire(CallEventHandler handler, Call c, OneShotContinuation cont) {
+		void fire(CallEventHandler handler, Call c, Continuation cont) {
 			if (pause) {
-				handler.paused(c, Check.notNull(cont));
+				assert (cont != null);
+				handler.paused(c, cont);
 			}
 			else if (values != null) {
 				handler.returned(c, values);
@@ -321,7 +324,8 @@ class Call {
 				handler.failed(c, error);
 			}
 			else if (asyncTask != null) {
-				handler.async(c, Check.notNull(cont), asyncTask);
+				assert (cont != null);
+				handler.async(c, cont, asyncTask);
 			}
 			else {
 				throw new AssertionError();
@@ -341,7 +345,7 @@ class Call {
 		private Cons<ResumeInfo> callStack;
 
 		Resumer(SchedulingContext schedulingContext) {
-			this.schedulingContext = Check.notNull(schedulingContext);
+			this.schedulingContext = Objects.requireNonNull(schedulingContext);
 			this.result = null;
 			this.error = null;
 		}
