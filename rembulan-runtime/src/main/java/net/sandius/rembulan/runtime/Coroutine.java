@@ -25,28 +25,20 @@ public final class Coroutine {
 	private Cons<ResumeInfo> callStack;
 	private Status status;
 
-	Coroutine(Object function) {
-		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, Check.notNull(function)));
+	Coroutine(Object body) {
+		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, body));
 		this.status = Status.SUSPENDED;
 	}
 
-	private enum Status {
+	public enum Status {
 		SUSPENDED,
 		RUNNING,
 		NORMAL,
 		DEAD
 	}
 
-	private synchronized Status getStatus() {
+	synchronized Status getStatus() {
 		return status;
-	}
-
-	public boolean isResuming() {
-		return getStatus() == Status.NORMAL;
-	}
-
-	public boolean isDead() {
-		return getStatus() == Status.DEAD;
 	}
 
 	private static class BootstrapResumable implements Resumable {

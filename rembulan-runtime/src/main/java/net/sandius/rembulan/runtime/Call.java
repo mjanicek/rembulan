@@ -381,7 +381,7 @@ class Call {
 
 		@Override
 		public Coroutine newCoroutine(LuaFunction function) {
-			return new Coroutine(function);
+			return new Coroutine(Objects.requireNonNull(function));
 		}
 
 		@Override
@@ -396,17 +396,21 @@ class Call {
 
 		@Override
 		public void resume(Coroutine coroutine, Object[] args) throws UnresolvedControlThrowable {
-			throw new UnresolvedControlThrowable(new ControlPayload(false, coroutine, args, null));
+			Objects.requireNonNull(coroutine);
+			throw new UnresolvedControlThrowable(new ControlPayload(
+					false, Objects.requireNonNull(coroutine), Objects.requireNonNull(args), null));
 		}
 
 		@Override
 		public void yield(Object[] args) throws UnresolvedControlThrowable {
-			throw new UnresolvedControlThrowable(new ControlPayload(false, null, args, null));
+			throw new UnresolvedControlThrowable(new ControlPayload(
+					false, null, Objects.requireNonNull(args), null));
 		}
 
 		@Override
 		public void resumeAfter(AsyncTask task) throws UnresolvedControlThrowable {
-			throw new UnresolvedControlThrowable(new ControlPayload(false, null, null, task));
+			throw new UnresolvedControlThrowable(new ControlPayload(
+					false, null, null, Objects.requireNonNull(task)));
 		}
 
 		@Override

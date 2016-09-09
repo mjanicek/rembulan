@@ -76,15 +76,26 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	boolean isInMainCoroutine();
 
 	/**
+	 * Returns the status of {@code coroutine} as seen from the perspective of this execution
+	 * context.
+	 *
+	 * @param coroutine  the target coroutine, must not be {@code null}
+	 * @return  the status of {@code coroutine} from the perspective of this execution context
+	 *
+	 * @throws NullPointerException  if {@code coroutine} is {@code null}
+	 */
+	Coroutine.Status getCoroutineStatus(Coroutine coroutine);
+
+	/**
 	 * Returns a new coroutine with the body {@code function}.
 	 *
-	 * <p>The coroutine will be initialised in a suspended state. To resume the coroutine,
-	 * use {@link #resume(Coroutine, Object[])}.</p>
-	 *
-	 * <p>The behaviour of this method is undefined if {@code function} is {@code null}.
+	 * <p>The coroutine will be initialised in the {@linkplain Coroutine.Status#SUSPENDED
+	 * suspended state}. To resume the coroutine, use {@link #resume(Coroutine, Object[])}.</p>
 	 *
 	 * @param function  coroutine body, must not be {@code null}
 	 * @return  a new (suspended) coroutine with the body {@code function}
+	 *
+	 * @throws NullPointerException  if {@code function} is {@code null}
 	 */
 	@SuppressWarnings("unused")
 	Coroutine newCoroutine(LuaFunction function);
@@ -98,13 +109,11 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	 * <p>The reference to the array {@code args} is not retained by the execution context;
 	 * {@code args} may therefore be freely re-used by the caller.</p>
 	 *
-	 * <p>The behaviour of this method is undefined if {@code coroutine} or {@code args}
-	 * is {@code null}.</p>
-	 *
-	 * @param coroutine  coroutine to be resumed, must not be {@code null}
+	 * @param coroutine  the coroutine to be resumed, must not be {@code null}
 	 * @param args  arguments to be passed to {@code coroutine}, must not be {@code null}
 	 *
 	 * @throws UnresolvedControlThrowable  the control throwable for this coroutine switch
+	 * @throws NullPointerException  if {@code coroutine} or {@code args} is {@code null}
 	 * @throws IllegalCoroutineStateException  when {@code coroutine} cannot be resumed
 	 */
 	@SuppressWarnings("unused")
@@ -119,11 +128,10 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	 * <p>The reference to the array {@code args} is not retained by the execution context;
 	 * {@code args} may therefore be freely re-used by the caller.</p>
 	 *
-	 * <p>The behaviour of this method is undefined if {@code args} is {@code null}.</p>
-	 *
 	 * @param args  arguments to be passed to the resuming coroutine, must not be {@code null}
 	 *
 	 * @throws UnresolvedControlThrowable  the control throwable for this coroutine switch
+	 * @throws NullPointerException  if {@code args} is {@code null}
 	 * @throws IllegalCoroutineStateException  when yielding from a non-yieldable coroutine
 	 */
 	@SuppressWarnings("unused")
@@ -140,6 +148,7 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	 * @param task  the task to be executed, must not be {@code null}
 	 *
 	 * @throws UnresolvedControlThrowable  the control throwable for this control change
+	 * @throws NullPointerException  if {@code task} is {@code null}
 	 */
 	@SuppressWarnings("unused")
 	void resumeAfter(AsyncTask task) throws UnresolvedControlThrowable;
@@ -148,7 +157,13 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	 * Informs the scheduler that the current task is about to consume or has consumed
 	 * {@code ticks} virtual ticks.
 	 *
-	 * @param ticks  number of ticks to be registered with the scheduler
+	 * <p>This method only registers {@code ticks} with the scheduler. In order to pause
+	 * the execution if the scheduler indicates that it should be paused, use
+	 * {@link #pauseIfRequested()}.</p>
+	 *
+	 * <p>The behaviour of this method is undefined if {@code ticks} is negative.</p>
+	 *
+	 * @param ticks  number of ticks to be registered with the scheduler, must not be negative
 	 */
 	@SuppressWarnings("unused")
 	void registerTicks(int ticks);

@@ -57,10 +57,10 @@ public final class SchedulingContexts {
 	 * Returns a scheduling context with an internal tick counter (initialised to
 	 * {@code max}).
 	 *
-	 * <p>Every call to {@link SchedulingContext#registerTicks(int)} with
-	 * a positive argument decreases the counter accordingly. The scheduling context
-	 * returns {@code true} from {@link SchedulingContext#shouldPause()} if and only if
-	 * counter is lesser than or equal to 0.</p>
+	 * <p>Every call to {@link SchedulingContext#registerTicks(int)} with a positive argument
+	 * decreases the counter accordingly (calls with non-positive arguments are ignored).
+	 * The scheduling context returns {@code true} from {@link SchedulingContext#shouldPause()}
+	 * if and only if counter is lesser than or equal to 0.</p>
 	 *
 	 * @param max  the initial counter value, must be non-negative
 	 * @return  a scheduling context that starts indicating that the caller should yield

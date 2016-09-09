@@ -37,14 +37,12 @@ public interface SchedulingContext {
 	 * of whether the current task should be paused. In order to check whether execution
 	 * should be paused, use {@link #shouldPause()}.</p>
 	 *
-	 * <p>It is the responsibility of this method's implementation to check that {@code ticks}
-	 * is a sensible value &mdash; typically, only positive or non-negative values make sense
-	 * &mdash; and handle them either by ignoring non-sensible values or throwing an exception.</p>
+	 * <p>The behaviour of this method is undefined if {@code ticks} is negative.</p>
 	 *
 	 * <p><b>Note</b>: this method is not meant to be used directly by Lua programs, but rather
-	 * to be called by the implementations of {@link ExecutionContext}.</p>
+	 * to be called by the implementations of {@link ExecutionContext#registerTicks(int)}.</p>
 	 *
-	 * @param ticks  number of ticks to be registered with the scheduler
+	 * @param ticks  number of ticks to be registered with the scheduler, must not be negative
 	 */
 	void registerTicks(int ticks);
 
@@ -52,9 +50,9 @@ public interface SchedulingContext {
 	 * Polls the scheduler, returning {@code true} if the current task should be paused.
 	 *
 	 * <p><b>Note</b>: this method is not meant to be used directly by Lua programs, but rather
-	 * to be called by the implementations of {@link ExecutionContext}.</p>
+	 * to be called by the implementations of {@link ExecutionContext#pauseIfRequested()}.</p>
 	 *
-	 * @return  {@code true} if the current task should yield
+	 * @return  {@code true} if the current task should be paused
 	 */
 	boolean shouldPause();
 

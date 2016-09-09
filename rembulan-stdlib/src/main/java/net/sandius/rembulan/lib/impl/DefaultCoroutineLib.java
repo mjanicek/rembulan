@@ -177,16 +177,13 @@ public class DefaultCoroutineLib extends CoroutineLib {
 		public static final String STATUS_DEAD = "dead";
 
 		public static String status(ExecutionContext context, Coroutine coroutine) {
-			Check.notNull(context);
-			Check.notNull(coroutine);
-
-			Coroutine currentCoroutine = context.getCurrentCoroutine();
-
-			if (coroutine == currentCoroutine) return STATUS_RUNNING;
-			else if (coroutine.isDead()) return STATUS_DEAD;
-			else if (coroutine.isResuming()) return STATUS_NORMAL;
-			// FIXME: this is not true for coroutines running concurrently
-			else return STATUS_SUSPENDED;
+			switch (context.getCoroutineStatus(coroutine)) {
+				case SUSPENDED:  return STATUS_SUSPENDED;
+				case RUNNING:    return STATUS_RUNNING;
+				case NORMAL:     return STATUS_NORMAL;
+				case DEAD:       return STATUS_DEAD;
+			}
+			throw new AssertionError();  // should never happen
 		}
 
 		@Override
