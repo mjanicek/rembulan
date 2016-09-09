@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.runtime;
 
+import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.util.Check;
 
 class ResumeInfo {
@@ -28,8 +29,27 @@ class ResumeInfo {
 		this.savedState = savedState;
 	}
 
-	public void resume(ExecutionContext context) throws ResolvedControlThrowable {
-		resumable.resume(context, savedState);
+	public boolean resume(ExecutionContext context, Throwable error) throws ResolvedControlThrowable {
+		if (error == null) {
+			// no errors
+			resumable.resume(context, savedState);
+			Dispatch.evaluateTailCalls(context);
+			return true;
+		}
+		else {
+			// there is an error to be handled
+			if (resumable instanceof ProtectedResumable) {
+				// top is protected, can handle the error
+				ProtectedResumable pr = (ProtectedResumable) resumable;
+				pr.resumeError(context, savedState, Conversions.toErrorObject(error));
+				Dispatch.evaluateTailCalls(context);
+				return true;
+			}
+			else {
+				// top is not protected, continue unwinding the stack
+				return false;
+			}
+		}
 	}
 
 }

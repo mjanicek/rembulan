@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.MetatableAccessor;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
@@ -526,25 +525,8 @@ class Call {
 				callStack = callStack.cdr;
 
 				try {
-					if (error == null) {
-						// no errors
-						top.resume(this);
-						Dispatch.evaluateTailCalls(this);
-					}
-					else {
-						// there is an error to be handled
-						if (top.resumable instanceof ProtectedResumable) {
-							// top is protected, can handle the error
-							Throwable e = error;
-							error = null;  // this exception will be handled
-
-							ProtectedResumable pr = (ProtectedResumable) top.resumable;
-							pr.resumeError(this, top.savedState, Conversions.toErrorObject(e));
-							Dispatch.evaluateTailCalls(this);
-						}
-						else {
-							// top is not protected, continue unwinding the stack
-						}
+					if (top.resume(this, error)) {
+						error = null;  // top was run
 					}
 				}
 				catch (ResolvedControlThrowable ct) {
