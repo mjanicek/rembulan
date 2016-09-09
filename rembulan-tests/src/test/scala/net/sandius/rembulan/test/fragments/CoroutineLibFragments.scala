@@ -17,7 +17,7 @@
 package net.sandius.rembulan.test.fragments
 
 import net.sandius.rembulan.lib.AssertionFailedException
-import net.sandius.rembulan.runtime.{Coroutine, IllegalOperationAttemptException, LuaFunction}
+import net.sandius.rembulan.runtime.{Coroutine, IllegalCoroutineStateException, LuaFunction}
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations}
 
 object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
@@ -141,7 +141,7 @@ object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
       |return
     """
   }
-  YieldFromOutsideCoroutine in CoroContext failsWith (classOf[IllegalOperationAttemptException], "attempt to yield from outside a coroutine")
+  YieldFromOutsideCoroutine in CoroContext failsWith (classOf[IllegalCoroutineStateException], "attempt to yield from outside a coroutine")
 
   val WrapNormalFunctionCannotBeCalledTwice = fragment ("WrapNormalFunctionCannotBeCalledTwice") {
     """local f = coroutine.wrap(function() end)
@@ -149,7 +149,7 @@ object CoroutineLibFragments extends FragmentBundle with FragmentExpectations  {
       |f()
     """
   }
-  WrapNormalFunctionCannotBeCalledTwice in CoroContext failsWith (classOf[IllegalStateException], "cannot resume dead coroutine")
+  WrapNormalFunctionCannotBeCalledTwice in CoroContext failsWith (classOf[IllegalCoroutineStateException], "cannot resume dead coroutine")
 
   val WrappedCoroutineRunning = fragment ("WrappedCoroutineRunning") {
     """return coroutine.wrap(coroutine.running)()
