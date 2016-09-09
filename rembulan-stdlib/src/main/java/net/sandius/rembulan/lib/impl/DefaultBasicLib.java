@@ -51,7 +51,7 @@ public class DefaultBasicLib extends BasicLib {
 	private final LuaFunction _loadfile;
 
 	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Object defaultEnv) {
-		this._print = new Print(out);
+		this._print = out != null ? new Print(out) : null;
 		this._dofile = new UnimplementedFunction("dofile");  // TODO
 
 		if (loader != null) {

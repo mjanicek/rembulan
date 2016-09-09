@@ -43,7 +43,6 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
@@ -94,11 +93,11 @@ public abstract class StringLib extends Lib {
 	}
 
 	@Override
-	public void postInstall(LuaState state, Table env, Table libTable) {
+	public void postInstall(LibContext context, Table env, Table libTable) {
 		// set metatable for the string type
-		Table mt = state.newTable();
+		Table mt = context.newTable();
 		mt.rawset(Metatables.MT_INDEX, libTable);
-		state.setStringMetatable(mt);
+		context.setMetatable("", mt);  // TODO: expose a method for setting the string metatable?
 	}
 
 	/**

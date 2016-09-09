@@ -43,7 +43,6 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.LuaState;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -65,7 +64,7 @@ public abstract class BasicLib extends Lib {
 	}
 
 	@Override
-	public void preInstall(LuaState state, Table env) {
+	public void preInstall(LibContext state, Table env) {
 		env.rawset("_G", env);
 		env.rawset("_VERSION", __VERSION());
 		

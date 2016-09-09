@@ -16,36 +16,8 @@
 
 package net.sandius.rembulan.lib;
 
-import net.sandius.rembulan.Table;
+import net.sandius.rembulan.MetatableAccessor;
 import net.sandius.rembulan.TableFactory;
 
-public abstract class Lib {
-
-	public static final String MT_NAME = "__name";
-	public static final String TYPENAME_LIGHT_USERDATA = "light userdata";
-
-	public abstract String name();
-
-	public abstract Table toTable(TableFactory tableFactory);
-
-	public void preInstall(LibContext context, Table env) {
-		// no-op by default
-	}
-
-	@Deprecated
-	public void installInto(LibContext context, Table env) {
-		preInstall(context, env);
-
-		Table t = toTable(context);
-		if (t != null) {
-			env.rawset(name(), t);
-		}
-
-		postInstall(context, env, t);
-	}
-
-	public void postInstall(LibContext context, Table env, Table libTable) {
-		// no-op by default
-	}
-
+public interface LibContext extends TableFactory, MetatableAccessor {
 }

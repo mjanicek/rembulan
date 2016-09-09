@@ -24,8 +24,8 @@ import net.sandius.rembulan.compiler.CompilerChunkLoader;
 import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallInterruptedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
-import net.sandius.rembulan.lib.ModuleLib;
-import net.sandius.rembulan.lib.impl.*;
+import net.sandius.rembulan.lib.impl.DefaultBasicLib;
+import net.sandius.rembulan.lib.impl.StdLibConfig;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.DefaultLuaState;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -34,7 +34,6 @@ import net.sandius.rembulan.util.Check;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.nio.file.FileSystems;
 
 public class RembulanConsole {
 
@@ -75,29 +74,23 @@ public class RembulanConsole {
 		this.err = Check.notNull(err);
 
 		DefaultLuaState state = new DefaultLuaState();
-		this.env = state.newTable();
+		this.loader = new CompilerChunkLoader(this.getClass().getClassLoader(), "rembulan_repl_");
+		this.env = StdLibConfig.getDefault()
+				.withLoader(loader)
+				.withIoStreams(in, out, err)
+				.setDebug(true)
+				.installInto(state);
 
 		this.callExecutor = DirectCallExecutor.newExecutor(state);
-
-		this.loader = new CompilerChunkLoader(this.getClass().getClassLoader(), "rembulan_repl_");
-
-		// install libraries
-		new DefaultBasicLib(new PrintStream(out), loader, env).installInto(state, env);
-		ModuleLib moduleLib = new DefaultModuleLib(state, env);
-		moduleLib.installInto(state, env);
-		moduleLib.install(new DefaultCoroutineLib());
-		moduleLib.install(new DefaultStringLib());
-		moduleLib.install(new DefaultMathLib());
-		moduleLib.install(new DefaultTableLib());
-		moduleLib.install(new DefaultIoLib(state.tableFactory(), FileSystems.getDefault(), in, out, err));
-		moduleLib.install(new DefaultOsLib());
-		moduleLib.install(new DefaultUtf8Lib());
-		moduleLib.install(new DefaultDebugLib());
 
 		// command-line arguments
 		env.rawset("arg", cmdLineArgs.toArgTable(state.tableFactory()));
 
-		requireFunction = moduleLib._require();
+		{
+			// get the require function
+			Object req = env.rawget("require");
+			requireFunction = req instanceof LuaFunction ? (LuaFunction) req : null;
+		}
 	}
 
 	private void printVersion() {
