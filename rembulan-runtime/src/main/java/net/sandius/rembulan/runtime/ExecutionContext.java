@@ -96,10 +96,14 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	 * <p>The reference to the array {@code args} is not retained by the execution context;
 	 * {@code args} may therefore be freely re-used by the caller.</p>
 	 *
+	 * <p>The behaviour of this method is undefined if {@code coroutine} or {@code args}
+	 * is {@code null}.</p>
+	 *
 	 * @param coroutine  coroutine to be resumed, must not be {@code null}
 	 * @param args  arguments to be passed to {@code coroutine}, must not be {@code null}
 	 *
 	 * @throws UnresolvedControlThrowable  the control throwable for this coroutine switch
+	 * @throws IllegalCoroutineStateException  when {@code coroutine} cannot be resumed
 	 */
 	@SuppressWarnings("unused")
 	void resume(Coroutine coroutine, Object[] args) throws UnresolvedControlThrowable;
@@ -113,9 +117,12 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	 * <p>The reference to the array {@code args} is not retained by the execution context;
 	 * {@code args} may therefore be freely re-used by the caller.</p>
 	 *
+	 * <p>The behaviour of this method is undefined if {@code args} is {@code null}.</p>
+	 *
 	 * @param args  arguments to be passed to the resuming coroutine, must not be {@code null}
 	 *
 	 * @throws UnresolvedControlThrowable  the control throwable for this coroutine switch
+	 * @throws IllegalCoroutineStateException  when yielding from a non-yieldable coroutine
 	 */
 	@SuppressWarnings("unused")
 	void yield(Object[] args) throws UnresolvedControlThrowable;
