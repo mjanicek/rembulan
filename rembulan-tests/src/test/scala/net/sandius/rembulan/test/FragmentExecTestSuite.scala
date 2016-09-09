@@ -26,6 +26,7 @@ import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.runtime.DefaultLuaState
 import net.sandius.rembulan.test.FragmentExpectations.Env
+import net.sandius.rembulan.test.Util.BufferPrinter
 import net.sandius.rembulan.{Conversions, LuaState, Table, Variable}
 import org.scalatest.{FunSpec, MustMatchers}
 
@@ -176,7 +177,9 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
         it (l.name + " / " + stepDesc) {
 
-          val (state, func) = Util.timed("Compilation and setup") {
+          val printer = new BufferPrinter()
+
+          val (state, func) = Util.timed(printer, "Compilation and setup") {
 
             val ldr = l.loader()
 
@@ -224,29 +227,29 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 //          val avgTimePerCPUUnitNanos = (after - before).toDouble / totalCPUUnitsSpent.toDouble
 //          val avgCPUUnitsPerSecond = (1000000000.0 * totalCPUUnitsSpent) / (after - before)
 
-          println("Execution took %.1f ms".format(totalTimeMillis))
+          printer.println("Execution took %.1f ms".format(totalTimeMillis))
 //          println("Total CPU cost: " + preemptionContext.totalCost + " LI")
-          println("Computation steps: " + steps)
+          printer.println("Computation steps: " + steps)
 //          println()
 //          println("Avg time per unit: %.2f ns".format(avgTimePerCPUUnitNanos))
 //          println("Avg units per second: %.1f LI/s".format(avgCPUUnitsPerSecond))
-          println()
+          printer.println()
 
           res match {
             case Success(result) =>
-              println("Result: success (" + result.size + " values):")
+              printer.println("Result: success (" + result.size + " values):")
               for ((v, i) <- result.zipWithIndex) {
-                println(i + ":" + "\t" + Conversions.toHumanReadableString(v) + " (" + (if (v != null) v.getClass.getName else "null") + ")")
+                printer.println(i + ":" + "\t" + Conversions.toHumanReadableString(v) + " (" + (if (v != null) v.getClass.getName else "null") + ")")
               }
             case Failure(ex) =>
-              println("Result: error: " + ex.getMessage)
+              printer.println("Result: error: " + ex.getMessage)
           }
 
           for (expects <- expectations;
                ctxExp <- expects.expectationFor(fragment);
                exp <- ctxExp.get(ctx)) {
 
-            exp.tryMatch(res)(this)
+            exp.tryMatch(res, { () => scala.Predef.print(printer.get) })(this)
           }
 
         }

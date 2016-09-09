@@ -159,26 +159,29 @@ object FragmentExpectations {
   }
 
   sealed trait Expect {
-    def tryMatch(actual: Try[Seq[AnyRef]])(spec: FunSpec): Unit
+    def tryMatch(actual: Try[Seq[AnyRef]], onFail: () => Unit)(spec: FunSpec): Unit
   }
 
   object Expect {
     case class Success(vms: Seq[ValueMatch]) extends Expect {
-      override def tryMatch(actual: Try[Seq[AnyRef]])(spec: FunSpec) = {
+      override def tryMatch(actual: Try[Seq[AnyRef]], onFail: () => Unit)(spec: FunSpec) = {
         actual match {
           case scala.util.Success(vs) =>
             if (vs.size != vms.size) {
+              onFail()
               spec.fail("result list size does not match: expected " + vms.size + ", got " + vs.size)
             }
             spec.assertResult(vs.size)(vms.size)
 
             for (((v, vm), i) <- (vs zip vms).zipWithIndex) {
               if (!vm.matches(v)) {
+                onFail()
                 spec.fail("value #" + i + " does not match: expected " + vm + ", got " + v)
               }
             }
 
           case scala.util.Failure(ex) =>
+            onFail()
             spec.fail("Expected success, got an exception: " + ex.getMessage, ex)
         }
       }
@@ -186,12 +189,15 @@ object FragmentExpectations {
 
     sealed trait Failure extends Expect {
 
-      protected def matchError(ex: Throwable)(spec: FunSpec): Unit
+      protected def matchError(ex: Throwable, onFail: () => Unit)(spec: FunSpec): Unit
 
-      override def tryMatch(actual: Try[Seq[AnyRef]])(spec: FunSpec) = {
+      override def tryMatch(actual: Try[Seq[AnyRef]], onFail: () => Unit)(spec: FunSpec) = {
         actual match {
-          case scala.util.Success(vs) => spec.fail("Expected failure, got success")
-          case scala.util.Failure(ex) => matchError(ex)(spec)
+          case scala.util.Success(vs) =>
+            onFail()
+            spec.fail("Expected failure, got success")
+
+          case scala.util.Failure(ex) => matchError(ex, onFail)(spec)
         }
       }
 
@@ -200,10 +206,11 @@ object FragmentExpectations {
     object Failure {
 
       case class ExceptionFailure(optExpectClass: Option[Class[_ <: Throwable]], optExpectMessage: Option[StringMatcher]) extends Failure {
-        override protected def matchError(ex: Throwable)(spec: FunSpec) = {
+        override protected def matchError(ex: Throwable, onFail: () => Unit)(spec: FunSpec) = {
           for (expectClass <- optExpectClass) {
             val actualClass = ex.getClass
             if (!expectClass.isAssignableFrom(actualClass)) {
+              onFail()
               spec.fail("Expected exception of type " + expectClass.getName + ", got " + actualClass.getName)
             }
           }
@@ -211,6 +218,7 @@ object FragmentExpectations {
           for (messageMatcher <- optExpectMessage) {
             val actualMessage = ex.getMessage
             if (!messageMatcher.matches(actualMessage)) {
+              onFail()
               spec.fail("Error message mismatch: expected \"" + messageMatcher + "\", got \"" + actualMessage + "\"")
             }
           }
@@ -218,11 +226,12 @@ object FragmentExpectations {
       }
 
       case class LuaErrorFailure(expectErrorObject: AnyRef) extends Failure {
-        override protected def matchError(ex: Throwable)(spec: FunSpec) = {
+        override protected def matchError(ex: Throwable, onFail: () => Unit)(spec: FunSpec) = {
           ex match {
             case le: LuaRuntimeException =>
               val actualErrorObject = le.getErrorObject
               if (expectErrorObject != actualErrorObject) {
+                onFail()
                 spec.fail("Error object mismatch: expected [" + expectErrorObject + "], got [" + actualErrorObject + "]")
               }
           }

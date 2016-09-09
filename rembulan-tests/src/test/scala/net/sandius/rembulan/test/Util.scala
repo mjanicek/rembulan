@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.test
 
+import java.io.{ByteArrayOutputStream, PrintStream}
+
 object Util {
 
   def fillStr(pattern: String, width: Int): String = {
@@ -43,12 +45,39 @@ object Util {
     for (row <- padded) yield row.mkString(tab)
   }
 
-  def timed[A](name: String)(body: => A): A = {
+  trait Printer {
+
+    def println(x: Any): Unit
+
+  }
+
+  object ConsolePrinter extends Printer {
+    override def println(x: Any) = scala.Predef.println(x)
+  }
+
+  class BufferPrinter extends Printer {
+
+    private val baos = new ByteArrayOutputStream()
+    private val printer = new PrintStream(baos)
+
+    def get = baos.toString()
+
+    def println(x: Any): Unit = {
+      printer.println(x)
+    }
+
+  }
+
+  def timed[A](printer: Printer, name: String)(body: => A): A = {
     val before = System.nanoTime()
     val result = body
     val after = System.nanoTime()
-    System.out.println("%s took %.1f ms".format(name, (after - before) / 1000000.0))
+    printer.println("%s took %.1f ms".format(name, (after - before) / 1000000.0))
     result
+  }
+
+  def timed[A](name: String)(body: => A): A = {
+    timed(ConsolePrinter, name)(body)
   }
 
   def separator: String = {
