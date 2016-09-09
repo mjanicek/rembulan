@@ -21,6 +21,25 @@ import net.sandius.rembulan.util.Cons;
 
 import java.util.Iterator;
 
+/**
+ * A throwable used for non-local control flow changes, containing a complete
+ * (<i>resolved</i>) Lua call stack information all the way to the stack top.
+ *
+ * <p>When suspending a call, the runtime uses the exception handling mechanism of the
+ * Java Virtual Machine to unravel the (Java) call stack and while doing so, to build
+ * a representation of the Lua call stack for a later resume. This throwable is an essential
+ * part of this mechanism.</p>
+ *
+ * <p>In contrast to {@link UnresolvedControlThrowable}, a {@code ResolvedControlThrowable}
+ * contains a complete representation of the Lua call stack that can be used to resume
+ * the call. In order to unravel the entire Lua call stack up to the entry
+ * point of the call, <b>this throwable should never be caught without being rethrown</b>.
+ * Doing so would prevent both the non-local control change (i.e., the suspend) and the
+ * construction of the remainder of the Lua call stack.</p>
+ *
+ * <p>Instances of this class are immutable and do not contain Java stack traces for performance
+ * reasons.</p>
+ */
 public final class ResolvedControlThrowable extends Throwable {
 
 	private final ControlThrowablePayload payload;
