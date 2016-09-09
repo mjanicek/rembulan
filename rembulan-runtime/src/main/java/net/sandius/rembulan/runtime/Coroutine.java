@@ -19,6 +19,18 @@ package net.sandius.rembulan.runtime;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 
+/**
+ * A Lua coroutine.
+ *
+ * <p>This class does not expose any public API; to manipulate {@code Coroutine} objects,
+ * use the following methods in {@link ExecutionContext}:</p>
+ * <ul>
+ *     <li>to create a new coroutine, use {@link ExecutionContext#newCoroutine(LuaFunction)};</li>
+ *     <li>to get coroutine status, use {@link ExecutionContext#getCoroutineStatus(Coroutine)};</li>
+ *     <li>to resume a coroutine, use {@link ExecutionContext#resume(Coroutine, Object[])};</li>
+ *     <li>to yield from a coroutine, use {@link ExecutionContext#yield(Object[])}.</li>
+ * </ul>
+ */
 public final class Coroutine {
 
 	// paused call stack: up-to-date only iff coroutine is not running
@@ -30,10 +42,29 @@ public final class Coroutine {
 		this.status = Status.SUSPENDED;
 	}
 
+	/**
+	 * Coroutine status.
+	 */
 	public enum Status {
+
+		/**
+		 * The status of a <i>suspended</i> coroutine, i.e., a coroutine that may be resumed.
+		 */
 		SUSPENDED,
+
+		/**
+		 * The status of a <i>running</i> coroutine, i.e., a coroutine that is currently executing.
+		 */
 		RUNNING,
+
+		/**
+		 * The status of a coroutine that is resuming another coroutine.
+		 */
 		NORMAL,
+
+		/**
+		 * The status of a <i>dead</i> coroutine, i.e., a coroutine that has finished execution.
+		 */
 		DEAD
 	}
 
