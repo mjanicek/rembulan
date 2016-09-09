@@ -325,7 +325,7 @@ public class Cons<T> {
 	 *
 	 * @param <T>  element type
 	 */
-	protected static class ConsIterator<T> implements Iterator<T> {
+	static class ConsIterator<T> implements Iterator<T> {
 
 		private Cons<T> p;
 
