@@ -33,7 +33,7 @@ public final class SchedulingContexts {
 
 	/**
 	 * Returns a scheduling context that always returns {@code false} from
-	 * {@link SchedulingContext#shouldYield()}, i.e., that <i>never</i> indicates
+	 * {@link SchedulingContext#shouldPause()}, i.e., that <i>never</i> indicates
 	 * that the caller should yield.
 	 *
 	 * @return  a scheduling context that never indicates that the caller should yield
@@ -44,7 +44,7 @@ public final class SchedulingContexts {
 
 	/**
 	 * Returns a scheduling context that always returns {@code true} from
-	 * {@link SchedulingContext#shouldYield()}, i.e., that <i>always</i> indicates
+	 * {@link SchedulingContext#shouldPause()}, i.e., that <i>always</i> indicates
 	 * that the caller should yield.
 	 *
 	 * @return  a scheduling context that always indicates that the caller should yield
@@ -59,7 +59,7 @@ public final class SchedulingContexts {
 	 *
 	 * <p>Every call to {@link SchedulingContext#registerTicks(int)} with
 	 * a positive argument decreases the counter accordingly. The scheduling context
-	 * returns {@code true} from {@link SchedulingContext#shouldYield()} if and only if
+	 * returns {@code true} from {@link SchedulingContext#shouldPause()} if and only if
 	 * counter is lesser than or equal to 0.</p>
 	 *
 	 * @param max  the initial counter value, must be non-negative
@@ -80,7 +80,7 @@ public final class SchedulingContexts {
 		}
 
 		@Override
-		public boolean shouldYield() {
+		public boolean shouldPause() {
 			return false;
 		}
 
@@ -94,7 +94,7 @@ public final class SchedulingContexts {
 		}
 
 		@Override
-		public boolean shouldYield() {
+		public boolean shouldPause() {
 			return true;
 		}
 
@@ -115,7 +115,7 @@ public final class SchedulingContexts {
 		}
 
 		@Override
-		public boolean shouldYield() {
+		public boolean shouldPause() {
 			return allowance <= 0;
 		}
 

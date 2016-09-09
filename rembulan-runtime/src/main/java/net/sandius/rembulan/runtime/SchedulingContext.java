@@ -19,7 +19,7 @@ package net.sandius.rembulan.runtime;
 /**
  * An interface to the cooperative scheduler used in executing Lua programs.
  *
- * <p>The interface specifies two methods: {@link #registerTicks(int)} and {@link #shouldYield()}.
+ * <p>The interface specifies two methods: {@link #registerTicks(int)} and {@link #shouldPause()}.
  * The former is used by an {@link ExecutionContext} to register ticks spent in executing
  * a Lua program; the latter is used by ExecutionContexts to determine whether the execution
  * should be paused.</p>
@@ -34,8 +34,8 @@ public interface SchedulingContext {
 	 * {@code ticks} virtual ticks.
 	 *
 	 * <p>This method only registers {@code ticks} with the scheduler, irrespective
-	 * of whether the current task should yield control and pause. In order to check whether
-	 * control should be yielded, use {@link #shouldYield()}.</p>
+	 * of whether the current task should be paused. In order to check whether execution
+	 * should be paused, use {@link #shouldPause()}.</p>
 	 *
 	 * <p>It is the responsibility of this method's implementation to check that {@code ticks}
 	 * is a sensible value &mdash; typically, only positive or non-negative values make sense
@@ -49,14 +49,13 @@ public interface SchedulingContext {
 	void registerTicks(int ticks);
 
 	/**
-	 * Polls the scheduler, returning {@code true} if the current task should
-	 * yield control and pause.
+	 * Polls the scheduler, returning {@code true} if the current task should be paused.
 	 *
 	 * <p><b>Note</b>: this method is not meant to be used directly by Lua programs, but rather
 	 * to be called by the implementations of {@link ExecutionContext}.</p>
 	 *
 	 * @return  {@code true} if the current task should yield
 	 */
-	boolean shouldYield();
+	boolean shouldPause();
 
 }

@@ -407,8 +407,8 @@ class Call {
 		}
 
 		@Override
-		public void checkCallYield() throws UnresolvedControlThrowable {
-			if (schedulingContext.shouldYield()) {
+		public void pauseIfRequested() throws UnresolvedControlThrowable {
+			if (schedulingContext.shouldPause()) {
 				pause();
 			}
 		}

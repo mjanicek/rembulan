@@ -154,7 +154,7 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	 * @throws UnresolvedControlThrowable  the control throwable for this control change
 	 */
 	@SuppressWarnings("unused")
-	void checkCallYield() throws UnresolvedControlThrowable;
+	void pauseIfRequested() throws UnresolvedControlThrowable;
 
 	/**
 	 * (Unconditionally) pauses the execution.

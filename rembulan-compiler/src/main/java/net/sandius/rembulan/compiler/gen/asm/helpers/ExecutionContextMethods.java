@@ -49,7 +49,7 @@ public abstract class ExecutionContextMethods {
 		return new MethodInsnNode(
 				INVOKEINTERFACE,
 				selfTpe().getInternalName(),
-				"checkCallYield",
+				"pauseIfRequested",
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE),
 				true);
