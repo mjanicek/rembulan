@@ -18,23 +18,28 @@ package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.util.Check;
 
+/**
+ * An exception thrown by a call executor when a call is paused. The continuation
+ * of the paused call may be accessed using the method {@link #getContinuation()}.
+ *
+ * <p>For performance reasons, instances of this class do not contain a stack trace.</p>
+ */
 public class CallInterruptedException extends Exception {
 
 	private final Continuation continuation;
 
 	CallInterruptedException(Continuation continuation) {
-		super("Call interrupted");
+		super("Call interrupted", null, true, false);
 		this.continuation = Check.notNull(continuation);
 	}
 
+	/**
+	 * Get the continuation of the paused call.
+	 *
+	 * @return  the call continuation
+	 */
 	public Continuation getContinuation() {
 		return continuation;
-	}
-
-	@Override
-	public synchronized Throwable fillInStackTrace() {
-		// don't fill in the stack trace
-		return this;
 	}
 
 }

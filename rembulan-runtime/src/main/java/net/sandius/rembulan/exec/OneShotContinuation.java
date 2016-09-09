@@ -22,7 +22,7 @@ package net.sandius.rembulan.exec;
 public interface OneShotContinuation extends Continuation {
 
 	/**
-	 * Returns {@code true} if this continuation is current, i.e. can be resumed.
+	 * Returns {@code true} if this continuation is current, i.e., can be resumed.
 	 *
 	 * <p>In other words, returns {@code false} if an attempt to resume the continuation
 	 * would throw a {@link InvalidContinuationException}.</p>

@@ -76,6 +76,8 @@ class StackTraceback {
 			ChunkClassLoader chunkClassLoader,
 			String[] suppress) {
 
+		Objects.requireNonNull(throwable);
+
 		Deque<Entry> entries = new ArrayDeque<>();
 
 		StackTraceElement[] causeStackTrace = throwable.getStackTrace();

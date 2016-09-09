@@ -25,6 +25,10 @@ import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * A call executor that executes Lua calls and asynchronous tasks scheduled by these
+ * calls in the current thread.
+ */
 public class DirectCallExecutor {
 
 	private final CallInitialiser initialiser;
@@ -35,12 +39,33 @@ public class DirectCallExecutor {
 		this.cpuLimit = cpuLimit;
 	}
 
+	/**
+	 * Returns a new direct call executor that uses the given call initialiser to instantiate
+	 * new calls. Calls executed by this executor will never be asked to pause by the
+	 * scheduler.
+	 *
+	 * @param initialiser  the call initialiser used by the executor, must not be {@code null}
+	 * @return  a direct call executor that never asks continuations to be paused
+	 *
+	 * @throws NullPointerException  if {@code initialiser} is {@code null}
+	 */
 	public static DirectCallExecutor newExecutor(CallInitialiser initialiser) {
 		return new DirectCallExecutor(initialiser, -1);
 	}
 
-	public static DirectCallExecutor newExecutorWithCpuLimit(CallInitialiser initialiser, int cpuLimit) {
-		return new DirectCallExecutor(initialiser, Check.positive(cpuLimit));
+	/**
+	 * Returns a new direct call executor that uses the given call initialiser to instantiate
+	 * new calls, and with every {@link #resume(Continuation)} capped at {@code ticksLimit} ticks.
+	 *
+	 * @param initialiser  the call initialiser used by the executor, must not be {@code null}
+	 * @param ticksLimit  the tick limit for resumes, must be positive
+	 * @return
+	 *
+	 * @throws NullPointerException  if {@code initialiser} is {@code null}
+	 * @throws IllegalArgumentException  if {@code ticksLimit} is not positive
+	 */
+	public static DirectCallExecutor newExecutorWithCpuLimit(CallInitialiser initialiser, int ticksLimit) {
+		return new DirectCallExecutor(initialiser, Check.positive(ticksLimit));
 	}
 
 	private static class Result implements CallEventHandler {
@@ -149,14 +174,50 @@ public class DirectCallExecutor {
 		return cpuLimit > 0 ? SchedulingContexts.upTo(cpuLimit) : SchedulingContexts.never();
 	}
 
+	/**
+	 * Calls {@code fn(args...)} in the current thread, returning the call result once
+	 * the call completes.
+	 *
+	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
+	 * be manipulated freely by the caller of this method.</p>
+	 *
+	 * @param fn  the call target, may be {@code null}
+	 * @param args  call arguments, must not be {@code null}
+	 * @return  the call result
+	 *
+	 * @throws CallException  if the call terminated abnormally
+	 * @throws CallInterruptedException  if the call initiated a pause
+	 * @throws InterruptedException  when the current thread is interrupted while waiting
+	 *                               for an asynchronous operation to be completed
+	 * @throws NullPointerException  if {@code args} is {@code null}
+	 */
 	public Object[] call(Object fn, Object... args)
 			throws CallException, CallInterruptedException, InterruptedException {
 
 		return resume(initialiser.newCall(fn, args));
 	}
 
+	/**
+	 * Resumes {@code continuation} in the current thread, returning the call result once
+	 * the call is completes.
+	 *
+	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
+	 * be manipulated freely by the caller of this method.</p>
+	 *
+	 * @param continuation  the continuation to resume, must not be {@code null}
+	 * @return  the call result
+	 *
+	 * @throws CallException  if the call terminated abnormally
+	 * @throws CallInterruptedException  if the call initiated a pause
+	 * @throws InterruptedException  when the current thread is interrupted while waiting
+	 *                               for an asynchronous operation to be completed
+	 * @throws InvalidContinuationException  when {@code continuation} is invalid
+	 * @throws NullPointerException  if {@code args} is {@code null}
+	 */
 	public Object[] resume(Continuation continuation)
 			throws CallException, CallInterruptedException, InterruptedException {
+
+		Objects.requireNonNull(continuation);
 
 		while (true) {
 			Result result = new Result();

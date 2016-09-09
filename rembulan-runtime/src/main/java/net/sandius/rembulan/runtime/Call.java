@@ -77,8 +77,8 @@ class Call {
 	 * @param args  the array of call arguments, must not be {@code null}
 	 * @return  a new {@code Call} object
 	 *
-	 * @throws NullPointerException  if {@code tableFactory} or {@code metatableAccessor}
-	 *                               is {@code null}
+	 * @throws NullPointerException  if {@code tableFactory}, {@code metatableAccessor}
+	 *                               or {@code args} is {@code null}
 	 */
 	public static Call init(
 			TableFactory tableFactory,

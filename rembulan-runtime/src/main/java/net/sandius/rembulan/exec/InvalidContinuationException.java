@@ -22,6 +22,12 @@ package net.sandius.rembulan.exec;
  */
 public class InvalidContinuationException extends RuntimeException {
 
+	/**
+	 * Constructs a new instance of {@code InvalidContinuationException} with the given
+	 * {@code message}.
+	 *
+	 * @param message  the message, may be {@code null}
+	 */
 	public InvalidContinuationException(String message) {
 		super(message);
 	}

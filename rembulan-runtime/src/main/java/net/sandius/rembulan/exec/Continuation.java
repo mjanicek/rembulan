@@ -19,7 +19,7 @@ package net.sandius.rembulan.exec;
 import net.sandius.rembulan.runtime.SchedulingContext;
 
 /**
- * Reified, resumable state of computation.
+ * Reified, resumable control state of a computation.
  */
 public interface Continuation {
 

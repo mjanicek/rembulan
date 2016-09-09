@@ -16,8 +16,20 @@
 
 package net.sandius.rembulan.exec;
 
+/**
+ * An interface for constructing call continuations.
+ */
 public interface CallInitialiser {
 
+	/**
+	 * Returns the Lua call {@code fn(args...)} reified as a continuation.
+	 *
+	 * @param fn  the call target, may be {@code null}
+	 * @param args  call arguments, must not be {@code null}
+	 * @return  a continuation representing the call {@code fn(args...)}
+	 *
+	 * @throws NullPointerException  if {@code args} is {@code null}
+	 */
 	Continuation newCall(Object fn, Object... args);
 
 }
