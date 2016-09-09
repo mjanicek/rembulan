@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib;
 
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 
@@ -28,12 +29,12 @@ public abstract class Lib {
 
 	public abstract Table toTable(TableFactory tableFactory);
 
-	public void preInstall(LibContext context, Table env) {
+	public void preInstall(StateContext context, Table env) {
 		// no-op by default
 	}
 
 	@Deprecated
-	public void installInto(LibContext context, Table env) {
+	public void installInto(StateContext context, Table env) {
 		preInstall(context, env);
 
 		Table t = toTable(context);
@@ -44,7 +45,7 @@ public abstract class Lib {
 		postInstall(context, env, t);
 	}
 
-	public void postInstall(LibContext context, Table env, Table libTable) {
+	public void postInstall(StateContext context, Table env, Table libTable) {
 		// no-op by default
 	}
 

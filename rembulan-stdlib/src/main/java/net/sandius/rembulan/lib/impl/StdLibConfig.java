@@ -16,11 +16,10 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.lib.LibContext;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.load.ChunkLoader;
-import net.sandius.rembulan.runtime.DefaultLuaState;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,7 +32,7 @@ import java.util.Objects;
  * The configuration of the Lua standard library.
  *
  * <p>This is an immutable class that provides transformation methods for manipulating
- * the configuration, and the {@link #installInto(DefaultLuaState)} method for installing
+ * the configuration, and the {@link #installInto(StateContext)} method for installing
  * the standard library with the specified configuration into a Lua state.</p>
  */
 public class StdLibConfig {
@@ -116,35 +115,31 @@ public class StdLibConfig {
 				: this;
 	}
 
-	private Table installInto(LibContext context) {
-		Table env = context.newTable();
-		new DefaultBasicLib(out != null ? new PrintStream(out) : null, loader, env).installInto(context, env);
-		ModuleLib moduleLib = new DefaultModuleLib(context, env);
-		moduleLib.installInto(context, env);
-		moduleLib.install(new DefaultCoroutineLib());
-		moduleLib.install(new DefaultStringLib());
-		moduleLib.install(new DefaultMathLib());
-		moduleLib.install(new DefaultTableLib());
-		moduleLib.install(new DefaultIoLib(context, fileSystem, in, out, err));
-		moduleLib.install(new DefaultOsLib());
-		moduleLib.install(new DefaultUtf8Lib());
-		moduleLib.install(new DefaultDebugLib());
-		return env;
-	}
-
 	/**
 	 * Installs the standard library into {@code state}, returning a new table suitable
 	 * for use as the global upvalue.
 	 *
-	 * @param state  the Lua state to install into, must not be {@code null}
+	 * @param state  the Lua state context to install into, must not be {@code null}
 	 * @return  a new table containing the standard library
 	 *
 	 * @throws NullPointerException  if {@code state is null}
 	 * @throws IllegalStateException  if the configuration is invalid
 	 */
-	public Table installInto(DefaultLuaState state) {
+	public Table installInto(StateContext state) {
 		Objects.requireNonNull(state);
-		return installInto(new LibContextImpl(state, state));
+		Table env = state.newTable();
+		new DefaultBasicLib(out != null ? new PrintStream(out) : null, loader, env).installInto(state, env);
+		ModuleLib moduleLib = new DefaultModuleLib(state, env);
+		moduleLib.installInto(state, env);
+		moduleLib.install(new DefaultCoroutineLib());
+		moduleLib.install(new DefaultStringLib());
+		moduleLib.install(new DefaultMathLib());
+		moduleLib.install(new DefaultTableLib());
+		moduleLib.install(new DefaultIoLib(state, fileSystem, in, out, err));
+		moduleLib.install(new DefaultOsLib());
+		moduleLib.install(new DefaultUtf8Lib());
+		moduleLib.install(new DefaultDebugLib());
+		return env;
 	}
 
 }

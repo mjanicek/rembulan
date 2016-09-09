@@ -26,6 +26,62 @@ package net.sandius.rembulan;
 public interface MetatableProvider {
 
 	/**
+	 * Returns the metatable for <b>nil</b> (the {@code nil} type), or {@code null} if this
+	 * provider does not assign a metatable to the {@code nil} type.
+	 *
+	 * @return  the metatable for the {@code nil} type
+	 */
+	Table nilMetatable();
+
+	/**
+	 * Returns the metatable for {@code boolean} values, or {@code null} if this provider does
+	 * not assign a metatable to the {@code boolean} type.
+	 *
+	 * @return  the metatable for the {@code boolean} type
+	 */
+	Table booleanMetatable();
+
+	/**
+	 * Returns the metatable for {@code number} values, or {@code null} if this provider does
+	 * not assign a metatable to the {@code number} type.
+	 *
+	 * @return  the metatable for the {@code number} type
+	 */
+	Table numberMetatable();
+
+	/**
+	 * Returns the metatable for {@code string} values, or {@code null} if this provider does
+	 * not assign a metatable to the {@code string} type.
+	 *
+	 * @return  the metatable for the {@code string} type
+	 */
+	Table stringMetatable();
+
+	/**
+	 * Returns the metatable for {@code function} values, or {@code null} if this provider does
+	 * not assign a metatable to the {@code function} type.
+	 *
+	 * @return  the metatable for the {@code function} type
+	 */
+	Table functionMetatable();
+
+	/**
+	 * Returns the metatable for {@code thread} values, or {@code null} if this provider does
+	 * not assign a metatable to the {@code thread} type.
+	 *
+	 * @return  the metatable for the {@code thread} type
+	 */
+	Table threadMetatable();
+
+	/**
+	 * Returns the metatable for light userdata, or {@code null} if this provider does
+	 * not assign a metatable to light userdata..
+	 *
+	 * @return  the metatable for light userdata
+	 */
+	Table lightUserdataMetatable();
+
+	/**
 	 * Returns the metatable for the object {@code instance}, or {@code null} if this
 	 * metatable provider does not assign any metatable to {@code instance}.
 	 *

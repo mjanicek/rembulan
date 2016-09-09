@@ -16,10 +16,10 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Lib;
-import net.sandius.rembulan.lib.LibContext;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -28,7 +28,7 @@ import net.sandius.rembulan.util.Check;
 
 public class DefaultModuleLib extends ModuleLib {
 
-	private final LibContext context;
+	private final StateContext context;
 	private final Table env;
 
 	private final Table _loaded;
@@ -37,7 +37,7 @@ public class DefaultModuleLib extends ModuleLib {
 	private final LuaFunction _loadlib;
 	private final LuaFunction _searchpath;
 
-	public DefaultModuleLib(LibContext context, Table env) {
+	public DefaultModuleLib(StateContext context, Table env) {
 		this.context = Check.notNull(context);
 		this.env = Check.notNull(env);
 
@@ -50,7 +50,7 @@ public class DefaultModuleLib extends ModuleLib {
 	}
 
 	@Override
-	public void postInstall(LibContext context, Table env, Table libTable) {
+	public void postInstall(StateContext context, Table env, Table libTable) {
 		_loaded.rawset(name(), libTable);
 	}
 

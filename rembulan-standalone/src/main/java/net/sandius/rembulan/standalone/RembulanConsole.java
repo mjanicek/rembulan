@@ -84,7 +84,7 @@ public class RembulanConsole {
 		this.callExecutor = DirectCallExecutor.newExecutor(state);
 
 		// command-line arguments
-		env.rawset("arg", cmdLineArgs.toArgTable(state.tableFactory()));
+		env.rawset("arg", cmdLineArgs.toArgTable(state));
 
 		{
 			// get the require function

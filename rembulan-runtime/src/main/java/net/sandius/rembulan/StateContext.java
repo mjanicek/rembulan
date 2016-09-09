@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib;
+package net.sandius.rembulan;
 
-import net.sandius.rembulan.MetatableAccessor;
-import net.sandius.rembulan.TableFactory;
+/**
+ * A global context holding shared metatables and providing methods for instantiating new
+ * tables.
+ */
+public interface StateContext extends MetatableAccessor, TableFactory {
 
-public interface LibContext extends TableFactory, MetatableAccessor {
 }

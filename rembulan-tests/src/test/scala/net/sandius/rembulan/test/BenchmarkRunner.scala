@@ -25,7 +25,7 @@ import net.sandius.rembulan.exec.DirectCallExecutor
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.runtime.{DefaultLuaState, LuaFunction}
-import net.sandius.rembulan.{LuaState, Table, Variable}
+import net.sandius.rembulan.{StateContext, Table, Variable}
 
 import scala.util.Try
 
@@ -86,22 +86,22 @@ object BenchmarkRunner {
     }
   }
 
-  def initEnv(state: LuaState, loader: ChunkLoader, args: Seq[String]): Table = {
-    val env = state.newTable()
+  def initEnv(context: StateContext, loader: ChunkLoader, args: Seq[String]): Table = {
+    val env = context.newTable()
 
-    new DefaultBasicLib(new PrintStream(System.out), loader, env).installInto(state, env)
-    new DefaultModuleLib(state, env).installInto(state, env)
-    new DefaultCoroutineLib().installInto(state, env)
-    new DefaultMathLib().installInto(state, env)
-    new DefaultStringLib().installInto(state, env)
-    new DefaultIoLib(state).installInto(state, env)
-    new DefaultOsLib().installInto(state, env)
-    new DefaultUtf8Lib().installInto(state, env)
-    new DefaultTableLib().installInto(state, env)
-    new DefaultDebugLib().installInto(state, env)
+    new DefaultBasicLib(new PrintStream(System.out), loader, env).installInto(context, env)
+    new DefaultModuleLib(context, env).installInto(context, env)
+    new DefaultCoroutineLib().installInto(context, env)
+    new DefaultMathLib().installInto(context, env)
+    new DefaultStringLib().installInto(context, env)
+    new DefaultIoLib(context).installInto(context, env)
+    new DefaultOsLib().installInto(context, env)
+    new DefaultUtf8Lib().installInto(context, env)
+    new DefaultTableLib().installInto(context, env)
+    new DefaultDebugLib().installInto(context, env)
 
     // command-line arguments
-    val argTable = state.newTable()
+    val argTable = context.newTable()
     for ((a, i) <- args.zipWithIndex) {
       argTable.rawset(i + 1, a)
     }

@@ -27,7 +27,7 @@ import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.runtime.DefaultLuaState
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.test.Util.BufferPrinter
-import net.sandius.rembulan.{Conversions, LuaState, Table, Variable}
+import net.sandius.rembulan.{Conversions, StateContext, Table, Variable}
 import org.scalatest.{FunSpec, MustMatchers}
 
 import scala.util.{Failure, Success}
@@ -52,11 +52,11 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   protected val Debug = FragmentExpectations.Env.Debug
   protected val Full = FragmentExpectations.Env.Full
 
-  def installLib(state: LuaState, env: Table, name: String, impl: Lib): Unit = {
+  def installLib(state: StateContext, env: Table, name: String, impl: Lib): Unit = {
     impl.installInto(state, env)
   }
 
-  protected def envForContext(state: LuaState, ctx: Env, ldr: ChunkLoader): Table = {
+  protected def envForContext(state: StateContext, ctx: Env, ldr: ChunkLoader): Table = {
     val env = state.newTable()
     ctx match {
       case Empty =>

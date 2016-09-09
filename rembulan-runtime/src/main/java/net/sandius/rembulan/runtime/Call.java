@@ -16,9 +16,7 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.MetatableAccessor;
-import net.sandius.rembulan.Table;
-import net.sandius.rembulan.TableFactory;
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.exec.CallEventHandler;
 import net.sandius.rembulan.exec.Continuation;
 import net.sandius.rembulan.exec.InvalidContinuationException;
@@ -38,8 +36,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 class Call {
 
-	private final TableFactory tableFactory;
-	private final MetatableAccessor metatableAccessor;
+	private final StateContext stateContext;
 	private final ReturnBuffer returnBuffer;
 
 	private Cons<Coroutine> coroutineStack;
@@ -50,13 +47,11 @@ class Call {
 	private static final int VERSION_TERMINATED = 1;
 
 	private Call(
-			TableFactory tableFactory,
-			MetatableAccessor metatableAccessor,
+			StateContext stateContext,
 			ReturnBuffer returnBuffer,
 			Coroutine mainCoroutine) {
 
-		this.tableFactory = Objects.requireNonNull(tableFactory);
-		this.metatableAccessor = Objects.requireNonNull(metatableAccessor);
+		this.stateContext = Objects.requireNonNull(stateContext);
 		this.returnBuffer = Objects.requireNonNull(returnBuffer);
 
 		this.coroutineStack = new Cons<>(Objects.requireNonNull(mainCoroutine));
@@ -71,25 +66,22 @@ class Call {
 	 *
 	 * <p>The call will be initialised in the {@link State#PAUSED paused state}.</p>
 	 *
-	 * @param tableFactory  table factory used by the call, must not be {@code null}
-	 * @param metatableAccessor  metatable accessor used by the call, must not be {@code null}
+	 * @param stateContext  state context used by the call, must not be {@code null}
 	 * @param fn  the call target, may be any value
 	 * @param args  the array of call arguments, must not be {@code null}
 	 * @return  a new {@code Call} object
 	 *
-	 * @throws NullPointerException  if {@code tableFactory}, {@code metatableAccessor}
-	 *                               or {@code args} is {@code null}
+	 * @throws NullPointerException  if {@code stateContext} or {@code args} is {@code null}
 	 */
 	public static Call init(
-			TableFactory tableFactory,
-			MetatableAccessor metatableAccessor,
+			StateContext stateContext,
 			Object fn,
 			Object... args) {
 
 		ReturnBuffer returnBuffer = ReturnBuffers.newDefaultReturnBuffer();
 		Coroutine c = new Coroutine(fn);
 		returnBuffer.setToContentsOf(args);
-		return new Call(tableFactory, metatableAccessor, returnBuffer, c);
+		return new Call(stateContext, returnBuffer, c);
 	}
 
 	/**
@@ -335,7 +327,7 @@ class Call {
 
 	private static final ResumeResult PAUSE_RESULT = new ResumeResult(true, null, null, null);
 
-	class Resumer implements ExecutionContext, ControlThrowablePayload.Visitor {
+	class Resumer extends AbstractStateContext implements ExecutionContext, ControlThrowablePayload.Visitor {
 
 		private final SchedulingContext schedulingContext;
 
@@ -344,29 +336,10 @@ class Call {
 		private Cons<ResumeInfo> callStack;
 
 		Resumer(SchedulingContext schedulingContext) {
+			super(stateContext);
 			this.schedulingContext = Objects.requireNonNull(schedulingContext);
 			this.result = null;
 			this.error = null;
-		}
-
-		@Override
-		public Table getMetatable(Object instance) {
-			return metatableAccessor.getMetatable(instance);
-		}
-
-		@Override
-		public Table setMetatable(Object instance, Table table) {
-			return metatableAccessor.setMetatable(instance, table);
-		}
-
-		@Override
-		public Table newTable() {
-			return tableFactory.newTable();
-		}
-
-		@Override
-		public Table newTable(int array, int hash) {
-			return tableFactory.newTable(array, hash);
 		}
 
 		@Override
