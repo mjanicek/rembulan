@@ -16,8 +16,20 @@
 
 package net.sandius.rembulan.runtime;
 
-public class IllegalCoroutineStateException extends IllegalStateException {
+import net.sandius.rembulan.LuaRuntimeException;
 
+/**
+ * An exception thrown by the call executor when attempting to resume a non-resumable
+ * coroutine or to yield from a non-yieldable coroutine.
+ */
+public class IllegalCoroutineStateException extends LuaRuntimeException {
+
+	/**
+	 * Constructs a new instance of {@code IllegalCoroutineStateException} with the
+	 * given error message.
+	 *
+	 * @param message  the error message, may be {@code null}
+	 */
 	public IllegalCoroutineStateException(String message) {
 		super(message);
 	}

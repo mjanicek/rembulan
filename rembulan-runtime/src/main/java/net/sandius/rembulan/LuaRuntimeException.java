@@ -26,6 +26,11 @@ public class LuaRuntimeException extends RuntimeException {
 
 	private final Object errorObject;
 
+	private LuaRuntimeException(Throwable cause, Object errorObject) {
+		super(cause);
+		this.errorObject = errorObject;
+	}
+
 	/**
 	 * Constructs a new {@code LuaRuntimeException} with {@code errorObject} as its
 	 * error object. {@code errorObject} may be {@code null}.
@@ -33,8 +38,20 @@ public class LuaRuntimeException extends RuntimeException {
 	 * @param errorObject  the error object, may be {@code null}
 	 */
 	public LuaRuntimeException(Object errorObject) {
-		super();
-		this.errorObject = errorObject;
+		this(null, errorObject);
+	}
+
+	/**
+	 * Constructs a new {@code LuaRuntimeException} with {@code cause} as its cause.
+	 *
+	 * <p>When queried for the error object, invokes {@link Conversions#toErrorObject(Throwable)}
+	 * on {@code cause}; when {@code cause} is {@code null}, then the error object
+	 * is {@code null}.</p>
+	 *
+	 * @param cause  the cause of this error, may be {@code null}
+	 */
+	public LuaRuntimeException(Throwable cause) {
+		this(cause, null);
 	}
 
 	/**
@@ -44,7 +61,7 @@ public class LuaRuntimeException extends RuntimeException {
 	 */
 	@Override
 	public String getMessage() {
-		return Conversions.toHumanReadableString(errorObject);
+		return Conversions.toHumanReadableString(getErrorObject());
 	}
 
 	/**
@@ -53,7 +70,13 @@ public class LuaRuntimeException extends RuntimeException {
 	 * @return  the error object attached to this exception (possibly {@code null})
 	 */
 	public Object getErrorObject() {
-		return errorObject;
+		Throwable cause = getCause();
+		if (cause != null) {
+			return Conversions.toErrorObject(cause);
+		}
+		else {
+			return errorObject;
+		}
 	}
 
 }

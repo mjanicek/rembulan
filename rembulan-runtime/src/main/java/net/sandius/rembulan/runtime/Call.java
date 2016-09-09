@@ -431,7 +431,7 @@ class Call {
 			assert (coroutineStack != null);
 
 			if (coroutineStack.cdr == null) {
-				error = new IllegalOperationAttemptException("attempt to yield from outside a coroutine");
+				error = Errors.illegalYieldAttempt();
 			}
 			else {
 				Coroutine top = coroutineStack.car;

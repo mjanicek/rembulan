@@ -84,10 +84,10 @@ public final class Coroutine {
 					}
 					else {
 						if (b.status == Status.DEAD) {
-							throw new IllegalCoroutineStateException("cannot resume dead coroutine");
+							throw Errors.resumeDeadCoroutine();
 						}
 						else {
-							throw new IllegalCoroutineStateException("cannot resume non-suspended coroutine");
+							throw Errors.resumeNonSuspendedCoroutine();
 						}
 					}
 				}

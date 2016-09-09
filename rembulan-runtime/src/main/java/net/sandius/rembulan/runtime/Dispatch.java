@@ -47,7 +47,7 @@ public final class Dispatch {
 				return (LuaFunction) handler;
 			}
 			else {
-				throw IllegalOperationAttemptException.call(target);
+				throw Errors.illegalCallAttempt(target);
 			}
 		}
 	}
@@ -112,6 +112,8 @@ public final class Dispatch {
 	 *
 	 * @throws ResolvedControlThrowable  if a tail call initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if a tail call of a non-callable value
+	 *                                           is attempted
 	 */
 	@SuppressWarnings("unused")
 	static void evaluateTailCalls(ExecutionContext context) throws ResolvedControlThrowable {
@@ -150,6 +152,8 @@ public final class Dispatch {
 	 *
 	 * @throws UnresolvedControlThrowable  if the call initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code target} is not a function
+	 *                                           and does not have the {@code __call} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target)
@@ -184,6 +188,8 @@ public final class Dispatch {
 	 *
 	 * @throws UnresolvedControlThrowable  if the call initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code target} is not a function
+	 *                                           and does not have the {@code __call} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1)
@@ -219,6 +225,8 @@ public final class Dispatch {
 	 *
 	 * @throws UnresolvedControlThrowable  if the call initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code target} is not a function
+	 *                                           and does not have the {@code __call} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2)
@@ -256,6 +264,8 @@ public final class Dispatch {
 	 *
 	 * @throws UnresolvedControlThrowable  if the call initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code target} is not a function
+	 *                                           and does not have the {@code __call} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3)
@@ -294,6 +304,8 @@ public final class Dispatch {
 	 *
 	 * @throws UnresolvedControlThrowable  if the call initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code target} is not a function
+	 *                                           and does not have the {@code __call} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4)
@@ -333,6 +345,8 @@ public final class Dispatch {
 	 *
 	 * @throws UnresolvedControlThrowable  if the call initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code target} is not a function
+	 *                                           and does not have the {@code __call} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object arg1, Object arg2, Object arg3, Object arg4, Object arg5)
@@ -377,6 +391,8 @@ public final class Dispatch {
 	 *
 	 * @throws UnresolvedControlThrowable  if the call initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code target} is not a function
+	 *                                           and does not have the {@code __call} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void call(ExecutionContext context, Object target, Object[] args)
@@ -397,7 +413,7 @@ public final class Dispatch {
 			call(context, handler, a, b);
 		}
 		else {
-			throw IllegalOperationAttemptException.arithmetic(a, b);
+			throw Errors.illegalArithmeticAttempt(a, b);
 		}
 	}
 
@@ -408,7 +424,7 @@ public final class Dispatch {
 			call(context, handler, o);
 		}
 		else {
-			throw IllegalOperationAttemptException.arithmetic(o);
+			throw Errors.illegalArithmeticAttempt(o);
 		}
 	}
 
@@ -425,6 +441,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an arithmetic value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __add} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void add(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -471,6 +490,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an arithmetic value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __sub} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void sub(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -516,6 +538,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an arithmetic value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __mul} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void mul(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -561,6 +586,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an arithmetic value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __div} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void div(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -606,6 +634,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an arithmetic value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __mod} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void mod(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -651,6 +682,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an arithmetic value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __idiv} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void idiv(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -696,6 +730,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an arithmetic value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __pow} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void pow(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -735,7 +772,7 @@ public final class Dispatch {
 			call(context, handler, a, b);
 		}
 		else {
-			throw IllegalOperationAttemptException.bitwise(a, b);
+			throw Errors.illegalBitwiseOperationAttempt(a, b);
 		}
 	}
 
@@ -746,7 +783,7 @@ public final class Dispatch {
 			call(context, handler, o);
 		}
 		else {
-			throw IllegalOperationAttemptException.bitwise(o);
+			throw Errors.illegalBitwiseOperationAttempt(o);
 		}
 	}
 
@@ -763,6 +800,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an integer value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __band} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void band(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -790,6 +830,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an integer value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __bor} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void bor(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -817,6 +860,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an integer value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __bxor} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void bxor(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -844,6 +890,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an integer value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __shl} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void shl(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -871,6 +920,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           an integer value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __shr} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void shr(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -897,6 +949,8 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code o} does not have an arithmetic value
+	 *                                           and does not have the {@code __unm} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void unm(ExecutionContext context, Object o) throws UnresolvedControlThrowable {
@@ -938,6 +992,8 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code o} does not have an integer value
+	 *                                           and does not have the {@code __bnot} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void bnot(ExecutionContext context, Object o) throws UnresolvedControlThrowable {
@@ -979,6 +1035,8 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code o} is not a string, does not have
+	 *                                           the {@code __len} metamethod, or is not a table
 	 */
 	@SuppressWarnings("unused")
 	public static void len(ExecutionContext context, Object o) throws UnresolvedControlThrowable {
@@ -994,7 +1052,7 @@ public final class Dispatch {
 				context.getReturnBuffer().setTo((long) ((Table) o).rawlen());
 			}
 			else {
-				throw IllegalOperationAttemptException.length(o);
+				throw Errors.illegalGetLengthAttempt(o);
 			}
 		}
 	}
@@ -1012,6 +1070,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} or {@code b} does not have
+	 *                                           a string value and neither {@code a} nor
+	 *                                           {@code b} has the {@code __concat} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void concat(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -1027,7 +1088,7 @@ public final class Dispatch {
 				call(context, handler, a, b);
 			}
 			else {
-				throw IllegalOperationAttemptException.concatenate(a, b);
+				throw Errors.illegalConcatenationAttempt(a, b);
 			}
 		}
 	}
@@ -1160,6 +1221,9 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} and {@code b} are not comparable
+	 *                                           and neither {@code a} nor {@code b} has the
+	 *                                           {@code __lt} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void lt(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -1176,7 +1240,7 @@ public final class Dispatch {
 				_call_comparison_mt(context, true, handler, a, b);
 			}
 			else {
-				throw IllegalOperationAttemptException.comparison(a, b);
+				throw Errors.illegalComparisonAttempt(a, b);
 			}
 		}
 	}
@@ -1230,6 +1294,10 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code a} and {@code b} are not comparable
+	 *                                           and neither {@code a} nor {@code b} has the
+	 *                                           {@code __le} metamethod and neither {@code a}
+	 *                                           nor {@code b} has the {@code __lt} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void le(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
@@ -1254,7 +1322,7 @@ public final class Dispatch {
 					_call_comparison_mt(context, false, lt_handler, b, a);
 				}
 				else {
-					throw IllegalOperationAttemptException.comparison(a, b);
+					throw Errors.illegalComparisonAttempt(a, b);
 				}
 			}
 		}
@@ -1310,6 +1378,8 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code table} is not a table and does
+	 *                                           not have the {@code __index} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void index(ExecutionContext context, Object table, Object key) throws UnresolvedControlThrowable {
@@ -1348,7 +1418,7 @@ public final class Dispatch {
 			index(context, handler, key);
 		}
 		else {
-			throw IllegalOperationAttemptException.index(table, key);
+			throw Errors.illegalIndexAttempt(table, key);
 		}
 	}
 
@@ -1392,6 +1462,8 @@ public final class Dispatch {
 	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
 	 *                           initiates a non-local control change
 	 * @throws NullPointerException  if {@code context} is {@code null}
+	 * @throws IllegalOperationAttemptException  if {@code table} is not a table and does
+	 *                                           not have the {@code __newindex} metamethod
 	 */
 	@SuppressWarnings("unused")
 	public static void setindex(ExecutionContext context, Object table, Object key, Object value) throws UnresolvedControlThrowable {
@@ -1430,7 +1502,7 @@ public final class Dispatch {
 			setindex(context, handler, key, value);
 		}
 		else {
-			throw IllegalOperationAttemptException.index(table, key);
+			throw Errors.illegalIndexAttempt(table, key);
 		}
 	}
 
