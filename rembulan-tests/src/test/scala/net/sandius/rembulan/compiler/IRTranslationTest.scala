@@ -157,7 +157,7 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   def compile(fn: IRFunc): CompiledFn = {
-    val compiler = new Compiler()
+    val compiler = new LuaCompiler()
     val pfn = compiler.processFunction(fn)
     CompiledFn(pfn.fn, pfn.types)
   }

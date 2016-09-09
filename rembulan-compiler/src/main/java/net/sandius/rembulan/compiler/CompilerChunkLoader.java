@@ -32,11 +32,11 @@ public class CompilerChunkLoader implements ChunkLoader {
 
 	private final ChunkClassLoader chunkClassLoader;
 	private final String rootClassPrefix;
-	private final Compiler compiler;
+	private final LuaCompiler compiler;
 
 	private int idx;
 
-	public CompilerChunkLoader(ClassLoader classLoader, Compiler compiler, String rootClassPrefix) {
+	public CompilerChunkLoader(ClassLoader classLoader, LuaCompiler compiler, String rootClassPrefix) {
 		this.chunkClassLoader = new ChunkClassLoader(classLoader);
 		this.compiler = Check.notNull(compiler);
 		this.rootClassPrefix = Check.notNull(rootClassPrefix);
@@ -47,7 +47,7 @@ public class CompilerChunkLoader implements ChunkLoader {
 			ClassLoader classLoader,
 			CompilerSettings compilerSettings,
 			String rootClassPrefix) {
-		this(classLoader, new Compiler(compilerSettings), rootClassPrefix);
+		this(classLoader, new LuaCompiler(compilerSettings), rootClassPrefix);
 	}
 
 	public CompilerChunkLoader(ClassLoader classLoader, String rootClassPrefix) {

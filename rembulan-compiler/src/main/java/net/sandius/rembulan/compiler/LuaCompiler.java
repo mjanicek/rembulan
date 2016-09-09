@@ -50,16 +50,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class Compiler {
+public class LuaCompiler {
 
 	private final CompilerSettings settings;
 
-	public Compiler(CompilerSettings settings) {
+	public LuaCompiler(CompilerSettings settings) {
 		this.settings = Check.notNull(settings);
 	}
 
 	@Deprecated
-	public Compiler() {
+	public LuaCompiler() {
 		this(CompilerSettings.defaultSettings());
 	}
 
