@@ -31,7 +31,7 @@ public interface MetatableProvider {
 	 *
 	 * @return  the metatable for the {@code nil} type
 	 */
-	Table nilMetatable();
+	Table getNilMetatable();
 
 	/**
 	 * Returns the metatable for {@code boolean} values, or {@code null} if this provider does
@@ -39,7 +39,7 @@ public interface MetatableProvider {
 	 *
 	 * @return  the metatable for the {@code boolean} type
 	 */
-	Table booleanMetatable();
+	Table getBooleanMetatable();
 
 	/**
 	 * Returns the metatable for {@code number} values, or {@code null} if this provider does
@@ -47,7 +47,7 @@ public interface MetatableProvider {
 	 *
 	 * @return  the metatable for the {@code number} type
 	 */
-	Table numberMetatable();
+	Table getNumberMetatable();
 
 	/**
 	 * Returns the metatable for {@code string} values, or {@code null} if this provider does
@@ -55,7 +55,7 @@ public interface MetatableProvider {
 	 *
 	 * @return  the metatable for the {@code string} type
 	 */
-	Table stringMetatable();
+	Table getStringMetatable();
 
 	/**
 	 * Returns the metatable for {@code function} values, or {@code null} if this provider does
@@ -63,7 +63,7 @@ public interface MetatableProvider {
 	 *
 	 * @return  the metatable for the {@code function} type
 	 */
-	Table functionMetatable();
+	Table getFunctionMetatable();
 
 	/**
 	 * Returns the metatable for {@code thread} values, or {@code null} if this provider does
@@ -71,7 +71,7 @@ public interface MetatableProvider {
 	 *
 	 * @return  the metatable for the {@code thread} type
 	 */
-	Table threadMetatable();
+	Table getThreadMetatable();
 
 	/**
 	 * Returns the metatable for light userdata, or {@code null} if this provider does
@@ -79,7 +79,7 @@ public interface MetatableProvider {
 	 *
 	 * @return  the metatable for light userdata
 	 */
-	Table lightUserdataMetatable();
+	Table getLightUserdataMetatable();
 
 	/**
 	 * Returns the metatable for the object {@code instance}, or {@code null} if this

@@ -41,38 +41,38 @@ abstract class AbstractStateContext implements StateContext {
 	}
 
 	@Override
-	public Table nilMetatable() {
-		return metatableAccessor.nilMetatable();
+	public Table getNilMetatable() {
+		return metatableAccessor.getNilMetatable();
 	}
 
 	@Override
-	public Table booleanMetatable() {
-		return metatableAccessor.booleanMetatable();
+	public Table getBooleanMetatable() {
+		return metatableAccessor.getBooleanMetatable();
 	}
 
 	@Override
-	public Table numberMetatable() {
-		return metatableAccessor.numberMetatable();
+	public Table getNumberMetatable() {
+		return metatableAccessor.getNumberMetatable();
 	}
 
 	@Override
-	public Table stringMetatable() {
-		return metatableAccessor.stringMetatable();
+	public Table getStringMetatable() {
+		return metatableAccessor.getStringMetatable();
 	}
 
 	@Override
-	public Table functionMetatable() {
-		return metatableAccessor.functionMetatable();
+	public Table getFunctionMetatable() {
+		return metatableAccessor.getFunctionMetatable();
 	}
 
 	@Override
-	public Table threadMetatable() {
-		return metatableAccessor.threadMetatable();
+	public Table getThreadMetatable() {
+		return metatableAccessor.getThreadMetatable();
 	}
 
 	@Override
-	public Table lightUserdataMetatable() {
-		return metatableAccessor.lightUserdataMetatable();
+	public Table getLightUserdataMetatable() {
+		return metatableAccessor.getLightUserdataMetatable();
 	}
 
 	@Override

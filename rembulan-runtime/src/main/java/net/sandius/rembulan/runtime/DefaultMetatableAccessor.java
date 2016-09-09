@@ -59,37 +59,37 @@ class DefaultMetatableAccessor implements MetatableAccessor {
 	protected Table lightuserdataMetatable;
 
 	@Override
-	public Table nilMetatable() {
+	public Table getNilMetatable() {
 		return nilMetatable;
 	}
 
 	@Override
-	public Table booleanMetatable() {
+	public Table getBooleanMetatable() {
 		return booleanMetatable;
 	}
 
 	@Override
-	public Table numberMetatable() {
+	public Table getNumberMetatable() {
 		return numberMetatable;
 	}
 
 	@Override
-	public Table stringMetatable() {
+	public Table getStringMetatable() {
 		return stringMetatable;
 	}
 
 	@Override
-	public Table functionMetatable() {
+	public Table getFunctionMetatable() {
 		return functionMetatable;
 	}
 
 	@Override
-	public Table threadMetatable() {
+	public Table getThreadMetatable() {
 		return threadMetatable;
 	}
 
 	@Override
-	public Table lightUserdataMetatable() {
+	public Table getLightUserdataMetatable() {
 		return lightuserdataMetatable;
 	}
 
@@ -101,13 +101,13 @@ class DefaultMetatableAccessor implements MetatableAccessor {
 		else {
 			LuaType type = LuaType.typeOf(o);
 			switch (type) {
-				case NIL: return nilMetatable();
-				case BOOLEAN: return booleanMetatable();
-				case NUMBER: return numberMetatable();
-				case STRING: return stringMetatable();
-				case FUNCTION: return functionMetatable();
-				case THREAD: return threadMetatable();
-				case USERDATA: return lightUserdataMetatable();
+				case NIL: return getNilMetatable();
+				case BOOLEAN: return getBooleanMetatable();
+				case NUMBER: return getNumberMetatable();
+				case STRING: return getStringMetatable();
+				case FUNCTION: return getFunctionMetatable();
+				case THREAD: return getThreadMetatable();
+				case USERDATA: return getLightUserdataMetatable();
 				default: throw new IllegalStateException("Illegal type: " + type);
 			}
 		}
