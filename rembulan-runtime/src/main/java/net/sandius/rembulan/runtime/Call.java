@@ -390,6 +390,11 @@ class Call {
 		}
 
 		@Override
+		public Coroutine.Status getCoroutineStatus(Coroutine coroutine) {
+			return coroutine.getStatus();
+		}
+
+		@Override
 		public void resume(Coroutine coroutine, Object[] args) throws UnresolvedControlThrowable {
 			throw new UnresolvedControlThrowable(new ControlPayload(false, coroutine, args, null));
 		}
