@@ -25,7 +25,7 @@ public final class Coroutine {
 	private Cons<ResumeInfo> callStack;
 	private Status status;
 
-	public Coroutine(Object function) {
+	Coroutine(Object function) {
 		this.callStack = new Cons<>(new ResumeInfo(BootstrapResumable.INSTANCE, Check.notNull(function)));
 		this.status = Status.SUSPENDED;
 	}

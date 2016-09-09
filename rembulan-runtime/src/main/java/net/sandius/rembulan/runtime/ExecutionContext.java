@@ -81,6 +81,8 @@ public interface ExecutionContext extends MetatableAccessor, TableFactory {
 	 * <p>The coroutine will be initialised in a suspended state. To resume the coroutine,
 	 * use {@link #resume(Coroutine, Object[])}.</p>
 	 *
+	 * <p>The behaviour of this method is undefined if {@code function} is {@code null}.
+	 *
 	 * @param function  coroutine body, must not be {@code null}
 	 * @return  a new (suspended) coroutine with the body {@code function}
 	 */
