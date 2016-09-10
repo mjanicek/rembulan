@@ -132,7 +132,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
   case class RembulanChkLoader(settings: CompilerSettings) extends ChkLoader {
     def name = "RemC" + "_" + compilerSettingsToString(settings)
-    def loader() = new CompilerChunkLoader(new ChunkClassLoader(), settings, "fragment_test_")
+    def loader() = CompilerChunkLoader.of(new ChunkClassLoader(), settings, "fragment_test_")
   }
 
   class CompilerConfigs private (configs: Seq[CompilerSettings]) {

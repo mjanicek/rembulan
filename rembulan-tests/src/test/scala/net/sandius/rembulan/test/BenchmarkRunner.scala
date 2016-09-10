@@ -118,7 +118,7 @@ object BenchmarkRunner {
     val sourceContents = new Scanner(resourceStream, "UTF-8").useDelimiter("\\A").next()
     require (sourceContents != null, "source contents must not be null")
 
-    val ldr = new CompilerChunkLoader(new ChunkClassLoader(), settings, "benchmark_")
+    val ldr = CompilerChunkLoader.of(new ChunkClassLoader(), settings, "benchmark_")
 
     val state = new DefaultLuaState()
 

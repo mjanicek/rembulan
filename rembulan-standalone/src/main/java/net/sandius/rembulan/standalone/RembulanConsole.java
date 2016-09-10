@@ -74,7 +74,7 @@ public class RembulanConsole {
 		this.err = Check.notNull(err);
 
 		DefaultLuaState state = new DefaultLuaState();
-		this.loader = new CompilerChunkLoader(this.getClass().getClassLoader(), "rembulan_repl_");
+		this.loader = CompilerChunkLoader.of("rembulan_repl_");
 		this.env = StdLibConfig.getDefault()
 				.withLoader(loader)
 				.withIoStreams(in, out, err)

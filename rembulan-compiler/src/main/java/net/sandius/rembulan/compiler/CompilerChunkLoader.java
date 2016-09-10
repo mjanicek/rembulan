@@ -36,11 +36,35 @@ public class CompilerChunkLoader implements ChunkLoader {
 
 	private int idx;
 
-	public CompilerChunkLoader(ClassLoader classLoader, LuaCompiler compiler, String rootClassPrefix) {
+	CompilerChunkLoader(ClassLoader classLoader, LuaCompiler compiler, String rootClassPrefix) {
 		this.chunkClassLoader = new ChunkClassLoader(classLoader);
 		this.compiler = Check.notNull(compiler);
 		this.rootClassPrefix = Check.notNull(rootClassPrefix);
 		this.idx = 0;
+	}
+
+	public static CompilerChunkLoader of(ClassLoader classLoader, LuaCompiler compiler, String rootClassPrefix) {
+		return new CompilerChunkLoader(classLoader, compiler, rootClassPrefix);
+	}
+
+	public static CompilerChunkLoader of(ClassLoader classLoader, CompilerSettings compilerSettings, String rootClassPrefix) {
+		return new CompilerChunkLoader(classLoader, new LuaCompiler(compilerSettings), rootClassPrefix);
+	}
+
+	public static CompilerChunkLoader of(ClassLoader classLoader, String rootClassPrefix) {
+		return of(classLoader, CompilerSettings.defaultSettings(), rootClassPrefix);
+	}
+
+	public static CompilerChunkLoader of(LuaCompiler compiler, String rootClassPrefix) {
+		return of(CompilerChunkLoader.class.getClassLoader(), compiler, rootClassPrefix);
+	}
+
+	public static CompilerChunkLoader of(CompilerSettings compilerSettings, String rootClassPrefix) {
+		return of(new LuaCompiler(compilerSettings), rootClassPrefix);
+	}
+
+	public static CompilerChunkLoader of(String rootClassPrefix) {
+		return of(CompilerSettings.defaultSettings(), rootClassPrefix);
 	}
 
 	public CompilerChunkLoader(
@@ -48,10 +72,6 @@ public class CompilerChunkLoader implements ChunkLoader {
 			CompilerSettings compilerSettings,
 			String rootClassPrefix) {
 		this(classLoader, new LuaCompiler(compilerSettings), rootClassPrefix);
-	}
-
-	public CompilerChunkLoader(ClassLoader classLoader, String rootClassPrefix) {
-		this(classLoader, CompilerSettings.defaultSettings(), rootClassPrefix);
 	}
 
 	public ChunkClassLoader getChunkClassLoader() {
