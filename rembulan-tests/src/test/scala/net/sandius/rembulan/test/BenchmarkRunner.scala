@@ -24,7 +24,7 @@ import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.exec.DirectCallExecutor
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
-import net.sandius.rembulan.runtime.{DefaultLuaState, LuaFunction}
+import net.sandius.rembulan.runtime.{LuaFunction, LuaState}
 import net.sandius.rembulan.{StateContext, Table, Variable}
 
 import scala.util.Try
@@ -110,7 +110,7 @@ object BenchmarkRunner {
     env
   }
 
-  case class EnvWithMainChunk(state: DefaultLuaState, fn: LuaFunction)
+  case class EnvWithMainChunk(state: LuaState, fn: LuaFunction)
 
   def init(settings: CompilerSettings, filename: String, args: String*) = {
     val resourceStream = getClass.getResourceAsStream(filename)
@@ -120,7 +120,7 @@ object BenchmarkRunner {
 
     val ldr = CompilerChunkLoader.of(new ChunkClassLoader(), settings, "benchmark_")
 
-    val state = new DefaultLuaState()
+    val state = new LuaState()
 
     val env = initEnv(state, ldr, args)
 

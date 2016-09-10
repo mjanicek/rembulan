@@ -23,12 +23,12 @@ import net.sandius.rembulan.exec.OneShotContinuation;
 import net.sandius.rembulan.impl.DefaultTable;
 
 /**
- * Default implementation of Lua states that is also a call initialiser.
+ * Default implementation of a state context that is also a call initialiser.
  */
-public class DefaultLuaState extends AbstractStateContext implements CallInitialiser {
+public class LuaState extends AbstractStateContext implements CallInitialiser {
 
 	/**
-	 * Constructs a new {@code DefaultLuaState} with the specified table factory
+	 * Constructs a new {@code LuaState} with the specified table factory
 	 * {@code tableFactory} and the metatable accessor {@code metatableAccessor}.
 	 *
 	 * @param tableFactory  table factory to be used by this state, must not be {@code null}
@@ -38,15 +38,15 @@ public class DefaultLuaState extends AbstractStateContext implements CallInitial
 	 * @throws NullPointerException  if {@code tableFactory} or {@code metatableAccessor}
 	 *                               is {@code null}
 	 */
-	public DefaultLuaState(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
+	public LuaState(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
 		super(tableFactory, metatableAccessor);
 	}
 
 	/**
-	 * Constructs a new {@code DefaultLuaState} with the default table factory and
+	 * Constructs a new {@code LuaState} with the default table factory and
 	 * the default (empty) metatable accessor.
 	 */
-	public DefaultLuaState() {
+	public LuaState() {
 		this(DefaultTable.factory(), new DefaultMetatableAccessor());
 	}
 

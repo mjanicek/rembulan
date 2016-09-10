@@ -30,8 +30,8 @@ import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.lib.impl.DefaultBasicLib;
 import net.sandius.rembulan.lib.impl.StandardLibrary;
 import net.sandius.rembulan.load.LoaderException;
-import net.sandius.rembulan.runtime.DefaultLuaState;
 import net.sandius.rembulan.runtime.LuaFunction;
+import net.sandius.rembulan.runtime.LuaState;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
@@ -84,7 +84,7 @@ public class RembulanConsole {
 				.defaultSettings()
 				.withCPUAccountingMode(cpuAccountingMode);
 
-		DefaultLuaState state = new DefaultLuaState();
+		LuaState state = new LuaState();
 		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
 		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.system(in, out, err);
 		this.env = StandardLibrary.in(runtimeEnv)

@@ -17,13 +17,13 @@
 package net.sandius.rembulan.examples
 
 import net.sandius.rembulan.exec.DirectCallExecutor
-import net.sandius.rembulan.runtime.DefaultLuaState
+import net.sandius.rembulan.runtime.LuaState
 
 object AsyncRunner {
 
   def main(args: Array[String]): Unit = {
 
-    val state = new DefaultLuaState()
+    val state = new LuaState()
     val executor = DirectCallExecutor.newExecutor(state)
 
     System.out.println("Calling...")

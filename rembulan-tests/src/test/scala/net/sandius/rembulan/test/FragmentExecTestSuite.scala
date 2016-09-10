@@ -24,7 +24,7 @@ import net.sandius.rembulan.exec._
 import net.sandius.rembulan.lib.Lib
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
-import net.sandius.rembulan.runtime.DefaultLuaState
+import net.sandius.rembulan.runtime.LuaState
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.test.Util.BufferPrinter
 import net.sandius.rembulan.{Conversions, StateContext, Table, Variable}
@@ -183,7 +183,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
             val ldr = l.loader()
 
-            val state = new DefaultLuaState()
+            val state = new LuaState()
 
             val env = envForContext(state, ctx, ldr)
             val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)
