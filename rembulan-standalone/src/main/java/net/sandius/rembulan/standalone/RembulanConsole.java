@@ -47,7 +47,7 @@ public class RembulanConsole {
 	private final PrintStream out;
 	private final PrintStream err;
 
-//	private final LuaState state;
+	private final StateContext state;
 	private final Table env;
 
 	private final CompilerChunkLoader loader;
@@ -85,7 +85,7 @@ public class RembulanConsole {
 				.defaultSettings()
 				.withCPUAccountingMode(cpuAccountingMode);
 
-		StateContext state = StateContexts.newDefaultInstance();
+		this.state = StateContexts.newDefaultInstance();
 		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
 		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.system(in, out, err);
 		this.env = StandardLibrary.in(runtimeEnv)
@@ -93,7 +93,7 @@ public class RembulanConsole {
 				.withDebug(true)
 				.installInto(state);
 
-		this.callExecutor = DirectCallExecutor.newExecutor(state);
+		this.callExecutor = DirectCallExecutor.newExecutor();
 
 		// command-line arguments
 		env.rawset("arg", cmdLineArgs.toArgTable(state));
@@ -132,7 +132,7 @@ public class RembulanConsole {
 			throws CallException {
 
 		try {
-			return callExecutor.call(fn, args);
+			return callExecutor.call(state, fn, args);
 		}
 		catch (CallInterruptedException | InterruptedException ex) {
 			throw new CallException(ex);

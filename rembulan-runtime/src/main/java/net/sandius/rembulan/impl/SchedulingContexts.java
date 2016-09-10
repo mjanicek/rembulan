@@ -17,6 +17,7 @@
 package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.runtime.SchedulingContext;
+import net.sandius.rembulan.runtime.SchedulingContextFactory;
 import net.sandius.rembulan.util.Check;
 
 /**
@@ -119,6 +120,57 @@ public final class SchedulingContexts {
 			return allowance <= 0;
 		}
 
+	}
+
+	private static final SchedulingContextFactory NEVER_FACTORY = new SchedulingContextFactory() {
+		@Override
+		public SchedulingContext newInstance() {
+			return never();
+		}
+	};
+
+	private static final SchedulingContextFactory ALWAYS_FACTORY = new SchedulingContextFactory() {
+		@Override
+		public SchedulingContext newInstance() {
+			return always();
+		}
+	};
+
+	/**
+	 * Returns a scheduling context factory that always returns {@link #never()}.
+	 *
+	 * @return  a scheduling context factory for never-pausing scheduling contexts
+	 */
+	public static SchedulingContextFactory neverFactory() {
+		return NEVER_FACTORY;
+	}
+
+	/**
+	 * Returns a scheduling context factory that always returns {@link #always()}.
+	 *
+	 * @return  a scheduling context factory for always-pausing scheduling contexts
+	 */
+	public static SchedulingContextFactory alwaysFactory() {
+		return ALWAYS_FACTORY;
+	}
+
+	/**
+	 * Returns a scheduling context factory that always returns {@link #upTo(long)}
+	 * with the argument {@code max}.
+	 *
+	 * @param max  the initial counter value, must be non-negative
+	 * @return  a scheduling context factory that returns tick-capped scheduling contexts
+	 *
+	 * @throws IllegalArgumentException  when {@code max} is negative
+	 */
+	public static SchedulingContextFactory upToFactory(final long max) {
+		Check.nonNegative(max);
+		return new SchedulingContextFactory() {
+			@Override
+			public SchedulingContext newInstance() {
+				return upTo(max);
+			}
+		};
 	}
 
 }

@@ -196,11 +196,10 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
           val before = System.nanoTime()
 
-          val callInitialiser = RuntimeCallInitialiser.forState(state)
-          val callExecutor = DirectCallExecutor.newExecutorWithCpuLimit(callInitialiser, s)
+          val callExecutor = DirectCallExecutor.newExecutorWithTickLimit(s)
 
           var resultValues: Array[AnyRef] = null
-          var continuation: Continuation = callInitialiser.newCall(func)
+          var continuation: Continuation = RuntimeCallInitialiser.forState(state).newCall(func)
           var error: CallException = null
 
           do {

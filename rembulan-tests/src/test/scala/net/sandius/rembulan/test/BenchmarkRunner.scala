@@ -149,10 +149,10 @@ object BenchmarkRunner {
     val c = initCall()
 
 
-    val executor = DirectCallExecutor.newExecutor(c.state)
+    val executor = DirectCallExecutor.newExecutor()
 
     val before = System.nanoTime()
-    executor.call(c.fn)
+    executor.call(c.state, c.fn)
     val after = System.nanoTime()
 
     val totalTimeMillis = (after - before) / 1000000.0

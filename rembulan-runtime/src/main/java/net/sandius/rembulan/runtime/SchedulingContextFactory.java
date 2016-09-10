@@ -14,22 +14,18 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.examples
+package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.exec.DirectCallExecutor
-import net.sandius.rembulan.impl.StateContexts
+/**
+ * A factory for instances of {@link SchedulingContext}.
+ */
+public interface SchedulingContextFactory {
 
-object AsyncRunner {
-
-  def main(args: Array[String]): Unit = {
-
-    val state = StateContexts.newDefaultInstance()
-    val executor = DirectCallExecutor.newExecutor()
-
-    System.out.println("Calling...")
-    val result = executor.call(state, new AsyncExample, java.lang.Long.valueOf(1000))
-    System.out.println(result.mkString("Returned: [", ", ", "]"))
-
-  }
+	/**
+	 * Returns a new scheduling context.
+	 *
+	 * @return  a new scheduling context
+	 */
+	SchedulingContext newInstance();
 
 }

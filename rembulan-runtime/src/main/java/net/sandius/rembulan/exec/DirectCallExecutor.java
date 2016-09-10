@@ -21,7 +21,7 @@ import net.sandius.rembulan.impl.SchedulingContexts;
 import net.sandius.rembulan.runtime.AsyncTask;
 import net.sandius.rembulan.runtime.RuntimeCallInitialiser;
 import net.sandius.rembulan.runtime.SchedulingContext;
-import net.sandius.rembulan.util.Check;
+import net.sandius.rembulan.runtime.SchedulingContextFactory;
 
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
@@ -29,80 +29,54 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A call executor that executes Lua calls and asynchronous tasks scheduled by these
- * calls in the current thread.
+ * calls in the current thread. The executor uses a {@link SchedulingContextFactory}
+ * to instantiate scheduling contexts.
  */
 public class DirectCallExecutor {
 
-	// Note: the non-static API does not feel right: it conflates the instantiation of new calls
-	// with the execution of arbitrary continuations, and does not offer a sufficiently
-	// fine-grained control of scheduling contexts
+	private final SchedulingContextFactory schedulingContextFactory;
 
-	private final CallInitialiser initialiser;
-	private final int cpuLimit;
-
-	DirectCallExecutor(CallInitialiser initialiser, int cpuLimit) {
-		this.initialiser = Objects.requireNonNull(initialiser);
-		this.cpuLimit = cpuLimit;
+	DirectCallExecutor(SchedulingContextFactory schedulingContextFactory) {
+		this.schedulingContextFactory = Objects.requireNonNull(schedulingContextFactory);
 	}
 
+	private static final DirectCallExecutor NEVER_PAUSING_EXECUTOR
+			= new DirectCallExecutor(SchedulingContexts.neverFactory());
+
 	/**
-	 * Returns a new direct call executor that uses the given call initialiser to instantiate
-	 * new calls. Calls executed by this executor will never be asked to pause by the
-	 * scheduler.
+	 * Returns a new direct call executor with a scheduler that never requests executions
+	 * to be paused.
 	 *
-	 * @param initialiser  the call initialiser used by the executor, must not be {@code null}
 	 * @return  a direct call executor that never asks continuations to be paused
-	 *
-	 * @throws NullPointerException  if {@code initialiser} is {@code null}
 	 */
-	public static DirectCallExecutor newExecutor(CallInitialiser initialiser) {
-		return new DirectCallExecutor(initialiser, -1);
+	public static DirectCallExecutor newExecutor() {
+		return NEVER_PAUSING_EXECUTOR;
 	}
 
 	/**
-	 * Returns a new direct call executor that uses the runtime call initialiser
-	 * to instantiate new calls in the state context {@code stateContext}.
-	 * Calls executed by this executor will never be asked to pause by the
-	 * scheduler.
+	 * Returns a new direct call executor with the specified scheduling context factory used
+	 * to instantiate a new scheduling context on each resume.
 	 *
-	 * @param stateContext  the state context to initialise calls in, must not be {@code null}
-	 * @return  a direct call executor that never asks continuations to be paused
+	 * @param schedulingContextFactory  the scheduling context factory, must not be {@code null}
+	 * @return  a direct call executor that uses the specified scheduling context factory
 	 *
-	 * @throws NullPointerException  if {@code stateContext} is {@code null}
+	 * @throws NullPointerException  if {@code schedulingContextFactory} is {@code null}
 	 */
-	public static DirectCallExecutor newExecutor(StateContext stateContext) {
-		return newExecutor(RuntimeCallInitialiser.forState(stateContext));
+	public static DirectCallExecutor newExecutor(SchedulingContextFactory schedulingContextFactory) {
+		return new DirectCallExecutor(schedulingContextFactory);
 	}
 
 	/**
-	 * Returns a new direct call executor that uses the given call initialiser to instantiate
-	 * new calls, and with every {@link #resume(Continuation)} capped at {@code ticksLimit} ticks.
+	 * Returns a new direct call executor that uses that asks each continuation it resumes
+	 * to pause after it has registered {@code ticksLimit} ticks.
 	 *
-	 * @param initialiser  the call initialiser used by the executor, must not be {@code null}
 	 * @param ticksLimit  the tick limit for resumes, must be positive
 	 * @return   a direct call executor that caps resumes at the given tick limit
 	 *
-	 * @throws NullPointerException  if {@code initialiser} is {@code null}
 	 * @throws IllegalArgumentException  if {@code ticksLimit} is not positive
 	 */
-	public static DirectCallExecutor newExecutorWithCpuLimit(CallInitialiser initialiser, int ticksLimit) {
-		return new DirectCallExecutor(initialiser, Check.positive(ticksLimit));
-	}
-
-	/**
-	 * Returns a new direct call executor that uses the runtime call initialiser to instantiate
-	 * new calls in the state context {@code stateContext}, and that limits every
-	 * {@link #resume(Continuation)} to {@code ticksLimit} ticks.
-	 *
-	 * @param stateContext  the state context used to initialise new calls, must not be {@code null}
-	 * @param ticksLimit  the tick limit for resumes, must be positive
-	 * @return   a direct call executor that caps resumes at the given tick limit
-	 *
-	 * @throws NullPointerException  if {@code stateContext} is {@code null}
-	 * @throws IllegalArgumentException  if {@code ticksLimit} is not positive
-	 */
-	public static DirectCallExecutor newExecutorWithCpuLimit(StateContext stateContext, int ticksLimit) {
-		return newExecutorWithCpuLimit(RuntimeCallInitialiser.forState(stateContext), ticksLimit);
+	public static DirectCallExecutor newExecutorWithTickLimit(long ticksLimit) {
+		return newExecutor(SchedulingContexts.upToFactory(ticksLimit));
 	}
 
 	private static class Result implements CallEventHandler {
@@ -207,17 +181,23 @@ public class DirectCallExecutor {
 
 	}
 
-	private SchedulingContext schedulingContext() {
-		return cpuLimit > 0 ? SchedulingContexts.upTo(cpuLimit) : SchedulingContexts.never();
+	/**
+	 * Returns the scheduling context factory used by this executor.
+	 *
+	 * @return  the scheduling context factory used by this executor
+	 */
+	public SchedulingContextFactory schedulingContextFactory() {
+		return schedulingContextFactory;
 	}
 
 	/**
-	 * Calls {@code fn(args...)} in the current thread, returning the call result once
-	 * the call completes.
+	 * Calls {@code fn(args...)} in the current thread in the state context {@code stateContext},
+	 * returning the call result once the call completes.
 	 *
 	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
 	 * be manipulated freely by the caller of this method.</p>
 	 *
+	 * @param stateContext  state context of the call, must not be {@code null}
 	 * @param fn  the call target, may be {@code null}
 	 * @param args  call arguments, must not be {@code null}
 	 * @return  the call result
@@ -226,12 +206,11 @@ public class DirectCallExecutor {
 	 * @throws CallInterruptedException  if the call initiated a pause
 	 * @throws InterruptedException  when the current thread is interrupted while waiting
 	 *                               for an asynchronous operation to be completed
-	 * @throws NullPointerException  if {@code args} is {@code null}
+	 * @throws NullPointerException  if {@code stateContext} or {@code args} is {@code null}
 	 */
-	public Object[] call(Object fn, Object... args)
+	public Object[] call(StateContext stateContext, Object fn, Object... args)
 			throws CallException, CallInterruptedException, InterruptedException {
-
-		return resume(initialiser.newCall(fn, args));
+		return resume(RuntimeCallInitialiser.forState(stateContext).newCall(fn, args));
 	}
 
 	/**
@@ -253,7 +232,7 @@ public class DirectCallExecutor {
 	 */
 	public Object[] resume(Continuation continuation)
 			throws CallException, CallInterruptedException, InterruptedException {
-		return execute(continuation, schedulingContext());
+		return execute(continuation, schedulingContextFactory.newInstance());
 	}
 
 	/**
