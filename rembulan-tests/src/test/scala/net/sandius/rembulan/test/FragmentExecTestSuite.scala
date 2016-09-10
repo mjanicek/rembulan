@@ -208,7 +208,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
               resultValues = callExecutor.resume(continuation)
             }
             catch {
-              case ex: CallInterruptedException => continuation = ex.getContinuation
+              case ex: CallPausedException => continuation = ex.getContinuation
               case ex: CallException => error = ex
             }
           } while (error == null && resultValues == null)

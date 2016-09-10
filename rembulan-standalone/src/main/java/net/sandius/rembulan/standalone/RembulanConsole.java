@@ -26,7 +26,7 @@ import net.sandius.rembulan.compiler.CompilerSettings;
 import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.env.RuntimeEnvironments;
 import net.sandius.rembulan.exec.CallException;
-import net.sandius.rembulan.exec.CallInterruptedException;
+import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.StateContexts;
 import net.sandius.rembulan.lib.impl.DefaultBasicLib;
@@ -134,7 +134,7 @@ public class RembulanConsole {
 		try {
 			return callExecutor.call(state, fn, args);
 		}
-		catch (CallInterruptedException | InterruptedException ex) {
+		catch (CallPausedException | InterruptedException ex) {
 			throw new CallException(ex);
 		}
 	}

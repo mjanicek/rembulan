@@ -22,7 +22,7 @@ import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
 import net.sandius.rembulan.env.RuntimeEnvironments;
 import net.sandius.rembulan.exec.CallException;
-import net.sandius.rembulan.exec.CallInterruptedException;
+import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.StateContexts;
 import net.sandius.rembulan.lib.impl.StandardLibrary;
@@ -33,16 +33,16 @@ import net.sandius.rembulan.runtime.LuaFunction;
 public class HelloWorld {
 
 	public static void main(String[] args)
-			throws InterruptedException, CallInterruptedException, CallException, LoaderException {
+			throws InterruptedException, CallPausedException, CallException, LoaderException {
 
 		String program = "print('hello world!')";
 
 		StateContext state = StateContexts.newDefaultInstance();
-
-		ChunkLoader loader = CompilerChunkLoader.of("hello_world");
 		Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
 
+		ChunkLoader loader = CompilerChunkLoader.of("hello_world");
 		LuaFunction main = loader.loadTextChunk(new Variable(env), "hello", program);
+
 		DirectCallExecutor.newExecutor().call(state, main);
 	}
 

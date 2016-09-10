@@ -22,7 +22,7 @@ import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
 import net.sandius.rembulan.env.RuntimeEnvironments;
 import net.sandius.rembulan.exec.CallException;
-import net.sandius.rembulan.exec.CallInterruptedException;
+import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.StateContexts;
 import net.sandius.rembulan.lib.impl.StandardLibrary;
@@ -33,7 +33,7 @@ import net.sandius.rembulan.runtime.LuaFunction;
 public class InfiniteLoop {
 
 	public static void main(String[] args)
-			throws InterruptedException, CallInterruptedException, CallException, LoaderException {
+			throws InterruptedException, CallException, LoaderException {
 
 		String program = "n = 0; while true do n = n + 1 end";
 
@@ -50,7 +50,7 @@ public class InfiniteLoop {
 			executor.call(state, main);
 			throw new AssertionError();  // never reaches this point
 		}
-		catch (CallInterruptedException ex) {
+		catch (CallPausedException ex) {
 			System.out.println("n = " + env.rawget("n"));
 		}
 

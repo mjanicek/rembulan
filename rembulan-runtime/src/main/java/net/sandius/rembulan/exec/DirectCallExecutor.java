@@ -163,14 +163,14 @@ public class DirectCallExecutor {
 		}
 
 		public Object[] get()
-				throws CallException, CallInterruptedException {
+				throws CallException, CallPausedException {
 
 			if (!wasSet.get()) {
 				throw new IllegalStateException("Call result has not been set");
 			}
 			else {
 				if (values != null) return values;
-				else if (cont != null) throw new CallInterruptedException(cont);
+				else if (cont != null) throw new CallPausedException(cont);
 				else if (error != null) throw new CallException(error);
 				else {
 					// should not happen
@@ -203,13 +203,13 @@ public class DirectCallExecutor {
 	 * @return  the call result
 	 *
 	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallInterruptedException  if the call initiated a pause
+	 * @throws CallPausedException  if the call initiated a pause
 	 * @throws InterruptedException  when the current thread is interrupted while waiting
 	 *                               for an asynchronous operation to be completed
 	 * @throws NullPointerException  if {@code stateContext} or {@code args} is {@code null}
 	 */
 	public Object[] call(StateContext stateContext, Object fn, Object... args)
-			throws CallException, CallInterruptedException, InterruptedException {
+			throws CallException, CallPausedException, InterruptedException {
 		return resume(RuntimeCallInitialiser.forState(stateContext).newCall(fn, args));
 	}
 
@@ -224,14 +224,14 @@ public class DirectCallExecutor {
 	 * @return  the call result
 	 *
 	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallInterruptedException  if the call initiated a pause
+	 * @throws CallPausedException  if the call initiated a pause
 	 * @throws InterruptedException  when the current thread is interrupted while waiting
 	 *                               for an asynchronous operation to be completed
 	 * @throws InvalidContinuationException  when {@code continuation} is invalid
 	 * @throws NullPointerException  if {@code continuation} is {@code null}
 	 */
 	public Object[] resume(Continuation continuation)
-			throws CallException, CallInterruptedException, InterruptedException {
+			throws CallException, CallPausedException, InterruptedException {
 		return execute(continuation, schedulingContextFactory.newInstance());
 	}
 
@@ -247,7 +247,7 @@ public class DirectCallExecutor {
 	 * @return  the call result
 	 *
 	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallInterruptedException  if the call initiated a pause
+	 * @throws CallPausedException  if the call initiated a pause
 	 * @throws InterruptedException  when the current thread is interrupted while waiting
 	 *                               for an asynchronous operation to be completed
 	 * @throws InvalidContinuationException  when {@code continuation} is invalid
@@ -255,7 +255,7 @@ public class DirectCallExecutor {
 	 *                               is {@code null}
 	 */
 	public static Object[] execute(Continuation continuation, SchedulingContext schedulingContext)
-			throws CallException, CallInterruptedException, InterruptedException {
+			throws CallException, CallPausedException, InterruptedException {
 
 		Objects.requireNonNull(continuation);
 		Objects.requireNonNull(schedulingContext);
@@ -299,7 +299,7 @@ public class DirectCallExecutor {
 	 * @return  the call result
 	 *
 	 * @throws CallException  if the call terminated abnormally
-	 * @throws CallInterruptedException  if the call initiated a pause
+	 * @throws CallPausedException  if the call initiated a pause
 	 * @throws InterruptedException  when the current thread is interrupted while waiting
 	 *                               for an asynchronous operation to be completed
 	 * @throws InvalidContinuationException  when {@code continuation} is invalid
@@ -307,7 +307,7 @@ public class DirectCallExecutor {
 	 *                               is {@code null}
 	 */
 	public static Object[] execute(Continuation continuation)
-			throws CallException, CallInterruptedException, InterruptedException {
+			throws CallException, CallPausedException, InterruptedException {
 		return execute(continuation, SchedulingContexts.neverPause());
 	}
 

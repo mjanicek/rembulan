@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.exec;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 /**
  * An exception thrown by a call executor when a call is paused. The continuation
@@ -24,13 +24,23 @@ import net.sandius.rembulan.util.Check;
  *
  * <p>For performance reasons, instances of this class do not contain a stack trace.</p>
  */
-public class CallInterruptedException extends Exception {
+public class CallPausedException extends Exception {
 
 	private final Continuation continuation;
 
-	CallInterruptedException(Continuation continuation) {
-		super("Call interrupted", null, true, false);
-		this.continuation = Check.notNull(continuation);
+	/**
+	 * Constructs a new instance of {@code CallPausedException} with the specified
+	 * continuation.
+	 *
+	 * <p>For performance reasons, the exception does not have a writable stack trace.</p>
+	 *
+	 * @param continuation  the continuation of the paused call, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code continuation} is {@code null}
+	 */
+	public CallPausedException(Continuation continuation) {
+		super("Call paused", null, true, false);
+		this.continuation = Objects.requireNonNull(continuation);
 	}
 
 	/**
