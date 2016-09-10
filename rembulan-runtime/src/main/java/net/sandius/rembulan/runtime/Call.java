@@ -21,6 +21,7 @@ import net.sandius.rembulan.exec.CallEventHandler;
 import net.sandius.rembulan.exec.Continuation;
 import net.sandius.rembulan.exec.InvalidContinuationException;
 import net.sandius.rembulan.exec.OneShotContinuation;
+import net.sandius.rembulan.impl.AbstractStateContext;
 import net.sandius.rembulan.impl.ReturnBuffers;
 import net.sandius.rembulan.util.Cons;
 

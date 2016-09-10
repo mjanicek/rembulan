@@ -14,24 +14,48 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.runtime;
+package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.MetatableAccessor;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 
-abstract class AbstractStateContext implements StateContext {
+import java.util.Objects;
+
+/**
+ * An abstract implementation of a state context that delegates state context methods
+ * to an underlying table factory and metatable accessor.
+ */
+public abstract class AbstractStateContext implements StateContext {
 
 	private final TableFactory tableFactory;
 	private final MetatableAccessor metatableAccessor;
 
-	AbstractStateContext(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
-		this.tableFactory = tableFactory;
-		this.metatableAccessor = metatableAccessor;
+	/**
+	 * Constructs a new {@code AbstractStateContext} with the specified table factory
+	 * and metatable accessor.
+	 *
+	 * @param tableFactory  the table factory, must not be {@code null}
+	 * @param metatableAccessor  the metatable accessor, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code tableFactory} or {@code metatableAccessor}
+	 *                               is {@code null}
+	 */
+	protected AbstractStateContext(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
+		this.tableFactory = Objects.requireNonNull(tableFactory);
+		this.metatableAccessor = Objects.requireNonNull(metatableAccessor);
 	}
 
-	AbstractStateContext(StateContext stateContext) {
+	/**
+	 * Constructs a new {@code AbstractStateContext} that delegates to the specified
+	 * state context {@code stateContext}.
+	 *
+	 * @param stateContext  the state context, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code stateContext} is {@code null}
+	 */
+	protected AbstractStateContext(StateContext stateContext) {
 		this(stateContext, stateContext);
 	}
 

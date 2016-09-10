@@ -14,24 +14,19 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.runtime;
+package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.MetatableAccessor;
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.exec.CallInitialiser;
-import net.sandius.rembulan.exec.OneShotContinuation;
-import net.sandius.rembulan.impl.DefaultTable;
 
 /**
- * Default implementation of a state context that is also a call initialiser.
- *
- * <p>To create new instances, use the static methods {@link #newDefaultInstance()}
- * and {@link #newInstance(TableFactory, MetatableAccessor)}.</p>
+ * Common implementations of state contexts.
  */
-public class LuaState extends AbstractStateContext implements CallInitialiser {
+public final class StateContexts {
 
-	LuaState(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
-		super(tableFactory, metatableAccessor);
+	private StateContexts() {
+		// not to be instantiated
 	}
 
 	/**
@@ -46,8 +41,8 @@ public class LuaState extends AbstractStateContext implements CallInitialiser {
 	 * @throws NullPointerException  if {@code tableFactory} or {@code metatableAccessor}
 	 *                               is {@code null}
 	 */
-	public static LuaState newInstance(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
-		return new LuaState(tableFactory, metatableAccessor);
+	public static StateContext newInstance(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
+		return new DefaultStateContext(tableFactory, metatableAccessor);
 	}
 
 	/**
@@ -56,13 +51,8 @@ public class LuaState extends AbstractStateContext implements CallInitialiser {
 	 *
 	 * @return  a new default instance
 	 */
-	public static LuaState newDefaultInstance() {
-		return new LuaState(DefaultTable.factory(), new DefaultMetatableAccessor());
-	}
-
-	@Override
-	public OneShotContinuation newCall(Object fn, Object... args) {
-		return Call.init(this, fn, args).getCurrentContinuation();
+	public static StateContext newDefaultInstance() {
+		return newInstance(DefaultTable.factory(), new DefaultMetatableAccessor());
 	}
 
 }

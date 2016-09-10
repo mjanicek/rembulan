@@ -21,10 +21,11 @@ import java.io.PrintStream
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.exec._
+import net.sandius.rembulan.impl.StateContexts
 import net.sandius.rembulan.lib.Lib
 import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
-import net.sandius.rembulan.runtime.LuaState
+import net.sandius.rembulan.runtime.RuntimeCallInitialiser
 import net.sandius.rembulan.test.FragmentExpectations.Env
 import net.sandius.rembulan.test.Util.BufferPrinter
 import net.sandius.rembulan.{Conversions, StateContext, Table, Variable}
@@ -183,7 +184,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
             val ldr = l.loader()
 
-            val state = LuaState.newDefaultInstance()
+            val state = StateContexts.newDefaultInstance()
 
             val env = envForContext(state, ctx, ldr)
             val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)
@@ -195,10 +196,11 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
           val before = System.nanoTime()
 
-          val callExecutor = DirectCallExecutor.newExecutorWithCpuLimit(state, s)
+          val callInitialiser = RuntimeCallInitialiser.forState(state)
+          val callExecutor = DirectCallExecutor.newExecutorWithCpuLimit(callInitialiser, s)
 
           var resultValues: Array[AnyRef] = null
-          var continuation: Continuation = state.newCall(func)
+          var continuation: Continuation = callInitialiser.newCall(func)
           var error: CallException = null
 
           do {

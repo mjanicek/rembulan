@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.runtime;
+package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.LuaObject;
 import net.sandius.rembulan.LuaType;

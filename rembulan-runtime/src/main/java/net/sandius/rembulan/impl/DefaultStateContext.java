@@ -14,22 +14,15 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.examples
+package net.sandius.rembulan.impl;
 
-import net.sandius.rembulan.exec.DirectCallExecutor
-import net.sandius.rembulan.impl.StateContexts
+import net.sandius.rembulan.MetatableAccessor;
+import net.sandius.rembulan.TableFactory;
 
-object AsyncRunner {
+class DefaultStateContext extends AbstractStateContext {
 
-  def main(args: Array[String]): Unit = {
-
-    val state = StateContexts.newDefaultInstance()
-    val executor = DirectCallExecutor.newExecutor(state)
-
-    System.out.println("Calling...")
-    val result = executor.call(new AsyncExample, java.lang.Long.valueOf(1000))
-    System.out.println(result.mkString("Returned: [", ", ", "]"))
-
-  }
+	protected DefaultStateContext(TableFactory tableFactory, MetatableAccessor metatableAccessor) {
+		super(tableFactory, metatableAccessor);
+	}
 
 }

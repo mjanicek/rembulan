@@ -16,8 +16,10 @@
 
 package net.sandius.rembulan.exec;
 
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.impl.SchedulingContexts;
 import net.sandius.rembulan.runtime.AsyncTask;
+import net.sandius.rembulan.runtime.RuntimeCallInitialiser;
 import net.sandius.rembulan.runtime.SchedulingContext;
 import net.sandius.rembulan.util.Check;
 
@@ -30,6 +32,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * calls in the current thread.
  */
 public class DirectCallExecutor {
+
+	// Note: this API does not feel right: it conflates the instantiation of new calls
+	// with the execution of arbitrary continuations, and does not offer a sufficiently
+	// fine-grained control of scheduling contexts
 
 	private final CallInitialiser initialiser;
 	private final int cpuLimit;
@@ -54,6 +60,21 @@ public class DirectCallExecutor {
 	}
 
 	/**
+	 * Returns a new direct call executor that uses the runtime call initialiser
+	 * to instantiate new calls in the state context {@code stateContext}.
+	 * Calls executed by this executor will never be asked to pause by the
+	 * scheduler.
+	 *
+	 * @param stateContext  the state context to initialise calls in, must not be {@code null}
+	 * @return  a direct call executor that never asks continuations to be paused
+	 *
+	 * @throws NullPointerException  if {@code stateContext} is {@code null}
+	 */
+	public static DirectCallExecutor newExecutor(StateContext stateContext) {
+		return newExecutor(RuntimeCallInitialiser.forState(stateContext));
+	}
+
+	/**
 	 * Returns a new direct call executor that uses the given call initialiser to instantiate
 	 * new calls, and with every {@link #resume(Continuation)} capped at {@code ticksLimit} ticks.
 	 *
@@ -66,6 +87,22 @@ public class DirectCallExecutor {
 	 */
 	public static DirectCallExecutor newExecutorWithCpuLimit(CallInitialiser initialiser, int ticksLimit) {
 		return new DirectCallExecutor(initialiser, Check.positive(ticksLimit));
+	}
+
+	/**
+	 * Returns a new direct call executor that uses the runtime call initialiser to instantiate
+	 * new calls in the state context {@code stateContext}, and that limits every
+	 * {@link #resume(Continuation)} to {@code ticksLimit} ticks.
+	 *
+	 * @param stateContext  the state context used to initialise new calls, must not be {@code null}
+	 * @param ticksLimit  the tick limit for resumes, must be positive
+	 * @return   a direct call executor that caps resumes at the given tick limit
+	 *
+	 * @throws NullPointerException  if {@code stateContext} is {@code null}
+	 * @throws IllegalArgumentException  if {@code ticksLimit} is not positive
+	 */
+	public static DirectCallExecutor newExecutorWithCpuLimit(StateContext stateContext, int ticksLimit) {
+		return newExecutorWithCpuLimit(RuntimeCallInitialiser.forState(stateContext), ticksLimit);
 	}
 
 	private static class Result implements CallEventHandler {

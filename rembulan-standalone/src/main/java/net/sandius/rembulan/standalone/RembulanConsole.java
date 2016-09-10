@@ -18,6 +18,7 @@ package net.sandius.rembulan.standalone;
 
 import jline.console.ConsoleReader;
 import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
@@ -27,11 +28,11 @@ import net.sandius.rembulan.env.RuntimeEnvironments;
 import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallInterruptedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
+import net.sandius.rembulan.impl.StateContexts;
 import net.sandius.rembulan.lib.impl.DefaultBasicLib;
 import net.sandius.rembulan.lib.impl.StandardLibrary;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.LuaFunction;
-import net.sandius.rembulan.runtime.LuaState;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
@@ -84,7 +85,7 @@ public class RembulanConsole {
 				.defaultSettings()
 				.withCPUAccountingMode(cpuAccountingMode);
 
-		LuaState state = LuaState.newDefaultInstance();
+		StateContext state = StateContexts.newDefaultInstance();
 		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
 		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.system(in, out, err);
 		this.env = StandardLibrary.in(runtimeEnv)
