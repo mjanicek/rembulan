@@ -71,6 +71,17 @@ abstract class Constants {
 	public static final String ENV_FULL_TRACEBACK = "REMBULAN_FULL_TRACEBACK";
 
 	/**
+	 * Name of the environment variable controlling the CPU accounting mode used for
+	 * compiling Lua functions.
+	 *
+	 * <p>When the variable is defined, CPU accounting mode will be set to
+	 * {@link net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode#IN_EVERY_BASIC_BLOCK};
+	 * otherwise, it will be set to
+	 * {@link net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode#NO_CPU_ACCOUNTING}.</p>
+	 */
+	public static final String ENV_CPU_ACCOUNTING = "REMBULAN_CPU_ACCOUNTING";
+
+	/**
 	 * File name used for chunks read from the standard input.
 	 */
 	public static final String SOURCE_STDIN = "stdin";

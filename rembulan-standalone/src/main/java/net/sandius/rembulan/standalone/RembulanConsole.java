@@ -21,6 +21,7 @@ import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
+import net.sandius.rembulan.compiler.CompilerSettings;
 import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallInterruptedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
@@ -73,8 +74,16 @@ public class RembulanConsole {
 		this.out = Check.notNull(out);
 		this.err = Check.notNull(err);
 
+		CompilerSettings.CPUAccountingMode cpuAccountingMode =
+				System.getenv(Constants.ENV_CPU_ACCOUNTING) != null
+				? CompilerSettings.CPUAccountingMode.IN_EVERY_BASIC_BLOCK
+				: CompilerSettings.CPUAccountingMode.NO_CPU_ACCOUNTING;
+		CompilerSettings compilerSettings = CompilerSettings
+				.defaultSettings()
+				.withCPUAccountingMode(cpuAccountingMode);
+
 		DefaultLuaState state = new DefaultLuaState();
-		this.loader = CompilerChunkLoader.of("rembulan_repl_");
+		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
 		this.env = StdLibConfig.getDefault()
 				.withLoader(loader)
 				.withIoStreams(in, out, err)
