@@ -22,6 +22,8 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerChunkLoader;
 import net.sandius.rembulan.compiler.CompilerSettings;
+import net.sandius.rembulan.env.RuntimeEnvironment;
+import net.sandius.rembulan.env.RuntimeEnvironments;
 import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallInterruptedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
@@ -84,9 +86,9 @@ public class RembulanConsole {
 
 		DefaultLuaState state = new DefaultLuaState();
 		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
-		this.env = StdLibConfig.getDefault()
+		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.systemRuntimeEnvironment(in, out, err);
+		this.env = StdLibConfig.of(runtimeEnv)
 				.withLoader(loader)
-				.withIoStreams(in, out, err)
 				.setDebug(true)
 				.installInto(state);
 

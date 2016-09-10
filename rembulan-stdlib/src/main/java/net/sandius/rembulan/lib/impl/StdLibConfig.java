@@ -18,6 +18,7 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
+import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.load.ChunkLoader;
 
@@ -25,7 +26,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.util.Objects;
 
 /**
@@ -37,40 +37,39 @@ import java.util.Objects;
  */
 public class StdLibConfig {
 
-	private final InputStream in;
-	private final OutputStream out;
-	private final OutputStream err;
-	private final FileSystem fileSystem;
+	private final RuntimeEnvironment environment;
 
 	private final ChunkLoader loader;
-
 	private final boolean withDebug;
 
-	private StdLibConfig(
-			InputStream in, OutputStream out, OutputStream err, FileSystem fileSystem,
+	private StdLibConfig(RuntimeEnvironment environment,
 			ChunkLoader loader, boolean withDebug) {
 
-		this.in = in;
-		this.out = out;
-		this.err = err;
-		this.fileSystem = fileSystem;
+		this.environment = Objects.requireNonNull(environment);
 		this.loader = loader;
 		this.withDebug = withDebug;
 	}
 
-	private StdLibConfig() {
-		this(System.in, System.out, System.err, FileSystems.getDefault(), null, false);
+	private StdLibConfig(RuntimeEnvironment environment) {
+		this(environment, null, false);
 	}
 
 	/**
-	 * Returns the default configuration. The default configuration does not include the
-	 * Debug library, its I/O library operates on the system's defaults, and it has no
-	 * chunk loader.
+	 * Returns a default configuration for the specified environment.
+	 * The default configuration does not include the Debug library and has no chunk loader.
 	 *
+	 * <p>If any of the standard streams defined by the runtime environment is {@code null},
+	 * the corresponding file in the I/O library (such as {@code io.stdin}) will be undefined.
+	 * Additionally, if {@code out} is {@code null}, then the global function {@code print}
+	 * will be undefined.</p>
+	 *
+	 * @param environment  the runtime environment, must not be {@code null}
 	 * @return  the default configuration
+	 *
+	 * @throws NullPointerException  if {@code environment} is {@code null}
 	 */
-	public static StdLibConfig getDefault() {
-		return new StdLibConfig();
+	public static StdLibConfig of(RuntimeEnvironment environment) {
+		return new StdLibConfig(environment);
 	}
 
 	/**
@@ -82,23 +81,7 @@ public class StdLibConfig {
 	 * @return  a configuration that uses {@code loader} as its chunk loader
 	 */
 	public StdLibConfig withLoader(ChunkLoader loader) {
-		return new StdLibConfig(in, out, err, fileSystem, loader, withDebug);
-	}
-
-	/**
-	 * Returns a configuration that differs from this configuration in that
-	 * it uses the specified I/O streams in the I/O library. If any of the streams
-	 * is {@code null}, the corresponding file in the I/O library (such as {@code io.stdin})
-	 * will be undefined. Additionally, if {@code out} is {@code null}, then the
-	 * global function {@code print} will be undefined.
-	 *
-	 * @param in  the standard input stream, may be {@code null}
-	 * @param out  the standard output stream, may be {@code null}
-	 * @param err  the standard error stream, may be {@code null}
-	 * @return  a configuration that uses the specified streams for its I/O
-	 */
-	public StdLibConfig withIoStreams(InputStream in, OutputStream out, OutputStream err) {
-		return new StdLibConfig(in, out, err, fileSystem, loader, withDebug);
+		return new StdLibConfig(environment, loader, withDebug);
 	}
 
 	/**
@@ -111,7 +94,7 @@ public class StdLibConfig {
 	 */
 	public StdLibConfig setDebug(boolean withDebug) {
 		return this.withDebug != withDebug
-				? new StdLibConfig(in, out, err, fileSystem, loader, withDebug)
+				? new StdLibConfig(environment, loader, withDebug)
 				: this;
 	}
 
@@ -128,6 +111,12 @@ public class StdLibConfig {
 	public Table installInto(StateContext state) {
 		Objects.requireNonNull(state);
 		Table env = state.newTable();
+
+		InputStream in = environment.standardInput();
+		OutputStream out = environment.standardOutput();
+		OutputStream err = environment.standardError();
+		FileSystem fileSystem = environment.fileSystem();
+
 		new DefaultBasicLib(out != null ? new PrintStream(out) : null, loader, env).installInto(state, env);
 		ModuleLib moduleLib = new DefaultModuleLib(state, env);
 		moduleLib.installInto(state, env);
