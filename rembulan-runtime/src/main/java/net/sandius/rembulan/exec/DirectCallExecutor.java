@@ -41,7 +41,7 @@ public class DirectCallExecutor {
 	}
 
 	private static final DirectCallExecutor NEVER_PAUSING_EXECUTOR
-			= new DirectCallExecutor(SchedulingContexts.neverFactory());
+			= new DirectCallExecutor(SchedulingContexts.neverPauseFactory());
 
 	/**
 	 * Returns a new direct call executor with a scheduler that never requests executions
@@ -76,7 +76,7 @@ public class DirectCallExecutor {
 	 * @throws IllegalArgumentException  if {@code ticksLimit} is not positive
 	 */
 	public static DirectCallExecutor newExecutorWithTickLimit(long ticksLimit) {
-		return newExecutor(SchedulingContexts.upToFactory(ticksLimit));
+		return newExecutor(SchedulingContexts.countDownContextFactory(ticksLimit));
 	}
 
 	private static class Result implements CallEventHandler {
@@ -308,7 +308,7 @@ public class DirectCallExecutor {
 	 */
 	public static Object[] execute(Continuation continuation)
 			throws CallException, CallInterruptedException, InterruptedException {
-		return execute(continuation, SchedulingContexts.never());
+		return execute(continuation, SchedulingContexts.neverPause());
 	}
 
 }

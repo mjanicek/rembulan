@@ -29,8 +29,8 @@ public final class SchedulingContexts {
 		// not to be instantiated
 	}
 
-	private static final SchedulingContext NEVER_INSTANCE = new Never();
-	private static final SchedulingContext ALWAYS_INSTANCE = new Always();
+	private static final SchedulingContext NEVER_INSTANCE = new NeverPausingSchedulingContext();
+	private static final SchedulingContext ALWAYS_INSTANCE = new AlwaysPausingSchedulingContext();
 
 	/**
 	 * Returns a scheduling context that always returns {@code false} from
@@ -39,7 +39,7 @@ public final class SchedulingContexts {
 	 *
 	 * @return  a scheduling context that never indicates that the caller should yield
 	 */
-	public static SchedulingContext never() {
+	public static SchedulingContext neverPause() {
 		return NEVER_INSTANCE;
 	}
 
@@ -50,7 +50,7 @@ public final class SchedulingContexts {
 	 *
 	 * @return  a scheduling context that always indicates that the caller should yield
 	 */
-	public static SchedulingContext always() {
+	public static SchedulingContext alwaysPause() {
 		return ALWAYS_INSTANCE;
 	}
 
@@ -69,11 +69,11 @@ public final class SchedulingContexts {
 	 *
 	 * @throws IllegalArgumentException  when {@code max} is negative
 	 */
-	public static SchedulingContext upTo(long max) {
-		return new UpTo(max);
+	public static SchedulingContext newCountDownContext(long max) {
+		return new CountDownSchedulingContext(max);
 	}
 
-	private static class Never implements SchedulingContext {
+	private static class NeverPausingSchedulingContext implements SchedulingContext {
 
 		@Override
 		public void registerTicks(int ticks) {
@@ -87,7 +87,7 @@ public final class SchedulingContexts {
 
 	}
 
-	private static class Always implements SchedulingContext {
+	private static class AlwaysPausingSchedulingContext implements SchedulingContext {
 
 		@Override
 		public void registerTicks(int ticks) {
@@ -101,11 +101,11 @@ public final class SchedulingContexts {
 
 	}
 
-	private static class UpTo implements SchedulingContext {
+	private static class CountDownSchedulingContext implements SchedulingContext {
 
 		private long allowance;
 
-		public UpTo(long max) {
+		public CountDownSchedulingContext(long max) {
 			Check.nonNegative(max);
 			this.allowance = max;
 		}
@@ -125,37 +125,37 @@ public final class SchedulingContexts {
 	private static final SchedulingContextFactory NEVER_FACTORY = new SchedulingContextFactory() {
 		@Override
 		public SchedulingContext newInstance() {
-			return never();
+			return neverPause();
 		}
 	};
 
 	private static final SchedulingContextFactory ALWAYS_FACTORY = new SchedulingContextFactory() {
 		@Override
 		public SchedulingContext newInstance() {
-			return always();
+			return alwaysPause();
 		}
 	};
 
 	/**
-	 * Returns a scheduling context factory that always returns {@link #never()}.
+	 * Returns a scheduling context factory that always returns {@link #neverPause()}.
 	 *
 	 * @return  a scheduling context factory for never-pausing scheduling contexts
 	 */
-	public static SchedulingContextFactory neverFactory() {
+	public static SchedulingContextFactory neverPauseFactory() {
 		return NEVER_FACTORY;
 	}
 
 	/**
-	 * Returns a scheduling context factory that always returns {@link #always()}.
+	 * Returns a scheduling context factory that always returns {@link #alwaysPause()}.
 	 *
 	 * @return  a scheduling context factory for always-pausing scheduling contexts
 	 */
-	public static SchedulingContextFactory alwaysFactory() {
+	public static SchedulingContextFactory alwaysPauseFactory() {
 		return ALWAYS_FACTORY;
 	}
 
 	/**
-	 * Returns a scheduling context factory that always returns {@link #upTo(long)}
+	 * Returns a scheduling context factory that always returns {@link #newCountDownContext(long)}
 	 * with the argument {@code max}.
 	 *
 	 * @param max  the initial counter value, must be non-negative
@@ -163,12 +163,12 @@ public final class SchedulingContexts {
 	 *
 	 * @throws IllegalArgumentException  when {@code max} is negative
 	 */
-	public static SchedulingContextFactory upToFactory(final long max) {
+	public static SchedulingContextFactory countDownContextFactory(final long max) {
 		Check.nonNegative(max);
 		return new SchedulingContextFactory() {
 			@Override
 			public SchedulingContext newInstance() {
-				return upTo(max);
+				return newCountDownContext(max);
 			}
 		};
 	}
