@@ -44,7 +44,7 @@ public class TailCall {
 				Dispatch.add(context, arg2, arg3);
 			}
 			catch (UnresolvedControlThrowable ct) {
-				ct.resolve(this, arg1);
+				throw ct.resolve(this, arg1);
 			}
 
 			resume(context, arg1);
