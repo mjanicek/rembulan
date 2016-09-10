@@ -84,7 +84,7 @@ public class RembulanConsole {
 				.defaultSettings()
 				.withCPUAccountingMode(cpuAccountingMode);
 
-		LuaState state = new LuaState();
+		LuaState state = LuaState.newDefaultInstance();
 		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
 		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.system(in, out, err);
 		this.env = StandardLibrary.in(runtimeEnv)

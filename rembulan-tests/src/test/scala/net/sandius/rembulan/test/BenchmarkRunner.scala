@@ -120,7 +120,7 @@ object BenchmarkRunner {
 
     val ldr = CompilerChunkLoader.of(new ChunkClassLoader(), settings, "benchmark_")
 
-    val state = new LuaState()
+    val state = LuaState.newDefaultInstance()
 
     val env = initEnv(state, ldr, args)
 

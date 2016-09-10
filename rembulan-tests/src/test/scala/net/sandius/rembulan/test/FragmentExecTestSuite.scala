@@ -183,7 +183,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
             val ldr = l.loader()
 
-            val state = new LuaState()
+            val state = LuaState.newDefaultInstance()
 
             val env = envForContext(state, ctx, ldr)
             val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)

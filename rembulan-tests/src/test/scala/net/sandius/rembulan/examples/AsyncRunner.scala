@@ -23,7 +23,7 @@ object AsyncRunner {
 
   def main(args: Array[String]): Unit = {
 
-    val state = new LuaState()
+    val state = LuaState.newDefaultInstance()
     val executor = DirectCallExecutor.newExecutor(state)
 
     System.out.println("Calling...")
