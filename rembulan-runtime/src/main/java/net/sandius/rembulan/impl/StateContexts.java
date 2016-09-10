@@ -21,7 +21,7 @@ import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.TableFactory;
 
 /**
- * Common implementations of state contexts.
+ * Static factories for state contexts.
  */
 public final class StateContexts {
 
@@ -30,7 +30,7 @@ public final class StateContexts {
 	}
 
 	/**
-	 * Returns a new {@code LuaState} with the specified table factory {@code tableFactory}
+	 * Returns a new state context with the specified table factory {@code tableFactory}
 	 * and the metatable accessor {@code metatableAccessor}.
 	 *
 	 * @param tableFactory  table factory to be used by this state, must not be {@code null}
@@ -46,7 +46,7 @@ public final class StateContexts {
 	}
 
 	/**
-	 * Returns a new {@code LuaState} with the default table factory and the default (empty)
+	 * Returns a new state context with the default table factory and the default (empty)
 	 * metatable accessor.
 	 *
 	 * @return  a new default instance
