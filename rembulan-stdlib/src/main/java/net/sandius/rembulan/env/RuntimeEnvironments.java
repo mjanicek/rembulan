@@ -36,7 +36,7 @@ public final class RuntimeEnvironments {
 	 *
 	 * @return  the system runtime environment
 	 */
-	public static RuntimeEnvironment systemRuntimeEnvironment() {
+	public static RuntimeEnvironment system() {
 		return SystemRuntimeEnvironment.getInstance();
 	}
 
@@ -49,7 +49,7 @@ public final class RuntimeEnvironments {
 	 * @param err  the standard error stream, may be {@code null}
 	 * @return  a system runtime environment that uses the specified streams for its I/O
 	 */
-	public static RuntimeEnvironment systemRuntimeEnvironment(InputStream in, OutputStream out, OutputStream err) {
+	public static RuntimeEnvironment system(InputStream in, OutputStream out, OutputStream err) {
 		return new SystemRuntimeEnvironment(in, out, err);
 	}
 

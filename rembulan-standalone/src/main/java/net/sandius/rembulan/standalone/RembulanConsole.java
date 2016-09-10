@@ -86,7 +86,7 @@ public class RembulanConsole {
 
 		DefaultLuaState state = new DefaultLuaState();
 		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
-		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.systemRuntimeEnvironment(in, out, err);
+		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.system(in, out, err);
 		this.env = StandardLibrary.in(runtimeEnv)
 				.withLoader(loader)
 				.withDebug(true)
