@@ -59,7 +59,7 @@ public class DirectCallExecutor {
 	 *
 	 * @param initialiser  the call initialiser used by the executor, must not be {@code null}
 	 * @param ticksLimit  the tick limit for resumes, must be positive
-	 * @return
+	 * @return   a direct call executor that caps resumes at the given tick limit
 	 *
 	 * @throws NullPointerException  if {@code initialiser} is {@code null}
 	 * @throws IllegalArgumentException  if {@code ticksLimit} is not positive
