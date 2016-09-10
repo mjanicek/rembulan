@@ -35,6 +35,7 @@ public final class Check {
 	 *
 	 * @throws IllegalArgumentException  if {@code o} is {@code null}
 	 */
+	@Deprecated
 	public static <T> T notNull(T o) {
 		if (o == null) {
 			throw new IllegalArgumentException("argument is null");
@@ -49,6 +50,7 @@ public final class Check {
 	 *
 	 * @throws IllegalArgumentException  if {@code o} is not {@code null}
 	 */
+	@Deprecated
 	public static void isNull(Object o) {
 		if (o != null) {
 			throw new IllegalArgumentException("argument is not null: " + o);
