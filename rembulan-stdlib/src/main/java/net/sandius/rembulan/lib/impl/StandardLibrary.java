@@ -35,22 +35,22 @@ import java.util.Objects;
  * the configuration, and the {@link #installInto(StateContext)} method for installing
  * the standard library with the specified configuration into a Lua state.</p>
  */
-public class StdLibConfig {
+public class StandardLibrary {
 
 	private final RuntimeEnvironment environment;
 
 	private final ChunkLoader loader;
 	private final boolean withDebug;
 
-	private StdLibConfig(RuntimeEnvironment environment,
-			ChunkLoader loader, boolean withDebug) {
+	private StandardLibrary(RuntimeEnvironment environment,
+							ChunkLoader loader, boolean withDebug) {
 
 		this.environment = Objects.requireNonNull(environment);
 		this.loader = loader;
 		this.withDebug = withDebug;
 	}
 
-	private StdLibConfig(RuntimeEnvironment environment) {
+	private StandardLibrary(RuntimeEnvironment environment) {
 		this(environment, null, false);
 	}
 
@@ -68,8 +68,8 @@ public class StdLibConfig {
 	 *
 	 * @throws NullPointerException  if {@code environment} is {@code null}
 	 */
-	public static StdLibConfig of(RuntimeEnvironment environment) {
-		return new StdLibConfig(environment);
+	public static StandardLibrary in(RuntimeEnvironment environment) {
+		return new StandardLibrary(environment);
 	}
 
 	/**
@@ -80,27 +80,29 @@ public class StdLibConfig {
 	 * @param loader  the chunk loader, may be {@code null}
 	 * @return  a configuration that uses {@code loader} as its chunk loader
 	 */
-	public StdLibConfig withLoader(ChunkLoader loader) {
-		return new StdLibConfig(environment, loader, withDebug);
+	public StandardLibrary withLoader(ChunkLoader loader) {
+		return new StandardLibrary(environment, loader, withDebug);
 	}
 
 	/**
-	 * Returns a configuration that includes the Debug library iff {@code withDebug}
+	 * Returns a configuration that includes the Debug library iff {@code hasDebug}
 	 * is {@code true}.
 	 *
-	 * @param withDebug  boolean flag indicating whether to include the Debug library
-	 * @return  a configuration that includes the Debug library iff {@code withDebug} is
+	 * @param hasDebug  boolean flag indicating whether to include the Debug library
+	 * @return  a configuration that includes the Debug library iff {@code hasDebug} is
 	 *          {@code true}
 	 */
-	public StdLibConfig setDebug(boolean withDebug) {
-		return this.withDebug != withDebug
-				? new StdLibConfig(environment, loader, withDebug)
+	public StandardLibrary withDebug(boolean hasDebug) {
+		return this.withDebug != hasDebug
+				? new StandardLibrary(environment, loader, hasDebug)
 				: this;
 	}
 
 	/**
 	 * Installs the standard library into {@code state}, returning a new table suitable
 	 * for use as the global upvalue.
+	 *
+	 * <p>The returned table is instantiated using the table factory provided by {@code state}.</p>
 	 *
 	 * @param state  the Lua state context to install into, must not be {@code null}
 	 * @return  a new table containing the standard library

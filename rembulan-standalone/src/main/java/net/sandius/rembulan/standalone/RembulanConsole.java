@@ -28,7 +28,7 @@ import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallInterruptedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.lib.impl.DefaultBasicLib;
-import net.sandius.rembulan.lib.impl.StdLibConfig;
+import net.sandius.rembulan.lib.impl.StandardLibrary;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.DefaultLuaState;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -87,9 +87,9 @@ public class RembulanConsole {
 		DefaultLuaState state = new DefaultLuaState();
 		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
 		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.systemRuntimeEnvironment(in, out, err);
-		this.env = StdLibConfig.of(runtimeEnv)
+		this.env = StandardLibrary.in(runtimeEnv)
 				.withLoader(loader)
-				.setDebug(true)
+				.withDebug(true)
 				.installInto(state);
 
 		this.callExecutor = DirectCallExecutor.newExecutor(state);
