@@ -55,4 +55,15 @@ public interface RuntimeEnvironment {
 	 */
 	FileSystem fileSystem();
 
+	/**
+	 * Returns the value of the environment variable {@code name}, or {@code null} when
+	 * {@code name} is not defined.
+	 *
+	 * @param name  the name of the environment variable, must not be {@code null}
+	 * @return  the value of the environment variable {@code name} (possibly {@code null})
+	 *
+	 * @throws NullPointerException  if {@code name} is {@code null}
+	 */
+	String getEnv(String name);
+
 }

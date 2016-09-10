@@ -145,7 +145,7 @@ Statuses:
 | `os.difftime` | ![not implemented](not-implemented.png) | |
 | `os.execute` | ![not implemented](not-implemented.png) | |
 | `os.exit` | ![not implemented](not-implemented.png) | |
-| `os.getenv` | ![not implemented](not-implemented.png) | |
+| `os.getenv` | ![complete](complete.png) | |
 | `os.remove` | ![not implemented](not-implemented.png) | |
 | `os.rename` | ![not implemented](not-implemented.png) | |
 | `os.setlocale` | ![not implemented](not-implemented.png) | |

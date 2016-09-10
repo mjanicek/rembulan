@@ -60,4 +60,9 @@ class SystemRuntimeEnvironment implements RuntimeEnvironment {
 		return FileSystems.getDefault();
 	}
 
+	@Override
+	public String getEnv(String name) {
+		return System.getenv(name);
+	}
+
 }

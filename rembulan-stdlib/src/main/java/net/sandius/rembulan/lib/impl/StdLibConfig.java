@@ -125,7 +125,7 @@ public class StdLibConfig {
 		moduleLib.install(new DefaultMathLib());
 		moduleLib.install(new DefaultTableLib());
 		moduleLib.install(new DefaultIoLib(state, fileSystem, in, out, err));
-		moduleLib.install(new DefaultOsLib());
+		moduleLib.install(new DefaultOsLib(environment));
 		moduleLib.install(new DefaultUtf8Lib());
 		moduleLib.install(new DefaultDebugLib());
 		return env;
