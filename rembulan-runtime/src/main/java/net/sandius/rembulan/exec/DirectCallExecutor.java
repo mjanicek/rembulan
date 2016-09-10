@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class DirectCallExecutor {
 
-	// Note: this API does not feel right: it conflates the instantiation of new calls
+	// Note: the non-static API does not feel right: it conflates the instantiation of new calls
 	// with the execution of arbitrary continuations, and does not offer a sufficiently
 	// fine-grained control of scheduling contexts
 
@@ -207,7 +207,7 @@ public class DirectCallExecutor {
 
 	}
 
-	private SchedulingContext preemptionContext() {
+	private SchedulingContext schedulingContext() {
 		return cpuLimit > 0 ? SchedulingContexts.upTo(cpuLimit) : SchedulingContexts.never();
 	}
 
@@ -236,7 +236,7 @@ public class DirectCallExecutor {
 
 	/**
 	 * Resumes {@code continuation} in the current thread, returning the call result once
-	 * the call is completes.
+	 * the call completes.
 	 *
 	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
 	 * be manipulated freely by the caller of this method.</p>
@@ -249,16 +249,41 @@ public class DirectCallExecutor {
 	 * @throws InterruptedException  when the current thread is interrupted while waiting
 	 *                               for an asynchronous operation to be completed
 	 * @throws InvalidContinuationException  when {@code continuation} is invalid
-	 * @throws NullPointerException  if {@code args} is {@code null}
+	 * @throws NullPointerException  if {@code continuation} is {@code null}
 	 */
 	public Object[] resume(Continuation continuation)
 			throws CallException, CallInterruptedException, InterruptedException {
+		return execute(continuation, schedulingContext());
+	}
+
+	/**
+	 * Resumes {@code continuation} in the current thread in the scheduling context
+	 * {@code schedulingContext}, returning the call result once the call completes.
+	 *
+	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
+	 * be manipulated freely by the caller of this method.</p>
+	 *
+	 * @param continuation  the continuation to resume, must not be {@code null}
+	 * @param schedulingContext  the scheduling context, must not be {@code null}
+	 * @return  the call result
+	 *
+	 * @throws CallException  if the call terminated abnormally
+	 * @throws CallInterruptedException  if the call initiated a pause
+	 * @throws InterruptedException  when the current thread is interrupted while waiting
+	 *                               for an asynchronous operation to be completed
+	 * @throws InvalidContinuationException  when {@code continuation} is invalid
+	 * @throws NullPointerException  if {@code continuation} or {@code schedulingContext}
+	 *                               is {@code null}
+	 */
+	public static Object[] execute(Continuation continuation, SchedulingContext schedulingContext)
+			throws CallException, CallInterruptedException, InterruptedException {
 
 		Objects.requireNonNull(continuation);
+		Objects.requireNonNull(schedulingContext);
 
 		while (true) {
 			Result result = new Result();
-			continuation.resume(result, preemptionContext());
+			continuation.resume(result, schedulingContext);
 
 			if (result.wasSet.get() && result.task != null && result.cont != null) {
 				// an asynchronous task
@@ -282,6 +307,29 @@ public class DirectCallExecutor {
 			}
 		}
 
+	}
+
+	/**
+	 * Executes {@code continuation} in the current thread in a scheduling context
+	 * that never asks the execution to pause, returning the call result once the call completes.
+	 *
+	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
+	 * be manipulated freely by the caller of this method.</p>
+	 *
+	 * @param continuation  the continuation to resume, must not be {@code null}
+	 * @return  the call result
+	 *
+	 * @throws CallException  if the call terminated abnormally
+	 * @throws CallInterruptedException  if the call initiated a pause
+	 * @throws InterruptedException  when the current thread is interrupted while waiting
+	 *                               for an asynchronous operation to be completed
+	 * @throws InvalidContinuationException  when {@code continuation} is invalid
+	 * @throws NullPointerException  if {@code continuation} or {@code schedulingContext}
+	 *                               is {@code null}
+	 */
+	public static Object[] execute(Continuation continuation)
+			throws CallException, CallInterruptedException, InterruptedException {
+		return execute(continuation, SchedulingContexts.never());
 	}
 
 }
