@@ -40,8 +40,7 @@ public class HelloWorld {
 		StateContext state = StateContexts.newDefaultInstance();
 
 		ChunkLoader loader = CompilerChunkLoader.of("hello_world");
-		Table env = StandardLibrary.in(RuntimeEnvironments.system())
-				.installInto(state);
+		Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
 
 		LuaFunction main = loader.loadTextChunk(new Variable(env), "hello", program);
 		DirectCallExecutor.newExecutor().call(state, main);
