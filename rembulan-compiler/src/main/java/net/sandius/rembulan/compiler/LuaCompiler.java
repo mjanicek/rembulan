@@ -36,6 +36,7 @@ import net.sandius.rembulan.compiler.tf.ConstFolder;
 import net.sandius.rembulan.compiler.tf.DeadCodePruner;
 import net.sandius.rembulan.parser.ParseException;
 import net.sandius.rembulan.parser.Parser;
+import net.sandius.rembulan.parser.TokenMgrError;
 import net.sandius.rembulan.parser.analysis.NameResolver;
 import net.sandius.rembulan.parser.ast.Chunk;
 import net.sandius.rembulan.util.ByteVector;
@@ -48,26 +49,45 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
+/**
+ * A Lua-to-Java-bytecode compiler.
+ */
 public class LuaCompiler {
 
 	private final CompilerSettings settings;
 
+	/**
+	 * Constructs a new compiler instance with the given settings.
+	 *
+	 * @param settings  the settings, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code settings} is {@code null}
+	 */
 	public LuaCompiler(CompilerSettings settings) {
-		this.settings = Check.notNull(settings);
+		this.settings = Objects.requireNonNull(settings);
 	}
 
-	@Deprecated
+	/**
+	 * Constructs a new compiler instance with
+	 * {@linkplain CompilerSettings#defaultSettings() default settings}.
+	 */
 	public LuaCompiler() {
 		this(CompilerSettings.defaultSettings());
 	}
 
+	/**
+	 * Returns the settings used in this compiler instance.
+	 *
+	 * @return  the settings used by this compiler
+	 */
 	public CompilerSettings settings() {
 		return settings;
 	}
 
-	private static Chunk parse(String sourceText) throws ParseException {
+	private static Chunk parse(String sourceText) throws ParseException, TokenMgrError {
 		ByteArrayInputStream bais = new ByteArrayInputStream(sourceText.getBytes());
 		Parser parser = new Parser(bais);
 		return parser.Chunk();
@@ -173,7 +193,26 @@ public class LuaCompiler {
 		return emitter.emit();
 	}
 
-	public CompiledModule compile(String sourceText, String sourceFileName, String rootClassName) throws ParseException {
+	/**
+	 * Compiles the Lua source string {@code sourceText} into Java bytecode, giving the main
+	 * class the name {@code rootClassName}, and using {@code sourceFileName} as the name
+	 * of the source file (for debugging information),
+	 *
+	 * @param sourceText  source text, must not be {@code null}
+	 * @param sourceFileName  file name of the source, must not be {@code null}
+	 * @param rootClassName  class name of the main class, must not be {@code null}
+	 * @return  {@code sourceText} compiled into a loadable module
+	 *
+	 * @throws NullPointerException  if {@code sourceText}, {@code sourceFileName}
+	 *                               or {@code rootClassName} is {@code null}
+	 * @throws TokenMgrError  when {@code sourceText} cannot be lexically analysed following
+	 *                        the Lua lexical rules
+	 * @throws ParseException  when {@code sourceText} cannot be parsed following the Lua
+	 *                         grammar
+	 */
+	public CompiledModule compile(String sourceText, String sourceFileName, String rootClassName)
+			throws ParseException, TokenMgrError {
+
 		Check.notNull(sourceText);
 		Chunk ast = parse(sourceText);
 		Module module = translate(ast);
