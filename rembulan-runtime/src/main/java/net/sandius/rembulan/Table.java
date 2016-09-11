@@ -162,4 +162,32 @@ public abstract class Table extends LuaObject {
 	 */
 	public abstract Object successorKeyOf(Object key);
 
+	/**
+	 * Returns {@code true} iff this table has weak keys.
+	 *
+	 * @return  {@code true} iff this table has weak keys
+	 */
+	public abstract boolean hasWeakKeys();
+
+	/**
+	 * Returns {@code true} iff this table has weak values.
+	 *
+	 * @return  {@code true} iff this table has weak values
+	 */
+	public abstract boolean hasWeakValues();
+
+	/**
+	 * Sets the mode of this table using the two boolean arguments {@code weakKeys}
+	 * and {@code weakValues}. If {@code weakKeys} is {@code true}, the table will have
+	 * weak keys (otherwise, the table will have non-weak keys). Similarly, if {@code weakValues}
+	 * is {@code true}, the table will have weak values (and non-weak values if {@code false}).
+	 *
+	 * <p>Returns a boolean indicating whether this call has changed the mode of this table.</p>
+	 *
+	 * @param weakKeys  key mode ({@code true} for weak, {@code false} for non-weak keys)
+	 * @param weakValues  value mode ({@code true} for weak, {@code false} for non-weak values)
+	 * @return  {@code true} if this call has changed the mode of this table
+	 */
+	public abstract boolean setMode(boolean weakKeys, boolean weakValues);
+
 }

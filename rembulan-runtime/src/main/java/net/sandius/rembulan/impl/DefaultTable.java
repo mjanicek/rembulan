@@ -26,6 +26,7 @@ import java.util.Map;
 
 /**
  * Default implementation of the Lua table storing all key-value pairs in a hashmap.
+ * The table implementation does not support weak keys or values.
  */
 public class DefaultTable extends Table {
 
@@ -129,6 +130,24 @@ public class DefaultTable extends Table {
 		}
 
 		throw new IllegalArgumentException("invalid key to 'next'");
+	}
+
+	@Override
+	public boolean hasWeakKeys() {
+		// TODO
+		return false;
+	}
+
+	@Override
+	public boolean hasWeakValues() {
+		// TODO
+		return false;
+	}
+
+	@Override
+	public boolean setMode(boolean weakKeys, boolean weakValues) {
+		// TODO
+		return false;
 	}
 
 }
