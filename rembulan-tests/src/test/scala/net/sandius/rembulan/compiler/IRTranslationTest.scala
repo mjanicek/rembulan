@@ -24,6 +24,7 @@ import net.sandius.rembulan.compiler.util.IRPrinterVisitor
 import net.sandius.rembulan.parser.analysis.NameResolver
 import net.sandius.rembulan.parser.ast.{Chunk, Expr}
 import net.sandius.rembulan.parser.{Expressions, Parser}
+import net.sandius.rembulan.test.Util
 import net.sandius.rembulan.test.fragments._
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -123,28 +124,27 @@ class IRTranslationTest extends FunSpec with MustMatchers {
   }
 
   describe ("expression") {
-
     describe ("can be translated to IR:") {
+      Util.silenced {
 
-      for ((s, o) <- Expressions.get if o) {
+        for ((s, o) <- Expressions.get if o) {
 
-        val ss = "return " + s
+          val ss = "return " + s
 
-        it (ss) {
-          val ck = resolveNames(parseChunk(ss))
+          it (ss) {
+            val ck = resolveNames(parseChunk(ss))
 
-          val mod = IRTranslator.translate(ck)
-          for (fn <- mod.fns().asScala) {
-            println("Function [" + fn.id + "]")
-            println()
-            printBlocks(fn.code)
+            val mod = IRTranslator.translate(ck)
+            for (fn <- mod.fns().asScala) {
+              println("Function [" + fn.id + "]")
+              println()
+              printBlocks(fn.code)
+            }
           }
         }
 
       }
-
     }
-
   }
 
   case class CompiledFn(fn: IRFunc, types: TypeInfo)
@@ -171,59 +171,64 @@ class IRTranslationTest extends FunSpec with MustMatchers {
       for (f <- b.all) {
         describe (f.description) {
           it ("can be translated to IR (translation only)") {
-            val code = f.code
+            Util.silenced {
+              val code = f.code
 
-            println("--BEGIN--")
-            println(code)
-            println("---END---")
+              println("--BEGIN--")
+              println(code)
+              println("---END---")
 
-            val ir = translate(parseChunk(code))
+              val ir = translate(parseChunk(code))
 
-            for (fn <- ir.fns.asScala) {
-              println("Function [" + fn.id + "]" + (if (fn.id.isRoot) " (main)" else ""))
-              println()
-              println("Code:")
-              printBlocks(fn.code)
-              println()
+              for (fn <- ir.fns.asScala) {
+                println("Function [" + fn.id + "]" + (if (fn.id.isRoot) " (main)" else ""))
+                println()
+                println("Code:")
+                printBlocks(fn.code)
+                println()
+              }
             }
 
           }
 
           it ("can be translated to IR and optimised") {
-            val code = f.code
+            Util.silenced {
+              val code = f.code
 
-            println("--BEGIN--")
-            println(code)
-            println("---END---")
+              println("--BEGIN--")
+              println(code)
+              println("---END---")
 
-            val ir = translate(parseChunk(code))
-            val cmod = compile(ir)
+              val ir = translate(parseChunk(code))
+              val cmod = compile(ir)
 
-            def printCompiledFn(cfn: CompiledFn): Unit = {
-              println("Function [" + cfn.fn.id + "]" + (if (cfn.fn.id.isRoot) " (main)" else ""))
-              println()
+              def printCompiledFn(cfn: CompiledFn): Unit = {
+                println("Function [" + cfn.fn.id + "]" + (if (cfn.fn.id.isRoot) " (main)" else ""))
+                println()
 
-              println("Params: (" + cfn.fn.params.asScala.mkString(", ") + ")")
-              println("Upvals: (" + cfn.fn.upvals.asScala.mkString(", ") + ")")
-              println()
+                println("Params: (" + cfn.fn.params.asScala.mkString(", ") + ")")
+                println("Upvals: (" + cfn.fn.upvals.asScala.mkString(", ") + ")")
+                println()
 
-              println("Code:")
-              printBlocks(cfn.fn.code)
-              println()
+                println("Code:")
+                printBlocks(cfn.fn.code)
+                println()
 
-              println("Type information:")
-              printTypes(cfn.types)
-              println()
+                println("Type information:")
+                printTypes(cfn.types)
+                println()
 
-              printDeps(dependencyInfo(cfn.fn))
-              println()
+                printDeps(dependencyInfo(cfn.fn))
+                println()
 
-              printSlots(cfn.types, slotInfo(cfn.fn))
-              println()
-            }
+                printSlots(cfn.types, slotInfo(cfn.fn))
+                println()
+              }
 
-            for (cfn <- cmod.fns) {
-              printCompiledFn(cfn)
+              for (cfn <- cmod.fns) {
+                printCompiledFn(cfn)
+              }
+
             }
 
           }

@@ -16,7 +16,9 @@
 
 package net.sandius.rembulan.test
 
-import java.io.{ByteArrayOutputStream, PrintStream}
+import java.io.{ByteArrayOutputStream, OutputStream, PrintStream}
+
+import scala.util.control.NonFatal
 
 object Util {
 
@@ -47,11 +49,16 @@ object Util {
 
   trait Printer {
 
+    def out: OutputStream
+    def err: OutputStream
+
     def println(x: Any): Unit
 
   }
 
   object ConsolePrinter extends Printer {
+    override def out = System.out
+    override def err = System.err
     override def println(x: Any) = scala.Predef.println(x)
   }
 
@@ -60,10 +67,32 @@ object Util {
     private val baos = new ByteArrayOutputStream()
     private val printer = new PrintStream(baos)
 
+    def out = baos
+    def err = baos
+
     def get = baos.toString()
 
     def println(x: Any): Unit = {
       printer.println(x)
+    }
+
+  }
+
+  def silenced(body: => Unit): Unit = {
+
+    val printer = new BufferPrinter()
+    val oldOut = System.out
+    System.setOut(new PrintStream(printer.out))
+
+    try {
+    }
+    catch {
+      case NonFatal(e) =>
+        oldOut.print(printer.get)
+        throw e
+    }
+    finally {
+      System.setOut(oldOut)
     }
 
   }

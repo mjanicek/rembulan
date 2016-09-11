@@ -17,6 +17,7 @@
 package net.sandius.rembulan.test
 
 import java.io.PrintStream
+import java.nio.file.FileSystems
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
@@ -27,7 +28,7 @@ import net.sandius.rembulan.lib.impl._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.runtime.RuntimeCallInitialiser
 import net.sandius.rembulan.test.FragmentExpectations.Env
-import net.sandius.rembulan.test.Util.BufferPrinter
+import net.sandius.rembulan.test.Util.{BufferPrinter, Printer}
 import net.sandius.rembulan.{Conversions, StateContext, Table, Variable}
 import org.scalatest.{FunSpec, MustMatchers}
 
@@ -57,46 +58,46 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
     impl.installInto(state, env)
   }
 
-  protected def envForContext(state: StateContext, ctx: Env, ldr: ChunkLoader): Table = {
+  protected def envForContext(state: StateContext, ctx: Env, ldr: ChunkLoader, printer: Printer): Table = {
     val env = state.newTable()
     ctx match {
       case Empty =>
         // no-op
 
       case Basic =>
-        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
 
       case Coro =>
-        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
         new DefaultCoroutineLib().installInto(state, env)
 
       case Math =>
-        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
         new DefaultMathLib().installInto(state, env)
 
       case Str =>
-        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
         new DefaultStringLib().installInto(state, env)
 
       case IO =>
-        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
         new DefaultIoLib(state).installInto(state, env)
 
       case Tab =>
-        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
         new DefaultTableLib().installInto(state, env)
 
       case Debug =>
-        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
         new DefaultDebugLib().installInto(state, env)
 
       case Full =>
-        new DefaultBasicLib(new PrintStream(System.out), ldr, env).installInto(state, env)
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
         new DefaultModuleLib(state, env).installInto(state, env)
         new DefaultCoroutineLib().installInto(state, env)
         new DefaultMathLib().installInto(state, env)
         new DefaultStringLib().installInto(state, env)
-        new DefaultIoLib(state).installInto(state, env)
+        new DefaultIoLib(state, FileSystems.getDefault, null, printer.out, printer.err).installInto(state, env)
         new DefaultOsLib().installInto(state, env)
         new DefaultTableLib().installInto(state, env)
         new DefaultUtf8Lib().installInto(state, env)
@@ -186,7 +187,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
             val state = StateContexts.newDefaultInstance()
 
-            val env = envForContext(state, ctx, ldr)
+            val env = envForContext(state, ctx, ldr, printer)
             val func = ldr.loadTextChunk(new Variable(env), "test", fragment.code)
 
             (state, func)

@@ -20,6 +20,7 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintWriter}
 
 import net.sandius.rembulan.parser.ast.Expr
 import net.sandius.rembulan.parser.util.FormattingPrinterVisitor
+import net.sandius.rembulan.test.Util
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.{FunSpec, MustMatchers}
@@ -58,14 +59,18 @@ class ExpressionParsingTest extends FunSpec with MustMatchers {
 
     def ok(s: String): Unit = {
       it ("ok: " + s) {
-        tryParseExpr(s)
+        Util.silenced {
+          tryParseExpr(s)
+        }
       }
     }
 
     def nok(s: String): Unit = {
       it ("not-ok: " + s) {
-        intercept[ParseException] {
-          tryParseExpr(s)
+        Util.silenced {
+          intercept[ParseException] {
+            tryParseExpr(s)
+          }
         }
       }
     }

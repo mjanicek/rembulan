@@ -68,7 +68,7 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""return table.concat({{}, {}})""") failsWith "invalid value (table) at index 1 in table for 'concat'"
 
       in (FullContext) {
-        program ("""return table.concat({io.stdin})""") failsWith "invalid value (userdata) at index 1 in table for 'concat'"
+        program ("""return table.concat({io.stdout})""") failsWith "invalid value (userdata) at index 1 in table for 'concat'"
       }
 
       // concat uses the __index metamethod on the concatenated table

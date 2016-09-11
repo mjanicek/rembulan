@@ -19,6 +19,7 @@ package net.sandius.rembulan.compiler
 import net.sandius.rembulan.Variable
 import net.sandius.rembulan.load.ChunkClassLoader
 import net.sandius.rembulan.runtime.LuaFunction
+import net.sandius.rembulan.test.Util
 import net.sandius.rembulan.test.fragments.BasicFragments
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -54,37 +55,42 @@ class FragmentCompileAndLoadTest extends FunSpec with MustMatchers {
         val settings = CompilerSettings.defaultSettings()
 
         it ("can be compiled to Java bytecode") {
-          println("-- CODE BEGIN --")
-          println(fragment.code)
-          println("--- CODE END ---")
-          println()
+          Util.silenced {
+            println("-- CODE BEGIN --")
+            println(fragment.code)
+            println("--- CODE END ---")
+            println()
 
-          withProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true") {
-            val compiler = new LuaCompiler(settings)
-            val cm = compiler.compile(fragment.code, "stdin", "test")
-            cm must not be null
+            withProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true") {
+              val compiler = new LuaCompiler(settings)
+              val cm = compiler.compile(fragment.code, "stdin", "test")
+              cm must not be null
+            }
           }
         }
 
         it ("can be loaded by the VM") {
-          val classLoader = new ChunkClassLoader()
+          Util.silenced {
 
-          val cm = withProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true") {
-            val compiler = new LuaCompiler(settings)
-            compiler.compile(fragment.code, "stdin", "test")
+            val classLoader = new ChunkClassLoader()
+
+            val cm = withProperty("net.sandius.rembulan.compiler.VerifyAndPrint", "true") {
+              val compiler = new LuaCompiler(settings)
+              compiler.compile(fragment.code, "stdin", "test")
+            }
+
+            val name = classLoader.install(cm)
+            val clazz = classLoader.loadClass(name).asInstanceOf[Class[LuaFunction]]
+
+            val f = try {
+              clazz.getConstructor(classOf[Variable]).newInstance(new Variable(null))
+            }
+            catch {
+              case ex: VerifyError => throw new IllegalStateException(ex)
+            }
+
+            f must not be null
           }
-
-          val name = classLoader.install(cm)
-          val clazz = classLoader.loadClass(name).asInstanceOf[Class[LuaFunction]]
-
-          val f = try {
-            clazz.getConstructor(classOf[Variable]).newInstance(new Variable(null))
-          }
-          catch {
-            case ex: VerifyError => throw new IllegalStateException(ex)
-          }
-
-          f must not be null
         }
 
       }
