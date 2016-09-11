@@ -159,6 +159,11 @@ public final class Metatables {
 	 */
 	public static final String MT_CALL = "__call";
 
+	/**
+	 * The metatable key {@code "__mode"}. Used to control the weakness of table keys
+	 * and values.
+	 */
+	public static final String MT_MODE = "__mode";
 
 	/**
 	 * Returns the entry with the key {@code event} of the metatable of the object {@code o}.

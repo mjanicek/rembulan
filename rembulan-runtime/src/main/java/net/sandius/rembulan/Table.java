@@ -19,6 +19,10 @@ package net.sandius.rembulan;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
+
 /**
  * An abstract class representing a Lua table.
  */
@@ -69,13 +73,19 @@ public abstract class Table extends LuaObject {
 	 * <p>When {@code key} is {@code null} (i.e., a <b>nil</b>) or a <i>NaN</i>,
 	 * an {@link IllegalArgumentException} is thrown.</p>
 	 *
-	 * <p>Implementations of this method must ensure that the Lua rules for valid
-	 * table keys are honoured, e.g. by normalising keys using
-	 * {@link Conversions#normaliseKey(Object)}.</p>
-	 *
 	 * <p>This method provides <i>raw</i> access to the table. For non-raw access
 	 * (i.e., handling the {@code __newindex} metamethod), use
 	 * {@link Dispatch#setindex(ExecutionContext, Table, Object, Object)}.</p>
+	 *
+	 * <p><b>Implementation notes:</b> Implementations of this method must ensure that
+	 * the behaviour of this method conforms to the Lua semantics as delineated in the Lua
+	 * Reference Manual. In particular:</p>
+	 * <ul>
+	 *     <li>float keys that have an integer value must be treated as integer keys
+	 *       (e.g. by using {@link Conversions#normaliseKey(Object)};</li>
+	 *     <li>updates of the value associated with the key {@code "__mode"}
+	 *       must call {@link #updateBasetableModes(Object, Object)}.</li>
+	 * </ul>
 	 *
 	 * @param key  the key, must not be {@code null} or <i>NaN</i>
 	 * @param value  the value to associate with {@code key}, may be {@code null}
@@ -163,31 +173,122 @@ public abstract class Table extends LuaObject {
 	public abstract Object successorKeyOf(Object key);
 
 	/**
-	 * Returns {@code true} iff this table has weak keys.
-	 *
-	 * @return  {@code true} iff this table has weak keys
+	 * The metatable of this table, may be {@code null}.
 	 */
-	public abstract boolean hasWeakKeys();
+	private Table metatable;
 
 	/**
-	 * Returns {@code true} iff this table has weak values.
+	 * A weak set containing the references to tables this table is a metatable of.
 	 *
-	 * @return  {@code true} iff this table has weak values
+	 * Let M be the metatable of a table T. Then T is a *basetable* of M. M may have multiple
+	 * basetables; this is the set of all basetables of this table.
+	 *
+	 * According to LRM §2.5.2, when a table T has a metatable M, the value associated
+	 * with the key "__mode" in M determines whether T has weak keys, values or both. This means
+	 * that an update of M["__mode"] may trigger a change in the weakness status of all basetables
+	 * of M. Therefore, each table must keep track of its basetables.
 	 */
-	public abstract boolean hasWeakValues();
+	private final Set<Table> basetables = Collections.newSetFromMap(new WeakHashMap<Table, Boolean>());
 
 	/**
-	 * Sets the mode of this table using the two boolean arguments {@code weakKeys}
-	 * and {@code weakValues}. If {@code weakKeys} is {@code true}, the table will have
+	 * Sets the metatable of this table to {@code mt}. {@code mt} may be {@code null}:
+	 * in that case, removes the metatable from this object.
+	 *
+	 * <p>Returns the metatable previously associated with this object (i.e., the metatable
+	 * before the call of this method; possibly {@code null}).</p>
+	 *
+	 * <p>This method maintains the weakness of this table by invoking
+	 * {@link #setMode(boolean, boolean)} every time it is called.</p>
+	 *
+	 * @param mt  new metatable to attach to this object, may be {@code null}
+	 * @return  previous metatable associated with this object
+	 */
+	@Override
+	public Table setMetatable(Table mt) {
+
+		// not thread-safe!
+
+		Table old = metatable;
+
+		if (old != null) {
+			// update the basetable mapping
+			old.basetables.remove(this);
+		}
+
+		boolean wk = false;
+		boolean wv = false;
+
+		if (mt != null) {
+			mt.basetables.add(this);
+			Object m = mt.rawget(Metatables.MT_MODE);
+			if (m instanceof String) {
+				String s = (String) m;
+				wk = s.indexOf('k') > -1;
+				wv = s.indexOf('v') > -1;
+			}
+		}
+
+		metatable = mt;
+		setMode(wk, wv);
+
+		return old;
+	}
+
+	@Override
+	public Table getMetatable() {
+		// not thread-safe!
+		return metatable;
+	}
+
+	/**
+	 * If {@code key} is equal to {@link Metatables#MT_MODE}, updates the weakness of the tables
+	 * that use this table as their metatable (i.e., the <i>basetables</i> of this table).
+	 * Otherwise, this method has no effect.
+	 *
+	 * <p>Whenever applicable, this method <b>must</b> be called by the implementations
+	 * of {@link #rawset(Object, Object)} in order to ensure that assignments to
+	 * the {@link Metatables#MT_MODE} key update the weakness mode of the tables that use this
+	 * table as a metatable, as required by §2.5.2 of the Lua Reference Manual.</p>
+	 *
+	 * <p>It is safe not to call this method when {@code key} is known not to be equal to
+	 * {@link Metatables#MT_MODE}.</p>
+	 *
+	 * @param key  the key, may be {@code null}
+	 * @param value  the value, may be {@code null}
+	 */
+	protected void updateBasetableModes(Object key, Object value) {
+		// not thread-safe!
+		if (Metatables.MT_MODE.equals(key)) {
+			boolean wk = false;
+			boolean wv = false;
+
+			if (value instanceof String) {
+				String s = (String) value;
+				wk = s.indexOf('k') > -1;
+				wv = s.indexOf('v') > -1;
+			}
+
+			// update all tables
+			for (Table t : basetables) {
+				t.setMode(wk, wv);
+			}
+		}
+	}
+
+	/**
+	 * Sets the weakness of this table. If {@code weakKeys} is {@code true}, the table will have
 	 * weak keys (otherwise, the table will have non-weak keys). Similarly, if {@code weakValues}
 	 * is {@code true}, the table will have weak values (and non-weak values if {@code false}).
 	 *
-	 * <p>Returns a boolean indicating whether this call has changed the mode of this table.</p>
+	 * <p>This method is not meant to be called directly: according to §2.5.2 of the Lua
+	 * Reference Manual, the weakness of a table is fully determined by the value of the
+	 * {@code "__mode"} field of its metatable. It is, however, meant to be called as part
+	 * of maintenance of this requirement by {@link #setMetatable(Table)} and
+	 * {@link #updateBasetableModes(Object, Object)}.</p>
 	 *
 	 * @param weakKeys  key mode ({@code true} for weak, {@code false} for non-weak keys)
 	 * @param weakValues  value mode ({@code true} for weak, {@code false} for non-weak values)
-	 * @return  {@code true} if this call has changed the mode of this table
 	 */
-	public abstract boolean setMode(boolean weakKeys, boolean weakValues);
+	protected abstract void setMode(boolean weakKeys, boolean weakValues);
 
 }

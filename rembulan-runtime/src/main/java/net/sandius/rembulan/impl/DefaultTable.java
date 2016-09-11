@@ -30,7 +30,6 @@ import java.util.Map;
  */
 public class DefaultTable extends Table {
 
-	private Table mt;
 	private final Map<Object, Object> values;
 
 	public DefaultTable() {
@@ -60,18 +59,6 @@ public class DefaultTable extends Table {
 	}
 
 	@Override
-	public Table getMetatable() {
-		return mt;
-	}
-
-	@Override
-	public Table setMetatable(Table mt) {
-		Table old = this.mt;
-		this.mt = mt;
-		return old;
-	}
-
-	@Override
 	public Object rawget(Object key) {
 		key = Conversions.normaliseKey(key);
 		return key != null ? values.get(key) : null;
@@ -94,6 +81,8 @@ public class DefaultTable extends Table {
 		else {
 			values.put(key, value);
 		}
+
+		updateBasetableModes(key, value);
 	}
 
 	@Override
@@ -133,21 +122,8 @@ public class DefaultTable extends Table {
 	}
 
 	@Override
-	public boolean hasWeakKeys() {
+	protected void setMode(boolean weakKeys, boolean weakValues) {
 		// TODO
-		return false;
-	}
-
-	@Override
-	public boolean hasWeakValues() {
-		// TODO
-		return false;
-	}
-
-	@Override
-	public boolean setMode(boolean weakKeys, boolean weakValues) {
-		// TODO
-		return false;
 	}
 
 }
