@@ -10,15 +10,40 @@
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <name>Rembulan</name>
+  <description>The Rembulan project</description>
+  <url>https://github.com/mjanicek/rembulan/</url>
+  <inceptionYear>2016</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Miroslav Janíček</name>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/mjanicek/rembulan.git</connection>
+    <url>https://github.com/mjanicek/rembulan/tree/master</url>
+  </scm>
+
   <modules>
     <module>rembulan-parent</module>
     <module>rembulan-runtime</module>
     <module>rembulan-compiler</module>
     <module>rembulan-stdlib</module>
-    <module>rembulan-standalone</module>
 
     <module>rembulan-tests</module>
     <module>rembulan-examples</module>
+
+    <!-- the last module must be deployed -->
+    <module>rembulan-standalone</module>
   </modules>
 
   <distributionManagement>

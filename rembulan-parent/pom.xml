@@ -18,6 +18,29 @@
   <version>0.1-SNAPSHOT</version>
   <packaging>pom</packaging>
 
+  <name>Rembulan parent POM</name>
+  <description>The parent POM for Rembulan modules</description>
+  <url>https://github.com/mjanicek/rembulan/</url>
+  <inceptionYear>2016</inceptionYear>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <name>Miroslav Janíček</name>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/mjanicek/rembulan.git</connection>
+    <url>https://github.com/mjanicek/rembulan/tree/master</url>
+  </scm>
+
   <properties>
     <maven.compiler.source>1.7</maven.compiler.source>
     <maven.compiler.target>1.7</maven.compiler.target>
@@ -36,7 +59,6 @@
   </distributionManagement>
 
   <dependencies>
-
   </dependencies>
 
   <build>
