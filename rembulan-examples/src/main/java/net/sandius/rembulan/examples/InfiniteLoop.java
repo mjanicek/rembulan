@@ -43,7 +43,7 @@ public class InfiniteLoop {
 		ChunkLoader loader = CompilerChunkLoader.of("infinite_loop");
 		LuaFunction main = loader.loadTextChunk(new Variable(env), "loop", program);
 
-		// execute at most one million ticks
+		// execute at most one million ops
 		DirectCallExecutor executor = DirectCallExecutor.newExecutorWithTickLimit(1000000);
 
 		try {
