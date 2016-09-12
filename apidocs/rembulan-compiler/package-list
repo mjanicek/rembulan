@@ -1,0 +1,14 @@
+net.sandius.rembulan.compiler
+net.sandius.rembulan.compiler.analysis
+net.sandius.rembulan.compiler.analysis.types
+net.sandius.rembulan.compiler.gen
+net.sandius.rembulan.compiler.gen.asm
+net.sandius.rembulan.compiler.gen.asm.helpers
+net.sandius.rembulan.compiler.ir
+net.sandius.rembulan.compiler.tf
+net.sandius.rembulan.compiler.util
+net.sandius.rembulan.parser
+net.sandius.rembulan.parser.analysis
+net.sandius.rembulan.parser.ast
+net.sandius.rembulan.parser.ast.util
+net.sandius.rembulan.parser.util
