@@ -32,6 +32,14 @@ completeness status of Rembulan with regard to PUC-Lua, in particular the standa
 
 Rembulan requires a Java Runtime Environment (JRE) version 7 or higher.
 
+### Documentation
+
+Generated JavaDocs are available online:
+
+ * [Runtime module](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/index.html)
+ * [Compiler](https://mjanicek.github.io/rembulan/apidocs/rembulan-compiler/index.html)
+ * [Standard Library](https://mjanicek.github.io/rembulan/apidocs/rembulan-stdlib/index.html)
+
 ### Building from source
 
 To build Rembulan, you will need the following:
