@@ -7,9 +7,10 @@
     - plain 8-bit strings? (currently, `java.lang.String` is used for strings)
     - string library locale support
  * tables:
-    - weak tables 
+    - weak tables
+    - efficient array tables 
     - efficient length operator (currently O(n))
-    - efficient iteration (currently O(n<sup>2</sup> to iterate the entire table; should be O(n)))
+    - efficient iteration (currently O(n<sup>2</sup>) to iterate the entire table; should be O(n)))
 
 ### Standard library
 
