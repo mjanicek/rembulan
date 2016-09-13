@@ -1449,6 +1449,32 @@ public final class Dispatch {
 	}
 
 	/**
+	 * Evaluates the Lua expression {@code table[key]} (in non-assignment context) including
+	 * the handling of metamethods, and stores the result to the return buffer associated with
+	 * {@code context}.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
+	 *
+	 * <p>This method differs from {@link #index(ExecutionContext, Object, Object)}
+	 * in that the {@code table} argument is required to be a non-{@code null} reference
+	 * to a {@link Table}, and {@code key} is an unboxed {@code long}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param table  the table, must not be {@code null}
+	 * @param key  the integer key
+	 *
+	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code table} is {@code null}
+	 */
+	@SuppressWarnings("unused")
+	public static void index(ExecutionContext context, Table table, long key) throws UnresolvedControlThrowable {
+		// TODO: don't just delegate to the generic case
+		index(context, (Object) Objects.requireNonNull(table), Long.valueOf(key));
+	}
+
+	/**
 	 * Executes the Lua statement {@code table[key] = value}, including the handling of
 	 * metamethods, and stores the result to the return buffer associated with {@code context}.
 	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
@@ -1529,6 +1555,31 @@ public final class Dispatch {
 	public static void setindex(ExecutionContext context, Table table, Object key, Object value) throws UnresolvedControlThrowable {
 		// TODO: don't just delegate to the generic case
 		setindex(context, (Object) Objects.requireNonNull(table), key, value);
+	}
+
+	/**
+	 * Executes the Lua statement {@code table[key] = value}, including the handling of
+	 * metamethods, and stores the result to the return buffer associated with {@code context}.
+	 * <b>This method throws an {@link UnresolvedControlThrowable}</b>: non-local control
+	 * changes are expected to be resolved by the caller of this method.
+	 *
+	 * <p>This method differs from {@link #setindex(ExecutionContext, Object, Object, Object)}
+	 * in that the {@code table} argument is required to be a non-{@code null} reference
+	 * to a {@link Table}, and {@code key} is an unboxed {@code long}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param table  the target, must not be {@code null}
+	 * @param key  the integer key
+	 * @param value  the value, may be any value
+	 *
+	 * @throws UnresolvedControlThrowable  if the evaluation called a metamethod and the metamethod
+	 *                           initiates a non-local control change
+	 * @throws NullPointerException  if {@code context} or {@code table} is {@code null}
+	 */
+	@SuppressWarnings("unused")
+	public static void setindex(ExecutionContext context, Table table, long key, Object value) throws UnresolvedControlThrowable {
+		// TODO: don't just delegate to the generic case
+		setindex(context, (Object) Objects.requireNonNull(table), Long.valueOf(key), value);
 	}
 
 	private static final Long ZERO = Long.valueOf(0L);

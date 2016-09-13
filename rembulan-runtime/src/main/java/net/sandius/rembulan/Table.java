@@ -56,7 +56,7 @@ public abstract class Table extends LuaObject {
 	 *
 	 * <p>This method provides <i>raw</i> access to the table. For non-raw access
 	 * (i.e., handling the {@code __index} metamethod), use
-	 * {@link Dispatch#index(ExecutionContext, Table, Object)}.</p>
+	 * {@link Dispatch#index(ExecutionContext, Table, long)}.</p>
 	 *
 	 * @param idx  the integer key
 	 * @return  the value associated with {@code idx}, or {@code null} when there is no
@@ -104,7 +104,7 @@ public abstract class Table extends LuaObject {
 	 *
 	 * <p>This method provides <i>raw</i> access to the table. For non-raw access
 	 * (i.e., handling the {@code __newindex} metamethod), use
-	 * {@link Dispatch#setindex(ExecutionContext, Table, Object, Object)}.</p>
+	 * {@link Dispatch#setindex(ExecutionContext, Table, long, Object)}.</p>
 	 *
 	 * @param idx  the integer key
 	 * @param value  the value to associate with {@code idx}, may be {@code null}

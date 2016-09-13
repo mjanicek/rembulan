@@ -462,12 +462,12 @@ public class DefaultTableLib extends TableLib {
 
 						case _LOOP_TABGET:
 							state = _LOOP_TABSET;
-							Dispatch.index(context, t, Long.valueOf(k - 1));
+							Dispatch.index(context, t, k - 1);
 
 						case _LOOP_TABSET:
 							state = _LOOP_TEST;
 							Object v = context.getReturnBuffer().get0();
-							Dispatch.setindex(context, t, Long.valueOf(k), v);
+							Dispatch.setindex(context, t, k, v);
 							break;  // go to next iteration
 
 						default:
@@ -779,7 +779,7 @@ public class DefaultTableLib extends TableLib {
 				switch (state) {
 					case _ERASE_PREPARE:
 						state = _ERASE_RESUME;
-						Dispatch.setindex(context, t, Long.valueOf(idx), null);
+						Dispatch.setindex(context, t, idx, null);
 
 					case _ERASE_RESUME:
 						// we're done
