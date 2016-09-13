@@ -21,10 +21,10 @@ import net.sandius.rembulan.util.Check;
 public class TabRawSetInt extends BodyNode {
 
 	private final Val obj;
-	private final int idx;
+	private final long idx;
 	private final Val value;
 
-	public TabRawSetInt(Val obj, int idx, Val value) {
+	public TabRawSetInt(Val obj, long idx, Val value) {
 		this.obj = Check.notNull(obj);
 		this.idx = Check.positive(idx);
 		this.value = Check.notNull(value);
@@ -34,7 +34,7 @@ public class TabRawSetInt extends BodyNode {
 		return obj;
 	}
 
-	public int idx() {
+	public long idx() {
 		return idx;
 	}
 

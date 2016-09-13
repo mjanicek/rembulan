@@ -546,7 +546,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	public void visit(TabRawSetInt node) {
 		il.add(new VarInsnNode(ALOAD, slot(node.obj())));
 		il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(Table.class)));
-		il.add(ASMUtils.loadInt(node.idx()));
+		il.add(ASMUtils.loadLong(node.idx()));
 		il.add(new VarInsnNode(ALOAD, slot(node.value())));
 		il.add(TableMethods.rawset_int());
 	}
@@ -614,9 +614,10 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		il.add(new VarInsnNode(ALOAD, lv_idx_tab));
 
 		// OFFSET + i
-		il.add(ASMUtils.loadInt(node.firstIdx()));
+		il.add(ASMUtils.loadLong(node.firstIdx()));
 		il.add(new VarInsnNode(ILOAD, lv_idx_i));
-		il.add(new InsnNode(IADD));
+		il.add(new InsnNode(I2L));
+		il.add(new InsnNode(LADD));
 
 		// stack.get(i)
 		il.add(new VarInsnNode(ALOAD, lv_idx_stack));

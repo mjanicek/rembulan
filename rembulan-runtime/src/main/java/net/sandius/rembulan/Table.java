@@ -47,7 +47,7 @@ public abstract class Table extends LuaObject {
 	public abstract Object rawget(Object key);
 
 	/**
-	 * Retrieves the value associated with the given (32-bit) integer {@code idx}, returning
+	 * Retrieves the value associated with the given integer {@code idx}, returning
 	 * {@code null} when {@code idx} has no value associated with it.
 	 *
 	 * <p>This method must be functionally equivalent to {@link #rawget(Object)} with the
@@ -62,8 +62,8 @@ public abstract class Table extends LuaObject {
 	 * @return  the value associated with {@code idx}, or {@code null} when there is no
 	 *          value associated with {@code idx} in this table
 	 */
-	public Object rawget(int idx) {
-		return rawget((long) idx);
+	public Object rawget(long idx) {
+		return rawget(Long.valueOf(idx));
 	}
 
 	/**
@@ -95,7 +95,7 @@ public abstract class Table extends LuaObject {
 	public abstract void rawset(Object key, Object value);
 
 	/**
-	 * Sets the value associated with the (32-bit) integer key {@code idx} to {@code value}.
+	 * Sets the value associated with the integer key {@code idx} to {@code value}.
 	 * When {@code value} is {@code null}, removes {@code idx} from the table.
 	 *
 	 * <p>This method must be functionally equivalent to {@link #rawset(Object,Object)} with the
@@ -109,8 +109,8 @@ public abstract class Table extends LuaObject {
 	 * @param idx  the integer key
 	 * @param value  the value to associate with {@code idx}, may be {@code null}
 	 */
-	public void rawset(int idx, Object value) {
-		rawset((long) idx, value);
+	public void rawset(long idx, Object value) {
+		rawset(Long.valueOf(idx), value);
 	}
 
 	/**
@@ -127,7 +127,7 @@ public abstract class Table extends LuaObject {
 	 *
 	 * @return  the length of the sequence if this table is a sequence
 	 */
-	public abstract int rawlen();
+	public abstract long rawlen();
 
 	/**
 	 * Returns the initial key for iterating through the set of keys in this table.

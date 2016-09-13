@@ -21,7 +21,7 @@ import net.sandius.rembulan.util.Check;
 public class TabRawAppendMulti extends BodyNode {
 
 	private final Val obj;
-	private final int firstIdx;
+	private final long firstIdx;
 	private final MultiVal src;
 
 	public TabRawAppendMulti(Val obj, int firstIdx, MultiVal src) {
@@ -34,7 +34,7 @@ public class TabRawAppendMulti extends BodyNode {
 		return obj;
 	}
 
-	public int firstIdx() {
+	public long firstIdx() {
 		return firstIdx;
 	}
 

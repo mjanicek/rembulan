@@ -298,7 +298,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table table = args.nextTable();
-			int index = args.nextInt();
+			long index = args.nextInteger();
 
 			index += 1;
 

@@ -1049,7 +1049,7 @@ public final class Dispatch {
 				call(context, handler, o);
 			}
 			else if (o instanceof Table) {
-				context.getReturnBuffer().setTo((long) ((Table) o).rawlen());
+				context.getReturnBuffer().setTo(((Table) o).rawlen());
 			}
 			else {
 				throw Errors.illegalGetLengthAttempt(o);

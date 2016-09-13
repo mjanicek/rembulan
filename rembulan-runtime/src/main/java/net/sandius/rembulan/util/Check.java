@@ -244,6 +244,19 @@ public final class Check {
 	}
 
 	/**
+	 * Throws an {@link IllegalArgumentException} if the long {@code n} is not positive;
+	 * otherwise, returns {@code n}.
+	 *
+	 * @param n  the long to be tested
+	 * @return  {@code n} if {@code n > 0}
+	 *
+	 * @throws IllegalArgumentException  if {@code n <= 0}
+	 */
+	public static long positive(long n) {
+		return gt(n, 0);
+	}
+
+	/**
 	 * Throws an {@link IllegalArgumentException} if the double {@code n} is <i>NaN</i>;
 	 * otherwise, returns {@code n}.
 	 *

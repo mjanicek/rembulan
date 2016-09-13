@@ -86,8 +86,8 @@ public class DefaultTable extends Table {
 	}
 
 	@Override
-	public int rawlen() {
-		int idx = 1;
+	public long rawlen() {
+		long idx = 1;
 
 		while (rawget(idx) != null) {
 			++idx;

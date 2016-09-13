@@ -36,7 +36,7 @@ public class TableMethods {
 				"rawset",
 				Type.getMethodDescriptor(
 						Type.VOID_TYPE,
-						Type.INT_TYPE,
+						Type.LONG_TYPE,
 						Type.getType(Object.class)),
 				false);
 	}

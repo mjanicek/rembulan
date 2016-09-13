@@ -124,12 +124,12 @@ public class DefaultTableLib extends TableLib {
 			public final Table t;
 			public final ArgumentIterator args;
 			public final String sep;
-			public final int i;
-			public final int j;
-			public final int k;
+			public final long i;
+			public final long j;
+			public final long k;
 			public final StringBuilder bld;
 
-			public SuspendedState(int state, Table t, ArgumentIterator args, String sep, int i, int j, int k, StringBuilder bld) {
+			public SuspendedState(int state, Table t, ArgumentIterator args, String sep, long i, long j, long k, StringBuilder bld) {
 				this.state = state;
 				this.t = t;
 				this.args = args;
@@ -142,7 +142,7 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
-		private static void appendToBuilder(StringBuilder bld, int index, Object o) {
+		private static void appendToBuilder(StringBuilder bld, long index, Object o) {
 			String s = Conversions.stringValueOf(o);
 			if (s != null) {
 				bld.append(s);
@@ -155,9 +155,9 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
-		private static void concatUsingRawGet(ExecutionContext context, Table t, String sep, int i, int j) {
+		private static void concatUsingRawGet(ExecutionContext context, Table t, String sep, long i, long j) {
 			StringBuilder bld = new StringBuilder();
-			for (int k = i; k <= j; k++) {
+			for (long k = i; k <= j; k++) {
 				Object o = t.rawget(k);
 				appendToBuilder(bld, k, o);
 				if (k + 1 <= j) {
@@ -172,7 +172,7 @@ public class DefaultTableLib extends TableLib {
 		private static final int STATE_BEFORE_LOOP = 2;
 		private static final int STATE_LOOP = 3;
 
-		private void run(ExecutionContext context, int state, Table t, ArgumentIterator args, String sep, int i, int j, int k, StringBuilder bld)
+		private void run(ExecutionContext context, int state, Table t, ArgumentIterator args, String sep, long i, long j, long k, StringBuilder bld)
 				throws ResolvedControlThrowable {
 
 			try {
@@ -190,13 +190,13 @@ public class DefaultTableLib extends TableLib {
 
 					// entry point for t without __len; k == #t
 					case STATE_BEFORE_LOOP: {
-						int len = k;
+						long len = k;
 						k = 0;  // clear k
 
 						// process arguments
 						sep = args.hasNext() && args.peek() != null ? args.nextString() : "";
 						i = args.optNextInt(1);
-						j = args.hasNext() && args.peek() != null ? args.nextInt() : len;
+						j = args.hasNext() && args.peek() != null ? args.nextInteger() : len;
 
 						// don't need the args any more
 						args = null;
@@ -268,7 +268,7 @@ public class DefaultTableLib extends TableLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final Table t = args.nextTable();
 			final int state;
-			final int k;
+			final long k;
 
 			if (!hasLenMetamethod(context, t)) {
 				// safe to use rawlen
@@ -306,11 +306,11 @@ public class DefaultTableLib extends TableLib {
 			public final int state;
 			public final Table t;
 			public final ArgumentIterator args;
-			public final int pos;
-			public final int len;
+			public final long pos;
+			public final long len;
 			public final Object value;
 
-			private SuspendedState(int state, Table t, ArgumentIterator args, int pos, int len, Object value) {
+			private SuspendedState(int state, Table t, ArgumentIterator args, long pos, long len, Object value) {
 				this.state = state;
 				this.t = t;
 				this.args = args;
@@ -336,14 +336,14 @@ public class DefaultTableLib extends TableLib {
 		private static final int _END_TABSET = (_END << PHASE_SHIFT) | 0;
 		private static final int _END_RETURN = (_END << PHASE_SHIFT) | 1;
 
-		private void checkValidPos(int pos, int len) {
+		private void checkValidPos(long pos, long len) {
 			if (pos < 1 || pos > len + 1) {
 				throw new BadArgumentException(2, name(), "position out of bounds");
 			}
 		}
 
-		private static void rawInsert(Table t, int pos, int len, Object value) {
-			for (int k = len + 1; k > pos; k--) {
+		private static void rawInsert(Table t, long pos, long len, Object value) {
+			for (long k = len + 1; k > pos; k--) {
 				t.rawset(k, t.rawget(k - 1));
 			}
 			t.rawset(pos, value);
@@ -402,10 +402,10 @@ public class DefaultTableLib extends TableLib {
 			run_args(context, t, args, len);
 		}
 
-		private void run_args(ExecutionContext context, Table t, ArgumentIterator args, int len)
+		private void run_args(ExecutionContext context, Table t, ArgumentIterator args, long len)
 				throws ResolvedControlThrowable {
 
-			final int pos;
+			final long pos;
 			final Object value;
 
 			if (args.size() == 2) {
@@ -415,7 +415,7 @@ public class DefaultTableLib extends TableLib {
 			}
 			else if (args.size() == 3) {
 				// explicit pos
-				pos = args.nextInt();
+				pos = args.nextInteger();
 				checkValidPos(pos, len);
 				value = args.nextAny();
 			}
@@ -427,7 +427,7 @@ public class DefaultTableLib extends TableLib {
 			start_loop(context, t, pos, len, value);
 		}
 
-		private void start_loop(ExecutionContext context, Table t, int pos, int len, Object value)
+		private void start_loop(ExecutionContext context, Table t, long pos, long len, Object value)
 				throws ResolvedControlThrowable {
 
 			// check whether we can use raw accesses instead of having to go through
@@ -445,7 +445,7 @@ public class DefaultTableLib extends TableLib {
 			}
 		}
 
-		private void _loop(ExecutionContext context, int state, Table t, int pos, int k, Object value)
+		private void _loop(ExecutionContext context, int state, Table t, long pos, long k, Object value)
 				throws ResolvedControlThrowable {
 
 			// came from start_loop in the invoke path
@@ -485,14 +485,14 @@ public class DefaultTableLib extends TableLib {
 			_end(context, state, t, pos, value);
 		}
 
-		private void _end(ExecutionContext context, int state, Table t, int pos, Object value)
+		private void _end(ExecutionContext context, int state, Table t, long pos, Object value)
 				throws ResolvedControlThrowable {
 			try {
 				switch (state) {
 
 					case _END_TABSET:
 						state = _END_RETURN;
-						Dispatch.setindex(context, t, Long.valueOf(pos), value);
+						Dispatch.setindex(context, t, pos, value);
 
 					case _END_RETURN:
 						break;
@@ -550,11 +550,11 @@ public class DefaultTableLib extends TableLib {
 			public final int state;
 			public final Table t;
 			public final ArgumentIterator args;
-			public final int pos;
-			public final int len;
+			public final long pos;
+			public final long len;
 			public final Object result;
 
-			private SuspendedState(int state, Table t, ArgumentIterator args, int pos, int len, Object result) {
+			private SuspendedState(int state, Table t, ArgumentIterator args, long pos, long len, Object result) {
 				this.state = state;
 				this.t = t;
 				this.args = args;
@@ -584,14 +584,14 @@ public class DefaultTableLib extends TableLib {
 		private static final int _ERASE_PREPARE = (_ERASE << PHASE_SHIFT) | 0;
 		private static final int _ERASE_RESUME  = (_ERASE << PHASE_SHIFT) | 1;
 
-		private void checkValidPos(int pos, int len) {
+		private void checkValidPos(long pos, long len) {
 			if (!((len == 0 && pos == 0) || pos == len)  // the no-shift case
 					&& (pos < 1 || pos > len + 1)) {
 				throw new BadArgumentException(2, name(), "position out of bounds");
 			}
 		}
 
-		private static Object rawRemove(Table t, int pos, int len) {
+		private static Object rawRemove(Table t, long pos, long len) {
 			Object result = t.rawget(pos);
 
 			if (pos == 0 || pos == len || pos == len + 1) {
@@ -600,7 +600,7 @@ public class DefaultTableLib extends TableLib {
 			}
 			else {
 				// shift down t[pos+1],...,t[len]; erase t[len]
-				for (int k = pos + 1; k <= len; k++) {
+				for (long k = pos + 1; k <= len; k++) {
 					t.rawset(k - 1, t.rawget(k));
 				}
 				t.rawset(len, null);
@@ -663,14 +663,14 @@ public class DefaultTableLib extends TableLib {
 			run_args(context, t, args, len);
 		}
 
-		private void run_args(ExecutionContext context, Table t, ArgumentIterator args, int len)
+		private void run_args(ExecutionContext context, Table t, ArgumentIterator args, long len)
 				throws ResolvedControlThrowable {
 
-			final int pos;
+			final long pos;
 
 			if (args.hasNext() && args.peek() != null) {
 				// explicit pos
-				pos = args.nextInt();
+				pos = args.nextInteger();
 				checkValidPos(pos, len);
 			}
 			else {
@@ -682,7 +682,7 @@ public class DefaultTableLib extends TableLib {
 			start_loop(context, t, pos, len);
 		}
 
-		private void start_loop(ExecutionContext context, Table t, int pos, int len)
+		private void start_loop(ExecutionContext context, Table t, long pos, long len)
 				throws ResolvedControlThrowable {
 
 			// check whether we can use raw accesses instead of having to go through
@@ -700,7 +700,7 @@ public class DefaultTableLib extends TableLib {
 			}
 		}
 
-		private void _get_result(ExecutionContext context, int state, Table t, int pos, int len)
+		private void _get_result(ExecutionContext context, int state, Table t, long pos, long len)
 				throws ResolvedControlThrowable {
 
 			final Object result;
@@ -733,7 +733,7 @@ public class DefaultTableLib extends TableLib {
 			}
 		}
 
-		private void _loop(ExecutionContext context, int state, Table t, int k, int len, Object result)
+		private void _loop(ExecutionContext context, int state, Table t, long k, long len, Object result)
 				throws ResolvedControlThrowable {
 
 			// came from start_loop in the invoke path
@@ -750,12 +750,12 @@ public class DefaultTableLib extends TableLib {
 
 						case _LOOP_TABGET:
 							state = _LOOP_TABSET;
-							Dispatch.index(context, t, Long.valueOf(k));
+							Dispatch.index(context, t, k);
 
 						case _LOOP_TABSET:
 							state = _LOOP_TEST;
 							Object v = context.getReturnBuffer().get0();
-							Dispatch.setindex(context, t, Long.valueOf(k - 1), v);
+							Dispatch.setindex(context, t, k - 1, v);
 							break;  // go to next iteration
 
 						default:
@@ -772,7 +772,7 @@ public class DefaultTableLib extends TableLib {
 			_erase(context, _ERASE_PREPARE, t, len, result);
 		}
 
-		private void _erase(ExecutionContext context, int state, Table t, int idx, Object result)
+		private void _erase(ExecutionContext context, int state, Table t, long idx, Object result)
 				throws ResolvedControlThrowable {
 
 			try {
@@ -814,12 +814,12 @@ public class DefaultTableLib extends TableLib {
 			public final int state;
 
 			public final Object obj;
-			public final int i;
-			public final int j;
-			public final int k;
+			public final long i;
+			public final long j;
+			public final long k;
 			public final ArrayList<Object> result;
 
-			public SuspendedState(int state, Object obj, int i, int j, int k, ArrayList<Object> result) {
+			public SuspendedState(int state, Object obj, long i, long j, long k, ArrayList<Object> result) {
 				this.state = state;
 				this.obj = obj;
 				this.i = i;
@@ -830,9 +830,9 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
-		private static void unpackUsingRawGet(ExecutionContext context, Table t, int i, int j) {
+		private static void unpackUsingRawGet(ExecutionContext context, Table t, long i, long j) {
 			ArrayList<Object> r = new ArrayList<>();
-			for (int k = i; k <= j; k++) {
+			for (long k = i; k <= j; k++) {
 				r.add(t.rawget(k));
 			}
 			context.getReturnBuffer().setToContentsOf(r);
@@ -843,7 +843,7 @@ public class DefaultTableLib extends TableLib {
 		private static final int STATE_BEFORE_LOOP = 2;
 		private static final int STATE_LOOP = 3;
 
-		private void run(ExecutionContext context, int state, Object obj, int i, int j, int k, ArrayList<Object> result)
+		private void run(ExecutionContext context, int state, Object obj, long i, long j, long k, ArrayList<Object> result)
 				throws ResolvedControlThrowable {
 
 			try {
@@ -921,13 +921,13 @@ public class DefaultTableLib extends TableLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object obj = args.peekOrNil();
 			args.skip();
-			int i = args.optNextInt(1);
+			long i = args.hasNext() && args.peek() != null ? args.nextInteger() : 1;
 
 			final int state;
-			final int j;
+			final long j;
 
 			if (args.hasNext() && args.peek() != null) {
-				j = args.nextInt();
+				j = args.nextInteger();
 				state = STATE_BEFORE_LOOP;
 			}
 			else if (obj instanceof Table && !hasLenMetamethod(context, (Table) obj)) {
