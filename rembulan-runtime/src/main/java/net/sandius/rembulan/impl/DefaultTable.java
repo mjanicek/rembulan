@@ -85,17 +85,6 @@ public class DefaultTable extends Table {
 		updateBasetableModes(key, value);
 	}
 
-	@Override
-	public long rawlen() {
-		long idx = 1;
-
-		while (rawget(idx) != null) {
-			++idx;
-		}
-
-		return idx - 1;
-	}
-
 	private Object next(Iterator<Object> it) {
 		return it.hasNext() ? it.next() : null;
 	}
