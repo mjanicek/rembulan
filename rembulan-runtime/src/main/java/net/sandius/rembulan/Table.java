@@ -125,35 +125,31 @@ public abstract class Table extends LuaObject {
 	 * <p>Note that when this table is not a sequence, the return value of this method
 	 * is undefined.</p>
 	 *
-	 * <p>The default implementation of {@code rawlen} returns a non-negative integer {@code i}
-	 * such that {@code rawget(i) != null} and {@code rawget(i + 1) == null} for {@code i > 0},
-	 * or 0 if {@code rawget(1) == null}.</p>
-	 *
 	 * @return  the length of the sequence if this table is a sequence
 	 */
 	public long rawlen() {
 		long idx = 1;
 
-		while (idx >= 1 && rawget(idx) != null) {
-			idx *= 2;
+		while (idx >= 0 && rawget(idx) != null) {
+			idx <<= 1;
 		}
+
+		// if idx overflows (idx < 0), don't check rawget(idx)
 
 		if (idx == 1) {
 			return 0;
 		}
-		else if (idx < 1) {
-			return Long.MAX_VALUE;
-		}
 		else {
-			// binary search in [idx / 2, idx]
+			// binary search in [idx >>> 1, idx]
 
-			long min = idx / 2;
+			long min = idx >>> 1;
 			long max = idx;
 
-			// invariant: rawget(min) != null && rawget(max) == null
+			// invariant: (min > 0 && rawget(min) != null) && (max < 0 || rawget(max) == null)
 
 			while (min + 1 != max) {
-				long mid = min + (max - min) / 2;
+				// works even if max == (1 << 63)
+				long mid = (min + max) >>> 1;
 				if (rawget(mid) == null) {
 					max = mid;
 				}
@@ -162,7 +158,7 @@ public abstract class Table extends LuaObject {
 				}
 			}
 
-			// min + 1 == max: given the invariant, min is the result
+			// min + 1 == max; given the invariant, min is the result
 
 			return min;
 		}
