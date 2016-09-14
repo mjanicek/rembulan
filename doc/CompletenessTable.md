@@ -89,7 +89,7 @@ Statuses:
 | `utf8.offset` | ![not implemented](not-implemented.png) | |
 | `table.concat` | ![complete](complete.png) | |
 | `table.insert` | ![complete](complete.png) | |
-| `table.move` | ![not implemented](not-implemented.png) | |
+| `table.move` | ![complete](complete.png) | |
 | `table.pack` | ![complete](complete.png) | |
 | `table.remove` | ![complete](complete.png) | |
 | `table.sort` | ![not implemented](not-implemented.png) | |

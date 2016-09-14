@@ -35,11 +35,9 @@ import java.util.ArrayList;
 
 public class DefaultTableLib extends TableLib {
 
-	private final LuaFunction _move;
 	private final LuaFunction _sort;
 
 	public DefaultTableLib() {
-		this._move = new UnimplementedFunction("table.move");  // TODO
 		this._sort = new UnimplementedFunction("table.sort");  // TODO
 	}
 
@@ -55,7 +53,7 @@ public class DefaultTableLib extends TableLib {
 
 	@Override
 	public LuaFunction _move() {
-		return _move;
+		return Move.INSTANCE;
 	}
 
 	@Override
@@ -507,6 +505,136 @@ public class DefaultTableLib extends TableLib {
 
 			// finished!
 			context.getReturnBuffer().setTo();
+		}
+
+	}
+
+	public static class Move extends AbstractLibFunction {
+
+		public static final Move INSTANCE = new Move();
+
+		@Override
+		protected String name() {
+			return "move";
+		}
+
+		private static class SuspendedState {
+
+			public final int state;
+			public final Table a1;
+			public final Table a2;
+			public final long f;
+			public final long t;
+			public final long idx;
+			public final long num;
+			public final boolean asc;
+
+			private SuspendedState(int state, Table a1, Table a2, long f, long t, long idx, long num, boolean asc) {
+				this.state = state;
+				this.a1 = a1;
+				this.a2 = a2;
+				this.f = f;
+				this.t = t;
+				this.idx = idx;
+				this.num = num;
+				this.asc = asc;
+			}
+
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+			if (args.size() < 2) {
+				throw args.badArgument(2, "number expected, got no value");
+			}
+			args.goTo(1);
+			long f = args.nextInteger();
+			long e = args.nextInteger();
+			long t = args.nextInteger();
+
+			final Table dest;
+			if (args.hasNext() && args.peek() != null) {
+				dest = args.nextTable();
+			}
+			else {
+				dest = null;
+			}
+
+			args.goTo(0);
+			final Table a1 = args.nextTable();
+			final Table a2 = dest != null ? dest : a1;
+
+			if (f <= e) {
+				long num = e - f + 1;
+				if (num <= 0) {
+					// overflow
+					throw args.badArgument(3, "too many elements to move");
+				}
+
+				boolean overlap = a1 == a2 && (f < t && t <= e);
+
+				if (!hasIndexMetamethod(context, a1) && !hasNewIndexMetamethod(context, a2)) {
+					// raw case
+					if (overlap) {
+						// same destination, range overlap
+						for (long idx = num - 1; idx >= 0; idx--) {
+							a2.rawset(t + idx, a1.rawget(f + idx));
+						}
+					}
+					else {
+						// different destination, or no range overlap
+						for (long idx = 0; idx < num; idx++) {
+							a2.rawset(t + idx, a1.rawget(f + idx));
+						}
+					}
+
+					context.getReturnBuffer().setTo(a2);
+				}
+				else {
+					long idx = overlap ? num - 1 : 0;
+					_run(context, 0, a1, a2, f, t, idx, num, !overlap);
+				}
+			}
+		}
+
+		private void _run(ExecutionContext context, int state, Table a1, Table a2, long f, long t, long idx, long num, boolean asc)
+				throws ResolvedControlThrowable {
+
+			try {
+				while (true) {
+					switch (state) {
+						case 0: {
+							boolean done = asc ? idx >= num : idx < 0;
+							if (done) {
+								context.getReturnBuffer().setTo(a2);
+								return;
+							}
+						}
+						case 1:
+							state = 2;
+							Dispatch.index(context, a1, f + idx);
+						case 2:
+							Object v = context.getReturnBuffer().get0();
+							state = 3;
+							Dispatch.setindex(context, a2, t + idx, v);
+						case 3:
+							idx += (asc ? 1 : -1);
+							state = 0;
+							break;
+						default:
+							throw new IllegalStateException("Illegal state: " + state);
+					}
+				}
+			}
+			catch (UnresolvedControlThrowable ct) {
+				throw ct.resolve(this, new SuspendedState(state, a1, a2, f, t, idx, num, asc));
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+			SuspendedState ss = (SuspendedState) suspendedState;
+			_run(context, ss.state, ss.a1, ss.a2, ss.f, ss.t, ss.idx, ss.num, ss.asc);
 		}
 
 	}

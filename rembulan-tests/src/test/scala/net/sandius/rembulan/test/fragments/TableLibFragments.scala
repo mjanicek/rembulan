@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.test.fragments
 
+import net.sandius.rembulan.Table
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
 
 object TableLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
@@ -259,6 +260,111 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
           |return ks, #t, t[1], t[2], t[3], t[4], t[5]
         """
       ) succeedsWith ("[1a][2b][3b]", 2, "d", "c", "a", null, null)
+
+    }
+
+    about ("table.move") {
+
+      program ("""table.move()""") failsWith "bad argument #2 to 'move' (number expected, got no value)"
+      program ("""table.move(nil)""") failsWith "bad argument #2 to 'move' (number expected, got no value)"
+      program ("""table.move(nil, nil)""") failsWith "bad argument #2 to 'move' (number expected, got nil)"
+      program ("""table.move(nil, "x")""") failsWith "bad argument #2 to 'move' (number expected, got string)"
+      program ("""table.move(nil, 1)""") failsWith "bad argument #3 to 'move' (number expected, got no value)"
+      program ("""table.move(nil, 1, 1)""") failsWith "bad argument #4 to 'move' (number expected, got no value)"
+      program ("""table.move(nil, 1, 1, 1)""") failsWith "bad argument #1 to 'move' (table expected, got nil)"
+      program ("""table.move({}, 1, 1, 1, "x")""") failsWith "bad argument #5 to 'move' (table expected, got string)"
+      program ("""table.move("x", 1, 1, 1, "y")""") failsWith "bad argument #5 to 'move' (table expected, got string)"
+
+      program ("""table.move({}, 1 << 63, (1 << 63) - 1, 0)""") failsWith "bad argument #3 to 'move' (too many elements to move)"
+      program ("""table.move({}, 0, (1 << 63) - 1, 0)""") failsWith "bad argument #3 to 'move' (too many elements to move)"
+      program ("""table.move({}, 1 << 63, -1, 0)""") failsWith "bad argument #3 to 'move' (too many elements to move)"
+
+      program ("""return table.move({}, 1, 1, 1, nil)""") succeedsWith (classOf[Table])
+
+      program ("""local t = {}; local u = table.move(t, 1, 1, 1); return t == u""") succeedsWith (true)
+
+      program (
+        """local t = table.move({"a", "b", "c", "d"}, 1, 3, 4)
+          |return #t, t[1], t[2], t[3], t[4], t[5], t[6]
+        """
+      ) succeedsWith (6, "a", "b", "c", "a", "b", "c")
+
+      program (
+        """local t = table.move({"a", "b", "c", "d"}, 1, 4, 2)
+          |return #t, t[1], t[2], t[3], t[4], t[5]
+        """
+      ) succeedsWith (5, "a", "a", "b", "c", "d")
+
+      program (
+        """local t = table.move({"a", "b", "c", "d", "e"}, 2, 5, 0)
+          |return #t, t[0], t[1], t[2], t[3], t[4], t[5]
+        """
+      ) succeedsWith (5, "b", "c", "d", "e", "d", "e")
+
+      program (
+        """-- same dest, no range overlap
+          |local log = ""
+          |local mt = {
+          |  __index = function (t, k) log = log.."["..tostring(k).."]" end,
+          |  __newindex = function (t, k, v) log = log.."{"..tostring(k).."}" end
+          |}
+          |
+          |table.move(setmetatable({}, mt), 1, 3, 4)
+          |return log
+        """
+      ) succeedsWith ("[1]{4}[2]{5}[3]{6}")
+
+      program (
+        """-- same dest, range overlap
+          |local log = ""
+          |local mt = {
+          |  __index = function (t, k) log = log.."["..tostring(k).."]" end,
+          |  __newindex = function (t, k, v) log = log.."{"..tostring(k).."}" end
+          |}
+          |
+          |table.move(setmetatable({}, mt), 1, 3, 2)
+          |return log
+        """
+      ) succeedsWith ("[3]{4}[2]{3}[1]{2}")
+
+      program (
+        """-- same dest, full overlap
+          |local log = ""
+          |local mt = {
+          |  __index = function (t, k) log = log.."["..tostring(k).."]" end,
+          |  __newindex = function (t, k, v) log = log.."{"..tostring(k).."}" end
+          |}
+          |
+          |table.move(setmetatable({}, mt), 1, 3, 1)
+          |return log
+        """
+      ) succeedsWith ("[1]{1}[2]{2}[3]{3}")
+
+      program (
+        """-- other dest, range overlap
+          |local log = ""
+          |local mt = {
+          |  __index = function (t, k) log = log.."["..tostring(k).."]" end,
+          |  __newindex = function (t, k, v) log = log.."{"..tostring(k).."}" end
+          |}
+          |
+          |table.move(setmetatable({}, mt), 1, 3, 2, setmetatable({}, mt))
+          |return log
+        """
+      ) succeedsWith ("[1]{2}[2]{3}[3]{4}")
+
+      program (
+        """-- other dest, no range overlap
+          |local log = ""
+          |local mt = {
+          |  __index = function (t, k) log = log.."["..tostring(k).."]" end,
+          |  __newindex = function (t, k, v) log = log.."{"..tostring(k).."}" end
+          |}
+          |
+          |table.move(setmetatable({}, mt), 1, 3, 4)
+          |return log
+        """
+      ) succeedsWith ("[1]{4}[2]{5}[3]{6}")
 
     }
 
