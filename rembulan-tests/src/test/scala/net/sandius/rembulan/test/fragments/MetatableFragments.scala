@@ -260,6 +260,7 @@ object MetatableFragments extends FragmentBundle with FragmentExpectations with 
     )
   
     for ((mtn, op) <- unaryMts) {
+
       val MetamethodCalled = fragment("metamethod " + mtn + " is called for unary '" + op + "'") {
         s"""t = {}
            |local mt = {}
@@ -270,8 +271,20 @@ object MetatableFragments extends FragmentBundle with FragmentExpectations with 
          """
       }
       MetamethodCalled in thisContext succeedsWith ("OK")
+
+      val MetamethodReceivesTwoArgs = fragment("metamethod " + mtn + " receives two arguments for '" + op + "'") {
+        s"""t = {}
+           |local mt = {}
+           |mt.$mtn = function(x, y) return x == y end
+           |setmetatable(t, mt)
+           |
+           |return ${op}t
+         """
+      }
+      MetamethodReceivesTwoArgs in thisContext succeedsWith (true)
+
     }
-    
+
   }
   
 }

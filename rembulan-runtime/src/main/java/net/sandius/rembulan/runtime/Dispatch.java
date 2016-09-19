@@ -421,7 +421,7 @@ public final class Dispatch {
 		Object handler = Metatables.getMetamethod(context, event, o);
 
 		if (handler != null) {
-			call(context, handler, o);
+			call(context, handler, o, o);
 		}
 		else {
 			throw Errors.illegalArithmeticAttempt(o);
@@ -780,7 +780,7 @@ public final class Dispatch {
 		Object handler = Metatables.getMetamethod(context, event, o);
 
 		if (handler != null) {
-			call(context, handler, o);
+			call(context, handler, o, o);
 		}
 		else {
 			throw Errors.illegalBitwiseOperationAttempt(o);
@@ -1046,7 +1046,7 @@ public final class Dispatch {
 		else {
 			Object handler = Metatables.getMetamethod(context, Metatables.MT_LEN, o);
 			if (handler != null) {
-				call(context, handler, o);
+				call(context, handler, o, o);
 			}
 			else if (o instanceof Table) {
 				context.getReturnBuffer().setTo(((Table) o).rawlen());
