@@ -143,6 +143,21 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""return string.format("%g", 3/70000)""") succeedsWith ("4.28571e-05")
 
       program ("""return ("%c%c%c%c%c"):format(104,101,108,108,111)""") succeedsWith ("hello")
+
+      program ("""return string.format("%s", nil)""") succeedsWith ("nil")
+      program ("""return string.format("%s", true)""") succeedsWith ("true")
+      program ("""return string.format("%s", 20.0)""") succeedsWith ("20.0")
+      program ("""return string.format("%s", "hello")""") succeedsWith ("hello")
+      program ("""return string.format("%s", {})""") succeedsWith (classOf[String])
+      program ("""return string.format("%s", setmetatable({}, {__tostring = function (v) return type(v) end}))""") succeedsWith ("table")
+      program ("""return string.format("|%s|%d", setmetatable({}, {__tostring = function (v) return type(v) end}), 42)""") succeedsWith ("|table|42")
+
+      program ("""return string.format("%q", nil)""") succeedsWith ("nil")
+      program ("""return string.format("%q%q", true, false)""") succeedsWith ("truefalse")
+      program ("""return string.format("%q", "hello")""") succeedsWith ("\"hello\"")
+      program ("""return string.format("%q", 10)""") succeedsWith ("10")
+      program ("""return string.format("%q", {})""") failsWith "bad argument #2 to 'format' (value has no literal form)"
+
     }
 
     about ("find") {

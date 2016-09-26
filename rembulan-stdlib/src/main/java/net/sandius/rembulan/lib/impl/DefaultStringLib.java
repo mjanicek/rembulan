@@ -19,11 +19,13 @@ package net.sandius.rembulan.lib.impl;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaRuntimeException;
+import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
+import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.runtime.AbstractFunction0;
 import net.sandius.rembulan.runtime.Dispatch;
@@ -280,6 +282,30 @@ public class DefaultStringLib extends StringLib {
 			return "format";
 		}
 
+		private static class SuspendedState {
+
+			public final String fmt;  // the format string
+			public final String str;  // the string so far
+			public final ArgumentIterator args;
+			public final int index;
+
+			// flags for the suspended %s
+			public final int width;
+			public final int flags;
+			public final int precision;
+
+			public SuspendedState(String fmt, String str, ArgumentIterator args, int index, int width, int flags, int precision) {
+				this.fmt = fmt;
+				this.str = str;
+				this.args = args;
+				this.index = index;
+				this.width = width;
+				this.flags = flags;
+				this.precision = precision;
+			}
+
+		}
+
 		private static String optionToString(char c) {
 			if (Character.isLetterOrDigit(c)) {
 				return "%" + c;
@@ -374,22 +400,22 @@ public class DefaultStringLib extends StringLib {
 			return -1;
 		}
 
-		private IllegalArgumentException invalidOptionException(char c) {
+		private static IllegalArgumentException invalidOptionException(char c) {
 			return new IllegalArgumentException("invalid option '" + optionToString(c) + "' to 'format'");
 		}
 
-		private int setFlag(int flags, int mask) {
+		private static int setFlag(int flags, int mask) {
 			if ((flags & mask) != 0) {
 				throw new IllegalArgumentException("illegal format (repeated flags)");
 			}
 			return flags | mask;
 		}
 
-		private boolean hasFlag(int flags, int mask) {
+		private static boolean hasFlag(int flags, int mask) {
 			return (flags & mask) != 0;
 		}
 
-		private String sign(boolean nonNegative, int flags) {
+		private static String sign(boolean nonNegative, int flags) {
 			return nonNegative
 					? (hasFlag(flags, FLAG_SIGN_ALWAYS)
 							? "+"
@@ -399,23 +425,23 @@ public class DefaultStringLib extends StringLib {
 					: "-";
 		}
 
-		private String altForm(long value, int flags, String prefix) {
+		private static String altForm(long value, int flags, String prefix) {
 			return value != 0 && hasFlag(flags, FLAG_ALT_FORM) ? prefix : "";
 		}
 
-		private String padded(int precision, String digits) {
+		private static String padded(int precision, String digits) {
 			return precision >= 0
 					? padLeft("0".equals(digits) ? "" : digits, '0', precision)
 					: digits;
 		}
 
-		private String trimmed(int precision, String chars) {
+		private static String trimmed(int precision, String chars) {
 			return precision >= 0
 					? chars.substring(0, Math.min(chars.length(), precision))
 					: chars;
 		}
 
-		private String justified(int width, int flags, String digits) {
+		private static String justified(int width, int flags, String digits) {
 			return width >= 0
 					? (hasFlag(flags, FLAG_LEFTJUSTIFY)
 							? padRight(digits, ' ', width)
@@ -429,7 +455,138 @@ public class DefaultStringLib extends StringLib {
 		private static final int FLAG_ZERO_PAD = 1 << 4;
 		private static final int FLAG_ALT_FORM = 1 << 5;
 
-		private int placeholder(String fmt, int from, StringBuilder bld, ArgumentIterator args) {
+		private static void format_signed_integer(StringBuilder bld, ArgumentIterator args, char spec, int width, int flags, int precision) {
+			long l = args.nextInteger();
+
+			String ls = LuaFormat.toString(l);
+			String digits = l < 0 ? ls.substring(1) : ls;  // ignore the sign, we'll re-attach it later
+			bld.append(justified(width, flags,
+					sign(l >= 0, flags) + padded(precision, digits)));
+		}
+
+		private static void format_unsigned_integer(StringBuilder bld, ArgumentIterator args, int width, int flags, int precision) {
+			long l = args.nextInteger();
+
+			String digits = longToUnsignedString(l);
+			bld.append(justified(width, flags, padded(precision, digits)));
+		}
+
+		private static void format_octal_integer(StringBuilder bld, ArgumentIterator args, int width, int flags, int precision) {
+			long l = args.nextInteger();
+
+			String digits = Long.toOctalString(l);
+			bld.append(justified(width, flags, altForm(l, flags, "0") + padded(precision, digits)));
+		}
+
+		private static void format_hex_integer(StringBuilder bld, ArgumentIterator args, boolean uppercase, int width, int flags, int precision) {
+			long l = args.nextInteger();
+
+			String digits = Long.toHexString(l);
+			String lowerCaseResult = justified(width, flags,
+					altForm(l, flags, "0x") + padded(precision, digits));
+
+			bld.append(uppercase ? lowerCaseResult.toUpperCase() : lowerCaseResult);
+		}
+
+		private static void format_char(StringBuilder bld, ArgumentIterator args, int width, int flags) {
+			bld.append(justified(width, flags, Character.toString((char) args.nextInteger())));
+		}
+
+		private static void format_float(StringBuilder bld, ArgumentIterator args, char spec, int width, int flags, int precision) {
+			double v = args.nextFloat();
+
+			if (Double.isNaN(v) || Double.isInfinite(v)) {
+				final String chars;
+
+				chars = Double.isNaN(v)
+						? LuaFormat.NAN
+						: sign(v > 0, flags) + LuaFormat.POS_INF;
+
+				bld.append(justified(width, flags, chars));
+			}
+			else {
+				StringBuilder fmtBld = new StringBuilder();
+				fmtBld.append('%');
+				if (hasFlag(flags, FLAG_LEFTJUSTIFY)) fmtBld.append('-');
+				if (hasFlag(flags, FLAG_SIGN_ALWAYS)) fmtBld.append('+');
+				if (hasFlag(flags, FLAG_SIGN_SPACE)) fmtBld.append(' ');
+				if (hasFlag(flags, FLAG_ZERO_PAD)) fmtBld.append('0');
+				if (hasFlag(flags, FLAG_ALT_FORM)) fmtBld.append('#');
+
+				if (width > 0) fmtBld.append(width);
+				// width required by Formatter, but not supplied
+				else if (hasFlag(flags, FLAG_ZERO_PAD)) fmtBld.append('1');
+
+				if (precision > 0) fmtBld.append('.').append(precision);
+				fmtBld.append(spec);
+				String formatted = String.format(fmtBld.toString(), v);
+
+				if (spec == 'a' || spec == 'A') {
+					// insert the '+' sign to the exponent
+					int p = formatted.indexOf(spec == 'a' ? 'p' : 'P') + 1;
+					if (formatted.charAt(p) != '-') {
+						formatted = formatted.substring(0, p) + '+' + formatted.substring(p);
+					}
+				}
+
+				bld.append(formatted);
+			}
+		}
+
+		private void format_s(ExecutionContext context, String fmt, StringBuilder bld, ArgumentIterator args, int index, int width, int flags, int precision)
+				throws ResolvedControlThrowable {
+			Object v = args.nextAny();
+			final String s;
+
+			String stringValue = Conversions.stringValueOf(v);
+			if (stringValue != null) {
+				s = stringValue;
+			}
+			else {
+				Object metamethod = Metatables.getMetamethod(context, BasicLib.MT_TOSTRING, v);
+				if (metamethod != null) {
+					// call __tostring
+					try {
+						Dispatch.call(context, metamethod, v);
+					}
+					catch (UnresolvedControlThrowable ct) {
+						throw ct.resolve(this, new SuspendedState(fmt, bld.toString(), args, index, width, flags, precision));
+					}
+					resume_s(context, bld, width, flags, precision);
+					return;
+				}
+				else {
+					s = Conversions.toHumanReadableString(v);
+				}
+			}
+			bld.append(justified(width, flags, trimmed(precision, s)));
+		}
+
+		private static void resume_s(ExecutionContext context, StringBuilder bld, int width, int flags, int precision) {
+			Object o = context.getReturnBuffer().get0();
+			String sv = Conversions.stringValueOf(o);
+			String s = sv != null ? sv : "";
+			bld.append(justified(width, flags, trimmed(precision, s)));
+		}
+
+		private void format_q(StringBuilder bld, ArgumentIterator args) {
+			Object o = args.nextAny();
+			final String s;
+
+			if (o == null) s = LuaFormat.NIL;
+			else if (o instanceof Boolean) s = LuaFormat.toString(((Boolean) o).booleanValue());
+			else if (o instanceof String) s = LuaFormat.escape((String) o);
+			else if (o instanceof Number) s = Conversions.stringValueOf((Number) o);
+			else {
+				throw new BadArgumentException(args.at(), name(), "value has no literal form");
+			}
+
+			bld.append(s);
+		}
+
+		private int placeholder(ExecutionContext context, String fmt, int from, StringBuilder bld, ArgumentIterator args)
+				throws ResolvedControlThrowable {
+
 			if (!args.hasNext()) {
 				throw new BadArgumentException(args.size() + 1, name(), "no value");
 			}
@@ -536,52 +693,28 @@ public class DefaultStringLib extends StringLib {
 			{
 				char d = fmt.charAt(index++);
 
-				final String result;
-
 				switch (d) {
+
 					case 'd':
-					case 'i': {
-						long l = args.nextInteger();
-
-						String ls = LuaFormat.toString(l);
-						String digits = l < 0 ? ls.substring(1) : ls;  // ignore the sign, we'll re-attach it later
-						result = justified(width, flags,
-								sign(l >= 0, flags) + padded(precision, digits));
+					case 'i':
+						format_signed_integer(bld, args, d, width, flags, precision);
 						break;
-					}
 
-					case 'u': {
-						long l = args.nextInteger();
-
-						String digits = longToUnsignedString(l);
-						result = justified(width, flags,
-								padded(precision, digits));
+					case 'u':
+						format_unsigned_integer(bld, args, width, flags, precision);
 						break;
-					}
 
-					case 'o': {
-						long l = args.nextInteger();
-
-						String digits = Long.toOctalString(l);
-						result = justified(width, flags,
-								altForm(l, flags, "0") + padded(precision, digits));
+					case 'o':
+						format_octal_integer(bld, args, width, flags, precision);
 						break;
-					}
 
 					case 'x':
-					case 'X': {
-						long l = args.nextInteger();
-
-						String digits = Long.toHexString(l);
-						String lowerCaseResult = justified(width, flags,
-								altForm(l, flags, "0x") + padded(precision, digits));
-
-						result = d == 'X' ? lowerCaseResult.toUpperCase() : lowerCaseResult;
+					case 'X':
+						format_hex_integer(bld, args, d == 'X', width, flags, precision);
 						break;
-					}
 
 					case 'c':
-						result = justified(width, flags, Character.toString((char) args.nextInteger()));
+						format_char(bld, args, width, flags);
 						break;
 
 					case 'f':
@@ -590,74 +723,23 @@ public class DefaultStringLib extends StringLib {
 					case 'e':
 					case 'E':
 					case 'g':
-					case 'G': {
-						double v = args.nextFloat();
-
-						if (Double.isNaN(v) || Double.isInfinite(v)) {
-							final String chars;
-
-							chars = Double.isNaN(v)
-									? LuaFormat.NAN
-									: sign(v > 0, flags) + LuaFormat.POS_INF;
-
-							result = justified(width, flags, chars);
-						}
-						else {
-							StringBuilder fmtBld = new StringBuilder();
-							fmtBld.append('%');
-							if (hasFlag(flags, FLAG_LEFTJUSTIFY)) fmtBld.append('-');
-							if (hasFlag(flags, FLAG_SIGN_ALWAYS)) fmtBld.append('+');
-							if (hasFlag(flags, FLAG_SIGN_SPACE)) fmtBld.append(' ');
-							if (hasFlag(flags, FLAG_ZERO_PAD)) fmtBld.append('0');
-							if (hasFlag(flags, FLAG_ALT_FORM)) fmtBld.append('#');
-
-							if (width > 0) fmtBld.append(width);
-							// width required by Formatter, but not supplied
-							else if (hasFlag(flags, FLAG_ZERO_PAD)) fmtBld.append('1');
-
-							if (precision > 0) fmtBld.append('.').append(precision);
-							fmtBld.append(d);
-							String formatted = String.format(fmtBld.toString(), v);
-
-							if (d == 'a' || d == 'A') {
-								// insert the '+' sign to the exponent
-								int p = formatted.indexOf(d == 'a' ? 'p' : 'P') + 1;
-								if (formatted.charAt(p) != '-') {
-									formatted = formatted.substring(0, p) + '+' + formatted.substring(p);
-								}
-							}
-
-							result = formatted;
-						}
-
+					case 'G':
+						format_float(bld, args, d, width, flags, precision);
 						break;
-					}
 
-					case 's': {
-						Object v = args.nextAny();
-						String s = Conversions.stringValueOf(v);
-						if (s != null) {
-							result = justified(width, flags, trimmed(precision, s));
-						}
-						else {
-							// TODO: use __tostring for non-string arguments
-							throw new UnsupportedOperationException("not implemented: tostring");
-						}
+					case 's':
+						format_s(context, fmt, bld, args, index, width, flags, precision);
 						break;
-					}
 
-					case 'q': {
-						String s = args.nextString();
-						result = LuaFormat.escape(s);
+					case 'q':
+						format_q(bld, args);
 						break;
-					}
 
 					default:
 						throw new IllegalArgumentException("invalid option '" + optionToString(d) + "' to 'format'");
 
 				}
 
-				bld.append(result);
 			}
 
 			return index < fmt.length() ? index : -1;
@@ -666,24 +748,33 @@ public class DefaultStringLib extends StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String fmt = args.nextString();
-
 			StringBuilder bld = new StringBuilder();
-
-			int idx = 0;
-			do {
-				idx = literal(fmt, idx, bld);
-				if (idx >= 0) {
-					idx = placeholder(fmt, idx, bld, args);
-				}
-			} while (idx >= 0);
-
-			context.getReturnBuffer().setTo(bld.toString());
+			run(context, fmt, args, bld, 0);
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			// TODO: needed for tostring
-			super.resume(context, suspendedState);
+			SuspendedState ss = (SuspendedState) suspendedState;
+
+			StringBuilder bld = new StringBuilder(ss.str);
+
+			// resume the suspended %s
+			resume_s(context, bld, ss.width, ss.flags, ss.precision);
+
+			// continue the loop
+			run(context, ss.fmt, ss.args, bld, ss.index);
+		}
+
+		private void run(ExecutionContext context, String fmt, ArgumentIterator args, StringBuilder bld, int idx)
+				throws ResolvedControlThrowable {
+			do {
+				idx = literal(fmt, idx, bld);
+				if (idx >= 0) {
+					idx = placeholder(context, fmt, idx, bld, args);
+				}
+			} while (idx >= 0);
+
+			context.getReturnBuffer().setTo(bld.toString());
 		}
 
 	}

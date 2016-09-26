@@ -77,6 +77,11 @@ public class ArgumentIterator implements Iterator<Object> {
 		return namer;
 	}
 
+	public int at() {
+		// 0-based!
+		return index;
+	}
+
 	public void skip() {
 		index += 1;
 	}

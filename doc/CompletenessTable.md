@@ -67,7 +67,7 @@ Statuses:
 | `string.char` | ![complete](complete.png) | |
 | `string.dump` | ![not implemented](not-implemented.png) | |
 | `string.find` | ![complete](complete.png) | |
-| `string.format` | ![partial](partial.png) | no `__tostring` metamethod calls for `%s` |
+| `string.format` | ![complete](complete.png) | |
 | `string.gmatch` | ![complete](complete.png) | |
 | `string.gsub` | ![complete](complete.png) | |
 | `string.len` | ![complete](complete.png) | |
