@@ -16,8 +16,8 @@
 
 package net.sandius.rembulan.test.fragments
 
-import net.sandius.rembulan.Table
 import net.sandius.rembulan.test.{FragmentBundle, FragmentExpectations, OneLiners}
+import net.sandius.rembulan.{LuaFormat, Table}
 
 object TableLibFragments extends FragmentBundle with FragmentExpectations with OneLiners {
 
@@ -486,6 +486,107 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
           |return ks, #t, x, y, t[1], t[2], t[3], t[4]
         """
       ) succeedsWith ("[1a][3c][2b][4d]{3}[3nil]", 4, "b", "d", "a", null, null, null)
+
+    }
+
+    about ("table.sort") {
+
+      program ("""table.sort()""") failsWith "bad argument #1 to 'sort' (table expected, got no value)"
+      program ("""table.sort(nil)""") failsWith "bad argument #1 to 'sort' (table expected, got nil)"
+      program ("""table.sort("hello")""") failsWith "bad argument #1 to 'sort' (table expected, got string)"
+
+      // comparator defined, but not called
+      program ("""table.sort({}, nil)""") succeedsWith ()
+      program ("""table.sort({}, 42)""") succeedsWith ()
+
+      program ("""local t = {2, 1}; table.sort(t); return t[1], t[2]""") succeedsWith (1, 2)
+      program ("""local t = {2, 1}; table.sort(t, nil); return t[1], t[2]""") succeedsWith (1, 2)
+
+      program ("""table.sort({3, 2}, 1)""") failsWith "bad argument #2 to 'sort' (function expected, got number)"
+
+      program ("""table.sort({true, false})""") failsWith "attempt to compare two boolean values"
+      program ("""table.sort({1, false})""") failsWith "attempt to compare "<<"boolean with number"
+
+      def doSortExplicit(vals: Seq[Any], exp: Seq[Any], comp: Option[String]): Unit = {
+        val vs = vals map {
+          case s: String => LuaFormat.escape(s)
+          case other => other
+        }
+        val ctor = vs.mkString("{", ",", "}")
+        val getter = ((1 to vals.size) map { "t[" + _.toString + "]" }).mkString(", ")
+
+        val compStr = comp match {
+          case Some(s) => ", " + s
+          case None => ""
+        }
+
+        program("local t = " + ctor + "; table.sort(t" + compStr + "); return " + getter).succeedsWith(exp:_*)
+      }
+
+      def doSort(vals: Any*): Unit = {
+        val exp = vals sortWith {
+          case (a: String, b: String) => a.compareTo(b) < 0
+          case (a: Number, b: Number) => net.sandius.rembulan.Ordering.NUMERIC.lt(a, b)
+          case _ => false
+        }
+        doSortExplicit(vals, exp, None)
+      }
+
+      doSort("a", "b", "c", "d")
+      doSort("d", "c", "b", "a")
+
+      doSort((50 to 120):_*)
+      doSort(30.to(4, -2):_*)
+      doSort(1.1, 1.3, 1.0, 1.2, 2.0, 1.0)
+
+//      doSortExplicit(Seq("hello", "hi", "hola"), Seq("hi", "hola", "hello"), Some("function(a, b) return #a < #b end"))
+
+      doSort(3, 8, 5, 4, 6)
+
+      program (
+        """local t = {"one", "thirteen", "three", "four", "eleven"}
+          |table.sort(t, function(a, b) return #a < #b end)
+          |return t[1], t[2], t[3], t[4], t[5]
+        """) succeedsWith ("one", "four", "three", "eleven", "thirteen")
+
+      // full stops
+      program (
+        """-- total mt access
+          |local t = {"one", "thirteen", "three", "four", "eleven"}
+          |local mt = {
+          |  __len = function (t) return rawlen(t) end,
+          |  __index = function (t, k) return rawget(t, k) end,
+          |  __newindex = function (t, k, v) return rawset(t, k, v) end
+          |}
+          |table.sort(setmetatable(t, mt), function(a, b) return #a < #b end)
+          |return t[1], t[2], t[3], t[4], t[5]
+        """) succeedsWith ("one", "four", "three", "eleven", "thirteen")
+
+      // proxy
+      program (
+        """-- proxy
+          |local function proxy(t)
+          |  return setmetatable({}, {
+          |    __len = function (_t) return #t end,
+          |    __index = function (_t, k) return t[k] end,
+          |    __newindex = function (_t, k, v) t[k] = v end
+          |  })
+          |end
+          |
+          |local t = {5, 3, 2, 6, 1, 4}
+          |table.sort(proxy(t))
+          |return t[1], t[2], t[3], t[4], t[5], t[6]
+        """
+      ) succeedsWith (1, 2, 3, 4, 5, 6)
+
+      // comparator must be a function
+      program ("""local f = setmetatable({}, {__call=function() return true end}); table.sort({2, 1}, f)""") failsWith "bad argument #2 to 'sort' (function expected, got table)"
+
+      // invalid order function
+      program ("""table.sort({1, 2, 3, 4}, function(a,b) return true end)""") failsWith "invalid order function for sorting"
+
+      // PUC-Lua does not detect the invalid order function in this case, and neither do we
+      program ("""table.sort({1, 2, 3, 4}, function(a,b) return false end)""") succeedsWith ()
 
     }
 

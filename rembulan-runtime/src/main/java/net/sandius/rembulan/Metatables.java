@@ -166,6 +166,37 @@ public final class Metatables {
 	public static final String MT_MODE = "__mode";
 
 	/**
+	 * Returns the entry with the key {@code event} of the metatable of the {@link LuaObject}
+	 * {@code o}. If {@code o} does not have a metatable or {@code event} does not exist in it as
+	 * a key, returns {@code null}.
+	 *
+	 * <p>The access of the metatable is raw (i.e. uses {@link Table#rawget(Object)}).</p>
+	 *
+	 * <p>This method differs from {@link #getMetamethod(MetatableProvider, String, Object)}
+	 * in that it does not require a metatable provider as the object in question is known
+	 * to have metatables attached on a per-instance basis.</p>
+	 *
+	 * @param event  the key to look up in the metatable, must not be {@code null}
+	 * @param o  the object in question, must not be {@code null}
+	 * @return a non-{@code null} value if {@code event} is a key in {@code o}'s metatable;
+	 *         {@code null} otherwise
+	 *
+	 * @throws NullPointerException  if {@code o} or {@code event} is {@code null}
+	 */
+	public static Object getMetamethod(String event, LuaObject o) {
+		Objects.requireNonNull(event);
+		Objects.requireNonNull(o);
+
+		Table mt = o.getMetatable();
+		if (mt != null) {
+			return mt.rawget(event);
+		}
+		else {
+			return null;
+		}
+	}
+
+	/**
 	 * Returns the entry with the key {@code event} of the metatable of the object {@code o}.
 	 * If {@code o} does not have a metatable or {@code event} does not exist in it as
 	 * a key, returns {@code null}.

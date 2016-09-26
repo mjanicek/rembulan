@@ -18,10 +18,9 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
-import net.sandius.rembulan.Metatables;
+import net.sandius.rembulan.Ordering;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.TableLib;
 import net.sandius.rembulan.runtime.Dispatch;
@@ -35,10 +34,14 @@ import java.util.ArrayList;
 
 public class DefaultTableLib extends TableLib {
 
-	private final LuaFunction _sort;
+	// Functions defined in this code are among the ugliest pieces of code ever written.
+	// This is because we must assume that any operation that may suspend will -- and
+	// given that most of these functions involve a loop, this means we must be able to
+	// suspend and resume *in the middle* of such loops. Whenever a more complex logic
+	// is involved, this becomes extremely hairy -- table.sort is a particularly juicy
+	// example.
 
 	public DefaultTableLib() {
-		this._sort = new UnimplementedFunction("table.sort");  // TODO
 	}
 
 	@Override
@@ -68,7 +71,7 @@ public class DefaultTableLib extends TableLib {
 
 	@Override
 	public LuaFunction _sort() {
-		return _sort;
+		return Sort.INSTANCE;
 	}
 
 	@Override
@@ -76,33 +79,14 @@ public class DefaultTableLib extends TableLib {
 		return Unpack.INSTANCE;
 	}
 
-	static boolean hasLenMetamethod(ExecutionContext context, Table t) {
-		return Metatables.getMetamethod(context, Metatables.MT_LEN, t) != null;
-	}
-
-	static boolean hasIndexMetamethod(ExecutionContext context, Table t) {
-		return Metatables.getMetamethod(context, Metatables.MT_INDEX, t) != null;
-	}
-
-	static boolean hasNewIndexMetamethod(ExecutionContext context, Table t) {
-		return Metatables.getMetamethod(context, Metatables.MT_NEWINDEX, t) != null;
-	}
-
-	static int getLength(ReturnBuffer rbuf) {
+	static long getLength(ReturnBuffer rbuf) {
 		Object o = rbuf.get0();
 		Long l = Conversions.integerValueOf(o);
-		if (l == null) {
-			throw new LuaRuntimeException("object length is not an integer");
-		}
-		long ll = l.longValue();
-
-		// does it fit into a 32-bit int?
-		int i = (int) ll;
-		if ((long) i != ll) {
-			throw new LuaRuntimeException("object length is not a 32-bit integer");
+		if (l != null) {
+			return l.longValue();
 		}
 		else {
-			return i;
+			throw new LuaRuntimeException("object length is not an integer");
 		}
 	}
 
@@ -202,7 +186,7 @@ public class DefaultTableLib extends TableLib {
 						// i, j are known, k is 0
 
 						// is this a clean table without __index?
-						if (!hasIndexMetamethod(context, t)) {
+						if (!TableUtil.hasIndexMetamethod(t)) {
 							concatUsingRawGet(context, t, sep, i, j);
 							return;
 						}
@@ -268,7 +252,7 @@ public class DefaultTableLib extends TableLib {
 			final int state;
 			final long k;
 
-			if (!hasLenMetamethod(context, t)) {
+			if (!TableUtil.hasLenMetamethod(t)) {
 				// safe to use rawlen
 				state = STATE_BEFORE_LOOP;
 				k = t.rawlen();
@@ -351,7 +335,7 @@ public class DefaultTableLib extends TableLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
 
-			if (!hasLenMetamethod(context, t)) {
+			if (!TableUtil.hasLenMetamethod(t)) {
 				run_args(context, t, args, t.rawlen());
 			}
 			else {
@@ -375,7 +359,7 @@ public class DefaultTableLib extends TableLib {
 
 			// __len is defined, must go through Dispatch
 
-			final int len;
+			final long len;
 
 			try {
 				switch (state) {
@@ -431,7 +415,7 @@ public class DefaultTableLib extends TableLib {
 			// check whether we can use raw accesses instead of having to go through
 			// Dispatch and potential metamethods
 
-			if (!hasIndexMetamethod(context, t) && !hasNewIndexMetamethod(context, t)) {
+			if (!TableUtil.hasIndexMetamethod(t) && !TableUtil.hasNewIndexMetamethod(t)) {
 				// raw case
 				rawInsert(t, pos, len, value);
 				context.getReturnBuffer().setTo();
@@ -573,7 +557,7 @@ public class DefaultTableLib extends TableLib {
 
 				boolean overlap = a1 == a2 && (f < t && t <= e);
 
-				if (!hasIndexMetamethod(context, a1) && !hasNewIndexMetamethod(context, a2)) {
+				if (!TableUtil.hasIndexMetamethod(a1) && !TableUtil.hasNewIndexMetamethod(a2)) {
 					// raw case
 					if (overlap) {
 						// same destination, range overlap
@@ -741,7 +725,7 @@ public class DefaultTableLib extends TableLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
 
-			if (!hasLenMetamethod(context, t)) {
+			if (!TableUtil.hasLenMetamethod(t)) {
 				run_args(context, t, args, t.rawlen());
 			}
 			else {
@@ -766,7 +750,7 @@ public class DefaultTableLib extends TableLib {
 
 			// __len is defined, must go through Dispatch
 
-			final int len;
+			final long len;
 
 			try {
 				switch (state) {
@@ -816,7 +800,7 @@ public class DefaultTableLib extends TableLib {
 			// check whether we can use raw accesses instead of having to go through
 			// Dispatch and potential metamethods
 
-			if (!hasIndexMetamethod(context, t) && !hasNewIndexMetamethod(context, t)) {
+			if (!TableUtil.hasIndexMetamethod(t) && !TableUtil.hasNewIndexMetamethod(t)) {
 				// raw case
 				Object result = rawRemove(t, pos, len);
 				context.getReturnBuffer().setTo(result);
@@ -928,6 +912,410 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
+	public static class Sort extends AbstractLibFunction {
+
+		// implemented using heapsort
+
+		public static final Sort INSTANCE = new Sort();
+
+		@Override
+		protected String name() {
+			return "sort";
+		}
+
+		// States:
+		// +-------------------------+----------------------------+---------------------+
+		// |     fetching length     |         heapifying         |       sorting       |
+		// +-------------------------+----------------------------+---------------------+
+		// ^                         ^                            ^
+		// +- STATE_OFFSET_LEN       +- STATE_OFFSET_HEAPIFY      +- STATE_OFFSET_SORT
+
+		private static final int STATE_OFFSET_LEN = 0;
+		private static final int STATE_OFFSET_HEAPIFY = STATE_OFFSET_LEN + 2;
+		private static final int STATE_OFFSET_SORT = STATE_OFFSET_HEAPIFY + 2;
+
+		private static class SuspendedState {
+
+			// whenever siftState is >= 0, there is an unfinished siftDown operation;
+			// once completed, state is to be resumed.
+
+			public final int state;
+			public final int siftState;
+
+			public final ArgumentIterator args;
+			public final Table t;
+			public final LuaFunction comp;
+
+			public final long i;
+			public final long len;
+			public final long j;
+
+			public final Object o1;
+			public final Object o2;
+			public final Object o3;
+
+			private SuspendedState(int state, int siftState, ArgumentIterator args, Table t, LuaFunction comp,
+								   long i, long len, long j, Object o1, Object o2, Object o3) {
+				this.state = state;
+				this.siftState = siftState;
+				this.t = t;
+				this.args = args;
+				this.comp = comp;
+				this.i = i;
+				this.len = len;
+				this.j = j;
+
+				this.o1 = o1;
+				this.o2 = o2;
+				this.o3 = o3;
+			}
+
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+			Table t = args.nextTable();
+
+			if (!TableUtil.hasLenMetamethod(t)) {
+				long len = t.rawlen();
+				prepareLoop(context, args, t, len);
+			}
+			else {
+				fetchLen(context, STATE_OFFSET_LEN, args, t);
+			}
+
+		}
+
+		private void fetchLen(ExecutionContext context, int state, ArgumentIterator args, Table t)
+				throws ResolvedControlThrowable {
+
+			long len = 0;
+			try {
+				switch (state) {
+					case STATE_OFFSET_LEN:
+						state = STATE_OFFSET_LEN + 1;
+						Dispatch.len(context, t);
+					case STATE_OFFSET_LEN + 1:
+						len = getLength(context.getReturnBuffer());
+						break;
+					default:
+						throw new IllegalStateException("Illegal state: " + state);
+				}
+			}
+			catch (UnresolvedControlThrowable ct) {
+				throw ct.resolve(this, new SuspendedState(state, -1, args, t, null, 1, -1, -1, null, null, null));
+			}
+
+			prepareLoop(context, args, t, len);
+		}
+
+		private void prepareLoop(ExecutionContext context, ArgumentIterator args, Table t, long len)
+			throws ResolvedControlThrowable {
+
+			if (len < 2) {
+				// nothing to sort
+				return;
+			}
+			else {
+				LuaFunction comp = args.hasNext() && args.peek() != null ? args.nextFunction() : null;
+
+				// can we sort it using a raw ordering?
+				Ordering<Object> rawOrdering = comp == null
+						&& !TableUtil.hasIndexMetamethod(t)
+						&& !TableUtil.hasNewIndexMetamethod(t)
+						? TableUtil.rawSequenceOrderingOf(t, 1, len) : null;
+
+				if (rawOrdering != null) {
+					rawSort(t, rawOrdering, len);
+				}
+				else {
+					go(context, t, comp, len);
+				}
+			}
+
+		}
+
+		private static void rawSort(Table t, Ordering<Object> ordering, long len) {
+			assert (len > 1);
+
+			rawHeapify(t, ordering, len);
+
+			long end = len;
+			while (end > 1) {
+				Object beginValue = t.rawget(1);
+				Object endValue = t.rawget(end);
+
+				// swap
+				t.rawset(end, beginValue);
+				t.rawset(1, endValue);
+
+				end -= 1;
+				rawSiftDown(t, ordering, 1, end);
+			}
+		}
+
+		private static void rawHeapify(Table t, Ordering<Object> ordering, long count) {
+			for (long start = count / 2; start >= 1; start--) {
+				rawSiftDown(t, ordering, start, count);
+			}
+		}
+
+		private void go(ExecutionContext context, Table t, LuaFunction comp, long len)
+				throws ResolvedControlThrowable {
+
+			heapify(context, STATE_OFFSET_HEAPIFY, t, comp, len / 2, len);
+			sort(context, STATE_OFFSET_SORT, t, comp, len, null, null);
+		}
+
+		private void heapify(ExecutionContext context, int state, Table t, LuaFunction comp, long start, long count)
+				throws ResolvedControlThrowable {
+
+			loop:
+			while (true) {
+				switch (state) {
+					case STATE_OFFSET_HEAPIFY:
+						if (start < 1) {
+							// done: [1..end] is a max-heap
+							break loop;
+						}
+						state = STATE_OFFSET_HEAPIFY + 1;
+						doSiftDown(context, state, t, comp, start, count);
+
+					case STATE_OFFSET_HEAPIFY + 1:
+						state = STATE_OFFSET_HEAPIFY;
+						start -= 1;
+						break;
+
+					default: throw new IllegalStateException("Illegal state: " + state);
+				}
+			}
+		}
+
+		private void sort(ExecutionContext context, int state, Table t, LuaFunction comp, long end,
+						  Object beginValue, Object endValue)
+				throws ResolvedControlThrowable {
+
+			while (true) {
+				try {
+					switch (state) {
+						case STATE_OFFSET_SORT:
+							if (end <= 1) {
+								// we're done
+								context.getReturnBuffer().setTo();
+								return;
+							}
+							state = STATE_OFFSET_SORT + 1;
+							Dispatch.index(context, t, 1);
+
+						case STATE_OFFSET_SORT + 1:
+							beginValue = context.getReturnBuffer().get0();
+							state = STATE_OFFSET_SORT + 2;
+							Dispatch.index(context, t, end);
+
+						case STATE_OFFSET_SORT + 2:
+							endValue = context.getReturnBuffer().get0();
+
+							// Verify order:
+							// The value at index 1 (i.e., beginValue) must be greater-than
+							// or equal-to the value at index `end` (i.e., endValue), since
+							// [1..end] is a max-heap. In other words, we're expecting that
+							//   (beginValue >= endValue),
+							// i.e.,
+							//   not (beginValue < endValue)
+
+							state = STATE_OFFSET_SORT + 3;
+							_lt(context, comp, beginValue, endValue);
+
+						case STATE_OFFSET_SORT + 3:
+							if (Conversions.booleanValueOf(context.getReturnBuffer().get0())) {
+								// illegal order: beginValue < endValue
+								throw new IllegalStateException("invalid order function for sorting");
+							}
+
+							// next: swap begin and end values in the table
+							state = STATE_OFFSET_SORT + 4;
+							Dispatch.setindex(context, t, end, beginValue);
+
+						case STATE_OFFSET_SORT + 4:
+							state = STATE_OFFSET_SORT + 5;
+							Dispatch.setindex(context, t, 1, endValue);
+
+						case STATE_OFFSET_SORT + 5:
+							// we don't need beginValue or endValue any longer
+							end -= 1;
+							state = STATE_OFFSET_SORT;
+							doSiftDown(context, state, t, comp, 1, end);
+							break;
+
+						default: throw new IllegalStateException("Illegal state: " + state);
+					}
+				}
+				catch (UnresolvedControlThrowable ct) {
+					throw ct.resolve(this, new SuspendedState(state, -1, null, t, comp, -1, end, -1, beginValue, endValue, null));
+				}
+			}
+		}
+
+		private void _lt(ExecutionContext context, LuaFunction comp, Object a, Object b)
+				throws UnresolvedControlThrowable {
+
+			if (comp != null) {
+				Dispatch.call(context, comp, a, b);
+			}
+			else {
+				Dispatch.lt(context, a, b);
+			}
+
+		}
+
+		private void doSiftDown(ExecutionContext context, int state, Table t, LuaFunction comp, long start, long end)
+				throws ResolvedControlThrowable {
+			siftDown(context, state, 0, t, comp, start, end, 0, null, null, null);
+		}
+
+		private void siftDown(ExecutionContext context, final int state, int siftState, Table t, LuaFunction comp,
+							  long root, long end, long child, Object rootValue, Object childValue, Object tmp)
+				throws ResolvedControlThrowable {
+
+			try {
+				while (true) {
+					switch (siftState) {
+
+						case 0:
+							if (root * 2 > end) {
+								// we're done
+								context.getReturnBuffer().setTo();
+								return;
+							}
+							child = root * 2;
+							siftState = 1;
+							Dispatch.index(context, t, root);
+
+						case 1:
+							rootValue = context.getReturnBuffer().get0();
+							siftState = 2;
+							Dispatch.index(context, t, child);
+
+						case 2:
+							childValue = context.getReturnBuffer().get0();
+
+							if (child + 1 > end) {
+								// skip the next steps
+								siftState = 5;
+								break;
+							}
+							else {
+								siftState = 3;
+								Dispatch.index(context, t, child + 1);
+							}
+
+						case 3:
+							tmp = context.getReturnBuffer().get0();
+							siftState = 4;
+							_lt(context, comp, childValue, tmp);
+
+						case 4:
+							if (Conversions.booleanValueOf(context.getReturnBuffer().get0())) {
+								// use the right child
+								child += 1;
+								childValue = tmp;
+								tmp = null;
+							}
+
+						case 5:
+							// childValue and child is up-to-date
+							siftState = 6;
+							_lt(context, comp, rootValue, childValue);
+
+						case 6:
+							if (!Conversions.booleanValueOf(context.getReturnBuffer().get0())) {
+								// heap property satisfied -> done
+								return;
+							}
+
+							// else: swap
+
+							siftState = 7;
+							Dispatch.setindex(context, t, root, childValue);
+
+						case 7:
+							siftState = 8;
+							Dispatch.setindex(context, t, child, rootValue);
+
+						case 8:
+							root = child;
+							siftState = 0;
+							break;  // continue with the loop
+
+						default:
+							throw new IllegalStateException("Illegal state: " + state);
+					}
+				}
+			}
+			catch (UnresolvedControlThrowable ct) {
+				throw ct.resolve(this, new SuspendedState(state, siftState, null, t, comp, root, end, child, rootValue, childValue, tmp));
+			}
+
+		}
+
+		private static void swap(Table t, long a, long b, Object va, Object vb) {
+			t.rawset(a, vb);
+			t.rawset(b, va);
+		}
+
+		private static void rawSiftDown(Table t, Ordering<Object> ordering, long start, long end) {
+			long root = start;
+
+			while (root * 2 <= end) {
+				long child = root * 2;
+
+				final Object rootValue = t.rawget(root);
+				Object childValue = t.rawget(child);
+				if (child + 1 <= end) {
+					Object tmp = t.rawget(child + 1);
+					if (ordering.lt(childValue, tmp)) {
+						// use the right child
+						child += 1;
+						childValue = tmp;
+					}
+				}
+
+				if (ordering.lt(rootValue, childValue)) {
+					swap(t, root, child, rootValue, childValue);
+					root = child;
+				}
+				else {
+					return;
+				}
+			}
+
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+			SuspendedState ss = (SuspendedState) suspendedState;
+			if (ss.state < STATE_OFFSET_HEAPIFY) {
+				fetchLen(context, ss.state, ss.args, ss.t);
+			}
+			else {
+				if (ss.siftState >= 0) {
+					// resume a siftDown
+					siftDown(context, ss.state, ss.siftState, ss.t, ss.comp, ss.i, ss.len, ss.j, ss.o1, ss.o2, ss.o3);
+				}
+
+				if (ss.state < STATE_OFFSET_SORT) {
+					heapify(context, ss.state, ss.t, ss.comp, ss.i, ss.len);
+					sort(context, STATE_OFFSET_SORT, ss.t, ss.comp, ss.len, null, null);
+				}
+				else {
+					sort(context, ss.state, ss.t, ss.comp, ss.len, ss.o1, ss.o2);
+				}
+
+			}
+		}
+
+	}
+
 	public static class Unpack extends AbstractLibFunction {
 
 		public static final Unpack INSTANCE = new Unpack();
@@ -989,7 +1377,7 @@ public class DefaultTableLib extends TableLib {
 						// j is known;
 
 						// is this a clean table without __index?
-						if (obj instanceof Table && !hasIndexMetamethod(context, (Table) obj)) {
+						if (obj instanceof Table && !TableUtil.hasIndexMetamethod((Table) obj)) {
 							unpackUsingRawGet(context, (Table) obj, i, j);
 							return;
 						}
@@ -1058,7 +1446,7 @@ public class DefaultTableLib extends TableLib {
 				j = args.nextInteger();
 				state = STATE_BEFORE_LOOP;
 			}
-			else if (obj instanceof Table && !hasLenMetamethod(context, (Table) obj)) {
+			else if (obj instanceof Table && !TableUtil.hasLenMetamethod((Table) obj)) {
 				j = ((Table) obj).rawlen();  // safe to use rawlen
 				state = STATE_BEFORE_LOOP;
 			}

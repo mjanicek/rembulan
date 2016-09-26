@@ -34,7 +34,8 @@ import java.util.Comparator;
  * {@link #NUMERIC} for the numeric ordering and {@link #STRING} for the string
  * ordering. These instances may be used directly for comparing objects of known,
  * conforming types; for unknown objects, the method {@link #of(Object, Object)}
- * returns either of the two ordering instances, or {@code null} if the arguments
+ * returns an ordering that accepts {@link java.lang.Object}, and uses one of
+ * the two ordering instances, or {@code null} if the arguments
  * are not directly comparable in Lua.</p>
  *
  * <p>The comparison methods of this class return unboxed booleans.</p>
@@ -50,10 +51,9 @@ import java.util.Comparator;
  * <pre>
  *     // Object a, b
  *     final boolean result;
- *     Ordering&lt;?&gt; cmp = Ordering.of(a, b);
+ *     Ordering&lt;Object&gt; cmp = Ordering.of(a, b);
  *     if (cmp != null) {
  *         // a and b are comparable in cmp
- *         {@literal @}SuppressWarnings("unchecked")
  *         result = cmp.le(a, b);
  *     }
  *     else {
@@ -368,44 +368,87 @@ public abstract class Ordering<T> implements Comparator<T> {
 
 	}
 
+	private static final NumericObjectOrdering NUMERIC_OBJECT = new NumericObjectOrdering();
+	private static final StringObjectOrdering STRING_OBJECT = new StringObjectOrdering();
+
+	private static class NumericObjectOrdering extends Ordering<Object> {
+
+		@Override
+		public boolean eq(Object a, Object b) {
+			return NUMERIC.eq((Number) a, (Number) b);
+		}
+
+		@Override
+		public boolean lt(Object a, Object b) {
+			return NUMERIC.lt((Number) a, (Number) b);
+		}
+
+		@Override
+		public boolean le(Object a, Object b) {
+			return NUMERIC.le((Number) a, (Number) b);
+		}
+
+		@Override
+		public int compare(Object a, Object b) {
+			return NUMERIC.compare((Number) a, (Number) b);
+		}
+
+	}
+
+	private static class StringObjectOrdering extends Ordering<Object> {
+
+		@Override
+		public boolean eq(Object a, Object b) {
+			return STRING.eq((String) a, (String) b);
+		}
+
+		@Override
+		public boolean lt(Object a, Object b) {
+			return STRING.lt((String) a, (String) b);
+		}
+
+		@Override
+		public boolean le(Object a, Object b) {
+			return STRING.le((String) a, (String) b);
+		}
+
+		@Override
+		public int compare(Object a, Object b) {
+			return STRING.compare((String) a, (String) b);
+		}
+
+	}
+
 	/**
 	 * Based on the actual types of the arguments {@code a} and {@code b}, returns
 	 * the ordering in which {@code a} and {@code b} can be compared, or {@code null}
 	 * if they are not comparable.
 	 *
 	 * <p>More specifically, if {@code a} and {@code b} are both numbers, returns
-	 * {@link #NUMERIC}; if {@code a} and {@code b} are both strings, returns
+	 * an ordering that uses (but is distinct from) {@link #NUMERIC}; if {@code a} and
+	 * {@code b} are both strings, returns an ordering that uses (but is distinct from)
 	 * {@link #STRING}; otherwise, returns {@code null}.</p>
 	 *
 	 * <p>Note that when the result is non-{@code null}, it is guaranteed that
 	 * 1) neither {@code a} nor {@code b} is {@code null}; and 2)
-	 * both {@code a} and {@code b} are of the accepted type of the comparison methods
-	 * (i.e. have been checked at runtime to be subclasses of the erased type parameter
-	 * {@code T} of the returned ordering). The following construction is therefore valid:</p>
-	 *
-	 * <pre>
-	 *     // Object a, b
-	 *     Ordering&lt;?&gt; cmp = Ordering.of(a, b);
-	 *     if (cmp != null) {
-	 *         // a and b are subclasses of cmp's (erased) type parameter,
-	 *         // so it is okay to suppress the warning here:
-	 *         {@literal @}SuppressWarnings("unchecked")
-	 *         boolean result = cmp.lt(a, b);
-	 *     }
-	 * </pre>
+	 * both {@code a} and {@code b} are of types accepted by the underlying ordering.
+	 * Caution must be observed when using the ordering with another object {@code c}
+	 * (i.e., other than {@code a} or {@code b}): the returned ordering will throw
+	 * a {@link ClassCastException} if {@code c} is of an incompatible type, or
+	 * a {@link NullPointerException} if {@code c} is {@code null}.</p>
 	 *
 	 * @param a  an object, may be {@code null}
 	 * @param b  another object, may be {@code null}
-	 * @return  {@link #NUMERIC} if both {@code a} and {@code b} are numbers;
-	 *          {@link #STRING} if both {@code a} and {@code b} are strings;
+	 * @return  an ordering based on {@link #NUMERIC} if both {@code a} and {@code b} are numbers;
+	 *          an ordering based on {@link #STRING} if both {@code a} and {@code b} are strings;
 	 *          {@code null} otherwise
 	 */
-	public static Ordering<?> of(Object a, Object b) {
+	public static Ordering<Object> of(Object a, Object b) {
 		if (a instanceof Number && b instanceof Number) {
-			return NUMERIC;
+			return NUMERIC_OBJECT;
 		}
 		else if (a instanceof String && b instanceof String) {
-			return STRING;
+			return STRING_OBJECT;
 		}
 		else {
 			return null;

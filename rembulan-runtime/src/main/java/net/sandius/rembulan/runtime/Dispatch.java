@@ -1227,9 +1227,8 @@ public final class Dispatch {
 	 */
 	@SuppressWarnings("unused")
 	public static void lt(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
-		Ordering c = Ordering.of(a, b);
+		Ordering<Object> c = Ordering.of(a, b);
 		if (c != null) {
-			@SuppressWarnings("unchecked")
 			boolean result = c.lt(a, b);
 			context.getReturnBuffer().setTo(result);
 		}
@@ -1301,9 +1300,8 @@ public final class Dispatch {
 	 */
 	@SuppressWarnings("unused")
 	public static void le(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
-		Ordering c = Ordering.of(a, b);
+		Ordering<Object> c = Ordering.of(a, b);
 		if (c != null) {
-			@SuppressWarnings("unchecked")
 			boolean result = c.le(a, b);
 			context.getReturnBuffer().setTo(result);
 		}

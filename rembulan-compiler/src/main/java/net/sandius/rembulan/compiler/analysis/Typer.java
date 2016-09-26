@@ -113,7 +113,7 @@ public class Typer {
 			return null;
 		}
 
-		Ordering c = Ordering.of(l, r);
+		Ordering<Object> c = Ordering.of(l, r);
 
 		if (c == null) {
 			return null;
