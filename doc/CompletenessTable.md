@@ -91,7 +91,7 @@ Statuses:
 | `table.move` | ![complete](complete.png) | |
 | `table.pack` | ![complete](complete.png) | |
 | `table.remove` | ![complete](complete.png) | |
-| `table.sort` | ![not implemented](not-implemented.png) | |
+| `table.sort` | ![complete](complete.png) | |
 | `table.unpack` | ![complete](complete.png) | |
 | `math.abs` | ![complete](complete.png) | |
 | `math.acos` | ![complete](complete.png) | |
