@@ -99,7 +99,7 @@ final class ClassWrapper<T> extends JavaWrapper<Class<T>> {
 		public static final GetStaticMemberAccessor INSTANCE = new GetStaticMemberAccessor();
 
 		@Override
-		protected LuaFunction accessorForName(String methodName) {
+		protected LuaFunction methodAccessorForName(String methodName) {
 			return new InvokeStaticMethod(methodName);
 		}
 
@@ -134,14 +134,14 @@ final class ClassWrapper<T> extends JavaWrapper<Class<T>> {
 			Object[] invokeArgs = new Object[args.length - 1];
 			System.arraycopy(args, 1, invokeArgs, 0, invokeArgs.length);
 
-			// find the best method invoker
-			MethodInvoker invoker = MethodInvoker.find(wrapper.get(), methodName, true, invokeArgs);
-
-			// invoke the method
 			try {
+				// find the best method invoker
+				MappedMethod invoker = MethodSelector.select(wrapper.get(), methodName, true, invokeArgs);
+
+				// invoke the method
 				invoker.invoke(context.getReturnBuffer(), null, invokeArgs);
 			}
-			catch (InvocationTargetException | IllegalAccessException ex) {
+			catch (MethodSelectionException | InvocationTargetException | IllegalAccessException ex) {
 				throw new LuaRuntimeException(ex);
 			}
 

@@ -103,8 +103,8 @@ public class LuaJavaLib extends Lib {
 			try {
 				instance = ObjectWrapper.newInstance(className, ctorArgs);
 			}
-			catch (ClassNotFoundException | IllegalAccessException | InstantiationException
-					| InvocationTargetException ex) {
+			catch (ClassNotFoundException | MethodSelectionException | IllegalAccessException
+					| InstantiationException | InvocationTargetException ex) {
 
 				throw new LuaRuntimeException(ex);
 			}
@@ -188,7 +188,8 @@ public class LuaJavaLib extends Lib {
 			try {
 				instance = ObjectWrapper.newInstance(classWrapper.get(), new Object[] { });
 			}
-			catch (IllegalAccessException | InstantiationException | InvocationTargetException ex) {
+			catch (MethodSelectionException | IllegalAccessException | InstantiationException
+					| InvocationTargetException ex) {
 				throw new LuaRuntimeException(ex);
 			}
 

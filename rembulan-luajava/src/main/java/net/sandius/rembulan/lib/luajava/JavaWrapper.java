@@ -78,7 +78,7 @@ abstract class JavaWrapper<T> extends Userdata {
 
 	static abstract class AbstractGetMemberAccessor extends AbstractFunction2 {
 
-		protected abstract LuaFunction accessorForName(String methodName);
+		protected abstract LuaFunction methodAccessorForName(String methodName);
 
 		@Override
 		public void invoke(ExecutionContext context, Object arg1, Object arg2)
@@ -98,7 +98,7 @@ abstract class JavaWrapper<T> extends Userdata {
 				}
 			}
 
-			context.getReturnBuffer().setTo(accessorForName(methodName));
+			context.getReturnBuffer().setTo(methodAccessorForName(methodName));
 		}
 
 		@Override

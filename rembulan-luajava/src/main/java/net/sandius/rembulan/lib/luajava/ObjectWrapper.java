@@ -46,14 +46,14 @@ final class ObjectWrapper<T> extends JavaWrapper<T> {
 	}
 
 	public static <T> ObjectWrapper<T> newInstance(Class<T> clazz, Object[] args)
-			throws IllegalAccessException, InstantiationException, InvocationTargetException {
-		ConstructorInvoker<T> invoker = ConstructorInvoker.find(clazz, args);
+			throws MethodSelectionException, IllegalAccessException, InstantiationException, InvocationTargetException {
+		MappedConstructor<T> invoker = MethodSelector.selectConstructor(clazz, args);
 		T o = invoker.newInstance(args);
 		return new ObjectWrapper<>(o);
 	}
 
 	public static ObjectWrapper<?> newInstance(String className, Object[] args)
-			throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
+			throws MethodSelectionException, ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		return newInstance(Class.forName(className), args);
 	}
 
@@ -100,7 +100,7 @@ final class ObjectWrapper<T> extends JavaWrapper<T> {
 		public static final GetInstanceMemberAccessor INSTANCE = new GetInstanceMemberAccessor();
 
 		@Override
-		protected LuaFunction accessorForName(String methodName) {
+		protected LuaFunction methodAccessorForName(String methodName) {
 			return new InvokeInstanceMethod(methodName);
 		}
 
@@ -137,14 +137,14 @@ final class ObjectWrapper<T> extends JavaWrapper<T> {
 			Object[] invokeArgs = new Object[args.length - 1];
 			System.arraycopy(args, 1, invokeArgs, 0, invokeArgs.length);
 
-			// find the best method invoker
-			MethodInvoker invoker = MethodInvoker.find(instance.getClass(), methodName, false, invokeArgs);
-
-			// invoke the method
 			try {
+				// find the best method invoker
+				MappedMethod invoker = MethodSelector.select(instance.getClass(), methodName, false, invokeArgs);
+
+				// invoke the method
 				invoker.invoke(context.getReturnBuffer(), instance, invokeArgs);
 			}
-			catch (InvocationTargetException | IllegalAccessException ex) {
+			catch (MethodSelectionException | InvocationTargetException | IllegalAccessException ex) {
 				throw new LuaRuntimeException(ex);
 			}
 
