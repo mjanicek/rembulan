@@ -22,7 +22,8 @@ import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.ValueTypeNamer;
 import net.sandius.rembulan.lib.Lib;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 /**
  * A value type namer that looks up type names in object metatables, and distinguishes
@@ -44,14 +45,24 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 	 * metatable provider {@code metatableProvider} for looking up type names.
 	 *
 	 * @param metatableProvider  the metatable provider, must not be {@code null}
-	 * @throws IllegalArgumentException  if {@code metatableProvider} is {@code null}
+	 * @throws NullPointerException  if {@code metatableProvider} is {@code null}
 	 */
 	public NameMetamethodValueTypeNamer(MetatableProvider metatableProvider) {
-		this.metatableProvider = Check.notNull(metatableProvider);
+		this.metatableProvider = Objects.requireNonNull(metatableProvider);
 	}
 
-	@Override
-	public String typeNameOf(Object instance) {
+	/**
+	 * Returns the type name (a string) of the given value {@code instance}, using
+	 * {@code metatableProvider} to look up the the name in the {@code "__name"} field
+	 * of {@code instance}'s metatable, if it is defined.
+	 *
+	 * @param instance  the object instance, may be {@code null}
+	 * @param metatableProvider  the metatable provider, must not be {@code null}
+	 * @return  type name of {@code instance}
+	 *
+	 * @throws NullPointerException  if {@code metatableProvider} is {@code null}
+	 */
+	public static String typeNameOf(Object instance, MetatableProvider metatableProvider) {
 		Object nameField = Metatables.getMetamethod(metatableProvider, Lib.MT_NAME, instance);
 		if (nameField instanceof String) {
 			return (String) nameField;
@@ -64,6 +75,11 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 				return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
 			}
 		}
+	}
+
+	@Override
+	public String typeNameOf(Object instance) {
+		return typeNameOf(instance, metatableProvider);
 	}
 
 }

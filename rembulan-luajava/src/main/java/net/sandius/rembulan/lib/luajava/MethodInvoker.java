@@ -103,7 +103,7 @@ class MethodInvoker {
 		}
 	}
 
-	public void invoke(ReturnBuffer buffer, Object object, Object[] args)
+	public void invoke(ReturnBuffer buffer, Object instance, Object[] args)
 			throws InvocationTargetException, IllegalAccessException {
 
 		Object[] actualArgs = new Object[args.length];
@@ -111,7 +111,7 @@ class MethodInvoker {
 			actualArgs[i] = converters[i].apply(args[i]);
 		}
 
-		Object result = method.invoke(object, args);
+		Object result = method.invoke(instance, args);
 		setResult(buffer, result);
 	}
 
