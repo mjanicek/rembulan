@@ -20,6 +20,7 @@ import net.sandius.rembulan.runtime.ReturnBuffer;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -63,14 +64,17 @@ class MethodInvoker {
 		return new MethodInvoker(method, converters, score);
 	}
 
-	public static MethodInvoker find(Class<?> clazz, String methodName, Object[] args) {
+	public static MethodInvoker find(Class<?> clazz, String methodName, boolean isStatic, Object[] args) {
 
 		// filter out non-matching methods
 
 		int score = Integer.MAX_VALUE;
 		List<MethodInvoker> invokers = new ArrayList<>();
 		for (Method m : clazz.getMethods()) {
-			if (m.getName().equals(methodName)) {
+			int mod = m.getModifiers();
+			if (Modifier.isPublic(mod) && Modifier.isStatic(mod) == isStatic
+					&&m.getName().equals(methodName)) {
+
 				MethodInvoker invoker = MethodInvoker.of(m, args);
 				if (invoker != null) {
 					if (invoker.score < score) {
@@ -111,7 +115,7 @@ class MethodInvoker {
 			actualArgs[i] = converters[i].apply(args[i]);
 		}
 
-		Object result = method.invoke(instance, args);
+		Object result = method.invoke(instance, actualArgs);
 		setResult(buffer, result);
 	}
 

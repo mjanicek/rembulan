@@ -17,6 +17,9 @@
 package net.sandius.rembulan.lib.luajava;
 
 import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.LuaObject;
+import net.sandius.rembulan.runtime.Coroutine;
+import net.sandius.rembulan.runtime.LuaFunction;
 
 final class JavaConversions {
 
@@ -25,8 +28,24 @@ final class JavaConversions {
 	}
 
 	public static Object toLuaValue(Object o) {
-//		return o instanceof Number ? Conversions.toCanonicalNumber((Number) o) : o;
-		return o;
+		if (o instanceof Class) {
+			return ClassWrapper.of((Class<?>) o);
+		}
+		else {
+			if (o == null || o instanceof Boolean || o instanceof String) {
+				return o;
+			}
+			else if (o instanceof Number) {
+				return Conversions.toCanonicalNumber((Number) o);
+			}
+			else if (o instanceof Character) {
+				return Long.valueOf(((Character) o).charValue());
+			}
+			else if (o instanceof LuaFunction || o instanceof Coroutine || o instanceof LuaObject) {
+				return o;
+			}
+			else return ObjectWrapper.of(o);
+		}
 	}
 
 	public static Long toLong(Long l) {

@@ -16,44 +16,67 @@
 
 package net.sandius.rembulan.lib.luajava;
 
-import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.impl.ImmutableTable;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.impl.NameMetamethodValueTypeNamer;
-import net.sandius.rembulan.runtime.AbstractFunction1;
-import net.sandius.rembulan.runtime.AbstractFunction2;
 import net.sandius.rembulan.runtime.AbstractFunctionAnyArg;
 import net.sandius.rembulan.runtime.ExecutionContext;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
-class ObjectWrapper extends Userdata {
+final class ObjectWrapper<T> extends JavaWrapper<T> {
 
-	private final Object object;
+	private final T instance;
 
-	ObjectWrapper(Object object) {
-		this.object = Objects.requireNonNull(object);
+	private ObjectWrapper(T instance) {
+		this.instance = Objects.requireNonNull(instance);
 	}
 
-	public static ObjectWrapper newInstance(Class<?> clazz, Object[] args)
+	public static <T> ObjectWrapper<T> of(T instance) {
+		return new ObjectWrapper<>(instance);
+	}
+
+	public static <T> ObjectWrapper<T> newInstance(Class<T> clazz, Object[] args)
 			throws IllegalAccessException, InstantiationException, InvocationTargetException {
-		ConstructorInvoker invoker = ConstructorInvoker.find(clazz, args);
-		Object o = invoker.newInstance(args);
-		return new ObjectWrapper(o);
+		ConstructorInvoker<T> invoker = ConstructorInvoker.find(clazz, args);
+		T o = invoker.newInstance(args);
+		return new ObjectWrapper<>(o);
 	}
 
-	public static ObjectWrapper newInstance(String className, Object[] args)
+	public static ObjectWrapper<?> newInstance(String className, Object[] args)
 			throws ClassNotFoundException, IllegalAccessException, InvocationTargetException, InstantiationException {
 		return newInstance(Class.forName(className), args);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ObjectWrapper<?> that = (ObjectWrapper<?>) o;
+		return this.instance == that.instance;
+	}
+
+	@Override
+	public int hashCode() {
+		return instance.hashCode();
+	}
+
+	static String staticTypeName() {
+		return "Java object";
+	}
+
+	@Override
+	String typeName() {
+		return staticTypeName();
 	}
 
 	@Override
@@ -62,123 +85,49 @@ class ObjectWrapper extends Userdata {
 	}
 
 	@Override
-	public Table setMetatable(Table mt) {
-		throw new UnsupportedOperationException("cannot change object wrapper metatable");
-	}
-
-	@Override
-	public Object getUserValue() {
-		return null;  // TODO
-	}
-
-	@Override
-	public Object setUserValue(Object value) {
-		return null;  // TODO
-	}
-
-	/**
-	 * Returns the wrapped object.
-	 *
-	 * @return  the wrapped object
-	 */
-	public Object get() {
-		return object;
-	}
-
-	public void invoke(ExecutionContext context, String methodName, Object[] args) {
-		MethodInvoker best = MethodInvoker.find(object.getClass(), methodName, args);
-
-		try {
-			best.invoke(context.getReturnBuffer(), object, args);
-		}
-		catch (IllegalAccessException | InvocationTargetException ex) {
-			throw new LuaRuntimeException(ex);
-		}
+	public T get() {
+		return instance;
 	}
 
 	static final ImmutableTable METATABLE = new ImmutableTable.Builder()
-			.add(Metatables.MT_INDEX, GetMethod.INSTANCE)
-			.add(Lib.MT_NAME, "object wrapper")
+			.add(Metatables.MT_INDEX, GetInstanceMemberAccessor.INSTANCE)
+			.add(Lib.MT_NAME, staticTypeName())
 			.add(BasicLib.MT_TOSTRING, ToString.INSTANCE)
 			.build();
 
-	static class GetMethod extends AbstractFunction2 {
+	static class GetInstanceMemberAccessor extends AbstractGetMemberAccessor {
 
-		public static final GetMethod INSTANCE = new GetMethod();
-
-		@Override
-		public void invoke(ExecutionContext context, Object arg1, Object arg2)
-				throws ResolvedControlThrowable {
-
-			// arg1 is ignored
-
-			final String methodName;
-			{
-				String s = Conversions.stringValueOf(arg2);
-				if (s != null) {
-					methodName = s;
-				}
-				else {
-					throw new IllegalArgumentException("invalid method name: expecting string, got "
-							+ NameMetamethodValueTypeNamer.typeNameOf(arg2, context));
-				}
-			}
-
-			context.getReturnBuffer().setTo(new InvokeJavaMethod(methodName));
-		}
+		public static final GetInstanceMemberAccessor INSTANCE = new GetInstanceMemberAccessor();
 
 		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
+		protected LuaFunction accessorForName(String methodName) {
+			return new InvokeInstanceMethod(methodName);
 		}
 
 	}
 
-	static class ToString extends AbstractFunction1 {
-
-		public static final ToString INSTANCE = new ToString();
-
-		@Override
-		public void invoke(ExecutionContext context, Object arg1) throws ResolvedControlThrowable {
-			if (arg1 instanceof ObjectWrapper) {
-				ObjectWrapper wrapper = (ObjectWrapper) arg1;
-				context.getReturnBuffer().setTo("Java object (" + wrapper.get().toString() + ")");
-			}
-			else {
-				throw new IllegalArgumentException("invalid argument to toString: expecting object wrapper, got "
-						+ NameMetamethodValueTypeNamer.typeNameOf(arg1, context));
-			}
-		}
-
-		@Override
-		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			throw new NonsuspendableFunctionException(this.getClass());
-		}
-
-	}
-
-	static class InvokeJavaMethod extends AbstractFunctionAnyArg {
+	static class InvokeInstanceMethod extends AbstractFunctionAnyArg {
 
 		private final String methodName;
 
-		public InvokeJavaMethod(String methodName) {
+		public InvokeInstanceMethod(String methodName) {
 			this.methodName = Objects.requireNonNull(methodName);
 		}
 
 		@Override
 		public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
 			if (args.length < 1) {
-				throw new BadArgumentException(1, methodName, "object wrapper expected, got no value");
+				throw new BadArgumentException(1, methodName, staticTypeName() + " expected, got no value");
 			}
 
-			final ObjectWrapper wrapper;
+			final ObjectWrapper<?> wrapper;
 			{
 				Object o = args[0];
 				if (o instanceof ObjectWrapper) {
-					wrapper = (ObjectWrapper) o;
+					wrapper = (ObjectWrapper<?>) o;
 				}
 				else {
-					throw new BadArgumentException(1, methodName, "object wrapper expected, got "
+					throw new BadArgumentException(1, methodName, staticTypeName() + ", got "
 							+ NameMetamethodValueTypeNamer.typeNameOf(o, context));
 				}
 			}
@@ -189,7 +138,7 @@ class ObjectWrapper extends Userdata {
 			System.arraycopy(args, 1, invokeArgs, 0, invokeArgs.length);
 
 			// find the best method invoker
-			MethodInvoker invoker = MethodInvoker.find(instance.getClass(), methodName, invokeArgs);
+			MethodInvoker invoker = MethodInvoker.find(instance.getClass(), methodName, false, invokeArgs);
 
 			// invoke the method
 			try {

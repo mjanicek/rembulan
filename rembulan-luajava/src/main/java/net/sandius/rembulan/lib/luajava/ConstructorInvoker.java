@@ -20,21 +20,22 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-class ConstructorInvoker {
+class ConstructorInvoker<T> {
 
-	private final Constructor<?> constructor;
+	private final Constructor<T> constructor;
 	private final ValueConverter[] converters;
 
 	private final int score;
 
-	ConstructorInvoker(Constructor<?> constructor, ValueConverter[] converters, int score) {
-		this.constructor = constructor;
+	ConstructorInvoker(Constructor<T> constructor, ValueConverter[] converters, int score) {
+		this.constructor = Objects.requireNonNull(constructor);
 		this.converters = converters;
 		this.score = score;
 	}
 
-	static ConstructorInvoker of(Constructor<?> constructor, Object[] args) {
+	static <T> ConstructorInvoker<T> of(Constructor<T> constructor, Object[] args) {
 		int score = 0;
 
 		Class<?>[] paramTypes = constructor.getParameterTypes();
@@ -56,18 +57,20 @@ class ConstructorInvoker {
 			score += sc;
 		}
 
-		return new ConstructorInvoker(constructor, converters, score);
+		return new ConstructorInvoker<>(constructor, converters, score);
 	}
 
-	public static ConstructorInvoker find(Class<?> clazz, Object[] args) {
-		Constructor<?>[] ctors = clazz.getConstructors();
+	public static <T> ConstructorInvoker<T> find(Class<T> clazz, Object[] args) {
 
 		// filter out non-matching methods
 
 		int score = Integer.MAX_VALUE;
-		List<ConstructorInvoker> invokers = new ArrayList<>();
+		List<ConstructorInvoker<T>> invokers = new ArrayList<>();
 		for (Constructor<?> ctor : clazz.getConstructors()) {
-			ConstructorInvoker invoker = ConstructorInvoker.of(ctor, args);
+
+			@SuppressWarnings("unchecked")
+			ConstructorInvoker<T> invoker = ConstructorInvoker.of((Constructor<T>) ctor, args);
+
 			if (invoker != null) {
 				if (invoker.score < score) {
 					// the best so far
@@ -98,7 +101,7 @@ class ConstructorInvoker {
 		}
 	}
 
-	public Object newInstance(Object[] args)
+	public T newInstance(Object[] args)
 			throws IllegalAccessException, InvocationTargetException, InstantiationException {
 
 		Object[] actualArgs = new Object[args.length];

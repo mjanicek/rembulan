@@ -16,51 +16,142 @@
 
 package net.sandius.rembulan.lib.luajava;
 
+import net.sandius.rembulan.LuaRuntimeException;
+import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.Userdata;
+import net.sandius.rembulan.impl.ImmutableTable;
+import net.sandius.rembulan.impl.NonsuspendableFunctionException;
+import net.sandius.rembulan.lib.BadArgumentException;
+import net.sandius.rembulan.lib.BasicLib;
+import net.sandius.rembulan.lib.Lib;
+import net.sandius.rembulan.lib.impl.NameMetamethodValueTypeNamer;
+import net.sandius.rembulan.runtime.AbstractFunctionAnyArg;
+import net.sandius.rembulan.runtime.ExecutionContext;
+import net.sandius.rembulan.runtime.LuaFunction;
+import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
 
-class ClassWrapper extends Userdata {
+final class ClassWrapper<T> extends JavaWrapper<Class<T>> {
 
-	private final Class<?> clazz;
+	private final Class<T> clazz;
 
-	ClassWrapper(Class<?> clazz) {
+	private ClassWrapper(Class<T> clazz) {
 		this.clazz = Objects.requireNonNull(clazz);
 	}
 
-	public static ClassWrapper of(String className) throws ClassNotFoundException {
-		return new ClassWrapper(Class.forName(className));
+	public static <T> ClassWrapper<T> of(Class<T> clazz) {
+		return new ClassWrapper<>(clazz);
 	}
 
-	public static String typeName() {
-		return "class";
+	public static ClassWrapper<?> of(String className, ClassLoader classLoader)
+			throws ClassNotFoundException {
+
+		return new ClassWrapper<>(Class.forName(className, true, classLoader));
+	}
+
+	public static ClassWrapper<?> of(String className)
+			throws ClassNotFoundException {
+		return of(className, ClassWrapper.class.getClassLoader());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ClassWrapper<?> that = (ClassWrapper<?>) o;
+		return clazz.equals(that.clazz);
+	}
+
+	@Override
+	public int hashCode() {
+		return clazz.hashCode();
+	}
+
+	static String staticTypeName() {
+		return "Java class";
+	}
+
+	@Override
+	String typeName() {
+		return staticTypeName();
 	}
 
 	@Override
 	public Table getMetatable() {
-		return null;  // TODO
+		return METATABLE;
 	}
 
 	@Override
-	public Table setMetatable(Table mt) {
-		return null;  // TODO
-	}
-
-	@Override
-	public Object getUserValue() {
-		return null;  // TODO
-	}
-
-	@Override
-	public Object setUserValue(Object value) {
-		return null;  // TODO
-	}
-
-	public Class<?> get() {
+	public Class<T> get() {
 		return clazz;
 	}
 
-	// TODO: static method access
+	static final ImmutableTable METATABLE = new ImmutableTable.Builder()
+			.add(Metatables.MT_INDEX, GetStaticMemberAccessor.INSTANCE)
+			.add(Lib.MT_NAME, staticTypeName())
+			.add(BasicLib.MT_TOSTRING, ToString.INSTANCE)
+			.build();
+
+	static class GetStaticMemberAccessor extends AbstractGetMemberAccessor {
+
+		public static final GetStaticMemberAccessor INSTANCE = new GetStaticMemberAccessor();
+
+		@Override
+		protected LuaFunction accessorForName(String methodName) {
+			return new InvokeStaticMethod(methodName);
+		}
+
+	}
+
+	static class InvokeStaticMethod extends AbstractFunctionAnyArg {
+
+		private final String methodName;
+
+		public InvokeStaticMethod(String methodName) {
+			this.methodName = Objects.requireNonNull(methodName);
+		}
+
+		@Override
+		public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
+			if (args.length < 1) {
+				throw new BadArgumentException(1, methodName, staticTypeName() + " expected, got no value");
+			}
+
+			final ClassWrapper<?> wrapper;
+			{
+				Object o = args[0];
+				if (o instanceof ClassWrapper) {
+					wrapper = (ClassWrapper<?>) o;
+				}
+				else {
+					throw new BadArgumentException(1, methodName, staticTypeName() + ", got "
+							+ NameMetamethodValueTypeNamer.typeNameOf(o, context));
+				}
+			}
+
+			Object[] invokeArgs = new Object[args.length - 1];
+			System.arraycopy(args, 1, invokeArgs, 0, invokeArgs.length);
+
+			// find the best method invoker
+			MethodInvoker invoker = MethodInvoker.find(wrapper.get(), methodName, true, invokeArgs);
+
+			// invoke the method
+			try {
+				invoker.invoke(context.getReturnBuffer(), null, invokeArgs);
+			}
+			catch (InvocationTargetException | IllegalAccessException ex) {
+				throw new LuaRuntimeException(ex);
+			}
+
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
 
 }

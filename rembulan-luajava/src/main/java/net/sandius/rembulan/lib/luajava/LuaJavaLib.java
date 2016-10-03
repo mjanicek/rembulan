@@ -182,7 +182,7 @@ public class LuaJavaLib extends Lib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			ClassWrapper classWrapper = args.nextUserdata(ClassWrapper.typeName(), ClassWrapper.class);
+			ClassWrapper classWrapper = args.nextUserdata(ClassWrapper.staticTypeName(), ClassWrapper.class);
 
 			final ObjectWrapper instance;
 			try {
