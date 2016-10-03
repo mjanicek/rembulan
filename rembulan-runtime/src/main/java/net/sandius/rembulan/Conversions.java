@@ -405,7 +405,7 @@ public final class Conversions {
 	 *       or {@code "false"} if {@code o} is <b>false</b>;</li>
 	 *   <li>otherwise, returns the string of the form {@code "TYPE: 0xHASH"}, where
 	 *       TYPE is the Lua type of {@code o}, and HASH
-	 *       is the {@link System#identityHashCode(Object) identity hash code} of {@code o}
+	 *       is the {@link Object#hashCode()} of {@code o}
 	 *       in hexadecimal format.
 	 *   </li>
 	 * </ul>
@@ -425,7 +425,7 @@ public final class Conversions {
 		else if (o instanceof Boolean) return LuaFormat.toString(((Boolean) o).booleanValue());
 		else return String.format("%s: %#010x",
 					PlainValueTypeNamer.INSTANCE.typeNameOf(o),
-					System.identityHashCode(o));
+					o.hashCode());
 	}
 
 	/**

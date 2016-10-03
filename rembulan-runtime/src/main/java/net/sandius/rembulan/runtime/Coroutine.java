@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.runtime;
 
+import net.sandius.rembulan.Ordering;
 import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 
@@ -30,6 +31,12 @@ import net.sandius.rembulan.util.Cons;
  *     <li>to resume a coroutine, use {@link ExecutionContext#resume(Coroutine, Object[])};</li>
  *     <li>to yield from a coroutine, use {@link ExecutionContext#yield(Object[])}.</li>
  * </ul>
+ *
+ * <p><b>Note on equality:</b> according to §3.4.4 of the Lua Reference Manual,
+ * coroutines {@code a} and {@code b} are expected to be equal if and only if they are
+ * the same object. However, {@link Ordering#isRawEqual(Object, Object)} compares
+ * coroutines using {@link Object#equals(Object)}. <b>Exercise caution when overriding
+ * {@code equals()}.</b></p>
  */
 public final class Coroutine {
 

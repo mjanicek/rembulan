@@ -25,6 +25,12 @@ import java.util.WeakHashMap;
 
 /**
  * An abstract class representing a Lua table.
+ *
+ * <p><b>Note on equality:</b> according to §3.4.4 of the Lua Reference Manual,
+ * tables {@code a} and {@code b} are expected to be equal if and only if they are
+ * the same object. However, {@link Ordering#isRawEqual(Object, Object)} compares
+ * tables using {@link Object#equals(Object)}. <b>Exercise caution when overriding
+ * {@code equals()}.</b></p>
  */
 public abstract class Table extends LuaObject {
 

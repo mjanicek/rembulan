@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan;
 
-import net.sandius.rembulan.runtime.LuaFunction;
-
 import java.util.Comparator;
 
 /**
@@ -133,6 +131,11 @@ public abstract class Ordering<T> implements Comparator<T> {
 	 *     different.</p>
 	 * </blockquote>
 	 *
+	 * <p><b>Note:</b> Rembulan uses {@link Object#equals(Object)} to compare all non-nil,
+	 * non-string, and non-numeric values for equality, effectively shifting the
+	 * responsibility of adhering to the rules of Lua raw-equality for tables, userdata
+	 * and threads to their implementations.</p>
+	 *
 	 * @param a  an object, may be {@code null}
 	 * @param b  another object, may be {@code null}
 	 * @return  {@code true} iff {@code a} is raw-equal to {@code b}
@@ -152,13 +155,8 @@ public abstract class Ordering<T> implements Comparator<T> {
 		else if (a instanceof String && b instanceof String) {
 			return Ordering.STRING.eq((String) a, (String) b);
 		}
-		else if (a instanceof Boolean || a instanceof LuaFunction) {
-			// value-based equality
-			return a.equals(b);
-		}
 		else {
-			// reference-based equality
-			return a == b;
+			return a.equals(b);
 		}
 	}
 

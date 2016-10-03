@@ -21,6 +21,12 @@ package net.sandius.rembulan;
  *
  * <p>Instances of this class may have a <i>user value</i> attached to them,
  * accessible using the methods {@link #getUserValue()} and {@link #setUserValue(Object)}.</p>
+ *
+ * <p><b>Note on equality:</b> according to §3.4.4 of the Lua Reference Manual,
+ * userdata {@code a} and {@code b} are expected to be equal if and only if they are
+ * the same object. However, {@link Ordering#isRawEqual(Object, Object)} compares
+ * userdata using {@link Object#equals(Object)}. <b>Exercise caution when overriding
+ * {@code equals()}.</b></p>
  */
 public abstract class Userdata extends LuaObject {
 

@@ -144,6 +144,22 @@ public class ImmutableTable extends Table {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ImmutableTable that = (ImmutableTable) o;
+		return this.entries.equals(that.entries)
+				&& this.initialKey.equals(that.initialKey);
+	}
+
+	@Override
+	public int hashCode() {
+		int result = entries.hashCode();
+		result = 31 * result + initialKey.hashCode();
+		return result;
+	}
+
+	@Override
 	public Object rawget(Object key) {
 		key = Conversions.normaliseKey(key);
 		Entry e = entries.get(key);
