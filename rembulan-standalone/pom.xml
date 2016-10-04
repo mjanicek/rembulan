@@ -61,7 +61,7 @@
 
     <dependency>
       <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-luajava</artifactId>
+      <artifactId>rembulan-luajava-compat</artifactId>
       <version>${project.parent.version}</version>
     </dependency>
 

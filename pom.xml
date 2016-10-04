@@ -39,7 +39,7 @@
     <module>rembulan-compiler</module>
     <module>rembulan-stdlib</module>
 
-    <module>rembulan-luajava</module>
+    <module>rembulan-luajava-compat</module>
 
     <module>rembulan-tests</module>
     <module>rembulan-examples</module>

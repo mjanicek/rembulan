@@ -12,12 +12,12 @@
     <relativePath>../rembulan-parent</relativePath>
   </parent>
 
-  <artifactId>rembulan-luajava</artifactId>
+  <artifactId>rembulan-luajava-compat</artifactId>
   <version>${project.parent.version}</version>
   <packaging>jar</packaging>
 
-  <name>Rembulan-LuaJava compatibility library</name>
-  <description>Rembulan-LuaJava compatibility library</description>
+  <name>Rembulan LuaJava compatibility library</name>
+  <description>Rembulan LuaJava compatibility library</description>
   <url>https://github.com/mjanicek/rembulan/</url>
   <inceptionYear>2016</inceptionYear>
 
