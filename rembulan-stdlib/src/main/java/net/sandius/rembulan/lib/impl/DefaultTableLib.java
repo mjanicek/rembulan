@@ -572,12 +572,17 @@ public class DefaultTableLib extends TableLib {
 						}
 					}
 
+					// done
 					context.getReturnBuffer().setTo(a2);
 				}
 				else {
 					long idx = overlap ? num - 1 : 0;
 					_run(context, 0, a1, a2, f, t, idx, num, !overlap);
 				}
+			}
+			else {
+				// no work: done
+				context.getReturnBuffer().setTo(a2);
 			}
 		}
 

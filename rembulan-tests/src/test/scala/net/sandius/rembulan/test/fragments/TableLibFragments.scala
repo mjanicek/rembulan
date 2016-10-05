@@ -283,6 +283,8 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("""local t = {}; local u = table.move(t, 1, 1, 1); return t == u""") succeedsWith (true)
 
+      program ("""local a = {}; return table.move({10,20,30}, 1, 0, 3, a) == a""") succeedsWith (true)
+
       program (
         """local t = table.move({"a", "b", "c", "d"}, 1, 3, 4)
           |return #t, t[1], t[2], t[3], t[4], t[5], t[6]
