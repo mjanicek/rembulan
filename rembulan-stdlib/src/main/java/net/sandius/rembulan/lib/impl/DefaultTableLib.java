@@ -1346,6 +1346,20 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
+		/**
+		 * The maximum number of values that may be unpacked.
+		 */
+		public static final long MAX_RESULTS = 1000000;
+
+		private static void verifyNumberOfResults(long i, long j) {
+			if (i < j) {
+				long n = j - i;
+				if (n < 0 || n > MAX_RESULTS) {
+					throw new IllegalArgumentException("too many results to unpack");
+				}
+			}
+		}
+
 		private static void unpackUsingRawGet(ExecutionContext context, Table t, long i, long j) {
 			ArrayList<Object> r = new ArrayList<>();
 			for (long k = i; k <= j; k++) {
@@ -1375,6 +1389,8 @@ public class DefaultTableLib extends TableLib {
 
 					case STATE_BEFORE_LOOP:
 						// j is known;
+
+						verifyNumberOfResults(i, j);
 
 						// is this a clean table without __index?
 						if (obj instanceof Table && !TableUtil.hasIndexMetamethod((Table) obj)) {

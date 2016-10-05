@@ -614,6 +614,13 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("""return table.unpack("nono")""") failsWith "attempt to index a string value"
 
+      program ("""local maxi = (1 << 31) - 1; table.unpack({}, 0, maxi)""") failsWith "too many results to unpack"
+      program ("""local maxi = (1 << 31) - 1; table.unpack({}, 1, maxi)""") failsWith "too many results to unpack"
+      program ("""local maxI = (1 << 63) - 1; table.unpack({}, 0, maxI)""") failsWith "too many results to unpack"
+      program ("""local maxI = (1 << 63) - 1; table.unpack({}, 1, maxI)""") failsWith "too many results to unpack"
+      program ("""local mini, maxi = -(1 << 31), (1 << 31) - 1; table.unpack({}, mini, maxi)""") failsWith "too many results to unpack"
+      program ("""local minI, maxI = 1 << 63, (1 << 63) - 1; table.unpack({}, minI, maxI)""") failsWith "too many results to unpack"
+
       in (FullContext) {
 
         program ("""return table.unpack("hello")""") succeedsWith (null, null, null, null, null)
