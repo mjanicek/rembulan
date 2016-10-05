@@ -29,7 +29,7 @@ completeness status of Rembulan with regard to PUC-Lua, in particular the standa
 
 ## Frequently asked questions (FAQ)
 
-##### What is Rembulan good for?
+#### What is Rembulan good for?
 
 Lua is a small, beautifully-designed and simple-yet-powerful programming language.
 Lua has been traditionally used as an embedded scripting language. Rembulan aims to serve
@@ -38,11 +38,11 @@ a similar purpose on the JVM, with an explicit focus on sandboxing the client Lu
 There are two main use-cases for Rembulan: running untrusted Lua scripts on the JVM,
 and enhancing Java applications by adding the ability to script them with Lua.
 
-##### Does Rembulan implement the Lua C API?
+#### Does Rembulan implement the Lua C API?
 
 No, at this point Rembulan requires libraries to be written against its Java interface.
  
-##### How are coroutines implemented?
+#### How are coroutines implemented?
  
 See [How are coroutines implemented?](doc/HowAreCoroutinesImplemented.md)  
 
