@@ -526,6 +526,19 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
+		private void checkValidArgs(long f, long e, long t) {
+			if (f <= e) {
+				long num = e - f + 1;
+				if (num < 1) {
+					// overflow
+					throw new BadArgumentException(3, name(), "too many elements to move");
+				}
+				if (t + (num - 1) < t) {
+					throw new BadArgumentException(4, name(), "destination wrap around");
+				}
+			}
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.size() < 2) {
@@ -548,12 +561,11 @@ public class DefaultTableLib extends TableLib {
 			final Table a1 = args.nextTable();
 			final Table a2 = dest != null ? dest : a1;
 
+			checkValidArgs(f, e, t);
+
 			if (f <= e) {
 				long num = e - f + 1;
-				if (num <= 0) {
-					// overflow
-					throw args.badArgument(3, "too many elements to move");
-				}
+				assert (num > 0);
 
 				boolean overlap = a1 == a2 && (f < t && t <= e);
 

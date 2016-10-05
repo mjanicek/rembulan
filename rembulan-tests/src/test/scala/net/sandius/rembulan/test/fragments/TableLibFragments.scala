@@ -285,6 +285,11 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("""local a = {}; return table.move({10,20,30}, 1, 0, 3, a) == a""") succeedsWith (true)
 
+      // destination wrap around
+      program ("""table.move({}, 1, (1 << 63) - 1, 2)""") failsWith ("bad argument #4 to 'move' (destination wrap around)")
+      program ("""table.move({}, 1, 2, (1 << 63) - 1)""") failsWith ("bad argument #4 to 'move' (destination wrap around)")
+      program ("""table.move({}, (1 << 63), -2, 2)""") failsWith ("bad argument #4 to 'move' (destination wrap around)")
+
       program (
         """local t = table.move({"a", "b", "c", "d"}, 1, 3, 4)
           |return #t, t[1], t[2], t[3], t[4], t[5], t[6]
