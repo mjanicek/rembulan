@@ -205,11 +205,11 @@ public abstract class Table extends LuaObject {
 	 * <p>To retrieve the initial key for iterating through this table, use
 	 * {@link #initialKey()}.</p>
 	 *
-	 * @param key  the key to get the immediate successor of
+	 * @param key  the key to get the immediate successor of, must not be {@code null}
 	 * @return  the immediate successor of {@code key} in this table
 	 *
 	 * @throws IllegalArgumentException  when no value is associated with {@code key}
-	 *                                   in this table
+	 *                                   in this table, or {@code key} is {@code null}
 	 */
 	public abstract Object successorKeyOf(Object key);
 

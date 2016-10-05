@@ -9,7 +9,6 @@
  * tables:
     - weak tables
     - efficient array tables 
-    - efficient iteration (currently O(n<sup>2</sup>) to iterate the entire table; should be O(n)))
 
 ### Standard library
 
