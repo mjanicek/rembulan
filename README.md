@@ -27,6 +27,24 @@ Manual, please [open a new issue](https://github.com/mjanicek/rembulan/issues).
 See also the [completeness table](doc/CompletenessTable.md) that maps out the current
 completeness status of Rembulan with regard to PUC-Lua, in particular the standard library.
 
+## Frequently asked questions (FAQ)
+
+##### What is Rembulan good for?
+
+Lua is a small, beautifully-designed and simple-yet-powerful programming language.
+Lua has been traditionally used as an embedded scripting language. Rembulan aims to serve
+a similar purpose on the JVM, with an explicit focus on sandboxing the client Lua programs.
+
+There are two main use-cases for Rembulan: running untrusted Lua scripts on the JVM,
+and enhancing Java applications by adding the ability to script them with Lua.
+
+##### Does Rembulan implement the Lua C API?
+
+No, at this point Rembulan requires libraries to be written against its Java interface.
+ 
+##### How are coroutines implemented?
+ 
+See [How are coroutines implemented?](doc/HowAreCoroutinesImplemented.md)  
 
 ## Using Rembulan
 
@@ -39,6 +57,11 @@ Generated JavaDocs are available online:
  * [Runtime module](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/index.html)
  * [Compiler](https://mjanicek.github.io/rembulan/apidocs/rembulan-compiler/index.html)
  * [Standard Library](https://mjanicek.github.io/rembulan/apidocs/rembulan-stdlib/index.html)
+
+There are also a few short texts in the `doc` folder:
+
+ * [How are coroutines implemented?](doc/HowAreCoroutinesImplmenented.md)
+ * [Rembulan completeness table](doc/CompletenessTable.md)
 
 ### Building from source
 
