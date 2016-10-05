@@ -29,7 +29,7 @@ Statuses:
 | [`error`](http://www.lua.org/manual/5.3/manual.html#pdf-error) | ![partial](img/partial.png) | error levels not supported |
 | [`_G`](http://www.lua.org/manual/5.3/manual.html#pdf-_G) | ![complete](img/complete.png) | |
 | [`getmetatable`](http://www.lua.org/manual/5.3/manual.html#pdf-getmetatable) | ![complete](img/complete.png) | |
-| [`ipairs`](http://www.lua.org/manual/5.3/manual.html#pdf-ipairs) | ![complete](img/complete.png) | |
+| [`ipairs`](http://www.lua.org/manual/5.3/manual.html#pdf-ipairs) | ![complete](img/complete.png) | `__ipairs` metamethod not supported |
 | [`load`](http://www.lua.org/manual/5.3/manual.html#pdf-load) | ![partial](img/partial.png) | binary chunks not supported |
 | [`loadfile`](http://www.lua.org/manual/5.3/manual.html#pdf-loadfile) | ![not implemented](img/not-implemented.png) | |
 | [`next`](http://www.lua.org/manual/5.3/manual.html#pdf-next) | ![complete](img/complete.png)| |

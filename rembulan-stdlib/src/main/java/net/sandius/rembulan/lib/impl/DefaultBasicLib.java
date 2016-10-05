@@ -296,13 +296,33 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args)
+				throws ResolvedControlThrowable {
+
 			Table table = args.nextTable();
 			long index = args.nextInteger();
 
 			index += 1;
 
-			Object o = table.rawget(index);
+			try {
+				Dispatch.index(context, table, index);
+			}
+			catch (UnresolvedControlThrowable ct) {
+				throw ct.resolve(this, index);
+			}
+
+			Object result = context.getReturnBuffer().get0();
+			processResult(context, index, result);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+			long index = (Long) suspendedState;
+			Object result = context.getReturnBuffer().get0();
+			processResult(context, index, result);
+		}
+
+		private static void processResult(ExecutionContext context, long index, Object o) throws ResolvedControlThrowable {
 			if (o != null) {
 				context.getReturnBuffer().setTo(index, o);
 			}
