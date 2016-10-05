@@ -1362,7 +1362,9 @@ public class DefaultTableLib extends TableLib {
 
 		private static void unpackUsingRawGet(ExecutionContext context, Table t, long i, long j) {
 			ArrayList<Object> r = new ArrayList<>();
-			for (long k = i; k <= j; k++) {
+
+			// protect against overflows when j == Long.MAX_VALUE
+			for (long k = i; (i <= k) && (k <= j); k++) {
 				r.add(t.rawget(k));
 			}
 			context.getReturnBuffer().setToContentsOf(r);
@@ -1424,7 +1426,8 @@ public class DefaultTableLib extends TableLib {
 							result.add(v);
 
 							// we may now continue
-							if (k <= j) {
+							// protect against overflows when j == Long.MAX_VALUE
+							if ((i <= k) && (k <= j)) {
 								state = STATE_LOOP;
 								Dispatch.index(context, obj, k++);  // may suspend
 							}
@@ -1433,7 +1436,7 @@ public class DefaultTableLib extends TableLib {
 							}
 						}
 
-						assert (k > j);
+						assert (k > j || k == Long.MIN_VALUE);
 
 						// we're done!
 						context.getReturnBuffer().setToContentsOf(result);

@@ -621,6 +621,20 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""local mini, maxi = -(1 << 31), (1 << 31) - 1; table.unpack({}, mini, maxi)""") failsWith "too many results to unpack"
       program ("""local minI, maxI = 1 << 63, (1 << 63) - 1; table.unpack({}, minI, maxI)""") failsWith "too many results to unpack"
 
+      // behaviour near math.maxinteger
+
+      program (
+        """local maxI = (1 << 63) - 1
+          |local t = {[maxI - 1] = 12, [maxI] = 23}
+          |return table.unpack(t, maxI - 1, maxI)
+        """) succeedsWith (12, 23)
+
+      program (
+        """local maxI = (1 << 63) - 1
+          |local t = setmetatable({}, {__index = function(t,k) return k end})
+          |return table.unpack(t, maxI - 1, maxI)
+        """) succeedsWith (Long.MaxValue - 1, Long.MaxValue)
+
       in (FullContext) {
 
         program ("""return table.unpack("hello")""") succeedsWith (null, null, null, null, null)
