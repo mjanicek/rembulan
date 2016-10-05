@@ -24,7 +24,8 @@ import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 public class DefaultModuleLib extends ModuleLib {
 
@@ -32,16 +33,20 @@ public class DefaultModuleLib extends ModuleLib {
 	private final Table env;
 
 	private final Table _loaded;
+	private final Table _preload;
+	private final Table _searchers;
 
 	private final LuaFunction _require;
 	private final LuaFunction _loadlib;
 	private final LuaFunction _searchpath;
 
 	public DefaultModuleLib(StateContext context, Table env) {
-		this.context = Check.notNull(context);
-		this.env = Check.notNull(env);
+		this.context = Objects.requireNonNull(context);
+		this.env = Objects.requireNonNull(env);
 
 		this._loaded = context.newTable();
+		this._preload = context.newTable();
+		this._searchers = context.newTable();
 
 		this._require = new Require();
 
@@ -98,12 +103,12 @@ public class DefaultModuleLib extends ModuleLib {
 
 	@Override
 	public Table _preload() {
-		return null;  // TODO
+		return _preload;
 	}
 
 	@Override
 	public Table _searchers() {
-		return null;  // TODO
+		return _searchers;
 	}
 
 	@Override
@@ -125,9 +130,11 @@ public class DefaultModuleLib extends ModuleLib {
 			Object mod = _loaded.rawget(modName);
 
 			if (mod != null) {
+				// already loaded
 				context.getReturnBuffer().setTo(mod);
 			}
 			else {
+
 				throw new UnsupportedOperationException("loading module '" + modName + "': not implemented");
 			}
 		}

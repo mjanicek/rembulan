@@ -17,6 +17,7 @@
 package net.sandius.rembulan.lib.luajava;
 
 import net.sandius.rembulan.LuaRuntimeException;
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.impl.UnimplementedFunction;
@@ -44,6 +45,21 @@ public class LuaJavaLib extends Lib {
 		t.rawset("new", New.INSTANCE);
 		t.rawset("createProxy", new UnimplementedFunction("luajava.createProxy"));
 		t.rawset("loadLib", new UnimplementedFunction("luajava.loadLib"));
+
+		return t;
+	}
+
+	@Override
+	public Object install(StateContext context, Table env, String modName, String origin) {
+		Table t = context.newTable();
+
+		t.rawset("newInstance", NewInstance.INSTANCE);
+		t.rawset("bindClass", BindClass.INSTANCE);
+		t.rawset("new", New.INSTANCE);
+		t.rawset("createProxy", new UnimplementedFunction("luajava.createProxy"));
+		t.rawset("loadLib", new UnimplementedFunction("luajava.loadLib"));
+
+		env.rawset(modName, t);
 
 		return t;
 	}

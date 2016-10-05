@@ -27,8 +27,10 @@ public abstract class Lib {
 
 	public abstract String name();
 
+	@Deprecated
 	public abstract Table toTable(TableFactory tableFactory);
 
+	@Deprecated
 	public void preInstall(StateContext context, Table env) {
 		// no-op by default
 	}
@@ -45,8 +47,13 @@ public abstract class Lib {
 		postInstall(context, env, t);
 	}
 
+	@Deprecated
 	public void postInstall(StateContext context, Table env, Table libTable) {
 		// no-op by default
+	}
+
+	public Object install(StateContext context, Table env, String modName, String origin) {
+		throw new UnsupportedOperationException();  // TODO
 	}
 
 }
