@@ -256,7 +256,7 @@ public class TraversableHashMap<K, V> implements Map<K, V> {
 	 * @return  the key preceding {@code key}, or {@code null} if {@code key} is the last key
 	 *
 	 * @throws NullPointerException  if {@code key} is {@code null}
-	 * @throws NoSuchMethodException  if the map does not associate any value to {@code key}
+	 * @throws NoSuchElementException  if the map does not associate any value to {@code key}
 	 */
 	public K getPredecessorOf(K key) {
 		Objects.requireNonNull(key);
