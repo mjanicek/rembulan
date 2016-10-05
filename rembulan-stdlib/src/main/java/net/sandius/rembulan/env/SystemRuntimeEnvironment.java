@@ -18,6 +18,7 @@ package net.sandius.rembulan.env;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.management.ManagementFactory;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 
@@ -63,6 +64,13 @@ class SystemRuntimeEnvironment implements RuntimeEnvironment {
 	@Override
 	public String getEnv(String name) {
 		return System.getenv(name);
+	}
+
+	@Override
+	public double getCpuTime() {
+		// FIXME: this really isn't a good idea...
+		long nanos = ManagementFactory.getThreadMXBean().getCurrentThreadCpuTime();
+		return nanos / 1000000000.0;
 	}
 
 }

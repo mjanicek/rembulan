@@ -17,8 +17,10 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.env.RuntimeEnvironment;
+import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.OsLib;
+import net.sandius.rembulan.runtime.AbstractFunction0;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
@@ -40,7 +42,7 @@ public class DefaultOsLib extends OsLib {
 	private final LuaFunction _tmpname;
 	
 	public DefaultOsLib(RuntimeEnvironment environment) {
-		this._clock = new UnimplementedFunction("os.clock");  // TODO
+		this._clock = environment != null ? new Clock(environment) : new UnimplementedFunction("os.clock");
 		this._date = new UnimplementedFunction("os.date");  // TODO
 		this._difftime = new UnimplementedFunction("os.difftime");  // TODO
 		this._execute = new UnimplementedFunction("os.execute");  // TODO
@@ -113,6 +115,25 @@ public class DefaultOsLib extends OsLib {
 		return _tmpname;
 	}
 
+	public static class Clock extends AbstractFunction0 {
+
+		private final RuntimeEnvironment environment;
+
+		public Clock(RuntimeEnvironment environment) {
+			this.environment = Objects.requireNonNull(environment);
+		}
+
+		@Override
+		public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
+			context.getReturnBuffer().setTo(environment.getCpuTime());
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+			throw new NonsuspendableFunctionException(this.getClass());
+		}
+
+	}
 
 	public static class GetEnv extends AbstractLibFunction {
 

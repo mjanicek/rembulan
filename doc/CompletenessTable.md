@@ -139,7 +139,7 @@ Statuses:
 | [`file:seek`](http://www.lua.org/manual/5.3/manual.html#pdf-file:seek) | ![complete](img/complete.png) | untested |
 | [`file:setvbuf`](http://www.lua.org/manual/5.3/manual.html#pdf-file:setvbuf) | ![not implemented](img/not-implemented.png) | |
 | [`file:write`](http://www.lua.org/manual/5.3/manual.html#pdf-file:write) | ![complete](img/complete.png) | |
-| [`os.clock`](http://www.lua.org/manual/5.3/manual.html#pdf-os.clock) | ![not implemented](img/not-implemented.png) | |
+| [`os.clock`](http://www.lua.org/manual/5.3/manual.html#pdf-os.clock) | ![partial](img/partial.png) | meaning depends on the runtime environment |
 | [`os.date`](http://www.lua.org/manual/5.3/manual.html#pdf-os.date) | ![not implemented](img/not-implemented.png) | |
 | [`os.difftime`](http://www.lua.org/manual/5.3/manual.html#pdf-os.difftime) | ![not implemented](img/not-implemented.png) | |
 | [`os.execute`](http://www.lua.org/manual/5.3/manual.html#pdf-os.execute) | ![not implemented](img/not-implemented.png) | |
