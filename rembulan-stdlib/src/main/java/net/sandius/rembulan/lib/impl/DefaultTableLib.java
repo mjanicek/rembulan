@@ -1029,6 +1029,10 @@ public class DefaultTableLib extends TableLib {
 		private void prepareLoop(ExecutionContext context, ArgumentIterator args, Table t, long len)
 			throws ResolvedControlThrowable {
 
+			if (len >= Integer.MAX_VALUE) {
+				throw args.badArgument(1, "array too big");
+			}
+
 			if (len < 2) {
 				// nothing to sort
 				return;

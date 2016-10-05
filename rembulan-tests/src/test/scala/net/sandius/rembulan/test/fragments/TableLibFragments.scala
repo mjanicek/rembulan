@@ -514,6 +514,13 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""table.sort({true, false})""") failsWith "attempt to compare two boolean values"
       program ("""table.sort({1, false})""") failsWith "attempt to compare "<<"boolean with number"
 
+      // "array too big" errors: length must fit into a signed 32-bit integer
+      program ("""local a = setmetatable({}, {__len = function () return (1 << 63) - 1 end}); table.sort(a)""") failsWith "bad argument #1 to 'sort' (array too big)"
+      program ("""local a = setmetatable({}, {__len = function () return (1 << 31) - 1 end}); table.sort(a)""") failsWith "bad argument #1 to 'sort' (array too big)"
+
+      // ok when length < Integer.MAX_VALUE
+      program ("""local a = setmetatable({}, {__len = function () return (1 << 31) - 2 end}); table.sort(a, function() error("BOOM!") end)""") failsWith "BOOM!"
+
       def doSortExplicit(vals: Seq[Any], exp: Seq[Any], comp: Option[String]): Unit = {
         val vs = vals map {
           case s: String => LuaFormat.escape(s)
