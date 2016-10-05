@@ -215,7 +215,7 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
 
     }
 
-    // will need table.unpack for this
+    // will need table.unpack and coroutine.wrap for this
     in (FullContext) {
 
       about ("gmatch") {
@@ -297,6 +297,17 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
           """return string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s)
             |  return load(s)()
             |end)
+          """
+        ) succeedsWith ("4+5 = 9", 1)
+
+        program (
+          """local coro_run = coroutine.wrap(function(s)
+            |  while true do
+            |    s = coroutine.yield(load(s)())
+            |  end
+            |end)
+            |
+            |return string.gsub("4+5 = $return 4+5$", "%$(.-)%$", coro_run)
           """
         ) succeedsWith ("4+5 = 9", 1)
 
