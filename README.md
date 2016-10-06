@@ -50,6 +50,9 @@ its own compiler and compiles to Java bytecode directly. It uses its own
 intermediate representation (IR) annotated with statically-inferred type information,
 but does not expose it to the user, and the IR has no serialisable form.
  
+For more information about the Rembulan compiler, see the
+[compiler overview](doc/CompilerOverview.md). 
+ 
 #### How are coroutines implemented?
  
 See [How are coroutines implemented?](doc/HowAreCoroutinesImplemented.md)  
@@ -69,6 +72,7 @@ Generated JavaDocs are available online:
 There are also a few short texts in the `doc` folder:
 
  * [How are coroutines implemented?](doc/HowAreCoroutinesImplmenented.md)
+ * [Overview of the Rembulan compiler](doc/CompilerOverview.md)
  * [Rembulan completeness table](doc/CompletenessTable.md)
 
 ### Building from source
