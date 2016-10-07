@@ -20,6 +20,7 @@ import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
+import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.ModuleLib;
@@ -36,11 +37,12 @@ public class DefaultModuleLib extends ModuleLib {
 	private final StateContext context;
 	private final Table env;
 
-	private final Table _loaded;
-	private final Table _preload;
-	private final Table _searchers;
+	private final Table libTable;
+	private final Table loaded;
+	private final Table preload;
 
-	private final LuaFunction _require;
+	private final LuaFunction require;
+
 	private final LuaFunction _loadlib;
 	private final LuaFunction _searchpath;
 
@@ -48,22 +50,33 @@ public class DefaultModuleLib extends ModuleLib {
 		this.context = Objects.requireNonNull(context);
 		this.env = Objects.requireNonNull(env);
 
-		this._loaded = context.newTable();
-		this._preload = context.newTable();
-		this._searchers = context.newTable();
+		this.libTable = context.newTable();
+		this.loaded = context.newTable();
+		this.preload = context.newTable();
+		Table searchers = context.newTable();
+
+		libTable.rawset("loaded", loaded);
+		libTable.rawset("preload", preload);
+		libTable.rawset("searchers", searchers);
 
 		// initialise searchers
-		_searchers.rawset(1, new PreloadSearcher(_preload));
+		searchers.rawset(1, new PreloadSearcher(preload));
 
-		this._require = new Require(env, _loaded);
+		this.require = new Require();
 
 		this._loadlib = new UnimplementedFunction("package.loadlib");
 		this._searchpath = new UnimplementedFunction("package.searchpath");
 	}
 
 	@Override
+	public Table toTable(TableFactory tableFactory) {
+		return libTable;
+	}
+
+	@Override
 	public void postInstall(StateContext context, Table env, Table libTable) {
-		_loaded.rawset(name(), libTable);
+		loaded.rawset("_G", env);
+		loaded.rawset(name(), libTable);
 	}
 
 	@Override
@@ -73,14 +86,14 @@ public class DefaultModuleLib extends ModuleLib {
 		if (t != null) {
 			String name = lib.name();
 			env.rawset(name, t);
-			_loaded.rawset(name, t);
+			loaded.rawset(name, t);
 		}
 		lib.postInstall(context, env, t);
 	}
 
 	@Override
 	public LuaFunction _require() {
-		return _require;
+		return require;
 	}
 
 	@Override
@@ -95,7 +108,7 @@ public class DefaultModuleLib extends ModuleLib {
 
 	@Override
 	public Table _loaded() {
-		return _loaded;
+		return loaded;
 	}
 
 	@Override
@@ -110,12 +123,13 @@ public class DefaultModuleLib extends ModuleLib {
 
 	@Override
 	public Table _preload() {
-		return _preload;
+		return preload;
 	}
 
 	@Override
 	public Table _searchers() {
-		return _searchers;
+		Object o = libTable.rawget("searchers");
+		return o instanceof Table ? (Table) o : null;
 	}
 
 	@Override
@@ -123,48 +137,29 @@ public class DefaultModuleLib extends ModuleLib {
 		return _searchpath;
 	}
 
-	public static class Require extends AbstractLibFunction {
+	private static class Require_SuspendedState {
 
-		private final Table env;
-		private final Table loaded;
+		private final int state;
+		private final String error;
+		private final String modName;
+		private final Table searchers;
+		private final long idx;
 
-		public Require(Table env, Table loaded) {
-			this.env = Objects.requireNonNull(env);
-			this.loaded = Objects.requireNonNull(loaded);
+		private Require_SuspendedState(int state, String error, String modName, Table searchers, long idx) {
+			this.state = state;
+			this.error = error;
+			this.modName = modName;
+			this.searchers = searchers;
+			this.idx = idx;
 		}
 
-		private class SuspendedState {
+	}
 
-			private final int state;
-			private final String error;
-			private final String modName;
-			private final Table searchers;
-			private final long idx;
-
-			private SuspendedState(int state, String error, String modName, Table searchers, long idx) {
-				this.state = state;
-				this.error = error;
-				this.modName = modName;
-				this.searchers = searchers;
-				this.idx = idx;
-			}
-
-		}
+	class Require extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
 			return "require";
-		}
-
-		private Table getSearchers() {
-			Object pkg = env.rawget("package");
-			if (pkg instanceof Table) {
-				Object o = ((Table) pkg).rawget("searchers");
-				if (o instanceof Table) {
-					return (Table) o;
-				}
-			}
-			throw new IllegalStateException("'package.searchers' must be a table");
 		}
 
 		@Override
@@ -179,7 +174,10 @@ public class DefaultModuleLib extends ModuleLib {
 			}
 			else {
 				// get package.searchers
-				Table searchers = getSearchers();
+				Table searchers = _searchers();
+				if (searchers == null) {
+					throw new IllegalStateException("'package.searchers' must be a table");
+				}
 				search(context, 0, "", modName, searchers, 1);
 			}
 		}
@@ -230,7 +228,7 @@ public class DefaultModuleLib extends ModuleLib {
 					}
 				}
 				catch (UnresolvedControlThrowable ct) {
-					throw ct.resolve(this, new SuspendedState(state, error, modName, searchers, idx));
+					throw ct.resolve(this, new Require_SuspendedState(state, error, modName, searchers, idx));
 				}
 			}
 
@@ -260,8 +258,8 @@ public class DefaultModuleLib extends ModuleLib {
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			if (suspendedState instanceof SuspendedState) {
-				SuspendedState ss = (SuspendedState) suspendedState;
+			if (suspendedState instanceof Require_SuspendedState) {
+				Require_SuspendedState ss = (Require_SuspendedState) suspendedState;
 				search(context, ss.state, ss.error, ss.modName, ss.searchers, ss.idx);
 			}
 			else {
