@@ -82,6 +82,7 @@ trait FragmentExpectations {
 
   protected val EmptyContext = Env.Empty
   protected val BasicContext = Env.Basic
+  protected val ModuleContext = Env.Module
   protected val CoroContext = Env.Coro
   protected val MathContext = Env.Math
   protected val StringLibContext = Env.Str  // must not be called StringContext -- messes up with string interpolation
@@ -147,6 +148,7 @@ object FragmentExpectations {
   object Env {
     case object Empty extends Env
     case object Basic extends Env
+    case object Module extends Env
     case object Coro extends Env
     case object Math extends Env
     case object Str extends Env

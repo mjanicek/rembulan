@@ -46,6 +46,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
   protected val Empty = FragmentExpectations.Env.Empty
   protected val Basic = FragmentExpectations.Env.Basic
+  protected val Mod = FragmentExpectations.Env.Module
   protected val Coro = FragmentExpectations.Env.Coro
   protected val Math = FragmentExpectations.Env.Math
   protected val Str = FragmentExpectations.Env.Str
@@ -66,6 +67,10 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
       case Basic =>
         new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
+
+      case Mod =>
+        new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
+        new DefaultModuleLib(state, env).installInto(state, env)
 
       case Coro =>
         new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
@@ -93,15 +98,17 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
 
       case Full =>
         new DefaultBasicLib(new PrintStream(printer.out), ldr, env).installInto(state, env)
-        new DefaultModuleLib(state, env).installInto(state, env)
-        new DefaultCoroutineLib().installInto(state, env)
-        new DefaultMathLib().installInto(state, env)
-        new DefaultStringLib().installInto(state, env)
-        new DefaultIoLib(state, FileSystems.getDefault, null, printer.out, printer.err).installInto(state, env)
-        new DefaultOsLib().installInto(state, env)
-        new DefaultTableLib().installInto(state, env)
-        new DefaultUtf8Lib().installInto(state, env)
-        new DefaultDebugLib().installInto(state, env)
+        val moduleLib = new DefaultModuleLib(state, env)
+        moduleLib.installInto(state, env)
+        
+        moduleLib.install(new DefaultCoroutineLib())
+        moduleLib.install(new DefaultMathLib())
+        moduleLib.install(new DefaultStringLib())
+        moduleLib.install(new DefaultIoLib(state, FileSystems.getDefault, null, printer.out, printer.err))
+        moduleLib.install(new DefaultOsLib())
+        moduleLib.install(new DefaultTableLib())
+        moduleLib.install(new DefaultUtf8Lib())
+        moduleLib.install(new DefaultDebugLib())
     }
 
     env
