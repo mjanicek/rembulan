@@ -123,8 +123,8 @@ Repository. To use the snapshot artifacts, add the following configuration to yo
     <name>Sonatype OSSRH (Snapshots)</name>
     <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     <snapshots />
-    </repository>
-  </repositories>
+  </repository>
+</repositories>
 ```
 
 To include the **runtime** as a dependency:
