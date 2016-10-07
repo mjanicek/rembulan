@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib;
 
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.lib.impl.AbstractLibFunction;
 import net.sandius.rembulan.lib.impl.ArgumentIterator;
@@ -24,30 +25,29 @@ import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 import java.util.Objects;
 
-public class LibLoaderFunction extends AbstractLibFunction {
+public abstract class SimpleLoaderFunction extends AbstractLibFunction {
 
 	private final Table env;
-	private final Lib lib;
 
-	public LibLoaderFunction(Table env, Lib lib) {
+	public SimpleLoaderFunction(Table env) {
 		this.env = Objects.requireNonNull(env);
-		this.lib = Objects.requireNonNull(lib);
 	}
 
 	@Override
 	protected String name() {
-		String n = lib.name();
-		return "(loader for " + (n != null ? n : "?") + ")";
+		return "(" + this.getClass().getName() + ")";
 	}
+
+	public abstract Object install(StateContext context, Table env, String modName, String origin);
 
 	@Override
 	protected void invoke(ExecutionContext context, ArgumentIterator args)
 			throws ResolvedControlThrowable {
 
 		String modName = args.nextString();
-		String origin = args.hasNext() ? args.nextString() : null;
+		String origin = args.hasNext() && args.peek() != null ? args.nextString() : null;
 
-		Object result = lib.install(context, env, modName, origin);
+		Object result = install(context, env, modName, origin);
 
 		if (result != null) {
 			context.getReturnBuffer().setTo(result);

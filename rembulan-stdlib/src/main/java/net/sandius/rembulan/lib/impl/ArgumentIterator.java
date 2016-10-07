@@ -122,7 +122,7 @@ public class ArgumentIterator implements Iterator<Object> {
 		return new BadArgumentException(index + 1, name, message);
 	}
 
-	protected Object peek() {
+	public Object peek() {
 		if (index < args.length) {
 			return args[index];
 		}
@@ -131,7 +131,7 @@ public class ArgumentIterator implements Iterator<Object> {
 		}
 	}
 
-	protected Object peek(String expectedType) {
+	public Object peek(String expectedType) {
 		try {
 			return peek();
 		}

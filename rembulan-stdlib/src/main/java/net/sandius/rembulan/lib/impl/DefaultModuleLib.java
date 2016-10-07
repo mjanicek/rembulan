@@ -16,14 +16,18 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.ModuleLib;
+import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
+import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 import java.util.Objects;
 
@@ -48,7 +52,10 @@ public class DefaultModuleLib extends ModuleLib {
 		this._preload = context.newTable();
 		this._searchers = context.newTable();
 
-		this._require = new Require();
+		// initialise searchers
+		_searchers.rawset(1, new PreloadSearcher(_preload));
+
+		this._require = new Require(env, _loaded);
 
 		this._loadlib = new UnimplementedFunction("package.loadlib");
 		this._searchpath = new UnimplementedFunction("package.searchpath");
@@ -116,26 +123,179 @@ public class DefaultModuleLib extends ModuleLib {
 		return _searchpath;
 	}
 
-	public class Require extends AbstractLibFunction {
+	public static class Require extends AbstractLibFunction {
+
+		private final Table env;
+		private final Table loaded;
+
+		public Require(Table env, Table loaded) {
+			this.env = Objects.requireNonNull(env);
+			this.loaded = Objects.requireNonNull(loaded);
+		}
+
+		private class SuspendedState {
+
+			private final int state;
+			private final String error;
+			private final String modName;
+			private final Table searchers;
+			private final long idx;
+
+			private SuspendedState(int state, String error, String modName, Table searchers, long idx) {
+				this.state = state;
+				this.error = error;
+				this.modName = modName;
+				this.searchers = searchers;
+				this.idx = idx;
+			}
+
+		}
 
 		@Override
 		protected String name() {
 			return "require";
 		}
 
+		private Table getSearchers() {
+			Object pkg = env.rawget("package");
+			if (pkg instanceof Table) {
+				Object o = ((Table) pkg).rawget("searchers");
+				if (o instanceof Table) {
+					return (Table) o;
+				}
+			}
+			throw new IllegalStateException("'package.searchers' must be a table");
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String modName = args.nextString();
 
-			Object mod = _loaded.rawget(modName);
+			Object mod = loaded.rawget(modName);
 
 			if (mod != null) {
 				// already loaded
 				context.getReturnBuffer().setTo(mod);
 			}
 			else {
+				// get package.searchers
+				Table searchers = getSearchers();
+				search(context, 0, "", modName, searchers, 1);
+			}
+		}
 
-				throw new UnsupportedOperationException("loading module '" + modName + "': not implemented");
+		private void search(ExecutionContext context, int state, String error, String modName, Table searchers, long idx)
+				throws ResolvedControlThrowable {
+
+			final LuaFunction loader;
+			final Object origin;
+
+			loop:
+			while (true) {
+				try {
+					switch (state) {
+						case 0:
+							Object o = searchers.rawget(idx++);
+							if (o == null) {
+								// reached the end of the list
+								throw new LuaRuntimeException("module '" + modName + "' not found:" + error);
+							}
+							state = 1;
+							Dispatch.call(context, o, modName);
+
+						case 1:
+							Object result = context.getReturnBuffer().get0();
+							if (result instanceof LuaFunction) {
+								// found it
+								loader = (LuaFunction) result;
+								origin = context.getReturnBuffer().get1();
+
+								break loop;
+							}
+							else {
+								// not a loader
+
+								// append error string
+								String s = Conversions.stringValueOf(result);
+								if (s != null) {
+									error += s;
+								}
+
+								state = 0;  // continue with the next iteration
+								break;
+							}
+
+						default:
+							throw new IllegalStateException("Invalid state: " + state);
+					}
+				}
+				catch (UnresolvedControlThrowable ct) {
+					throw ct.resolve(this, new SuspendedState(state, error, modName, searchers, idx));
+				}
+			}
+
+			load(context, modName, loader, origin);
+		}
+
+		private void load(ExecutionContext context, String modName, LuaFunction loader, Object origin)
+				throws ResolvedControlThrowable {
+
+			try {
+				Dispatch.call(context, loader, modName, origin);
+			}
+			catch (UnresolvedControlThrowable ct) {
+				throw ct.resolve(this, modName);
+			}
+
+			resumeLoad(context, modName);
+		}
+
+		private void resumeLoad(ExecutionContext context, String modName) {
+			Object loadResult = context.getReturnBuffer().get0();
+			Object requireResult = loadResult != null ? loadResult : true;
+
+			loaded.rawset(modName, requireResult);
+			context.getReturnBuffer().setTo(requireResult);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+			if (suspendedState instanceof SuspendedState) {
+				SuspendedState ss = (SuspendedState) suspendedState;
+				search(context, ss.state, ss.error, ss.modName, ss.searchers, ss.idx);
+			}
+			else {
+				resumeLoad(context, (String) suspendedState);
+			}
+		}
+
+	}
+
+	static class PreloadSearcher extends AbstractLibFunction {
+
+		private final Table preload;
+
+		PreloadSearcher(Table preload) {
+			this.preload = Objects.requireNonNull(preload);
+		}
+
+		@Override
+		protected String name() {
+			return "(preload searcher)";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+			String modName = args.nextString();
+
+			Object entry = preload.rawget(modName);
+
+			if (entry != null) {
+				context.getReturnBuffer().setTo(entry);
+			}
+			else {
+				String error = "\n\tno field package.preload['" + modName + "']";
+				context.getReturnBuffer().setTo(error);
 			}
 		}
 

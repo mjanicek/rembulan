@@ -29,6 +29,7 @@ import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.StateContexts;
+import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.lib.impl.DefaultBasicLib;
 import net.sandius.rembulan.lib.impl.StandardLibrary;
 import net.sandius.rembulan.lib.luajava.LuaJavaLib;
@@ -94,19 +95,16 @@ public class RembulanConsole {
 				.withDebug(true)
 				.installInto(state);
 
+		requireFunction = ModuleLibHelper.getRequire(env);
+
 		// install luajava
-		new LuaJavaLib().installInto(state, env);
+		ModuleLibHelper.addToPreLoad(env, "luajava", LuaJavaLib.loader(env));
 
 		this.callExecutor = DirectCallExecutor.newExecutor();
 
 		// command-line arguments
 		env.rawset("arg", cmdLineArgs.toArgTable(state));
 
-		{
-			// get the require function
-			Object req = env.rawget("require");
-			requireFunction = req instanceof LuaFunction ? (LuaFunction) req : null;
-		}
 	}
 
 	private void printVersion() {

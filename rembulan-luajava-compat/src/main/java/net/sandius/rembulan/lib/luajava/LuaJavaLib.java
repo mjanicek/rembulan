@@ -19,49 +19,47 @@ package net.sandius.rembulan.lib.luajava;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.Lib;
+import net.sandius.rembulan.lib.SimpleLoaderFunction;
 import net.sandius.rembulan.lib.impl.AbstractLibFunction;
 import net.sandius.rembulan.lib.impl.ArgumentIterator;
 import net.sandius.rembulan.runtime.ExecutionContext;
+import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class LuaJavaLib extends Lib {
+public final class LuaJavaLib {
 
-	@Override
-	public String name() {
-		return "luajava";
+	private LuaJavaLib() {
+		// not to be instantiated
 	}
 
-	@Override
-	public Table toTable(TableFactory tableFactory) {
-		Table t = tableFactory.newTable();
-
-		t.rawset("newInstance", NewInstance.INSTANCE);
-		t.rawset("bindClass", BindClass.INSTANCE);
-		t.rawset("new", New.INSTANCE);
-		t.rawset("createProxy", new UnimplementedFunction("luajava.createProxy"));
-		t.rawset("loadLib", new UnimplementedFunction("luajava.loadLib"));
-
-		return t;
+	public static LuaFunction loader(Table env) {
+		return new LoaderFunction(env);
 	}
 
-	@Override
-	public Object install(StateContext context, Table env, String modName, String origin) {
-		Table t = context.newTable();
+	static class LoaderFunction extends SimpleLoaderFunction {
 
-		t.rawset("newInstance", NewInstance.INSTANCE);
-		t.rawset("bindClass", BindClass.INSTANCE);
-		t.rawset("new", New.INSTANCE);
-		t.rawset("createProxy", new UnimplementedFunction("luajava.createProxy"));
-		t.rawset("loadLib", new UnimplementedFunction("luajava.loadLib"));
+		public LoaderFunction(Table env) {
+			super(env);
+		}
 
-		env.rawset(modName, t);
+		@Override
+		public Object install(StateContext context, Table env, String modName, String origin) {
+			Table t = context.newTable();
 
-		return t;
+			t.rawset("newInstance", LuaJavaLib.NewInstance.INSTANCE);
+			t.rawset("bindClass", LuaJavaLib.BindClass.INSTANCE);
+			t.rawset("new", LuaJavaLib.New.INSTANCE);
+			t.rawset("createProxy", new UnimplementedFunction(modName + ".createProxy"));
+			t.rawset("loadLib", new UnimplementedFunction(modName + ".loadLib"));
+
+			env.rawset(modName, t);
+
+			return t;
+		}
+
 	}
 
 	/**
