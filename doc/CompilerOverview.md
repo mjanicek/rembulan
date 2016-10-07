@@ -47,7 +47,9 @@ depends on the *types* of the operands of *op*.
 [§2.4 of the Lua Reference Manual](http://www.lua.org/manual/5.3/manual.html#2.4).)
 For instance, the expression
 
-    x + y
+```lua
+x + y
+```  
     
 may trigger a metamethod call, unless `x` and `y` are `number`s or `string`s that can
 be converted to numbers. It then follows that if we know that both `x` and `y` are `number`s,
@@ -57,12 +59,14 @@ that the type of the expression `(x + y)` will be `number`.
 Type analysis of course also works in conjunction with control flow analysis.
 Suppose we have the following snippet:
  
-    local x
-    if condition then
-      x = a + b
-    else
-      x = 0
-    end  
+```lua 
+local x
+if condition then
+  x = a + b
+else
+  x = 0
+end  
+```
 
 Here, the type of the value of the local variable `x` after the `if` statement will depend
 on the types of `a` and `b` (and the value of `condition`, see below). Let us look at the possible

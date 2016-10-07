@@ -86,9 +86,11 @@ Maven will pull in the remaining dependencies as part of the build process.
 
 To fetch the latest code on the `master` branch and build it, run
 
-    git clone https://github.com/mjanicek/rembulan.git
-    cd rembulan    
-    mvn install
+```sh
+git clone https://github.com/mjanicek/rembulan.git
+cd rembulan    
+mvn install
+```
 
 This will build all modules, run tests and finally install all artifacts into your local
 Maven repository.    
@@ -98,50 +100,62 @@ Maven repository.
 Much like PUC-Lua, Rembulan contains a standalone REPL. This is packaged in the module
 `rembulan-standalone`. To build the REPL, first run
 
-    mvn package
+```sh
+mvn package
+```
 
 Next, to run the REPL:
- 
-    cd rembulan-standalone/target/appassembler/bin
-    ./rembulan
+
+```sh
+cd rembulan-standalone/target/appassembler/bin
+./rembulan
+```
 
 ### Using Rembulan from Maven
 
 There are no releases yet, but snapshot artifacts are published to the Sonatype OSSRH Snapshot
 Repository. To use the snapshot artifacts, add the following configuration to your `pom.xml`:
 
-    <repositories>
-      <repository>
-        <id>sonatype-ossrh-snapshots</id>
-        <name>Sonatype OSSRH (Snapshots)</name>
-        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        <snapshots />
-      </repository>
-    </repositories>
+```xml
+<repositories>
+  <repository>
+    <id>sonatype-ossrh-snapshots</id>
+    <name>Sonatype OSSRH (Snapshots)</name>
+    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    <snapshots />
+    </repository>
+  </repositories>
+```
 
 To include the **runtime** as a dependency:
 
-    <dependency>
-      <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-runtime</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
+```xml
+<dependency>
+  <groupId>net.sandius.rembulan</groupId>
+  <artifactId>rembulan-runtime</artifactId>
+  <version>0.1-SNAPSHOT</version>
+</dependency>
+```
 
 To include the **compiler** as a dependency:
 
-    <dependency>
-      <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-compiler</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
+```xml
+<dependency>
+  <groupId>net.sandius.rembulan</groupId>
+  <artifactId>rembulan-compiler</artifactId>
+  <version>0.1-SNAPSHOT</version>
+</dependency>
+```
 
 To include the **standard library** as a dependency:
 
-    <dependency>
-      <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-stdlib</artifactId>
-      <version>0.1-SNAPSHOT</version>
-    </dependency>
+```xml
+<dependency>
+  <groupId>net.sandius.rembulan</groupId>
+  <artifactId>rembulan-stdlib</artifactId>
+  <version>0.1-SNAPSHOT</version>
+</dependency>
+```
 
 Note that `rembulan-compiler` and `rembulan-stdlib` both pull in `rembulan-runtime` as
 a dependency, but are otherwise independent. (I.e., to use the compiler and the standard
@@ -166,22 +180,26 @@ it into a (non-sandboxed) state, and runs it:
 
 (From [`rembulan-examples/.../HelloWorld.java`](rembulan-examples/src/main/java/net/sandius/rembulan/examples/HelloWorld.java))
 
-    String program = "print('hello world!')";
-    
-    // initialise state
-    StateContext state = StateContexts.newDefaultInstance();
-    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-    
-    // compile
-    ChunkLoader loader = CompilerChunkLoader.of("hello_world");
-    LuaFunction main = loader.loadTextChunk(new Variable(env), "hello", program);
-    
-    // execute
-    DirectCallExecutor.newExecutor().call(state, main);
+```java
+String program = "print('hello world!')";
+
+// initialise state
+StateContext state = StateContexts.newDefaultInstance();
+Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
+
+// compile
+ChunkLoader loader = CompilerChunkLoader.of("hello_world");
+LuaFunction main = loader.loadTextChunk(new Variable(env), "hello", program);
+
+// execute
+DirectCallExecutor.newExecutor().call(state, main);
+```
 
 The output (printed to `System.out`) is:
 
-    hello world!
+```
+hello world!
+```
 
 #### Example: CPU accounting
 
@@ -190,32 +208,36 @@ given number of operations has been performed:
 
 (From [`rembulan-examples/.../InfiniteLoop.java`](rembulan-examples/src/main/java/net/sandius/rembulan/examples/InfiniteLoop.java))
 
-    String program = "n = 0; while true do n = n + 1 end";
-    
-    // initialise state
-    StateContext state = StateContexts.newDefaultInstance();
-    Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
-    
-    // compile
-    ChunkLoader loader = CompilerChunkLoader.of("infinite_loop");
-    LuaFunction main = loader.loadTextChunk(new Variable(env), "loop", program);
+```xml
+String program = "n = 0; while true do n = n + 1 end";
 
-    // execute at most one million ops
-    DirectCallExecutor executor = DirectCallExecutor.newExecutorWithTickLimit(1000000);
+// initialise state
+StateContext state = StateContexts.newDefaultInstance();
+Table env = StandardLibrary.in(RuntimeEnvironments.system()).installInto(state);
 
-    try {
-        executor.call(state, main);
-        throw new AssertionError();  // never reaches this point!
-    }
-    catch (CallPausedException ex) {
-        System.out.println("n = " + env.rawget("n"));
-    }
+// compile
+ChunkLoader loader = CompilerChunkLoader.of("infinite_loop");
+LuaFunction main = loader.loadTextChunk(new Variable(env), "loop", program);
+
+// execute at most one million ops
+DirectCallExecutor executor = DirectCallExecutor.newExecutorWithTickLimit(1000000);
+
+try {
+    executor.call(state, main);
+    throw new AssertionError();  // never reaches this point!
+}
+catch (CallPausedException ex) {
+    System.out.println("n = " + env.rawget("n"));
+}
+```
 
 Prints:
 
-    n = 199999
+```
+n = 199999
+```
 
-The `CallPausedException` contains a *continuation* of the call. The call can be resumed:
+The [`CallPausedException`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/exec/CallPausedException.html) contains a *continuation* of the call. The call can be resumed:
 the pause is transparent to the Lua code, and the loop does not end with an error (it is merely
 paused).
 
