@@ -208,7 +208,7 @@ given number of operations has been performed:
 
 (From [`rembulan-examples/.../InfiniteLoop.java`](rembulan-examples/src/main/java/net/sandius/rembulan/examples/InfiniteLoop.java))
 
-```xml
+```java
 String program = "n = 0; while true do n = n + 1 end";
 
 // initialise state
