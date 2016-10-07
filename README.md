@@ -55,7 +55,7 @@ For more information about the Rembulan compiler, see the
  
 #### How are coroutines implemented?
  
-See [How are coroutines implemented?](doc/HowAreCoroutinesImplemented.md)  
+See [How are coroutines implemented?](doc/CoroutinesOverview.md)  
 
 ## Using Rembulan
 
@@ -71,7 +71,7 @@ Generated JavaDocs are available online:
 
 There are also a few short texts in the `doc` folder:
 
- * [How are coroutines implemented?](doc/HowAreCoroutinesImplmenented.md)
+ * [How are coroutines implemented?](doc/CoroutinesOverview.md)
  * [Overview of the Rembulan compiler](doc/CompilerOverview.md)
  * [Rembulan completeness table](doc/CompletenessTable.md)
 

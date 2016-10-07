@@ -1,4 +1,4 @@
-# How are coroutines implemented?
+# Overview of the coroutine implementation
 
 The way coroutines are handled in Rembulan permeates through the entire implementation
 strategy. The main obstacle to overcome is the lack of native support for coroutines
@@ -9,19 +9,43 @@ or implement them entirely in user code. Rembulan chooses the latter approach.
 The main idea is to use exceptions for switching coroutines, and attach
 call stack information to them.
 
-Every Lua function is a Java class with two methods (entry points): `invoke` and `resume`.
+What follows is a short overview of how coroutine switching is achieved in Java code and
+terms. For Lua programs, this process is entirely transparent.
+
+Every Lua function is an instance of (a subtype of) the Java class
+[`LuaFunction`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/LuaFunction.html)
+with two methods (entry points): `invoke` and `resume`.
 `invoke` is called when the function is called; `resume` is called when it is being resumed
 having been previously paused in an `invoke` or `resume`. Every operation that may involve
 a coroutine switch (that is, all operations that may involve metamethods, plus calls) may
 then throw a “control throwable”, an exception that has a call stack associated with it.
-Adding a call frame information to that exception and rethrowing it serves two purposes:
+This control throwable must be caught and rethrown using the following idiom:
+
+```java
+try {
+    // an operation that may pause
+    Dispatch.add(context, a, b);
+}
+catch (UnresolvedControlThrowable ct) {
+    // state is the suspended state used for resume
+    // throws a ResolvedControlThrowable
+    throw ct.resolve(this, state);  
+}
+```
+
+(For more details, see
+[`Dispatch`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/Dispatch.html),
+[`UnresolvedControlThrowable`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/UnresolvedControlThrowable.html)
+and [`ResolvedControlThrowable`](https://mjanicek.github.io/rembulan/apidocs/rembulan-runtime/net/sandius/rembulan/runtime/ResolvedControlThrowable.html).)
+
+Adding call frame information to that exception and rethrowing serves two purposes:
 
   1) saving the call frame, and
   2) doing this for every call in the call stack.
 
 A saved call frame fully represents the paused call; a saved call stack fully represents the paused coroutine.
 
-Resuming a coroutine is then as simple as taking its paused call stack, and unpausing it:
+Resuming a coroutine is then involves as taking its paused call stack, and unpausing it:
 resuming the top call frame (by calling `resume`). When it returns, the call frame below
 is called etc.
 
