@@ -32,7 +32,6 @@ import net.sandius.rembulan.impl.StateContexts;
 import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.lib.impl.DefaultBasicLib;
 import net.sandius.rembulan.lib.impl.StandardLibrary;
-import net.sandius.rembulan.lib.luajava.LuaJavaLib;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.util.Check;
@@ -96,9 +95,6 @@ public class RembulanConsole {
 				.installInto(state);
 
 		requireFunction = ModuleLibHelper.getRequire(env);
-
-		// install luajava
-		ModuleLibHelper.addToPreLoad(env, "luajava", LuaJavaLib.loader(env));
 
 		this.callExecutor = DirectCallExecutor.newExecutor();
 

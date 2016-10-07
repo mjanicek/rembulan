@@ -21,8 +21,11 @@ import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
+import net.sandius.rembulan.env.RuntimeEnvironment;
+import net.sandius.rembulan.env.RuntimeEnvironments;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Lib;
+import net.sandius.rembulan.lib.LoaderProvider;
 import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
@@ -31,6 +34,8 @@ import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 import java.util.Objects;
+import java.util.ServiceConfigurationError;
+import java.util.ServiceLoader;
 
 public class DefaultModuleLib extends ModuleLib {
 
@@ -46,9 +51,19 @@ public class DefaultModuleLib extends ModuleLib {
 	private final LuaFunction _loadlib;
 	private final LuaFunction _searchpath;
 
-	public DefaultModuleLib(StateContext context, Table env) {
+	/**
+	 * Constructs a new instance of the default module library.
+	 *
+	 * @param context  state context to use by the library, must not be {@code null}
+	 * @param runtimeEnvironment  runtime environment passed to instantiated libraries, must not be {@code null}
+	 * @param env  the global table passed to the instantiated libraries, must not be {@code null}
+	 * @param classLoader  class loader used for instantiating libraries, must not be {@code null}
+	 */
+	public DefaultModuleLib(StateContext context, RuntimeEnvironment runtimeEnvironment, Table env, ClassLoader classLoader) {
 		this.context = Objects.requireNonNull(context);
 		this.env = Objects.requireNonNull(env);
+		Objects.requireNonNull(runtimeEnvironment);
+		Objects.requireNonNull(classLoader);
 
 		this.libTable = context.newTable();
 		this.loaded = context.newTable();
@@ -61,11 +76,27 @@ public class DefaultModuleLib extends ModuleLib {
 
 		// initialise searchers
 		searchers.rawset(1, new PreloadSearcher(preload));
+		searchers.rawset(2, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
 
 		this.require = new Require();
 
 		this._loadlib = new UnimplementedFunction("package.loadlib");
 		this._searchpath = new UnimplementedFunction("package.searchpath");
+	}
+
+	/**
+	 * Constructs a new instance of the default module library.
+	 *
+	 * <b>Deprecated:</b> breaks sandboxing.
+	 * Use {@link DefaultModuleLib#DefaultModuleLib(StateContext, RuntimeEnvironment, Table, ClassLoader)}
+	 * instead.
+	 *
+	 * @param context  state context, must not be {@code null}
+	 * @param env  the global table, must not be {@code null}
+	 */
+	@Deprecated
+	public DefaultModuleLib(StateContext context, Table env) {
+		this(context, RuntimeEnvironments.system(), env, ClassLoader.getSystemClassLoader());
 	}
 
 	@Override
@@ -295,6 +326,111 @@ public class DefaultModuleLib extends ModuleLib {
 				String error = "\n\tno field package.preload['" + modName + "']";
 				context.getReturnBuffer().setTo(error);
 			}
+		}
+
+	}
+
+	/**
+	 * An abstract searcher function that uses a {@link ServiceLoader} to discover
+	 * loader services.
+	 *
+	 * @param <T>  the type of the loader service
+	 */
+	static abstract class AbstractServiceLoaderSearcher<T> extends AbstractLibFunction {
+
+		private final Class<T> serviceClass;
+		private final ServiceLoader<T> serviceLoader;
+
+		protected AbstractServiceLoaderSearcher(Class<T> serviceClass, ClassLoader classLoader) {
+			this.serviceClass = Objects.requireNonNull(serviceClass);
+			this.serviceLoader = ServiceLoader.load(serviceClass, classLoader);
+		}
+
+		@Override
+		protected String name() {
+			return "(" + serviceClass.getName() + " ServiceLoader searcher)";
+		}
+
+		private LuaFunction findLoader(String modName) {
+			try {
+				for (T service : serviceLoader) {
+					if (matches(modName, service)) {
+						LuaFunction loader = getLoader(service);
+						if (loader != null) {
+							return loader;
+						}
+					}
+				}
+			}
+			catch (ServiceConfigurationError error) {
+				// TODO: maybe we should just let the VM crash?
+				throw new LuaRuntimeException(error);
+			}
+
+			// not found
+			return null;
+		}
+
+		/**
+		 * Returns {@code} true if the given service {@code service} provides a module with
+		 * the name {@code moduleName}.
+		 *
+		 * @param moduleName  module name
+		 * @param service  a service to be examined
+		 *
+		 * @return  {@code true} if the {@code service} provides a module with the name
+		 *          {@code moduleName}
+		 */
+		protected abstract boolean matches(String moduleName, T service);
+
+		/**
+		 * Returns the loader provided by a given service.
+		 *
+		 * <p>May return {@code null} to indicate that {@code service} does not provide
+		 * a loader.</p>
+		 *
+		 * @param service  the service to get the loader from
+		 * @return  the loader function
+		 */
+		protected abstract LuaFunction getLoader(T service);
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+			String modName = args.nextString();
+
+			LuaFunction loader = findLoader(modName);
+
+			if (loader != null) {
+				context.getReturnBuffer().setTo(loader);
+			}
+			else {
+				String error = "\n\tno " + serviceClass.getName() + " for '" + modName + "'";
+				context.getReturnBuffer().setTo(error);
+			}
+
+		}
+
+	}
+
+	static class LoaderProviderServiceLoaderSearcher extends AbstractServiceLoaderSearcher<LoaderProvider> {
+
+		private final RuntimeEnvironment runtimeEnvironment;
+		private final Table env;
+
+		public LoaderProviderServiceLoaderSearcher(RuntimeEnvironment runtimeEnvironment, Table env, ClassLoader classLoader) {
+			super(LoaderProvider.class, classLoader);
+			this.runtimeEnvironment = Objects.requireNonNull(runtimeEnvironment);
+			this.env = Objects.requireNonNull(env);
+		}
+
+		@Override
+		protected boolean matches(String modName, LoaderProvider service) {
+			return service.name().equals(modName);
+		}
+
+		@Override
+		protected LuaFunction getLoader(LoaderProvider service) {
+			return service.newLoader(runtimeEnvironment, env);
 		}
 
 	}
