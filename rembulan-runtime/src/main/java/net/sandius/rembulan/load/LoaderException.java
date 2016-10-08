@@ -100,11 +100,13 @@ public class LoaderException extends Exception {
 	 *
 	 * <p>The format of this error message is:</p>
 	 * <pre>
-	 *     "SourceFileName:SourceLine: CauseClass: CauseMessage"
+	 *     "SourceFileName:SourceLine: CauseMessage"
 	 * </pre>
-	 * <p>When no source file name is available, the source information prefix is omitted;
-	 * when no source line information is available, the {@code SourceLine} string is
-	 * equal to "?".</p>
+	 * <p>When no source file name is available, the source information prefix is omitted
+	 * (i.e., the error message is equal to {@code CauseMessage}); when no source line information
+	 * is available, the {@code SourceLine} string is equal to "?".</p>
+	 *
+	 * <p>{@code CauseMessage} is the error message as returner by the cause of this exception.</p>
 	 *
 	 * @return  a Lua-style error message for this loader exception
 	 */
@@ -115,7 +117,7 @@ public class LoaderException extends Exception {
 				? sourceFileName + ":" + (sourceLine > 0 ? Integer.toString(sourceLine) : "?") + ": "
 				: "";
 
-		return prefix + cause.getClass().getName() + ": " + cause.getMessage();
+		return prefix + cause.getMessage();
 	}
 
 }

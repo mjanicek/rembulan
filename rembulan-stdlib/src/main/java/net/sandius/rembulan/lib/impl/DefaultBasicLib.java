@@ -953,7 +953,7 @@ public class DefaultBasicLib extends BasicLib {
 				fn = loader.loadTextChunk(new Variable(env), chunkName, chunkText);
 			}
 			catch (LoaderException ex) {
-				context.getReturnBuffer().setTo(null, Conversions.toErrorObject(ex));
+				context.getReturnBuffer().setTo(null, ex.getLuaStyleErrorMessage());
 				return;
 			}
 
