@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class ArrayByteString extends ByteString {
+class ArrayByteString extends ByteString {
 
 	private final byte[] bytes;
 	private int hashCode;

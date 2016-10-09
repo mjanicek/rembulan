@@ -23,7 +23,7 @@ import java.util.Objects;
  * An immutable view of a {@link java.lang.String} that treats all characters of
  * the underlying strings as 8-bit values by taking the less significant byte.
  */
-public final class StringViewByteString extends ByteString {
+class StringViewByteString extends ByteString {
 
 	private final String string;
 
