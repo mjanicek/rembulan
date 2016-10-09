@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -78,13 +80,28 @@ public abstract class ByteString implements CharSequence {
 	 */
 	public abstract byte byteAt(int index);
 
-	void putToByteBuffer(ByteBuffer buffer) {
-		buffer.put(getBytes());
-	}
+	/**
+	 * Puts the contents of this byte string to the specified {@code buffer}.
+	 *
+	 * @param buffer  the buffer to use, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code buffer} is {@code null}
+	 */
+	public abstract void putTo(ByteBuffer buffer);
 
-	public String encode(Charset charset) {
+	/**
+	 * Writes the contents of this byte string to the specified {@code stream}.
+	 *
+	 * @param stream  the stream to use, must not be {@code null}
+	 *
+	 * @throws IOException  when I/O error happens during the write
+	 * @throws NullPointerException  if {@code stream} is {@code null}
+	 */
+	public abstract void writeTo(OutputStream stream) throws IOException;
+
+	public String toString(Charset charset) {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(length());
-		putToByteBuffer(byteBuffer);
+		putTo(byteBuffer);
 		byteBuffer.rewind();
 		return charset.decode(byteBuffer).toString();
 	}

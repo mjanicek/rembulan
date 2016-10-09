@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
@@ -95,8 +97,13 @@ class ArrayByteString extends ByteString {
 	}
 
 	@Override
-	public void putToByteBuffer(ByteBuffer buffer) {
+	public void putTo(ByteBuffer buffer) {
 		buffer.put(bytes);
+	}
+
+	@Override
+	public void writeTo(OutputStream stream) throws IOException {
+		stream.write(bytes);
 	}
 
 }

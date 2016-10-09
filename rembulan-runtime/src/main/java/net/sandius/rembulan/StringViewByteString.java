@@ -16,6 +16,9 @@
 
 package net.sandius.rembulan;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -186,6 +189,16 @@ class StringViewByteString extends ByteString {
 			bytes[i] = (byte) charAt(i);
 		}
 		return bytes;
+	}
+
+	@Override
+	public void putTo(ByteBuffer buffer) {
+		buffer.put(getBytes());
+	}
+
+	@Override
+	public void writeTo(OutputStream stream) throws IOException {
+		stream.write(getBytes());
 	}
 
 	private boolean computeIsRaw() {
