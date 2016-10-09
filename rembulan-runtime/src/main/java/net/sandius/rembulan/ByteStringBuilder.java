@@ -85,7 +85,7 @@ public class ByteStringBuilder {
 	}
 
 	public String toString(Charset charset) {
-		return toByteString().toString(charset);
+		return toByteString().decode(charset);
 	}
 
 	@Override

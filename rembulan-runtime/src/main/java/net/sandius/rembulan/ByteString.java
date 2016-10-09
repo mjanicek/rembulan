@@ -27,12 +27,12 @@ import java.util.Objects;
  * Byte string, an immutable sequence of bytes.
  *
  * <p>The purpose of this class is to serve as a bridge between Java strings (with their
- * characters corresponding to 16-bit code units in the Basic Multilingual Plane (BMP).)
+ * characters corresponding to 16-bit code units in the Basic Multilingual Plane (BMP))
  * and Lua strings (raw 8-bit sequences).</p>
  *
  * <p>Byte strings may be created in three basic ways:</p>
  * <ul>
- *     <li>by constructing a <b>lossy</b> 8-bit view of a Java string using
+ *     <li>by constructing a (potentially) <b>lossy</b> 8-bit view of a Java string using
  *       {@link #viewOf(String)};</li>
  *     <li>by copying from a byte array using {@link #copyOf(byte[])};</li>
  *     <li>by encoding a {@code java.lang.String} into bytes using {@link #encode(String)}
@@ -41,21 +41,21 @@ import java.util.Objects;
  *
  * <p>{@code ByteString} implements {@link CharSequence} in order to enable a degree
  * of interoperability with other Java-based character processing classes. A byte string
- * is a character sequence in the following manner:</p>
+ * is interpreted as a character sequence in the following manner:</p>
  * <ul>
  *     <li>every byte of the byte string is mapped directly to a character (in the
  *       range U+0000 to U+00FF) by the method {@link #charAt(int)};</li>
  *     <li>the method {@link #length()} returns the number of bytes in the byte string.</li>
  * </ul>
  *
- * <p>In other words, the way a byte string is to be seen as a character array is analogous
+ * <p>In other words, the way a byte string is to be seen as a character sequence is analogous
  * to <i>casting</i> the {@code byte} values it contains to {@code char}s. This is also
- * the interpretation used by the method {@link #toString()}. Note especially that this
- * does not take charsets into account. {@code ByteString} therefore provides the method
- * {@link #toString(Charset)} that uses a {@link Charset} to decode the byte string.</p>
+ * the interpretation used by the method {@link #toString()}. Note especially that {@code toString()}
+ * does not take charsets into account &mdash; {@code ByteString} therefore provides the method
+ * {@link #decode(Charset)} that uses a {@link Charset} to decode the byte string.</p>
  *
  * <p>The {@link #hashCode()} of a byte string is defined using the same function as
- * that of {@link String#hashCode()}, using the above definition of {@code charAt()}. This
+ * that of {@link String#hashCode()} and the above definition of {@code charAt()}. This
  * means that for a raw 8-bit string {@code s}, the following will be true:</p>
  * <pre>
  *     s.hashCode() == ByteString.viewOf(s).hashCode()
@@ -229,7 +229,7 @@ public abstract class ByteString implements CharSequence, Comparable<ByteString>
 	 *
 	 * <p>This method does <b>not</b> take any character encoding into account;
 	 * most importantly, it does not use the platform's charset. In order to decode the byte
-	 * string using a charset, use {@link #toString(Charset)}.</p>
+	 * string using a charset, use {@link #decode(Charset)} or {@link #decode()}.</p>
 	 *
 	 * @return  a string obtained from this byte string by mapping each byte to a character
 	 */
@@ -245,11 +245,25 @@ public abstract class ByteString implements CharSequence, Comparable<ByteString>
 	 *
 	 * @throws NullPointerException  if {@code charset} is {@code null}
 	 */
-	public String toString(Charset charset) {
+	public String decode(Charset charset) {
 		ByteBuffer byteBuffer = ByteBuffer.allocate(length());
 		putTo(byteBuffer);
 		byteBuffer.rewind();
 		return charset.decode(byteBuffer).toString();
+	}
+
+	/**
+	 * Returns a string represented by this byte string decoded using the default charset
+	 * of the virtual machine.
+	 *
+	 * <p>This is effectively equivalent to {@link #decode(Charset)}
+	 * called with {@link Charset#defaultCharset()}.</p>
+	 *
+	 * @return  a string decoded from this byte string using the platform's default
+	 *          charset
+	 */
+	public String decode() {
+		return decode(Charset.defaultCharset());
 	}
 
 	/**
