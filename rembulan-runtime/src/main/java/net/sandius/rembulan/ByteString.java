@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * Byte string, an immutable sequence of bytes.
@@ -60,7 +61,7 @@ import java.util.Arrays;
  *     s.hashCode() == ByteString.viewOf(s).hashCode()
  * </pre>
  */
-public abstract class ByteString implements CharSequence {
+public abstract class ByteString implements CharSequence, Comparable<ByteString> {
 
 	ByteString() {
 		// no-op: package-private to restrict access
@@ -249,6 +250,33 @@ public abstract class ByteString implements CharSequence {
 		putTo(byteBuffer);
 		byteBuffer.rewind();
 		return charset.decode(byteBuffer).toString();
+	}
+
+	/**
+	 * Compares this byte string lexicographically with {@code that}. Returns a negative
+	 * integer, zero, or a positive integer if {@code this} is lesser than, equal to or greater
+	 * than {@code that} in this ordering.
+	 *
+	 * <p>For the purposes of this ordering, bytes are interpreted as <i>unsigned</i>
+	 * integers.</p>
+	 *
+	 * @param that  byte string to compare to
+	 * @return  a negative, zero, or positive integer if {@code this} is lexicographically
+	 *          lesser than, equal to or greater than {@code that}
+	 */
+	@Override
+	public int compareTo(ByteString that) {
+		Objects.requireNonNull(that);
+
+		int len = Math.min(this.length(), that.length());
+		for (int i = 0; i < len; i++) {
+			int a = this.byteAt(i) & 0xff;
+			int b = that.byteAt(i) & 0xff;
+			int cmp = a - b;
+			if (cmp != 0) return cmp;
+		}
+
+		return this.length() - that.length();
 	}
 
 }
