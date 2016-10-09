@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Objects;
 
@@ -24,7 +23,7 @@ import java.util.Objects;
  * An immutable view of a {@link java.lang.String} that treats all characters of
  * the underlying strings as 8-bit values by taking the less significant byte.
  */
-public final class StringByteView implements CharSequence {
+public final class StringViewByteString extends ByteString {
 
 	private final String string;
 
@@ -43,40 +42,37 @@ public final class StringByteView implements CharSequence {
 	private static final int ALL_8_BIT = 1;
 	private static final int TRUNCATED = 2;
 
-	StringByteView(String s) {
+	StringViewByteString(String s) {
 		this.string = Objects.requireNonNull(s);
 		this.hashCode = 0;
 		this.originalIsRaw = 0;
 	}
 
-	/**
-	 * Returns a {@code StringByteView} of the string {@code s}.
-	 *
-	 * @param s  the string to take the byte view of, must not be {@code null}
-	 * @return  a byte view of {@code s}
-	 */
-	public static StringByteView of(String s) {
-		return new StringByteView(s);
+	static StringViewByteString decoded(String s) {
+		ArrayByteString bs = new ArrayByteString(s.getBytes());
+		return new StringViewByteString(bs.toString());
+	}
+
+	static StringViewByteString decoded(String s, Charset charset) {
+		ArrayByteString bs = new ArrayByteString(s.getBytes(charset));
+		return new StringViewByteString(bs.toString());
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		StringByteView that = (StringByteView) o;
-
+	protected boolean equals(ByteString that) {
 		if (this.length() != that.length()) return false;
 
-		// Don't force hashCode computation, but use it if it is know that it it has already
-		// been computed.
-		int thisHash = this.hashCode;
-		int thatHash = that.hashCode;
-		if (thisHash != 0 && thatHash != 0 && thisHash != thatHash) return false;
+		if (that instanceof StringViewByteString) {
+			// Don't force hashCode computation, but use it if we know that it has already
+			// been computed.
+			int thisHash = this.hashCode;
+			int thatHash = ((StringViewByteString) that).hashCode;
+			if (thisHash != 0 && thatHash != 0 && thisHash != thatHash) return false;
+		}
 
 		int len = this.length();
 		for (int i = 0; i < len; i++) {
-			if (this.charAt(i) != that.charAt(i)) return false;
+			if (this.byteAt(i) != that.byteAt(i)) return false;
 		}
 
 		return true;
@@ -132,13 +128,18 @@ public final class StringByteView implements CharSequence {
 	}
 
 	@Override
+	public byte byteAt(int index) {
+		return (byte) string.charAt(index);
+	}
+
+	@Override
 	public char charAt(int index) {
-		return (char) (((int) string.charAt(index)) & 0xff);
+		return (char) (byteAt(index) & 0xff);
 	}
 
 	@Override
 	public CharSequence subSequence(int start, int end) {
-		return StringByteView.of(string.substring(start, end));
+		return new StringViewByteString(string.substring(start, end));
 	}
 
 	private String toConvertedString() {
@@ -173,21 +174,13 @@ public final class StringByteView implements CharSequence {
 		return string;
 	}
 
-	/**
-	 * Returns a new byte array containing the byte view of the underlying string.
-	 *
-	 * @return  a new byte array
-	 */
+	@Override
 	public byte[] getBytes() {
 		byte[] bytes = new byte[string.length()];
 		for (int i = 0; i < bytes.length; i++) {
 			bytes[i] = (byte) charAt(i);
 		}
 		return bytes;
-	}
-
-	public void putToByteBuffer(ByteBuffer buffer) {
-		buffer.put(getBytes());
 	}
 
 	private boolean computeIsRaw() {
@@ -217,13 +210,6 @@ public final class StringByteView implements CharSequence {
 		else {
 			return o == ALL_8_BIT;
 		}
-	}
-
-	public String encode(Charset charset) {
-		ByteBuffer byteBuffer = ByteBuffer.allocate(string.length());
-		putToByteBuffer(byteBuffer);
-		byteBuffer.rewind();
-		return charset.decode(byteBuffer).toString();
 	}
 
 }
