@@ -19,7 +19,6 @@ package net.sandius.rembulan;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.Objects;
 
 /**
@@ -53,16 +52,6 @@ class StringViewByteString extends ByteString {
 
 	StringViewByteString(String s) {
 		this(s, 0);
-	}
-
-	static StringViewByteString decoded(String s) {
-		ArrayByteString bs = new ArrayByteString(s.getBytes());
-		return new StringViewByteString(bs.toString());
-	}
-
-	static StringViewByteString decoded(String s, Charset charset) {
-		ArrayByteString bs = new ArrayByteString(s.getBytes(charset));
-		return new StringViewByteString(bs.toString());
 	}
 
 	@Override
@@ -102,9 +91,6 @@ class StringViewByteString extends ByteString {
 				 *
 				 * Caveat: hashCode may actually be 0, in which case it will be re-computed
 				 * every time hashCode() is called.
-				 *
-				 * The hash function is the same as the one documented by String.hashCode(),
-				 * but we only consider the least significant byte of each character.
 				 */
 
 				int mask = 0;
@@ -137,11 +123,6 @@ class StringViewByteString extends ByteString {
 	@Override
 	public byte byteAt(int index) {
 		return (byte) string.charAt(index);
-	}
-
-	@Override
-	public char charAt(int index) {
-		return (char) (byteAt(index) & 0xff);
 	}
 
 	@Override

@@ -20,6 +20,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
 
+/**
+ * A byte string builder, similar in functionality and purpose to {@link StringBuilder}.
+ */
 public class ByteStringBuilder {
 
 	private final ByteArrayOutputStream baos;
@@ -58,7 +61,7 @@ public class ByteStringBuilder {
 	}
 
 	public ByteStringBuilder append(String string, Charset charset) {
-		return this.append(ByteString.decode(string, charset));
+		return this.append(ByteString.encode(string, charset));
 	}
 
 	public ByteStringBuilder append(ByteString byteString) {

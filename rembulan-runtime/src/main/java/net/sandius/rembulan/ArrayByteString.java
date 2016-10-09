@@ -22,6 +22,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * A byte string backed by a byte array.
+ */
 class ArrayByteString extends ByteString {
 
 	private final byte[] bytes;
@@ -76,11 +79,6 @@ class ArrayByteString extends ByteString {
 	@Override
 	public byte byteAt(int index) {
 		return bytes[index];
-	}
-
-	@Override
-	public char charAt(int index) {
-		return (char) (bytes[index] & 0xff);
 	}
 
 	@Override
