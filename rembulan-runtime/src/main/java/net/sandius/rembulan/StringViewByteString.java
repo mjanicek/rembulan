@@ -42,10 +42,14 @@ public final class StringViewByteString extends ByteString {
 	private static final int ALL_8_BIT = 1;
 	private static final int TRUNCATED = 2;
 
-	StringViewByteString(String s) {
+	private StringViewByteString(String s, int originalIsRaw) {
 		this.string = Objects.requireNonNull(s);
+		this.originalIsRaw = originalIsRaw;
 		this.hashCode = 0;
-		this.originalIsRaw = 0;
+	}
+
+	StringViewByteString(String s) {
+		this(s, 0);
 	}
 
 	static StringViewByteString decoded(String s) {
@@ -139,7 +143,8 @@ public final class StringViewByteString extends ByteString {
 
 	@Override
 	public CharSequence subSequence(int start, int end) {
-		return new StringViewByteString(string.substring(start, end));
+		int raw = originalIsRaw == ALL_8_BIT ? ALL_8_BIT : 0;
+		return new StringViewByteString(string.substring(start, end), raw);
 	}
 
 	private String toConvertedString() {
