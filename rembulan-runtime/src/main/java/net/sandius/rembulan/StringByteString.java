@@ -189,4 +189,15 @@ class StringByteString extends ByteString {
 		return super.concat(other);
 	}
 
+	@Override
+	public boolean startsWith(byte b) {
+		if (string.isEmpty()) return false;
+
+		// FIXME: this assumes that the 1st char of the encoded string can be directly compared
+		// to the argument. This is wrong for many encodings, incl. UTF-8, where this
+		// is only true for b < 128. (I.e., ASCII).
+
+		return string.charAt(0) == (char) b;
+	}
+
 }

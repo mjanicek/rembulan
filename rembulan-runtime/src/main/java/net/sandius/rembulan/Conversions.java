@@ -252,8 +252,8 @@ public final class Conversions {
 		if (o instanceof Number) {
 			return (Number) o;
 		}
-		else if (o instanceof String) {
-			Number n = numericalValueOf((String) o);
+		else if (o instanceof ByteString || o instanceof String) {
+			Number n = numericalValueOf(o.toString());
 			return n != null ? floatValueOf(n) : null;
 		}
 		else {

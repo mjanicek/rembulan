@@ -816,6 +816,10 @@ public class DefaultBasicLib extends BasicLib {
 				Table table = (Table) arg1;
 				result = table.rawlen();
 			}
+			else if (arg1 instanceof ByteString) {
+				ByteString s = (ByteString) arg1;
+				result = (long) s.length();
+			}
 			else if (arg1 instanceof String) {
 				String s = (String) arg1;
 				result = Dispatch.len(s);
@@ -838,13 +842,19 @@ public class DefaultBasicLib extends BasicLib {
 			return "select";
 		}
 
+		private static boolean isHash(Object o) {
+			if (o instanceof ByteString) return ((ByteString) o).startsWith((byte) '#');
+			else if (o instanceof String) return ((String) o).startsWith("#");
+			else return false;
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object index = args.peekOrNil();
 
-			if (index instanceof String && ((String) index).startsWith("#")) {
+			if (isHash(index)) {
 				// return the number of remaining args
-				int count = args.tailSize() - 1;
+				int count = args.size() - 1;
 				context.getReturnBuffer().setTo((long) count);
 			}
 			else {

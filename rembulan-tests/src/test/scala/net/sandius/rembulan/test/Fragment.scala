@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.test
 
-import net.sandius.rembulan.{LuaFormat, LuaRuntimeException}
+import net.sandius.rembulan.{Conversions, LuaFormat, LuaRuntimeException}
 import org.scalatest.FunSpec
 
 import scala.collection.mutable
@@ -229,7 +229,7 @@ object FragmentExpectations {
         override protected def matchError(ex: Throwable, onFail: () => Unit)(spec: FunSpec) = {
           ex match {
             case le: LuaRuntimeException =>
-              val actualErrorObject = le.getErrorObject
+              val actualErrorObject = Conversions.javaRepresentationOf(le.getErrorObject)
               if (expectErrorObject != actualErrorObject) {
                 onFail()
                 spec.fail("Error object mismatch: expected [" + expectErrorObject + "], got [" + actualErrorObject + "]")

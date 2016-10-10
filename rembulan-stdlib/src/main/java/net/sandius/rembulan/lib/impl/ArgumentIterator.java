@@ -324,8 +324,23 @@ public class ArgumentIterator implements Iterator<Object> {
 		return result;
 	}
 
+	// FIXME: use ByteString
 	public String nextStrictString() {
-		return nextStrict(TYPENAME_STRING, String.class);
+		final String result;
+		try {
+			Object arg = peek(TYPENAME_STRING);
+			if (arg instanceof ByteString || arg instanceof String) {
+				result = arg.toString();
+			}
+			else {
+				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg));
+			}
+		}
+		catch (RuntimeException ex) {
+			throw badArgument(ex);
+		}
+		skip();
+		return result;
 	}
 
 	public String optNextString(String defaultValue) {

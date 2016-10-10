@@ -235,4 +235,7 @@ public abstract class ByteString implements Comparable<ByteString> {
 		return ByteString.wrap(result);
 	}
 
+	// TODO: add startsWith(ByteString)
+	public abstract boolean startsWith(byte c);
+
 }

@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.MetatableProvider;
 import net.sandius.rembulan.Metatables;
@@ -64,8 +65,8 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 	 */
 	public static String typeNameOf(Object instance, MetatableProvider metatableProvider) {
 		Object nameField = Metatables.getMetamethod(metatableProvider, Lib.MT_NAME, instance);
-		if (nameField instanceof String) {
-			return (String) nameField;
+		if (nameField instanceof ByteString || nameField instanceof String) {
+			return nameField.toString();
 		}
 		else {
 			if (LuaType.isLightUserdata(instance)) {

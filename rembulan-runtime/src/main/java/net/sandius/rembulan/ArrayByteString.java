@@ -107,6 +107,9 @@ class ArrayByteString extends ByteString {
 		stream.write(bytes);
 	}
 
-
+	@Override
+	public boolean startsWith(byte b) {
+		return bytes.length > 0 && bytes[0] == b;
+	}
 
 }
