@@ -75,6 +75,8 @@ public class DefaultTable extends Table {
 			throw new IllegalArgumentException("table index is NaN");
 		}
 
+		value = Conversions.canonicalRepresentationOf(value);
+
 		if (value == null) {
 			values.remove(key);
 		}
