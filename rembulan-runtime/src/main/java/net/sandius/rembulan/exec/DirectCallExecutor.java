@@ -21,6 +21,7 @@ import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.impl.ReturnBuffers;
 import net.sandius.rembulan.impl.SchedulingContexts;
 import net.sandius.rembulan.runtime.AsyncTask;
+import net.sandius.rembulan.runtime.ReturnBufferFactory;
 import net.sandius.rembulan.runtime.RuntimeCallInitialiser;
 import net.sandius.rembulan.runtime.SchedulingContext;
 import net.sandius.rembulan.runtime.SchedulingContextFactory;
@@ -37,10 +38,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DirectCallExecutor {
 
 	private final SchedulingContextFactory schedulingContextFactory;
+	private final ReturnBufferFactory returnBufferFactory;
 
 	DirectCallExecutor(SchedulingContextFactory schedulingContextFactory) {
 		this.schedulingContextFactory = Objects.requireNonNull(schedulingContextFactory);
+		this.returnBufferFactory = DEFAULT_RETURN_BUFFER_FACTORY;
 	}
+
+	private static final ReturnBufferFactory DEFAULT_RETURN_BUFFER_FACTORY =
+			ReturnBuffers.canonical(ReturnBuffers.defaultFactory(), false, true);
 
 	private static final DirectCallExecutor NEVER_PAUSING_EXECUTOR
 			= new DirectCallExecutor(SchedulingContexts.neverPauseFactory());
@@ -212,7 +218,9 @@ public class DirectCallExecutor {
 	 */
 	public Object[] call(StateContext stateContext, Object fn, Object... args)
 			throws CallException, CallPausedException, InterruptedException {
-		CallInitialiser initialiser = RuntimeCallInitialiser.forState(stateContext, ReturnBuffers.canonicalising(ReturnBuffers.defaultFactory()));
+		CallInitialiser initialiser = RuntimeCallInitialiser.forState(
+				stateContext,
+				returnBufferFactory);
 		return resume(initialiser.newCall(fn, Conversions.copyAsJavaValues(args)));
 	}
 
