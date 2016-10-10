@@ -56,7 +56,7 @@ public final class ReturnBuffers {
 	 * @throws NullPointerException  if {@code buffer} is {@code null}
 	 */
 	public static ReturnBuffer canonicalising(ReturnBuffer buffer) {
-		return new CanonicalisingReturnBufferWrapper(buffer);
+		return new CanonicalisingDelegatingReturnBuffer(buffer);
 	}
 
 	private static final ReturnBufferFactory DEFAULT_FACTORY_INSTANCE = new ReturnBufferFactory() {
