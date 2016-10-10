@@ -19,6 +19,7 @@ package net.sandius.rembulan.lib.impl;
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
+import net.sandius.rembulan.LuaType;
 import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Ordering;
 import net.sandius.rembulan.PlainValueTypeNamer;
@@ -206,7 +207,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 
 				Object s = context.getReturnBuffer().get0();
-				if (s instanceof String) {
+				if (LuaType.isString(s)) {
 					out.print(s);
 				}
 				else {
