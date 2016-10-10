@@ -81,11 +81,9 @@ public final class Conversions {
 	 * @see #arithmeticValueOf(Object)
 	 */
 	public static Number numericalValueOf(Object o) {
-		return o instanceof Number
-				? (Number) o
-				: o instanceof String
-						? numericalValueOf((String) o)
-						: null;
+		if (o instanceof Number) return (Number) o;
+		else if (o instanceof ByteString || o instanceof String) return numericalValueOf(o.toString());
+		else return null;
 	}
 
 	/**
