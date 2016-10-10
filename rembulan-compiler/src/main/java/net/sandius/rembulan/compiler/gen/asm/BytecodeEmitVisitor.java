@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.CompilerSettings;
@@ -419,8 +420,24 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	@Override
 	public void visit(LoadConst.Str node) {
-		il.add(new LdcInsnNode(node.value()));
-		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
+		// use byte strings?
+		if (context.compilerSettings.byteStrings()) {
+			// TODO cache if constCaching is set
+			il.add(new LdcInsnNode(node.value()));
+			il.add(new MethodInsnNode(INVOKESTATIC,
+					Type.getInternalName(ByteString.class),
+					"of",
+					Type.getMethodDescriptor(
+							Type.getType(ByteString.class),
+							Type.getType(String.class)),
+					false));
+			il.add(new VarInsnNode(ASTORE, slot(node.dest())));
+
+		}
+		else {
+			il.add(new LdcInsnNode(node.value()));
+			il.add(new VarInsnNode(ASTORE, slot(node.dest())));
+		}
 	}
 
 	private static String dispatchMethodName(BinOp.Op op) {

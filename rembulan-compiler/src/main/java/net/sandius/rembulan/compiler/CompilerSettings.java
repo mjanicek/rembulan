@@ -83,6 +83,11 @@ public final class CompilerSettings {
 	public static final boolean DEFAULT_CONST_CACHING_MODE = true;
 
 	/**
+	 * The default byte string mode.
+	 */
+	public static final boolean DEFAULT_BYTE_STRING_MODE = true;
+
+	/**
 	 * The default method size limit.
 	 */
 	public static final int DEFAULT_NODE_SIZE_LIMIT = 2000;
@@ -90,17 +95,20 @@ public final class CompilerSettings {
 	private final CPUAccountingMode cpuAccountingMode;
 	private final boolean constFolding;
 	private final boolean constCaching;
+	private final boolean byteStrings;
 	private final int nodeSizeLimit;
 
 	CompilerSettings(
 			CPUAccountingMode cpuAccountingMode,
 			boolean constFolding,
 			boolean constCaching,
+			boolean byteStrings,
 			int nodeSizeLimit) {
 
 		this.cpuAccountingMode = Objects.requireNonNull(cpuAccountingMode);
 		this.constFolding = constFolding;
 		this.constCaching = constCaching;
+		this.byteStrings = byteStrings;
 		this.nodeSizeLimit = nodeSizeLimit;
 	}
 
@@ -114,6 +122,7 @@ public final class CompilerSettings {
 		return this.cpuAccountingMode == that.cpuAccountingMode
 				&& this.constFolding == that.constFolding
 				&& this.constCaching == that.constCaching
+				&& this.byteStrings == that.byteStrings
 				&& this.nodeSizeLimit == that.nodeSizeLimit;
 	}
 
@@ -122,6 +131,7 @@ public final class CompilerSettings {
 		int result = cpuAccountingMode.hashCode();
 		result = 31 * result + (constFolding ? 1 : 0);
 		result = 31 * result + (constCaching ? 1 : 0);
+		result = 31 * result + (byteStrings ? 1 : 0);
 		result = 31 * result + nodeSizeLimit;
 		return result;
 	}
@@ -135,6 +145,7 @@ public final class CompilerSettings {
 	 * @param cpuAccountingMode  CPU accounting mode, must not be {@code null}
 	 * @param constFolding  const folding mode
 	 * @param constCaching  const caching mode
+	 * @param byteStrings  byte string mode
 	 * @param nodeSizeLimit  node size limit
 	 * @return  the corresponding compiler settings
 	 *
@@ -144,9 +155,11 @@ public final class CompilerSettings {
 			CPUAccountingMode cpuAccountingMode,
 			boolean constFolding,
 			boolean constCaching,
+			boolean byteStrings,
 			int nodeSizeLimit) {
 
-		return new CompilerSettings(cpuAccountingMode, constFolding, constCaching, nodeSizeLimit);
+		return new CompilerSettings(
+				cpuAccountingMode, constFolding, constCaching, byteStrings, nodeSizeLimit);
 	}
 
 	/**
@@ -159,6 +172,7 @@ public final class CompilerSettings {
 				DEFAULT_CPU_ACCOUNTING_MODE,
 				DEFAULT_CONST_FOLDING_MODE,
 				DEFAULT_CONST_CACHING_MODE,
+				DEFAULT_BYTE_STRING_MODE,
 				DEFAULT_NODE_SIZE_LIMIT);
 	}
 
@@ -198,6 +212,10 @@ public final class CompilerSettings {
 		return constCaching;
 	}
 
+	public boolean byteStrings() {
+		return byteStrings;
+	}
+
 	/**
 	 * Returns the node size limit.
 	 *
@@ -219,7 +237,7 @@ public final class CompilerSettings {
 	 */
 	public CompilerSettings withCPUAccountingMode(CPUAccountingMode mode) {
 		return mode != this.cpuAccountingMode
-				? new CompilerSettings(mode, constFolding, constCaching, nodeSizeLimit)
+				? new CompilerSettings(mode, constFolding, constCaching, byteStrings, nodeSizeLimit)
 				: this;
 	}
 
@@ -233,7 +251,7 @@ public final class CompilerSettings {
 	 */
 	public CompilerSettings withConstFolding(boolean mode) {
 		return mode != this.constFolding
-				? new CompilerSettings(cpuAccountingMode, mode, constCaching, nodeSizeLimit)
+				? new CompilerSettings(cpuAccountingMode, mode, constCaching, byteStrings, nodeSizeLimit)
 				: this;
 	}
 
@@ -247,7 +265,20 @@ public final class CompilerSettings {
 	 */
 	public CompilerSettings withConstCaching(boolean mode) {
 		return mode != this.constCaching
-				? new CompilerSettings(cpuAccountingMode, constFolding, mode, nodeSizeLimit)
+				? new CompilerSettings(cpuAccountingMode, constFolding, mode, byteStrings, nodeSizeLimit)
+				: this;
+	}
+
+	/**
+	 * Returns compiler settings derived from this compiler settings by updating
+	 * the byte string mode to {@code mode}.
+	 *
+	 * @param mode  new byte string mode
+	 * @return  settings derived from {@code this} by updating the byte string mode to {@code mode}
+	 */
+	public CompilerSettings withByteStrings(boolean mode) {
+		return mode != this.byteStrings
+				? new CompilerSettings(cpuAccountingMode, constFolding, constCaching, mode, nodeSizeLimit)
 				: this;
 	}
 
@@ -261,7 +292,7 @@ public final class CompilerSettings {
 	 */
 	public CompilerSettings withNodeSizeLimit(int limit) {
 		return limit != this.nodeSizeLimit
-				? new CompilerSettings(cpuAccountingMode, constFolding, constCaching, limit)
+				? new CompilerSettings(cpuAccountingMode, constFolding, constCaching, byteStrings, limit)
 				: this;
 	}
 
