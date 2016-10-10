@@ -17,6 +17,7 @@
 package net.sandius.rembulan.standalone;
 
 import jline.console.ConsoleReader;
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
@@ -261,13 +262,13 @@ public class RembulanConsole {
 	}
 
 	private String getPrompt() {
-		String s = Conversions.stringValueOf(env.rawget(Constants.VAR_NAME_PROMPT));
-		return s != null ? s : Constants.DEFAULT_PROMPT;
+		ByteString s = Conversions.stringValueOf(env.rawget(Constants.VAR_NAME_PROMPT));
+		return s != null ? s.toString() : Constants.DEFAULT_PROMPT;
 	}
 
 	private String getPrompt2() {
-		String s = Conversions.stringValueOf(env.rawget(Constants.VAR_NAME_PROMPT2));
-		return s != null ? s : Constants.DEFAULT_PROMPT2;
+		ByteString s = Conversions.stringValueOf(env.rawget(Constants.VAR_NAME_PROMPT2));
+		return s != null ? s.toString() : Constants.DEFAULT_PROMPT2;
 	}
 
 	private void startInteractive() throws IOException {

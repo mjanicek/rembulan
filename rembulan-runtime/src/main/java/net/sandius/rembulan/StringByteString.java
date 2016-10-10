@@ -112,6 +112,11 @@ class StringByteString extends ByteString {
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return string.isEmpty();
+	}
+
+	@Override
 	public byte byteAt(int index) {
 		// FIXME: cache it
 		return string.getBytes(charset)[index];
@@ -158,6 +163,30 @@ class StringByteString extends ByteString {
 	@Override
 	public void writeTo(OutputStream stream) throws IOException {
 		stream.write(getBytes());
+	}
+
+	@Override
+	public int compareTo(ByteString other) {
+		if (other instanceof StringByteString) {
+			StringByteString that = (StringByteString) other;
+			if (this.charset.equals(that.charset)) {
+				return this.string.compareTo(that.string);
+			}
+		}
+
+		return super.compareTo(other);
+	}
+
+	@Override
+	public ByteString concat(ByteString other) {
+		if (other instanceof StringByteString) {
+			StringByteString that = (StringByteString) other;
+			if (this.charset.equals(that.charset)) {
+				return ByteString.of(this.string.concat(that.string));
+			}
+		}
+
+		return super.concat(other);
 	}
 
 }

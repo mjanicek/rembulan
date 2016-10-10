@@ -146,6 +146,17 @@ public final class Conversions {
 		}
 	}
 
+	public static Object canonicalRepresentationOf(Object o) {
+		if (o instanceof Number) return toCanonicalNumber((Number) o);
+		else if (o instanceof String) return ByteString.of((String) o);
+		else return o;
+	}
+
+	public static Object javaRepresentationOf(Object o) {
+		if (o instanceof ByteString) return ((ByteString) o).toString();
+		else return o;
+	}
+
 	/**
 	 * Normalises the number {@code n} so that it may be used as a key in a Lua
 	 * table.
@@ -176,7 +187,9 @@ public final class Conversions {
 	 * @return  normalised number if {@code o} is a number, {@code o} otherwise
 	 */
 	public static Object normaliseKey(Object o) {
-		return o instanceof Number ? normaliseKey((Number) o) : o;
+		if (o instanceof Number) return normaliseKey((Number) o);
+		else if (o instanceof String) return ByteString.of((String) o);
+		else return o;
 	}
 
 	/**
@@ -363,12 +376,12 @@ public final class Conversions {
 	 *
 	 * @throws NullPointerException if {@code n} is {@code null}
 	 */
-	public static String stringValueOf(Number n) {
+	public static ByteString stringValueOf(Number n) {
 		if (n instanceof Double || n instanceof Float) {
-			return LuaFormat.toString(n.doubleValue());
+			return ByteString.of(LuaFormat.toString(n.doubleValue()));
 		}
 		else {
-			return LuaFormat.toString(n.longValue());
+			return ByteString.of(LuaFormat.toString(n.longValue()));
 		}
 	}
 
@@ -384,12 +397,11 @@ public final class Conversions {
 	 * @return string value of {@code o}, or {@code null} if {@code o} does not have
 	 *         a string value
 	 */
-	public static String stringValueOf(Object o) {
-		return o instanceof String
-				? (String) o
-				: o instanceof Number
-						? stringValueOf((Number) o)
-						: null;
+	public static ByteString stringValueOf(Object o) {
+		if (o instanceof String) return ByteString.of((String) o);
+		else if (o instanceof ByteString) return (ByteString) o;
+		else if (o instanceof Number) return stringValueOf((Number) o);
+		else return null;
 	}
 
 	/**
@@ -420,8 +432,8 @@ public final class Conversions {
 	 */
 	public static String toHumanReadableString(Object o) {
 		if (o == null) return LuaFormat.NIL;
-		else if (o instanceof String) return (String) o;
-		else if (o instanceof Number) return stringValueOf((Number) o);
+		else if (o instanceof ByteString || o instanceof String) return o.toString();
+		else if (o instanceof Number) return stringValueOf((Number) o).toString();
 		else if (o instanceof Boolean) return LuaFormat.toString(((Boolean) o).booleanValue());
 		else return String.format("%s: %#010x",
 					PlainValueTypeNamer.INSTANCE.typeNameOf(o),

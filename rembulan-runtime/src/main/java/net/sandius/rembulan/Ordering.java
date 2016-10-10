@@ -152,8 +152,8 @@ public abstract class Ordering<T> implements Comparator<T> {
 		else if (a instanceof Number && b instanceof Number) {
 			return Ordering.NUMERIC.eq((Number) a, (Number) b);
 		}
-		else if (a instanceof String && b instanceof String) {
-			return Ordering.STRING.eq((String) a, (String) b);
+		else if (LuaType.isString(a) && LuaType.isString(b)) {
+			return Ordering.STRING.eq(toByteString(a), toByteString(b));
 		}
 		else {
 			return a.equals(b);
@@ -338,29 +338,29 @@ public abstract class Ordering<T> implements Comparator<T> {
 	 * <p>This is the (total) lexicographical ordering imposed by the method
 	 * {@link String#compareTo(String)}.</p>
 	 */
-	public static final class StringOrdering extends Ordering<String> {
+	public static final class StringOrdering extends Ordering<ByteString> {
 
 		private StringOrdering() {
 			// not to be instantiated by the outside world
 		}
 
 		@Override
-		public boolean eq(String a, String b) {
+		public boolean eq(ByteString a, ByteString b) {
 			return a.compareTo(b) == 0;
 		}
 
 		@Override
-		public boolean lt(String a, String b) {
+		public boolean lt(ByteString a, ByteString b) {
 			return a.compareTo(b) < 0;
 		}
 
 		@Override
-		public boolean le(String a, String b) {
+		public boolean le(ByteString a, ByteString b) {
 			return a.compareTo(b) <= 0;
 		}
 
 		@Override
-		public int compare(String a, String b) {
+		public int compare(ByteString a, ByteString b) {
 			return a.compareTo(b);
 		}
 
@@ -393,26 +393,31 @@ public abstract class Ordering<T> implements Comparator<T> {
 
 	}
 
+	private static ByteString toByteString(Object o) throws ClassCastException {
+		if (o instanceof ByteString) return (ByteString) o;
+		else return ByteString.of((String) o);  // may throw a ClassCastException
+	}
+
 	private static class StringObjectOrdering extends Ordering<Object> {
 
 		@Override
 		public boolean eq(Object a, Object b) {
-			return STRING.eq((String) a, (String) b);
+			return STRING.eq(toByteString(a), toByteString(b));
 		}
 
 		@Override
 		public boolean lt(Object a, Object b) {
-			return STRING.lt((String) a, (String) b);
+			return STRING.lt(toByteString(a), toByteString(b));
 		}
 
 		@Override
 		public boolean le(Object a, Object b) {
-			return STRING.le((String) a, (String) b);
+			return STRING.le(toByteString(a), toByteString(b));
 		}
 
 		@Override
 		public int compare(Object a, Object b) {
-			return STRING.compare((String) a, (String) b);
+			return STRING.compare(toByteString(a), toByteString(b));
 		}
 
 	}
@@ -445,7 +450,7 @@ public abstract class Ordering<T> implements Comparator<T> {
 		if (a instanceof Number && b instanceof Number) {
 			return NUMERIC_OBJECT;
 		}
-		else if (a instanceof String && b instanceof String) {
+		else if (LuaType.isString(a) && LuaType.isString(b)) {
 			return STRING_OBJECT;
 		}
 		else {

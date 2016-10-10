@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.compiler.analysis;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaMathOperators;
 import net.sandius.rembulan.Ordering;
@@ -97,9 +98,9 @@ public class Typer {
 		}
 	}
 
-	private static Object tryEmulateConcatOperation(Object l, Object r) {
-		String sl = Conversions.stringValueOf(l);
-		String sr = Conversions.stringValueOf(r);
+	private static ByteString tryEmulateConcatOperation(Object l, Object r) {
+		ByteString sl = Conversions.stringValueOf(l);
+		ByteString sr = Conversions.stringValueOf(r);
 
 		if (sl == null || sr == null) {
 			return null;
@@ -185,9 +186,9 @@ public class Typer {
 				return arg.equals(Boolean.FALSE);
 
 			case LEN:
-				return arg instanceof String
-						? Dispatch.len((String) arg)
-						: null;
+				if (arg instanceof String) return Dispatch.len((String) arg);
+				else if (arg instanceof ByteString) return Long.valueOf(((ByteString) arg).length());
+				else return null;
 
 			default:
 				throw new IllegalArgumentException("Illegal operation: " + op);

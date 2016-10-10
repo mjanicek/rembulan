@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
@@ -303,13 +304,14 @@ public class ArgumentIterator implements Iterator<Object> {
 		}
 	}
 
+	// FIXME: use ByteString
 	public String nextString() {
 		final String result;
 		try {
 			Object arg = peek(TYPENAME_STRING);
-			String v = Conversions.stringValueOf(arg);
+			ByteString v = Conversions.stringValueOf(arg);
 			if (v != null) {
-				result = v;
+				result = v.toString();
 			}
 			else {
 				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg));

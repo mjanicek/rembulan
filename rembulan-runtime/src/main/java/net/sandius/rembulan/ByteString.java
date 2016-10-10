@@ -90,6 +90,10 @@ public abstract class ByteString implements Comparable<ByteString> {
 		return wrap(s.getBytes(charset));
 	}
 
+	public static ByteString empty() {
+		return ArrayByteString.EMPTY_INSTANCE;
+	}
+
 	/**
 	 * Returns {@code true} if {@code o} is a byte string with contents equal
 	 * to this byte string.
@@ -136,6 +140,8 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * @return  the length of this byte string
 	 */
 	public abstract int length();
+
+	public abstract boolean isEmpty();
 
 	// TODO: doc
 	public abstract ByteString substring(int start, int end);
@@ -217,6 +223,16 @@ public abstract class ByteString implements Comparable<ByteString> {
 		}
 
 		return this.length() - that.length();
+	}
+
+	public ByteString concat(ByteString other) {
+		byte[] thisBytes = this.getBytes();
+		byte[] otherBytes = other.getBytes();
+
+		byte[] result = new byte[thisBytes.length + otherBytes.length];
+		System.arraycopy(thisBytes, 0, result, 0, thisBytes.length);
+		System.arraycopy(otherBytes, 0, result, thisBytes.length, otherBytes.length);
+		return ByteString.wrap(result);
 	}
 
 }

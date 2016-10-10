@@ -27,6 +27,8 @@ import java.util.Objects;
  */
 class ArrayByteString extends ByteString {
 
+	static final ArrayByteString EMPTY_INSTANCE = new ArrayByteString(new byte[0]);
+
 	private final byte[] bytes;
 	private int hashCode;
 
@@ -73,6 +75,11 @@ class ArrayByteString extends ByteString {
 	}
 
 	@Override
+	public boolean isEmpty() {
+		return bytes.length == 0;
+	}
+
+	@Override
 	public byte byteAt(int index) {
 		return bytes[index];
 	}
@@ -99,5 +106,7 @@ class ArrayByteString extends ByteString {
 	public void writeTo(OutputStream stream) throws IOException {
 		stream.write(bytes);
 	}
+
+
 
 }

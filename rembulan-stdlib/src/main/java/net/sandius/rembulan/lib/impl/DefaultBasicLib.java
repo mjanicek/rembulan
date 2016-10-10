@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.Metatables;
@@ -560,7 +561,7 @@ public class DefaultBasicLib extends BasicLib {
 				if (args.hasNext()) {
 					// message is defined
 					Object message = args.nextAny();
-					String stringMessage = Conversions.stringValueOf(message);
+					ByteString stringMessage = Conversions.stringValueOf(message);
 					if (stringMessage != null) {
 						ex = new AssertionFailedException(stringMessage);
 					}
@@ -1000,7 +1001,7 @@ public class DefaultBasicLib extends BasicLib {
 						chunkText = bld.toString();
 					}
 					else {
-						String s = Conversions.stringValueOf(o);
+						ByteString s = Conversions.stringValueOf(o);
 						if (s != null) {
 							bld.append(s);
 						}

@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaRuntimeException;
@@ -538,9 +539,9 @@ public class DefaultStringLib extends StringLib {
 			Object v = args.nextAny();
 			final String s;
 
-			String stringValue = Conversions.stringValueOf(v);
+			ByteString stringValue = Conversions.stringValueOf(v);
 			if (stringValue != null) {
-				s = stringValue;
+				s = stringValue.toString();
 			}
 			else {
 				Object metamethod = Metatables.getMetamethod(context, BasicLib.MT_TOSTRING, v);
@@ -564,8 +565,8 @@ public class DefaultStringLib extends StringLib {
 
 		private static void resume_s(ExecutionContext context, StringBuilder bld, int width, int flags, int precision) {
 			Object o = context.getReturnBuffer().get0();
-			String sv = Conversions.stringValueOf(o);
-			String s = sv != null ? sv : "";
+			ByteString sv = Conversions.stringValueOf(o);
+			String s = sv != null ? sv.toString() : "";
 			bld.append(justified(width, flags, trimmed(precision, s)));
 		}
 
@@ -576,7 +577,8 @@ public class DefaultStringLib extends StringLib {
 			if (o == null) s = LuaFormat.NIL;
 			else if (o instanceof Boolean) s = LuaFormat.toString(((Boolean) o).booleanValue());
 			else if (o instanceof String) s = LuaFormat.escape((String) o);
-			else if (o instanceof Number) s = Conversions.stringValueOf((Number) o);
+			else if (o instanceof ByteString) s = LuaFormat.escape(((ByteString) o).toString());
+			else if (o instanceof Number) s = Conversions.stringValueOf((Number) o).toString();
 			else {
 				throw new BadArgumentException(args.at(), name(), "value has no literal form");
 			}
@@ -881,9 +883,9 @@ public class DefaultStringLib extends StringLib {
 				Object o = args.nextAny();
 
 				// a string?
-				String replStr = Conversions.stringValueOf(o);
+				ByteString replStr = Conversions.stringValueOf(o);
 				if (replStr != null) {
-					repl = replStr;
+					repl = replStr.toString();
 				}
 				else if (o instanceof Table || o instanceof LuaFunction) {
 					repl = o;
@@ -989,7 +991,7 @@ public class DefaultStringLib extends StringLib {
 						else {
 							if (idx - 1 < captures.size()) {
 								// captures are either strings or integers
-								String sv = Conversions.stringValueOf(captures.get(idx - 1));
+								ByteString sv = Conversions.stringValueOf(captures.get(idx - 1));
 								assert (sv != null);
 								bld.append(sv);
 							}
@@ -1047,7 +1049,7 @@ public class DefaultStringLib extends StringLib {
 
 		private static void resumeReplace(ExecutionContext context, StringBuilder bld, String fullMatch) {
 			Object value = context.getReturnBuffer().get0();
-			String sv = Conversions.stringValueOf(value);
+			ByteString sv = Conversions.stringValueOf(value);
 			if (sv != null) {
 				bld.append(sv);
 			}

@@ -36,30 +36,42 @@ public final class LuaFormat {
 	 */
 	public static final String NIL = "nil";
 
+	static final ByteString BYTE_NIL = ByteString.of(NIL);
+
 	/**
 	 * String representation of <b>true</b>.
 	 */
 	public static final String TRUE = "true";
+
+	static final ByteString BYTE_TRUE = ByteString.of(TRUE);
 
 	/**
 	 * String representation of <b>false</b>.
 	 */
 	public static final String FALSE = "false";
 
+	static final ByteString BYTE_FALSE = ByteString.of(FALSE);
+
 	/**
 	 * String representation of positive infinity.
 	 */
 	public static final String POS_INF = "inf";
+
+	static final ByteString BYTE_POS_INF = ByteString.of(POS_INF);
 
 	/**
 	 * String representation of negative infinity.
 	 */
 	public static final String NEG_INF = "-inf";
 
+	static final ByteString BYTE_NEG_INF = ByteString.of(NEG_INF);
+
 	/**
 	 * String representation of <i>NaN</i>.
 	 */
 	public static final String NAN = "nan";
+
+	static final ByteString BYTE_NAN = ByteString.of(NAN);
 
 
 	/**

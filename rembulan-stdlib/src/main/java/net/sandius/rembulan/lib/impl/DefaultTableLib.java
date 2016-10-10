@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.Ordering;
@@ -125,7 +126,7 @@ public class DefaultTableLib extends TableLib {
 		}
 
 		private static void appendToBuilder(StringBuilder bld, long index, Object o) {
-			String s = Conversions.stringValueOf(o);
+			ByteString s = Conversions.stringValueOf(o);
 			if (s != null) {
 				bld.append(s);
 			}
