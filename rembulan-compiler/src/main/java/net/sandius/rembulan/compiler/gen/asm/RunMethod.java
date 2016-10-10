@@ -19,7 +19,6 @@ package net.sandius.rembulan.compiler.gen.asm;
 import net.sandius.rembulan.compiler.gen.CodeSegmenter;
 import net.sandius.rembulan.compiler.gen.SegmentedCode;
 import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
-import net.sandius.rembulan.compiler.gen.asm.helpers.BoxedPrimitivesMethods;
 import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.impl.DefaultSavedState;
@@ -364,7 +363,7 @@ class RunMethod {
 		return closureFields;
 	}
 
-	static class ConstFieldInstance {
+	abstract static class ConstFieldInstance {
 
 		private final Object value;
 		private final String fieldName;
@@ -391,9 +390,11 @@ class RunMethod {
 					null);
 		}
 
+		public abstract void doInstantiate(InsnList il);
+
 		public InsnList instantiateInsns() {
 			InsnList il = new InsnList();
-			il.add(BoxedPrimitivesMethods.loadBoxedConstant(value));
+			doInstantiate(il);
 			il.add(new FieldInsnNode(
 					PUTSTATIC,
 					ownerClassType.getInternalName(),

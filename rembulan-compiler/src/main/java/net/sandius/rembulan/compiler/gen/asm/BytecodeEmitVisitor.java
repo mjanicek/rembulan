@@ -144,23 +144,47 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		}
 	}
 
-	private RunMethod.ConstFieldInstance newConstFieldInstance(Object constValue, int idx) {
+	private RunMethod.ConstFieldInstance newConstFieldInstance(final Object constValue, int idx) {
 		Check.notNull(constValue);
 
 		String fieldName = "_k_" + idx;
 
 		final Type t;
-		if (constValue instanceof Double) {
-			t = Type.getType(Double.class);
+		if (constValue instanceof Double || constValue instanceof Long) {
+			t = Type.getType(constValue.getClass());
+			return new RunMethod.ConstFieldInstance(constValue, fieldName, context.thisClassType(), t) {
+				@Override
+				public void doInstantiate(InsnList il) {
+					il.add(BoxedPrimitivesMethods.loadBoxedConstant(constValue));
+				}
+			};
 		}
-		else if (constValue instanceof Long) {
-			t = Type.getType(Long.class);
+		else if (constValue instanceof String) {
+			t = Type.getType(constValue.getClass());
+			return new RunMethod.ConstFieldInstance(constValue, fieldName, context.thisClassType(), Type.getType(ByteString.class)) {
+				@Override
+				public void doInstantiate(InsnList il) {
+					il.add(newByteString((String) constValue));
+				}
+			};
 		}
 		else {
 			throw new UnsupportedOperationException("Illegal constant: " + constValue);
 		}
 
-		return new RunMethod.ConstFieldInstance(constValue, fieldName, context.thisClassType(), t);
+	}
+
+	private InsnList newByteString(String value) {
+		InsnList il = new InsnList();
+		il.add(new LdcInsnNode(value));
+		il.add(new MethodInsnNode(INVOKESTATIC,
+				Type.getInternalName(ByteString.class),
+				"of",
+				Type.getMethodDescriptor(
+						Type.getType(ByteString.class),
+						Type.getType(String.class)),
+				false));
+		return il;
 	}
 
 	private InsnList loadCachedConst(Object constValue) {
@@ -422,22 +446,19 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	public void visit(LoadConst.Str node) {
 		// use byte strings?
 		if (context.compilerSettings.byteStrings()) {
-			// TODO cache if constCaching is set
-			il.add(new LdcInsnNode(node.value()));
-			il.add(new MethodInsnNode(INVOKESTATIC,
-					Type.getInternalName(ByteString.class),
-					"of",
-					Type.getMethodDescriptor(
-							Type.getType(ByteString.class),
-							Type.getType(String.class)),
-					false));
-			il.add(new VarInsnNode(ASTORE, slot(node.dest())));
-
+			if (context.compilerSettings.constCaching()) {
+				il.add(loadCachedConst(node.value()));
+			}
+			else {
+				il.add(newByteString(node.value()));
+			}
 		}
 		else {
+			// java.lang.String
 			il.add(new LdcInsnNode(node.value()));
-			il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 		}
+
+		il.add(new VarInsnNode(ASTORE, slot(node.dest())));
 	}
 
 	private static String dispatchMethodName(BinOp.Op op) {
