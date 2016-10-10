@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan;
 
+import java.util.Arrays;
+
 /**
  * Static methods implementing Lua value conversions.
  */
@@ -155,6 +157,30 @@ public final class Conversions {
 	public static Object javaRepresentationOf(Object o) {
 		if (o instanceof ByteString) return ((ByteString) o).toString();
 		else return o;
+	}
+
+	public static Object[] toCanonicalValues(Object[] values) {
+		for (int i = 0; i < values.length; i++) {
+			Object v = values[i];
+			values[i] = canonicalRepresentationOf(v);
+		}
+		return values;
+	}
+
+	public static Object[] toJavaValues(Object[] values) {
+		for (int i = 0; i < values.length; i++) {
+			Object v = values[i];
+			values[i] = javaRepresentationOf(v);
+		}
+		return values;
+	}
+
+	public static Object[] copyAsCanonicalValues(Object[] values) {
+		return toCanonicalValues(Arrays.copyOf(values, values.length));
+	}
+
+	public static Object[] copyAsJavaValues(Object[] values) {
+		return toJavaValues(Arrays.copyOf(values, values.length));
 	}
 
 	/**

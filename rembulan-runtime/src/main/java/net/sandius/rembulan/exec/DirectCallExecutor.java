@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.exec;
 
+import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.impl.SchedulingContexts;
 import net.sandius.rembulan.runtime.AsyncTask;
@@ -105,7 +106,7 @@ public class DirectCallExecutor {
 		public void returned(Object id, Object[] result) {
 			if (result != null) {
 				if (wasSet.compareAndSet(false, true)) {
-					this.values = result;
+					this.values = Conversions.copyAsJavaValues(result);
 				}
 				else {
 					throw new IllegalStateException("Call result already set");
@@ -210,7 +211,7 @@ public class DirectCallExecutor {
 	 */
 	public Object[] call(StateContext stateContext, Object fn, Object... args)
 			throws CallException, CallPausedException, InterruptedException {
-		return resume(RuntimeCallInitialiser.forState(stateContext).newCall(fn, args));
+		return resume(RuntimeCallInitialiser.forState(stateContext).newCall(fn, Conversions.copyAsJavaValues(args)));
 	}
 
 	/**

@@ -219,7 +219,7 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
           }
           else {
             require (resultValues != null, "result must not be null")
-            Success(resultValues.toSeq map { Conversions.javaRepresentationOf(_) })
+            Success(resultValues.toSeq)
           }
 
           val after = System.nanoTime()
