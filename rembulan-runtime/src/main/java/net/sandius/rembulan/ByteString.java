@@ -30,11 +30,22 @@ import java.util.Objects;
  * characters corresponding to 16-bit code units in the Basic Multilingual Plane (BMP))
  * and Lua strings (raw 8-bit sequences).</p>
  *
+ * <p>Byte strings come in two flavours:</p>
+ * <ul>
+ *     <li>one is a wrapper of {@link String java.lang.String} with a given {@link Charset};</li>
+ *     <li>the other is a wrapper of a {@code byte} arrays.</li>
+ * </ul>
+ *
+ * <p>The {@code ByteString} class provides the functionality for treating both cases
+ * as sequences of bytes when they take part in Lua operations, and as Java strings when
+ * used by an outer Java application. However, these perspectives are as <i>lazy</i>
+ * as possible, in order to avoid doing unnecessary work.</p>
+ *
  * <p>The {@link #hashCode()} of a byte string is defined using the same function as
  * that of {@link String#hashCode()} with bytes treated as unsigned integers. This means
  * that for a raw 8-bit string {@code s}, the following will be true:</p>
  * <pre>
- *     s.hashCode() == ByteString.viewOf(s).hashCode()
+ *     s.hashCode() == ByteString.of(s).hashCode()
  * </pre>
  */
 public abstract class ByteString implements Comparable<ByteString> {
@@ -43,10 +54,29 @@ public abstract class ByteString implements Comparable<ByteString> {
 		// no-op: package-private to restrict access
 	}
 
+	/**
+	 * Returns a new byte string corresponding to the bytes in {@code s} as encoded
+	 * by the specified {@code charset}.
+	 *
+	 * @param s  the string to take the byte view of, must not be {@code null}
+	 * @param charset  the charset to use for decoding {@code s} into bytes, must not be {@code null}
+	 * @return  a byte string perspective of {@code s} using {@code charset}
+	 *
+	 * @throws NullPointerException  if {@code s} or {@code charset} is {@code null}
+	 */
 	public static ByteString of(String s, Charset charset) {
 		return new StringByteString(s, charset);
 	}
 
+	/**
+	 * Returns a new byte string corresponding to the bytes in {@code s} as encoded
+	 * by the default charset ({@link Charset#defaultCharset()}).
+	 *
+	 * @param s  the string to take the perspective of, must not be {@code null}
+	 * @return  a byte string perspective of {@code s}
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 */
 	public static ByteString of(String s) {
 		return of(s, Charset.defaultCharset());
 	}
@@ -60,36 +90,18 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 *
 	 * @param bytes  the byte array to use as the byte string, must not be {@code null}
 	 * @return  a byte string containing a copy of {@code bytes}
+	 *
+	 * @throws NullPointerException  if {@code bytes} is {@code null}
 	 */
 	public static ByteString copyOf(byte[] bytes) {
 		return wrap(Arrays.copyOf(bytes, bytes.length));
 	}
 
 	/**
-	 * Returns the string {@code s} converted to a byte string using the platform's default
-	 * charset.
+	 * Returns an empty byte string.
 	 *
-	 * @param s  the string to convert to bytes, must not be {@code null}
-	 * @return  the string {@code s} encoded into bytes using the platform's default charset
+	 * @return  an empty byte string
 	 */
-	public static ByteString encode(String s) {
-		return wrap(s.getBytes());
-	}
-
-	/**
-	 * Returns the string {@code s} converted to a byte string using the specified charset
-	 * {@code charset}.
-	 *
-	 * @param s  the string to convert to bytes, must not be {@code null}
-	 * @param charset  the charset to use to decode {@code s} into bytes, must not be {@code null}
-	 * @return  the string {@code s} encoded into bytes using {@code charset}
-	 *
-	 * @throws NullPointerException  if {@code s} or {@code charset} is {@code null}
-	 */
-	public static ByteString encode(String s, Charset charset) {
-		return wrap(s.getBytes(charset));
-	}
-
 	public static ByteString empty() {
 		return ArrayByteString.EMPTY_INSTANCE;
 	}
@@ -108,14 +120,15 @@ public abstract class ByteString implements Comparable<ByteString> {
 
 	/**
 	 * Returns the hash code of this byte string. The hash code is computed using the same
-	 * function as used by {@link String#hashCode()}.
+	 * function as used by {@link String#hashCode()}, interprets the byte string's bytes
+	 * unsigned integers.
 	 *
 	 * @return  the hash code of this byte string
 	 */
 	@Override
 	public abstract int hashCode();
 
-	protected abstract boolean equals(ByteString that);
+	abstract boolean equals(ByteString that);
 
 	/**
 	 * Returns a new byte array containing the bytes of this byte string.
@@ -141,9 +154,28 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 */
 	public abstract int length();
 
+	/**
+	 * Returns {@code true} iff this byte string is empty, i.e., if the number of bytes it
+	 * contains is 0.
+	 *
+	 * @return  {@code true} iff this byte string is empty
+	 */
 	public abstract boolean isEmpty();
 
-	// TODO: doc
+	/**
+	 * Returns a substring of this byte string starting at position {@code start} (inclusive),
+	 * ending at position {@code end} (exclusive).
+	 *
+	 * <p>The indices refer to the <i>byte</i> position in the byte string.</p>
+	 *
+	 * @param start  the first index to include in the new substring (inclusive)
+	 * @param end  the smallest index immediately following the new substring in this byte string
+	 * @return  a substring of this byte string ranging from {@code start} (inclusive)
+	 *          to {@code end} (exclusive)
+	 *
+	 * @throws IndexOutOfBoundsException  if {@code start < 0}, {@code end > length()}
+	 *                                    or {@code start > end}
+	 */
 	public abstract ByteString substring(int start, int end);
 
 	/**
@@ -165,6 +197,11 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 */
 	public abstract void writeTo(OutputStream stream) throws IOException;
 
+	/**
+	 * Returns the interpretation of this byte string as a Java string.
+	 *
+	 * @return  the string represented by this byte string
+	 */
 	@Override
 	public abstract String toString();
 
@@ -206,9 +243,11 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * <p>For the purposes of this ordering, bytes are interpreted as <i>unsigned</i>
 	 * integers.</p>
 	 *
-	 * @param that  byte string to compare to
+	 * @param that  byte string to compare to, must not be {@code null}
 	 * @return  a negative, zero, or positive integer if {@code this} is lexicographically
 	 *          lesser than, equal to or greater than {@code that}
+	 *
+	 * @throws NullPointerException  if {@code that} is {@code null}
 	 */
 	@Override
 	public int compareTo(ByteString that) {
@@ -225,6 +264,15 @@ public abstract class ByteString implements Comparable<ByteString> {
 		return this.length() - that.length();
 	}
 
+	/**
+	 * Returns a byte string formed by a concatenating this byte string with the byte string
+	 * {@code other}.
+	 *
+	 * @param other  the byte string to concatenate this byte string with, must not be {@code null}
+	 * @return  this byte string concatenated with {@code other}
+	 *
+	 * @throws NullPointerException  if {@code other} is {@code null}
+	 */
 	public ByteString concat(ByteString other) {
 		byte[] thisBytes = this.getBytes();
 		byte[] otherBytes = other.getBytes();
@@ -236,6 +284,13 @@ public abstract class ByteString implements Comparable<ByteString> {
 	}
 
 	// TODO: add startsWith(ByteString)
-	public abstract boolean startsWith(byte c);
+
+	/**
+	 * Returns {@code true} if the first byte of this byte string is {@code b}.
+	 *
+	 * @param b  the byte to compare the first byte of this byte string to
+	 * @return  {@code true} if this byte string starts with {@code b}
+	 */
+	public abstract boolean startsWith(byte b);
 
 }
