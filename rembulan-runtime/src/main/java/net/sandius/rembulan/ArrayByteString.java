@@ -64,11 +64,7 @@ class ArrayByteString extends ByteString {
 
 	@Override
 	public String toString() {
-		char[] chars = new char[bytes.length];
-		for (int i = 0; i < chars.length; i++) {
-			chars[i] = (char) (bytes[i] & 0xff);
-		}
-		return String.valueOf(chars);
+		return new String(Arrays.copyOf(bytes, bytes.length));
 	}
 
 	@Override
@@ -82,7 +78,7 @@ class ArrayByteString extends ByteString {
 	}
 
 	@Override
-	public CharSequence subSequence(int start, int end) {
+	public ByteString substring(int start, int end) {
 		if (start > end || start < 0 || end < 0 || end > bytes.length) {
 			throw new IndexOutOfBoundsException();
 		}

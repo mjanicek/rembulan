@@ -30,68 +30,25 @@ import java.util.Objects;
  * characters corresponding to 16-bit code units in the Basic Multilingual Plane (BMP))
  * and Lua strings (raw 8-bit sequences).</p>
  *
- * <p>Byte strings may be created in three basic ways:</p>
- * <ul>
- *     <li>by constructing a (potentially) <b>lossy</b> 8-bit view of a Java string using
- *       {@link #viewOf(String)};</li>
- *     <li>by copying from a byte array using {@link #copyOf(byte[])};</li>
- *     <li>by encoding a {@code java.lang.String} into bytes using {@link #encode(String)}
- *       and {@link #encode(String, Charset)}.</li>
- * </ul>
- *
- * <p>{@code ByteString} implements {@link CharSequence} in order to enable a degree
- * of interoperability with other Java-based character processing classes. A byte string
- * is interpreted as a character sequence in the following manner:</p>
- * <ul>
- *     <li>every byte of the byte string is mapped directly to a character (in the
- *       range U+0000 to U+00FF) by the method {@link #charAt(int)};</li>
- *     <li>the method {@link #length()} returns the number of bytes in the byte string.</li>
- * </ul>
- *
- * <p>In other words, the way a byte string is to be seen as a character sequence is analogous
- * to <i>casting</i> the {@code byte} values it contains to {@code char}s. This is also
- * the interpretation used by the method {@link #toString()}. Note especially that {@code toString()}
- * does not take charsets into account &mdash; {@code ByteString} therefore provides the method
- * {@link #decode(Charset)} that uses a {@link Charset} to decode the byte string.</p>
- *
  * <p>The {@link #hashCode()} of a byte string is defined using the same function as
- * that of {@link String#hashCode()} and the above definition of {@code charAt()}. This
- * means that for a raw 8-bit string {@code s}, the following will be true:</p>
+ * that of {@link String#hashCode()} with bytes treated as unsigned integers. This means
+ * that for a raw 8-bit string {@code s}, the following will be true:</p>
  * <pre>
  *     s.hashCode() == ByteString.viewOf(s).hashCode()
  * </pre>
  */
-public abstract class ByteString implements CharSequence, Comparable<ByteString> {
+public abstract class ByteString implements Comparable<ByteString> {
 
 	ByteString() {
 		// no-op: package-private to restrict access
 	}
 
-	/**
-	 * Returns an 8-bit view of the string {@code s}.
-	 *
-	 * <p>The byte string will be backed by {@code s}, i.e., no copying of its contents
-	 * will be performed by this method.</p>
-	 *
-	 * <p>Characters in the resulting byte string are mapped to bytes by dropping the more
-	 * significant byte. Therefore, the byte string obtained this way is not suitable for
-	 * use with strings that contain characters outside of the range U+0000 to U+00FF (inclusive).
-	 * (Note that this code point range corresponds to Basic Latin, Latin-1 Supplement and
-	 * C0 and C1 Control characters.)</p>
-	 *
-	 * <p>In other words, <b>when {@code s} contains a character outside of U+0000 and U+00FF,
-	 * its 8-bit view will not correspond to the same string</b>, and the missing information
-	 * will be effectively lost from its byte representation. To encode a {@code java.lang.String}
-	 * into a {@code ByteString} without such of information, use {@link #encode(String)}
-	 * or {@link #encode(String, Charset)}.</p>
-	 *
-	 * @param s  the string to take the byte view of, must not be {@code null}
-	 * @return  a byte view of {@code s}
-	 *
-	 * @throws NullPointerException  if {@code s} is {@code null}
-	 */
-	public static ByteString viewOf(String s) {
-		return new StringViewByteString(s);
+	public static ByteString of(String s, Charset charset) {
+		return new StringByteString(s, charset);
+	}
+
+	public static ByteString of(String s) {
+		return of(s, Charset.defaultCharset());
 	}
 
 	static ByteString wrap(byte[] bytes) {
@@ -131,16 +88,6 @@ public abstract class ByteString implements CharSequence, Comparable<ByteString>
 	 */
 	public static ByteString encode(String s, Charset charset) {
 		return wrap(s.getBytes(charset));
-	}
-
-	public static ByteString recode(String s) {
-		ArrayByteString bs = new ArrayByteString(s.getBytes());
-		return new StringViewByteString(bs.toString());
-	}
-
-	public static ByteString recode(String s, Charset charset) {
-		ArrayByteString bs = new ArrayByteString(s.getBytes(charset));
-		return new StringViewByteString(bs.toString());
 	}
 
 	/**
@@ -184,21 +131,14 @@ public abstract class ByteString implements CharSequence, Comparable<ByteString>
 	public abstract byte byteAt(int index);
 
 	/**
-	 * Returns the byte at position {@code index} mapped to a character.
+	 * Returns the length of this byte string, i.e., the number of bytes it contains.
 	 *
-	 * <p>Java characters represent UTF-16 code units (including surrogates). This method
-	 * therefore returns a character corresponding to a Unicode code point between U+0000
-	 * and U+00FF within the Basic Multilingual Plane (BMP).</p>
-	 *
-	 * @param index  the position in the string
-	 * @return  the byte at position {@code index} converted to a character
-	 *
-	 * @throws IndexOutOfBoundsException  if {@code index < 0} or {@code index >= length()}
+	 * @return  the length of this byte string
 	 */
-	@Override
-	public char charAt(int index) {
-		return (char) (byteAt(index) & 0xff);
-	}
+	public abstract int length();
+
+	// TODO: doc
+	public abstract ByteString substring(int start, int end);
 
 	/**
 	 * Puts the contents of this byte string to the specified {@code buffer}.
@@ -219,20 +159,6 @@ public abstract class ByteString implements CharSequence, Comparable<ByteString>
 	 */
 	public abstract void writeTo(OutputStream stream) throws IOException;
 
-	/**
-	 * Returns a string representation of this byte string where each byte is directly
-	 * mapped to a Java character.
-	 *
-	 * <p>Java characters represent UTF-16 code units (including surrogates). This method
-	 * therefore returns a string where bytes are converted to Unicode code points U+0000
-	 * to U+00FF within the Basic Multilingual Plane (BMP).</p>
-	 *
-	 * <p>This method does <b>not</b> take any character encoding into account;
-	 * most importantly, it does not use the platform's charset. In order to decode the byte
-	 * string using a charset, use {@link #decode(Charset)} or {@link #decode()}.</p>
-	 *
-	 * @return  a string obtained from this byte string by mapping each byte to a character
-	 */
 	@Override
 	public abstract String toString();
 

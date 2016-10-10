@@ -57,7 +57,7 @@ public class ByteStringBuilder {
 	}
 
 	public ByteStringBuilder append(String string) {
-		return this.append(ByteString.viewOf(string));
+		return this.append(ByteString.of(string));
 	}
 
 	public ByteStringBuilder append(String string, Charset charset) {
