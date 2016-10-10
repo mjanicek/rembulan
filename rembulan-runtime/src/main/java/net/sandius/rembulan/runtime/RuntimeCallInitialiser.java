@@ -19,6 +19,7 @@ package net.sandius.rembulan.runtime;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.exec.CallInitialiser;
 import net.sandius.rembulan.exec.Continuation;
+import net.sandius.rembulan.impl.ReturnBuffers;
 
 import java.util.Objects;
 
@@ -31,14 +32,33 @@ import java.util.Objects;
 public class RuntimeCallInitialiser implements CallInitialiser {
 
 	private final StateContext stateContext;
+	private final ReturnBufferFactory returnBufferFactory;
 
-	RuntimeCallInitialiser(StateContext stateContext) {
+	RuntimeCallInitialiser(StateContext stateContext, ReturnBufferFactory returnBufferFactory) {
 		this.stateContext = Objects.requireNonNull(stateContext);
+		this.returnBufferFactory = Objects.requireNonNull(returnBufferFactory);
 	}
 
 	/**
 	 * Returns a new call initialiser for calls executed in the specified state
-	 * context {@code stateContext}.
+	 * context {@code stateContext} that use return buffers initialised by the specified
+	 * factory {@code returnBufferFactory}.
+	 *
+	 * @param stateContext  the state context, must not be {@code null}
+	 * @param returnBufferFactory  the return buffer factory, must not be {@code null}
+	 * @return  a new call initialiser for {@code stateContext}
+	 *
+	 * @throws NullPointerException  if {@code stateContext} or {@code returnBufferFactory}
+	 *                               is {@code null}
+	 */
+	public static RuntimeCallInitialiser forState(StateContext stateContext, ReturnBufferFactory returnBufferFactory) {
+		return new RuntimeCallInitialiser(stateContext, returnBufferFactory);
+	}
+
+	/**
+	 * Returns a new call initialiser for calls executed in the specified state
+	 * context {@code stateContext}, and using the default return buffer factory
+	 * (see {@link ReturnBuffers#defaultFactory()}).
 	 *
 	 * @param stateContext  the state context, must not be {@code null}
 	 * @return  a new call initialiser for {@code stateContext}
@@ -46,12 +66,12 @@ public class RuntimeCallInitialiser implements CallInitialiser {
 	 * @throws NullPointerException  if {@code stateContext} is {@code null}
 	 */
 	public static RuntimeCallInitialiser forState(StateContext stateContext) {
-		return new RuntimeCallInitialiser(stateContext);
+		return forState(stateContext, ReturnBuffers.defaultFactory());
 	}
 
 	@Override
 	public Continuation newCall(Object fn, Object... args) {
-		return Call.init(stateContext, fn, args).getCurrentContinuation();
+		return Call.init(stateContext, returnBufferFactory, fn, args).getCurrentContinuation();
 	}
 
 }

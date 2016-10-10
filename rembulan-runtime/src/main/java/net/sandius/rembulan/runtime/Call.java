@@ -22,7 +22,6 @@ import net.sandius.rembulan.exec.Continuation;
 import net.sandius.rembulan.exec.InvalidContinuationException;
 import net.sandius.rembulan.exec.OneShotContinuation;
 import net.sandius.rembulan.impl.AbstractStateContext;
-import net.sandius.rembulan.impl.ReturnBuffers;
 import net.sandius.rembulan.util.Cons;
 
 import java.util.Arrays;
@@ -68,18 +67,21 @@ class Call {
 	 * <p>The call will be initialised in the {@link State#PAUSED paused state}.</p>
 	 *
 	 * @param stateContext  state context used by the call, must not be {@code null}
+	 * @param returnBufferFactory  return buffer factory used by the call, must not be {@code null}
 	 * @param fn  the call target, may be any value
 	 * @param args  the array of call arguments, must not be {@code null}
 	 * @return  a new {@code Call} object
 	 *
-	 * @throws NullPointerException  if {@code stateContext} or {@code args} is {@code null}
+	 * @throws NullPointerException  if {@code stateContext}, {@code returnBufferFactory}
+	 *                               or {@code args} is {@code null}
 	 */
 	public static Call init(
 			StateContext stateContext,
+			ReturnBufferFactory returnBufferFactory,
 			Object fn,
 			Object... args) {
 
-		ReturnBuffer returnBuffer = ReturnBuffers.newDefaultReturnBuffer();
+		ReturnBuffer returnBuffer = returnBufferFactory.newInstance();
 		Coroutine c = new Coroutine(fn);
 		returnBuffer.setToContentsOf(args);
 		return new Call(stateContext, returnBuffer, c);

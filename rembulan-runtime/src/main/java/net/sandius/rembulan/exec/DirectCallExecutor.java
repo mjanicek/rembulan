@@ -18,6 +18,7 @@ package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.StateContext;
+import net.sandius.rembulan.impl.ReturnBuffers;
 import net.sandius.rembulan.impl.SchedulingContexts;
 import net.sandius.rembulan.runtime.AsyncTask;
 import net.sandius.rembulan.runtime.RuntimeCallInitialiser;
@@ -211,7 +212,8 @@ public class DirectCallExecutor {
 	 */
 	public Object[] call(StateContext stateContext, Object fn, Object... args)
 			throws CallException, CallPausedException, InterruptedException {
-		return resume(RuntimeCallInitialiser.forState(stateContext).newCall(fn, Conversions.copyAsJavaValues(args)));
+		CallInitialiser initialiser = RuntimeCallInitialiser.forState(stateContext, ReturnBuffers.canonicalising(ReturnBuffers.defaultFactory()));
+		return resume(initialiser.newCall(fn, Conversions.copyAsJavaValues(args)));
 	}
 
 	/**

@@ -17,6 +17,9 @@
 package net.sandius.rembulan.impl;
 
 import net.sandius.rembulan.runtime.ReturnBuffer;
+import net.sandius.rembulan.runtime.ReturnBufferFactory;
+
+import java.util.Objects;
 
 /**
  * Static factory for instantiating return buffers.
@@ -40,6 +43,46 @@ public final class ReturnBuffers {
 	 */
 	public static ReturnBuffer newDefaultReturnBuffer() {
 		return new PairCachingReturnBuffer();
+	}
+
+	/**
+	 * Returns a wrapper of the specified return buffer {@code buffer} that converts all
+	 * values to their canonical values when writing to the buffer.
+	 *
+	 * @param buffer  the buffer to wrap, must not be {@code null}
+	 * @return  a buffer derived from {@code buffer} that converts values to canonical
+	 *          values on writes
+	 *
+	 * @throws NullPointerException  if {@code buffer} is {@code null}
+	 */
+	public static ReturnBuffer canonicalising(ReturnBuffer buffer) {
+		return new CanonicalisingReturnBufferWrapper(buffer);
+	}
+
+	private static final ReturnBufferFactory DEFAULT_FACTORY_INSTANCE = new ReturnBufferFactory() {
+		@Override
+		public ReturnBuffer newInstance() {
+			return newDefaultReturnBuffer();
+		}
+	};
+
+	/**
+	 * Returns a factory for constructing instances of the default return buffer implementation.
+	 *
+	 * @return  a factory for default return buffers
+	 */
+	public static ReturnBufferFactory defaultFactory() {
+		return DEFAULT_FACTORY_INSTANCE;
+	}
+
+	public static ReturnBufferFactory canonicalising(final ReturnBufferFactory factory) {
+		Objects.requireNonNull(factory);
+		return new ReturnBufferFactory() {
+			@Override
+			public ReturnBuffer newInstance() {
+				return canonicalising(factory.newInstance());
+			}
+		};
 	}
 
 }
