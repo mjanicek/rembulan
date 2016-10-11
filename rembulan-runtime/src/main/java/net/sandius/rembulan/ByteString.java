@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.util.ByteIterator;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -32,8 +34,10 @@ import java.util.Objects;
  *
  * <p>Byte strings come in two flavours:</p>
  * <ul>
- *     <li>one is a wrapper of {@link String java.lang.String} with a given {@link Charset};</li>
- *     <li>the other is a wrapper of a {@code byte} arrays.</li>
+ *     <li>one is a wrapper of {@link String java.lang.String} with a given {@link Charset}
+ *       &mdash; constructed using {@link #of(String)};</li>
+ *     <li>the other is a wrapper of a {@code byte} arrays
+ *       &mdash; constructed using {@link #wrap(byte[])}.</li>
  * </ul>
  *
  * <p>The {@code ByteString} class provides the functionality for treating both cases
@@ -41,12 +45,7 @@ import java.util.Objects;
  * used by an outer Java application. However, these perspectives are as <i>lazy</i>
  * as possible, in order to avoid doing unnecessary work.</p>
  *
- * <p>The {@link #hashCode()} of a byte string is defined using the same function as
- * that of {@link String#hashCode()} with bytes treated as unsigned integers. This means
- * that for a raw 8-bit string {@code s}, the following will be true:</p>
- * <pre>
- *     s.hashCode() == ByteString.of(s).hashCode()
- * </pre>
+ * <p>This class provides a natural lexicographical ordering that is consistent with equals.</p>
  */
 public abstract class ByteString implements Comparable<ByteString> {
 
@@ -63,6 +62,8 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * @return  a byte string perspective of {@code s} using {@code charset}
 	 *
 	 * @throws NullPointerException  if {@code s} or {@code charset} is {@code null}
+	 * @throws IllegalArgumentException  if {@code charset} does not provide encoding
+	 *                                   capability (see {@link Charset#canEncode()})
 	 */
 	public static ByteString of(String s, Charset charset) {
 		return new StringByteString(s, charset);
@@ -86,7 +87,7 @@ public abstract class ByteString implements Comparable<ByteString> {
 	}
 
 	/**
-	 * Returns a byte string containing a copy of the bytes {@code bytes}.
+	 * Returns a byte string containing a copy of the byte array {@code bytes}.
 	 *
 	 * @param bytes  the byte array to use as the byte string, must not be {@code null}
 	 * @return  a byte string containing a copy of {@code bytes}
@@ -107,26 +108,47 @@ public abstract class ByteString implements Comparable<ByteString> {
 	}
 
 	/**
-	 * Returns {@code true} if {@code o} is a byte string with contents equal
-	 * to this byte string.
+	 * Returns {@code true} if {@code o} is a byte string containing the same bytes as
+	 * this byte string.
 	 *
-	 * @param o  object to evaluate equality with, may be {@code null}
+	 * <p><b>Note:</b> this method uses the strict interpretation of byte strings as byte
+	 * sequences. It is therefore <b>not</b> necessarily true that for two byte strings {@code a}
+	 * and {@code b}, the result of their comparison is the same as the result of comparing
+	 * their images provided by {@link #toString()}:</p>
+	 * <pre>
+	 *     boolean byteEq = a.equals(b);
+	 *     boolean stringEq = a.toString().equals(b.toString());
+	 *
+	 *     // may fail!
+	 *     assert (byteEq == stringEq);
+	 * </pre>
+	 *
+	 * @param o  object to evaluate for equality with, may be {@code null}
 	 * @return  {@code true} iff {@code o} is a byte string with equal contents to {@code this}
 	 */
 	@Override
-	public boolean equals(Object o) {
+	public final boolean equals(Object o) {
 		return this == o || o instanceof ByteString && this.equals((ByteString) o);
 	}
 
 	/**
 	 * Returns the hash code of this byte string. The hash code is computed using the same
-	 * function as used by {@link String#hashCode()}, interprets the byte string's bytes
-	 * unsigned integers.
+	 * function as used by {@link String#hashCode()}, interpreting the byte string's bytes
+	 * as unsigned integers.
 	 *
 	 * @return  the hash code of this byte string
 	 */
 	@Override
 	public abstract int hashCode();
+
+	/**
+	 * Returns an integer <i>i</i> that corresponds to the hash code of this byte string
+	 * if <i>i</i> is non-zero. When <i>i</i> is zero, it <b>may or may not</b> be the hash code
+	 * of this string.
+	 *
+	 * @return  the hash code of this byte string if non-zero
+	 */
+	abstract int maybeHashCode();
 
 	abstract boolean equals(ByteString that);
 
@@ -148,11 +170,27 @@ public abstract class ByteString implements Comparable<ByteString> {
 	public abstract byte byteAt(int index);
 
 	/**
+	 * Returns an iterator over the bytes in this byte string.
+	 *
+	 * @return  an iterator over the bytes in this byte string
+	 */
+	abstract ByteIterator byteIterator();
+
+	/**
 	 * Returns the length of this byte string, i.e., the number of bytes it contains.
 	 *
 	 * @return  the length of this byte string
 	 */
 	public abstract int length();
+
+	/**
+	 * Returns an integer <i>i</i> that is equal to the length of this byte string if
+	 * <i>i</i> is non-negative. When <i>i</i> is negative, the length of this byte string
+	 * is not yet known.
+	 *
+	 * @return  the length of this byte string if non-negative
+	 */
+	abstract int maybeLength();
 
 	/**
 	 * Returns {@code true} iff this byte string is empty, i.e., if the number of bytes it
@@ -215,9 +253,11 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * @throws NullPointerException  if {@code charset} is {@code null}
 	 */
 	public String decode(Charset charset) {
+		if (isEmpty()) return "";
+
 		ByteBuffer byteBuffer = ByteBuffer.allocate(length());
 		putTo(byteBuffer);
-		byteBuffer.rewind();
+		byteBuffer.flip();
 		return charset.decode(byteBuffer).toString();
 	}
 
@@ -243,6 +283,21 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * <p>For the purposes of this ordering, bytes are interpreted as <i>unsigned</i>
 	 * integers.</p>
 	 *
+	 * <p><b>Note:</b> this method uses the strict interpretation of byte strings as byte
+	 * sequences. It is therefore <b>not</b> necessarily true that for two byte strings {@code a}
+	 * and {@code b}, the result of their comparison is the same as the result of comparing
+	 * their images provided by {@link #toString()}:</p>
+	 * <pre>
+	 *     int byteCmp = a.compareTo(b);
+	 *     int stringCmp = a.toString().compareTo(b.toString());
+	 *
+	 *     // may fail!
+	 *     assert(Integer.signum(byteCmp) == Integer.signum(stringCmp));
+	 * </pre>
+	 *
+	 * <p>This is done in order to ensure that the natural ordering provided by this
+	 * {@code compareTo()} is consistent with equals.</p>
+	 *
 	 * @param that  byte string to compare to, must not be {@code null}
 	 * @return  a negative, zero, or positive integer if {@code this} is lexicographically
 	 *          lesser than, equal to or greater than {@code that}
@@ -253,20 +308,30 @@ public abstract class ByteString implements Comparable<ByteString> {
 	public int compareTo(ByteString that) {
 		Objects.requireNonNull(that);
 
-		int len = Math.min(this.length(), that.length());
-		for (int i = 0; i < len; i++) {
-			int a = this.byteAt(i) & 0xff;
-			int b = that.byteAt(i) & 0xff;
-			int cmp = a - b;
-			if (cmp != 0) return cmp;
+		ByteIterator thisIterator = this.byteIterator();
+		ByteIterator thatIterator = that.byteIterator();
+
+		while (thisIterator.hasNext() && thatIterator.hasNext()) {
+			int thisByte = thisIterator.nextByte() & 0xff;
+			int thatByte = thatIterator.nextByte() & 0xff;
+			int diff = thisByte - thatByte;
+			if (diff != 0) return diff;
 		}
 
-		return this.length() - that.length();
+		return thisIterator.hasNext()
+				? 1  // !thatIterator.hasNext() => that is shorter
+				: thatIterator.hasNext()
+						? -1  // this is shorter
+						: 0;  // equal length
 	}
 
 	/**
 	 * Returns a byte string formed by a concatenating this byte string with the byte string
 	 * {@code other}.
+	 *
+	 * <p><b>Note:</b> this method uses the non-strict interpretation and therefore
+	 * may (<i>but might not necessarily</i>) preserve unmappable and malformed characters
+	 * occurring in the two strings.</p>
 	 *
 	 * @param other  the byte string to concatenate this byte string with, must not be {@code null}
 	 * @return  this byte string concatenated with {@code other}
@@ -274,6 +339,9 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * @throws NullPointerException  if {@code other} is {@code null}
 	 */
 	public ByteString concat(ByteString other) {
+		if (other.isEmpty()) return this;
+		else if (this.isEmpty()) return other;
+
 		byte[] thisBytes = this.getBytes();
 		byte[] otherBytes = other.getBytes();
 

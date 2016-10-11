@@ -16,6 +16,9 @@
 
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.util.ArrayByteIterator;
+import net.sandius.rembulan.util.ByteIterator;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -53,8 +56,7 @@ class ArrayByteString extends ByteString {
 		int hc = hashCode;
 		if (hc == 0) {
 			if (bytes.length > 0) {
-				for (int i = 0; i < bytes.length; i++) {
-					int b = bytes[i];
+				for (byte b : bytes) {
 					hc = (hc * 31) + (b & 0xff);
 				}
 				hashCode = hc;
@@ -65,12 +67,22 @@ class ArrayByteString extends ByteString {
 	}
 
 	@Override
+	int maybeHashCode() {
+		return hashCode;
+	}
+
+	@Override
 	public String toString() {
-		return new String(Arrays.copyOf(bytes, bytes.length));
+		return decode();
 	}
 
 	@Override
 	public int length() {
+		return bytes.length;
+	}
+
+	@Override
+	int maybeLength() {
 		return bytes.length;
 	}
 
@@ -82,6 +94,11 @@ class ArrayByteString extends ByteString {
 	@Override
 	public byte byteAt(int index) {
 		return bytes[index];
+	}
+
+	@Override
+	ByteIterator byteIterator() {
+		return new ArrayByteIterator(bytes);
 	}
 
 	@Override
@@ -104,7 +121,8 @@ class ArrayByteString extends ByteString {
 
 	@Override
 	public void writeTo(OutputStream stream) throws IOException {
-		stream.write(bytes);
+		// must make a defensive copy to avoid leaking the contents
+		stream.write(getBytes());
 	}
 
 	@Override

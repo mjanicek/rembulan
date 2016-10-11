@@ -16,6 +16,9 @@
 
 package net.sandius.rembulan;
 
+import net.sandius.rembulan.util.ByteIterator;
+import net.sandius.rembulan.util.CharsetEncoderByteIterator;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -37,47 +40,47 @@ class StringByteString extends ByteString {
 	StringByteString(String s, Charset charset) {
 		this.string = Objects.requireNonNull(s);
 		this.charset = Objects.requireNonNull(charset);
+		if (!charset.canEncode()) {
+			throw new IllegalArgumentException("Charset cannot encode: " + charset.name());
+		}
 		this.byteHashCode = 0;
-		this.byteLength = 0;
+		this.byteLength = string.isEmpty() ? 0 : -1;
 	}
 
 	@Override
 	protected boolean equals(ByteString that) {
-		if (that instanceof StringByteString) {
-			StringByteString sbs = (StringByteString) that;
-			if (this.charset.equals(sbs.charset)) {
-				return this.string.equals(sbs.string);
-			}
-			else {
-				// Don't force byteHashCode computation, but use it if we know that it has already
-				// been computed.
-				int thisHash = this.byteHashCode;
-				int thatHash = ((StringByteString) that).byteHashCode;
-				if (thisHash != 0 && thatHash != 0 && thisHash != thatHash) return false;
+		if (this.isEmpty() && that.isEmpty()) return true;
+
+		// don't force hashCode computation, but use if already known
+		int thisHash = this.maybeHashCode();
+		int thatHash = that.maybeHashCode();
+		if (thisHash != 0 && thatHash != 0 && thisHash != thatHash) return false;
+
+		// don't force length computation, but use if already known
+		int thisLength = this.maybeLength();
+		int thatLength = that.maybeLength();
+		if (thisLength >= 0 && thatLength >= 0 && thisLength != thatLength) return false;
+
+		// compare byte-by-byte
+		ByteIterator thisIterator = this.byteIterator();
+		ByteIterator thatIterator = that.byteIterator();
+		while (thisIterator.hasNext() && thatIterator.hasNext()) {
+			byte thisByte = thisIterator.nextByte();
+			byte thatByte = thatIterator.nextByte();
+			if (thisByte != thatByte) {
+				return false;
 			}
 		}
 
-		// TODO: do this incrementally
-
-		if (this.length() != that.length()) return false;
-
-		int len = this.length();
-		for (int i = 0; i < len; i++) {
-			if (this.byteAt(i) != that.byteAt(i)) return false;
-		}
-
-		return true;
+		return thisIterator.hasNext() == thatIterator.hasNext();
 	}
 
 	private int computeHashCode() {
-		// FIXME: do this incrementally
 		int hc = 0;
 
-		byte[] bytes = string.getBytes(charset);
-
-		for (int i = 0; i < bytes.length; i++) {
-			int b = bytes[i];
-			hc = (hc * 31) + (b & 0xff);
+		ByteIterator it = new CharsetEncoderByteIterator(string, charset);
+		while (it.hasNext()) {
+			hc = (hc * 31) + (it.nextByte() & 0xff);
 		}
 
 		return hc;
@@ -87,7 +90,7 @@ class StringByteString extends ByteString {
 	public int hashCode() {
 		int hc = byteHashCode;
 
-		if (hc == 0 && string.length() > 0) {
+		if (hc == 0 && !string.isEmpty()) {
 			hc = computeHashCode();
 
 			// update cached hashCode
@@ -98,17 +101,33 @@ class StringByteString extends ByteString {
 	}
 
 	@Override
+	int maybeHashCode() {
+		return byteHashCode;
+	}
+
+	private int computeLength() {
+		int len = 0;
+		ByteIterator it = new CharsetEncoderByteIterator(string, charset);
+		while (it.hasNext()) {
+			it.nextByte();
+			len++;
+		}
+		return len;
+	}
+
+	@Override
 	public int length() {
 		int len = byteLength;
-		if (len == 0 && string.length() > 0) {
-			// FIXME: get bytes from a cache
-			byte[] bytes = string.getBytes();
-			len = bytes.length;
-
-			// update cached length
+		if (len < 0) {
+			len = computeLength();
 			byteLength = len;
 		}
 		return len;
+	}
+
+	@Override
+	int maybeLength() {
+		return byteLength;
 	}
 
 	@Override
@@ -116,16 +135,38 @@ class StringByteString extends ByteString {
 		return string.isEmpty();
 	}
 
+	// must not escape, may be an array from the cache!
+	private byte[] toBytes() {
+		// TODO: cache the result
+		return string.getBytes(charset);
+	}
+
+	@Override
+	public byte[] getBytes() {
+		byte[] bytes = toBytes();
+
+		// must make a defensive copy
+		return Arrays.copyOf(bytes, bytes.length);
+	}
+
 	@Override
 	public byte byteAt(int index) {
-		// FIXME: cache it
-		return string.getBytes(charset)[index];
+		if (index < 0) {
+			// don't even have to convert to bytes
+			throw new IndexOutOfBoundsException(String.valueOf(index));
+		}
+
+		return toBytes()[index];
+	}
+
+	@Override
+	ByteIterator byteIterator() {
+		return new CharsetEncoderByteIterator(string, charset);
 	}
 
 	@Override
 	public ByteString substring(int start, int end) {
-		// FIXME: cache it
-		byte[] bytes = string.getBytes(charset);
+		byte[] bytes = toBytes();
 
 		if (start > end || start < 0 || end < 0 || end > bytes.length) {
 			throw new IndexOutOfBoundsException();
@@ -150,31 +191,15 @@ class StringByteString extends ByteString {
 	}
 
 	@Override
-	public byte[] getBytes() {
-		// FIXME: get from cache
-		return string.getBytes(charset);
-	}
-
-	@Override
 	public void putTo(ByteBuffer buffer) {
-		buffer.put(getBytes());
+		// ByteBuffer cannot be directly extended: it's safe to use a possibly cached array
+		buffer.put(toBytes());
 	}
 
 	@Override
 	public void writeTo(OutputStream stream) throws IOException {
+		// OutputStream can be extended: pass a defensive copy
 		stream.write(getBytes());
-	}
-
-	@Override
-	public int compareTo(ByteString other) {
-		if (other instanceof StringByteString) {
-			StringByteString that = (StringByteString) other;
-			if (this.charset.equals(that.charset)) {
-				return this.string.compareTo(that.string);
-			}
-		}
-
-		return super.compareTo(other);
 	}
 
 	@Override
@@ -182,6 +207,7 @@ class StringByteString extends ByteString {
 		if (other instanceof StringByteString) {
 			StringByteString that = (StringByteString) other;
 			if (this.charset.equals(that.charset)) {
+				// Caveat: preserves malformed characters and characters unmappable by charset
 				return ByteString.of(this.string.concat(that.string));
 			}
 		}
@@ -192,12 +218,8 @@ class StringByteString extends ByteString {
 	@Override
 	public boolean startsWith(byte b) {
 		if (string.isEmpty()) return false;
-
-		// FIXME: this assumes that the 1st char of the encoded string can be directly compared
-		// to the argument. This is wrong for many encodings, incl. UTF-8, where this
-		// is only true for b < 128. (I.e., ASCII).
-
-		return string.charAt(0) == (char) b;
+		ByteIterator it = new CharsetEncoderByteIterator(string, charset);
+		return it.hasNext() && it.nextByte() == b;
 	}
 
 }
