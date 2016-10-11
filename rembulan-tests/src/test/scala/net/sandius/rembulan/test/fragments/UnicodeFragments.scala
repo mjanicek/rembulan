@@ -34,11 +34,11 @@ object UnicodeFragments extends FragmentBundle with FragmentExpectations with On
 
     program (s"""return '$s'""") succeedsWith (s)
     program (s"""return #('$s')""") succeedsWith (utf8Length(s))
-    program (s"""return #('$lua')""") succeedsWith (103)
+    program (s"""return #('$s') -- explicit""") succeedsWith (103)
 
     program (s"""return '$lua'""") succeedsWith (s)
     program (s"""return #('$lua')""") succeedsWith (utf8Length(s))
-    program (s"""return #('$lua')""") succeedsWith (103)
+    program (s"""return #('$lua') -- explicit""") succeedsWith (103)
 
   }
 
