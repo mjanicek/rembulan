@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.UnimplementedFunction;
@@ -150,8 +151,8 @@ public class DefaultOsLib extends OsLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String name = args.nextString();
-			String value = environment.getEnv(name);
+			ByteString name = args.nextString();
+			String value = environment.getEnv(name.toString());
 			context.getReturnBuffer().setTo(value);
 		}
 

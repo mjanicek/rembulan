@@ -96,7 +96,7 @@ public class LuaJavaLib extends Lib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args)
 				throws ResolvedControlThrowable {
 
-			String className = args.nextString();
+			String className = args.nextString().toString();
 			Object[] ctorArgs = args.getTail();
 
 			final ObjectWrapper instance;
@@ -141,7 +141,7 @@ public class LuaJavaLib extends Lib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String className = args.nextString();
+			String className = args.nextString().toString();
 
 			final ClassWrapper wrapper;
 			try {

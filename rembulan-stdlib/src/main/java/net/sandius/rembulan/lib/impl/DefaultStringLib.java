@@ -17,6 +17,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ByteString;
+import net.sandius.rembulan.ByteStringBuilder;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaRuntimeException;
@@ -35,6 +36,7 @@ import net.sandius.rembulan.runtime.IllegalOperationAttemptException;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
+import net.sandius.rembulan.util.ByteIterator;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
@@ -149,6 +151,42 @@ public class DefaultStringLib extends StringLib {
 		return j > len ? len : j;
 	}
 
+	private static byte toLower(byte b) {
+		int c = b & 0xff;
+		// FIXME: dealing with ASCII only
+		return c >= 'A' && c <= 'Z' ? (byte) (c - (int) 'A' + (int) 'a') : b;
+	}
+
+	private static ByteString toLowerCase(ByteString s) {
+		boolean changed = false;
+
+		ByteStringBuilder bld = new ByteStringBuilder();
+		ByteIterator it = s.byteIterator();
+		while (it.hasNext()) {
+			bld.append(toLower(it.nextByte()));
+		}
+
+		return changed ? bld.toByteString() : s;
+	}
+
+	private static byte toUpper(byte b) {
+		int c = b & 0xff;
+		// FIXME: dealing with ASCII only
+		return c >= 'a' && c <= 'z' ? (byte) (c - (int) 'a' + (int) 'A') : b;
+	}
+
+	private static ByteString toUpperCase(ByteString s) {
+		boolean changed = false;
+
+		ByteStringBuilder bld = new ByteStringBuilder();
+		ByteIterator it = s.byteIterator();
+		while (it.hasNext()) {
+			bld.append(toUpper(it.nextByte()));
+		}
+
+		return changed ? bld.toByteString() : s;
+	}
+
 	public static class Byte extends AbstractLibFunction {
 
 		public static final Byte INSTANCE = new Byte();
@@ -160,7 +198,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 			int i = args.optNextInt(1);
 			int j = args.optNextInt(i);
 
@@ -171,8 +209,7 @@ public class DefaultStringLib extends StringLib {
 
 			List<Object> buf = new ArrayList<>();
 			for (int idx = i; idx <= j; idx++) {
-				// FIXME: these are not bytes!
-				char c = s.charAt(idx - 1);
+				int c = s.byteAt(idx - 1) & 0xff;
 				buf.add(Long.valueOf(c));
 			}
 			context.getReturnBuffer().setToContentsOf(buf);
@@ -191,13 +228,13 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			char[] chars = new char[args.size()];
+			byte[] bytes = new byte[args.size()];
 
-			for (int i = 0; i < chars.length; i++) {
-				chars[i] = (char) args.nextIntRange("value", 0, 255);
+			for (int i = 0; i < bytes.length; i++) {
+				bytes[i] = (byte) args.nextIntRange("value", 0, 255);
 			}
 
-			String s = String.valueOf(chars);
+			ByteString s = ByteString.copyOf(bytes);
 			context.getReturnBuffer().setTo(s);
 		}
 
@@ -233,8 +270,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+			String s = args.nextString().toString();  // FIXME
+			String pattern = args.nextString().toString();  // FIXME
 			int init = args.optNextInt(1);
 			boolean plain = args.optNextBoolean(false);
 
@@ -749,7 +786,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String fmt = args.nextString();
+			String fmt = args.nextString().toString();  // FIXME
 			StringBuilder bld = new StringBuilder();
 			run(context, fmt, args, bld, 0);
 		}
@@ -847,8 +884,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+			String s = args.nextString().toString();  // FIXME
+			String pattern = args.nextString().toString();  // FIXME
 
 			StringPattern pat = StringPattern.fromString(pattern, true);
 
@@ -872,8 +909,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+			String s = args.nextString().toString();  // FIXME
+			String pattern = args.nextString().toString();  // FIXME
 
 			final Object repl;
 			if (!args.hasNext()) {
@@ -1086,7 +1123,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 			context.getReturnBuffer().setTo((long) s.length());
 		}
 
@@ -1103,8 +1140,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			context.getReturnBuffer().setTo(s.toLowerCase());
+			ByteString s = args.nextString();
+			context.getReturnBuffer().setTo(toLowerCase(s));
 		}
 
 	}
@@ -1120,8 +1157,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+			String s = args.nextString().toString();  // FIXME
+			String pattern = args.nextString().toString();  // FIXME
 			int init = args.optNextInt(1);
 
 			init = lowerBound(init, s.length());
@@ -1156,13 +1193,13 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 			int n = args.nextInt();
-			String sep = args.optNextString("");
+			ByteString sep = args.hasNext() ? args.nextString() : ByteString.empty();
 
-			final String result;
+			final ByteString result;
 			if (n > 0) {
-				StringBuilder bld = new StringBuilder();
+				ByteStringBuilder bld = new ByteStringBuilder();
 
 				for (int i = 0; i < n; i++) {
 					bld.append(s);
@@ -1171,10 +1208,10 @@ public class DefaultStringLib extends StringLib {
 					}
 				}
 
-				result = bld.toString();
+				result = bld.toByteString();
 			}
 			else {
-				result = "";
+				result = ByteString.empty();
 			}
 
 			context.getReturnBuffer().setTo(result);
@@ -1193,16 +1230,18 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 
-			int len = s.length();
-			char[] chars = new char[len];
+			byte[] bytes = s.getBytes();
+			for (int i = 0; i < bytes.length / 2; i++) {
+				int j = bytes.length - 1 - i;
 
-			for (int i = 0; i < chars.length; i++) {
-				chars[i] = s.charAt(len - 1 - i);
+				byte tmp = bytes[i];
+				bytes[i] = bytes[j];
+				bytes[j] = tmp;
 			}
 
-			String result = String.valueOf(chars);
+			ByteString result = ByteString.copyOf(bytes);
 
 			context.getReturnBuffer().setTo(result);
 		}
@@ -1220,7 +1259,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 			int i = args.nextInt();
 			int j = args.optNextInt(-1);
 
@@ -1228,7 +1267,7 @@ public class DefaultStringLib extends StringLib {
 			i = lowerBound(i, len) - 1;
 			j = upperBound(j, len);
 
-			String result = s.substring(i, j);
+			ByteString result = s.substring(i, j);
 
 			context.getReturnBuffer().setTo(result);
 		}
@@ -1246,8 +1285,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			context.getReturnBuffer().setTo(s.toUpperCase());
+			ByteString s = args.nextString();
+			context.getReturnBuffer().setTo(toUpperCase(s));
 		}
 
 	}

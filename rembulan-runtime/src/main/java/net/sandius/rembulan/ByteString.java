@@ -174,7 +174,7 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 *
 	 * @return  an iterator over the bytes in this byte string
 	 */
-	abstract ByteIterator byteIterator();
+	public abstract ByteIterator byteIterator();
 
 	/**
 	 * Returns the length of this byte string, i.e., the number of bytes it contains.
@@ -351,6 +351,24 @@ public abstract class ByteString implements Comparable<ByteString> {
 		return ByteString.wrap(result);
 	}
 
+	/**
+	 * Returns a byte string formed by concatenating this byte string with the string
+	 * {@code other}.
+	 *
+	 * <p>This is a convenience method equivalent to</p>
+	 * <pre>
+	 *     concat(ByteString.of(other))
+	 * </pre>
+	 *
+	 * @param other  the string to concatenate with, must not be {@code null}
+	 * @return  this byte string concatenated with {@code other}
+	 *
+	 * @throws  NullPointerException  if {@code other} is {@code null}
+	 */
+	public ByteString concat(String other) {
+		return this.concat(ByteString.of(other));
+	}
+
 	// TODO: add startsWith(ByteString)
 
 	/**
@@ -360,5 +378,21 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * @return  {@code true} if this byte string starts with {@code b}
 	 */
 	public abstract boolean startsWith(byte b);
+
+	// TODO: add contains(ByteString)
+
+	/**
+	 * Returns {@code true} if the byte string contains the byte {@code b}.
+	 *
+	 * @param b  the byte to search for in the byte string
+	 * @return  {@code true} if this byte string contains {@code b}
+	 */
+	public boolean contains(byte b) {
+		ByteIterator it = byteIterator();
+		while (it.hasNext()) {
+			if (b == it.nextByte()) return true;
+		}
+		return false;
+	}
 
 }

@@ -97,7 +97,7 @@ class ArrayByteString extends ByteString {
 	}
 
 	@Override
-	ByteIterator byteIterator() {
+	public ByteIterator byteIterator() {
 		return new ArrayByteIterator(bytes);
 	}
 

@@ -160,7 +160,7 @@ class StringByteString extends ByteString {
 	}
 
 	@Override
-	ByteIterator byteIterator() {
+	public ByteIterator byteIterator() {
 		return new CharsetEncoderByteIterator(string, charset);
 	}
 

@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.UnimplementedFunction;
@@ -120,7 +121,7 @@ public class DefaultModuleLib extends ModuleLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String modName = args.nextString();
+			ByteString modName = args.nextString();
 
 			Object mod = _loaded.rawget(modName);
 

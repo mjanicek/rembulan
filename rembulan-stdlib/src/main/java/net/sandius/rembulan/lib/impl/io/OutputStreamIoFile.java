@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl.io;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.lib.impl.IoFile;
 import net.sandius.rembulan.util.Check;
@@ -37,16 +38,19 @@ public class OutputStreamIoFile extends IoFile {
 		return false;
 	}
 
+	@Override
 	public void close() throws IOException {
 		throw new UnsupportedOperationException("cannot close standard file");
 	}
 
+	@Override
 	public void flush() throws IOException {
 		out.flush();
 	}
 
-	public void write(String s) throws IOException {
-		out.write(s.getBytes());
+	@Override
+	public void write(ByteString s) throws IOException {
+		s.writeTo(out);
 	}
 
 	@Override

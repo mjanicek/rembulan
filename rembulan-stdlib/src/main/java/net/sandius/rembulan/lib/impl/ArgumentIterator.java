@@ -40,6 +40,8 @@ import static net.sandius.rembulan.LuaFormat.TYPENAME_USERDATA;
 
 public class ArgumentIterator implements Iterator<Object> {
 
+	// TODO: clean up!
+
 	private final ValueTypeNamer namer;
 
 	private final String name;
@@ -304,14 +306,13 @@ public class ArgumentIterator implements Iterator<Object> {
 		}
 	}
 
-	// FIXME: use ByteString
-	public String nextString() {
-		final String result;
+	public ByteString nextString() {
+		final ByteString result;
 		try {
 			Object arg = peek(TYPENAME_STRING);
 			ByteString v = Conversions.stringValueOf(arg);
 			if (v != null) {
-				result = v.toString();
+				result = v;
 			}
 			else {
 				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg));
@@ -324,13 +325,15 @@ public class ArgumentIterator implements Iterator<Object> {
 		return result;
 	}
 
-	// FIXME: use ByteString
-	public String nextStrictString() {
-		final String result;
+	public ByteString nextStrictString() {
+		final ByteString result;
 		try {
 			Object arg = peek(TYPENAME_STRING);
-			if (arg instanceof ByteString || arg instanceof String) {
-				result = arg.toString();
+			if (arg instanceof ByteString) {
+				result = (ByteString) arg;
+			}
+			else if (arg instanceof String) {
+				result = ByteString.of((String) arg);
 			}
 			else {
 				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg));
@@ -341,10 +344,6 @@ public class ArgumentIterator implements Iterator<Object> {
 		}
 		skip();
 		return result;
-	}
-
-	public String optNextString(String defaultValue) {
-		return hasNext() ? nextString() : defaultValue;
 	}
 
 	public LuaFunction nextFunction() {

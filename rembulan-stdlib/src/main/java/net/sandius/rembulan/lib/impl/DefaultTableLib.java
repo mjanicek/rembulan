@@ -17,6 +17,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ByteString;
+import net.sandius.rembulan.ByteStringBuilder;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.Ordering;
@@ -106,13 +107,13 @@ public class DefaultTableLib extends TableLib {
 
 			public final Table t;
 			public final ArgumentIterator args;
-			public final String sep;
+			public final ByteString sep;
 			public final long i;
 			public final long j;
 			public final long k;
-			public final StringBuilder bld;
+			public final ByteStringBuilder bld;
 
-			public SuspendedState(int state, Table t, ArgumentIterator args, String sep, long i, long j, long k, StringBuilder bld) {
+			public SuspendedState(int state, Table t, ArgumentIterator args, ByteString sep, long i, long j, long k, ByteStringBuilder bld) {
 				this.state = state;
 				this.t = t;
 				this.args = args;
@@ -125,7 +126,7 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
-		private static void appendToBuilder(StringBuilder bld, long index, Object o) {
+		private static void appendToBuilder(ByteStringBuilder bld, long index, Object o) {
 			ByteString s = Conversions.stringValueOf(o);
 			if (s != null) {
 				bld.append(s);
@@ -138,8 +139,8 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
-		private static void concatUsingRawGet(ExecutionContext context, Table t, String sep, long i, long j) {
-			StringBuilder bld = new StringBuilder();
+		private static void concatUsingRawGet(ExecutionContext context, Table t, ByteString sep, long i, long j) {
+			ByteStringBuilder bld = new ByteStringBuilder();
 			for (long k = i; k <= j; k++) {
 				Object o = t.rawget(k);
 				appendToBuilder(bld, k, o);
@@ -147,7 +148,7 @@ public class DefaultTableLib extends TableLib {
 					bld.append(sep);
 				}
 			}
-			context.getReturnBuffer().setTo(bld.toString());
+			context.getReturnBuffer().setTo(bld.toByteString());
 		}
 
 		private static final int STATE_LEN_PREPARE = 0;
@@ -155,7 +156,7 @@ public class DefaultTableLib extends TableLib {
 		private static final int STATE_BEFORE_LOOP = 2;
 		private static final int STATE_LOOP = 3;
 
-		private void run(ExecutionContext context, int state, Table t, ArgumentIterator args, String sep, long i, long j, long k, StringBuilder bld)
+		private void run(ExecutionContext context, int state, Table t, ArgumentIterator args, ByteString sep, long i, long j, long k, ByteStringBuilder bld)
 				throws ResolvedControlThrowable {
 
 			try {
@@ -177,7 +178,7 @@ public class DefaultTableLib extends TableLib {
 						k = 0;  // clear k
 
 						// process arguments
-						sep = args.hasNext() && args.peek() != null ? args.nextString() : "";
+						sep = args.hasNext() && args.peek() != null ? args.nextString() : ByteString.empty();
 						i = args.optNextInt(1);
 						j = args.hasNext() && args.peek() != null ? args.nextInteger() : len;
 
@@ -198,7 +199,7 @@ public class DefaultTableLib extends TableLib {
 						if (i <= j) {
 							k = i;
 							state = STATE_LOOP;
-							bld = new StringBuilder();  // allocate the result accumulator
+							bld = new ByteStringBuilder();  // allocate the result accumulator
 							Dispatch.index(context, t, k++);  // may suspend
 
 							// fall-through to state == STATE_LOOP
@@ -234,7 +235,7 @@ public class DefaultTableLib extends TableLib {
 						assert (k > j);
 
 						// we're done!
-						context.getReturnBuffer().setTo(bld.toString());
+						context.getReturnBuffer().setTo(bld.toByteString());
 						return;
 					}
 
