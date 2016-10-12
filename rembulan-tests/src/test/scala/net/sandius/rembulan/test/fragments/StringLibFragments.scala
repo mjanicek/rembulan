@@ -94,6 +94,28 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""string.char(256)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
     }
 
+    about ("sub") {
+
+      // from the PUC-Lua test suite (strings.lua)
+      program ("""return string.sub("123456789",2,4)""")succeedsWith ("234")
+      program ("""return string.sub("123456789",7)""")succeedsWith ("789")
+      program ("""return string.sub("123456789",7,6)""")succeedsWith ("")
+      program ("""return string.sub("123456789",7,7)""")succeedsWith ("7")
+      program ("""return string.sub("123456789",0,0)""")succeedsWith ("")
+      program ("""return string.sub("123456789",-10,10)""")succeedsWith ("123456789")
+      program ("""return string.sub("123456789",1,9)""")succeedsWith ("123456789")
+      program ("""return string.sub("123456789",-10,-20)""")succeedsWith ("")
+      program ("""return string.sub("123456789",-1)""")succeedsWith ("9")
+      program ("""return string.sub("123456789",-4)""")succeedsWith ("6789")
+      program ("""return string.sub("123456789",-6, -4)""")succeedsWith ("456")
+      program ("""return string.sub("123456789", 1 << 63, -4)""")succeedsWith ("123456")
+      program ("""return string.sub("123456789", 1 << 63, (1 << 63) - 1)""")succeedsWith ("123456789")
+      program ("""return string.sub("123456789", 1 << 63, 1 << 63)""")succeedsWith ("")
+      program ("""return string.sub("\000123456789",3,5)""")succeedsWith ("234")
+      program ("""return ("\000123456789"):sub(8)""")succeedsWith ("789")      
+
+    }
+
     about ("format") {
       program ("""return ("%s%d"):format("0", 10.0)""") succeedsWith ("010")
 

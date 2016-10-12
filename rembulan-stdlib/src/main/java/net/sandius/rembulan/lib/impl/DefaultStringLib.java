@@ -143,12 +143,12 @@ public class DefaultStringLib extends StringLib {
 
 	private static int lowerBound(int i, int len) {
 		int j = i < 0 ? len + i + 1 : i;
-		return j < 1 ? 1 : j;
+		return Math.max(1, j);
 	}
 
 	private static int upperBound(int i, int len) {
 		int j = i < 0 ? len + i + 1 : i;
-		return j > len ? len : j;
+		return Math.max(0, Math.min(len, j));
 	}
 
 	private static byte toLower(byte b) {

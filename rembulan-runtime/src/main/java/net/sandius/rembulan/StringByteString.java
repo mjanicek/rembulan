@@ -164,14 +164,17 @@ class StringByteString extends ByteString {
 		return new CharsetEncoderByteIterator(string, charset);
 	}
 
+	private static void checkSubstringBounds(int start, int end, int len) {
+		if (start > end) throw new IndexOutOfBoundsException("start > end (" + start + " > " + end + ")");
+		else if (start < 0) throw new IndexOutOfBoundsException("start < 0 (" + start + " < 0)");
+		else if (end < 0) throw new IndexOutOfBoundsException("end < 0 (" + end + " < 0)");
+		else if (end > len) throw new IndexOutOfBoundsException("end > length (" + start + " > " + len + ")");
+	}
+
 	@Override
 	public ByteString substring(int start, int end) {
 		byte[] bytes = toBytes();
-
-		if (start > end || start < 0 || end < 0 || end > bytes.length) {
-			throw new IndexOutOfBoundsException();
-		}
-
+		checkSubstringBounds(start, end, bytes.length);
 		return new ArrayByteString(Arrays.copyOfRange(bytes, start, end));
 	}
 
