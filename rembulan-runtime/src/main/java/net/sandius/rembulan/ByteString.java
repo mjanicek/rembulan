@@ -82,6 +82,24 @@ public abstract class ByteString implements Comparable<ByteString> {
 		return of(s, Charset.defaultCharset());
 	}
 
+	/**
+	 * Returns a new byte string corresponding to bytes in {@code s} by taking the
+	 * least significant byte of each character.
+	 *
+	 * @param s  the string to get bytes from , must not be {@code null}
+	 * @return  a byte string based on {@code s} by taking the least significant
+	 *          byte of each char
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 */
+	public static ByteString fromRaw(String s) {
+		byte[] bytes = new byte[s.length()];
+		for (int i = 0; i < bytes.length; i++) {
+			bytes[i] = (byte) (s.charAt(i) & 0xff);
+		}
+		return wrap(bytes);
+	}
+
 	static ByteString wrap(byte[] bytes) {
 		return new ArrayByteString(bytes);
 	}
@@ -274,6 +292,16 @@ public abstract class ByteString implements Comparable<ByteString> {
 	public String decode() {
 		return decode(Charset.defaultCharset());
 	}
+
+	/**
+	 * Returns a string in which all characters are directly mapped to the bytes in this
+	 * byte string by treating them as unsigned integers.
+	 *
+	 * <p>This method is the complement of {@link #fromRaw(String)}.</p>
+	 *
+	 * @return  a raw string based on this byte string
+	 */
+	public abstract String toRawString();
 
 	/**
 	 * Compares this byte string lexicographically with {@code that}. Returns a negative

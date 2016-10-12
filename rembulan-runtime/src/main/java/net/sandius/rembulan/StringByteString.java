@@ -194,6 +194,16 @@ class StringByteString extends ByteString {
 	}
 
 	@Override
+	public String toRawString() {
+		byte[] bytes = toBytes();
+		char[] chars = new char[bytes.length];
+		for (int i = 0; i < chars.length; i++) {
+			chars[i] = (char) (bytes[i] & 0xff);
+		}
+		return String.valueOf(chars);
+	}
+
+	@Override
 	public void putTo(ByteBuffer buffer) {
 		// ByteBuffer cannot be directly extended: it's safe to use a possibly cached array
 		buffer.put(toBytes());
