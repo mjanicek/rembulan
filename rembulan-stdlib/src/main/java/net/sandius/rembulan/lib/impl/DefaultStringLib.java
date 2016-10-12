@@ -163,7 +163,10 @@ public class DefaultStringLib extends StringLib {
 		ByteStringBuilder bld = new ByteStringBuilder();
 		ByteIterator it = s.byteIterator();
 		while (it.hasNext()) {
-			bld.append(toLower(it.nextByte()));
+			byte b = it.nextByte();
+			byte c = toLower(b);
+			changed |= b != c;
+			bld.append(c);
 		}
 
 		return changed ? bld.toByteString() : s;
@@ -181,7 +184,10 @@ public class DefaultStringLib extends StringLib {
 		ByteStringBuilder bld = new ByteStringBuilder();
 		ByteIterator it = s.byteIterator();
 		while (it.hasNext()) {
-			bld.append(toUpper(it.nextByte()));
+			byte b = it.nextByte();
+			byte c = toUpper(b);
+			changed |= b != c;
+			bld.append(c);
 		}
 
 		return changed ? bld.toByteString() : s;
