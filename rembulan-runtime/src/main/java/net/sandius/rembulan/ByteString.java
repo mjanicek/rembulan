@@ -19,6 +19,7 @@ package net.sandius.rembulan;
 import net.sandius.rembulan.util.ByteIterator;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -193,6 +194,15 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * @return  an iterator over the bytes in this byte string
 	 */
 	public abstract ByteIterator byteIterator();
+
+	/**
+	 * Returns an input stream that reads the contents of this string.
+	 *
+	 * @return an input stream that reads the contents of this string
+	 */
+	public InputStream asInputStream() {
+		return new ByteStringInputStream(byteIterator());
+	}
 
 	/**
 	 * Returns the length of this byte string, i.e., the number of bytes it contains.

@@ -394,6 +394,10 @@ public final class LuaFormat {
 		return bld.toString();
 	}
 
+	public static String escape(ByteString byteString) {
+		return escape(byteString.toRawString());
+	}
+
 	private static final Set<String> keywords;
 
 	static {

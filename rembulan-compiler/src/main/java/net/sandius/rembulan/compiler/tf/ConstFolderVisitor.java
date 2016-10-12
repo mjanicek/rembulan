@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.compiler.tf;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.analysis.types.LiteralType;
 import net.sandius.rembulan.compiler.analysis.types.Type;
@@ -47,8 +48,8 @@ public class ConstFolderVisitor extends CodeTransformerVisitor {
 				return new LoadConst.Int(dest, n.longValue());
 			}
 		}
-		else if (o instanceof String) {
-			return new LoadConst.Str(dest, (String) o);
+		else if (o instanceof ByteString) {
+			return new LoadConst.Str(dest, (ByteString) o);
 		}
 		else if (o instanceof Boolean) {
 			return new LoadConst.Bool(dest, ((Boolean) o).booleanValue());

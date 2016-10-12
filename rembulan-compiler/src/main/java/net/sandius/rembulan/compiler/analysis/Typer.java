@@ -44,8 +44,8 @@ public class Typer {
 				return LuaTypes.NUMBER_INTEGER.newLiteralType(n.longValue());
 			}
 		}
-		else if (o instanceof String) {
-			return LuaTypes.STRING.newLiteralType((String) o);
+		else if (o instanceof ByteString) {
+			return LuaTypes.STRING.newLiteralType((ByteString) o);
 		}
 		else if (o instanceof Boolean) {
 			return LuaTypes.BOOLEAN.newLiteralType((Boolean) o);

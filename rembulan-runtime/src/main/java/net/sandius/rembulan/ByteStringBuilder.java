@@ -32,6 +32,15 @@ public class ByteStringBuilder {
 		return this;
 	}
 
+	public ByteStringBuilder append(byte[] array, int off, int len) {
+		baos.write(array, off, len);
+		return this;
+	}
+
+	public ByteStringBuilder append(byte[] array) {
+		return append(array, 0, array.length);
+	}
+
 	public ByteStringBuilder append(ByteString string) {
 		try {
 			string.writeTo(baos);

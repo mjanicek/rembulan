@@ -19,7 +19,9 @@ package net.sandius.rembulan;
 import net.sandius.rembulan.util.ArrayByteIterator;
 import net.sandius.rembulan.util.ByteIterator;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -108,6 +110,12 @@ class ArrayByteString extends ByteString {
 	@Override
 	public ByteIterator byteIterator() {
 		return new ArrayByteIterator(bytes);
+	}
+
+	@Override
+	public InputStream asInputStream() {
+		// no need to go via the iterator
+		return new ByteArrayInputStream(bytes);
 	}
 
 	@Override

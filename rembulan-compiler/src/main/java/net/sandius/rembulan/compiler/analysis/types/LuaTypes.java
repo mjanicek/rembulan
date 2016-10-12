@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.compiler.analysis.types;
 
+import net.sandius.rembulan.ByteString;
+
 public abstract class LuaTypes {
 
 	private LuaTypes() {
@@ -45,7 +47,7 @@ public abstract class LuaTypes {
 	public static final AbstractType NUMBER = abstractSubtype(NON_NIL, "number");
 	public static final ConcreteLitType<Long> NUMBER_INTEGER = concreteSubtype(NUMBER, "integer", Long.class);
 	public static final ConcreteLitType<Double> NUMBER_FLOAT = concreteSubtype(NUMBER, "float", Double.class);
-	public static final ConcreteLitType<String> STRING = concreteSubtype(NON_NIL, "string", String.class);
+	public static final ConcreteLitType<ByteString> STRING = concreteSubtype(NON_NIL, "string", ByteString.class);
 	public static final ConcreteType TABLE = concreteSubtype(NON_NIL, "table");
 
 	public static final AbstractType FUNCTION = abstractSubtype(NON_NIL, "function");

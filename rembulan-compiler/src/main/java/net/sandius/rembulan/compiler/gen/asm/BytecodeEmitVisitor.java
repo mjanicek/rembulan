@@ -159,12 +159,12 @@ class BytecodeEmitVisitor extends CodeVisitor {
 				}
 			};
 		}
-		else if (constValue instanceof String) {
+		else if (constValue instanceof ByteString) {
 			t = Type.getType(constValue.getClass());
 			return new RunMethod.ConstFieldInstance(constValue, fieldName, context.thisClassType(), Type.getType(ByteString.class)) {
 				@Override
 				public void doInstantiate(InsnList il) {
-					il.add(newByteString((String) constValue));
+					il.add(newByteString((ByteString) constValue));
 				}
 			};
 		}
@@ -174,12 +174,12 @@ class BytecodeEmitVisitor extends CodeVisitor {
 
 	}
 
-	private InsnList newByteString(String value) {
+	private static InsnList newByteString(ByteString value) {
 		InsnList il = new InsnList();
-		il.add(new LdcInsnNode(value));
+		il.add(new LdcInsnNode(value.toRawString()));
 		il.add(new MethodInsnNode(INVOKESTATIC,
 				Type.getInternalName(ByteString.class),
-				"of",
+				"fromRaw",
 				Type.getMethodDescriptor(
 						Type.getType(ByteString.class),
 						Type.getType(String.class)),

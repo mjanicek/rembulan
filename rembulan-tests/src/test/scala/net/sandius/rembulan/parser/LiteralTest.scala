@@ -16,6 +16,9 @@
 
 package net.sandius.rembulan.parser
 
+import java.nio.charset.StandardCharsets
+
+import net.sandius.rembulan.ByteString
 import net.sandius.rembulan.parser.ast.{Numeral, StringLiteral}
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
@@ -55,8 +58,8 @@ class LiteralTest extends FunSpec with MustMatchers {
 
   describe ("string literal") {
 
-    def go(l: String, expected: String): Unit = {
-      describe (l) {
+    def go(l: ByteString, expected: ByteString): Unit = {
+      describe (l.toString) {
         it ("is parsed correctly") {
           val v = StringLiteral.fromString(l).value()
           v mustEqual expected
@@ -64,21 +67,28 @@ class LiteralTest extends FunSpec with MustMatchers {
       }
     }
 
-    go ("\"hello\"", "hello")
-    go ("'there'", "there")
+    def raw(s: String) = ByteString.fromRaw(s)
+    def j(s: String) = ByteString.of(s)
+    def utf(s: String) = ByteString.of(s, StandardCharsets.UTF_8)
 
-    go ("\"doub'le\"", "doub'le")
-    go ("'sing\"le'", "sing\"le")
+    go (raw("\"hello\""), utf("hello"))
+    go (raw("'there'"), utf("there"))
 
-    go ("\"esc\\n\"", "esc\n")
-    go ("\"a\\tb\\r\"", "a\tb\r")
-    go ("\"\f\b\"", "\f\b")
+    go (raw("\"doub'le\""), utf("doub'le"))
+    go (raw("'sing\"le'"), utf("sing\"le"))
 
-    go ("\"\\104\\101\\108\\32\\108\\111\"", "hel lo")
+    go (raw("\"esc\\n\""), utf("esc\n"))
+    go (raw("\"a\\tb\\r\""), utf("a\tb\r"))
+    go (raw("\"\f\b\""), utf("\f\b"))
 
-    go ("\"\\x68\\101\\x6c\\x6Co\"", "hello")
+    go (raw("\"\\104\\101\\108\\32\\108\\111\""), utf("hel lo"))
 
-    go ("\"\\u{68}\\u{69}", "hi")
+    go (raw("\"\\x68\\101\\x6c\\x6Co\""), utf("hello"))
+
+    go (raw("\"[\\000123456789]\""), utf("[\000123456789]"))
+
+    go (raw("\"\\u{68}\\u{69}"), utf("hi"))
+    go (raw("\"\\u{00FA}d\\u{011B}sn\\u{00FD}\""), utf("úděsný"))
 
   }
 
