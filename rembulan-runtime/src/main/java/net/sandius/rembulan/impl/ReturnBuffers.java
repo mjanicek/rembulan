@@ -149,7 +149,8 @@ public final class ReturnBuffers {
 		}
 	}
 
-	public static ReturnBufferFactory mapping(final ReturnBufferFactory factory, final ReadMapper reads, final WriteMapper writes) {
+	// TODO: clean up and make public
+	static ReturnBufferFactory mapping(final ReturnBufferFactory factory, final ReadMapper reads, final WriteMapper writes) {
 		Objects.requireNonNull(factory);
 		return new ReturnBufferFactory() {
 			@Override
@@ -159,7 +160,8 @@ public final class ReturnBuffers {
 		};
 	}
 
-	public static ReturnBufferFactory canonical(final ReturnBufferFactory factory, boolean reads, boolean writes) {
+	// TODO: clean up and make public
+	static ReturnBufferFactory canonical(final ReturnBufferFactory factory, boolean reads, boolean writes) {
 		return mapping(factory, reads ? CANONICALISER : null, writes ? CANONICALISER : null);
 	}
 
