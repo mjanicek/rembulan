@@ -43,6 +43,7 @@
 
 package net.sandius.rembulan.lib;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
@@ -50,9 +51,9 @@ import net.sandius.rembulan.runtime.LuaFunction;
 
 public abstract class BasicLib extends Lib {
 
-	public static final String MT_TOSTRING = "__tostring";
-	public static final String MT_METATABLE = "__metatable";
-	public static final String MT_PAIRS = "__pairs";
+	public static final ByteString MT_TOSTRING = ByteString.of("__tostring");
+	public static final ByteString MT_METATABLE = ByteString.of("__metatable");
+	public static final ByteString MT_PAIRS = ByteString.of("__pairs");
 
 	@Override
 	public String name() {

@@ -407,7 +407,7 @@ public final class Dispatch {
 		}
 	}
 
-	private static void try_mt_arithmetic(ExecutionContext context, String event, Object a, Object b) throws UnresolvedControlThrowable {
+	private static void try_mt_arithmetic(ExecutionContext context, ByteString event, Object a, Object b) throws UnresolvedControlThrowable {
 		Object handler = Metatables.binaryHandlerFor(context, event, a, b);
 
 		if (handler != null) {
@@ -418,7 +418,7 @@ public final class Dispatch {
 		}
 	}
 
-	private static void try_mt_arithmetic(ExecutionContext context, String event, Object o) throws UnresolvedControlThrowable {
+	private static void try_mt_arithmetic(ExecutionContext context, ByteString event, Object o) throws UnresolvedControlThrowable {
 		Object handler = Metatables.getMetamethod(context, event, o);
 
 		if (handler != null) {
@@ -766,7 +766,7 @@ public final class Dispatch {
 		return Arithmetic.of(a, b).pow(a, b);
 	}
 
-	private static void try_mt_bitwise(ExecutionContext context, String event, Object a, Object b) throws UnresolvedControlThrowable {
+	private static void try_mt_bitwise(ExecutionContext context, ByteString event, Object a, Object b) throws UnresolvedControlThrowable {
 		Object handler = Metatables.binaryHandlerFor(context, event, a, b);
 
 		if (handler != null) {
@@ -777,7 +777,7 @@ public final class Dispatch {
 		}
 	}
 
-	private static void try_mt_bitwise(ExecutionContext context, String event, Object o) throws UnresolvedControlThrowable {
+	private static void try_mt_bitwise(ExecutionContext context, ByteString event, Object o) throws UnresolvedControlThrowable {
 		Object handler = Metatables.getMetamethod(context, event, o);
 
 		if (handler != null) {

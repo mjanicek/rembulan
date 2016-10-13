@@ -23,7 +23,7 @@ import net.sandius.rembulan.TableFactory;
 
 public abstract class Lib {
 
-	public static final String MT_NAME = "__name";
+	public static final ByteString MT_NAME = ByteString.of("__name");
 	public static final String TYPENAME_LIGHT_USERDATA = "light userdata";
 
 	public static final ByteString BYTE_TYPENAME_LIGHT_USERDATA = ByteString.of(TYPENAME_LIGHT_USERDATA);
