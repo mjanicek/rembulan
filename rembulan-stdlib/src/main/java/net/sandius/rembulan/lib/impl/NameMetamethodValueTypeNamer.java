@@ -73,7 +73,7 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 		}
 		else {
 			if (LuaType.isLightUserdata(instance)) {
-				return Lib.BYTE_TYPENAME_LIGHT_USERDATA;
+				return Lib.TYPENAME_LIGHT_USERDATA;
 			}
 			else {
 				return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);

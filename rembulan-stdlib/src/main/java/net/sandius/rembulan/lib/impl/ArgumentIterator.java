@@ -145,13 +145,13 @@ public class ArgumentIterator implements Iterator<Object> {
 
 	// guaranteed not to return null
 	protected Number peekNumber() {
-		Object arg = peek(TYPENAME_NUMBER);
+		Object arg = peek(TYPENAME_NUMBER.toString());
 		Number n = Conversions.numericalValueOf(arg);
 		if (n != null) {
 			return n;
 		}
 		else {
-			throw new UnexpectedArgumentException(TYPENAME_NUMBER, namer.typeNameOf(arg).toString());
+			throw new UnexpectedArgumentException(TYPENAME_NUMBER.toString(), namer.typeNameOf(arg).toString());
 		}
 	}
 
@@ -164,17 +164,17 @@ public class ArgumentIterator implements Iterator<Object> {
 		}
 	}
 
-	public <T> T nextStrict(String expectedTypeName, Class<T> clazz) {
+	public <T> T nextStrict(ByteString expectedTypeName, Class<T> clazz) {
 		final T result;
 		try {
-			Object arg = peek(expectedTypeName);
+			Object arg = peek(expectedTypeName.toString());
 			if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
 				@SuppressWarnings("unchecked")
 				T typed = (T) arg;
 				result = typed;
 			}
 			else {
-				throw new UnexpectedArgumentException(expectedTypeName, namer.typeNameOf(arg).toString());
+				throw new UnexpectedArgumentException(expectedTypeName.toString(), namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -309,13 +309,13 @@ public class ArgumentIterator implements Iterator<Object> {
 	public ByteString nextString() {
 		final ByteString result;
 		try {
-			Object arg = peek(TYPENAME_STRING);
+			Object arg = peek(TYPENAME_STRING.toString());
 			ByteString v = Conversions.stringValueOf(arg);
 			if (v != null) {
 				result = v;
 			}
 			else {
-				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg).toString());
+				throw new UnexpectedArgumentException(TYPENAME_STRING.toString(), namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -328,7 +328,7 @@ public class ArgumentIterator implements Iterator<Object> {
 	public ByteString nextStrictString() {
 		final ByteString result;
 		try {
-			Object arg = peek(TYPENAME_STRING);
+			Object arg = peek(TYPENAME_STRING.toString());
 			if (arg instanceof ByteString) {
 				result = (ByteString) arg;
 			}
@@ -336,7 +336,7 @@ public class ArgumentIterator implements Iterator<Object> {
 				result = ByteString.of((String) arg);
 			}
 			else {
-				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg).toString());
+				throw new UnexpectedArgumentException(TYPENAME_STRING.toString(), namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -355,7 +355,7 @@ public class ArgumentIterator implements Iterator<Object> {
 	}
 
 	public Table nextTableOrNil() {
-		return nextStrictOrNil(TYPENAME_TABLE, Table.class);
+		return nextStrictOrNil(TYPENAME_TABLE.toString(), Table.class);
 	}
 
 	public Coroutine nextCoroutine() {
@@ -363,11 +363,11 @@ public class ArgumentIterator implements Iterator<Object> {
 	}
 
 	public <T extends Userdata> T nextUserdata(String typeName, Class<T> clazz) {
-		return nextStrict(typeName, clazz);
+		return nextStrict(ByteString.of(typeName), clazz);
 	}
 
 	public Userdata nextUserdata() {
-		return nextUserdata(TYPENAME_USERDATA, Userdata.class);
+		return nextUserdata(TYPENAME_USERDATA.toString(), Userdata.class);
 	}
 
 }

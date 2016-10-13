@@ -528,7 +528,7 @@ public final class Conversions {
 	 * @see #stringValueOf(Object)
 	 */
 	public static ByteString toHumanReadableString(Object o) {
-		if (o == null) return LuaFormat.BYTE_NIL;
+		if (o == null) return LuaFormat.NIL;
 		else if (o instanceof ByteString) return (ByteString) o;
 		else if (o instanceof Number) return stringValueOf((Number) o);
 		else if (o instanceof Boolean) return LuaFormat.toByteString(((Boolean) o).booleanValue());

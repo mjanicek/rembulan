@@ -540,13 +540,13 @@ public class DefaultStringLib extends StringLib {
 			double v = args.nextFloat();
 
 			if (Double.isNaN(v) || Double.isInfinite(v)) {
-				final String chars;
+				final ByteString chars;
 
 				chars = Double.isNaN(v)
 						? LuaFormat.NAN
-						: sign(v > 0, flags) + LuaFormat.INF;
+						: ByteString.of(sign(v > 0, flags) + LuaFormat.INF);
 
-				bld.append(justified(width, flags, chars));
+				bld.append(justified(width, flags, chars.toString()));
 			}
 			else {
 				StringBuilder fmtBld = new StringBuilder();
@@ -617,7 +617,7 @@ public class DefaultStringLib extends StringLib {
 			Object o = args.nextAny();
 			final String s;
 
-			if (o == null) s = LuaFormat.NIL;
+			if (o == null) s = LuaFormat.NIL.toString();
 			else if (o instanceof Boolean) s = LuaFormat.toString(((Boolean) o).booleanValue());
 			else if (o instanceof String) s = LuaFormat.escape((String) o);
 			else if (o instanceof ByteString) s = LuaFormat.escape(((ByteString) o).toString());
