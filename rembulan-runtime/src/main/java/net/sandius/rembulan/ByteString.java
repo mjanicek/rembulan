@@ -128,7 +128,29 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * @throws NullPointerException  if {@code bytes} is {@code null}
 	 */
 	public static ByteString copyOf(byte[] bytes) {
-		return wrap(Arrays.copyOf(bytes, bytes.length));
+		return copyOf(bytes, 0, bytes.length);
+	}
+
+	/**
+	 * Returns a byte string containing a copy of a slice of the byte array {@code bytes}
+	 * starting at the offset {@code offset} and consisting of {@code length} bytes.
+	 *
+	 * @param bytes  the byte array to use as the byte string, must not be {@code null}
+	 * @param offset  offset in {@code bytes} to start reading from
+	 * @param length  the number of bytes to copy from {@code bytes}
+	 * @return  a byte string containing a copy of {@code bytes}
+	 *
+	 * @throws NullPointerException  if {@code bytes} is {@code null}
+	 * @throws IndexOutOfBoundsException  if {@code offset} or {@code length} are negative,
+	 *                                    or if {@code (offset + length)} is greater than
+	 *                                    {@code bytes.length}
+	 */
+	public static ByteString copyOf(byte[] bytes, int offset, int length) {
+		if (offset < 0 || length < 0 || (offset + length) > bytes.length) {
+			throw new IndexOutOfBoundsException("offset=" + offset + ", length=" + length);
+		}
+
+		return wrap(Arrays.copyOfRange(bytes, offset, length));
 	}
 
 	/**

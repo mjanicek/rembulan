@@ -19,11 +19,21 @@ package net.sandius.rembulan.util;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+/**
+ * A byte iterator over byte arrays.
+ */
 public class ArrayByteIterator implements ByteIterator {
 
 	private final byte[] bytes;
 	private int idx;
 
+	/**
+	 * Constructs a new byte iterator of the array {@code bytes}.
+	 *
+	 * @param bytes  the byte iterator to iterate over, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code bytes} is {@code null}
+	 */
 	public ArrayByteIterator(byte[] bytes) {
 		this.bytes = Objects.requireNonNull(bytes);
 	}
