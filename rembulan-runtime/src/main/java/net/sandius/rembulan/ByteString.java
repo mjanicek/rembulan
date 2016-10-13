@@ -106,7 +106,8 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * charset in a form suitable for use as a string constant.
 	 *
 	 * <p>This method differs from {@link #of(String)} in that it may force the computation
-	 * of eagerly-evaluated properties of the resulting string at instantiation time.</p>
+	 * of lazily-evaluated properties of the resulting string at instantiation time and
+	 * cache them for use at runtime.</p>
 	 *
 	 * @param s  the string to get bytes from, must not be {@code null}
 	 * @return  a byte string based on a byte perspective of {@code s}
