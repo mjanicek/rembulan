@@ -193,11 +193,6 @@ public class CharsetEncoderByteIterator implements ByteIterator {
 	}
 
 	@Override
-	public int position() {
-		return byteIdx;
-	}
-
-	@Override
 	public byte nextByte() {
 		try {
 			byte b = out.get();

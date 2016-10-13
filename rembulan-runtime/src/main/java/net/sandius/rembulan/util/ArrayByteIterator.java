@@ -39,11 +39,6 @@ public class ArrayByteIterator implements ByteIterator {
 	}
 
 	@Override
-	public int position() {
-		return idx;
-	}
-
-	@Override
 	public boolean hasNext() {
 		return idx < bytes.length;
 	}

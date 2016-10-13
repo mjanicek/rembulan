@@ -29,17 +29,6 @@ import java.util.NoSuchElementException;
 public interface ByteIterator extends Iterator<Byte> {
 
 	/**
-	 * Returns the current position in the byte stream, i.e., the position of the next byte
-	 * returned by a call to {@link #nextByte()}.
-	 *
-	 * <p>Consequently, when {@link #hasNext()} returns {@code false}, the value returned
-	 * by this method is equal to the number of bytes in the byte sequence (i.e., its length).</p>
-	 *
-	 * @return  the current position in the byte stream
-	 */
-	int position();
-
-	/**
 	 * Returns the next byte from the sequence and increments the byte position.
 	 *
 	 * <p>When there is no next byte to be read from the stream, this method throws
