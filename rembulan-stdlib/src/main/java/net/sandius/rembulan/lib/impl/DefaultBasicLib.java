@@ -890,6 +890,8 @@ public class DefaultBasicLib extends BasicLib {
 
 	public static class Load extends AbstractLibFunction {
 
+		private static final ByteString DEFAULT_MODE = ByteString.constOf("bt");
+
 		private final ChunkLoader loader;
 		private final Object defaultEnv;
 
@@ -928,7 +930,7 @@ public class DefaultBasicLib extends BasicLib {
 			// mode
 			final ByteString modeString = args.hasNext()
 					? args.nextString()
-					: ByteString.of("bt");
+					: DEFAULT_MODE;
 
 			final Object env = args.hasNext()
 					? args.nextAny()

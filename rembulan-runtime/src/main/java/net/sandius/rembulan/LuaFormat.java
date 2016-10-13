@@ -42,7 +42,7 @@ public final class LuaFormat {
 	/**
 	 * The byte string representation of <b>nil</b>.
 	 */
-	public static final ByteString BYTE_NIL = ByteString.of(NIL);
+	public static final ByteString BYTE_NIL = ByteString.constOf(NIL);
 
 	/**
 	 * The string representation of <b>true</b>.
@@ -55,7 +55,7 @@ public final class LuaFormat {
 	/**
 	 * The byte string representation of <b>true</b>.
 	 */
-	public static final ByteString BYTE_TRUE = ByteString.of(TRUE);
+	public static final ByteString BYTE_TRUE = ByteString.constOf(TRUE);
 
 	/**
 	 * The string representation of <b>false</b>.
@@ -68,7 +68,7 @@ public final class LuaFormat {
 	/**
 	 * The byte string representation of <b>false</b>.
 	 */
-	public static final ByteString BYTE_FALSE = ByteString.of(FALSE);
+	public static final ByteString BYTE_FALSE = ByteString.constOf(FALSE);
 
 	/**
 	 * The string representation of infinity.
@@ -81,7 +81,7 @@ public final class LuaFormat {
 	/**
 	 * The byte string representation of infinity.
 	 */
-	public static final ByteString BYTE_INF = ByteString.of(INF);
+	public static final ByteString BYTE_INF = ByteString.constOf(INF);
 
 	/**
 	 * The string representation of <i>NaN</i>.
@@ -94,7 +94,7 @@ public final class LuaFormat {
 	/**
 	 * The byte string representation of <i>NaN</i>.
 	 */
-	public static final ByteString BYTE_NAN = ByteString.of(NAN);
+	public static final ByteString BYTE_NAN = ByteString.constOf(NAN);
 
 
 	/**
@@ -127,7 +127,7 @@ public final class LuaFormat {
 	/**
 	 * Byte string representation of the Lua {@code boolean} type.
 	 */
-	public static final ByteString BYTE_TYPENAME_BOOLEAN = ByteString.of(TYPENAME_BOOLEAN);
+	public static final ByteString BYTE_TYPENAME_BOOLEAN = ByteString.constOf(TYPENAME_BOOLEAN);
 
 	/**
 	 * String representation of the Lua {@code number} type.
@@ -143,7 +143,7 @@ public final class LuaFormat {
 	/**
 	 * Byte string representation of the Lua {@code number} type.
 	 */
-	public static final ByteString BYTE_TYPENAME_NUMBER = ByteString.of(TYPENAME_NUMBER);
+	public static final ByteString BYTE_TYPENAME_NUMBER = ByteString.constOf(TYPENAME_NUMBER);
 
 	/**
 	 * String representation of the Lua {@code string} type.
@@ -159,7 +159,7 @@ public final class LuaFormat {
 	/**
 	 * Byte string representation of the Lua {@code string} type.
 	 */
-	public static final ByteString BYTE_TYPENAME_STRING = ByteString.of(TYPENAME_STRING);
+	public static final ByteString BYTE_TYPENAME_STRING = ByteString.constOf(TYPENAME_STRING);
 
 	/**
 	 * String representation of the Lua {@code table} type.
@@ -175,7 +175,7 @@ public final class LuaFormat {
 	/**
 	 * Byte string representation of the Lua {@code table} type.
 	 */
-	public static final ByteString BYTE_TYPENAME_TABLE = ByteString.of(TYPENAME_TABLE);
+	public static final ByteString BYTE_TYPENAME_TABLE = ByteString.constOf(TYPENAME_TABLE);
 
 	/**
 	 * String representation of the Lua {@code function} type.
@@ -191,7 +191,7 @@ public final class LuaFormat {
 	/**
 	 * Byte string representation of the Lua {@code function} type.
 	 */
-	public static final ByteString BYTE_TYPENAME_FUNCTION = ByteString.of(TYPENAME_FUNCTION);
+	public static final ByteString BYTE_TYPENAME_FUNCTION = ByteString.constOf(TYPENAME_FUNCTION);
 
 	/**
 	 * String representation of the Lua {@code userdata} type.
@@ -207,7 +207,7 @@ public final class LuaFormat {
 	/**
 	 * Byte string representation of the Lua {@code userdata} type.
 	 */
-	public static final ByteString BYTE_TYPENAME_USERDATA = ByteString.of(TYPENAME_USERDATA);
+	public static final ByteString BYTE_TYPENAME_USERDATA = ByteString.constOf(TYPENAME_USERDATA);
 
 	/**
 	 * String representation of the Lua {@code thread} type.
@@ -223,7 +223,7 @@ public final class LuaFormat {
 	/**
 	 * Byte string representation of the Lua {@code thread} type.
 	 */
-	public static final ByteString BYTE_TYPENAME_THREAD = ByteString.of(TYPENAME_THREAD);
+	public static final ByteString BYTE_TYPENAME_THREAD = ByteString.constOf(TYPENAME_THREAD);
 
 	/**
 	 * Returns the Lua format string representation of the boolean value {@code b}.
@@ -296,7 +296,7 @@ public final class LuaFormat {
 		return ByteString.of(s);
 	}
 
-	private static final ByteString BYTE_NEG_INF = ByteString.of("-").concat(BYTE_INF);
+	private static final ByteString BYTE_NEG_INF = ByteString.constOf("-" + INF);
 
 	/**
 	 * Returns the Lua format byte string representation of the float value {@code f}.

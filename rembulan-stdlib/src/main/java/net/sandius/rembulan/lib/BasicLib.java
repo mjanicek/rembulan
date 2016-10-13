@@ -51,9 +51,9 @@ import net.sandius.rembulan.runtime.LuaFunction;
 
 public abstract class BasicLib extends Lib {
 
-	public static final ByteString MT_TOSTRING = ByteString.of("__tostring");
-	public static final ByteString MT_METATABLE = ByteString.of("__metatable");
-	public static final ByteString MT_PAIRS = ByteString.of("__pairs");
+	public static final ByteString MT_TOSTRING = ByteString.constOf("__tostring");
+	public static final ByteString MT_METATABLE = ByteString.constOf("__metatable");
+	public static final ByteString MT_PAIRS = ByteString.constOf("__pairs");
 
 	@Override
 	public String name() {
