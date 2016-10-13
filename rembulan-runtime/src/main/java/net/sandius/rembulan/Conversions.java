@@ -128,12 +128,8 @@ public final class Conversions {
 	 * @throws NullPointerException if {@code n} is {@code null}
 	 */
 	public static Number toCanonicalNumber(Number n) {
-		if (n instanceof Long) {
-			// integer in its canonical representation
-			return n;
-		}
-		else if (n instanceof Double) {
-			// float in its canonical representation
+		if (n instanceof Long || n instanceof Double) {
+			// already in canonical representation
 			return n;
 		}
 		else if (n instanceof Float) {
@@ -146,39 +142,116 @@ public final class Conversions {
 		}
 	}
 
+	/**
+	 * Returns the value {@code o} to its canonical representation.
+	 *
+	 * <p>For numbers, this method is equivalent to {@link #toCanonicalNumber(Number)}.
+	 * If {@code o} is a {@link String java.lang.String}, it is wrapped into a byte
+	 * string by {@link ByteString#of(String)}. Otherwise, {@code o} is in canonical
+	 * representation.</p>
+	 *
+	 * <p>This method is intended for use at the Java &rarr; Lua boundary, and whenever
+	 * it is not certain that {@code o} is in a canonical representation when a canonical
+	 * representation is required.</p>
+	 *
+	 * @param o  value to convert to canonical representation, may be {@code null}
+	 * @return  {@code o} converted to canonical representation
+	 */
 	public static Object canonicalRepresentationOf(Object o) {
 		if (o instanceof Number) return toCanonicalNumber((Number) o);
 		else if (o instanceof String) return ByteString.of((String) o);
 		else return o;
 	}
 
+	/**
+	 * Returns the value {@code o} in its Java representation.
+	 *
+	 * <p>If {@code o} is a {@link ByteString}, returns {@code o} as a {@code java.lang.String}
+	 * (using {@link ByteString#toString()}. Otherwise, returns {@code o}.</p>
+	 *
+	 * <p>This method is intended for use at the Lua &rarr; Java boundary for interoperating
+	 * with Java code unaware of (or not concerned with) the interpretation of Lua
+	 * strings as sequences of bytes.</p>
+	 *
+	 * @param o  value to convert to Java representation, may be {@code null}
+	 * @return  {@code o} converted to a {@code java.lang.String} if {@code o} is
+	 *          a byte string, {@code o} otherwise
+	 */
 	public static Object javaRepresentationOf(Object o) {
-		if (o instanceof ByteString) return ((ByteString) o).toString();
+		if (o instanceof ByteString) return o.toString();
 		else return o;
 	}
 
-	public static Object[] toCanonicalValues(Object[] values) {
+	/**
+	 * Modifies the contents of the array {@code values} by converting all values to
+	 * their canonical representations.
+	 *
+	 * @param values  values to convert to their canonical representations, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code values} is {@code null}
+	 *
+	 * @see #canonicalRepresentationOf(Object)
+	 */
+	public static void toCanonicalValues(Object[] values) {
 		for (int i = 0; i < values.length; i++) {
 			Object v = values[i];
 			values[i] = canonicalRepresentationOf(v);
 		}
-		return values;
 	}
 
-	public static Object[] toJavaValues(Object[] values) {
+	/**
+	 * Modifies the contents of the array {@code values} by converting all values to
+	 * their Java representations.
+	 *
+	 * <p>This method is intended for use at the Lua &rarr; Java boundary for interoperating
+	 * with Java code unaware of (or not concerned with) the interpretation of Lua
+	 * strings as sequences of bytes.</p>
+	 *
+	 * @param values  values to convert to their Java representations, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code values} is {@code null}
+	 *
+	 * @see #javaRepresentationOf(Object)
+	 */
+	public static void toJavaValues(Object[] values) {
 		for (int i = 0; i < values.length; i++) {
 			Object v = values[i];
 			values[i] = javaRepresentationOf(v);
 		}
+	}
+
+	/**
+	 * Returns a copy of the array {@code values} with all values converted to their
+	 * canonical representation.
+	 *
+	 * @param values  values to convert to their canonical representation, must not be {@code null}
+	 * @return  a copy of {@code values} with all elements converted to canonical representation
+	 *
+	 * @see #canonicalRepresentationOf(Object)
+	 */
+	public static Object[] copyAsCanonicalValues(Object[] values) {
+		values = Arrays.copyOf(values, values.length);
+		toCanonicalValues(values);
 		return values;
 	}
 
-	public static Object[] copyAsCanonicalValues(Object[] values) {
-		return toCanonicalValues(Arrays.copyOf(values, values.length));
-	}
-
+	/**
+	 * Returns a copy of the array {@code values} with all values converted to their
+	 * Java representation.
+	 *
+	 * <p>This method is intended for use at the Lua &rarr; Java boundary for interoperating
+	 * with Java code unaware of (or not concerned with) the interpretation of Lua
+	 * strings as sequences of bytes.</p>
+	 *
+	 * @param values  values to convert to their Java representation, must not be {@code null}
+	 * @return  a copy of {@code values} with all elements converted to their Java representation
+	 *
+	 * @see #javaRepresentationOf(Object)
+	 */
 	public static Object[] copyAsJavaValues(Object[] values) {
-		return toJavaValues(Arrays.copyOf(values, values.length));
+		values = Arrays.copyOf(values, values.length);
+		toJavaValues(values);
+		return values;
 	}
 
 	/**
@@ -205,10 +278,12 @@ public final class Conversions {
 	 * in a Lua table.
 	 *
 	 * <p>If {@code o} is a number, returns the number normalised (see {@link #normaliseKey(Number)}.
-	 * Otherwise, returns {@code o}.</p>
+	 * If {@code o} is a {@code java.lang.String}, returns {@code o} as a byte string using
+	 * {@link ByteString#of(String)}. Otherwise, returns {@code o}.</p>
 	 *
 	 * @param o  object to normalise, may be {@code null}
-	 * @return  normalised number if {@code o} is a number, {@code o} otherwise
+	 * @return  normalised number if {@code o} is a number, {@code o} as byte string if
+	 *          {@code o} is a {@code java.lang.String}, {@code o} otherwise
 	 */
 	public static Object normaliseKey(Object o) {
 		if (o instanceof Number) return normaliseKey((Number) o);
