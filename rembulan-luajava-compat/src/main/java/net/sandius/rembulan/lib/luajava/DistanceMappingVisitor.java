@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.luajava;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaMathOperators;
 
@@ -63,11 +64,13 @@ class DistanceMappingVisitor implements ParameterMappingVisitor<Integer> {
 
 	@Override
 	public Integer visitLongParameter(Object arg) {
+		arg = Conversions.canonicalRepresentationOf(arg);
+
 		if (arg instanceof Number) {
-			return longParam(Conversions.toCanonicalNumber((Number) arg));
+			return longParam((Number) arg);
 		}
-		else if (arg instanceof String) {
-			Number n = Conversions.numericalValueOf((String) arg);
+		else if (arg instanceof ByteString) {
+			Number n = Conversions.numericalValueOf((ByteString) arg);
 			return n != null ? add(STRING_TO_NUMBER, longParam(n)) : null;
 		}
 		else {
@@ -77,11 +80,13 @@ class DistanceMappingVisitor implements ParameterMappingVisitor<Integer> {
 
 	@Override
 	public Integer visitIntParameter(Object arg) {
+		arg = Conversions.canonicalRepresentationOf(arg);
+
 		if (arg instanceof Number) {
-			return intParam(Conversions.toCanonicalNumber((Number) arg));
+			return intParam((Number) arg);
 		}
-		else if (arg instanceof String) {
-			Number n = Conversions.numericalValueOf((String) arg);
+		else if (arg instanceof ByteString) {
+			Number n = Conversions.numericalValueOf((ByteString) arg);
 			return n != null ? add(STRING_TO_NUMBER, intParam(n)) : null;
 		}
 		else {
@@ -91,11 +96,13 @@ class DistanceMappingVisitor implements ParameterMappingVisitor<Integer> {
 
 	@Override
 	public Integer visitShortParameter(Object arg) {
+		arg = Conversions.canonicalRepresentationOf(arg);
+
 		if (arg instanceof Number) {
 			return shortParam(Conversions.toCanonicalNumber((Number) arg));
 		}
-		else if (arg instanceof String) {
-			Number n = Conversions.numericalValueOf((String) arg);
+		else if (arg instanceof ByteString) {
+			Number n = Conversions.numericalValueOf((ByteString) arg);
 			return n != null ? add(STRING_TO_NUMBER, shortParam(n)) : null;
 		}
 		else {
@@ -105,11 +112,13 @@ class DistanceMappingVisitor implements ParameterMappingVisitor<Integer> {
 
 	@Override
 	public Integer visitByteParameter(Object arg) {
+		arg = Conversions.canonicalRepresentationOf(arg);
+
 		if (arg instanceof Number) {
 			return byteParam(Conversions.toCanonicalNumber((Number) arg));
 		}
-		else if (arg instanceof String) {
-			Number n = Conversions.numericalValueOf((String) arg);
+		else if (arg instanceof ByteString) {
+			Number n = Conversions.numericalValueOf((ByteString) arg);
 			return n != null ? add(STRING_TO_NUMBER, byteParam(n)) : null;
 		}
 		else {
@@ -119,11 +128,13 @@ class DistanceMappingVisitor implements ParameterMappingVisitor<Integer> {
 
 	@Override
 	public Integer visitCharParameter(Object arg) {
+		arg = Conversions.canonicalRepresentationOf(arg);
+
 		if (arg instanceof Number) {
 			return charParam(Conversions.toCanonicalNumber((Number) arg));
 		}
-		else if (arg instanceof String) {
-			Number n = Conversions.numericalValueOf((String) arg);
+		else if (arg instanceof ByteString) {
+			Number n = Conversions.numericalValueOf((ByteString) arg);
 			return n != null ? add(STRING_TO_NUMBER, charParam(n)) : null;
 		}
 		else {
@@ -133,11 +144,13 @@ class DistanceMappingVisitor implements ParameterMappingVisitor<Integer> {
 
 	@Override
 	public Integer visitDoubleParameter(Object arg) {
+		arg = Conversions.canonicalRepresentationOf(arg);
+
 		if (arg instanceof Number) {
 			return doubleParam(Conversions.toCanonicalNumber((Number) arg));
 		}
-		else if (arg instanceof String) {
-			Number n = Conversions.numericalValueOf((String) arg);
+		else if (arg instanceof ByteString) {
+			Number n = Conversions.numericalValueOf((ByteString) arg);
 			return n != null ? add(STRING_TO_NUMBER, doubleParam(n)) : null;
 		}
 		else {
@@ -147,11 +160,13 @@ class DistanceMappingVisitor implements ParameterMappingVisitor<Integer> {
 
 	@Override
 	public Integer visitFloatParameter(Object arg) {
+		arg = Conversions.canonicalRepresentationOf(arg);
+
 		if (arg instanceof Number) {
 			return floatParam(Conversions.toCanonicalNumber((Number) arg));
 		}
-		else if (arg instanceof String) {
-			Number n = Conversions.numericalValueOf((String) arg);
+		else if (arg instanceof ByteString) {
+			Number n = Conversions.numericalValueOf((ByteString) arg);
 			return n != null ? add(STRING_TO_NUMBER, floatParam(n)) : null;
 		}
 		else {

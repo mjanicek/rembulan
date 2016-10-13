@@ -44,8 +44,8 @@ public final class Conversions {
 	 * @return  a number representing the numerical value of {@code s} (in the canonical
 	 *          representation), or {@code null} if {@code s} does not have a numerical value
 	 */
-	public static Number numericalValueOf(String s) {
-		String trimmed = s.trim();
+	public static Number numericalValueOf(ByteString s) {
+		String trimmed = s.toString().trim();
 		try {
 			return Long.valueOf(LuaFormat.parseInteger(trimmed));
 		}
@@ -64,7 +64,7 @@ public final class Conversions {
 	 * does not have a numerical value.
 	 *
 	 * <p>If {@code o} is already a number, returns {@code o} cast to number. If {@code o}
-	 * is a string, returns its numerical value (see {@link #numericalValueOf(String)}).
+	 * is a string, returns its numerical value (see {@link #numericalValueOf(ByteString)}).
 	 * Otherwise, returns {@code null}.</p>
 	 *
 	 * <p>This method differs from {@link #arithmeticValueOf(Object)} in that it
@@ -82,7 +82,8 @@ public final class Conversions {
 	 */
 	public static Number numericalValueOf(Object o) {
 		if (o instanceof Number) return (Number) o;
-		else if (o instanceof ByteString || o instanceof String) return numericalValueOf(o.toString());
+		else if (o instanceof ByteString) return numericalValueOf((ByteString) o);
+		else if (o instanceof String) return numericalValueOf(ByteString.of((String) o));
 		else return null;
 	}
 
@@ -296,7 +297,7 @@ public final class Conversions {
 	 * does not have an arithmetic value.
 	 *
 	 * <p>If {@code o} is a number, then that number is its arithmetic value. If {@code o}
-	 * is a string that has a numerical value (see {@link #numericalValueOf(String)}),
+	 * is a string that has a numerical value (see {@link #numericalValueOf(ByteString)}),
 	 * its arithmetic value is the numerical value converted to a float. Otherwise,
 	 * {@code o} does not have an arithmetic value.</p>
 	 *
@@ -327,12 +328,9 @@ public final class Conversions {
 		if (o instanceof Number) {
 			return (Number) o;
 		}
-		else if (o instanceof ByteString || o instanceof String) {
-			Number n = numericalValueOf(o.toString());
-			return n != null ? floatValueOf(n) : null;
-		}
 		else {
-			return null;
+			Number n = numericalValueOf(o);
+			return n != null ? floatValueOf(n) : null;
 		}
 	}
 
@@ -466,9 +464,9 @@ public final class Conversions {
 	/**
 	 * Returns the string value of the number {@code n}.
 	 *
-	 * <p>The string value of integers is the result of {@link LuaFormat#toString(long)}
+	 * <p>The string value of integers is the result of {@link LuaFormat#toByteString(long)}
 	 * on their numerical value; similarly the string value of floats is the result
-	 * of {@link LuaFormat#toString(double)} on their numerical value.
+	 * of {@link LuaFormat#toByteString(double)} on their numerical value.
 	 *
 	 * @param n  number to be converted to string, must not be {@code null}
 	 * @return string value of {@code n}, guaranteed to be non-{@code null}
@@ -477,10 +475,10 @@ public final class Conversions {
 	 */
 	public static ByteString stringValueOf(Number n) {
 		if (n instanceof Double || n instanceof Float) {
-			return ByteString.of(LuaFormat.toString(n.doubleValue()));
+			return LuaFormat.toByteString(n.doubleValue());
 		}
 		else {
-			return ByteString.of(LuaFormat.toString(n.longValue()));
+			return LuaFormat.toByteString(n.longValue());
 		}
 	}
 
@@ -497,9 +495,9 @@ public final class Conversions {
 	 *         a string value
 	 */
 	public static ByteString stringValueOf(Object o) {
-		if (o instanceof String) return ByteString.of((String) o);
-		else if (o instanceof ByteString) return (ByteString) o;
+		if (o instanceof ByteString) return (ByteString) o;
 		else if (o instanceof Number) return stringValueOf((Number) o);
+		else if (o instanceof String) return ByteString.of((String) o);
 		else return null;
 	}
 
