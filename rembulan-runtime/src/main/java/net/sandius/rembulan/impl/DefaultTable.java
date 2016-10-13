@@ -31,6 +31,9 @@ public class DefaultTable extends Table {
 
 	private final TraversableHashMap<Object, Object> values;
 
+	/**
+	 * Constructs a new empty table.
+	 */
 	public DefaultTable() {
 		this.values = new TraversableHashMap<>();
 	}

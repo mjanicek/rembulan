@@ -48,6 +48,9 @@ public class TraversableHashMap<K, V> implements Map<K, V> {
 	private final Collection<V> values;
 	private final Set<Map.Entry<K, V>> entrySet;
 
+	/**
+	 * Constructs a new empty map.
+	 */
 	public TraversableHashMap() {
 		this.entries = new HashMap<>();
 		this.firstKey = null;

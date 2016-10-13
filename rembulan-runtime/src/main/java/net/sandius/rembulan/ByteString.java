@@ -87,7 +87,7 @@ public abstract class ByteString implements Comparable<ByteString> {
 	 * Returns a new byte string corresponding to bytes in {@code s} by taking the
 	 * least significant byte of each character.
 	 *
-	 * @param s  the string to get bytes from , must not be {@code null}
+	 * @param s  the string to get bytes from, must not be {@code null}
 	 * @return  a byte string based on {@code s} by taking the least significant
 	 *          byte of each char
 	 *

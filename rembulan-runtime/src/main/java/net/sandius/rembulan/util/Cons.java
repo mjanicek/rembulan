@@ -331,7 +331,8 @@ public class Cons<T> {
 
 		/**
 		 * Constructs a new iterator with the starting position at {@code p}.
-		 * @param p
+		 *
+		 * @param p  the starting position, may be {@code null}
 		 */
 		public ConsIterator(Cons<T> p) {
 			this.p = p;
