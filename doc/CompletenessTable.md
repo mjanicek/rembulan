@@ -4,7 +4,6 @@
 
  * garbage collection, `__gc` metamethod
  * strings:
-    - plain 8-bit strings? (currently, `java.lang.String` is used for strings)
     - string library locale support
  * tables:
     - weak tables
@@ -62,7 +61,7 @@ Statuses:
 | [`package.preload`](http://www.lua.org/manual/5.3/manual.html#pdf-package.preload) | ![missing](img/missing.png) | |
 | [`package.searchers`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchers) | ![missing](img/missing.png) | |
 | [`package.searchpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchpath) | ![missing](img/missing.png) | |
-| [`string.byte`](http://www.lua.org/manual/5.3/manual.html#pdf-string.byte) | ![partial](img/partial.png) | truncates chars into bytes |
+| [`string.byte`](http://www.lua.org/manual/5.3/manual.html#pdf-string.byte) | ![complete](img/complete.png) | |
 | [`string.char`](http://www.lua.org/manual/5.3/manual.html#pdf-string.char) | ![complete](img/complete.png) | |
 | [`string.dump`](http://www.lua.org/manual/5.3/manual.html#pdf-string.dump) | ![not implemented](img/not-implemented.png) | |
 | [`string.find`](http://www.lua.org/manual/5.3/manual.html#pdf-string.find) | ![complete](img/complete.png) | |
