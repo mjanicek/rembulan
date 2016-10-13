@@ -454,14 +454,15 @@ public final class Conversions {
 	 *
 	 * @see #stringValueOf(Object)
 	 */
-	public static String toHumanReadableString(Object o) {
-		if (o == null) return LuaFormat.NIL;
-		else if (o instanceof ByteString || o instanceof String) return o.toString();
-		else if (o instanceof Number) return stringValueOf((Number) o).toString();
-		else if (o instanceof Boolean) return LuaFormat.toString(((Boolean) o).booleanValue());
-		else return String.format("%s: %#010x",
+	public static ByteString toHumanReadableString(Object o) {
+		if (o == null) return LuaFormat.BYTE_NIL;
+		else if (o instanceof ByteString) return (ByteString) o;
+		else if (o instanceof Number) return stringValueOf((Number) o);
+		else if (o instanceof Boolean) return LuaFormat.toByteString(((Boolean) o).booleanValue());
+		else if (o instanceof String) return ByteString.of((String) o);
+		else return ByteString.of(String.format("%s: %#010x",
 					PlainValueTypeNamer.INSTANCE.typeNameOf(o),
-					o.hashCode());
+					o.hashCode()));
 	}
 
 	/**

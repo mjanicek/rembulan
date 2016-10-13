@@ -61,7 +61,7 @@ public class LuaRuntimeException extends RuntimeException {
 	 */
 	@Override
 	public String getMessage() {
-		return Conversions.toHumanReadableString(getErrorObject());
+		return Conversions.toHumanReadableString(getErrorObject()).toString();
 	}
 
 	/**

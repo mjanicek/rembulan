@@ -22,11 +22,11 @@ package net.sandius.rembulan;
 public interface ValueTypeNamer {
 
 	/**
-	 * Returns the type name (a string) of the value {@code instance}.
+	 * Returns the type name (a byte string) of the value {@code instance}.
 	 *
 	 * @param instance  the object in question, may be {@code null}
 	 * @return  the type name of {@code instance}
 	 */
-	String typeNameOf(Object instance);
+	ByteString typeNameOf(Object instance);
 
 }

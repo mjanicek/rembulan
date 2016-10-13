@@ -151,7 +151,7 @@ public class ArgumentIterator implements Iterator<Object> {
 			return n;
 		}
 		else {
-			throw new UnexpectedArgumentException(TYPENAME_NUMBER, namer.typeNameOf(arg));
+			throw new UnexpectedArgumentException(TYPENAME_NUMBER, namer.typeNameOf(arg).toString());
 		}
 	}
 
@@ -174,7 +174,7 @@ public class ArgumentIterator implements Iterator<Object> {
 				result = typed;
 			}
 			else {
-				throw new UnexpectedArgumentException(expectedTypeName, namer.typeNameOf(arg));
+				throw new UnexpectedArgumentException(expectedTypeName, namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -194,7 +194,7 @@ public class ArgumentIterator implements Iterator<Object> {
 				result = typed;
 			}
 			else {
-				throw new UnexpectedArgumentException(expectedTypeName, namer.typeNameOf(arg));
+				throw new UnexpectedArgumentException(expectedTypeName, namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -315,7 +315,7 @@ public class ArgumentIterator implements Iterator<Object> {
 				result = v;
 			}
 			else {
-				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg));
+				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -336,7 +336,7 @@ public class ArgumentIterator implements Iterator<Object> {
 				result = ByteString.of((String) arg);
 			}
 			else {
-				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg));
+				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {

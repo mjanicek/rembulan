@@ -544,7 +544,7 @@ public class DefaultStringLib extends StringLib {
 
 				chars = Double.isNaN(v)
 						? LuaFormat.NAN
-						: sign(v > 0, flags) + LuaFormat.POS_INF;
+						: sign(v > 0, flags) + LuaFormat.INF;
 
 				bld.append(justified(width, flags, chars));
 			}
@@ -600,7 +600,7 @@ public class DefaultStringLib extends StringLib {
 					return;
 				}
 				else {
-					s = Conversions.toHumanReadableString(v);
+					s = Conversions.toHumanReadableString(v).toString();
 				}
 			}
 			bld.append(justified(width, flags, trimmed(precision, s)));

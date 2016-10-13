@@ -16,14 +16,14 @@
 
 package net.sandius.rembulan;
 
-import static net.sandius.rembulan.LuaFormat.TYPENAME_BOOLEAN;
-import static net.sandius.rembulan.LuaFormat.TYPENAME_FUNCTION;
-import static net.sandius.rembulan.LuaFormat.TYPENAME_NIL;
-import static net.sandius.rembulan.LuaFormat.TYPENAME_NUMBER;
-import static net.sandius.rembulan.LuaFormat.TYPENAME_STRING;
-import static net.sandius.rembulan.LuaFormat.TYPENAME_TABLE;
-import static net.sandius.rembulan.LuaFormat.TYPENAME_THREAD;
-import static net.sandius.rembulan.LuaFormat.TYPENAME_USERDATA;
+import static net.sandius.rembulan.LuaFormat.BYTE_TYPENAME_BOOLEAN;
+import static net.sandius.rembulan.LuaFormat.BYTE_TYPENAME_FUNCTION;
+import static net.sandius.rembulan.LuaFormat.BYTE_TYPENAME_NIL;
+import static net.sandius.rembulan.LuaFormat.BYTE_TYPENAME_NUMBER;
+import static net.sandius.rembulan.LuaFormat.BYTE_TYPENAME_STRING;
+import static net.sandius.rembulan.LuaFormat.BYTE_TYPENAME_TABLE;
+import static net.sandius.rembulan.LuaFormat.BYTE_TYPENAME_THREAD;
+import static net.sandius.rembulan.LuaFormat.BYTE_TYPENAME_USERDATA;
 
 /**
  * A value type namer that uses a fixed mapping from types to type names.
@@ -49,22 +49,22 @@ public class PlainValueTypeNamer implements ValueTypeNamer {
 	 *
 	 * @throws NullPointerException  if {@code type} is {@code null}
 	 */
-	public static String luaTypeToName(LuaType type) {
+	public static ByteString luaTypeToName(LuaType type) {
 		switch (type) {
-			case NIL: return TYPENAME_NIL;
-			case BOOLEAN: return TYPENAME_BOOLEAN;
-			case NUMBER: return TYPENAME_NUMBER;
-			case STRING: return TYPENAME_STRING;
-			case TABLE: return TYPENAME_TABLE;
-			case FUNCTION: return TYPENAME_FUNCTION;
-			case USERDATA: return TYPENAME_USERDATA;
-			case THREAD: return TYPENAME_THREAD;
+			case NIL: return BYTE_TYPENAME_NIL;
+			case BOOLEAN: return BYTE_TYPENAME_BOOLEAN;
+			case NUMBER: return BYTE_TYPENAME_NUMBER;
+			case STRING: return BYTE_TYPENAME_STRING;
+			case TABLE: return BYTE_TYPENAME_TABLE;
+			case FUNCTION: return BYTE_TYPENAME_FUNCTION;
+			case USERDATA: return BYTE_TYPENAME_USERDATA;
+			case THREAD: return BYTE_TYPENAME_THREAD;
 			default: throw new NullPointerException("Illegal type: " + type);
 		}
 	}
 
 	@Override
-	public String typeNameOf(Object instance) {
+	public ByteString typeNameOf(Object instance) {
 		return luaTypeToName(LuaType.typeOf(instance));
 	}
 

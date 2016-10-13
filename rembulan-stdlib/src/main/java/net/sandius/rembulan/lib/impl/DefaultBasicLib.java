@@ -239,7 +239,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
+			ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
 			context.getReturnBuffer().setTo(typeName);
 		}
 
@@ -410,7 +410,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				// no metamethod, just call the default toString
-				String s = Conversions.toHumanReadableString(arg);
+				ByteString s = Conversions.toHumanReadableString(arg);
 				context.getReturnBuffer().setTo(s);
 			}
 		}

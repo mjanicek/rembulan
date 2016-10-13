@@ -63,14 +63,17 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 	 *
 	 * @throws NullPointerException  if {@code metatableProvider} is {@code null}
 	 */
-	public static String typeNameOf(Object instance, MetatableProvider metatableProvider) {
+	public static ByteString typeNameOf(Object instance, MetatableProvider metatableProvider) {
 		Object nameField = Metatables.getMetamethod(metatableProvider, Lib.MT_NAME, instance);
-		if (nameField instanceof ByteString || nameField instanceof String) {
-			return nameField.toString();
+		if (nameField instanceof ByteString) {
+			return (ByteString) nameField;
+		}
+		else if (nameField instanceof String) {
+			return ByteString.of((String) nameField);
 		}
 		else {
 			if (LuaType.isLightUserdata(instance)) {
-				return Lib.TYPENAME_LIGHT_USERDATA;
+				return Lib.BYTE_TYPENAME_LIGHT_USERDATA;
 			}
 			else {
 				return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);
@@ -79,7 +82,7 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 	}
 
 	@Override
-	public String typeNameOf(Object instance) {
+	public ByteString typeNameOf(Object instance) {
 		return typeNameOf(instance, metatableProvider);
 	}
 

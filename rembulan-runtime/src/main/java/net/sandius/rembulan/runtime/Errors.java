@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.runtime;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.NoIntegerRepresentationException;
 import net.sandius.rembulan.PlainValueTypeNamer;
@@ -36,18 +37,20 @@ final class Errors {
 	}
 
 	static IllegalOperationAttemptException illegalArithmeticAttempt(Object a, Object b) {
-		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.numericalValueOf(a) == null ? a : b);
-		return new IllegalOperationAttemptException(attemptTemplateMessage("perform arithmetic on", typeName));
+		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.numericalValueOf(a) == null ? a : b);
+		return new IllegalOperationAttemptException(
+				attemptTemplateMessage("perform arithmetic on", typeName.toString()));
 	}
 
 	static IllegalOperationAttemptException illegalArithmeticAttempt(Object o) {
-		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
-		return new IllegalOperationAttemptException(attemptTemplateMessage("perform arithmetic on", typeName));
+		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
+		return new IllegalOperationAttemptException(
+				attemptTemplateMessage("perform arithmetic on", typeName.toString()));
 	}
 
 	static IllegalOperationAttemptException illegalComparisonAttempt(Object a, Object b) {
-		String ta = PlainValueTypeNamer.INSTANCE.typeNameOf(a);
-		String tb = PlainValueTypeNamer.INSTANCE.typeNameOf(b);
+		ByteString ta = PlainValueTypeNamer.INSTANCE.typeNameOf(a);
+		ByteString tb = PlainValueTypeNamer.INSTANCE.typeNameOf(b);
 		String message = ta.equals(tb)
 				? "attempt to compare two " + ta + " values"
 				: "attempt to compare " + ta + " with " + tb;
@@ -55,14 +58,16 @@ final class Errors {
 	}
 
 	static IllegalOperationAttemptException illegalCallAttempt(Object o) {
+		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
 		return new IllegalOperationAttemptException(
-				attemptTemplateMessage("call", PlainValueTypeNamer.INSTANCE.typeNameOf(o)));
+				attemptTemplateMessage("call", typeName.toString()));
 	}
 
 	static IllegalOperationAttemptException illegalIndexAttempt(Object table, Object key) {
 		Object o = table instanceof Table ? key : table;
+		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
 		return new IllegalOperationAttemptException(
-				attemptTemplateMessage("index", PlainValueTypeNamer.INSTANCE.typeNameOf(o)));
+				attemptTemplateMessage("index", typeName.toString()));
 	}
 
 	static IllegalOperationAttemptException illegalBitwiseOperationAttempt(Object a, Object b) {
@@ -70,9 +75,9 @@ final class Errors {
 
 		if (Conversions.numericalValueOf(nonNumeric) == null) {
 			// indeed it's not a number
-			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(nonNumeric);
+			ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(nonNumeric);
 			return new IllegalOperationAttemptException(
-					attemptTemplateMessage("perform bitwise operation on", typeName));
+					attemptTemplateMessage("perform bitwise operation on", typeName.toString()));
 		}
 		else {
 			return new IllegalOperationAttemptException(Errors.noIntegerRepresentation());
@@ -82,9 +87,9 @@ final class Errors {
 	static IllegalOperationAttemptException illegalBitwiseOperationAttempt(Object o) {
 		if (Conversions.numericalValueOf(o) == null) {
 			// indeed it's not a number
-			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
+			ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
 			return new IllegalOperationAttemptException(
-					attemptTemplateMessage("perform bitwise operation on", typeName));
+					attemptTemplateMessage("perform bitwise operation on", typeName.toString()));
 		}
 		else {
 			return new IllegalOperationAttemptException(Errors.noIntegerRepresentation());
@@ -92,14 +97,14 @@ final class Errors {
 	}
 
 	static IllegalOperationAttemptException illegalGetLengthAttempt(Object o) {
-		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
+		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(o);
 		return new IllegalOperationAttemptException("attempt to get length of a " + typeName + " value");
 	}
 
 	static IllegalOperationAttemptException illegalConcatenationAttempt(Object a, Object b) {
-		String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.stringValueOf(a) == null ? a : b);
+		ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(Conversions.stringValueOf(a) == null ? a : b);
 		return new IllegalOperationAttemptException(
-				attemptTemplateMessage("concatenate", typeName));
+				attemptTemplateMessage("concatenate", typeName.toString()));
 	}
 
 	static IllegalCoroutineStateException illegalYieldAttempt() {

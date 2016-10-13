@@ -32,107 +32,205 @@ public final class LuaFormat {
 	}
 
 	/**
-	 * String representation of <b>nil</b>.
+	 * The string representation of <b>nil</b>.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_NIL} rather than wrapping this value using {@link ByteString#of(String)}.</p>
 	 */
 	public static final String NIL = "nil";
 
-	static final ByteString BYTE_NIL = ByteString.of(NIL);
+	/**
+	 * The byte string representation of <b>nil</b>.
+	 */
+	public static final ByteString BYTE_NIL = ByteString.of(NIL);
 
 	/**
-	 * String representation of <b>true</b>.
+	 * The string representation of <b>true</b>.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TRUE} rather than wrapping this value using {@link ByteString#of(String)}.</p>
 	 */
 	public static final String TRUE = "true";
 
-	static final ByteString BYTE_TRUE = ByteString.of(TRUE);
+	/**
+	 * The byte string representation of <b>true</b>.
+	 */
+	public static final ByteString BYTE_TRUE = ByteString.of(TRUE);
 
 	/**
-	 * String representation of <b>false</b>.
+	 * The string representation of <b>false</b>.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_FALSE} rather than wrapping this value using {@link ByteString#of(String)}.</p>
 	 */
 	public static final String FALSE = "false";
 
-	static final ByteString BYTE_FALSE = ByteString.of(FALSE);
-
 	/**
-	 * String representation of positive infinity.
+	 * The byte string representation of <b>false</b>.
 	 */
-	public static final String POS_INF = "inf";
-
-	static final ByteString BYTE_POS_INF = ByteString.of(POS_INF);
+	public static final ByteString BYTE_FALSE = ByteString.of(FALSE);
 
 	/**
-	 * String representation of negative infinity.
+	 * The string representation of infinity.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_INF} rather than wrapping this value using {@link ByteString#of(String)}.</p>
 	 */
-	public static final String NEG_INF = "-inf";
-
-	static final ByteString BYTE_NEG_INF = ByteString.of(NEG_INF);
+	public static final String INF = "inf";
 
 	/**
-	 * String representation of <i>NaN</i>.
+	 * The byte string representation of infinity.
+	 */
+	public static final ByteString BYTE_INF = ByteString.of(INF);
+
+	/**
+	 * The string representation of <i>NaN</i>.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_NAN} rather than wrapping this value using {@link ByteString#of(String)}.</p>
 	 */
 	public static final String NAN = "nan";
 
-	static final ByteString BYTE_NAN = ByteString.of(NAN);
+	/**
+	 * The byte string representation of <i>NaN</i>.
+	 */
+	public static final ByteString BYTE_NAN = ByteString.of(NAN);
 
 
 	/**
 	 * String representation of the Lua {@code nil} type.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TYPENAME_NIL} rather than wrapping this value
+	 * using {@link ByteString#of(String)}.</p>
 	 *
 	 * @see LuaType#NIL
 	 */
 	public static final String TYPENAME_NIL = NIL;
 
 	/**
+	 * Byte string representation of the Lua {@code nil} type.
+	 */
+	public static final ByteString BYTE_TYPENAME_NIL = BYTE_NIL;
+
+	/**
 	 * String representation of the Lua {@code boolean} type.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TYPENAME_BOOLEAN} rather than wrapping this value
+	 * using {@link ByteString#of(String)}.</p>
 	 *
 	 * @see LuaType#BOOLEAN
 	 */
 	public static final String TYPENAME_BOOLEAN = "boolean";
 
 	/**
+	 * Byte string representation of the Lua {@code boolean} type.
+	 */
+	public static final ByteString BYTE_TYPENAME_BOOLEAN = ByteString.of(TYPENAME_BOOLEAN);
+
+	/**
 	 * String representation of the Lua {@code number} type.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TYPENAME_NUMBER} rather than wrapping this value
+	 * using {@link ByteString#of(String)}.</p>
 	 *
 	 * @see LuaType#NUMBER
 	 */
 	public static final String TYPENAME_NUMBER = "number";
 
 	/**
+	 * Byte string representation of the Lua {@code number} type.
+	 */
+	public static final ByteString BYTE_TYPENAME_NUMBER = ByteString.of(TYPENAME_NUMBER);
+
+	/**
 	 * String representation of the Lua {@code string} type.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TYPENAME_STRING} rather than wrapping this value
+	 * using {@link ByteString#of(String)}.</p>
 	 *
 	 * @see LuaType#STRING
 	 */
 	public static final String TYPENAME_STRING = "string";
 
 	/**
+	 * Byte string representation of the Lua {@code string} type.
+	 */
+	public static final ByteString BYTE_TYPENAME_STRING = ByteString.of(TYPENAME_STRING);
+
+	/**
 	 * String representation of the Lua {@code table} type.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TYPENAME_TABLE} rather than wrapping this value
+	 * using {@link ByteString#of(String)}.</p>
 	 *
 	 * @see LuaType#TABLE
 	 */
 	public static final String TYPENAME_TABLE = "table";
 
 	/**
+	 * Byte string representation of the Lua {@code table} type.
+	 */
+	public static final ByteString BYTE_TYPENAME_TABLE = ByteString.of(TYPENAME_TABLE);
+
+	/**
 	 * String representation of the Lua {@code function} type.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TYPENAME_FUNCTION} rather than wrapping this value
+	 * using {@link ByteString#of(String)}.</p>
 	 *
 	 * @see LuaType#FUNCTION
 	 */
 	public static final String TYPENAME_FUNCTION = "function";
 
 	/**
+	 * Byte string representation of the Lua {@code function} type.
+	 */
+	public static final ByteString BYTE_TYPENAME_FUNCTION = ByteString.of(TYPENAME_FUNCTION);
+
+	/**
 	 * String representation of the Lua {@code userdata} type.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TYPENAME_USERDATA} rather than wrapping this value
+	 * using {@link ByteString#of(String)}.</p>
 	 *
 	 * @see LuaType#USERDATA
 	 */
 	public static final String TYPENAME_USERDATA = "userdata";
 
 	/**
+	 * Byte string representation of the Lua {@code userdata} type.
+	 */
+	public static final ByteString BYTE_TYPENAME_USERDATA = ByteString.of(TYPENAME_USERDATA);
+
+	/**
 	 * String representation of the Lua {@code thread} type.
+	 *
+	 * <p><b>Note:</b> this is a {@code java.lang.String}. To get a <i>byte</i> string,
+	 * use {@link #BYTE_TYPENAME_THREAD} rather than wrapping this value
+	 * using {@link ByteString#of(String)}.</p>
 	 *
 	 * @see LuaType#THREAD
 	 */
 	public static final String TYPENAME_THREAD = "thread";
 
+	/**
+	 * Byte string representation of the Lua {@code thread} type.
+	 */
+	public static final ByteString BYTE_TYPENAME_THREAD = ByteString.of(TYPENAME_THREAD);
 
 	/**
 	 * Returns the Lua format string representation of the boolean value {@code b}.
+	 *
+	 * <p><b>Note:</b> this method returns a {@code java.lang.String}. In order to
+	 * obtain a <i>byte</i> string, use {@link #toByteString(boolean)} rather than
+	 * wrapping the result of this method using {@link ByteString#of(String)}.</p>
 	 *
 	 * @param b  the boolean value
 	 * @return  string representation of {@code b}
@@ -142,7 +240,22 @@ public final class LuaFormat {
 	}
 
 	/**
+	 * Returns the Lua format byte string representation of the boolean value {@code b}
+	 * as a byte string.
+	 *
+	 * @param b  the boolean value
+	 * @return  byte string representation of {@code b}
+	 */
+	public static ByteString toByteString(boolean b) {
+		return b ? BYTE_TRUE : BYTE_FALSE;
+	}
+
+	/**
 	 * Returns the Lua format string representation of the integer value {@code l}.
+	 *
+	 * <p><b>Note:</b> this method returns a {@code java.lang.String}. In order to
+	 * obtain a <i>byte</i> string, use {@link #toByteString(long)} rather than
+	 * wrapping the result of this method using {@link ByteString#of(String)}.</p>
 	 *
 	 * @param l  the integer value
 	 * @return  string representation of {@code l}
@@ -152,15 +265,49 @@ public final class LuaFormat {
 	}
 
 	/**
+	 * Returns the Lua format byte string representation of the integer value {@code l}.
+	 *
+	 * @param l  the integer value
+	 * @return  byte string representation of {@code l}
+	 */
+	public static ByteString toByteString(long l) {
+		return ByteString.of(toString(l));
+	}
+
+	/**
 	 * Returns the Lua format string representation of the float value {@code f}.
+	 *
+	 * <p><b>Note:</b> this method returns a {@code java.lang.String}. In order to
+	 * obtain a <i>byte</i> string, use {@link #toByteString(long)} rather than
+	 * wrapping the result of this method using {@link ByteString#of(String)}.</p>
 	 *
 	 * @param f  the float value
 	 * @return  string representation of {@code f}
 	 */
 	public static String toString(double f) {
-		if (Double.isNaN(f)) return NAN;
-		else if (Double.isInfinite(f)) return f > 0 ? POS_INF : NEG_INF;
-		else return Double.toString(f).toLowerCase();  // TODO: check precision used in Lua
+		return toByteString(f).toString();
+	}
+
+	private static ByteString finiteDoubleToByteString(double f) {
+		// f assumed not to be NaN or infinite
+		// TODO: check precision used in Lua
+		// TODO: don't go via java.lang.String
+		String s = Double.toString(f).toLowerCase();
+		return ByteString.of(s);
+	}
+
+	private static final ByteString BYTE_NEG_INF = ByteString.of("-").concat(BYTE_INF);
+
+	/**
+	 * Returns the Lua format byte string representation of the float value {@code f}.
+	 *
+	 * @param f  the float value
+	 * @return  byte string representation of {@code f}
+	 */
+	public static ByteString toByteString(double f) {
+		if (Double.isNaN(f)) return BYTE_NAN;
+		else if (Double.isInfinite(f)) return f > 0 ? BYTE_INF : BYTE_NEG_INF;
+		else return finiteDoubleToByteString(f);
 	}
 
 	private static int hexValue(int c) {
@@ -394,6 +541,17 @@ public final class LuaFormat {
 		return bld.toString();
 	}
 
+	/**
+	 * Returns a string {@code esc} formed from the byte string {@code s} such that
+	 * when {@code esc} is read by a Lua lexer as a string literal, it evaluates to
+	 * a byte string equal to {@code s}. The resulting string is enclosed in double quotes
+	 * ({@code "}).
+	 *
+	 * @param byteString  the byte sequence sequence to escape, must not be {@code null}
+	 * @return  a Lua string literal representing {@code s}
+	 *
+	 * @throws NullPointerException  if {@code s} is {@code null}
+	 */
 	public static String escape(ByteString byteString) {
 		return escape(byteString.toRawString());
 	}
