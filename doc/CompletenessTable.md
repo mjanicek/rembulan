@@ -23,13 +23,13 @@ Statuses:
 | --- | :---: | --- |
 | [`assert`](http://www.lua.org/manual/5.3/manual.html#pdf-assert) | ![complete](img/complete.png) | |
 | [`collectgarbage`](http://www.lua.org/manual/5.3/manual.html#pdf-collectgarbage) | ![stub](img/stub.png) | no-op, no support for `__gc` metamethods|
-| [`dofile`](http://www.lua.org/manual/5.3/manual.html#pdf-dofile) | ![not implemented](img/not-implemented.png) | |
+| [`dofile`](http://www.lua.org/manual/5.3/manual.html#pdf-dofile) | ![partial](img/partial.png) | binary chunks not supported, stdin mode not supported |
 | [`error`](http://www.lua.org/manual/5.3/manual.html#pdf-error) | ![partial](img/partial.png) | error levels not supported |
 | [`_G`](http://www.lua.org/manual/5.3/manual.html#pdf-_G) | ![complete](img/complete.png) | |
 | [`getmetatable`](http://www.lua.org/manual/5.3/manual.html#pdf-getmetatable) | ![complete](img/complete.png) | |
 | [`ipairs`](http://www.lua.org/manual/5.3/manual.html#pdf-ipairs) | ![complete](img/complete.png) | `__ipairs` metamethod not supported |
 | [`load`](http://www.lua.org/manual/5.3/manual.html#pdf-load) | ![partial](img/partial.png) | binary chunks not supported |
-| [`loadfile`](http://www.lua.org/manual/5.3/manual.html#pdf-loadfile) | ![not implemented](img/not-implemented.png) | |
+| [`loadfile`](http://www.lua.org/manual/5.3/manual.html#pdf-loadfile) | ![partial](img/partial.png) | binary chunks not supported, stdin mode not supported |
 | [`next`](http://www.lua.org/manual/5.3/manual.html#pdf-next) | ![complete](img/complete.png)| |
 | [`pairs`](http://www.lua.org/manual/5.3/manual.html#pdf-pairs) | ![complete](img/complete.png) | |
 | [`pcall`](http://www.lua.org/manual/5.3/manual.html#pdf-pcall) | ![complete](img/complete.png)| |

@@ -17,7 +17,6 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.*;
-import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
@@ -33,9 +32,15 @@ import net.sandius.rembulan.runtime.ReturnBuffer;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 public class DefaultBasicLib extends BasicLib {
 
@@ -44,9 +49,8 @@ public class DefaultBasicLib extends BasicLib {
 	private final LuaFunction _load;
 	private final LuaFunction _loadfile;
 
-	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Object defaultEnv) {
+	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Object defaultEnv, FileSystem fileSystem) {
 		this._print = out != null ? new Print(out) : null;
-		this._dofile = new UnimplementedFunction("dofile");  // TODO
 
 		if (loader != null) {
 			this._load = new Load(loader, defaultEnv);
@@ -56,7 +60,20 @@ public class DefaultBasicLib extends BasicLib {
 			this._load = null;
 		}
 
-		this._loadfile = new UnimplementedFunction("loadfile");  // TODO
+		if (loader != null && fileSystem != null) {
+			this._loadfile = new LoadFile(fileSystem, loader, defaultEnv);
+			this._dofile = new DoFile(fileSystem, loader, defaultEnv);
+		}
+		else {
+			this._loadfile = null;
+			this._dofile = null;
+		}
+
+	}
+
+	@Deprecated
+	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Object defaultEnv) {
+		this(out, loader, defaultEnv, null);
 	}
 
 	@Override
@@ -890,7 +907,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	public static class Load extends AbstractLibFunction {
 
-		private static final ByteString DEFAULT_MODE = ByteString.constOf("bt");
+		static final ByteString DEFAULT_MODE = ByteString.constOf("bt");
 
 		private final ChunkLoader loader;
 		private final Object defaultEnv;
@@ -1032,6 +1049,135 @@ public class DefaultBasicLib extends BasicLib {
 		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
 			State state = (State) suspendedState;
 			loadFromFunction(context, true, state.chunkName, state.env, state.bld, state.fn);
+		}
+
+	}
+
+	public static class LoadFile extends AbstractLibFunction {
+
+		private final FileSystem fileSystem;
+		private final ChunkLoader loader;
+		private final Object defaultEnv;
+
+		public LoadFile(FileSystem fileSystem, ChunkLoader loader, Object defaultEnv) {
+			this.fileSystem = Objects.requireNonNull(fileSystem);
+			this.loader = Objects.requireNonNull(loader);
+			this.defaultEnv = defaultEnv;
+		}
+
+		@Override
+		protected String name() {
+			return "loadfile";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+
+			final ByteString fileName = args.hasNext() ? args.nextString() : null;
+			final ByteString modeString = args.hasNext() ? args.nextString() : Load.DEFAULT_MODE;
+			final Object env = args.hasNext() ? args.nextAny() : defaultEnv;
+
+			boolean isStdin = fileName == null;
+
+			// chunk name
+			final String chunkName = isStdin ? "stdin" : fileName.toString();
+
+			if (isStdin) {
+				context.getReturnBuffer().setTo(null, "not supported: loadfile from stdin");
+				return;
+			}
+			else {
+				final LuaFunction fn;
+				try {
+					fn = loadTextChunkFromFile(fileSystem, loader, chunkName, modeString, env);
+				}
+				catch (LoaderException ex) {
+					context.getReturnBuffer().setTo(null, ex.getLuaStyleErrorMessage());
+					return;
+				}
+
+				assert (fn != null);
+
+				context.getReturnBuffer().setTo(fn);
+			}
+
+		}
+
+	}
+
+	private static LuaFunction loadTextChunkFromFile(FileSystem fileSystem, ChunkLoader loader, String fileName, ByteString modeString, Object env)
+			throws LoaderException {
+
+		final LuaFunction fn;
+		try {
+			Path p = fileSystem.getPath(fileName);
+
+			if (!modeString.contains((byte) 't')) {
+				throw new LuaRuntimeException("attempt to load a text chunk (mode is '" + modeString + "')");
+			}
+
+			// FIXME: this is extremely wasteful!
+			byte[] bytes = Files.readAllBytes(p);
+			ByteString chunkText = ByteString.copyOf(bytes);
+			fn = loader.loadTextChunk(new Variable(env), fileName, chunkText.toString());
+		}
+		catch (InvalidPathException | IOException ex) {
+			throw new LoaderException(ex, fileName);
+		}
+
+		if (fn == null) {
+			throw new LuaRuntimeException("loader returned nil");
+		}
+
+		return fn;
+	}
+
+	public static class DoFile extends AbstractLibFunction {
+
+		private final FileSystem fileSystem;
+		private final ChunkLoader loader;
+		private final Object env;
+
+		public DoFile(FileSystem fileSystem, ChunkLoader loader, Object env) {
+			this.fileSystem = Objects.requireNonNull(fileSystem);
+			this.loader = Objects.requireNonNull(loader);
+			this.env = env;
+		}
+
+		@Override
+		protected String name() {
+			return "dofile";
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+			final ByteString fileName = args.hasNext() ? args.nextString() : null;
+
+			if (fileName == null) {
+				throw new UnsupportedOperationException("not supported: 'dofile' from stdin");
+			}
+
+			// TODO: we'll only be executing this function once -- add functionality to ChunkLoader to give us a "temporary" loader?
+
+			final LuaFunction fn;
+			try {
+				fn = loadTextChunkFromFile(fileSystem, loader, fileName.toString(), Load.DEFAULT_MODE, env);
+			}
+			catch (LoaderException ex) {
+				throw new LuaRuntimeException(ex.getLuaStyleErrorMessage());
+			}
+
+			try {
+				Dispatch.call(context, fn);
+			}
+			catch (UnresolvedControlThrowable ct) {
+				ct.resolve(this, null);
+			}
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+			// no-op: results are already in the result buffer
 		}
 
 	}
