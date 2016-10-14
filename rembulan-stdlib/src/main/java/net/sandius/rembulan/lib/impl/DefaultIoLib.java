@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
@@ -225,11 +226,11 @@ public class DefaultIoLib extends IoLib {
 		return IoFile.ToString.INSTANCE;
 	}
 
-	private IoFile openFile(String filename, Open.Mode mode) {
+	private IoFile openFile(ByteString filename, Open.Mode mode) {
 		Check.notNull(filename);
 		Check.notNull(mode);
 
-		Path path = fileSystem.getPath(filename);
+		Path path = fileSystem.getPath(filename.toString());
 
 		throw new UnsupportedOperationException();  // TODO
 	}
@@ -337,7 +338,7 @@ public class DefaultIoLib extends IoLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.hasNext()) {
 				// open the argument for reading and set it as the default input file
-				String filename = args.nextString();
+				ByteString filename = args.nextString();
 				IoFile f = lib.openFile(filename, Open.Mode.READ);
 				assert (f != null);
 				lib.setDefaultInputFile(f);
@@ -390,12 +391,12 @@ public class DefaultIoLib extends IoLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String filename = args.nextString();
+			ByteString filename = args.nextString();
 
 			final boolean binary;
 			final Mode mode;
 
-			String modeString = args.hasNext() ? args.nextString() : null;
+			String modeString = args.hasNext() ? args.nextString().toString() : null;  // FIXME
 			if (modeString != null) {
 				if (modeString.endsWith("b")) {
 					binary = true;
@@ -449,7 +450,7 @@ public class DefaultIoLib extends IoLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.hasNext()) {
 				// open the argument for writing and set it as the default output file
-				String filename = args.nextString();
+				ByteString filename = args.nextString();
 				IoFile f = lib.openFile(filename, Open.Mode.WRITE);
 				assert (f != null);
 				lib.setDefaultOutputFile(f);

@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.DefaultUserdata;
 import net.sandius.rembulan.runtime.ExecutionContext;
@@ -44,7 +45,7 @@ public abstract class IoFile extends DefaultUserdata {
 
 	public abstract void flush() throws IOException;
 
-	public abstract void write(String s) throws IOException;
+	public abstract void write(ByteString s) throws IOException;
 
 	public enum Whence {
 		BEGINNING,
@@ -164,7 +165,7 @@ public abstract class IoFile extends DefaultUserdata {
 			final long offset;
 
 			if (args.hasNext()) {
-				String s = args.nextString();
+				String s = args.nextString().toString();  // FIXME
 				Whence w = stringToWhence(s);
 				if (w == null) {
 					throw args.badArgument(1, "invalid option '" + s + "'");
@@ -221,7 +222,7 @@ public abstract class IoFile extends DefaultUserdata {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			final IoFile f = args.nextUserdata(typeName(), IoFile.class);
 			while (args.hasNext()) {
-				final String s = args.nextString();
+				final ByteString s = args.nextString();
 				try {
 					f.write(s);
 				}

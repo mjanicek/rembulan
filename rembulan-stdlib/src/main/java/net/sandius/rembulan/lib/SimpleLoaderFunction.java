@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.lib.impl.AbstractLibFunction;
@@ -38,14 +39,14 @@ public abstract class SimpleLoaderFunction extends AbstractLibFunction {
 		return "(" + this.getClass().getName() + ")";
 	}
 
-	public abstract Object install(StateContext context, Table env, String modName, String origin);
+	public abstract Object install(StateContext context, Table env, ByteString modName, ByteString origin);
 
 	@Override
 	protected void invoke(ExecutionContext context, ArgumentIterator args)
 			throws ResolvedControlThrowable {
 
-		String modName = args.nextString();
-		String origin = args.hasNext() && args.peek() != null ? args.nextString() : null;
+		ByteString modName = args.nextString();
+		ByteString origin = args.hasNext() && args.peek() != null ? args.nextString() : null;
 
 		Object result = install(context, env, modName, origin);
 

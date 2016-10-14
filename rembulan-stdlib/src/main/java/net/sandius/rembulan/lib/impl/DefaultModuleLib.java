@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
@@ -171,12 +172,12 @@ public class DefaultModuleLib extends ModuleLib {
 	private static class Require_SuspendedState {
 
 		private final int state;
-		private final String error;
-		private final String modName;
+		private final ByteString error;
+		private final ByteString modName;
 		private final Table searchers;
 		private final long idx;
 
-		private Require_SuspendedState(int state, String error, String modName, Table searchers, long idx) {
+		private Require_SuspendedState(int state, ByteString error, ByteString modName, Table searchers, long idx) {
 			this.state = state;
 			this.error = error;
 			this.modName = modName;
@@ -195,7 +196,7 @@ public class DefaultModuleLib extends ModuleLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String modName = args.nextString();
+			ByteString modName = args.nextString();
 
 			Object mod = loaded.rawget(modName);
 
@@ -209,11 +210,11 @@ public class DefaultModuleLib extends ModuleLib {
 				if (searchers == null) {
 					throw new IllegalStateException("'package.searchers' must be a table");
 				}
-				search(context, 0, "", modName, searchers, 1);
+				search(context, 0, ByteString.empty(), modName, searchers, 1);
 			}
 		}
 
-		private void search(ExecutionContext context, int state, String error, String modName, Table searchers, long idx)
+		private void search(ExecutionContext context, int state, ByteString error, ByteString modName, Table searchers, long idx)
 				throws ResolvedControlThrowable {
 
 			final LuaFunction loader;
@@ -245,9 +246,9 @@ public class DefaultModuleLib extends ModuleLib {
 								// not a loader
 
 								// append error string
-								String s = Conversions.stringValueOf(result);
+								ByteString s = Conversions.stringValueOf(result);
 								if (s != null) {
-									error += s;
+									error = error.concat(s);
 								}
 
 								state = 0;  // continue with the next iteration
@@ -266,7 +267,7 @@ public class DefaultModuleLib extends ModuleLib {
 			load(context, modName, loader, origin);
 		}
 
-		private void load(ExecutionContext context, String modName, LuaFunction loader, Object origin)
+		private void load(ExecutionContext context, ByteString modName, LuaFunction loader, Object origin)
 				throws ResolvedControlThrowable {
 
 			try {
@@ -279,7 +280,7 @@ public class DefaultModuleLib extends ModuleLib {
 			resumeLoad(context, modName);
 		}
 
-		private void resumeLoad(ExecutionContext context, String modName) {
+		private void resumeLoad(ExecutionContext context, ByteString modName) {
 			Object loadResult = context.getReturnBuffer().get0();
 			Object requireResult = loadResult != null ? loadResult : true;
 
@@ -294,7 +295,7 @@ public class DefaultModuleLib extends ModuleLib {
 				search(context, ss.state, ss.error, ss.modName, ss.searchers, ss.idx);
 			}
 			else {
-				resumeLoad(context, (String) suspendedState);
+				resumeLoad(context, (ByteString) suspendedState);
 			}
 		}
 
@@ -315,7 +316,7 @@ public class DefaultModuleLib extends ModuleLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String modName = args.nextString();
+			ByteString modName = args.nextString();
 
 			Object entry = preload.rawget(modName);
 
@@ -396,9 +397,9 @@ public class DefaultModuleLib extends ModuleLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String modName = args.nextString();
+			ByteString modName = args.nextString();
 
-			LuaFunction loader = findLoader(modName);
+			LuaFunction loader = findLoader(modName.toString());
 
 			if (loader != null) {
 				context.getReturnBuffer().setTo(loader);

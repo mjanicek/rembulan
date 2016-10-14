@@ -61,6 +61,12 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""return ("hello"):byte()""") succeedsWith (104)
       program ("""return (""):byte()""") succeedsWith ()
 
+      // assumes UTF-8 is the platform encoding!
+      program ("""return ("úděsný"):byte(1, -1)""") succeedsWith (195, 186, 100, 196, 155, 115, 110, 195, 189)
+
+      // this must be independent from UTF-8 being the platform encoding
+      program ("return (\"\\u{00FA}d\\u{011B}sn\\u{00FD}\"):byte(1, -1)") succeedsWith (195, 186, 100, 196, 155, 115, 110, 195, 189)
+
       program ("""return string.byte(42, 1, -1)""") succeedsWith (52, 50)
       program ("""return string.byte(42.0, 1, -1)""") succeedsWith (52, 50, 46, 48)
       program ("""return ("hello"):byte("1")""") succeedsWith (104)
@@ -75,10 +81,62 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
       program ("""return string.char()""") succeedsWith ("")
       program ("""return string.char(104, 101, 108, 108, 111)""") succeedsWith ("hello")
 
+      // conversion back to String assumes that UTF-8 is the platform encoding
+      program ("""return string.char(195, 186, 100, 196, 155, 115, 110, 195, 189)""") succeedsWith ("úděsný")
+
+      // storing arbitrary bytes in a string
+      program ("""return string.byte(string.char(192,168,0,1), 1, -1)""") succeedsWith (192, 168, 0, 1)
+      program ("""return #string.char(192,168,0,1)""") succeedsWith (4)
+
       program ("""return string.char("104", "105.0", 33.0)""") succeedsWith ("hi!")
 
       program ("""string.char(-1)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
       program ("""string.char(256)""") failsWith (classOf[IllegalArgumentException], "bad argument #1 to 'char' (value out of range)")
+    }
+
+    about ("sub") {
+
+      // from the PUC-Lua test suite (strings.lua)
+      program ("""return string.sub("123456789",2,4)""")succeedsWith ("234")
+      program ("""return string.sub("123456789",7)""")succeedsWith ("789")
+      program ("""return string.sub("123456789",7,6)""")succeedsWith ("")
+      program ("""return string.sub("123456789",7,7)""")succeedsWith ("7")
+      program ("""return string.sub("123456789",0,0)""")succeedsWith ("")
+      program ("""return string.sub("123456789",-10,10)""")succeedsWith ("123456789")
+      program ("""return string.sub("123456789",1,9)""")succeedsWith ("123456789")
+      program ("""return string.sub("123456789",-10,-20)""")succeedsWith ("")
+      program ("""return string.sub("123456789",-1)""")succeedsWith ("9")
+      program ("""return string.sub("123456789",-4)""")succeedsWith ("6789")
+      program ("""return string.sub("123456789",-6, -4)""")succeedsWith ("456")
+      program ("""return string.sub("123456789", 1 << 63, -4)""")succeedsWith ("123456")
+      program ("""return string.sub("123456789", 1 << 63, (1 << 63) - 1)""")succeedsWith ("123456789")
+      program ("""return string.sub("123456789", 1 << 63, 1 << 63)""")succeedsWith ("")
+      program ("""return string.sub("\000123456789",3,5)""")succeedsWith ("234")
+      program ("""return ("\000123456789"):sub(8)""")succeedsWith ("789")      
+
+    }
+
+    about ("upper") {
+
+      // from the PUC-Lua test suite (strings.lua)
+      program ("""return string.upper("ab\0c")""") succeedsWith ("AB\0C")
+
+    }
+
+    about ("lower") {
+
+      // from the PUC-Lua test suite (strings.lua)
+      program ("""return string.lower("\0ABCc%$")""") succeedsWith ("\0abcc%$")
+
+    }
+
+    about ("rep") {
+
+      // from the PUC-Lua test suite (strings.lua)
+      program ("""return string.rep('teste', 0)""") succeedsWith ("")
+      program ("""return string.rep('tés\00tê', 2)""") succeedsWith ("tés\0têtés\000tê")
+      program ("""return string.rep('', 10)""") succeedsWith ("")
+
     }
 
     about ("format") {
@@ -215,7 +273,7 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
 
     }
 
-    // will need table.unpack for this
+    // will need table.unpack and coroutine.wrap for this
     in (FullContext) {
 
       about ("gmatch") {
@@ -297,6 +355,17 @@ object StringLibFragments extends FragmentBundle with FragmentExpectations with 
           """return string.gsub("4+5 = $return 4+5$", "%$(.-)%$", function (s)
             |  return load(s)()
             |end)
+          """
+        ) succeedsWith ("4+5 = 9", 1)
+
+        program (
+          """local coro_run = coroutine.wrap(function(s)
+            |  while true do
+            |    s = coroutine.yield(load(s)())
+            |  end
+            |end)
+            |
+            |return string.gsub("4+5 = $return 4+5$", "%$(.-)%$", coro_run)
           """
         ) succeedsWith ("4+5 = 9", 1)
 

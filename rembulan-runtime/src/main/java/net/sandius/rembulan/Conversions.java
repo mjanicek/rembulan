@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan;
 
+import java.util.Arrays;
+
 /**
  * Static methods implementing Lua value conversions.
  */
@@ -42,8 +44,8 @@ public final class Conversions {
 	 * @return  a number representing the numerical value of {@code s} (in the canonical
 	 *          representation), or {@code null} if {@code s} does not have a numerical value
 	 */
-	public static Number numericalValueOf(String s) {
-		String trimmed = s.trim();
+	public static Number numericalValueOf(ByteString s) {
+		String trimmed = s.toString().trim();
 		try {
 			return Long.valueOf(LuaFormat.parseInteger(trimmed));
 		}
@@ -62,7 +64,7 @@ public final class Conversions {
 	 * does not have a numerical value.
 	 *
 	 * <p>If {@code o} is already a number, returns {@code o} cast to number. If {@code o}
-	 * is a string, returns its numerical value (see {@link #numericalValueOf(String)}).
+	 * is a string, returns its numerical value (see {@link #numericalValueOf(ByteString)}).
 	 * Otherwise, returns {@code null}.</p>
 	 *
 	 * <p>This method differs from {@link #arithmeticValueOf(Object)} in that it
@@ -79,11 +81,10 @@ public final class Conversions {
 	 * @see #arithmeticValueOf(Object)
 	 */
 	public static Number numericalValueOf(Object o) {
-		return o instanceof Number
-				? (Number) o
-				: o instanceof String
-						? numericalValueOf((String) o)
-						: null;
+		if (o instanceof Number) return (Number) o;
+		else if (o instanceof ByteString) return numericalValueOf((ByteString) o);
+		else if (o instanceof String) return numericalValueOf(ByteString.of((String) o));
+		else return null;
 	}
 
 	/**
@@ -128,12 +129,8 @@ public final class Conversions {
 	 * @throws NullPointerException if {@code n} is {@code null}
 	 */
 	public static Number toCanonicalNumber(Number n) {
-		if (n instanceof Long) {
-			// integer in its canonical representation
-			return n;
-		}
-		else if (n instanceof Double) {
-			// float in its canonical representation
+		if (n instanceof Long || n instanceof Double) {
+			// already in canonical representation
 			return n;
 		}
 		else if (n instanceof Float) {
@@ -144,6 +141,118 @@ public final class Conversions {
 			// re-box
 			return Long.valueOf(n.longValue());
 		}
+	}
+
+	/**
+	 * Returns the value {@code o} to its canonical representation.
+	 *
+	 * <p>For numbers, this method is equivalent to {@link #toCanonicalNumber(Number)}.
+	 * If {@code o} is a {@link String java.lang.String}, it is wrapped into a byte
+	 * string by {@link ByteString#of(String)}. Otherwise, {@code o} is in canonical
+	 * representation.</p>
+	 *
+	 * <p>This method is intended for use at the Java &rarr; Lua boundary, and whenever
+	 * it is not certain that {@code o} is in a canonical representation when a canonical
+	 * representation is required.</p>
+	 *
+	 * @param o  value to convert to canonical representation, may be {@code null}
+	 * @return  {@code o} converted to canonical representation
+	 */
+	public static Object canonicalRepresentationOf(Object o) {
+		if (o instanceof Number) return toCanonicalNumber((Number) o);
+		else if (o instanceof String) return ByteString.of((String) o);
+		else return o;
+	}
+
+	/**
+	 * Returns the value {@code o} in its Java representation.
+	 *
+	 * <p>If {@code o} is a {@link ByteString}, returns {@code o} as a {@code java.lang.String}
+	 * (using {@link ByteString#toString()}. Otherwise, returns {@code o}.</p>
+	 *
+	 * <p>This method is intended for use at the Lua &rarr; Java boundary for interoperating
+	 * with Java code unaware of (or not concerned with) the interpretation of Lua
+	 * strings as sequences of bytes.</p>
+	 *
+	 * @param o  value to convert to Java representation, may be {@code null}
+	 * @return  {@code o} converted to a {@code java.lang.String} if {@code o} is
+	 *          a byte string, {@code o} otherwise
+	 */
+	public static Object javaRepresentationOf(Object o) {
+		if (o instanceof ByteString) return o.toString();
+		else return o;
+	}
+
+	/**
+	 * Modifies the contents of the array {@code values} by converting all values to
+	 * their canonical representations.
+	 *
+	 * @param values  values to convert to their canonical representations, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code values} is {@code null}
+	 *
+	 * @see #canonicalRepresentationOf(Object)
+	 */
+	public static void toCanonicalValues(Object[] values) {
+		for (int i = 0; i < values.length; i++) {
+			Object v = values[i];
+			values[i] = canonicalRepresentationOf(v);
+		}
+	}
+
+	/**
+	 * Modifies the contents of the array {@code values} by converting all values to
+	 * their Java representations.
+	 *
+	 * <p>This method is intended for use at the Lua &rarr; Java boundary for interoperating
+	 * with Java code unaware of (or not concerned with) the interpretation of Lua
+	 * strings as sequences of bytes.</p>
+	 *
+	 * @param values  values to convert to their Java representations, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code values} is {@code null}
+	 *
+	 * @see #javaRepresentationOf(Object)
+	 */
+	public static void toJavaValues(Object[] values) {
+		for (int i = 0; i < values.length; i++) {
+			Object v = values[i];
+			values[i] = javaRepresentationOf(v);
+		}
+	}
+
+	/**
+	 * Returns a copy of the array {@code values} with all values converted to their
+	 * canonical representation.
+	 *
+	 * @param values  values to convert to their canonical representation, must not be {@code null}
+	 * @return  a copy of {@code values} with all elements converted to canonical representation
+	 *
+	 * @see #canonicalRepresentationOf(Object)
+	 */
+	public static Object[] copyAsCanonicalValues(Object[] values) {
+		values = Arrays.copyOf(values, values.length);
+		toCanonicalValues(values);
+		return values;
+	}
+
+	/**
+	 * Returns a copy of the array {@code values} with all values converted to their
+	 * Java representation.
+	 *
+	 * <p>This method is intended for use at the Lua &rarr; Java boundary for interoperating
+	 * with Java code unaware of (or not concerned with) the interpretation of Lua
+	 * strings as sequences of bytes.</p>
+	 *
+	 * @param values  values to convert to their Java representation, must not be {@code null}
+	 * @return  a copy of {@code values} with all elements converted to their Java representation
+	 *
+	 * @see #javaRepresentationOf(Object)
+	 */
+	public static Object[] copyAsJavaValues(Object[] values) {
+		values = Arrays.copyOf(values, values.length);
+		toJavaValues(values);
+		return values;
 	}
 
 	/**
@@ -170,13 +279,17 @@ public final class Conversions {
 	 * in a Lua table.
 	 *
 	 * <p>If {@code o} is a number, returns the number normalised (see {@link #normaliseKey(Number)}.
-	 * Otherwise, returns {@code o}.</p>
+	 * If {@code o} is a {@code java.lang.String}, returns {@code o} as a byte string using
+	 * {@link ByteString#of(String)}. Otherwise, returns {@code o}.</p>
 	 *
 	 * @param o  object to normalise, may be {@code null}
-	 * @return  normalised number if {@code o} is a number, {@code o} otherwise
+	 * @return  normalised number if {@code o} is a number, {@code o} as byte string if
+	 *          {@code o} is a {@code java.lang.String}, {@code o} otherwise
 	 */
 	public static Object normaliseKey(Object o) {
-		return o instanceof Number ? normaliseKey((Number) o) : o;
+		if (o instanceof Number) return normaliseKey((Number) o);
+		else if (o instanceof String) return ByteString.of((String) o);
+		else return o;
 	}
 
 	/**
@@ -184,7 +297,7 @@ public final class Conversions {
 	 * does not have an arithmetic value.
 	 *
 	 * <p>If {@code o} is a number, then that number is its arithmetic value. If {@code o}
-	 * is a string that has a numerical value (see {@link #numericalValueOf(String)}),
+	 * is a string that has a numerical value (see {@link #numericalValueOf(ByteString)}),
 	 * its arithmetic value is the numerical value converted to a float. Otherwise,
 	 * {@code o} does not have an arithmetic value.</p>
 	 *
@@ -215,12 +328,9 @@ public final class Conversions {
 		if (o instanceof Number) {
 			return (Number) o;
 		}
-		else if (o instanceof String) {
-			Number n = numericalValueOf((String) o);
-			return n != null ? floatValueOf(n) : null;
-		}
 		else {
-			return null;
+			Number n = numericalValueOf(o);
+			return n != null ? floatValueOf(n) : null;
 		}
 	}
 
@@ -354,21 +464,21 @@ public final class Conversions {
 	/**
 	 * Returns the string value of the number {@code n}.
 	 *
-	 * <p>The string value of integers is the result of {@link LuaFormat#toString(long)}
+	 * <p>The string value of integers is the result of {@link LuaFormat#toByteString(long)}
 	 * on their numerical value; similarly the string value of floats is the result
-	 * of {@link LuaFormat#toString(double)} on their numerical value.
+	 * of {@link LuaFormat#toByteString(double)} on their numerical value.
 	 *
 	 * @param n  number to be converted to string, must not be {@code null}
 	 * @return string value of {@code n}, guaranteed to be non-{@code null}
 	 *
 	 * @throws NullPointerException if {@code n} is {@code null}
 	 */
-	public static String stringValueOf(Number n) {
+	public static ByteString stringValueOf(Number n) {
 		if (n instanceof Double || n instanceof Float) {
-			return LuaFormat.toString(n.doubleValue());
+			return LuaFormat.toByteString(n.doubleValue());
 		}
 		else {
-			return LuaFormat.toString(n.longValue());
+			return LuaFormat.toByteString(n.longValue());
 		}
 	}
 
@@ -384,12 +494,11 @@ public final class Conversions {
 	 * @return string value of {@code o}, or {@code null} if {@code o} does not have
 	 *         a string value
 	 */
-	public static String stringValueOf(Object o) {
-		return o instanceof String
-				? (String) o
-				: o instanceof Number
-						? stringValueOf((Number) o)
-						: null;
+	public static ByteString stringValueOf(Object o) {
+		if (o instanceof ByteString) return (ByteString) o;
+		else if (o instanceof Number) return stringValueOf((Number) o);
+		else if (o instanceof String) return ByteString.of((String) o);
+		else return null;
 	}
 
 	/**
@@ -418,14 +527,15 @@ public final class Conversions {
 	 *
 	 * @see #stringValueOf(Object)
 	 */
-	public static String toHumanReadableString(Object o) {
+	public static ByteString toHumanReadableString(Object o) {
 		if (o == null) return LuaFormat.NIL;
-		else if (o instanceof String) return (String) o;
+		else if (o instanceof ByteString) return (ByteString) o;
 		else if (o instanceof Number) return stringValueOf((Number) o);
-		else if (o instanceof Boolean) return LuaFormat.toString(((Boolean) o).booleanValue());
-		else return String.format("%s: %#010x",
+		else if (o instanceof Boolean) return LuaFormat.toByteString(((Boolean) o).booleanValue());
+		else if (o instanceof String) return ByteString.of((String) o);
+		else return ByteString.of(String.format("%s: %#010x",
 					PlainValueTypeNamer.INSTANCE.typeNameOf(o),
-					o.hashCode());
+					o.hashCode()));
 	}
 
 	/**

@@ -17,6 +17,7 @@
 package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.Arithmetic;
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaMathOperators;
 import net.sandius.rembulan.MetatableProvider;
@@ -406,7 +407,7 @@ public final class Dispatch {
 		}
 	}
 
-	private static void try_mt_arithmetic(ExecutionContext context, String event, Object a, Object b) throws UnresolvedControlThrowable {
+	private static void try_mt_arithmetic(ExecutionContext context, ByteString event, Object a, Object b) throws UnresolvedControlThrowable {
 		Object handler = Metatables.binaryHandlerFor(context, event, a, b);
 
 		if (handler != null) {
@@ -417,7 +418,7 @@ public final class Dispatch {
 		}
 	}
 
-	private static void try_mt_arithmetic(ExecutionContext context, String event, Object o) throws UnresolvedControlThrowable {
+	private static void try_mt_arithmetic(ExecutionContext context, ByteString event, Object o) throws UnresolvedControlThrowable {
 		Object handler = Metatables.getMetamethod(context, event, o);
 
 		if (handler != null) {
@@ -765,7 +766,7 @@ public final class Dispatch {
 		return Arithmetic.of(a, b).pow(a, b);
 	}
 
-	private static void try_mt_bitwise(ExecutionContext context, String event, Object a, Object b) throws UnresolvedControlThrowable {
+	private static void try_mt_bitwise(ExecutionContext context, ByteString event, Object a, Object b) throws UnresolvedControlThrowable {
 		Object handler = Metatables.binaryHandlerFor(context, event, a, b);
 
 		if (handler != null) {
@@ -776,7 +777,7 @@ public final class Dispatch {
 		}
 	}
 
-	private static void try_mt_bitwise(ExecutionContext context, String event, Object o) throws UnresolvedControlThrowable {
+	private static void try_mt_bitwise(ExecutionContext context, ByteString event, Object o) throws UnresolvedControlThrowable {
 		Object handler = Metatables.getMetamethod(context, event, o);
 
 		if (handler != null) {
@@ -1020,7 +1021,7 @@ public final class Dispatch {
 	 */
 	@SuppressWarnings("unused")
 	public static long len(String s) {
-		return s.getBytes().length;  // FIXME: wasteful!
+		return ByteString.of(s).length();
 	}
 
 	/**
@@ -1040,7 +1041,10 @@ public final class Dispatch {
 	 */
 	@SuppressWarnings("unused")
 	public static void len(ExecutionContext context, Object o) throws UnresolvedControlThrowable {
-		if (o instanceof String) {
+		if (o instanceof ByteString) {
+			context.getReturnBuffer().setTo((long) ((ByteString) o).length());
+		}
+		else if (o instanceof String) {
 			context.getReturnBuffer().setTo(len((String) o));
 		}
 		else {
@@ -1076,8 +1080,8 @@ public final class Dispatch {
 	 */
 	@SuppressWarnings("unused")
 	public static void concat(ExecutionContext context, Object a, Object b) throws UnresolvedControlThrowable {
-		String sa = Conversions.stringValueOf(a);
-		String sb = Conversions.stringValueOf(b);
+		ByteString sa = Conversions.stringValueOf(a);
+		ByteString sb = Conversions.stringValueOf(b);
 
 		if (sa != null && sb != null) {
 			context.getReturnBuffer().setTo(sa.concat(sb));
@@ -1277,7 +1281,7 @@ public final class Dispatch {
 	 */
 	@SuppressWarnings("unused")
 	public static boolean lt(String a, String b) {
-		return Ordering.STRING.lt(a, b);
+		return Ordering.STRING.lt(ByteString.of(a), ByteString.of(b));
 	}
 
 	/**
@@ -1359,7 +1363,7 @@ public final class Dispatch {
 	 */
 	@SuppressWarnings("unused")
 	public static boolean le(String a, String b) {
-		return Ordering.STRING.le(a, b);
+		return Ordering.STRING.le(ByteString.of(a), ByteString.of(b));
 	}
 
 	/**

@@ -16,12 +16,17 @@
 
 package net.sandius.rembulan.lib;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.LuaRuntimeException;
 
 public class AssertionFailedException extends LuaRuntimeException {
 
-	public AssertionFailedException(String message) {
+	public AssertionFailedException(ByteString message) {
 		super(message);
+	}
+
+	public AssertionFailedException(String message) {
+		super(ByteString.of(message));
 	}
 
 	public AssertionFailedException(Object errorObject) {

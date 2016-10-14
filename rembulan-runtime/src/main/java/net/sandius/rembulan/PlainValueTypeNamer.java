@@ -49,7 +49,7 @@ public class PlainValueTypeNamer implements ValueTypeNamer {
 	 *
 	 * @throws NullPointerException  if {@code type} is {@code null}
 	 */
-	public static String luaTypeToName(LuaType type) {
+	public static ByteString luaTypeToName(LuaType type) {
 		switch (type) {
 			case NIL: return TYPENAME_NIL;
 			case BOOLEAN: return TYPENAME_BOOLEAN;
@@ -64,7 +64,7 @@ public class PlainValueTypeNamer implements ValueTypeNamer {
 	}
 
 	@Override
-	public String typeNameOf(Object instance) {
+	public ByteString typeNameOf(Object instance) {
 		return luaTypeToName(LuaType.typeOf(instance));
 	}
 

@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.luajava;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
@@ -46,7 +47,7 @@ public final class LuaJavaLib {
 		}
 
 		@Override
-		public Object install(StateContext context, Table env, String modName, String origin) {
+		public Object install(StateContext context, Table env, ByteString modName, ByteString origin) {
 			Table t = context.newTable();
 
 			t.rawset("newInstance", LuaJavaLib.NewInstance.INSTANCE);
@@ -110,7 +111,7 @@ public final class LuaJavaLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args)
 				throws ResolvedControlThrowable {
 
-			String className = args.nextString();
+			String className = args.nextString().toString();
 			Object[] ctorArgs = args.getTail();
 
 			final ObjectWrapper instance;
@@ -155,7 +156,7 @@ public final class LuaJavaLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String className = args.nextString();
+			String className = args.nextString().toString();
 
 			final ClassWrapper wrapper;
 			try {

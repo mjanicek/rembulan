@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
@@ -38,6 +39,8 @@ import static net.sandius.rembulan.LuaFormat.TYPENAME_THREAD;
 import static net.sandius.rembulan.LuaFormat.TYPENAME_USERDATA;
 
 public class ArgumentIterator implements Iterator<Object> {
+
+	// TODO: clean up!
 
 	private final ValueTypeNamer namer;
 
@@ -142,13 +145,13 @@ public class ArgumentIterator implements Iterator<Object> {
 
 	// guaranteed not to return null
 	protected Number peekNumber() {
-		Object arg = peek(TYPENAME_NUMBER);
+		Object arg = peek(TYPENAME_NUMBER.toString());
 		Number n = Conversions.numericalValueOf(arg);
 		if (n != null) {
 			return n;
 		}
 		else {
-			throw new UnexpectedArgumentException(TYPENAME_NUMBER, namer.typeNameOf(arg));
+			throw new UnexpectedArgumentException(TYPENAME_NUMBER.toString(), namer.typeNameOf(arg).toString());
 		}
 	}
 
@@ -161,17 +164,17 @@ public class ArgumentIterator implements Iterator<Object> {
 		}
 	}
 
-	public <T> T nextStrict(String expectedTypeName, Class<T> clazz) {
+	public <T> T nextStrict(ByteString expectedTypeName, Class<T> clazz) {
 		final T result;
 		try {
-			Object arg = peek(expectedTypeName);
+			Object arg = peek(expectedTypeName.toString());
 			if (arg != null && clazz.isAssignableFrom(arg.getClass())) {
 				@SuppressWarnings("unchecked")
 				T typed = (T) arg;
 				result = typed;
 			}
 			else {
-				throw new UnexpectedArgumentException(expectedTypeName, namer.typeNameOf(arg));
+				throw new UnexpectedArgumentException(expectedTypeName.toString(), namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -191,7 +194,7 @@ public class ArgumentIterator implements Iterator<Object> {
 				result = typed;
 			}
 			else {
-				throw new UnexpectedArgumentException(expectedTypeName, namer.typeNameOf(arg));
+				throw new UnexpectedArgumentException(expectedTypeName, namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -303,16 +306,16 @@ public class ArgumentIterator implements Iterator<Object> {
 		}
 	}
 
-	public String nextString() {
-		final String result;
+	public ByteString nextString() {
+		final ByteString result;
 		try {
-			Object arg = peek(TYPENAME_STRING);
-			String v = Conversions.stringValueOf(arg);
+			Object arg = peek(TYPENAME_STRING.toString());
+			ByteString v = Conversions.stringValueOf(arg);
 			if (v != null) {
 				result = v;
 			}
 			else {
-				throw new UnexpectedArgumentException(TYPENAME_STRING, namer.typeNameOf(arg));
+				throw new UnexpectedArgumentException(TYPENAME_STRING.toString(), namer.typeNameOf(arg).toString());
 			}
 		}
 		catch (RuntimeException ex) {
@@ -322,12 +325,25 @@ public class ArgumentIterator implements Iterator<Object> {
 		return result;
 	}
 
-	public String nextStrictString() {
-		return nextStrict(TYPENAME_STRING, String.class);
-	}
-
-	public String optNextString(String defaultValue) {
-		return hasNext() ? nextString() : defaultValue;
+	public ByteString nextStrictString() {
+		final ByteString result;
+		try {
+			Object arg = peek(TYPENAME_STRING.toString());
+			if (arg instanceof ByteString) {
+				result = (ByteString) arg;
+			}
+			else if (arg instanceof String) {
+				result = ByteString.of((String) arg);
+			}
+			else {
+				throw new UnexpectedArgumentException(TYPENAME_STRING.toString(), namer.typeNameOf(arg).toString());
+			}
+		}
+		catch (RuntimeException ex) {
+			throw badArgument(ex);
+		}
+		skip();
+		return result;
 	}
 
 	public LuaFunction nextFunction() {
@@ -339,7 +355,7 @@ public class ArgumentIterator implements Iterator<Object> {
 	}
 
 	public Table nextTableOrNil() {
-		return nextStrictOrNil(TYPENAME_TABLE, Table.class);
+		return nextStrictOrNil(TYPENAME_TABLE.toString(), Table.class);
 	}
 
 	public Coroutine nextCoroutine() {
@@ -347,11 +363,11 @@ public class ArgumentIterator implements Iterator<Object> {
 	}
 
 	public <T extends Userdata> T nextUserdata(String typeName, Class<T> clazz) {
-		return nextStrict(typeName, clazz);
+		return nextStrict(ByteString.of(typeName), clazz);
 	}
 
 	public Userdata nextUserdata() {
-		return nextUserdata(TYPENAME_USERDATA, Userdata.class);
+		return nextUserdata(TYPENAME_USERDATA.toString(), Userdata.class);
 	}
 
 }

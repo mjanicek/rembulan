@@ -84,7 +84,8 @@ public enum LuaType {
 	NUMBER,
 
 	/**
-	 * The Lua {@code string} type, corresponding to instances of {@link String java.lang.String}.
+	 * The Lua {@code string} type, corresponding to instances of {@link ByteString}
+	 * and {@link String java.lang.String}.
 	 */
 	STRING,
 
@@ -120,7 +121,7 @@ public enum LuaType {
 		if (o == null) return LuaType.NIL;
 		else if (o instanceof Boolean) return LuaType.BOOLEAN;
 		else if (o instanceof Number) return LuaType.NUMBER;
-		else if (o instanceof String) return LuaType.STRING;
+		else if (o instanceof ByteString || o instanceof String) return LuaType.STRING;
 		else if (o instanceof Table) return LuaType.TABLE;
 		else if (o instanceof LuaFunction) return LuaType.FUNCTION;
 		else if (o instanceof Coroutine) return LuaType.THREAD;
@@ -195,13 +196,13 @@ public enum LuaType {
 	 * Returns {@code true} iff {@code o} is a Lua string.
 	 *
 	 * <p>{@code o} is a Lua string if and only if {@code o} is an instance of
-	 * {@link String java.lang.String}.</p>
+	 * {@link ByteString} or {@link String java.lang.String}.</p>
 	 *
 	 * @param o  the object to test for being a string, may be {@code null}
 	 * @return  {@code true} iff {@code o} is a Lua string
 	 */
 	public static boolean isString(Object o) {
-		return o instanceof String;
+		return o instanceof ByteString || o instanceof String;
 	}
 
 	/**

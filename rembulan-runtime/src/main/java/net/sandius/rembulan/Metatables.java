@@ -31,139 +31,139 @@ public final class Metatables {
 	 * The metatable key {@code "__add"}. When defined, customises the behaviour of
 	 * the Lua addition operator ({@code +}).
 	 */
-	public static final String MT_ADD = "__add";
+	public static final ByteString MT_ADD = ByteString.constOf("__add");
 
 	/**
 	 * The metatable key {@code "__sub"}. When defined, customises the behaviour of
 	 * the Lua subtraction operator (binary {@code -}).
 	 */
-	public static final String MT_SUB = "__sub";
+	public static final ByteString MT_SUB = ByteString.constOf("__sub");
 
 	/**
 	 * The metatable key {@code "__mul"}. When defined, customises the behaviour of
 	 * the Lua multiplication operator ({@code *}).
 	 */
-	public static final String MT_MUL = "__mul";
+	public static final ByteString MT_MUL = ByteString.constOf("__mul");
 
 	/**
 	 * The metatable key {@code "__div"}. When defined, customises the behaviour of
 	 * the Lua division operator ({@code /}).
 	 */
-	public static final String MT_DIV = "__div";
+	public static final ByteString MT_DIV = ByteString.constOf("__div");
 
 	/**
 	 * The metatable key {@code "__mod"}. When defined, customises the behaviour of
 	 * the Lua modulo operator ({@code %}).
 	 */
-	public static final String MT_MOD = "__mod";
+	public static final ByteString MT_MOD = ByteString.constOf("__mod");
 
 	/**
 	 * The metatable key {@code "__pow"}. When defined, customises the behaviour of
 	 * the Lua exponentiation operator ({@code ^}).
 	 */
-	public static final String MT_POW = "__pow";
+	public static final ByteString MT_POW = ByteString.constOf("__pow");
 
 	/**
 	 * The metatable key {@code "__unm"}. When defined, customises the behaviour of
 	 * the Lua unary minus operator (unary {@code -}).
 	 */
-	public static final String MT_UNM = "__unm";
+	public static final ByteString MT_UNM = ByteString.constOf("__unm");
 
 	/**
 	 * The metatable key {@code "__idiv"}. When defined, customises the behaviour of
 	 * the Lua floor division ({@code //}).
 	 */
-	public static final String MT_IDIV = "__idiv";
+	public static final ByteString MT_IDIV = ByteString.constOf("__idiv");
 
 	/**
 	 * The metatable key {@code "__band"}. When defined, customises the behaviour of
 	 * the Lua bitwise AND operator ({@code &}).
 	 */
-	public static final String MT_BAND = "__band";
+	public static final ByteString MT_BAND = ByteString.constOf("__band");
 
 	/**
 	 * The metatable key {@code "__bor"}. When defined, customises the behaviour of
 	 * the Lua bitwise OR operator ({@code |}).
 	 */
-	public static final String MT_BOR = "__bor";
+	public static final ByteString MT_BOR = ByteString.constOf("__bor");
 
 	/**
 	 * The metatable key {@code "__bxor"}. When defined, customises the behaviour of
 	 * the Lua bitwise XOR operator (binary {@code ~}).
 	 */
-	public static final String MT_BXOR = "__bxor";
+	public static final ByteString MT_BXOR = ByteString.constOf("__bxor");
 
 	/**
 	 * The metatable key {@code "__bnot"}. When defined, customises the behaviour of
 	 * the Lua bitwise NOT operator (unary {@code ~}).
 	 */
-	public static final String MT_BNOT = "__bnot";
+	public static final ByteString MT_BNOT = ByteString.constOf("__bnot");
 
 	/**
 	 * The metatable key {@code "__shl"}. When defined, customises the behaviour of
 	 * the Lua bitwise left shift operator ({@code <<}).
 	 */
-	public static final String MT_SHL = "__shl";
+	public static final ByteString MT_SHL = ByteString.constOf("__shl");
 
 	/**
 	 * The metatable key {@code "__shr"}. When defined, customises the behaviour of
 	 * the Lua bitwise right shift operator ({@code >>}).
 	 */
-	public static final String MT_SHR = "__shr";
+	public static final ByteString MT_SHR = ByteString.constOf("__shr");
 
 	/**
 	 * The metatable key {@code "__concat"}. When defined, customises the behaviour of
 	 * the Lua concatenation operator ({@code ..}).
 	 */
-	public static final String MT_CONCAT = "__concat";
+	public static final ByteString MT_CONCAT = ByteString.constOf("__concat");
 
 	/**
 	 * The metatable key {@code "__len"}. When defined, customises the behaviour of
 	 * the Lua length operator ({@code #}).
 	 */
-	public static final String MT_LEN = "__len";
+	public static final ByteString MT_LEN = ByteString.constOf("__len");
 
 	/**
 	 * The metatable key {@code "__eq"}. When defined, customises the behaviour of
 	 * the Lua equality operator ({@code ==}).
 	 */
-	public static final String MT_EQ = "__eq";
+	public static final ByteString MT_EQ = ByteString.constOf("__eq");
 
 	/**
 	 * The metatable key {@code "__lt"}. When defined, customises the behaviour of
 	 * the Lua lesser-than operator ({@code <}).
 	 */
-	public static final String MT_LT = "__lt";
+	public static final ByteString MT_LT = ByteString.constOf("__lt");
 
 	/**
 	 * The metatable key {@code "__le"}. When defined, customises the behaviour of
 	 * the Lua lesser-than-or-equal-to operator ({@code <=}).
 	 */
-	public static final String MT_LE = "__le";
+	public static final ByteString MT_LE = ByteString.constOf("__le");
 
 	/**
 	 * The metatable key {@code "__index"}. When defined, customises the behaviour of
 	 * the (non-assignment) Lua table access operator ({@code t[k]}).
 	 */
-	public static final String MT_INDEX = "__index";
+	public static final ByteString MT_INDEX = ByteString.constOf("__index");
 
 	/**
 	 * The metatable key {@code "__newindex"}. When defined, customises the behaviour of
 	 * Lua table assignment ({@code t[k] = v}).
 	 */
-	public static final String MT_NEWINDEX = "__newindex";
+	public static final ByteString MT_NEWINDEX = ByteString.constOf("__newindex");
 
 	/**
 	 * The metatable key {@code "__call"}. When defined, customises the behaviour of
 	 * the Lua call operator ({@code f(args)}).
 	 */
-	public static final String MT_CALL = "__call";
+	public static final ByteString MT_CALL = ByteString.constOf("__call");
 
 	/**
 	 * The metatable key {@code "__mode"}. Used to control the weakness of table keys
 	 * and values.
 	 */
-	public static final String MT_MODE = "__mode";
+	public static final ByteString MT_MODE = ByteString.constOf("__mode");
 
 	/**
 	 * Returns the entry with the key {@code event} of the metatable of the {@link LuaObject}
@@ -172,7 +172,7 @@ public final class Metatables {
 	 *
 	 * <p>The access of the metatable is raw (i.e. uses {@link Table#rawget(Object)}).</p>
 	 *
-	 * <p>This method differs from {@link #getMetamethod(MetatableProvider, String, Object)}
+	 * <p>This method differs from {@link #getMetamethod(MetatableProvider, ByteString, Object)}
 	 * in that it does not require a metatable provider as the object in question is known
 	 * to have metatables attached on a per-instance basis.</p>
 	 *
@@ -183,7 +183,7 @@ public final class Metatables {
 	 *
 	 * @throws NullPointerException  if {@code o} or {@code event} is {@code null}
 	 */
-	public static Object getMetamethod(String event, LuaObject o) {
+	public static Object getMetamethod(ByteString event, LuaObject o) {
 		Objects.requireNonNull(event);
 		Objects.requireNonNull(o);
 
@@ -211,7 +211,7 @@ public final class Metatables {
 	 *
 	 * @throws NullPointerException  if {@code metatableProvider} or {@code event} is {@code null}
 	 */
-	public static Object getMetamethod(MetatableProvider metatableProvider, String event, Object o) {
+	public static Object getMetamethod(MetatableProvider metatableProvider, ByteString event, Object o) {
 		Objects.requireNonNull(event);
 		// o can be null
 
@@ -228,7 +228,7 @@ public final class Metatables {
 	 * Returns the metatable entry {@code event} for {@code a} or in {@code b}, or {@code null}
 	 * if neither {@code a} nor {@code b} has such an entry in their metatable.
 	 *
-	 * <p>This method is similar to {@link #getMetamethod(MetatableProvider, String, Object)},
+	 * <p>This method is similar to {@link #getMetamethod(MetatableProvider, ByteString, Object)},
 	 * but first looks up the entry {@code event} in {@code a}, and if this fails (by
 	 * returning {@code null}), tries to look {@code event} up in {@code b}.
 	 *
@@ -242,7 +242,7 @@ public final class Metatables {
 	 *
 	 * @throws NullPointerException  if {@code metatableProvider} or {@code event} is {@code null}
 	 */
-	public static Object binaryHandlerFor(MetatableProvider metatableProvider, String event, Object a, Object b) {
+	public static Object binaryHandlerFor(MetatableProvider metatableProvider, ByteString event, Object a, Object b) {
 		Objects.requireNonNull(metatableProvider);
 		Objects.requireNonNull(event);
 		Object ma = Metatables.getMetamethod(metatableProvider, event, a);

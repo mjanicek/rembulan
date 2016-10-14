@@ -19,10 +19,9 @@ package net.sandius.rembulan.impl;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
+import net.sandius.rembulan.util.TraversableHashMap;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Default implementation of the Lua table storing all key-value pairs in a hashmap.
@@ -30,10 +29,13 @@ import java.util.Map;
  */
 public class DefaultTable extends Table {
 
-	private final Map<Object, Object> values;
+	private final TraversableHashMap<Object, Object> values;
 
+	/**
+	 * Constructs a new empty table.
+	 */
 	public DefaultTable() {
-		this.values = new HashMap<Object, Object>();
+		this.values = new TraversableHashMap<>();
 	}
 
 	static class Factory implements TableFactory {
@@ -52,6 +54,7 @@ public class DefaultTable extends Table {
 
 	/**
 	 * Returns the table factory for constructing instances of {@code DefaultTable}.
+	 *
 	 * @return  the table factory for {@code DefaultTable}s
 	 */
 	public static TableFactory factory() {
@@ -75,6 +78,8 @@ public class DefaultTable extends Table {
 			throw new IllegalArgumentException("table index is NaN");
 		}
 
+		value = Conversions.canonicalRepresentationOf(value);
+
 		if (value == null) {
 			values.remove(key);
 		}
@@ -85,29 +90,19 @@ public class DefaultTable extends Table {
 		updateBasetableModes(key, value);
 	}
 
-	private Object next(Iterator<Object> it) {
-		return it.hasNext() ? it.next() : null;
-	}
-
 	@Override
 	public Object initialKey() {
-		Iterator<Object> it = values.keySet().iterator();
-		return next(it);
+		return values.getFirstKey();
 	}
 
 	@Override
 	public Object successorKeyOf(Object key) {
-		// FIXME: extremely inefficient!
-		Iterator<Object> it = values.keySet().iterator();
-
-		while (it.hasNext()) {
-			Object k = it.next();
-			if (k.equals(key)) {
-				return next(it);
-			}
+		try {
+			return values.getSuccessorOf(key);
 		}
-
-		throw new IllegalArgumentException("invalid key to 'next'");
+		catch (NoSuchElementException | NullPointerException ex) {
+			throw new IllegalArgumentException("invalid key to 'next'", ex);
+		}
 	}
 
 	@Override

@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
+import net.sandius.rembulan.ByteStringBuilder;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.LuaRuntimeException;
@@ -34,6 +36,7 @@ import net.sandius.rembulan.runtime.IllegalOperationAttemptException;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
+import net.sandius.rembulan.util.ByteIterator;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
@@ -140,12 +143,54 @@ public class DefaultStringLib extends StringLib {
 
 	private static int lowerBound(int i, int len) {
 		int j = i < 0 ? len + i + 1 : i;
-		return j < 1 ? 1 : j;
+		return Math.max(1, j);
 	}
 
 	private static int upperBound(int i, int len) {
 		int j = i < 0 ? len + i + 1 : i;
-		return j > len ? len : j;
+		return Math.max(0, Math.min(len, j));
+	}
+
+	private static byte toLower(byte b) {
+		int c = b & 0xff;
+		// FIXME: dealing with ASCII only
+		return c >= 'A' && c <= 'Z' ? (byte) (c - (int) 'A' + (int) 'a') : b;
+	}
+
+	private static ByteString toLowerCase(ByteString s) {
+		boolean changed = false;
+
+		ByteStringBuilder bld = new ByteStringBuilder();
+		ByteIterator it = s.byteIterator();
+		while (it.hasNext()) {
+			byte b = it.nextByte();
+			byte c = toLower(b);
+			changed |= b != c;
+			bld.append(c);
+		}
+
+		return changed ? bld.toByteString() : s;
+	}
+
+	private static byte toUpper(byte b) {
+		int c = b & 0xff;
+		// FIXME: dealing with ASCII only
+		return c >= 'a' && c <= 'z' ? (byte) (c - (int) 'a' + (int) 'A') : b;
+	}
+
+	private static ByteString toUpperCase(ByteString s) {
+		boolean changed = false;
+
+		ByteStringBuilder bld = new ByteStringBuilder();
+		ByteIterator it = s.byteIterator();
+		while (it.hasNext()) {
+			byte b = it.nextByte();
+			byte c = toUpper(b);
+			changed |= b != c;
+			bld.append(c);
+		}
+
+		return changed ? bld.toByteString() : s;
 	}
 
 	public static class Byte extends AbstractLibFunction {
@@ -159,7 +204,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 			int i = args.optNextInt(1);
 			int j = args.optNextInt(i);
 
@@ -170,8 +215,7 @@ public class DefaultStringLib extends StringLib {
 
 			List<Object> buf = new ArrayList<>();
 			for (int idx = i; idx <= j; idx++) {
-				// FIXME: these are not bytes!
-				char c = s.charAt(idx - 1);
+				int c = s.byteAt(idx - 1) & 0xff;
 				buf.add(Long.valueOf(c));
 			}
 			context.getReturnBuffer().setToContentsOf(buf);
@@ -190,13 +234,13 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			char[] chars = new char[args.size()];
+			byte[] bytes = new byte[args.size()];
 
-			for (int i = 0; i < chars.length; i++) {
-				chars[i] = (char) args.nextIntRange("value", 0, 255);
+			for (int i = 0; i < bytes.length; i++) {
+				bytes[i] = (byte) args.nextIntRange("value", 0, 255);
 			}
 
-			String s = String.valueOf(chars);
+			ByteString s = ByteString.copyOf(bytes);
 			context.getReturnBuffer().setTo(s);
 		}
 
@@ -232,8 +276,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+			String s = args.nextString().toString();  // FIXME
+			String pattern = args.nextString().toString();  // FIXME
 			int init = args.optNextInt(1);
 			boolean plain = args.optNextBoolean(false);
 
@@ -496,13 +540,13 @@ public class DefaultStringLib extends StringLib {
 			double v = args.nextFloat();
 
 			if (Double.isNaN(v) || Double.isInfinite(v)) {
-				final String chars;
+				final ByteString chars;
 
 				chars = Double.isNaN(v)
 						? LuaFormat.NAN
-						: sign(v > 0, flags) + LuaFormat.POS_INF;
+						: ByteString.of(sign(v > 0, flags) + LuaFormat.INF);
 
-				bld.append(justified(width, flags, chars));
+				bld.append(justified(width, flags, chars.toString()));
 			}
 			else {
 				StringBuilder fmtBld = new StringBuilder();
@@ -538,9 +582,9 @@ public class DefaultStringLib extends StringLib {
 			Object v = args.nextAny();
 			final String s;
 
-			String stringValue = Conversions.stringValueOf(v);
+			ByteString stringValue = Conversions.stringValueOf(v);
 			if (stringValue != null) {
-				s = stringValue;
+				s = stringValue.toString();
 			}
 			else {
 				Object metamethod = Metatables.getMetamethod(context, BasicLib.MT_TOSTRING, v);
@@ -556,7 +600,7 @@ public class DefaultStringLib extends StringLib {
 					return;
 				}
 				else {
-					s = Conversions.toHumanReadableString(v);
+					s = Conversions.toHumanReadableString(v).toString();
 				}
 			}
 			bld.append(justified(width, flags, trimmed(precision, s)));
@@ -564,8 +608,8 @@ public class DefaultStringLib extends StringLib {
 
 		private static void resume_s(ExecutionContext context, StringBuilder bld, int width, int flags, int precision) {
 			Object o = context.getReturnBuffer().get0();
-			String sv = Conversions.stringValueOf(o);
-			String s = sv != null ? sv : "";
+			ByteString sv = Conversions.stringValueOf(o);
+			String s = sv != null ? sv.toString() : "";
 			bld.append(justified(width, flags, trimmed(precision, s)));
 		}
 
@@ -573,10 +617,11 @@ public class DefaultStringLib extends StringLib {
 			Object o = args.nextAny();
 			final String s;
 
-			if (o == null) s = LuaFormat.NIL;
+			if (o == null) s = LuaFormat.NIL.toString();
 			else if (o instanceof Boolean) s = LuaFormat.toString(((Boolean) o).booleanValue());
 			else if (o instanceof String) s = LuaFormat.escape((String) o);
-			else if (o instanceof Number) s = Conversions.stringValueOf((Number) o);
+			else if (o instanceof ByteString) s = LuaFormat.escape(((ByteString) o).toString());
+			else if (o instanceof Number) s = Conversions.stringValueOf((Number) o).toString();
 			else {
 				throw new BadArgumentException(args.at(), name(), "value has no literal form");
 			}
@@ -747,7 +792,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String fmt = args.nextString();
+			String fmt = args.nextString().toString();  // FIXME
 			StringBuilder bld = new StringBuilder();
 			run(context, fmt, args, bld, 0);
 		}
@@ -845,8 +890,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+			String s = args.nextString().toString();  // FIXME
+			String pattern = args.nextString().toString();  // FIXME
 
 			StringPattern pat = StringPattern.fromString(pattern, true);
 
@@ -870,8 +915,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+			String s = args.nextString().toString();  // FIXME
+			String pattern = args.nextString().toString();  // FIXME
 
 			final Object repl;
 			if (!args.hasNext()) {
@@ -881,9 +926,9 @@ public class DefaultStringLib extends StringLib {
 				Object o = args.nextAny();
 
 				// a string?
-				String replStr = Conversions.stringValueOf(o);
+				ByteString replStr = Conversions.stringValueOf(o);
 				if (replStr != null) {
-					repl = replStr;
+					repl = replStr.toString();
 				}
 				else if (o instanceof Table || o instanceof LuaFunction) {
 					repl = o;
@@ -989,7 +1034,7 @@ public class DefaultStringLib extends StringLib {
 						else {
 							if (idx - 1 < captures.size()) {
 								// captures are either strings or integers
-								String sv = Conversions.stringValueOf(captures.get(idx - 1));
+								ByteString sv = Conversions.stringValueOf(captures.get(idx - 1));
 								assert (sv != null);
 								bld.append(sv);
 							}
@@ -1047,7 +1092,7 @@ public class DefaultStringLib extends StringLib {
 
 		private static void resumeReplace(ExecutionContext context, StringBuilder bld, String fullMatch) {
 			Object value = context.getReturnBuffer().get0();
-			String sv = Conversions.stringValueOf(value);
+			ByteString sv = Conversions.stringValueOf(value);
 			if (sv != null) {
 				bld.append(sv);
 			}
@@ -1084,7 +1129,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 			context.getReturnBuffer().setTo((long) s.length());
 		}
 
@@ -1101,8 +1146,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			context.getReturnBuffer().setTo(s.toLowerCase());
+			ByteString s = args.nextString();
+			context.getReturnBuffer().setTo(toLowerCase(s));
 		}
 
 	}
@@ -1118,8 +1163,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			String pattern = args.nextString();
+			String s = args.nextString().toString();  // FIXME
+			String pattern = args.nextString().toString();  // FIXME
 			int init = args.optNextInt(1);
 
 			init = lowerBound(init, s.length());
@@ -1154,13 +1199,13 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 			int n = args.nextInt();
-			String sep = args.optNextString("");
+			ByteString sep = args.hasNext() ? args.nextString() : ByteString.empty();
 
-			final String result;
+			final ByteString result;
 			if (n > 0) {
-				StringBuilder bld = new StringBuilder();
+				ByteStringBuilder bld = new ByteStringBuilder();
 
 				for (int i = 0; i < n; i++) {
 					bld.append(s);
@@ -1169,10 +1214,10 @@ public class DefaultStringLib extends StringLib {
 					}
 				}
 
-				result = bld.toString();
+				result = bld.toByteString();
 			}
 			else {
-				result = "";
+				result = ByteString.empty();
 			}
 
 			context.getReturnBuffer().setTo(result);
@@ -1191,16 +1236,18 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 
-			int len = s.length();
-			char[] chars = new char[len];
+			byte[] bytes = s.getBytes();
+			for (int i = 0; i < bytes.length / 2; i++) {
+				int j = bytes.length - 1 - i;
 
-			for (int i = 0; i < chars.length; i++) {
-				chars[i] = s.charAt(len - 1 - i);
+				byte tmp = bytes[i];
+				bytes[i] = bytes[j];
+				bytes[j] = tmp;
 			}
 
-			String result = String.valueOf(chars);
+			ByteString result = ByteString.copyOf(bytes);
 
 			context.getReturnBuffer().setTo(result);
 		}
@@ -1218,7 +1265,7 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
+			ByteString s = args.nextString();
 			int i = args.nextInt();
 			int j = args.optNextInt(-1);
 
@@ -1226,7 +1273,7 @@ public class DefaultStringLib extends StringLib {
 			i = lowerBound(i, len) - 1;
 			j = upperBound(j, len);
 
-			String result = s.substring(i, j);
+			ByteString result = s.substring(i, j);
 
 			context.getReturnBuffer().setTo(result);
 		}
@@ -1244,8 +1291,8 @@ public class DefaultStringLib extends StringLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String s = args.nextString();
-			context.getReturnBuffer().setTo(s.toUpperCase());
+			ByteString s = args.nextString();
+			context.getReturnBuffer().setTo(toUpperCase(s));
 		}
 
 	}

@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.impl.io;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.lib.impl.IoFile;
 import net.sandius.rembulan.util.Check;
@@ -48,7 +49,7 @@ public class InputStreamIoFile extends IoFile {
 	}
 
 	@Override
-	public void write(String s) throws IOException {
+	public void write(ByteString s) throws IOException {
 		throw new UnsupportedOperationException("Bad file descriptor");
 	}
 

@@ -16,6 +16,8 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
+import net.sandius.rembulan.ByteStringBuilder;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.Ordering;
@@ -105,13 +107,13 @@ public class DefaultTableLib extends TableLib {
 
 			public final Table t;
 			public final ArgumentIterator args;
-			public final String sep;
+			public final ByteString sep;
 			public final long i;
 			public final long j;
 			public final long k;
-			public final StringBuilder bld;
+			public final ByteStringBuilder bld;
 
-			public SuspendedState(int state, Table t, ArgumentIterator args, String sep, long i, long j, long k, StringBuilder bld) {
+			public SuspendedState(int state, Table t, ArgumentIterator args, ByteString sep, long i, long j, long k, ByteStringBuilder bld) {
 				this.state = state;
 				this.t = t;
 				this.args = args;
@@ -124,8 +126,8 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
-		private static void appendToBuilder(StringBuilder bld, long index, Object o) {
-			String s = Conversions.stringValueOf(o);
+		private static void appendToBuilder(ByteStringBuilder bld, long index, Object o) {
+			ByteString s = Conversions.stringValueOf(o);
 			if (s != null) {
 				bld.append(s);
 			}
@@ -137,8 +139,8 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
-		private static void concatUsingRawGet(ExecutionContext context, Table t, String sep, long i, long j) {
-			StringBuilder bld = new StringBuilder();
+		private static void concatUsingRawGet(ExecutionContext context, Table t, ByteString sep, long i, long j) {
+			ByteStringBuilder bld = new ByteStringBuilder();
 			for (long k = i; k <= j; k++) {
 				Object o = t.rawget(k);
 				appendToBuilder(bld, k, o);
@@ -146,7 +148,7 @@ public class DefaultTableLib extends TableLib {
 					bld.append(sep);
 				}
 			}
-			context.getReturnBuffer().setTo(bld.toString());
+			context.getReturnBuffer().setTo(bld.toByteString());
 		}
 
 		private static final int STATE_LEN_PREPARE = 0;
@@ -154,7 +156,7 @@ public class DefaultTableLib extends TableLib {
 		private static final int STATE_BEFORE_LOOP = 2;
 		private static final int STATE_LOOP = 3;
 
-		private void run(ExecutionContext context, int state, Table t, ArgumentIterator args, String sep, long i, long j, long k, StringBuilder bld)
+		private void run(ExecutionContext context, int state, Table t, ArgumentIterator args, ByteString sep, long i, long j, long k, ByteStringBuilder bld)
 				throws ResolvedControlThrowable {
 
 			try {
@@ -176,7 +178,7 @@ public class DefaultTableLib extends TableLib {
 						k = 0;  // clear k
 
 						// process arguments
-						sep = args.hasNext() && args.peek() != null ? args.nextString() : "";
+						sep = args.hasNext() && args.peek() != null ? args.nextString() : ByteString.empty();
 						i = args.optNextInt(1);
 						j = args.hasNext() && args.peek() != null ? args.nextInteger() : len;
 
@@ -197,7 +199,7 @@ public class DefaultTableLib extends TableLib {
 						if (i <= j) {
 							k = i;
 							state = STATE_LOOP;
-							bld = new StringBuilder();  // allocate the result accumulator
+							bld = new ByteStringBuilder();  // allocate the result accumulator
 							Dispatch.index(context, t, k++);  // may suspend
 
 							// fall-through to state == STATE_LOOP
@@ -233,7 +235,7 @@ public class DefaultTableLib extends TableLib {
 						assert (k > j);
 
 						// we're done!
-						context.getReturnBuffer().setTo(bld.toString());
+						context.getReturnBuffer().setTo(bld.toByteString());
 						return;
 					}
 
@@ -526,6 +528,19 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
+		private void checkValidArgs(long f, long e, long t) {
+			if (f <= e) {
+				long num = e - f + 1;
+				if (num < 1) {
+					// overflow
+					throw new BadArgumentException(3, name(), "too many elements to move");
+				}
+				if (t + (num - 1) < t) {
+					throw new BadArgumentException(4, name(), "destination wrap around");
+				}
+			}
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.size() < 2) {
@@ -548,12 +563,11 @@ public class DefaultTableLib extends TableLib {
 			final Table a1 = args.nextTable();
 			final Table a2 = dest != null ? dest : a1;
 
+			checkValidArgs(f, e, t);
+
 			if (f <= e) {
 				long num = e - f + 1;
-				if (num <= 0) {
-					// overflow
-					throw args.badArgument(3, "too many elements to move");
-				}
+				assert (num > 0);
 
 				boolean overlap = a1 == a2 && (f < t && t <= e);
 
@@ -572,12 +586,17 @@ public class DefaultTableLib extends TableLib {
 						}
 					}
 
+					// done
 					context.getReturnBuffer().setTo(a2);
 				}
 				else {
 					long idx = overlap ? num - 1 : 0;
 					_run(context, 0, a1, a2, f, t, idx, num, !overlap);
 				}
+			}
+			else {
+				// no work: done
+				context.getReturnBuffer().setTo(a2);
 			}
 		}
 
@@ -1012,6 +1031,10 @@ public class DefaultTableLib extends TableLib {
 		private void prepareLoop(ExecutionContext context, ArgumentIterator args, Table t, long len)
 			throws ResolvedControlThrowable {
 
+			if (len >= Integer.MAX_VALUE) {
+				throw args.badArgument(1, "array too big");
+			}
+
 			if (len < 2) {
 				// nothing to sort
 				return;
@@ -1346,9 +1369,25 @@ public class DefaultTableLib extends TableLib {
 
 		}
 
+		/**
+		 * The maximum number of values that may be unpacked.
+		 */
+		public static final long MAX_RESULTS = 1000000;
+
+		private static void verifyNumberOfResults(long i, long j) {
+			if (i < j) {
+				long n = j - i;
+				if (n < 0 || n > MAX_RESULTS) {
+					throw new IllegalArgumentException("too many results to unpack");
+				}
+			}
+		}
+
 		private static void unpackUsingRawGet(ExecutionContext context, Table t, long i, long j) {
 			ArrayList<Object> r = new ArrayList<>();
-			for (long k = i; k <= j; k++) {
+
+			// protect against overflows when j == Long.MAX_VALUE
+			for (long k = i; (i <= k) && (k <= j); k++) {
 				r.add(t.rawget(k));
 			}
 			context.getReturnBuffer().setToContentsOf(r);
@@ -1375,6 +1414,8 @@ public class DefaultTableLib extends TableLib {
 
 					case STATE_BEFORE_LOOP:
 						// j is known;
+
+						verifyNumberOfResults(i, j);
 
 						// is this a clean table without __index?
 						if (obj instanceof Table && !TableUtil.hasIndexMetamethod((Table) obj)) {
@@ -1408,7 +1449,8 @@ public class DefaultTableLib extends TableLib {
 							result.add(v);
 
 							// we may now continue
-							if (k <= j) {
+							// protect against overflows when j == Long.MAX_VALUE
+							if ((i <= k) && (k <= j)) {
 								state = STATE_LOOP;
 								Dispatch.index(context, obj, k++);  // may suspend
 							}
@@ -1417,7 +1459,7 @@ public class DefaultTableLib extends TableLib {
 							}
 						}
 
-						assert (k > j);
+						assert (k > j || k == Long.MIN_VALUE);
 
 						// we're done!
 						context.getReturnBuffer().setToContentsOf(result);

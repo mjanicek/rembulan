@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.lib.luajava;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
@@ -88,9 +89,9 @@ abstract class JavaWrapper<T> extends Userdata {
 
 			final String methodName;
 			{
-				String s = Conversions.stringValueOf(arg2);
+				ByteString s = Conversions.stringValueOf(arg2);
 				if (s != null) {
-					methodName = s;
+					methodName = s.toString();
 				}
 				else {
 					throw new IllegalArgumentException("invalid member name: expecting string, got "

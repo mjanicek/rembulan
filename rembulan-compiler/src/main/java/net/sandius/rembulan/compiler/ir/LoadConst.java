@@ -16,6 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
+import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.util.Check;
 
 public abstract class LoadConst extends BodyNode {
@@ -105,9 +106,9 @@ public abstract class LoadConst extends BodyNode {
 
 	public static class Str extends LoadConst {
 
-		private final String value;
+		private final ByteString value;
 
-		public Str(Val dest, String value) {
+		public Str(Val dest, ByteString value) {
 			super(dest);
 			this.value = Check.notNull(value);
 		}
@@ -117,7 +118,7 @@ public abstract class LoadConst extends BodyNode {
 			visitor.visit(this);
 		}
 
-		public String value() {
+		public ByteString value() {
 			return value;
 		}
 

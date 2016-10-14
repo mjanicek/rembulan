@@ -19,6 +19,7 @@ package net.sandius.rembulan.impl;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
+import net.sandius.rembulan.util.TraversableHashMap;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -218,8 +219,13 @@ public class ImmutableTable extends Table {
 	@Override
 	public Object successorKeyOf(Object key) {
 		key = Conversions.normaliseKey(key);
-		Entry e = entries.get(key);
-		return e != null ? e.nextKey : null;
+		try {
+			Entry e = entries.get(key);
+			return e.nextKey;
+		}
+		catch (NullPointerException ex) {
+			throw new IllegalArgumentException("invalid key to 'next'", ex);
+		}
 	}
 
 	@Override
@@ -232,23 +238,7 @@ public class ImmutableTable extends Table {
 	 */
 	public static class Builder {
 
-		private final Map<Object, MutableEntry> entries;
-		private Object firstKey;
-		private Object lastKey;
-
-		private static class MutableEntry {
-
-			private Object value;  // must not be null
-			private Object prevKey;
-			private Object nextKey;
-
-			public MutableEntry(Object value, Object prevKey, Object nextKey) {
-				this.value = value;
-				this.prevKey = prevKey;
-				this.nextKey = nextKey;
-			}
-
-		}
+		private final TraversableHashMap<Object, Object> entries;
 
 		private static void checkKey(Object key) {
 			if (key == null || (key instanceof Double && Double.isNaN(((Double) key).doubleValue()))) {
@@ -256,21 +246,19 @@ public class ImmutableTable extends Table {
 			}
 		}
 
-		private Builder(Map<Object, MutableEntry> entries, Object firstKey, Object lastKey) {
+		private Builder(TraversableHashMap<Object, Object> entries) {
 			this.entries = Objects.requireNonNull(entries);
-			this.firstKey = firstKey;
-			this.lastKey = lastKey;
 		}
 
 		/**
 		 * Constructs a new empty builder.
 		 */
 		public Builder() {
-			this(new HashMap<Object, MutableEntry>(), null, null);
+			this(new TraversableHashMap<>());
 		}
 
-		private static <K, V> Map<K, V> mapCopy(Map<K, V> map) {
-			Map<K, V> result = new HashMap<>();
+		private static <K, V> TraversableHashMap<K, V> mapCopy(TraversableHashMap<K, V> map) {
+			TraversableHashMap<K, V> result = new TraversableHashMap<>();
 			result.putAll(map);
 			return result;
 		}
@@ -283,7 +271,7 @@ public class ImmutableTable extends Table {
 		 * @throws  NullPointerException  if {@code builder} is {@code null}
 		 */
 		public Builder(Builder builder) {
-			this(mapCopy(builder.entries), builder.firstKey, builder.lastKey);
+			this(mapCopy(builder.entries));
 		}
 
 		/**
@@ -311,58 +299,11 @@ public class ImmutableTable extends Table {
 			key = Conversions.normaliseKey(key);
 			checkKey(key);
 
-			MutableEntry e = entries.get(key);
-
-			if (e == null) {
-				if (value != null) {
-					// insert key at the end
-					entries.put(key, new MutableEntry(value, lastKey, null));
-
-					// update the last entry
-					if (lastKey != null) {
-						MutableEntry le = entries.get(lastKey);
-						assert (le != null);
-						assert (le.nextKey == null);
-						le.nextKey = key;
-					}
-					lastKey = key;
-
-					// was this the first key?
-					if (firstKey == null) {
-						firstKey = key;
-					}
-				}
-				else {
-					// ignore
-				}
+			if (value != null) {
+				entries.put(key, value);
 			}
 			else {
-				if (value != null) {
-					// update value: does not influence iteration order
-					e.value = value;
-				}
-				else {
-					// remove key
-					entries.remove(key);
-
-					if (e.prevKey != null) {
-						MutableEntry prev = entries.get(e.prevKey);
-						prev.nextKey = e.nextKey;
-					}
-					else {
-						// this was the first entry
-						firstKey = e.nextKey;
-					}
-
-					if (e.nextKey != null) {
-						MutableEntry next = entries.get(e.nextKey);
-						next.prevKey = e.prevKey;
-					}
-					else {
-						// this was the last entry
-						lastKey = e.prevKey;
-					}
-				}
+				entries.remove(key);
 			}
 
 			return this;
@@ -373,8 +314,6 @@ public class ImmutableTable extends Table {
 		 */
 		public void clear() {
 			entries.clear();
-			firstKey = null;
-			lastKey = null;
 		}
 
 		/**
@@ -385,11 +324,12 @@ public class ImmutableTable extends Table {
 		 */
 		public ImmutableTable build() {
 			Map<Object, Entry> tableEntries = new HashMap<>();
-			for (Map.Entry<Object, MutableEntry> e : entries.entrySet()) {
-				MutableEntry me = e.getValue();
-				tableEntries.put(e.getKey(), new Entry(me.value, me.nextKey));
+
+			for (Map.Entry<Object, Object> e : entries.entrySet()) {
+				Object k = e.getKey();
+				tableEntries.put(e.getKey(), new Entry(e.getValue(), entries.getSuccessorOf(k)));
 			}
-			return new ImmutableTable(Collections.unmodifiableMap(tableEntries), firstKey);
+			return new ImmutableTable(Collections.unmodifiableMap(tableEntries), entries.getFirstKey());
 		}
 
 	}

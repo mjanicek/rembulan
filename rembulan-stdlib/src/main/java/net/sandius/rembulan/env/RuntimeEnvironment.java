@@ -66,4 +66,14 @@ public interface RuntimeEnvironment {
 	 */
 	String getEnv(String name);
 
+	/**
+	 * Returns an approximation of the CPU time used by this program in seconds.
+	 *
+	 * @return  an approximation of the CPU time used by this program in seconds
+	 *
+	 * @throws UnsupportedOperationException  if this operation is not supported by the
+	 *                                        runtime environment
+	 */
+	double getCpuTime();
+
 }

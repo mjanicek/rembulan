@@ -283,6 +283,13 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("""local t = {}; local u = table.move(t, 1, 1, 1); return t == u""") succeedsWith (true)
 
+      program ("""local a = {}; return table.move({10,20,30}, 1, 0, 3, a) == a""") succeedsWith (true)
+
+      // destination wrap around
+      program ("""table.move({}, 1, (1 << 63) - 1, 2)""") failsWith ("bad argument #4 to 'move' (destination wrap around)")
+      program ("""table.move({}, 1, 2, (1 << 63) - 1)""") failsWith ("bad argument #4 to 'move' (destination wrap around)")
+      program ("""table.move({}, (1 << 63), -2, 2)""") failsWith ("bad argument #4 to 'move' (destination wrap around)")
+
       program (
         """local t = table.move({"a", "b", "c", "d"}, 1, 3, 4)
           |return #t, t[1], t[2], t[3], t[4], t[5], t[6]
@@ -507,6 +514,13 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""table.sort({true, false})""") failsWith "attempt to compare two boolean values"
       program ("""table.sort({1, false})""") failsWith "attempt to compare "<<"boolean with number"
 
+      // "array too big" errors: length must fit into a signed 32-bit integer
+      program ("""local a = setmetatable({}, {__len = function () return (1 << 63) - 1 end}); table.sort(a)""") failsWith "bad argument #1 to 'sort' (array too big)"
+      program ("""local a = setmetatable({}, {__len = function () return (1 << 31) - 1 end}); table.sort(a)""") failsWith "bad argument #1 to 'sort' (array too big)"
+
+      // ok when length < Integer.MAX_VALUE
+      program ("""local a = setmetatable({}, {__len = function () return (1 << 31) - 2 end}); table.sort(a, function() error("BOOM!") end)""") failsWith "BOOM!"
+
       def doSortExplicit(vals: Seq[Any], exp: Seq[Any], comp: Option[String]): Unit = {
         val vs = vals map {
           case s: String => LuaFormat.escape(s)
@@ -613,6 +627,27 @@ object TableLibFragments extends FragmentBundle with FragmentExpectations with O
       program ("""return table.unpack({1,0,-1})""") succeedsWith (1, 0, -1)
 
       program ("""return table.unpack("nono")""") failsWith "attempt to index a string value"
+
+      program ("""local maxi = (1 << 31) - 1; table.unpack({}, 0, maxi)""") failsWith "too many results to unpack"
+      program ("""local maxi = (1 << 31) - 1; table.unpack({}, 1, maxi)""") failsWith "too many results to unpack"
+      program ("""local maxI = (1 << 63) - 1; table.unpack({}, 0, maxI)""") failsWith "too many results to unpack"
+      program ("""local maxI = (1 << 63) - 1; table.unpack({}, 1, maxI)""") failsWith "too many results to unpack"
+      program ("""local mini, maxi = -(1 << 31), (1 << 31) - 1; table.unpack({}, mini, maxi)""") failsWith "too many results to unpack"
+      program ("""local minI, maxI = 1 << 63, (1 << 63) - 1; table.unpack({}, minI, maxI)""") failsWith "too many results to unpack"
+
+      // behaviour near math.maxinteger
+
+      program (
+        """local maxI = (1 << 63) - 1
+          |local t = {[maxI - 1] = 12, [maxI] = 23}
+          |return table.unpack(t, maxI - 1, maxI)
+        """) succeedsWith (12, 23)
+
+      program (
+        """local maxI = (1 << 63) - 1
+          |local t = setmetatable({}, {__index = function(t,k) return k end})
+          |return table.unpack(t, maxI - 1, maxI)
+        """) succeedsWith (Long.MaxValue - 1, Long.MaxValue)
 
       in (FullContext) {
 

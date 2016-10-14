@@ -16,9 +16,12 @@
 
 package net.sandius.rembulan.exec;
 
+import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.StateContext;
+import net.sandius.rembulan.impl.ReturnBuffers;
 import net.sandius.rembulan.impl.SchedulingContexts;
 import net.sandius.rembulan.runtime.AsyncTask;
+import net.sandius.rembulan.runtime.ReturnBufferFactory;
 import net.sandius.rembulan.runtime.RuntimeCallInitialiser;
 import net.sandius.rembulan.runtime.SchedulingContext;
 import net.sandius.rembulan.runtime.SchedulingContextFactory;
@@ -35,10 +38,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DirectCallExecutor {
 
 	private final SchedulingContextFactory schedulingContextFactory;
+	private final ReturnBufferFactory returnBufferFactory;
+	private final boolean performJavaConversions;
 
 	DirectCallExecutor(SchedulingContextFactory schedulingContextFactory) {
 		this.schedulingContextFactory = Objects.requireNonNull(schedulingContextFactory);
+		this.returnBufferFactory = DEFAULT_RETURN_BUFFER_FACTORY;
+		this.performJavaConversions = true;
 	}
+
+	private static final ReturnBufferFactory DEFAULT_RETURN_BUFFER_FACTORY =
+			ReturnBuffers.defaultFactory();
 
 	private static final DirectCallExecutor NEVER_PAUSING_EXECUTOR
 			= new DirectCallExecutor(SchedulingContexts.neverPauseFactory());
@@ -210,7 +220,14 @@ public class DirectCallExecutor {
 	 */
 	public Object[] call(StateContext stateContext, Object fn, Object... args)
 			throws CallException, CallPausedException, InterruptedException {
-		return resume(RuntimeCallInitialiser.forState(stateContext).newCall(fn, args));
+
+		CallInitialiser initialiser = RuntimeCallInitialiser.forState(
+				stateContext,
+				returnBufferFactory);
+
+		return resume(initialiser.newCall(
+				performJavaConversions ? Conversions.canonicalRepresentationOf(fn) : fn,
+				performJavaConversions ? Conversions.copyAsCanonicalValues(args) : args));
 	}
 
 	/**
@@ -232,7 +249,7 @@ public class DirectCallExecutor {
 	 */
 	public Object[] resume(Continuation continuation)
 			throws CallException, CallPausedException, InterruptedException {
-		return execute(continuation, schedulingContextFactory.newInstance());
+		return execute(continuation, schedulingContextFactory.newInstance(), performJavaConversions);
 	}
 
 	/**
@@ -240,11 +257,16 @@ public class DirectCallExecutor {
 	 * {@code schedulingContext}, returning the call result once the call completes.
 	 *
 	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
-	 * be manipulated freely by the caller of this method.</p>
+	 * be manipulated freely by the caller of this method. If {@code convertResultsToJava}
+	 * is {@code true}, the result values will be converted to Java using
+	 * {@link Conversions#toJavaValues(Object[])}.</p>
 	 *
 	 * @param continuation  the continuation to resume, must not be {@code null}
 	 * @param schedulingContext  the scheduling context, must not be {@code null}
-	 * @return  the call result
+	 * @param convertResultsToJava  flag controlling the conversion of result values to
+	 *                              their Java representations
+	 * @return  the call result, converted to Java representations
+	 *          if {@code convertResults} is {@code true}
 	 *
 	 * @throws CallException  if the call terminated abnormally
 	 * @throws CallPausedException  if the call initiated a pause
@@ -254,7 +276,10 @@ public class DirectCallExecutor {
 	 * @throws NullPointerException  if {@code continuation} or {@code schedulingContext}
 	 *                               is {@code null}
 	 */
-	public static Object[] execute(Continuation continuation, SchedulingContext schedulingContext)
+	public static Object[] execute(
+			Continuation continuation,
+			SchedulingContext schedulingContext,
+			boolean convertResultsToJava)
 			throws CallException, CallPausedException, InterruptedException {
 
 		Objects.requireNonNull(continuation);
@@ -282,10 +307,45 @@ public class DirectCallExecutor {
 				latch.await();
 			}
 			else {
-				return result.get();
+				Object[] values = result.get();
+				if (convertResultsToJava) {
+					Conversions.toJavaValues(values);
+				}
+
+				return values;
 			}
 		}
+	}
 
+	/**
+	 * Resumes {@code continuation} in the current thread in the scheduling context
+	 * {@code schedulingContext}, returning the call result once the call completes.
+	 *
+	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
+	 * be manipulated freely by the caller of this method.</p>
+	 *
+	 * <p>This method converts return values to Java values using
+	 * {@link Conversions#toJavaValues(Object[])}. For a greater control over this behaviour,
+	 * use {@link #execute(Continuation, SchedulingContext, boolean)} instead.</p>
+	 *
+	 * @param continuation  the continuation to resume, must not be {@code null}
+	 * @param schedulingContext  the scheduling context, must not be {@code null}
+	 * @return  the call result
+	 *
+	 * @throws CallException  if the call terminated abnormally
+	 * @throws CallPausedException  if the call initiated a pause
+	 * @throws InterruptedException  when the current thread is interrupted while waiting
+	 *                               for an asynchronous operation to be completed
+	 * @throws InvalidContinuationException  when {@code continuation} is invalid
+	 * @throws NullPointerException  if {@code continuation} or {@code schedulingContext}
+	 *                               is {@code null}
+	 */
+	public static Object[] execute(
+			Continuation continuation,
+			SchedulingContext schedulingContext)
+			throws CallException, CallPausedException, InterruptedException {
+
+		return execute(continuation, schedulingContext, true);
 	}
 
 	/**
@@ -294,6 +354,10 @@ public class DirectCallExecutor {
 	 *
 	 * <p>The call result will be passed in a freshly-allocated array, and may therefore
 	 * be manipulated freely by the caller of this method.</p>
+	 *
+	 * <p>This method converts return values to Java values using
+	 * {@link Conversions#toJavaValues(Object[])}. For a greater control over this behaviour,
+	 * use {@link #execute(Continuation, SchedulingContext, boolean)} instead.</p>
 	 *
 	 * @param continuation  the continuation to resume, must not be {@code null}
 	 * @return  the call result

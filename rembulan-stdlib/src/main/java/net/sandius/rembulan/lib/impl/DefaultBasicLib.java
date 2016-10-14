@@ -16,13 +16,7 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.Conversions;
-import net.sandius.rembulan.LuaRuntimeException;
-import net.sandius.rembulan.Metatables;
-import net.sandius.rembulan.Ordering;
-import net.sandius.rembulan.PlainValueTypeNamer;
-import net.sandius.rembulan.Table;
-import net.sandius.rembulan.Variable;
+import net.sandius.rembulan.*;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
@@ -205,7 +199,7 @@ public class DefaultBasicLib extends BasicLib {
 				}
 
 				Object s = context.getReturnBuffer().get0();
-				if (s instanceof String) {
+				if (LuaType.isString(s)) {
 					out.print(s);
 				}
 				else {
@@ -245,7 +239,7 @@ public class DefaultBasicLib extends BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			String typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
+			ByteString typeName = PlainValueTypeNamer.INSTANCE.typeNameOf(args.nextAny());
 			context.getReturnBuffer().setTo(typeName);
 		}
 
@@ -296,13 +290,33 @@ public class DefaultBasicLib extends BasicLib {
 		}
 
 		@Override
-		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+		protected void invoke(ExecutionContext context, ArgumentIterator args)
+				throws ResolvedControlThrowable {
+
 			Table table = args.nextTable();
 			long index = args.nextInteger();
 
 			index += 1;
 
-			Object o = table.rawget(index);
+			try {
+				Dispatch.index(context, table, index);
+			}
+			catch (UnresolvedControlThrowable ct) {
+				throw ct.resolve(this, index);
+			}
+
+			Object result = context.getReturnBuffer().get0();
+			processResult(context, index, result);
+		}
+
+		@Override
+		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
+			long index = (Long) suspendedState;
+			Object result = context.getReturnBuffer().get0();
+			processResult(context, index, result);
+		}
+
+		private static void processResult(ExecutionContext context, long index, Object o) throws ResolvedControlThrowable {
 			if (o != null) {
 				context.getReturnBuffer().setTo(index, o);
 			}
@@ -396,7 +410,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				// no metamethod, just call the default toString
-				String s = Conversions.toHumanReadableString(arg);
+				ByteString s = Conversions.toHumanReadableString(arg);
 				context.getReturnBuffer().setTo(s);
 			}
 		}
@@ -414,9 +428,9 @@ public class DefaultBasicLib extends BasicLib {
 
 		public static final ToNumber INSTANCE = new ToNumber();
 
-		public static Long toNumber(String s, int base) {
+		public static Long toNumber(ByteString s, int base) {
 			try {
-				return Long.parseLong(s.trim(), base);
+				return Long.parseLong(s.toString().trim(), base);
 			}
 			catch (NumberFormatException ex) {
 				return null;
@@ -444,7 +458,7 @@ public class DefaultBasicLib extends BasicLib {
 				args.skip();
 				args.nextInteger();
 				args.rewind();
-				String s = args.nextStrictString();
+				ByteString s = args.nextStrictString();
 				int base = args.nextIntRange("base", Character.MIN_RADIX, Character.MAX_RADIX);
 
 				context.getReturnBuffer().setTo(toNumber(s, base));
@@ -540,7 +554,7 @@ public class DefaultBasicLib extends BasicLib {
 				if (args.hasNext()) {
 					// message is defined
 					Object message = args.nextAny();
-					String stringMessage = Conversions.stringValueOf(message);
+					ByteString stringMessage = Conversions.stringValueOf(message);
 					if (stringMessage != null) {
 						ex = new AssertionFailedException(stringMessage);
 					}
@@ -794,6 +808,10 @@ public class DefaultBasicLib extends BasicLib {
 				Table table = (Table) arg1;
 				result = table.rawlen();
 			}
+			else if (arg1 instanceof ByteString) {
+				ByteString s = (ByteString) arg1;
+				result = (long) s.length();
+			}
 			else if (arg1 instanceof String) {
 				String s = (String) arg1;
 				result = Dispatch.len(s);
@@ -816,13 +834,19 @@ public class DefaultBasicLib extends BasicLib {
 			return "select";
 		}
 
+		private static boolean isHash(Object o) {
+			if (o instanceof ByteString) return ((ByteString) o).startsWith((byte) '#');
+			else if (o instanceof String) return ((String) o).startsWith("#");
+			else return false;
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object index = args.peekOrNil();
 
-			if (index instanceof String && ((String) index).startsWith("#")) {
+			if (isHash(index)) {
 				// return the number of remaining args
-				int count = args.tailSize() - 1;
+				int count = args.size() - 1;
 				context.getReturnBuffer().setTo((long) count);
 			}
 			else {
@@ -866,6 +890,8 @@ public class DefaultBasicLib extends BasicLib {
 
 	public static class Load extends AbstractLibFunction {
 
+		private static final ByteString DEFAULT_MODE = ByteString.constOf("bt");
+
 		private final ChunkLoader loader;
 		private final Object defaultEnv;
 
@@ -896,15 +922,15 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				if (args.hasNext()) args.skip();  // next is nil
-				chunkName = chunk instanceof String
-						? "[string \"" + (String) chunk + "\"]"
+				chunkName = chunk instanceof ByteString
+						? "[string \"" + chunk + "\"]"
 						: "=(load)";
 			}
 
 			// mode
-			final String modeString = args.hasNext()
+			final ByteString modeString = args.hasNext()
 					? args.nextString()
-					: "bt";
+					: DEFAULT_MODE;
 
 			final Object env = args.hasNext()
 					? args.nextAny()
@@ -912,28 +938,30 @@ public class DefaultBasicLib extends BasicLib {
 
 			// TODO: binary chunks
 
-			if (!modeString.contains("t")) {
-				context.getReturnBuffer().setTo(null, "attempt to load a text chunk (mode is '" + modeString + "')");
+			if (!modeString.contains((byte) 't')) {
+				ByteStringBuilder bld = new ByteStringBuilder();
+				bld.append("attempt to load a text chunk (mode is '").append(modeString).append("')");
+				context.getReturnBuffer().setTo(null, bld.toByteString());
 			}
 			else {
-				if (chunk instanceof String) {
-					loadFromString(context, chunkName, env, (String) chunk);
+				if (chunk instanceof ByteString) {
+					loadFromString(context, chunkName, env, (ByteString) chunk);
 				}
 				else {
 					LuaFunction fn = (LuaFunction) chunk;
-					loadFromFunction(context, false, chunkName, env, new StringBuilder(), fn);
+					loadFromFunction(context, false, chunkName, env, new ByteStringBuilder(), fn);
 				}
 			}
 
 		}
 
-		private void loadFromString(ExecutionContext context, String chunkName, Object env, String chunkText) {
+		private void loadFromString(ExecutionContext context, String chunkName, Object env, ByteString chunkText) {
 			final LuaFunction fn;
 			try {
-				fn = loader.loadTextChunk(new Variable(env), chunkName, chunkText);
+				fn = loader.loadTextChunk(new Variable(env), chunkName, chunkText.toString());
 			}
 			catch (LoaderException ex) {
-				context.getReturnBuffer().setTo(null, Conversions.toErrorObject(ex));
+				context.getReturnBuffer().setTo(null, ex.getLuaStyleErrorMessage());
 				return;
 			}
 
@@ -950,10 +978,10 @@ public class DefaultBasicLib extends BasicLib {
 
 			public final String chunkName;
 			public final Object env;
-			public final StringBuilder bld;
+			public final ByteStringBuilder bld;
 			public final LuaFunction fn;
 
-			private State(String chunkName, Object env, StringBuilder bld, LuaFunction fn) {
+			private State(String chunkName, Object env, ByteStringBuilder bld, LuaFunction fn) {
 				this.chunkName = chunkName;
 				this.env = env;
 				this.bld = bld;
@@ -962,10 +990,10 @@ public class DefaultBasicLib extends BasicLib {
 
 		}
 
-		private void loadFromFunction(ExecutionContext context, boolean resuming, String chunkName, Object env, StringBuilder bld, LuaFunction fn)
+		private void loadFromFunction(ExecutionContext context, boolean resuming, String chunkName, Object env, ByteStringBuilder bld, LuaFunction fn)
 				throws ResolvedControlThrowable {
 
-			String chunkText = null;
+			ByteString chunkText = null;
 
 			try {
 				while (chunkText == null) {
@@ -977,10 +1005,10 @@ public class DefaultBasicLib extends BasicLib {
 
 					Object o = context.getReturnBuffer().get0();
 					if (o == null) {
-						chunkText = bld.toString();
+						chunkText = bld.toByteString();
 					}
 					else {
-						String s = Conversions.stringValueOf(o);
+						ByteString s = Conversions.stringValueOf(o);
 						if (s != null) {
 							bld.append(s);
 						}

@@ -358,6 +358,11 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
 
       program ("local e = load('return _ENV')(); return _ENV, e, _ENV == e") succeedsWith (classOf[Table], classOf[Table], true)
 
+      // error reporting: FIXME: actual loader error messages are different from PUC-Lua!
+      program ("""return load("x(")""") succeedsWith (null, "[string \"x(\"]:?: function call expected at line 1")
+      program ("""return load("'")""") succeedsWith (null, "[string \"'\"]:?: Lexical error at line 1, column 2.  Encountered: <EOF> after : \"\"")
+      program ("""return load('"')""") succeedsWith (null, "[string \"\"\"]:?: Lexical error at line 1, column 2.  Encountered: <EOF> after : \"\"")
+
       program (
         """local n = 5
           |local i = 0

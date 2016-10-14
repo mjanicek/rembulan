@@ -1507,14 +1507,38 @@ object BasicFragments extends FragmentBundle with FragmentExpectations with OneL
   }
   IPairsOnList in BasicContext succeedsWith (4, 166, "15243342")
 
-  val IPairsWithMetatable = fragment ("IPairsWithMetatable") {
+  val IPairsRespectsIndexMetatable = fragment ("") {
+    """local l = {5, 4, 3, 2}
+      |local count = 0
+      |local mt_count = 0
+      |local a = 1
+      |local s = ""
+      |
+      |local proxy = setmetatable({}, {
+      |    __index = function(t, k)
+      |        mt_count = mt_count + 1
+      |        return rawget(l, k)
+      |    end})
+      |
+      |for i, v in ipairs(proxy) do
+      |    count = count + 1
+      |    a = a * v + i
+      |    s = s..i..v
+      |end
+      |
+      |return count, mt_count, a, s
+    """
+  }
+  IPairsRespectsIndexMetatable in BasicContext succeedsWith (4, 5, 166, "15243342")
+
+  val IPairsWithPairsMetatable = fragment ("IPairsWithPairsMetatable") {
     """local t = {}
       |local mt = { __pairs = function(x) error() end }
       |setmetatable(t, mt)
       |return ipairs(t)
     """
   }
-  IPairsWithMetatable in BasicContext succeedsWith (classOf[LuaFunction], classOf[Table], 0)
+  IPairsWithPairsMetatable in BasicContext succeedsWith (classOf[LuaFunction], classOf[Table], 0)
 
   val IPairsNoTable = fragment ("IPairsNoTable") {
     """ipairs(42)
