@@ -87,6 +87,15 @@ public class DefaultModuleLib extends ModuleLib {
 		libTable.rawset("searchers", searchers);
 		libTable.rawset("searchpath", _searchpath);
 
+		{
+			String envPath = runtimeEnvironment.getEnv("LUA_PATH_5_3");
+			if (envPath == null) {
+				envPath = runtimeEnvironment.getEnv("LUA_PATH");
+			}
+
+			libTable.rawset("path", getPath(envPath, defaultPath(runtimeEnvironment.fileSystem())));
+		}
+
 		// initialise searchers
 		long idx = 1;
 		searchers.rawset(idx++, new PreloadSearcher(preload));
@@ -182,6 +191,20 @@ public class DefaultModuleLib extends ModuleLib {
 	@Override
 	public LuaFunction _searchpath() {
 		return _searchpath;
+	}
+
+	static ByteString defaultPath(FileSystem fileSystem) {
+		// TODO: make this depend on the platform
+		return ByteString.of("/usr/local/share/lua/5.3/?.lua;/usr/local/share/lua/5.3/?/init.lua;/usr/local/lib/lua/5.3/?.lua;/usr/local/lib/lua/5.3/?/init.lua;./?.lua;./?/init.lua");
+	}
+
+	static ByteString getPath(String envPath, ByteString defaultPath) {
+		if (envPath != null) {
+			return ByteString.of(envPath).replace(ByteString.of(";;"), defaultPath);
+		}
+		else {
+			return defaultPath;
+		}
 	}
 
 	private static class Require_SuspendedState {
