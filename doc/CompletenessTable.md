@@ -52,14 +52,14 @@ Statuses:
 | [`coroutine.status`](http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.status) | ![complete](img/complete.png) | |
 | [`coroutine.wrap`](http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.wrap) | ![complete](img/complete.png) | |
 | [`coroutine.yield`](http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.yield) | ![complete](img/complete.png) | |
-| [`require`](http://www.lua.org/manual/5.3/manual.html#pdf-require) | ![stub](img/stub.png) | lookup in `package.loaded` only |
+| [`require`](http://www.lua.org/manual/5.3/manual.html#pdf-require) | ![complete](img/complete.png) | |
 | [`package.config`](http://www.lua.org/manual/5.3/manual.html#pdf-package.config) | ![missing](img/missing.png) | |
-| [`package.cpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.cpath) | ![missing](img/missing.png) | |
+| [`package.cpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.cpath) | ![missing](img/missing.png) | incompatible with Rembulan |
 | [`package.loaded`](http://www.lua.org/manual/5.3/manual.html#pdf-package.loaded) | ![complete](img/complete.png) | |
-| [`package.loadlib`](http://www.lua.org/manual/5.3/manual.html#pdf-package.loadlib) | ![not implemented](img/not-implemented.png) | |
-| [`package.path`](http://www.lua.org/manual/5.3/manual.html#pdf-package.path) | ![missing](img/missing.png) | |
-| [`package.preload`](http://www.lua.org/manual/5.3/manual.html#pdf-package.preload) | ![missing](img/missing.png) | |
-| [`package.searchers`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchers) | ![missing](img/missing.png) | |
+| [`package.loadlib`](http://www.lua.org/manual/5.3/manual.html#pdf-package.loadlib) | ![not implemented](img/not-implemented.png) | incompatible with Rembulan |
+| [`package.path`](http://www.lua.org/manual/5.3/manual.html#pdf-package.path) | ![partial](img/partial.png) | default path assumes a Unix-like environment |
+| [`package.preload`](http://www.lua.org/manual/5.3/manual.html#pdf-package.preload) | ![complete](img/complete.png) | |
+| [`package.searchers`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchers) | ![partial](img/partial.png) | the `cpath` searcher and the all-in-one searcher not implemented |
 | [`package.searchpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchpath) | ![complete](img/complete.png) | |
 | [`string.byte`](http://www.lua.org/manual/5.3/manual.html#pdf-string.byte) | ![complete](img/complete.png) | |
 | [`string.char`](http://www.lua.org/manual/5.3/manual.html#pdf-string.char) | ![complete](img/complete.png) | |
