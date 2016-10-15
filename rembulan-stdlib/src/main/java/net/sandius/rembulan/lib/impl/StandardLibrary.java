@@ -120,7 +120,7 @@ public class StandardLibrary {
 		FileSystem fileSystem = environment.fileSystem();
 
 		new DefaultBasicLib(out != null ? new PrintStream(out) : null, loader, env, fileSystem).installInto(state, env);
-		ModuleLib moduleLib = new DefaultModuleLib(state, environment, env, ClassLoader.getSystemClassLoader());
+		ModuleLib moduleLib = new DefaultModuleLib(state, environment, env, ClassLoader.getSystemClassLoader(), loader);
 		moduleLib.installInto(state, env);
 		moduleLib.install(new DefaultCoroutineLib());
 		moduleLib.install(new DefaultStringLib());

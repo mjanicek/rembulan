@@ -29,6 +29,8 @@ import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.LoaderProvider;
 import net.sandius.rembulan.lib.ModuleLib;
+import net.sandius.rembulan.load.ChunkLoader;
+import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -67,7 +69,7 @@ public class DefaultModuleLib extends ModuleLib {
 	 * @param env  the global table passed to the instantiated libraries, must not be {@code null}
 	 * @param classLoader  class loader used for instantiating libraries, must not be {@code null}
 	 */
-	public DefaultModuleLib(StateContext context, RuntimeEnvironment runtimeEnvironment, Table env, ClassLoader classLoader) {
+	public DefaultModuleLib(StateContext context, RuntimeEnvironment runtimeEnvironment, Table env, ClassLoader classLoader, ChunkLoader chunkLoader) {
 		this.context = Objects.requireNonNull(context);
 		this.env = Objects.requireNonNull(env);
 		Objects.requireNonNull(runtimeEnvironment);
@@ -86,8 +88,12 @@ public class DefaultModuleLib extends ModuleLib {
 		libTable.rawset("searchpath", _searchpath);
 
 		// initialise searchers
-		searchers.rawset(1, new PreloadSearcher(preload));
-		searchers.rawset(2, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
+		long idx = 1;
+		searchers.rawset(idx++, new PreloadSearcher(preload));
+		if (chunkLoader != null) {
+			searchers.rawset(idx++, new ChunkLoadPathSearcher(runtimeEnvironment.fileSystem(), libTable, chunkLoader, env));
+		}
+		searchers.rawset(idx++, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
 
 		this.require = new Require();
 
@@ -97,8 +103,8 @@ public class DefaultModuleLib extends ModuleLib {
 	/**
 	 * Constructs a new instance of the default module library.
 	 *
-	 * <b>Deprecated:</b> breaks sandboxing.
-	 * Use {@link DefaultModuleLib#DefaultModuleLib(StateContext, RuntimeEnvironment, Table, ClassLoader)}
+	 * <b>Deprecated:</b> breaks sandboxing, and does not provide chunk loading.
+	 * Use {@link DefaultModuleLib#DefaultModuleLib(StateContext, RuntimeEnvironment, Table, ClassLoader, ChunkLoader)}
 	 * instead.
 	 *
 	 * @param context  state context, must not be {@code null}
@@ -106,7 +112,7 @@ public class DefaultModuleLib extends ModuleLib {
 	 */
 	@Deprecated
 	public DefaultModuleLib(StateContext context, Table env) {
-		this(context, RuntimeEnvironments.system(), env, ClassLoader.getSystemClassLoader());
+		this(context, RuntimeEnvironments.system(), env, ClassLoader.getSystemClassLoader(), null);
 	}
 
 	@Override
@@ -340,6 +346,68 @@ public class DefaultModuleLib extends ModuleLib {
 
 	}
 
+	static class ChunkLoadPathSearcher extends AbstractLibFunction {
+
+		private final Table libTable;
+		private final FileSystem fileSystem;
+		private final ChunkLoader loader;
+		private final Object env;
+
+		ChunkLoadPathSearcher(FileSystem fileSystem, Table libTable, ChunkLoader loader, Object env) {
+			this.fileSystem = Objects.requireNonNull(fileSystem);
+			this.libTable = Objects.requireNonNull(libTable);
+			this.loader = Objects.requireNonNull(loader);
+			this.env = env;
+		}
+
+		@Override
+		protected String name() {
+			return "(path searcher)";
+		}
+
+		private LuaFunction loaderForPath(ByteString path) throws LoaderException {
+			return DefaultBasicLib.loadTextChunkFromFile(fileSystem, loader, path.toString(), DefaultBasicLib.Load.DEFAULT_MODE, env);
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+			ByteString modName = args.nextString();
+
+			// FIXME: it might be easier and more modular to just call package.searchpath and loadfile
+
+			ByteString path = Conversions.stringValueOf(libTable.rawget("path"));
+			if (path == null) {
+				throw new IllegalStateException("'package.path' must be a string");
+			}
+
+			List<ByteString> paths = SearchPath.getPaths(modName, path, SearchPath.DEFAULT_SEP, ByteString.of(fileSystem.getSeparator()));
+
+			ByteStringBuilder msgBuilder = new ByteStringBuilder();
+			for (ByteString s : paths) {
+				Path p = fileSystem.getPath(s.toString());
+				if (Files.isReadable(p)) {
+					final LuaFunction fn;
+					try {
+						fn = loaderForPath(s);
+					}
+					catch (LoaderException ex) {
+						throw new LuaRuntimeException("error loading module '" + modName + "' from file '" + s + "'"
+								+ "\n\t" + ex.getLuaStyleErrorMessage());
+					}
+
+					context.getReturnBuffer().setTo(fn, s);
+					return;
+				}
+				else {
+					msgBuilder.append("\n\tno file '").append(s).append((byte) '\'');
+				}
+			}
+
+			context.getReturnBuffer().setTo(msgBuilder.toByteString());
+		}
+
+	}
+
 	/**
 	 * An abstract searcher function that uses a {@link ServiceLoader} to discover
 	 * loader services.
@@ -462,7 +530,7 @@ public class DefaultModuleLib extends ModuleLib {
 			return "searchpath";
 		}
 
-		private static List<ByteString> getPaths(ByteString name, ByteString path, ByteString sep, ByteString rep) {
+		static List<ByteString> getPaths(ByteString name, ByteString path, ByteString sep, ByteString rep) {
 			List<ByteString> result = new ArrayList<>();
 
 			name = name.replace(sep, rep);

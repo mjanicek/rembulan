@@ -1105,7 +1105,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	private static LuaFunction loadTextChunkFromFile(FileSystem fileSystem, ChunkLoader loader, String fileName, ByteString modeString, Object env)
+	static LuaFunction loadTextChunkFromFile(FileSystem fileSystem, ChunkLoader loader, String fileName, ByteString modeString, Object env)
 			throws LoaderException {
 
 		final LuaFunction fn;
