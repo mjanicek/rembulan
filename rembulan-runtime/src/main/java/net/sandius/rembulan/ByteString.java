@@ -470,4 +470,22 @@ public abstract class ByteString implements Comparable<ByteString> {
 		return false;
 	}
 
+	/**
+	 * Replaces all occurrences of the byte string {@code target} in this byte string
+	 * with the replacement {@code replacement}.
+	 *
+	 * @param target  the substring to replace, must not be {@code null}
+	 * @param replacement  the replacement, must not be {@code null}
+	 * @return  this byte string with all occurrences of {@code target} replaced
+	 *          by {@code replacement}
+	 *
+	 * @throws NullPointerException  if {@code target} or {@code replacement} is {@code null}
+	 */
+	public ByteString replace(ByteString target, ByteString replacement) {
+		// FIXME: don't go via raw strings
+		return ByteString.fromRaw(this.toRawString().replace(
+				target.toRawString(),
+				replacement.toRawString()));
+	}
+
 }

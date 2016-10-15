@@ -17,6 +17,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ByteString;
+import net.sandius.rembulan.ByteStringBuilder;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
@@ -33,7 +34,13 @@ import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
+import net.sandius.rembulan.util.ByteIterator;
 
+import java.nio.file.FileSystem;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
@@ -71,9 +78,12 @@ public class DefaultModuleLib extends ModuleLib {
 		this.preload = context.newTable();
 		Table searchers = context.newTable();
 
+		this._searchpath = new SearchPath(runtimeEnvironment.fileSystem());
+
 		libTable.rawset("loaded", loaded);
 		libTable.rawset("preload", preload);
 		libTable.rawset("searchers", searchers);
+		libTable.rawset("searchpath", _searchpath);
 
 		// initialise searchers
 		searchers.rawset(1, new PreloadSearcher(preload));
@@ -82,7 +92,6 @@ public class DefaultModuleLib extends ModuleLib {
 		this.require = new Require();
 
 		this._loadlib = new UnimplementedFunction("package.loadlib");
-		this._searchpath = new UnimplementedFunction("package.searchpath");
 	}
 
 	/**
@@ -432,6 +441,80 @@ public class DefaultModuleLib extends ModuleLib {
 		@Override
 		protected LuaFunction getLoader(LoaderProvider service) {
 			return service.newLoader(runtimeEnvironment, env);
+		}
+
+	}
+
+	static class SearchPath extends AbstractLibFunction {
+
+		private static final ByteString DEFAULT_SEP = ByteString.constOf(".");
+
+		private final FileSystem fileSystem;
+		private final ByteString defaultDirSeparator;
+
+		SearchPath(FileSystem fileSystem) {
+			this.fileSystem = Objects.requireNonNull(fileSystem);
+			defaultDirSeparator = ByteString.of(fileSystem.getSeparator());
+		}
+
+		@Override
+		protected String name() {
+			return "searchpath";
+		}
+
+		private static List<ByteString> getPaths(ByteString name, ByteString path, ByteString sep, ByteString rep) {
+			List<ByteString> result = new ArrayList<>();
+
+			name = name.replace(sep, rep);
+
+			ByteStringBuilder builder = new ByteStringBuilder();
+			ByteIterator it = path.byteIterator();
+			while (it.hasNext()) {
+				byte b = it.nextByte();
+				switch (b) {
+					case '?':
+						builder.append(name);
+						break;
+					case ';':
+						result.add(builder.toByteString());
+						builder.setLength(0);
+						break;
+					default:
+						builder.append(b);
+						break;
+				}
+			}
+
+			if (builder.length() > 0) {
+				result.add(builder.toByteString());
+			}
+
+			return result;
+		}
+
+		@Override
+		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
+			ByteString name = args.nextString();
+			ByteString path = args.nextString();
+
+			ByteString sep = args.hasNext() && args.peek() != null ? args.nextString() : DEFAULT_SEP;
+			ByteString rep = args.hasNext() && args.peek() != null ? args.nextString() : defaultDirSeparator;
+
+			ByteStringBuilder msgBuilder = new ByteStringBuilder();
+
+			for (ByteString s : getPaths(name, path, sep, rep)) {
+				Path p = fileSystem.getPath(s.toString());
+				if (Files.isReadable(p)) {
+					context.getReturnBuffer().setTo(s);
+					return;
+				}
+				else {
+					msgBuilder.append("\n\tno file '").append(s).append((byte) '\'');
+				}
+			}
+
+			// no readable file found
+			context.getReturnBuffer().setTo(null, msgBuilder.toString());
 		}
 
 	}

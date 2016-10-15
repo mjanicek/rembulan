@@ -60,7 +60,7 @@ Statuses:
 | [`package.path`](http://www.lua.org/manual/5.3/manual.html#pdf-package.path) | ![missing](img/missing.png) | |
 | [`package.preload`](http://www.lua.org/manual/5.3/manual.html#pdf-package.preload) | ![missing](img/missing.png) | |
 | [`package.searchers`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchers) | ![missing](img/missing.png) | |
-| [`package.searchpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchpath) | ![missing](img/missing.png) | |
+| [`package.searchpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.searchpath) | ![complete](img/complete.png) | |
 | [`string.byte`](http://www.lua.org/manual/5.3/manual.html#pdf-string.byte) | ![complete](img/complete.png) | |
 | [`string.char`](http://www.lua.org/manual/5.3/manual.html#pdf-string.char) | ![complete](img/complete.png) | |
 | [`string.dump`](http://www.lua.org/manual/5.3/manual.html#pdf-string.dump) | ![not implemented](img/not-implemented.png) | |
