@@ -53,7 +53,7 @@ Statuses:
 | [`coroutine.wrap`](http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.wrap) | ![complete](img/complete.png) | |
 | [`coroutine.yield`](http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.yield) | ![complete](img/complete.png) | |
 | [`require`](http://www.lua.org/manual/5.3/manual.html#pdf-require) | ![complete](img/complete.png) | |
-| [`package.config`](http://www.lua.org/manual/5.3/manual.html#pdf-package.config) | ![missing](img/missing.png) | |
+| [`package.config`](http://www.lua.org/manual/5.3/manual.html#pdf-package.config) | ![complete](img/complete.png) | |
 | [`package.cpath`](http://www.lua.org/manual/5.3/manual.html#pdf-package.cpath) | ![missing](img/missing.png) | incompatible with Rembulan |
 | [`package.loaded`](http://www.lua.org/manual/5.3/manual.html#pdf-package.loaded) | ![complete](img/complete.png) | |
 | [`package.loadlib`](http://www.lua.org/manual/5.3/manual.html#pdf-package.loadlib) | ![not implemented](img/not-implemented.png) | incompatible with Rembulan |

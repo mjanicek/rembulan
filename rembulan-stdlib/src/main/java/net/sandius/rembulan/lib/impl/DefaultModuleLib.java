@@ -49,6 +49,11 @@ import java.util.ServiceLoader;
 
 public class DefaultModuleLib extends ModuleLib {
 
+	static final byte PATH_SEPARATOR = (byte) ';';
+	static final byte PATH_TEMPLATE_PLACEHOLDER = (byte) '?';
+	static final byte WIN_DIRECTORY_PLACEHOLDER = (byte) '!';  // FIXME: not used in Rembulan
+	static final byte LUAOPEN_IGNORE = (byte) '-';  // FIXME: not used in Rembulan!
+
 	private final StateContext context;
 	private final Table env;
 
@@ -75,18 +80,34 @@ public class DefaultModuleLib extends ModuleLib {
 		Objects.requireNonNull(runtimeEnvironment);
 		Objects.requireNonNull(classLoader);
 
+		FileSystem fileSystem = runtimeEnvironment.fileSystem();
+
 		this.libTable = context.newTable();
 		this.loaded = context.newTable();
 		this.preload = context.newTable();
 		Table searchers = context.newTable();
 
-		this._searchpath = new SearchPath(runtimeEnvironment.fileSystem());
+		this._searchpath = new SearchPath(fileSystem);
 
 		libTable.rawset("loaded", loaded);
 		libTable.rawset("preload", preload);
 		libTable.rawset("searchers", searchers);
 		libTable.rawset("searchpath", _searchpath);
 
+		// package.config
+		{
+			ByteStringBuilder builder = new ByteStringBuilder();
+
+			builder.append(fileSystem.getSeparator()).append((byte) '\n');
+			builder.append(PATH_SEPARATOR).append((byte) '\n');
+			builder.append(PATH_TEMPLATE_PLACEHOLDER).append((byte) '\n');
+			builder.append(WIN_DIRECTORY_PLACEHOLDER).append((byte) '\n');
+			builder.append(LUAOPEN_IGNORE).append((byte) '\n');
+
+			libTable.rawset("config", builder.toByteString());
+		}
+
+		// package.path
 		{
 			String envPath = runtimeEnvironment.getEnv("LUA_PATH_5_3");
 			if (envPath == null) {
@@ -96,13 +117,15 @@ public class DefaultModuleLib extends ModuleLib {
 			libTable.rawset("path", getPath(envPath, defaultPath(runtimeEnvironment.fileSystem())));
 		}
 
-		// initialise searchers
-		long idx = 1;
-		searchers.rawset(idx++, new PreloadSearcher(preload));
-		if (chunkLoader != null) {
-			searchers.rawset(idx++, new ChunkLoadPathSearcher(runtimeEnvironment.fileSystem(), libTable, chunkLoader, env));
+		// package.searchers
+		{
+			long idx = 1;
+			searchers.rawset(idx++, new PreloadSearcher(preload));
+			if (chunkLoader != null) {
+				searchers.rawset(idx++, new ChunkLoadPathSearcher(fileSystem, libTable, chunkLoader, env));
+			}
+			searchers.rawset(idx++, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
 		}
-		searchers.rawset(idx++, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
 
 		this.require = new Require();
 
@@ -563,10 +586,10 @@ public class DefaultModuleLib extends ModuleLib {
 			while (it.hasNext()) {
 				byte b = it.nextByte();
 				switch (b) {
-					case '?':
+					case PATH_TEMPLATE_PLACEHOLDER:
 						builder.append(name);
 						break;
-					case ';':
+					case PATH_SEPARATOR:
 						result.add(builder.toByteString());
 						builder.setLength(0);
 						break;
