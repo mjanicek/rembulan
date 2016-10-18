@@ -24,7 +24,6 @@ import net.sandius.rembulan.load.ChunkLoader;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.nio.file.FileSystem;
 import java.util.Objects;
 
@@ -119,7 +118,7 @@ public class StandardLibrary {
 		OutputStream err = environment.standardError();
 		FileSystem fileSystem = environment.fileSystem();
 
-		new DefaultBasicLib(out != null ? new PrintStream(out) : null, loader, env, fileSystem).installInto(state, env);
+		DefaultBasicLib.install(state, env, environment, loader);
 		ModuleLib moduleLib = new DefaultModuleLib(state, environment, env, ClassLoader.getSystemClassLoader(), loader);
 		moduleLib.installInto(state, env);
 		moduleLib.install(new DefaultCoroutineLib());

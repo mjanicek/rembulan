@@ -189,7 +189,7 @@ public class RembulanConsole {
 	private void execute(LuaFunction fn) throws CallException {
 		Object[] results = callFunction(fn);
 		if (results.length > 0) {
-			callFunction(new DefaultBasicLib.Print(out), results);
+			callFunction(new DefaultBasicLib.Print(out, env), results);
 		}
 	}
 

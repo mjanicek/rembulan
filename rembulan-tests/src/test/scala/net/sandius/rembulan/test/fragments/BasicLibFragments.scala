@@ -43,6 +43,26 @@ object BasicLibFragments extends FragmentBundle with FragmentExpectations with O
 
     }
 
+    about ("print") {
+
+      fragment ("print retrieves tostring once") {
+        """local n = 0
+          |
+          |local tos = tostring
+          |local function cf(x)
+          |    return function(y) return '['..x..'|'..tos(y)..']' end
+          |end
+          |setmetatable(_ENV, {__index=function(t,k) n = n + 1; return cf(n) end})
+          |
+          |tostring = nil
+          |
+          |print(nil, 10, "x")
+          |return n
+        """
+      } in BasicContext succeedsWith(1)
+
+    }
+
     about ("tostring") {
 
       program ("return tostring(nil)") succeedsWith "nil"

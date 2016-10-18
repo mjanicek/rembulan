@@ -17,6 +17,7 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.*;
+import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
@@ -33,6 +34,7 @@ import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -44,13 +46,18 @@ import java.util.Objects;
 
 public class DefaultBasicLib extends BasicLib {
 
+	private final Table envTable;
+
 	private final LuaFunction _print;
 	private final LuaFunction _dofile;
 	private final LuaFunction _load;
 	private final LuaFunction _loadfile;
 
-	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Object defaultEnv, FileSystem fileSystem) {
-		this._print = out != null ? new Print(out) : null;
+	@Deprecated
+	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Table defaultEnv, FileSystem fileSystem) {
+		this.envTable = defaultEnv;
+
+		this._print = out != null ? new Print(out, envTable) : null;
 
 		if (loader != null) {
 			this._load = new Load(loader, defaultEnv);
@@ -72,8 +79,15 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 	@Deprecated
-	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Object defaultEnv) {
+	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Table defaultEnv) {
 		this(out, loader, defaultEnv, null);
+	}
+
+	public static BasicLib install(StateContext context, Table env, RuntimeEnvironment runtimeEnvironment, ChunkLoader loader) {
+		PrintStream out = runtimeEnvironment.standardOutput() != null ? new PrintStream(runtimeEnvironment.standardOutput()) : null;
+		DefaultBasicLib basicLib = new DefaultBasicLib(out, loader, env, runtimeEnvironment.fileSystem());
+		basicLib.installInto(context, env);
+		return basicLib;
 	}
 
 	@Override
@@ -194,10 +208,26 @@ public class DefaultBasicLib extends BasicLib {
 
 	public static class Print extends AbstractLibFunction {
 
-		private final PrintStream out;
+		static class SuspendedState {
 
-		public Print(PrintStream out) {
-			this.out = Check.notNull(out);
+			private final int state;
+			private final Object tostring;
+			private final Object[] args;
+
+			SuspendedState(int state, Object tostring, Object[] args) {
+				this.state = state;
+				this.tostring = tostring;
+				this.args = args;
+			}
+
+		}
+
+		private final OutputStream out;
+		private final Table envTable;
+
+		public Print(OutputStream out, Table envTable) {
+			this.out = Objects.requireNonNull(out);
+			this.envTable = Objects.requireNonNull(envTable);
 		}
 
 		@Override
@@ -205,42 +235,70 @@ public class DefaultBasicLib extends BasicLib {
 			return "print";
 		}
 
-		private void run(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
-			for (int i = 0; i < args.length; i++) {
-				Object a = args[i];
-				try {
-					Dispatch.call(context, ToString.INSTANCE, a);
-				}
-				catch (UnresolvedControlThrowable ct) {
-					throw ct.resolve(this, Arrays.copyOfRange(args, i + 1, args.length));
-				}
+		private void run(ExecutionContext context, int state, Object tostring, Object[] args) throws ResolvedControlThrowable {
 
-				Object s = context.getReturnBuffer().get0();
-				if (LuaType.isString(s)) {
-					out.print(s);
-				}
-				else {
-					throw new LuaRuntimeException("error calling 'print' ('tostring' must return a string to 'print')");
-				}
+			switch (state) {
 
-				if (i + 1 < args.length) {
-					out.print('\t');
-				}
+				case 0:
+					try {
+						Dispatch.index(context, envTable, ToString.KEY);
+					}
+					catch (UnresolvedControlThrowable ct) {
+						throw ct.resolve(this, new SuspendedState(1, null, args));
+					}
+
+				case 1:
+					tostring = context.getReturnBuffer().get0();
+
+				case 2:
+					try {
+						for (int i = 0; i < args.length; i++) {
+							Object a = args[i];
+							try {
+								Dispatch.call(context, tostring, a);
+							}
+							catch (UnresolvedControlThrowable ct) {
+								throw ct.resolve(this, new SuspendedState(2, tostring, Arrays.copyOfRange(args, i + 1, args.length)));
+							}
+
+							Object s = context.getReturnBuffer().get0();
+							s = Conversions.canonicalRepresentationOf(s);
+
+							if (s instanceof ByteString) {
+								((ByteString) s).writeTo(out);
+							}
+							else {
+								throw new LuaRuntimeException("error calling 'print' ('tostring' must return a string to 'print')");
+							}
+
+							if (i + 1 < args.length) {
+								out.write((byte) '\t');
+							}
+						}
+						out.write((byte) '\n');
+						out.flush();
+					}
+					catch (IOException ex) {
+						throw new LuaRuntimeException(ex);
+					}
+
+					// returning nothing
+					context.getReturnBuffer().setTo();
+					return;
+
+				default: throw new IllegalStateException("Illegal state: " + state);
 			}
-			out.println();
-
-			// returning nothing
-			context.getReturnBuffer().setTo();
 		}
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			run(context, args.getAll());
+			run(context, 0, null, args.getAll());
 		}
 
 		@Override
 		public void resume(ExecutionContext context, Object suspendedState) throws ResolvedControlThrowable {
-			run(context, (Object[]) suspendedState);
+			SuspendedState ss = (SuspendedState) suspendedState;
+			run(context, ss.state, ss.tostring, ss.args);
 		}
 
 	}
@@ -401,6 +459,8 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 	public static class ToString extends AbstractLibFunction {
+
+		static final ByteString KEY = ByteString.constOf("tostring");
 
 		public static final ToString INSTANCE = new ToString();
 
@@ -945,7 +1005,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 
 			// mode
-			final ByteString modeString = args.hasNext()
+			final ByteString modeString = args.hasNext() && args.peek() != null
 					? args.nextString()
 					: DEFAULT_MODE;
 
