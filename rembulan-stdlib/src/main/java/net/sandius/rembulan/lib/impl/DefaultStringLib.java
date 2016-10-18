@@ -1273,7 +1273,7 @@ public class DefaultStringLib extends StringLib {
 			i = lowerBound(i, len) - 1;
 			j = upperBound(j, len);
 
-			ByteString result = s.substring(i, j);
+			ByteString result = i < j ? s.substring(i, j) : ByteString.empty();
 
 			context.getReturnBuffer().setTo(result);
 		}
