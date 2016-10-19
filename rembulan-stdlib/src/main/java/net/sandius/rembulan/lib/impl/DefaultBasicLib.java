@@ -20,7 +20,6 @@ import net.sandius.rembulan.*;
 import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
@@ -51,6 +50,10 @@ import java.util.Objects;
  * of its facilities.
  */
 public final class DefaultBasicLib {
+
+	public static final ByteString MT_TOSTRING = ByteString.constOf("__tostring");
+	public static final ByteString MT_METATABLE = ByteString.constOf("__metatable");
+	public static final ByteString MT_PAIRS = ByteString.constOf("__pairs");
 
 	/**
 	 * {@code assert (v [, message])}
@@ -118,7 +121,7 @@ public final class DefaultBasicLib {
 	 * {@code getmetatable (object)}
 	 *
 	 * <p>If {@code object} does not have a metatable, returns <b>nil</b>. Otherwise,
-	 * if the object's metatable has a {@link BasicLib#MT_METATABLE {@code "__metatable"}} field,
+	 * if the object's metatable has a {@link #MT_METATABLE {@code "__metatable"}} field,
 	 * returns the associated value. Otherwise, returns the metatable of the given object.</p>
 	 */
 	public static final LuaFunction GETMETATABLE = new GetMetatable();
@@ -159,7 +162,7 @@ public final class DefaultBasicLib {
 	/**
 	 * {@code pairs (t)}
 	 *
-	 * <p>If {@code t} has a metamethod {@link BasicLib#MT_PAIRS {@code "__pairs"}}, calls it with
+	 * <p>If {@code t} has a metamethod {@link #MT_PAIRS {@code "__pairs"}}, calls it with
 	 * {@code t} as argument and returns the first three results from the call.</p>
 	 *
 	 * <p>Otherwise, returns three values: the {@link #NEXT {@code next}} function,
@@ -237,7 +240,7 @@ public final class DefaultBasicLib {
 	 * <p>Sets the metatable for the given {@code table}. (To change the metatable of other
 	 * types from Lua code, you must use the debug library (see §6.10 of the Lua Reference
 	 * Manual).) If {@code metatable} is <b>nil</b>, removes the metatable of the given
-	 * table. If the original metatable has a {@link BasicLib#MT_METATABLE {@code "__metatable"}}
+	 * table. If the original metatable has a {@link #MT_METATABLE {@code "__metatable"}}
 	 * field, raises an error.</p>
 	 *
 	 * <p>This function returns {@code table}.</p>
@@ -267,7 +270,7 @@ public final class DefaultBasicLib {
 	 * <p>Receives a value of any type and converts it to a string in a human-readable format.
 	 * (For complete control of how numbers are converted,
 	 * use {@link DefaultStringLib#FORMAT {@code string.format}}.) If the metatable
-	 * of {@code v} has a {@link BasicLib#MT_TOSTRING {@code "__tostring"}} field,
+	 * of {@code v} has a {@link #MT_TOSTRING {@code "__tostring"}} field,
 	 * then {@code tostring} calls the corresponding value with {@code v} as argument, and uses
 	 * the result of the call as its result.</p>
 	 */
@@ -581,7 +584,7 @@ public final class DefaultBasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
-			Object metamethod = Metatables.getMetamethod(context, BasicLib.MT_PAIRS, t);
+			Object metamethod = Metatables.getMetamethod(context, MT_PAIRS, t);
 
 			if (metamethod != null) {
 				try {
@@ -636,7 +639,7 @@ public final class DefaultBasicLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object arg = args.nextAny();
 
-			Object meta = Metatables.getMetamethod(context, BasicLib.MT_TOSTRING, arg);
+			Object meta = Metatables.getMetamethod(context, MT_TOSTRING, arg);
 			if (meta != null) {
 				try {
 					Dispatch.call(context, meta, arg);
@@ -717,7 +720,7 @@ public final class DefaultBasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object arg = args.nextAny();
-			Object meta = Metatables.getMetamethod(context, BasicLib.MT_METATABLE, arg);
+			Object meta = Metatables.getMetamethod(context, MT_METATABLE, arg);
 
 			Object result = meta != null
 					? meta  // __metatable field present, return its value
@@ -740,7 +743,7 @@ public final class DefaultBasicLib {
 			Table t = args.nextTable();
 			Table mt = args.nextTableOrNil();
 
-			if (Metatables.getMetamethod(context, BasicLib.MT_METATABLE, t) != null) {
+			if (Metatables.getMetamethod(context, MT_METATABLE, t) != null) {
 				throw new IllegalOperationAttemptException("cannot change a protected metatable");
 			}
 			else {

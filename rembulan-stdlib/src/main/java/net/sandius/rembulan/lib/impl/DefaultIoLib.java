@@ -23,7 +23,6 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.lib.impl.io.InputStreamIoFile;
@@ -122,7 +121,7 @@ public final class DefaultIoLib {
 
 		mt.rawset(Metatables.MT_INDEX, mt);
 		mt.rawset(Lib.MT_NAME, IoFile.typeName());
-		mt.rawset(BasicLib.MT_TOSTRING, IoFile.TOSTRING);
+		mt.rawset(DefaultBasicLib.MT_TOSTRING, IoFile.TOSTRING);
 		// TODO: set the __gc metamethod
 		mt.rawset("close", IoFile.CLOSE);
 		mt.rawset("flush", IoFile.FLUSH);

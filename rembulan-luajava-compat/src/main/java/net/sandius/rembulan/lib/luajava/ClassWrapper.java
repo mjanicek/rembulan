@@ -22,8 +22,8 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.ImmutableTable;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.Lib;
+import net.sandius.rembulan.lib.impl.DefaultBasicLib;
 import net.sandius.rembulan.lib.impl.NameMetamethodValueTypeNamer;
 import net.sandius.rembulan.runtime.AbstractFunctionAnyArg;
 import net.sandius.rembulan.runtime.ExecutionContext;
@@ -91,7 +91,7 @@ final class ClassWrapper<T> extends JavaWrapper<Class<T>> {
 	static final ImmutableTable METATABLE = new ImmutableTable.Builder()
 			.add(Metatables.MT_INDEX, GetStaticMemberAccessor.INSTANCE)
 			.add(Lib.MT_NAME, staticTypeName())
-			.add(BasicLib.MT_TOSTRING, ToString.INSTANCE)
+			.add(DefaultBasicLib.MT_TOSTRING, ToString.INSTANCE)
 			.build();
 
 	static class GetStaticMemberAccessor extends AbstractGetMemberAccessor {

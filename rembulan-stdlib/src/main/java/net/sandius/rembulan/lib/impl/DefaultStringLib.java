@@ -28,7 +28,6 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.AbstractFunction0;
 import net.sandius.rembulan.runtime.Dispatch;
@@ -88,7 +87,7 @@ public final class DefaultStringLib {
 	 * {@code string.dump (function [, strip])}
 	 *
 	 * <p>Returns a string containing a binary representation (a binary chunk) of the given
-	 * function, so that a later {@link BasicLib#_load() {@code load}} on this string
+	 * function, so that a later {@link DefaultBasicLib.Load {@code load}} on this string
 	 * returns a copy of the function (but with new upvalues). If {@code strip} is a true value,
 	 * the binary representation may not include all debug information about the function,
 	 * to save space.</p>
@@ -148,7 +147,7 @@ public final class DefaultStringLib {
 	 * all expect a number as argument. Options {@code c}, {@code d}, {@code i}, {@code o},
 	 * {@code u}, {@code X}, and {@code x} expect an integer. Option {@code q} expects a string.
 	 * Option {@code s} expects a string; if its argument is not a string, it is converted
-	 * to one following the same rules of {@link BasicLib#_tostring() {@code tostring}}.
+	 * to one following the same rules of {@link DefaultBasicLib#TOSTRING {@code tostring}}.
 	 * If the option has any modifier (flags, width, length), the string argument should
 	 * not contain embedded zeros. When Lua is compiled with a non-C99 compiler, options
 	 * {@code A} and {@code a} (hexadecimal floats) do not support any modifier (flags, width,
@@ -841,7 +840,7 @@ public final class DefaultStringLib {
 				s = stringValue.toString();
 			}
 			else {
-				Object metamethod = Metatables.getMetamethod(context, BasicLib.MT_TOSTRING, v);
+				Object metamethod = Metatables.getMetamethod(context, DefaultBasicLib.MT_TOSTRING, v);
 				if (metamethod != null) {
 					// call __tostring
 					try {
