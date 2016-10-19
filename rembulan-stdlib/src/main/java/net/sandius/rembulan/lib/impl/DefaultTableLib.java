@@ -22,9 +22,10 @@ import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.Ordering;
 import net.sandius.rembulan.PlainValueTypeNamer;
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.TableLib;
+import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -34,51 +35,126 @@ import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 import java.util.ArrayList;
 
-public class DefaultTableLib extends TableLib {
+/**
+ * <p>This library provides generic functions for table manipulation. It provides all its functions
+ * inside the table {@code table}.</p>
+ *
+ * <p>Remember that, whenever an operation needs the length of a table, the table must be a proper
+ * sequence or have a {@code __len} metamethod (see §3.4.7 of the Lua Reference Manual).
+ * All functions ignore non-numeric keys in the tables given as arguments.</p>
+ */
+public final class DefaultTableLib {
 
-	// Functions defined in this code are among the ugliest pieces of code ever written.
+	// Functions defined in this class are among the ugliest pieces of code ever written.
 	// This is because we must assume that any operation that may suspend will -- and
 	// given that most of these functions involve a loop, this means we must be able to
 	// suspend and resume *in the middle* of such loops. Whenever a more complex logic
 	// is involved, this becomes extremely hairy -- table.sort is a particularly juicy
 	// example.
 
-	public DefaultTableLib() {
+	/**
+	 * {@code table.concat (list [, sep [, i [, j]]])}
+	 *
+	 * <p>Given a list where all elements are strings or numbers, returns the string
+	 * {@code list[i]..sep..list[i+1] ··· sep..list[j]}. The default value for {@code sep}
+	 * is the empty string, the default for {@code i} is 1, and the default for {@code j}
+	 * is {@code #list}. If {@code i} is greater than {@code j}, returns the empty string.</p>
+	 */
+	public static final LuaFunction CONCAT = new Concat();
+
+	/**
+	 * {@code table.insert (list, [pos,] value)}
+	 *
+	 * <p>Inserts element value at position {@code pos} in {@code list}, shifting up the elements
+	 * {@code list[pos], list[pos+1], ···, list[#list]}. The default value for {@code pos}
+	 * is {@code #list+1}, so that a call {@code table.insert(t,x)} inserts {@code x}
+	 * at the end of list {@code t}.</p>
+	 */
+	public static final LuaFunction INSERT = new Insert();
+
+	/**
+	 * {@code table.move (a1, f, e, t [,a2])}
+	 *
+	 * <p>Moves elements from table {@code a1} to table {@code a2}. This function performs
+	 * the equivalent to the following multiple assignment:
+	 * {@code a2[t],··· = a1[f],···,a1[e]}. The default for {@code a2} is {@code a1}.
+	 * The destination range can overlap with the source range. The number of elements
+	 * to be moved must fit in a Lua integer.</p>
+	 */
+	public static final LuaFunction MOVE = new Move();
+
+	/**
+	 * {@code table.pack (···)}
+	 *
+	 * <p>Returns a new table with all parameters stored into keys 1, 2, etc. and with
+	 * a field {@code "n"} with the total number of parameters. Note that the resulting table
+	 * may not be a sequence.</p>
+	 */
+	public static final LuaFunction PACK = new Pack();
+
+	/**
+	 * {@code table.remove (list [, pos])}
+	 *
+	 * <p>Removes from {@code list} the element at position {@code pos}, returning the value
+	 * of the removed element. When {@code pos} is an integer between 1 and {@code #list},
+	 * it shifts down the elements{@code  list[pos+1], list[pos+2], ···, list[#list]}
+	 * and erases element {@code list[#list]}; The index pos can also be 0 when {@code #list}
+	 * is 0, or {@code #list + 1}; in those cases, the function erases the element
+	 * {@code list[pos]}.</p>
+	 *
+	 * <p>The default value for {@code pos} is {@code #list}, so that a call
+	 * {@code table.remove(l)} removes the last element of list {@code l}.</p>
+	 */
+	public static final LuaFunction REMOVE = new Remove();
+
+	/**
+	 * {@code table.sort (list [, comp])}
+	 *
+	 * <p>Sorts list elements in a given order, in-place, from {@code list[1]}
+	 * to {@code list[#list]}. If {@code comp} is given, then it must be a function that receives
+	 * two list elements and returns <b>true</b> when the first element must come before
+	 * the second in the final order (so that, after the sort, {@code i < j} implies
+	 * {@code not comp(list[j],list[i])}). If {@code comp} is not given, then the standard
+	 * Lua operator {@code <} is used instead.</p>
+	 *
+	 * <p>Note that the {@code comp} function must define a strict partial order over the elements
+	 * in the list; that is, it must be asymmetric and transitive. Otherwise, no valid sort may
+	 * be possible.</p>
+	 *
+	 * <p>The sort algorithm is not stable; that is, elements not comparable by the given order
+	 * (e.g., equal elements) may have their relative positions changed by the sort.</p>
+	 */
+	public static final LuaFunction SORT = new Sort();
+
+	/**
+	 * {@code table.unpack (list [, i [, j]])}
+	 *
+	 * <p>Returns the elements from the given list. This function is equivalent to</p>
+	 *
+	 * <blockquote>
+	 *  {@code return list[i], list[i+1], ···, list[j] }
+	 * </blockquote>
+	 *
+	 * <p>By default, {@code i} is 1 and {@code j} is {@code #list}.</p>
+	 */
+	public static final LuaFunction UNPACK = new Unpack();
+
+	private DefaultTableLib() {
+		// not to be instantiated
 	}
 
-	@Override
-	public LuaFunction _concat() {
-		return Concat.INSTANCE;
-	}
+	public static void installInto(StateContext context, Table env) {
+		Table t = context.newTable();
 
-	@Override
-	public LuaFunction _insert() {
-		return Insert.INSTANCE;
-	}
+		t.rawset("concat", CONCAT);
+		t.rawset("insert", INSERT);
+		t.rawset("move", MOVE);
+		t.rawset("pack", PACK);
+		t.rawset("remove", REMOVE);
+		t.rawset("sort", SORT);
+		t.rawset("unpack", UNPACK);
 
-	@Override
-	public LuaFunction _move() {
-		return Move.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _pack() {
-		return Pack.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _remove() {
-		return Remove.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _sort() {
-		return Sort.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _unpack() {
-		return Unpack.INSTANCE;
+		ModuleLibHelper.install(env, "table", t);
 	}
 
 	static long getLength(ReturnBuffer rbuf) {
@@ -92,9 +168,7 @@ public class DefaultTableLib extends TableLib {
 		}
 	}
 
-	public static class Concat extends AbstractLibFunction {
-
-		public static final Concat INSTANCE = new Concat();
+	static class Concat extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -276,9 +350,7 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
-	public static class Insert extends AbstractLibFunction {
-
-		public static final Insert INSTANCE = new Insert();
+	static class Insert extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -495,9 +567,7 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
-	public static class Move extends AbstractLibFunction {
-
-		public static final Move INSTANCE = new Move();
+	static class Move extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -642,9 +712,7 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
-	public static class Pack extends AbstractLibFunction {
-
-		public static final Pack INSTANCE = new Pack();
+	static class Pack extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -667,9 +735,7 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
-	public static class Remove extends AbstractLibFunction {
-
-		public static final Remove INSTANCE = new Remove();
+	static class Remove extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -931,11 +997,9 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
-	public static class Sort extends AbstractLibFunction {
+	static class Sort extends AbstractLibFunction {
 
 		// implemented using heapsort
-
-		public static final Sort INSTANCE = new Sort();
 
 		@Override
 		protected String name() {
@@ -1339,9 +1403,7 @@ public class DefaultTableLib extends TableLib {
 
 	}
 
-	public static class Unpack extends AbstractLibFunction {
-
-		public static final Unpack INSTANCE = new Unpack();
+	static class Unpack extends AbstractLibFunction {
 
 		@Override
 		protected String name() {

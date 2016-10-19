@@ -16,11 +16,11 @@
 
 package net.sandius.rembulan.test
 
-import java.io.PrintStream
 import java.util.Scanner
 
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
+import net.sandius.rembulan.env.RuntimeEnvironments
 import net.sandius.rembulan.exec.DirectCallExecutor
 import net.sandius.rembulan.impl.StateContexts
 import net.sandius.rembulan.lib.impl._
@@ -88,18 +88,19 @@ object BenchmarkRunner {
   }
 
   def initEnv(context: StateContext, loader: ChunkLoader, args: Seq[String]): Table = {
+    val runtimeEnv = RuntimeEnvironments.system()
     val env = context.newTable()
 
-    new DefaultBasicLib(new PrintStream(System.out), loader, env).installInto(context, env)
-    new DefaultModuleLib(context, env).installInto(context, env)
-    new DefaultCoroutineLib().installInto(context, env)
-    new DefaultMathLib().installInto(context, env)
-    new DefaultStringLib().installInto(context, env)
-    new DefaultIoLib(context).installInto(context, env)
-    new DefaultOsLib().installInto(context, env)
-    new DefaultUtf8Lib().installInto(context, env)
-    new DefaultTableLib().installInto(context, env)
-    new DefaultDebugLib().installInto(context, env)
+    DefaultBasicLib.installInto(context, env, runtimeEnv, loader)
+    DefaultModuleLib.installInto(context, env, runtimeEnv, loader, getClass.getClassLoader)
+    DefaultCoroutineLib.installInto(context, env)
+    DefaultMathLib.installInto(context, env)
+    DefaultStringLib.installInto(context, env)
+    DefaultIoLib.installInto(context, env, runtimeEnv)
+    DefaultOsLib.installInto(context, env, runtimeEnv)
+    DefaultUtf8Lib.installInto(context, env)
+    DefaultTableLib.installInto(context, env)
+    DefaultDebugLib.installInto(context, env)
 
     // command-line arguments
     val argTable = context.newTable()

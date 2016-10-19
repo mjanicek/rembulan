@@ -40,4 +40,19 @@ public final class ModuleLibHelper {
 		}
 	}
 
+	public static void addToLoaded(Table env, String modName, Object value) {
+		Object pkg = env.rawget("package");
+		if (pkg instanceof Table) {
+			Object loaded = ((Table) pkg).rawget("loaded");
+			if (loaded instanceof Table) {
+				((Table) loaded).rawset(modName, value);
+			}
+		}
+	}
+
+	public static void install(Table env, String modName, Object value) {
+		env.rawset(modName, value);
+		addToLoaded(env, modName, value);
+	}
+
 }

@@ -19,12 +19,8 @@ package net.sandius.rembulan.lib.impl;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.env.RuntimeEnvironment;
-import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.load.ChunkLoader;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.FileSystem;
 import java.util.Objects;
 
 /**
@@ -113,22 +109,19 @@ public class StandardLibrary {
 		Objects.requireNonNull(state);
 		Table env = state.newTable();
 
-		InputStream in = environment.standardInput();
-		OutputStream out = environment.standardOutput();
-		OutputStream err = environment.standardError();
-		FileSystem fileSystem = environment.fileSystem();
+		DefaultBasicLib.installInto(state, env, environment, loader);
+		DefaultModuleLib.installInto(state, env, environment, loader, ClassLoader.getSystemClassLoader());
+		DefaultCoroutineLib.installInto(state, env);
+		DefaultStringLib.installInto(state, env);
+		DefaultMathLib.installInto(state, env);
+		DefaultTableLib.installInto(state, env);
+		DefaultIoLib.installInto(state, env, environment);
+		DefaultOsLib.installInto(state, env, environment);
+		DefaultUtf8Lib.installInto(state, env);
+		if (withDebug) {
+			DefaultDebugLib.installInto(state, env);
+		}
 
-		DefaultBasicLib.install(state, env, environment, loader);
-		ModuleLib moduleLib = new DefaultModuleLib(state, environment, env, ClassLoader.getSystemClassLoader(), loader);
-		moduleLib.installInto(state, env);
-		moduleLib.install(new DefaultCoroutineLib());
-		moduleLib.install(new DefaultStringLib());
-		moduleLib.install(new DefaultMathLib());
-		moduleLib.install(new DefaultTableLib());
-		moduleLib.install(new DefaultIoLib(state, fileSystem, in, out, err));
-		moduleLib.install(new DefaultOsLib(environment));
-		moduleLib.install(new DefaultUtf8Lib());
-		moduleLib.install(new DefaultDebugLib());
 		return env;
 	}
 

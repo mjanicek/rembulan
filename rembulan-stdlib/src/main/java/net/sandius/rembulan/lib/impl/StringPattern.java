@@ -43,7 +43,6 @@
 
 package net.sandius.rembulan.lib.impl;
 
-import net.sandius.rembulan.lib.StringLib;
 import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
@@ -55,10 +54,10 @@ import java.util.Set;
 
 /**
  * Patterns in Lua are described by regular strings, which are interpreted as patterns
- * by the pattern-matching functions {@link StringLib#_find() {@code string.find}},
- * {@link StringLib#_gmatch() {@code string.gmatch}},
- * {@link StringLib#_gsub() {@code string.gsub}},
- * and {@link StringLib#_match() {@code string.match}}.
+ * by the pattern-matching functions {@link DefaultStringLib#FIND {@code string.find}},
+ * {@link DefaultStringLib#GMATCH {@code string.gmatch}},
+ * {@link DefaultStringLib#GSUB {@code string.gsub}},
+ * and {@link DefaultStringLib#MATCH {@code string.match}}.
  * This section describes the syntax and the meaning (that is, what they match) of these
  * strings.
  *

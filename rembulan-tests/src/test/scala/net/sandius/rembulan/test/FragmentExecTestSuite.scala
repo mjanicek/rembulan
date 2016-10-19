@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.test
 
-import java.nio.file.FileSystems
-
 import net.sandius.rembulan.compiler.CompilerSettings.CPUAccountingMode
 import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.env.RuntimeEnvironments
@@ -62,54 +60,54 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   protected def envForContext(state: StateContext, ctx: Env, ldr: ChunkLoader, printer: Printer): Table = {
     val env = state.newTable()
     val runtimeEnv = RuntimeEnvironments.system()  // FIXME
+    val moduleClassLoader = this.getClass().getClassLoader
+
     ctx match {
       case Empty =>
         // no-op
 
       case Basic =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
 
       case Mod =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
-        new DefaultModuleLib(state, env).installInto(state, env)
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        DefaultModuleLib.installInto(state, env, runtimeEnv, ldr, moduleClassLoader)
 
       case Coro =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
-        new DefaultCoroutineLib().installInto(state, env)
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        DefaultCoroutineLib.installInto(state, env)
 
       case Math =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
-        new DefaultMathLib().installInto(state, env)
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        DefaultMathLib.installInto(state, env)
 
       case Str =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
-        new DefaultStringLib().installInto(state, env)
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        DefaultStringLib.installInto(state, env)
 
       case IO =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
-        new DefaultIoLib(state).installInto(state, env)
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        DefaultIoLib.installInto(state, env, runtimeEnv)
 
       case Tab =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
-        new DefaultTableLib().installInto(state, env)
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        DefaultTableLib.installInto(state, env)
 
       case Debug =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
-        new DefaultDebugLib().installInto(state, env)
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        DefaultDebugLib.installInto(state, env)
 
       case Full =>
-        DefaultBasicLib.install(state, env, runtimeEnv, ldr)
-        val moduleLib = new DefaultModuleLib(state, env)
-        moduleLib.installInto(state, env)
-        
-        moduleLib.install(new DefaultCoroutineLib())
-        moduleLib.install(new DefaultMathLib())
-        moduleLib.install(new DefaultStringLib())
-        moduleLib.install(new DefaultIoLib(state, FileSystems.getDefault, null, printer.out, printer.err))
-        moduleLib.install(new DefaultOsLib())
-        moduleLib.install(new DefaultTableLib())
-        moduleLib.install(new DefaultUtf8Lib())
-        moduleLib.install(new DefaultDebugLib())
+        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        DefaultModuleLib.installInto(state, env, runtimeEnv, ldr, moduleClassLoader)
+        DefaultCoroutineLib.installInto(state, env)
+        DefaultMathLib.installInto(state, env)
+        DefaultStringLib.installInto(state, env)
+        DefaultIoLib.installInto(state, env, runtimeEnv)
+        DefaultOsLib.installInto(state, env, runtimeEnv)
+        DefaultTableLib.installInto(state, env)
+        DefaultUtf8Lib.installInto(state, env)
+        DefaultDebugLib.installInto(state, env)
     }
 
     env

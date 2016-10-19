@@ -17,8 +17,10 @@
 package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.Conversions;
+import net.sandius.rembulan.StateContext;
+import net.sandius.rembulan.Table;
 import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.MathLib;
+import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -26,159 +28,253 @@ import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Objects;
 import java.util.Random;
 
-public class DefaultMathLib extends MathLib {
+/**
+ * This library provides basic mathematical functions. It provides all its functions and constants
+ * inside the table {@code math}. Functions with the annotation "integer/float" give integer
+ * results for integer arguments and float results for float (or mixed) arguments. Rounding
+ * functions ({@link #CEIL {@code math.ceil}}, {@link #FLOOR {@code math.floor}},
+ * and {@link #MODF {@code math.modf}}) return an integer when the result fits
+ * in the range of an integer, or a float otherwise.
+ */
+public final class DefaultMathLib {
 
-	private final LuaFunction _random;
-	private final LuaFunction _randomseed;
+	/**
+	 * {@code math.abs (x)}
+	 *
+	 * <p>Returns the absolute value of {@code x}. (integer/float)</p>
+	 */
+	public static final LuaFunction ABS = new Abs();
 
-	public DefaultMathLib(Random random) {
-		Check.notNull(random);
-		this._random = new Rand(random);
-		this._randomseed = new RandSeed(random);
+	/**
+	 * {@code math.acos (x)}
+	 *
+	 * <p>Returns the arc cosine of {@code x} (in radians).</p>
+	 */
+	public static final LuaFunction ACOS = new ACos();
+
+	/**
+	 * {@code math.asin (x)}
+	 *
+	 * <p>Returns the arc sine of {@code x} (in radians).</p>
+	 */
+	public static final LuaFunction ASIN = new ASin();
+
+	/**
+	 * {@code math.atan (x)}
+	 *
+	 * <p>Returns the arc tangent of {@code y/x} (in radians), but uses the signs of both
+	 * parameters to find the quadrant of the result. (It also handles correctly the case
+	 * of {@code x} being zero.)</p>
+	 *
+	 * <p>The default value for {@code x} is 1, so that the call {@code math.atan(y)} returns
+	 * the arc tangent of {@code y}.</p>
+	 */
+	public static final LuaFunction ATAN = new ATan();
+
+	/**
+	 * {@code math.ceil (x)}
+	 *
+	 * <p>Returns the smallest integer larger than or equal to {@code x}.</p>
+	 */
+	public static final LuaFunction CEIL = new Ceil();
+
+	/**
+	 * {@code math.cos (x)}
+	 *
+	 * <p>Returns the cosine of {@code x} (assumed to be in radians).</p>
+	 */
+	public static final LuaFunction COS = new Cos();
+
+	/**
+	 * {@code math.deg (x)}
+	 *
+	 * <p>Returns the angle {@code x} (given in radians) in degrees.</p>
+	 */
+	public static final LuaFunction DEG = new Deg();
+
+	/**
+	 * {@code math.exp (x)}
+	 *
+	 * <p>Returns the value <i>e</i><sup>{@code x}</sup> (where <i>e</i> is the base
+	 * of natural logarithms).</p>
+	 */
+	public static final LuaFunction EXP = new Exp();
+
+	/**
+	 * {@code math.floor (x)}
+	 *
+	 * <p>Returns the largest integral value smaller than or equal to {@code x}.</p>
+	 */
+	public static final LuaFunction FLOOR = new Floor();
+
+	/**
+	 * {@code math.fmod (x, y)}
+	 *
+	 * <p>Returns the remainder of the division of {@code x} by {@code y} that rounds
+	 * the quotient towards zero. (integer/float)</p>
+	 */
+	public static final LuaFunction FMOD = new FMod();
+
+	/**
+	 * {@code math.huge}
+	 *
+	 * <p>The value {@code HUGE_VAL}, a value larger than or equal to any other numerical
+	 * value.</p>
+	 */
+	public static final Double HUGE = Double.POSITIVE_INFINITY;
+
+	/**
+	 * {@code math.log (x [, base])}
+	 *
+	 * <p>Returns the logarithm of {@code x} in the given base. The default for {@code base}
+	 * is <i>e</i> (so that the function returns the natural logarithm of {@code x}).</p>
+	 */
+	public static final LuaFunction LOG = new Log();
+
+	/**
+	 * {@code math.max (x, ···)}
+	 *
+	 * <p>Returns the argument with the maximum value, according to the Lua operator &lt;.
+	 * (integer/float)</p>
+	 */
+	public static final LuaFunction MAX = new MaxMin(true);
+
+	/**
+	 * An integer with the maximum value for an integer.
+	 */
+	public static final Long MAXINTEGER = Long.MAX_VALUE;
+
+	/**
+	 * {@code math.min (x, ···)}
+	 *
+	 * <p>Returns the argument with the minimum value, according to the Lua operator &lt;.
+	 * (integer/float)</p>
+	 */
+	public static final LuaFunction MIN = new MaxMin(false);
+
+	/**
+	 * An integer with the minimum value for an integer.
+	 */
+	public static final Long MININTEGER = Long.MIN_VALUE;
+
+	/**
+	 * {@code math.modf (x)}
+	 *
+	 * <p>Returns the integral part of {@code x} and the fractional part of {@code x}.
+	 * Its second result is always a float.</p>
+	 */
+	public static final LuaFunction MODF = new ModF();
+
+	/**
+	 * {@code math.pi}
+	 *
+	 * <p>The value of &pi;.</p>
+	 */
+	public static final Double PI = Math.PI;
+
+	/**
+	 * {@code math.rad (x)}
+	 *
+	 * <p>Returns the angle {@code x} (given in degrees) in radians.</p>
+	 */
+	public static final LuaFunction RAD = new Rad();
+
+	/**
+	 * {@code math.sin (x)}
+	 *
+	 * <p>Returns the sine of {@code x} (assumed to be in radians).</p>
+	 */
+	public static final LuaFunction SIN = new Sin();
+
+	/**
+	 * {@code math.sqrt (x)}
+	 *
+	 * <p>Returns the square root of {@code x}. (You can also use the expression {@code x^0.5}
+	 * to compute this value.)</p>
+	 */
+	public static final LuaFunction SQRT = new Sqrt();
+
+	/**
+	 * {@code math.tan (x)}
+	 *
+	 * <p>Returns the tangent of {@code x} (assumed to be in radians).</p>
+	 */
+	public static final LuaFunction TAN = new Tan();
+
+	/**
+	 * {@code math.tointeger (x)}
+	 *
+	 * <p>If the value {@code x} is convertible to an integer, returns that integer.
+	 * Otherwise, returns <b>nil</b>.</p>
+	*/
+	public static final LuaFunction TOINTEGER = new ToInteger();
+
+	/**
+	 * {@code math.type (x)}
+	 *
+	 * <p>Returns {@code "integer"} if {@code x} is an integer, {@code "float"} if it is a float,
+	 * or <b>nil</b> if {@code x} is not a number.</p>
+	 */
+	public static final LuaFunction TYPE = new Type();
+
+	/**
+	 * {@code math.ult (m, n)}
+	 *
+	 * <p>Returns a boolean, <b>true</b> if integer {@code m} is below integer {@code n} when
+	 * they are compared as unsigned integers.</p>
+	 */
+	public static final LuaFunction ULT = new ULt();
+
+	private DefaultMathLib() {
+		// not to be instantiated
 	}
 
-	public DefaultMathLib() {
-		this(new Random());
+	public static void installInto(StateContext context, Table env, Random random) {
+
+		LuaFunction rand = new Rand(random);
+		LuaFunction randSeed = new RandSeed(random);
+
+		Table t = context.newTable();
+
+		t.rawset("abs", ABS);
+		t.rawset("acos", ACOS);
+		t.rawset("asin", ASIN);
+		t.rawset("atan", ATAN);
+		t.rawset("ceil", CEIL);
+		t.rawset("cos", COS);
+		t.rawset("deg", DEG);
+		t.rawset("exp", EXP);
+		t.rawset("floor", FLOOR);
+		t.rawset("fmod", FMOD);
+		t.rawset("huge", HUGE);
+		t.rawset("log", LOG);
+		t.rawset("max", MAX);
+		t.rawset("maxinteger", MAXINTEGER);
+		t.rawset("min", MIN);
+		t.rawset("mininteger", MININTEGER);
+		t.rawset("modf", MODF);
+		t.rawset("pi", PI);
+		t.rawset("rad", RAD);
+		t.rawset("random", rand);
+		t.rawset("randomseed", randSeed);
+		t.rawset("sin", SIN);
+		t.rawset("sqrt", SQRT);
+		t.rawset("tan", TAN);
+		t.rawset("tointeger", TOINTEGER);
+		t.rawset("type", TYPE);
+		t.rawset("ult", ULT);
+		
+		ModuleLibHelper.install(env, "math", t);
 	}
 
-	@Override
-	public LuaFunction _abs() {
-		return Abs.INSTANCE;
+	public static void installInto(StateContext context, Table env) {
+		installInto(context, env, new Random());
 	}
 
-	@Override
-	public LuaFunction _acos() {
-		return ACos.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _asin() {
-		return ASin.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _atan() {
-		return ATan.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _ceil() {
-		return Ceil.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _cos() {
-		return Cos.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _deg() {
-		return Deg.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _exp() {
-		return Exp.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _floor() {
-		return Floor.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _fmod() {
-		return FMod.INSTANCE;
-	}
-
-	@Override
-	public Double _huge() {
-		return Double.POSITIVE_INFINITY;
-	}
-
-	@Override
-	public LuaFunction _log() {
-		return Log.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _max() {
-		return MaxMin.MAX_INSTANCE;
-	}
-
-	@Override
-	public Long _maxinteger() {
-		return Long.MAX_VALUE;
-	}
-
-	@Override
-	public LuaFunction _min() {
-		return MaxMin.MIN_INSTANCE;
-	}
-
-	@Override
-	public Long _mininteger() {
-		return Long.MIN_VALUE;
-	}
-
-	@Override
-	public LuaFunction _modf() {
-		return ModF.INSTANCE;
-	}
-
-	@Override
-	public Double _pi() {
-		return Math.PI;
-	}
-
-	@Override
-	public LuaFunction _rad() {
-		return Rad.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _random() {
-		return _random;
-	}
-
-	@Override
-	public LuaFunction _randomseed() {
-		return _randomseed;
-	}
-
-	@Override
-	public LuaFunction _sin() {
-		return Sin.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _sqrt() {
-		return Sqrt.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _tan() {
-		return Tan.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _tointeger() {
-		return ToInteger.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _type() {
-		return Type.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _ult() {
-		return ULt.INSTANCE;
-	}
-
-	public static abstract class AbstractMathFunction1 extends AbstractLibFunction {
+	static abstract class AbstractMathFunction1 extends AbstractLibFunction {
 
 		protected abstract Number op(double x);
 
@@ -195,9 +291,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Abs extends AbstractMathFunction1 {
-
-		public static final Abs INSTANCE = new Abs();
+	static class Abs extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -216,9 +310,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ACos extends AbstractMathFunction1 {
-
-		public static final ACos INSTANCE = new ACos();
+	static class ACos extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -232,9 +324,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ASin extends AbstractMathFunction1 {
-
-		public static final ASin INSTANCE = new ASin();
+	static class ASin extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -248,9 +338,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ATan extends AbstractMathFunction1 {
-
-		public static final ATan INSTANCE = new ATan();
+	static class ATan extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -264,9 +352,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Ceil extends AbstractMathFunction1 {
-
-		public static final Ceil INSTANCE = new Ceil();
+	static class Ceil extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -287,9 +373,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Cos extends AbstractMathFunction1 {
-
-		public static final Cos INSTANCE = new Cos();
+	static class Cos extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -303,9 +387,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Deg extends AbstractMathFunction1 {
-
-		public static final Deg INSTANCE = new Deg();
+	static class Deg extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -319,9 +401,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Exp extends AbstractMathFunction1 {
-
-		public static final Exp INSTANCE = new Exp();
+	static class Exp extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -335,9 +415,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Floor extends AbstractMathFunction1 {
-
-		public static final Floor INSTANCE = new Floor();
+	static class Floor extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -360,9 +438,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class FMod extends AbstractLibFunction {
-
-		public static final FMod INSTANCE = new FMod();
+	static class FMod extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -398,9 +474,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Log extends AbstractLibFunction {
-
-		public static final Log INSTANCE = new Log();
+	static class Log extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -428,12 +502,9 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class MaxMin extends AbstractLibFunction {
+	static class MaxMin extends AbstractLibFunction {
 
 		private final boolean isMax;
-
-		public static final MaxMin MAX_INSTANCE = new MaxMin(true);
-		public static final MaxMin MIN_INSTANCE = new MaxMin(false);
 
 		public MaxMin(boolean isMax) {
 			this.isMax = isMax;
@@ -507,9 +578,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ModF extends AbstractLibFunction {
-
-		public static final ModF INSTANCE = new ModF();
+	static class ModF extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -548,9 +617,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Rad extends AbstractMathFunction1 {
-
-		public static final Rad INSTANCE = new Rad();
+	static class Rad extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -564,12 +631,37 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
+	/**
+	 * {@code math.random ([m [, n]])}
+	 *
+	 * <p>When called without arguments, returns a uniform pseudo-random real number
+	 * in the range <i>[0,1)</i>. When called with an integer number {@code m},
+	 * {@code math.random} returns a uniform pseudo-random integer in the range
+	 * <i>[1, m]</i>. When called with two integer numbers {@code m} and {@code n},
+	 * {@code math.random} returns a uniform pseudo-random integer in the range
+	 * <i>[m, n]</i>.</p>
+	 *
+	 * <p>This function is an interface to the simple pseudo-random generator function
+	 * {@code rand} provided by Standard C. (No guarantees can be given for its statistical
+	 * properties.)</p>
+	 */
 	public static class Rand extends AbstractLibFunction {
 
+		/**
+		 * The random number generator used by this function.
+		 */
 		protected final Random random;
 
+		/**
+		 * Constructs a new {@code math.random} function that uses {@code random} as its
+		 * random number generator.
+		 *
+		 * @param random  the random number generator to use, must not be {@code null}
+		 *
+		 * @throws NullPointerException  if {@code random} is {@code null}
+		 */
 		public Rand(Random random) {
-			this.random = Check.notNull(random);
+			this.random = Objects.requireNonNull(random);
 		}
 
 		@Override
@@ -577,7 +669,12 @@ public class DefaultMathLib extends MathLib {
 			return "random";
 		}
 
-		// return a long in the range [0, n)
+		/**
+		 * Returns a long in the range [0, n).
+		 *
+		 * @param n  the limit
+		 * @return  a random long from the range [0, n)
+		 */
 		protected long nextLong(long n) {
 			Check.nonNegative(n);
 			if (n <= Integer.MAX_VALUE) {
@@ -635,12 +732,29 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
+	/**
+	 * {@code math.randomseed (x)}
+	 *
+	 * <p>Sets {@code x} as the "seed" for the pseudo-random generator: equal seeds produce
+	 * equal sequences of numbers.</p>
+	 */
 	public static class RandSeed extends AbstractLibFunction {
 
+		/**
+		 * The random number generator used by this function.
+		 */
 		protected final Random random;
 
+		/**
+		 * Constructs a new {@code math.randomseed} function that uses {@code random} as its
+		 * random number generator.
+		 *
+		 * @param random  the random number generator to use, must not be {@code null}
+		 *
+		 * @throws NullPointerException  if {@code random} is {@code null}
+		 */
 		public RandSeed(Random random) {
-			this.random = Check.notNull(random);
+			this.random = Objects.requireNonNull(random);
 		}
 
 		@Override
@@ -663,9 +777,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Sin extends AbstractMathFunction1 {
-
-		public static final Sin INSTANCE = new Sin();
+	static class Sin extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -679,9 +791,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Sqrt extends AbstractMathFunction1 {
-
-		public static final Sqrt INSTANCE = new Sqrt();
+	static class Sqrt extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -695,9 +805,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Tan extends AbstractMathFunction1 {
-
-		public static final Tan INSTANCE = new Tan();
+	static class Tan extends AbstractMathFunction1 {
 
 		@Override
 		protected String name() {
@@ -711,9 +819,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ToInteger extends AbstractLibFunction {
-
-		public static final ToInteger INSTANCE = new ToInteger();
+	static class ToInteger extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -728,9 +834,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class Type extends AbstractLibFunction {
-
-		public static final Type INSTANCE = new Type();
+	static class Type extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -752,9 +856,7 @@ public class DefaultMathLib extends MathLib {
 
 	}
 
-	public static class ULt extends AbstractLibFunction {
-
-		public static final ULt INSTANCE = new ULt();
+	static class ULt extends AbstractLibFunction {
 
 		@Override
 		protected String name() {

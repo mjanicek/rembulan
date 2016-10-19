@@ -18,13 +18,14 @@ package net.sandius.rembulan.lib.impl;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Metatables;
+import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.Userdata;
+import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.lib.BasicLib;
-import net.sandius.rembulan.lib.IoLib;
 import net.sandius.rembulan.lib.Lib;
+import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.lib.impl.io.InputStreamIoFile;
 import net.sandius.rembulan.lib.impl.io.OutputStreamIoFile;
 import net.sandius.rembulan.runtime.Dispatch;
@@ -32,17 +33,45 @@ import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
-import net.sandius.rembulan.util.Check;
 
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
-public class DefaultIoLib extends IoLib {
+/**
+ * <p>The I/O library provides two different styles for file manipulation. The first one uses
+ * implicit file handles; that is, there are operations to set a default input file and
+ * a default output file, and all input/output operations are over these default files.
+ * The second style uses explicit file handles.</p>
+ *
+ * <p>When using implicit file handles, all operations are supplied by table {@code io}.
+ * When using explicit file handles, the operation {@code io.open}
+ * returns a file handle and then all operations are supplied as methods of the file handle.</p>
+ *
+ * <p>The table {@code io} also provides three predefined file handles with their usual
+ * meanings from C: {@code io.stdin}, {@code io.stdout}, and {@code io.stderr}.
+ * The I/O library never closes these files.</p>
+ *
+ * Unless otherwise stated, all I/O functions return <b>nil</b> on failure (plus an error
+ * message as a second result and a system-dependent error code as a third result) and some
+ * value different from <b>nil</b> on success. On non-POSIX systems, the computation
+ * of the error message and error code in case of errors may be not thread safe, because they
+ * rely on the global C variable {@code errno}.
+ */
+public final class DefaultIoLib {
+
+	/**
+	 * {@code io.type (obj)}
+	 *
+	 * <p>Checks whether {@code obj} is a valid file handle. Returns the string {@code "file"}
+	 * if {@code obj} is an open file handle, {@code "closed file"} if {@code obj} is
+	 * a closed file handle, or <b>nil</b> if {@code obj} is not a file handle.</p>
+	 */
+	public static final LuaFunction TYPE = new Type();
 
 	private final LuaFunction _close;
 	private final LuaFunction _flush;
@@ -66,15 +95,15 @@ public class DefaultIoLib extends IoLib {
 	private IoFile defaultInput;
 	private IoFile defaultOutput;
 
-	public DefaultIoLib(
+	private DefaultIoLib(
 			TableFactory tableFactory,
 			FileSystem fileSystem,
 			InputStream in,
 			OutputStream out,
 			OutputStream err) {
 
-		Check.notNull(tableFactory);
-		Check.notNull(fileSystem);
+		Objects.requireNonNull(tableFactory);
+		Objects.requireNonNull(fileSystem);
 
 		this._close = new Close(this);
 		this._flush = new Flush(this);
@@ -93,15 +122,15 @@ public class DefaultIoLib extends IoLib {
 
 		mt.rawset(Metatables.MT_INDEX, mt);
 		mt.rawset(Lib.MT_NAME, IoFile.typeName());
-		mt.rawset(BasicLib.MT_TOSTRING, _file_tostring());
+		mt.rawset(BasicLib.MT_TOSTRING, IoFile.TOSTRING);
 		// TODO: set the __gc metamethod
-		mt.rawset("close", _file_close());
-		mt.rawset("flush", _file_flush());
-		mt.rawset("lines", _file_lines());
-		mt.rawset("read", _file_read());
-		mt.rawset("seek", _file_seek());
-		mt.rawset("setvbuf", _file_setvbuf());
-		mt.rawset("write", _file_write());
+		mt.rawset("close", IoFile.CLOSE);
+		mt.rawset("flush", IoFile.FLUSH);
+		mt.rawset("lines", IoFile.LINES);
+		mt.rawset("read", IoFile.READ);
+		mt.rawset("seek", IoFile.SEEK);
+		mt.rawset("setvbuf", IoFile.SETVBUF);
+		mt.rawset("write", IoFile.WRITE);
 
 		this.fileSystem = fileSystem;
 
@@ -113,122 +142,40 @@ public class DefaultIoLib extends IoLib {
 		defaultOutput = stdOut;
 	}
 
-	public DefaultIoLib(TableFactory tableFactory) {
-		this(tableFactory, FileSystems.getDefault(), System.in, System.out, System.err);
+	public static void installInto(StateContext context, Table env, RuntimeEnvironment runtimeEnvironment) {
+		Table t = context.newTable();
+
+		// FIXME
+		DefaultIoLib l = new DefaultIoLib(
+				context,
+				runtimeEnvironment.fileSystem(),
+				runtimeEnvironment.standardInput(),
+				runtimeEnvironment.standardOutput(),
+				runtimeEnvironment.standardError());
+
+		t.rawset("close", l._close);
+		t.rawset("flush", l._flush);
+		t.rawset("input", l._input);
+		t.rawset("lines", l._lines);
+		t.rawset("open", l._open);
+		t.rawset("output", l._output);
+		t.rawset("popen", l._popen);
+		t.rawset("read", l._read);
+		t.rawset("tmpfile", l._tmpfile);
+		t.rawset("type", TYPE);
+		t.rawset("write", l._write);
+
+		t.rawset("stdin", l.stdIn);
+		t.rawset("stdout", l.stdOut);
+		t.rawset("stderr", l.stdErr);
+
+		ModuleLibHelper.install(env, "io", t);
 	}
 
-	@Override
-	public LuaFunction _close() {
-		return _close;
-	}
-
-	@Override
-	public LuaFunction _flush() {
-		return _flush;
-	}
-
-	@Override
-	public LuaFunction _input() {
-		return _input;
-	}
-
-	@Override
-	public LuaFunction _lines() {
-		return _lines;
-	}
-
-	@Override
-	public LuaFunction _open() {
-		return _open;
-	}
-
-	@Override
-	public LuaFunction _output() {
-		return _output;
-	}
-
-	@Override
-	public LuaFunction _popen() {
-		return _popen;
-	}
-
-	@Override
-	public LuaFunction _read() {
-		return _read;
-	}
-
-	@Override
-	public LuaFunction _tmpfile() {
-		return _tmpfile;
-	}
-
-	@Override
-	public LuaFunction _type() {
-		return Type.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _write() {
-		return _write;
-	}
-
-	@Override
-	public Userdata _stdin() {
-		return stdIn;
-	}
-
-	@Override
-	public Userdata _stdout() {
-		return stdOut;
-	}
-
-	@Override
-	public Userdata _stderr() {
-		return stdErr;
-	}
-
-	@Override
-	public LuaFunction _file_close() {
-		return IoFile.Close.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _file_flush() {
-		return IoFile.Flush.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _file_lines() {
-		return IoFile.Lines.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _file_read() {
-		return IoFile.Read.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _file_seek() {
-		return IoFile.Seek.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _file_setvbuf() {
-		return IoFile.SetVBuf.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _file_write() {
-		return IoFile.Write.INSTANCE;
-	}
-
-	public LuaFunction _file_tostring() {
-		return IoFile.ToString.INSTANCE;
-	}
 
 	private IoFile openFile(ByteString filename, Open.Mode mode) {
-		Check.notNull(filename);
-		Check.notNull(mode);
+		Objects.requireNonNull(filename);
+		Objects.requireNonNull(mode);
 
 		Path path = fileSystem.getPath(filename.toString());
 
@@ -236,7 +183,7 @@ public class DefaultIoLib extends IoLib {
 	}
 
 	public IoFile setDefaultInputFile(IoFile f) {
-		defaultInput = Check.notNull(f);
+		defaultInput = Objects.requireNonNull(f);
 		return f;
 	}
 
@@ -245,7 +192,7 @@ public class DefaultIoLib extends IoLib {
 	}
 
 	public IoFile setDefaultOutputFile(IoFile f) {
-		defaultOutput = Check.notNull(f);
+		defaultOutput = Objects.requireNonNull(f);
 		return f;
 	}
 
@@ -253,12 +200,12 @@ public class DefaultIoLib extends IoLib {
 		return defaultOutput;
 	}
 
-	public static class Close extends AbstractLibFunction {
+	static class Close extends AbstractLibFunction {
 
 		private final DefaultIoLib lib;
 
 		public Close(DefaultIoLib lib) {
-			this.lib = Check.notNull(lib);
+			this.lib = Objects.requireNonNull(lib);
 		}
 
 		@Override
@@ -273,7 +220,7 @@ public class DefaultIoLib extends IoLib {
 					: lib.getDefaultOutputFile();
 
 			try {
-				Dispatch.call(context, IoFile.Close.INSTANCE, file);
+				Dispatch.call(context, IoFile.CLOSE, file);
 			}
 			catch (UnresolvedControlThrowable ct) {
 				throw ct.resolve(this, null);
@@ -287,12 +234,12 @@ public class DefaultIoLib extends IoLib {
 
 	}
 
-	public static class Flush extends AbstractLibFunction {
+	static class Flush extends AbstractLibFunction {
 
 		private final DefaultIoLib lib;
 
 		public Flush(DefaultIoLib lib) {
-			this.lib = Check.notNull(lib);
+			this.lib = Objects.requireNonNull(lib);
 		}
 
 		@Override
@@ -305,7 +252,7 @@ public class DefaultIoLib extends IoLib {
 			IoFile outFile = lib.getDefaultOutputFile();
 
 			try {
-				Dispatch.call(context, IoFile.Flush.INSTANCE);
+				Dispatch.call(context, IoFile.FLUSH);
 			}
 			catch (UnresolvedControlThrowable ct) {
 				throw ct.resolve(this, outFile);
@@ -321,12 +268,12 @@ public class DefaultIoLib extends IoLib {
 
 	}
 
-	public static class Input extends AbstractLibFunction {
+	static class Input extends AbstractLibFunction {
 
 		private final DefaultIoLib lib;
 
 		public Input(DefaultIoLib lib) {
-			this.lib = Check.notNull(lib);
+			this.lib = Objects.requireNonNull(lib);
 		}
 
 		@Override
@@ -353,12 +300,12 @@ public class DefaultIoLib extends IoLib {
 
 	}
 
-	public static class Open extends AbstractLibFunction {
+	static class Open extends AbstractLibFunction {
 
 		private final DefaultIoLib lib;
 
 		public Open(DefaultIoLib lib) {
-			this.lib = Check.notNull(lib);
+			this.lib = Objects.requireNonNull(lib);
 		}
 
 		enum Mode {
@@ -433,12 +380,12 @@ public class DefaultIoLib extends IoLib {
 
 	}
 
-	public static class Output extends AbstractLibFunction {
+	static class Output extends AbstractLibFunction {
 
 		private final DefaultIoLib lib;
 
 		public Output(DefaultIoLib lib) {
-			this.lib = Check.notNull(lib);
+			this.lib = Objects.requireNonNull(lib);
 		}
 
 		@Override
@@ -465,12 +412,12 @@ public class DefaultIoLib extends IoLib {
 
 	}
 
-	public static class Read extends AbstractLibFunction {
+	static class Read extends AbstractLibFunction {
 
 		private final DefaultIoLib lib;
 
 		public Read(DefaultIoLib lib) {
-			this.lib = Check.notNull(lib);
+			this.lib = Objects.requireNonNull(lib);
 		}
 
 		@Override
@@ -487,7 +434,7 @@ public class DefaultIoLib extends IoLib {
 			callArgs.addAll(Arrays.asList(args.getAll()));
 
 			try {
-				Dispatch.call(context, IoFile.Read.INSTANCE, callArgs.toArray());
+				Dispatch.call(context, IoFile.READ, callArgs.toArray());
 			}
 			catch (UnresolvedControlThrowable ct) {
 				throw ct.resolve(this, null);
@@ -503,9 +450,7 @@ public class DefaultIoLib extends IoLib {
 
 	}
 
-	public static class Type extends AbstractLibFunction {
-
-		public static final Type INSTANCE = new Type();
+	static class Type extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -532,12 +477,12 @@ public class DefaultIoLib extends IoLib {
 	}
 
 
-	public static class Write extends AbstractLibFunction {
+	static class Write extends AbstractLibFunction {
 
 		private final DefaultIoLib lib;
 
 		public Write(DefaultIoLib lib) {
-			this.lib = Check.notNull(lib);
+			this.lib = Objects.requireNonNull(lib);
 		}
 
 		@Override
@@ -554,7 +499,7 @@ public class DefaultIoLib extends IoLib {
 			callArgs.addAll(Arrays.asList(args.getAll()));
 
 			try {
-				Dispatch.call(context, IoFile.Write.INSTANCE, callArgs.toArray());
+				Dispatch.call(context, IoFile.WRITE, callArgs.toArray());
 			}
 			catch (UnresolvedControlThrowable ct) {
 				throw ct.resolve(this, null);

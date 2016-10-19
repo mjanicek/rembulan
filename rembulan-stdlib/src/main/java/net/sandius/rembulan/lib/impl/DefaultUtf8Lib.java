@@ -16,54 +16,146 @@
 
 package net.sandius.rembulan.lib.impl;
 
+import net.sandius.rembulan.ByteString;
+import net.sandius.rembulan.StateContext;
+import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.Utf8Lib;
+import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.LuaFunction;
 
-public class DefaultUtf8Lib extends Utf8Lib {
+/**
+ * <p>This library provides basic support for UTF-8 encoding. It provides all its functions
+ * inside the table {@code utf8}. This library does not provide any support for Unicode other
+ * than the handling of the encoding. Any operation that needs the meaning of a character,
+ * such as character classification, is outside its scope.</p>
+ *
+ * <p>Unless stated otherwise, all functions that expect a byte position as a parameter assume
+ * that the given position is either the start of a byte sequence or one plus the length of the
+ * subject string. As in the string library, negative indices count from the end
+ * of the string.</p>
+ */
+public final class DefaultUtf8Lib {
 
-	private final LuaFunction _char;
-	private final LuaFunction _codes;
-	private final LuaFunction _codepoint;
-	private final LuaFunction _len;
-	private final LuaFunction _offset;
-	
-	public DefaultUtf8Lib() {
-		this._char = new UnimplementedFunction("utf8.char");  // TODO
-		this._codes = new UnimplementedFunction("utf8.codes");  // TODO
-		this._codepoint = new UnimplementedFunction("utf8.codepoint");  // TODO
-		this._len = new UnimplementedFunction("utf8.len");  // TODO
-		this._offset = new UnimplementedFunction("utf8.offset");  // TODO
+	/**
+	 * {@code utf8.char (···)}
+	 *
+	 * <p>Receives zero or more integers, converts each one to its corresponding UTF-8
+	 * byte sequence and returns a string with the concatenation of all these sequences.</p>
+	 */
+	public static final LuaFunction CHAR = new Char();
+
+	/**
+	 * {@code utf8.charpattern}
+	 *
+	 * <p>The pattern (a string, not a function) "{@code [\0-\x7F\xC2-\xF4][\x80-\xBF]*}"
+	 * (see §6.4.1), which matches exactly one UTF-8 byte sequence, assuming that the subject is
+	 * a valid UTF-8 string.</p>
+	 */
+	public static final ByteString CHARPATTERN = null;  // TODO
+
+	/**
+	 * {@code utf8.codes (s)}
+	 *
+	 * <p>Returns values so that the construction</p>
+	 * <pre>
+	 * {@code
+	 * for p, c in utf8.codes(s) do body end
+	 * }
+	 * </pre>
+	 * <p>will iterate over all characters in string {@code s}, with {@code p} being the position
+	 * (in bytes) and {@code c} the code point of each character. It raises an error if it meets
+	 * any invalid byte sequence.</p>
+	 */
+	public static final LuaFunction CODES = new Codes();
+
+	/**
+	 * {@code utf8.codepoint (s [, i [, j]])}
+	 *
+	 * <p>Returns the codepoints (as integers) from all characters in {@code s} that start between
+	 * byte position {@code i} and {@code j} (both included). The default for {@code i} is 1
+	 * and for {@code j} is {@code i}. It raises an error if it meets any invalid byte
+	 * sequence.</p>
+	 */
+	public static final LuaFunction CODEPOINT = new CodePoint();
+
+	/**
+	 * {@code utf8.len (s [, i [, j]])}
+	 *
+	 * <p>Returns the number of UTF-8 characters in string {@code s} that start between positions
+	 * {@code i} and {@code j} (both inclusive). The default for {@code i} is 1
+	 * and for {@code j} is -1. If it finds any invalid byte sequence, returns a <b>false</b>
+	 * value plus the position of the first invalid byte.</p>
+	 */
+	public static final LuaFunction LEN = new Len();
+
+	/**
+	 * {@code utf8.offset (s, n [, i])}
+	 *
+	 * <p>Returns the position (in bytes) where the encoding of the {@code n}-th character
+	 * of {@code s} (counting from position {@code i}) starts. A negative {@code n} gets
+	 * characters before position {@code i}. The default for {@code i} is 1 when {@code n}
+	 * is non-negative and {@code #s + 1} otherwise, so that {@code utf8.offset(s, -n)}
+	 * gets the offset of the {@code n}-th character from the end of the string. If the specified
+	 * character is neither in the subject nor right after its end, the function
+	 * returns <b>nil</b>.</p>
+	 *
+	 * <p>As a special case, when {@code n} is 0 the function returns the start of the encoding
+	 * of the character that contains the {@code i}-th byte of {@code s}.</p>
+	 *
+	 * <p>This function assumes that {@code s} is a valid UTF-8 string.</p>
+	 */
+	public static final LuaFunction OFFSET = new Offset();
+
+	private DefaultUtf8Lib() {
+		// not to be instantiated
 	}
 
-	@Override
-	public LuaFunction _char() {
-		return _char;
+	public static void installInto(StateContext context, Table env) {
+		Table t = context.newTable();
+
+		t.rawset("char", CHAR);
+		t.rawset("charpattern", CHARPATTERN);
+		t.rawset("codes", CODES);
+		t.rawset("codepoint", CODEPOINT);
+		t.rawset("len", LEN);
+		t.rawset("offset", OFFSET);
+
+		ModuleLibHelper.install(env, "utf8", t);
 	}
 
-	@Override
-	public String _charpattern() {
-		return null;  // TODO
+	static class Char extends UnimplementedFunction {
+		// TODO
+		public Char() {
+			super("utf8.char");
+		}
 	}
 
-	@Override
-	public LuaFunction _codes() {
-		return _codes;
+	static class Codes extends UnimplementedFunction {
+		// TODO
+		public Codes() {
+			super("utf8.codes");
+		}
 	}
 
-	@Override
-	public LuaFunction _codepoint() {
-		return _codepoint;
+	static class CodePoint extends UnimplementedFunction {
+		// TODO
+		public CodePoint() {
+			super("utf8.codepoint");
+		}
 	}
 
-	@Override
-	public LuaFunction _len() {
-		return _len;
+	static class Len extends UnimplementedFunction {
+		// TODO
+		public Len() {
+			super("utf8.len");
+		}
 	}
 
-	@Override
-	public LuaFunction _offset() {
-		return _offset;
+	static class Offset extends UnimplementedFunction {
+		// TODO
+		public Offset() {
+			super("utf8.offset");
+		}
 	}
 
 }

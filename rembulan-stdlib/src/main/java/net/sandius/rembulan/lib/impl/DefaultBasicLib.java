@@ -21,6 +21,7 @@ import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.lib.AssertionFailedException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
+import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.Dispatch;
@@ -44,168 +45,340 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class DefaultBasicLib extends BasicLib {
+/**
+ * The basic library provides core functions to Lua. If you do not include this library in your
+ * application, you should check carefully whether you need to provide implementations for some
+ * of its facilities.
+ */
+public final class DefaultBasicLib {
 
-	private final Table envTable;
+	/**
+	 * {@code assert (v [, message])}
+	 *
+	 * <p>Calls {@link #ERROR {@code error}} if the value of its argument {@code v}
+	 * is false (i.e., <b>nil</b> or <b>false</b>); otherwise, returns all its arguments.
+	 * In case of error, {@code message} is the error object; when absent, it defaults
+	 * to {@code "assertion failed!"}</p>
+	 */
+	public static final LuaFunction ASSERT = new Assert();
 
-	private final LuaFunction _print;
-	private final LuaFunction _dofile;
-	private final LuaFunction _load;
-	private final LuaFunction _loadfile;
+	/**
+	 * {@code collectgarbage ([opt [, arg]])}
+	 *
+	 * <p>This function is a generic interface to the garbage collector. It performs different
+	 * functions according to its first argument, {@code opt}:</p>
+	 * <ul>
+	 *   <li><b>{@code "collect"}</b>:
+	 *     performs a full garbage-collection cycle. This is the default option.</li>
+	 *   <li><b>{@code "stop"}</b>:
+	 *     stops automatic execution of the garbage collector. The collector will run only when
+	 *     explicitly invoked, until a call to restart it.</li>
+	 *   <li><b>{@code "restart"}</b>:
+	 *     restarts automatic execution of the garbage collector.</li>
+	 *   <li><b>{@code "count"}</b>:
+	 *     returns the total memory in use by Lua in Kbytes. The value has a fractional part,
+	 *     so that it multiplied by 1024 gives the exact number of bytes in use by Lua
+	 *     (except for overflows).</li>
+	 *   <li><b>{@code "step"}</b>: performs a garbage-collection step. The step "size"
+	 *     is controlled by {@code arg}. With a zero value, the collector will perform
+	 *     one basic (indivisible) step. For non-zero values, the collector will perform
+	 *     as if that amount of memory (in KBytes) had been allocated by Lua.
+	 *     Returns <b>true</b> if the step finished a collection cycle.</li>
+	 *   <li><b>{@code "setpause"}</b>:
+	 *     sets {@code arg} as the new value for the <i>pause</i> of the collector
+	 *     (see §2.5 of the Lua Reference Manual). Returns the previous value
+	 *     for <i>pause</i>.</li>
+	 *   <li><b>{@code "setstepmul"}</b>:
+	 *     sets {@code arg} as the new value for the <i>step multiplier</i>
+	 *     of the collector (see §2.5 of the Lua Reference Manual). Returns the previous value
+	 *     for <i>step</i>.</li>
+	 *   <li><b>{@code "isrunning"}</b>:
+	 *     returns a boolean that tells whether the collector is running
+	 *     (i.e., not stopped).</li>
+	 * </ul>
+	 */
+	public static final LuaFunction COLLECTGARBAGE = new CollectGarbage();
 
-	@Deprecated
-	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Table defaultEnv, FileSystem fileSystem) {
-		this.envTable = defaultEnv;
+	/**
+	 * {@code error (message [, level])}
+	 *
+	 * <p>Terminates the last protected function called and returns {@code message}
+	 * as the error object. Function {@code error} never returns.</p>
+	 *
+	 * <p>Usually, {@code error} adds some information about the error position
+	 * at the beginning of the message, if the message is a string. The {@code level}
+	 * argument specifies how to get the error position. With level 1 (the default),
+	 * the error position is where the {@code error} function was called. Level 2 points
+	 * the error to where the function that called {@code error} was called; and so on.
+	 * Passing a level 0 avoids the addition of error position information to the message.</p>
+	 */
+	public static final LuaFunction ERROR = new Error();
 
-		this._print = out != null ? new Print(out, envTable) : null;
+	/**
+	 * {@code getmetatable (object)}
+	 *
+	 * <p>If {@code object} does not have a metatable, returns <b>nil</b>. Otherwise,
+	 * if the object's metatable has a {@link BasicLib#MT_METATABLE {@code "__metatable"}} field,
+	 * returns the associated value. Otherwise, returns the metatable of the given object.</p>
+	 */
+	public static final LuaFunction GETMETATABLE = new GetMetatable();
+
+	/**
+	 * {@code ipairs (t)}
+	 *
+	 * <p>Returns three values (an iterator function, the table {@code t}, and 0) so that
+	 * the construction</p>
+	 *
+	 *   <blockquote>{@code for i,v in ipairs(t) do body end}</blockquote>
+	 *
+	 * <p>will iterate over the key–value pairs {@code (1,t[1])}, {@code (2,t[2])}, ...,
+	 * up to the first <b>nil</b> value.</p>
+	 */
+	public static final LuaFunction IPAIRS = new IPairs();
+
+	/**
+	 * {@code next (table [, index])}
+	 *
+	 * <p>Allows a program to traverse all fields of a table. Its first argument is a table
+	 * and its second argument is an index in this table. {@code next} returns the next
+	 * index of the table and its associated value. When called with <b>nil</b> as its second
+	 * argument, {@code next} returns an initial index and its associated value.
+	 * When called with the last index, or with <b>nil</b> in an empty table, next returns
+	 * <b>nil</b>. If the second argument is absent, then it is interpreted as <b>nil</b>.
+	 * In particular, you can use {@code next(t)} to check whether a table is empty.</p>
+	 *
+	 * <p>The order in which the indices are enumerated is not specified, even for numeric
+	 * indices. (To traverse a table in numerical order, use a numerical <b>for</b>.)</p>
+	 *
+	 * <p>The behavior of {@code next} is undefined if, during the traversal, you assign
+	 * any value to a non-existent field in the table. You may however modify existing fields.
+	 * In particular, you may clear existing fields.</p>
+	 */
+	public static final LuaFunction NEXT = new Next();
+
+	/**
+	 * {@code pairs (t)}
+	 *
+	 * <p>If {@code t} has a metamethod {@link BasicLib#MT_PAIRS {@code "__pairs"}}, calls it with
+	 * {@code t} as argument and returns the first three results from the call.</p>
+	 *
+	 * <p>Otherwise, returns three values: the {@link #NEXT {@code next}} function,
+	 * the table {@code t}, and <b>nil</b>, so that the construction</p>
+	 *
+	 *   <blockquote>{@code for k,v in pairs(t) do body end}</blockquote>
+	 *
+	 * <p>will iterate over all key–value pairs of table {@code t}.</p>
+	 *
+	 * <p>See function {@link #NEXT {@code next}} for the caveats of modifying the table
+	 * during its traversal.</p>
+	 */
+	public static final LuaFunction PAIRS = new Pairs();
+
+	/**
+	 * {@code pcall (f [, arg1, ···])}
+	 *
+	 * <p>Calls function {@code f} with the given arguments in protected mode. This means
+	 * that any error inside {@code f} is not propagated; instead, {@code pcall}
+	 * catches the error and returns a status code. Its first result is the status code
+	 * (a boolean), which is <b>true</b> if the call succeeds without errors. In such case,
+	 * {@code pcall} also returns all results from the call, after this first result.
+	 * In case of any error, {@code pcall} returns <b>false</b> plus the error message.</p>
+	 */
+	public static final LuaFunction PCALL = new PCall();
+
+	/**
+	 * {@code rawequal (v1, v2)}
+	 *
+	 * <p>Checks whether {@code v1} is equal to {@code v2}, without invoking any
+	 * metamethod. Returns a boolean.</p>
+	 */
+	public static final LuaFunction RAWEQUAL = new RawEqual();
+
+	/**
+	 * {@code rawget (table, index)}
+	 *
+	 * <p>Gets the real value of {@code table[index]}, without invoking any metamethod.
+	 * {@code table} must be a table; {@code index} may be any value.</p>
+	 */
+	public static final LuaFunction RAWGET = new RawGet();
+
+	/**
+	 * {@code rawlen (v)}
+	 *
+	 * <p>Returns the length of the object {@code v}, which must be a table or a string,
+	 * without invoking any metamethod. Returns an integer.</p>
+	 */
+	public static final LuaFunction RAWLEN = new RawLen();
+
+	/**
+	 * {@code rawset (table, index, value)}
+	 *
+	 * <p>Sets the real value of {@code table[index]} to {@code value}, without
+	 * invoking any metamethod. {@code table} must be a table, {@code index} any value
+	 * different from <b>nil</b> and NaN, and {@code value} any Lua value.</p>
+	 *
+	 * <p>This function returns {@code table}.</p>
+	 */
+	public static final LuaFunction RAWSET = new RawSet();
+
+	/**
+	 * {@code select (index, ···)}
+	 *
+	 * <p>If {@code index} is a number, returns all arguments after argument number index;
+	 * a negative number indexes from the end (-1 is the last argument). Otherwise, index must
+	 * be the string {@code "#"}, and select returns the total number of extra arguments
+	 * it received.</p>
+	 */
+	public static final LuaFunction SELECT = new Select();
+
+	/**
+	 * {@code setmetatable (table, metatable)}
+	 *
+	 * <p>Sets the metatable for the given {@code table}. (To change the metatable of other
+	 * types from Lua code, you must use the debug library (see §6.10 of the Lua Reference
+	 * Manual).) If {@code metatable} is <b>nil</b>, removes the metatable of the given
+	 * table. If the original metatable has a {@link BasicLib#MT_METATABLE {@code "__metatable"}}
+	 * field, raises an error.</p>
+	 *
+	 * <p>This function returns {@code table}.</p>
+	 */
+	public static final LuaFunction SETMETATABLE = new SetMetatable();
+
+	/**
+	 * {@code tonumber (e [, base])}
+	 *
+	 * <p>When called with no {@code base}, {@code tonumber} tries to convert
+	 * its argument to a number. If the argument is already a number or a string convertible to
+	 * a number (see §3.4.2 of the Lua Reference Manual), then {@code tonumber} returns
+	 * this number; otherwise, it returns <b>nil</b>.</p>
+	 *
+	 * <p>When called with {@code base}, then {@code e} should be a string to be
+	 * interpreted as an integer numeral in that base. The base may be any integer between
+	 * 2 and 36, inclusive. In bases above 10, the letter 'A' (in either upper or lower case)
+	 * represents 10, 'B' represents 11, and so forth, with 'Z' representing 35. If the string
+	 * {@code e} is not a valid numeral in the given base, the function returns
+	 * <b>nil</b>.</p>
+	 */
+	public static final LuaFunction TONUMBER = new ToNumber();
+
+	/**
+	 * {@code tostring (v)}
+	 *
+	 * <p>Receives a value of any type and converts it to a string in a human-readable format.
+	 * (For complete control of how numbers are converted,
+	 * use {@link DefaultStringLib#FORMAT {@code string.format}}.) If the metatable
+	 * of {@code v} has a {@link BasicLib#MT_TOSTRING {@code "__tostring"}} field,
+	 * then {@code tostring} calls the corresponding value with {@code v} as argument, and uses
+	 * the result of the call as its result.</p>
+	 */
+	public static final LuaFunction TOSTRING = new ToString();
+
+	/**
+	 * {@code type (v)}
+	 *
+	 * <p>Returns the type of its only argument, coded as a string. The possible results of this
+	 * function are {@code "nil"} (a string, not the value <b>nil</b>),
+	 * {@code "number"}, {@code "string"}, {@code "boolean"},
+	 * {@code "table"}, {@code "function"}, {@code "thread"},
+	 * and {@code "userdata"}.</p>
+	 */
+	public static final LuaFunction TYPE = new Type();
+
+	/**
+	 * {@code _VERSION}
+	 *
+	 * <p>A global variable (not a function) that holds a string containing the running Lua
+	 * version. The current value of this variable (in PUC-Lua 5.3.x)
+	 * is {@code "Lua 5.3"}.</p>
+	 */
+	public static final ByteString _VERSION = ByteString.constOf("Lua 5.3");
+
+	/**
+	 * {@code xpcall (f, msgh [, arg1, ···])}
+	 *
+	 * <p>This function is similar to {@link #PCALL {@code pcall}}, except that it sets
+	 * a new message handler {@code msgh}.</p>
+	 */
+	public static final LuaFunction XPCALL = new XPCall();
+
+	private DefaultBasicLib() {
+		// not to be instantiated
+	}
+
+	public static void installInto(StateContext context, Table env, RuntimeEnvironment runtimeEnvironment, ChunkLoader loader) {
+		final OutputStream out;
+		final FileSystem fileSystem;
+
+		if (runtimeEnvironment != null) {
+			out = runtimeEnvironment.standardOutput() != null ? new PrintStream(runtimeEnvironment.standardOutput()) : null;
+			fileSystem = runtimeEnvironment.fileSystem();
+		}
+		else {
+			out = null;
+			fileSystem = null;
+		}
+
+		LuaFunction print = out != null ? new Print(out, env) : null;
+
+		final LuaFunction load;
+		final LuaFunction loadfile;
+		final LuaFunction dofile;
 
 		if (loader != null) {
-			this._load = new Load(loader, defaultEnv);
+			load = new Load(loader, env);
 		}
 		else {
 			// no loader supplied
-			this._load = null;
+			load = null;
 		}
 
 		if (loader != null && fileSystem != null) {
-			this._loadfile = new LoadFile(fileSystem, loader, defaultEnv);
-			this._dofile = new DoFile(fileSystem, loader, defaultEnv);
+			loadfile = new LoadFile(fileSystem, loader, env);
+			dofile = new DoFile(fileSystem, loader, env);
 		}
 		else {
-			this._loadfile = null;
-			this._dofile = null;
+			loadfile = null;
+			dofile = null;
 		}
 
+		env.rawset("assert", ASSERT);
+		env.rawset("collectgarbage", COLLECTGARBAGE);
+		env.rawset("dofile", dofile);
+		env.rawset("error", ERROR);
+		env.rawset("_G", env);
+		env.rawset("getmetatable", GETMETATABLE);
+		env.rawset("ipairs", IPAIRS);
+		env.rawset("load", load);
+		env.rawset("loadfile", loadfile);
+		env.rawset("next", NEXT);
+		env.rawset("pairs", PAIRS);
+		env.rawset("pcall", PCALL);
+		env.rawset("print", print);
+		env.rawset("rawequal", RAWEQUAL);
+		env.rawset("rawget", RAWGET);
+		env.rawset("rawlen", RAWLEN);
+		env.rawset("rawset", RAWSET);
+		env.rawset("select", SELECT);
+		env.rawset("setmetatable", SETMETATABLE);
+		env.rawset("tostring", TOSTRING);
+		env.rawset("tonumber", TONUMBER);
+		env.rawset("type", TYPE);
+		env.rawset("_VERSION", _VERSION);
+		env.rawset("xpcall", XPCALL);
+
+		ModuleLibHelper.addToLoaded(env, "_G", env);
 	}
 
-	@Deprecated
-	public DefaultBasicLib(PrintStream out, ChunkLoader loader, Table defaultEnv) {
-		this(out, loader, defaultEnv, null);
-	}
-
-	public static BasicLib install(StateContext context, Table env, RuntimeEnvironment runtimeEnvironment, ChunkLoader loader) {
-		PrintStream out = runtimeEnvironment.standardOutput() != null ? new PrintStream(runtimeEnvironment.standardOutput()) : null;
-		DefaultBasicLib basicLib = new DefaultBasicLib(out, loader, env, runtimeEnvironment.fileSystem());
-		basicLib.installInto(context, env);
-		return basicLib;
-	}
-
-	@Override
-	public String __VERSION() {
-		return "Lua 5.3";
-	}
-
-	@Override
-	public LuaFunction _print() {
-		return _print;
-	}
-
-	@Override
-	public LuaFunction _type() {
-		return Type.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _next() {
-		return Next.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _pairs() {
-		return Pairs.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _ipairs() {
-		return IPairs.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _tostring() {
-		return ToString.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _tonumber() {
-		return ToNumber.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _error() {
-		return Error.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _assert() {
-		return Assert.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _getmetatable() {
-		return GetMetatable.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _setmetatable() {
-		return SetMetatable.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _pcall() {
-		return PCall.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _xpcall() {
-		return XPCall.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _rawequal() {
-		return RawEqual.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _rawget() {
-		return RawGet.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _rawset() {
-		return RawSet.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _rawlen() {
-		return RawLen.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _select() {
-		return Select.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _collectgarbage() {
-		return CollectGarbage.INSTANCE;
-	}
-
-	@Override
-	public LuaFunction _dofile() {
-		return _dofile;
-	}
-
-	@Override
-	public LuaFunction _load() {
-		return _load;
-	}
-
-	@Override
-	public LuaFunction _loadfile() {
-		return _loadfile;
-	}
-
-
+	/**
+	 * {@code print (···)}
+	 *
+	 * <p>Receives any number of arguments and prints their values to {@code stdout},
+	 * using the {@link #TOSTRING {@code tostring}} function to convert each argument
+	 * to a string. {@code print} is not intended for formatted output, but only as
+	 * a quick way to show a value, for instance for debugging. For complete control over
+	 * the output, use {@link DefaultStringLib#FORMAT {@code string.format}}
+	 * and {@code io.write}.</p>
+	 */
 	public static class Print extends AbstractLibFunction {
 
 		static class SuspendedState {
@@ -303,9 +476,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Type extends AbstractLibFunction {
-
-		public static final Type INSTANCE = new Type();
+	static class Type extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -320,9 +491,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Next extends AbstractLibFunction {
-
-		public static final Next INSTANCE = new Next();
+	static class Next extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -355,7 +524,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class INext extends AbstractLibFunction {
+	static class INext extends AbstractLibFunction {
 
 		public static final INext INSTANCE = new INext();
 
@@ -402,9 +571,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Pairs extends AbstractLibFunction {
-
-		public static final Pairs INSTANCE = new Pairs();
+	static class Pairs extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -414,7 +581,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
-			Object metamethod = Metatables.getMetamethod(context, MT_PAIRS, t);
+			Object metamethod = Metatables.getMetamethod(context, BasicLib.MT_PAIRS, t);
 
 			if (metamethod != null) {
 				try {
@@ -429,7 +596,7 @@ public class DefaultBasicLib extends BasicLib {
 			}
 			else {
 				ReturnBuffer rbuf = context.getReturnBuffer();
-				rbuf.setTo(Next.INSTANCE, t, null);
+				rbuf.setTo(NEXT, t, null);
 			}
 		}
 
@@ -441,9 +608,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class IPairs extends AbstractLibFunction {
-
-		public static final IPairs INSTANCE = new IPairs();
+	static class IPairs extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -458,11 +623,9 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class ToString extends AbstractLibFunction {
+	static class ToString extends AbstractLibFunction {
 
 		static final ByteString KEY = ByteString.constOf("tostring");
-
-		public static final ToString INSTANCE = new ToString();
 
 		@Override
 		protected String name() {
@@ -473,7 +636,7 @@ public class DefaultBasicLib extends BasicLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object arg = args.nextAny();
 
-			Object meta = Metatables.getMetamethod(context, MT_TOSTRING, arg);
+			Object meta = Metatables.getMetamethod(context, BasicLib.MT_TOSTRING, arg);
 			if (meta != null) {
 				try {
 					Dispatch.call(context, meta, arg);
@@ -501,9 +664,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class ToNumber extends AbstractLibFunction {
-
-		public static final ToNumber INSTANCE = new ToNumber();
+	static class ToNumber extends AbstractLibFunction {
 
 		public static Long toNumber(ByteString s, int base) {
 			try {
@@ -546,9 +707,7 @@ public class DefaultBasicLib extends BasicLib {
 	}
 
 
-	public static class GetMetatable extends AbstractLibFunction {
-
-		public static final GetMetatable INSTANCE = new GetMetatable();
+	static class GetMetatable extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -558,7 +717,7 @@ public class DefaultBasicLib extends BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object arg = args.nextAny();
-			Object meta = Metatables.getMetamethod(context, MT_METATABLE, arg);
+			Object meta = Metatables.getMetamethod(context, BasicLib.MT_METATABLE, arg);
 
 			Object result = meta != null
 					? meta  // __metatable field present, return its value
@@ -569,9 +728,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class SetMetatable extends AbstractLibFunction {
-
-		public static final SetMetatable INSTANCE = new SetMetatable();
+	static class SetMetatable extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -583,7 +740,7 @@ public class DefaultBasicLib extends BasicLib {
 			Table t = args.nextTable();
 			Table mt = args.nextTableOrNil();
 
-			if (Metatables.getMetamethod(context, MT_METATABLE, t) != null) {
+			if (Metatables.getMetamethod(context, BasicLib.MT_METATABLE, t) != null) {
 				throw new IllegalOperationAttemptException("cannot change a protected metatable");
 			}
 			else {
@@ -594,9 +751,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Error extends AbstractLibFunction {
-
-		public static final Error INSTANCE = new Error();
+	static class Error extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -612,9 +767,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Assert extends AbstractLibFunction {
-
-		public static final Assert INSTANCE = new Assert();
+	static class Assert extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -651,9 +804,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class PCall extends AbstractLibFunction implements ProtectedResumable {
-
-		public static final PCall INSTANCE = new PCall();
+	static class PCall extends AbstractLibFunction implements ProtectedResumable {
 
 		@Override
 		protected String name() {
@@ -696,11 +847,9 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class XPCall extends AbstractLibFunction implements ProtectedResumable {
+	static class XPCall extends AbstractLibFunction implements ProtectedResumable {
 
 		public static final int MAX_DEPTH = 220;  // 220 in PUC-Lua 5.3
-
-		public static final XPCall INSTANCE = new XPCall();
 
 		@Override
 		protected String name() {
@@ -808,9 +957,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawEqual extends AbstractLibFunction {
-
-		public static final RawEqual INSTANCE = new RawEqual();
+	static class RawEqual extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -826,9 +973,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawGet extends AbstractLibFunction {
-
-		public static final RawGet INSTANCE = new RawGet();
+	static class RawGet extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -844,9 +989,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawSet extends AbstractLibFunction {
-
-		public static final RawSet INSTANCE = new RawSet();
+	static class RawSet extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -865,9 +1008,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class RawLen extends AbstractLibFunction {
-
-		public static final RawLen INSTANCE = new RawLen();
+	static class RawLen extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -902,9 +1043,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class Select extends AbstractLibFunction {
-
-		public static final Select INSTANCE = new Select();
+	static class Select extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -946,9 +1085,7 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
-	public static class CollectGarbage extends AbstractLibFunction {
-
-		public static final CollectGarbage INSTANCE = new CollectGarbage();
+	static class CollectGarbage extends AbstractLibFunction {
 
 		@Override
 		protected String name() {
@@ -965,6 +1102,40 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
+	/**
+	 * {@code load (chunk [, chunkname [, mode [, env]]])}
+	 *
+	 * <p>Loads a chunk.</p>
+	 *
+	 * <p>If chunk is a string, the chunk is this string. If {@code chunk} is a function,
+	 * {@code load} calls it repeatedly to get the chunk pieces. Each call to chunk must
+	 * return a string that concatenates with previous results. A return of an empty string,
+	 * <b>nil</b>, or no value signals the end of the chunk.</p>
+	 *
+	 * <p>If there are no syntactic errors, returns the compiled chunk as a function; otherwise,
+	 * returns <b>nil</b> plus the error message.</p>
+	 *
+	 * <p>If the resulting function has upvalues, the first upvalue is set to the value
+	 * of {@code env}, if that parameter is given, or to the value of the global environment.
+	 * Other upvalues are initialized with <b>nil</b>. (When you load a main chunk, the resulting
+	 * function will always have exactly one upvalue, the {@code _ENV} variable
+	 * (see §2.2 of the Lua Reference Manual). However, when you load a binary chunk created
+	 * from a function (see {@link DefaultStringLib#DUMP {@code string.dump}}), the resulting
+	 * function can have an arbitrary number of upvalues.) All upvalues are fresh, that is,
+	 * they are not shared with any other function.</p>
+	 *
+	 * <p>{@code chunkname} is used as the name of the chunk for error messages and debug
+	 * information (see §4.9 of the Lua Reference Manual). When absent, it defaults
+	 * to {@code chunk}, if chunk is a string, or to {@code "=(load)"} otherwise.</p>
+	 *
+	 * <p>The string {@code mode} controls whether the chunk can be text or binary
+	 * (that is, a precompiled chunk). It may be the string {@code "b"} (only binary chunks),
+	 * {@code "t"} (only text chunks), or {@code "bt"} (both binary and text).
+	 * The default is {@code "bt"}.</p>
+	 *
+	 * <p>Lua does not check the consistency of binary chunks. Maliciously crafted binary
+	 * chunks can crash the interpreter.</p>
+	 */
 	public static class Load extends AbstractLibFunction {
 
 		static final ByteString DEFAULT_MODE = ByteString.constOf("bt");
@@ -1113,6 +1284,12 @@ public class DefaultBasicLib extends BasicLib {
 
 	}
 
+	/**
+	 * {@code loadfile ([filename [, mode [, env]]])}
+	 *
+	 * <p>Similar to {@link Load {@code load}}, but gets the chunk from file
+	 * {@code filename} or from the standard input, if no file name is given.</p>
+	 */
 	public static class LoadFile extends AbstractLibFunction {
 
 		private final FileSystem fileSystem;
@@ -1192,6 +1369,15 @@ public class DefaultBasicLib extends BasicLib {
 		return fn;
 	}
 
+	/**
+	 * {@code dofile ([filename])}
+	 *
+	 * <p>Opens the named file and executes its contents as a Lua chunk. When called without
+	 * arguments, {@code dofile} executes the contents of the standard input
+	 * ({@code stdin}). Returns all values returned by the chunk. In case of errors,
+	 * {@code dofile} propagates the error to its caller (that is, {@code dofile}
+	 * does not run in protected mode).</p>
+	 */
 	public static class DoFile extends AbstractLibFunction {
 
 		private final FileSystem fileSystem;

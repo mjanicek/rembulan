@@ -25,7 +25,7 @@ import net.sandius.rembulan.util.Check;
  * A function that throws an {@link UnsupportedOperationException} when invoked,
  * for use as a placeholder for unimplemented functions.
  */
-public final class UnimplementedFunction extends AbstractFunction0 {
+public class UnimplementedFunction extends AbstractFunction0 {
 
 	private final String name;
 

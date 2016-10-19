@@ -22,13 +22,9 @@ import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.env.RuntimeEnvironment;
-import net.sandius.rembulan.env.RuntimeEnvironments;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.LoaderProvider;
-import net.sandius.rembulan.lib.ModuleLib;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.Dispatch;
@@ -47,52 +43,39 @@ import java.util.Objects;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
-public class DefaultModuleLib extends ModuleLib {
+/**
+ * The package library provides basic facilities for loading modules in Lua. It exports
+ * one function directly in the global environment: {@code require}.
+ * Everything else is exported in a {@code table} package.
+ */
+public final class DefaultModuleLib {
 
 	static final byte PATH_SEPARATOR = (byte) ';';
 	static final byte PATH_TEMPLATE_PLACEHOLDER = (byte) '?';
 	static final byte WIN_DIRECTORY_PLACEHOLDER = (byte) '!';  // FIXME: not used in Rembulan
 	static final byte LUAOPEN_IGNORE = (byte) '-';  // FIXME: not used in Rembulan!
 
-	private final StateContext context;
-	private final Table env;
+	private DefaultModuleLib() {
+		// not to be instantiated
+	}
 
-	private final Table libTable;
-	private final Table loaded;
-	private final Table preload;
-
-	private final LuaFunction require;
-
-	private final LuaFunction _loadlib;
-	private final LuaFunction _searchpath;
-
-	/**
-	 * Constructs a new instance of the default module library.
-	 *
-	 * @param context  state context to use by the library, must not be {@code null}
-	 * @param runtimeEnvironment  runtime environment passed to instantiated libraries, must not be {@code null}
-	 * @param env  the global table passed to the instantiated libraries, must not be {@code null}
-	 * @param classLoader  class loader used for instantiating libraries, must not be {@code null}
-	 */
-	public DefaultModuleLib(StateContext context, RuntimeEnvironment runtimeEnvironment, Table env, ClassLoader classLoader, ChunkLoader chunkLoader) {
-		this.context = Objects.requireNonNull(context);
-		this.env = Objects.requireNonNull(env);
+	public static void installInto(StateContext context, Table env, RuntimeEnvironment runtimeEnvironment, ChunkLoader chunkLoader, ClassLoader classLoader) {
+		Objects.requireNonNull(context);
+		Objects.requireNonNull(env);
 		Objects.requireNonNull(runtimeEnvironment);
 		Objects.requireNonNull(classLoader);
 
 		FileSystem fileSystem = runtimeEnvironment.fileSystem();
 
-		this.libTable = context.newTable();
-		this.loaded = context.newTable();
-		this.preload = context.newTable();
+		Table t = context.newTable();
+
+		final ByteString config;
+		Table loaded = context.newTable();
+		Table preload = context.newTable();
+		final ByteString path;
 		Table searchers = context.newTable();
-
-		this._searchpath = new SearchPath(fileSystem);
-
-		libTable.rawset("loaded", loaded);
-		libTable.rawset("preload", preload);
-		libTable.rawset("searchers", searchers);
-		libTable.rawset("searchpath", _searchpath);
+		LuaFunction searchpath = new SearchPath(fileSystem);
+		LuaFunction require = new Require(t, loaded);
 
 		// package.config
 		{
@@ -104,7 +87,13 @@ public class DefaultModuleLib extends ModuleLib {
 			builder.append(WIN_DIRECTORY_PLACEHOLDER).append((byte) '\n');
 			builder.append(LUAOPEN_IGNORE).append((byte) '\n');
 
-			libTable.rawset("config", builder.toByteString());
+			config = builder.toByteString();
+		}
+
+		// package.loaded
+		{
+			loaded.rawset("_G", env);
+			loaded.rawset("package", t);
 		}
 
 		// package.path
@@ -114,106 +103,38 @@ public class DefaultModuleLib extends ModuleLib {
 				envPath = runtimeEnvironment.getEnv("LUA_PATH");
 			}
 
-			libTable.rawset("path", getPath(envPath, defaultPath(runtimeEnvironment.fileSystem())));
+			path = getPath(envPath, defaultPath(runtimeEnvironment.fileSystem()));
 		}
 
 		// package.searchers
 		{
-			long idx = 1;
-			searchers.rawset(idx++, new PreloadSearcher(preload));
+			addSearcher(searchers, new PreloadSearcher(preload));
 			if (chunkLoader != null) {
-				searchers.rawset(idx++, new ChunkLoadPathSearcher(fileSystem, libTable, chunkLoader, env));
+				addSearcher(searchers, new ChunkLoadPathSearcher(fileSystem, t, chunkLoader, env));
 			}
-			searchers.rawset(idx++, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
+			addSearcher(searchers, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
 		}
 
-		this.require = new Require();
+		t.rawset("config", config);
+		t.rawset("loaded", loaded);
+		t.rawset("loadlib", new UnimplementedFunction("package.loadlib"));
+		t.rawset("preload", preload);
+		t.rawset("searchers", searchers);
+		t.rawset("searchpath", searchpath);
+		t.rawset("path", path);
 
-		this._loadlib = new UnimplementedFunction("package.loadlib");
+		// install into the global environment
+		env.rawset("package", t);
+		env.rawset("require", require);
 	}
 
-	/**
-	 * Constructs a new instance of the default module library.
-	 *
-	 * <b>Deprecated:</b> breaks sandboxing, and does not provide chunk loading.
-	 * Use {@link DefaultModuleLib#DefaultModuleLib(StateContext, RuntimeEnvironment, Table, ClassLoader, ChunkLoader)}
-	 * instead.
-	 *
-	 * @param context  state context, must not be {@code null}
-	 * @param env  the global table, must not be {@code null}
-	 */
-	@Deprecated
-	public DefaultModuleLib(StateContext context, Table env) {
-		this(context, RuntimeEnvironments.system(), env, ClassLoader.getSystemClassLoader(), null);
+	static void addSearcher(Table searchers, LuaFunction fn) {
+		searchers.rawset(searchers.rawlen() + 1, fn);
 	}
 
-	@Override
-	public Table toTable(TableFactory tableFactory) {
-		return libTable;
-	}
-
-	@Override
-	public void postInstall(StateContext context, Table env, Table libTable) {
-		loaded.rawset("_G", env);
-		loaded.rawset(name(), libTable);
-	}
-
-	@Override
-	public void install(Lib lib) {
-		lib.preInstall(context, env);
-		Table t = lib.toTable(context);
-		if (t != null) {
-			String name = lib.name();
-			env.rawset(name, t);
-			loaded.rawset(name, t);
-		}
-		lib.postInstall(context, env, t);
-	}
-
-	@Override
-	public LuaFunction _require() {
-		return require;
-	}
-
-	@Override
-	public String _config() {
-		return null;  // TODO
-	}
-
-	@Override
-	public String _cpath() {
-		return null;  // TODO
-	}
-
-	@Override
-	public Table _loaded() {
-		return loaded;
-	}
-
-	@Override
-	public LuaFunction _loadlib() {
-		return _loadlib;
-	}
-
-	@Override
-	public String _path() {
-		return null;  // TODO
-	}
-
-	@Override
-	public Table _preload() {
-		return preload;
-	}
-
-	@Override
-	public Table _searchers() {
+	static Table searchers(Table libTable) {
 		Object o = libTable.rawget("searchers");
 		return o instanceof Table ? (Table) o : null;
-	}
-
-	@Override
-	public LuaFunction _searchpath() {
-		return _searchpath;
 	}
 
 	static ByteString defaultPath(FileSystem fileSystem) {
@@ -230,25 +151,33 @@ public class DefaultModuleLib extends ModuleLib {
 		}
 	}
 
-	private static class Require_SuspendedState {
+	static class Require extends AbstractLibFunction {
 
-		private final int state;
-		private final ByteString error;
-		private final ByteString modName;
-		private final Table searchers;
-		private final long idx;
+		private final Table libTable;
+		private final Table loaded;
 
-		private Require_SuspendedState(int state, ByteString error, ByteString modName, Table searchers, long idx) {
-			this.state = state;
-			this.error = error;
-			this.modName = modName;
-			this.searchers = searchers;
-			this.idx = idx;
+		private static class Require_SuspendedState {
+
+			private final int state;
+			private final ByteString error;
+			private final ByteString modName;
+			private final Table searchers;
+			private final long idx;
+
+			private Require_SuspendedState(int state, ByteString error, ByteString modName, Table searchers, long idx) {
+				this.state = state;
+				this.error = error;
+				this.modName = modName;
+				this.searchers = searchers;
+				this.idx = idx;
+			}
+
 		}
 
-	}
-
-	class Require extends AbstractLibFunction {
+		public Require(Table libTable, Table loaded) {
+			this.libTable = Objects.requireNonNull(libTable);
+			this.loaded = Objects.requireNonNull(loaded);
+		}
 
 		@Override
 		protected String name() {
@@ -267,7 +196,7 @@ public class DefaultModuleLib extends ModuleLib {
 			}
 			else {
 				// get package.searchers
-				Table searchers = _searchers();
+				Table searchers = searchers(libTable);
 				if (searchers == null) {
 					throw new IllegalStateException("'package.searchers' must be a table");
 				}
