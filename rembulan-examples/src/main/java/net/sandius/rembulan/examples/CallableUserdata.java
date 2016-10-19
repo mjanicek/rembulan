@@ -130,6 +130,7 @@ public class CallableUserdata {
 		// run the main function
 		Object[] result = DirectCallExecutor.newExecutor().call(state, main);
 
+		// prints [null, 2.0, 1, world, hello]
 		System.out.println("Result: " + Arrays.toString(result));
 
 	}

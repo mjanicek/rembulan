@@ -70,6 +70,7 @@ public class SimpleGlobalFunction {
 		// run the main function
 		Object[] result = DirectCallExecutor.newExecutor().call(state, main);
 
+		// prints the number of milliseconds since 1 Jan 1970
 		System.out.println("Result: " + Arrays.toString(result));
 
 	}
