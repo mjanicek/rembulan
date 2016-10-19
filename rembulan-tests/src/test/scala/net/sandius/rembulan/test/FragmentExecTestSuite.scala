@@ -52,10 +52,6 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
   protected val Debug = FragmentExpectations.Env.Debug
   protected val Full = FragmentExpectations.Env.Full
 
-  def installLib(state: StateContext, env: Table, name: String, impl: Lib): Unit = {
-    impl.installInto(state, env)
-  }
-
   protected def envForContext(state: StateContext, ctx: Env, ldr: ChunkLoader, printer: Printer): Table = {
     val env = state.newTable()
     val runtimeEnv = RuntimeEnvironments.system()  // FIXME

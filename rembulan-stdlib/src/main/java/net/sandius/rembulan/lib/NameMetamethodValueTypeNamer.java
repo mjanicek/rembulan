@@ -29,10 +29,10 @@ import java.util.Objects;
  * A value type namer that looks up type names in object metatables, and distinguishes
  * light userdata from full userdata.
  *
- * <p>The namer first tries to find the key {@code "__name"} (see {@link Lib#MT_NAME})
+ * <p>The namer first tries to find the key {@code "__name"} (see {@link BasicLib#MT_NAME})
  * in the object's metatable. If a value with such key exists and is a string, it is
  * used as the type name. Otherwise, light userdata is assigned the type name
- * {@code "light userdata"} ({@link Lib#TYPENAME_LIGHT_USERDATA}), and the rest is
+ * {@code "light userdata"} ({@link BasicLib#TYPENAME_LIGHT_USERDATA}), and the rest is
  * assigned the same name as assigned by {@link PlainValueTypeNamer}.</p>
  *
  */
@@ -63,7 +63,7 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 	 * @throws NullPointerException  if {@code metatableProvider} is {@code null}
 	 */
 	public static ByteString typeNameOf(Object instance, MetatableProvider metatableProvider) {
-		Object nameField = Metatables.getMetamethod(metatableProvider, Lib.MT_NAME, instance);
+		Object nameField = Metatables.getMetamethod(metatableProvider, BasicLib.MT_NAME, instance);
 		if (nameField instanceof ByteString) {
 			return (ByteString) nameField;
 		}
@@ -72,7 +72,7 @@ public class NameMetamethodValueTypeNamer implements ValueTypeNamer {
 		}
 		else {
 			if (LuaType.isLightUserdata(instance)) {
-				return Lib.TYPENAME_LIGHT_USERDATA;
+				return BasicLib.TYPENAME_LIGHT_USERDATA;
 			}
 			else {
 				return PlainValueTypeNamer.INSTANCE.typeNameOf(instance);

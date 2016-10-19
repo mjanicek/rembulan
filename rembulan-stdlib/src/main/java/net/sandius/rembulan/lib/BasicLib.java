@@ -48,9 +48,39 @@ import java.util.Objects;
  */
 public final class BasicLib {
 
-	public static final ByteString MT_TOSTRING = ByteString.constOf("__tostring");
+	/**
+	 * The metatable key {@code "__metatable"}. When defined, customises the behaviour
+	 * of {@link #GETMETATABLE {@code getmetatable}}
+	 * and {@link #SETMETATABLE {@code setmetatable}}.
+	 */
 	public static final ByteString MT_METATABLE = ByteString.constOf("__metatable");
+
+	/**
+	 * The metatable key {@code "__name"}. Used to customise the type name of an object
+	 * in error messages.
+	 *
+	 * @see NameMetamethodValueTypeNamer
+	 */
+	public static final ByteString MT_NAME = ByteString.constOf("__name");
+
+	/**
+	 * The metatable key {@code "__pairs"}. When defined, customises the behaviour
+	 * of {@link #PAIRS {@code pairs}}.
+	 */
 	public static final ByteString MT_PAIRS = ByteString.constOf("__pairs");
+
+	/**
+	 * The metatable key {@code "__tostring"}. When defined, customises the behaviour
+	 * of {@link #TOSTRING {@code tostring}}.
+	 */
+	public static final ByteString MT_TOSTRING = ByteString.constOf("__tostring");
+
+	/**
+	 * The name used for describing light userdata in error messages.
+	 *
+	 * @see NameMetamethodValueTypeNamer
+	 */
+	public static final ByteString TYPENAME_LIGHT_USERDATA = ByteString.constOf("light userdata");
 
 	/**
 	 * {@code assert (v [, message])}

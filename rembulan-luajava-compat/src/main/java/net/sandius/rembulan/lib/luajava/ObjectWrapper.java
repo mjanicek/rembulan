@@ -23,7 +23,6 @@ import net.sandius.rembulan.impl.ImmutableTable;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.lib.BadArgumentException;
 import net.sandius.rembulan.lib.BasicLib;
-import net.sandius.rembulan.lib.Lib;
 import net.sandius.rembulan.lib.NameMetamethodValueTypeNamer;
 import net.sandius.rembulan.runtime.AbstractFunctionAnyArg;
 import net.sandius.rembulan.runtime.ExecutionContext;
@@ -91,7 +90,7 @@ final class ObjectWrapper<T> extends JavaWrapper<T> {
 
 	static final ImmutableTable METATABLE = new ImmutableTable.Builder()
 			.add(Metatables.MT_INDEX, GetInstanceMemberAccessor.INSTANCE)
-			.add(Lib.MT_NAME, staticTypeName())
+			.add(BasicLib.MT_NAME, staticTypeName())
 			.add(BasicLib.MT_TOSTRING, ToString.INSTANCE)
 			.build();
 

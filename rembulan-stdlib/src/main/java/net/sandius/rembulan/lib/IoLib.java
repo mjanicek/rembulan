@@ -118,7 +118,7 @@ public final class IoLib {
 		this.fileMetatable = mt;
 
 		mt.rawset(Metatables.MT_INDEX, mt);
-		mt.rawset(Lib.MT_NAME, IoFile.typeName());
+		mt.rawset(BasicLib.MT_NAME, IoFile.typeName());
 		mt.rawset(BasicLib.MT_TOSTRING, IoFile.TOSTRING);
 		// TODO: set the __gc metamethod
 		mt.rawset("close", IoFile.CLOSE);
