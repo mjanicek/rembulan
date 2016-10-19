@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.AbstractFunctionAnyArg;
 import net.sandius.rembulan.runtime.Coroutine;
 import net.sandius.rembulan.runtime.ExecutionContext;
@@ -36,7 +35,7 @@ import java.util.Arrays;
  * This library comprises the operations to manipulate coroutines, which come inside the table
  * {@code coroutine}. See §2.6 of the Lua Reference Manual for a general description of coroutines.
  */
-public final class DefaultCoroutineLib {
+public final class CoroutineLib {
 
 	/**
 	 * {@code coroutine.create (f)}
@@ -110,7 +109,7 @@ public final class DefaultCoroutineLib {
 	 */
 	public static final LuaFunction WRAP = new Wrap();
 
-	private DefaultCoroutineLib() {
+	private CoroutineLib() {
 		// not to be instantiated
 	}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.ByteStringBuilder;
@@ -24,7 +24,6 @@ import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.LoaderProvider;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.Dispatch;
@@ -48,14 +47,14 @@ import java.util.ServiceLoader;
  * one function directly in the global environment: {@code require}.
  * Everything else is exported in a {@code table} package.
  */
-public final class DefaultModuleLib {
+public final class ModuleLib {
 
 	static final byte PATH_SEPARATOR = (byte) ';';
 	static final byte PATH_TEMPLATE_PLACEHOLDER = (byte) '?';
 	static final byte WIN_DIRECTORY_PLACEHOLDER = (byte) '!';  // FIXME: not used in Rembulan
 	static final byte LUAOPEN_IGNORE = (byte) '-';  // FIXME: not used in Rembulan!
 
-	private DefaultModuleLib() {
+	private ModuleLib() {
 		// not to be instantiated
 	}
 
@@ -341,7 +340,7 @@ public final class DefaultModuleLib {
 		}
 
 		private LuaFunction loaderForPath(ByteString path) throws LoaderException {
-			return DefaultBasicLib.loadTextChunkFromFile(fileSystem, loader, path.toString(), DefaultBasicLib.Load.DEFAULT_MODE, env);
+			return BasicLib.loadTextChunkFromFile(fileSystem, loader, path.toString(), BasicLib.Load.DEFAULT_MODE, env);
 		}
 
 		@Override

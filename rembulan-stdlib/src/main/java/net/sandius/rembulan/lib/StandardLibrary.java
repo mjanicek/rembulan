@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
@@ -109,17 +109,17 @@ public class StandardLibrary {
 		Objects.requireNonNull(state);
 		Table env = state.newTable();
 
-		DefaultBasicLib.installInto(state, env, environment, loader);
-		DefaultModuleLib.installInto(state, env, environment, loader, ClassLoader.getSystemClassLoader());
-		DefaultCoroutineLib.installInto(state, env);
-		DefaultStringLib.installInto(state, env);
-		DefaultMathLib.installInto(state, env);
-		DefaultTableLib.installInto(state, env);
-		DefaultIoLib.installInto(state, env, environment);
-		DefaultOsLib.installInto(state, env, environment);
-		DefaultUtf8Lib.installInto(state, env);
+		BasicLib.installInto(state, env, environment, loader);
+		ModuleLib.installInto(state, env, environment, loader, ClassLoader.getSystemClassLoader());
+		CoroutineLib.installInto(state, env);
+		StringLib.installInto(state, env);
+		MathLib.installInto(state, env);
+		TableLib.installInto(state, env);
+		IoLib.installInto(state, env, environment);
+		OsLib.installInto(state, env, environment);
+		Utf8Lib.installInto(state, env);
 		if (withDebug) {
-			DefaultDebugLib.installInto(state, env);
+			DebugLib.installInto(state, env);
 		}
 
 		return env;

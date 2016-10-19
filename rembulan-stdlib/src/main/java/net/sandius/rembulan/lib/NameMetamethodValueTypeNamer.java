@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.LuaType;
@@ -22,7 +22,6 @@ import net.sandius.rembulan.MetatableProvider;
 import net.sandius.rembulan.Metatables;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.ValueTypeNamer;
-import net.sandius.rembulan.lib.Lib;
 
 import java.util.Objects;
 

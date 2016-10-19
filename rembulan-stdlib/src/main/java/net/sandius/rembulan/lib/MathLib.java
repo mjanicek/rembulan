@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -39,7 +37,7 @@ import java.util.Random;
  * and {@link #MODF {@code math.modf}}) return an integer when the result fits
  * in the range of an integer, or a float otherwise.
  */
-public final class DefaultMathLib {
+public final class MathLib {
 
 	/**
 	 * {@code math.abs (x)}
@@ -228,7 +226,7 @@ public final class DefaultMathLib {
 	 */
 	public static final LuaFunction ULT = new ULt();
 
-	private DefaultMathLib() {
+	private MathLib() {
 		// not to be instantiated
 	}
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Metatables;
@@ -23,10 +23,8 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
 import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.Lib;
-import net.sandius.rembulan.lib.ModuleLibHelper;
-import net.sandius.rembulan.lib.impl.io.InputStreamIoFile;
-import net.sandius.rembulan.lib.impl.io.OutputStreamIoFile;
+import net.sandius.rembulan.lib.io.InputStreamIoFile;
+import net.sandius.rembulan.lib.io.OutputStreamIoFile;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -61,7 +59,7 @@ import java.util.Objects;
  * of the error message and error code in case of errors may be not thread safe, because they
  * rely on the global C variable {@code errno}.
  */
-public final class DefaultIoLib {
+public final class IoLib {
 
 	/**
 	 * {@code io.type (obj)}
@@ -94,7 +92,7 @@ public final class DefaultIoLib {
 	private IoFile defaultInput;
 	private IoFile defaultOutput;
 
-	private DefaultIoLib(
+	private IoLib(
 			TableFactory tableFactory,
 			FileSystem fileSystem,
 			InputStream in,
@@ -121,7 +119,7 @@ public final class DefaultIoLib {
 
 		mt.rawset(Metatables.MT_INDEX, mt);
 		mt.rawset(Lib.MT_NAME, IoFile.typeName());
-		mt.rawset(DefaultBasicLib.MT_TOSTRING, IoFile.TOSTRING);
+		mt.rawset(BasicLib.MT_TOSTRING, IoFile.TOSTRING);
 		// TODO: set the __gc metamethod
 		mt.rawset("close", IoFile.CLOSE);
 		mt.rawset("flush", IoFile.FLUSH);
@@ -145,7 +143,7 @@ public final class DefaultIoLib {
 		Table t = context.newTable();
 
 		// FIXME
-		DefaultIoLib l = new DefaultIoLib(
+		IoLib l = new IoLib(
 				context,
 				runtimeEnvironment.fileSystem(),
 				runtimeEnvironment.standardInput(),
@@ -201,9 +199,9 @@ public final class DefaultIoLib {
 
 	static class Close extends AbstractLibFunction {
 
-		private final DefaultIoLib lib;
+		private final IoLib lib;
 
-		public Close(DefaultIoLib lib) {
+		public Close(IoLib lib) {
 			this.lib = Objects.requireNonNull(lib);
 		}
 
@@ -235,9 +233,9 @@ public final class DefaultIoLib {
 
 	static class Flush extends AbstractLibFunction {
 
-		private final DefaultIoLib lib;
+		private final IoLib lib;
 
-		public Flush(DefaultIoLib lib) {
+		public Flush(IoLib lib) {
 			this.lib = Objects.requireNonNull(lib);
 		}
 
@@ -269,9 +267,9 @@ public final class DefaultIoLib {
 
 	static class Input extends AbstractLibFunction {
 
-		private final DefaultIoLib lib;
+		private final IoLib lib;
 
-		public Input(DefaultIoLib lib) {
+		public Input(IoLib lib) {
 			this.lib = Objects.requireNonNull(lib);
 		}
 
@@ -301,9 +299,9 @@ public final class DefaultIoLib {
 
 	static class Open extends AbstractLibFunction {
 
-		private final DefaultIoLib lib;
+		private final IoLib lib;
 
-		public Open(DefaultIoLib lib) {
+		public Open(IoLib lib) {
 			this.lib = Objects.requireNonNull(lib);
 		}
 
@@ -381,9 +379,9 @@ public final class DefaultIoLib {
 
 	static class Output extends AbstractLibFunction {
 
-		private final DefaultIoLib lib;
+		private final IoLib lib;
 
-		public Output(DefaultIoLib lib) {
+		public Output(IoLib lib) {
 			this.lib = Objects.requireNonNull(lib);
 		}
 
@@ -413,9 +411,9 @@ public final class DefaultIoLib {
 
 	static class Read extends AbstractLibFunction {
 
-		private final DefaultIoLib lib;
+		private final IoLib lib;
 
-		public Read(DefaultIoLib lib) {
+		public Read(IoLib lib) {
 			this.lib = Objects.requireNonNull(lib);
 		}
 
@@ -478,9 +476,9 @@ public final class DefaultIoLib {
 
 	static class Write extends AbstractLibFunction {
 
-		private final DefaultIoLib lib;
+		private final IoLib lib;
 
-		public Write(DefaultIoLib lib) {
+		public Write(IoLib lib) {
 			this.lib = Objects.requireNonNull(lib);
 		}
 

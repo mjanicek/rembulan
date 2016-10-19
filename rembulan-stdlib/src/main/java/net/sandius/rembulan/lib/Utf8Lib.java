@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.LuaFunction;
 
 /**
@@ -34,7 +33,7 @@ import net.sandius.rembulan.runtime.LuaFunction;
  * subject string. As in the string library, negative indices count from the end
  * of the string.</p>
  */
-public final class DefaultUtf8Lib {
+public final class Utf8Lib {
 
 	/**
 	 * {@code utf8.char (···)}
@@ -106,7 +105,7 @@ public final class DefaultUtf8Lib {
 	 */
 	public static final LuaFunction OFFSET = new Offset();
 
-	private DefaultUtf8Lib() {
+	private Utf8Lib() {
 		// not to be instantiated
 	}
 

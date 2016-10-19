@@ -26,7 +26,7 @@ import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.StateContexts;
-import net.sandius.rembulan.lib.impl.StandardLibrary;
+import net.sandius.rembulan.lib.StandardLibrary;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.AbstractFunction0;

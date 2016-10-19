@@ -14,13 +14,10 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.*;
 import net.sandius.rembulan.env.RuntimeEnvironment;
-import net.sandius.rembulan.lib.AssertionFailedException;
-import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.load.ChunkLoader;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.Dispatch;
@@ -49,7 +46,7 @@ import java.util.Objects;
  * application, you should check carefully whether you need to provide implementations for some
  * of its facilities.
  */
-public final class DefaultBasicLib {
+public final class BasicLib {
 
 	public static final ByteString MT_TOSTRING = ByteString.constOf("__tostring");
 	public static final ByteString MT_METATABLE = ByteString.constOf("__metatable");
@@ -269,7 +266,7 @@ public final class DefaultBasicLib {
 	 *
 	 * <p>Receives a value of any type and converts it to a string in a human-readable format.
 	 * (For complete control of how numbers are converted,
-	 * use {@link DefaultStringLib#FORMAT {@code string.format}}.) If the metatable
+	 * use {@link StringLib#FORMAT {@code string.format}}.) If the metatable
 	 * of {@code v} has a {@link #MT_TOSTRING {@code "__tostring"}} field,
 	 * then {@code tostring} calls the corresponding value with {@code v} as argument, and uses
 	 * the result of the call as its result.</p>
@@ -304,7 +301,7 @@ public final class DefaultBasicLib {
 	 */
 	public static final LuaFunction XPCALL = new XPCall();
 
-	private DefaultBasicLib() {
+	private BasicLib() {
 		// not to be instantiated
 	}
 
@@ -379,7 +376,7 @@ public final class DefaultBasicLib {
 	 * using the {@link #TOSTRING {@code tostring}} function to convert each argument
 	 * to a string. {@code print} is not intended for formatted output, but only as
 	 * a quick way to show a value, for instance for debugging. For complete control over
-	 * the output, use {@link DefaultStringLib#FORMAT {@code string.format}}
+	 * the output, use {@link StringLib#FORMAT {@code string.format}}
 	 * and {@code io.write}.</p>
 	 */
 	public static class Print extends AbstractLibFunction {

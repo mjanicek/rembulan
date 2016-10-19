@@ -23,7 +23,7 @@ import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.env.RuntimeEnvironments
 import net.sandius.rembulan.exec.DirectCallExecutor
 import net.sandius.rembulan.impl.StateContexts
-import net.sandius.rembulan.lib.impl._
+import net.sandius.rembulan.lib._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.runtime.LuaFunction
 import net.sandius.rembulan.{StateContext, Table, Variable}
@@ -91,16 +91,16 @@ object BenchmarkRunner {
     val runtimeEnv = RuntimeEnvironments.system()
     val env = context.newTable()
 
-    DefaultBasicLib.installInto(context, env, runtimeEnv, loader)
-    DefaultModuleLib.installInto(context, env, runtimeEnv, loader, getClass.getClassLoader)
-    DefaultCoroutineLib.installInto(context, env)
-    DefaultMathLib.installInto(context, env)
-    DefaultStringLib.installInto(context, env)
-    DefaultIoLib.installInto(context, env, runtimeEnv)
-    DefaultOsLib.installInto(context, env, runtimeEnv)
-    DefaultUtf8Lib.installInto(context, env)
-    DefaultTableLib.installInto(context, env)
-    DefaultDebugLib.installInto(context, env)
+    BasicLib.installInto(context, env, runtimeEnv, loader)
+    ModuleLib.installInto(context, env, runtimeEnv, loader, getClass.getClassLoader)
+    CoroutineLib.installInto(context, env)
+    MathLib.installInto(context, env)
+    StringLib.installInto(context, env)
+    IoLib.installInto(context, env, runtimeEnv)
+    OsLib.installInto(context, env, runtimeEnv)
+    Utf8Lib.installInto(context, env)
+    TableLib.installInto(context, env)
+    DebugLib.installInto(context, env)
 
     // command-line arguments
     val argTable = context.newTable()

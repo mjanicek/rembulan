@@ -30,9 +30,9 @@ import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.StateContexts;
+import net.sandius.rembulan.lib.BasicLib;
 import net.sandius.rembulan.lib.ModuleLibHelper;
-import net.sandius.rembulan.lib.impl.DefaultBasicLib;
-import net.sandius.rembulan.lib.impl.StandardLibrary;
+import net.sandius.rembulan.lib.StandardLibrary;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.util.Check;
@@ -189,7 +189,7 @@ public class RembulanConsole {
 	private void execute(LuaFunction fn) throws CallException {
 		Object[] results = callFunction(fn);
 		if (results.length > 0) {
-			callFunction(new DefaultBasicLib.Print(out, env), results);
+			callFunction(new BasicLib.Print(out, env), results);
 		}
 	}
 

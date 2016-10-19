@@ -19,8 +19,6 @@ package net.sandius.rembulan.lib;
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.lib.impl.AbstractLibFunction;
-import net.sandius.rembulan.lib.impl.ArgumentIterator;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 

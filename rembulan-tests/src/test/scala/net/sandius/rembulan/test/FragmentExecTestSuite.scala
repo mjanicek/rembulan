@@ -21,8 +21,7 @@ import net.sandius.rembulan.compiler.{CompilerChunkLoader, CompilerSettings}
 import net.sandius.rembulan.env.RuntimeEnvironments
 import net.sandius.rembulan.exec._
 import net.sandius.rembulan.impl.StateContexts
-import net.sandius.rembulan.lib.Lib
-import net.sandius.rembulan.lib.impl._
+import net.sandius.rembulan.lib._
 import net.sandius.rembulan.load.{ChunkClassLoader, ChunkLoader}
 import net.sandius.rembulan.runtime.RuntimeCallInitialiser
 import net.sandius.rembulan.test.FragmentExpectations.Env
@@ -67,47 +66,47 @@ trait FragmentExecTestSuite extends FunSpec with MustMatchers {
         // no-op
 
       case Basic =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
 
       case Mod =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
-        DefaultModuleLib.installInto(state, env, runtimeEnv, ldr, moduleClassLoader)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        ModuleLib.installInto(state, env, runtimeEnv, ldr, moduleClassLoader)
 
       case Coro =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
-        DefaultCoroutineLib.installInto(state, env)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        CoroutineLib.installInto(state, env)
 
       case Math =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
-        DefaultMathLib.installInto(state, env)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        MathLib.installInto(state, env)
 
       case Str =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
-        DefaultStringLib.installInto(state, env)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        StringLib.installInto(state, env)
 
       case IO =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
-        DefaultIoLib.installInto(state, env, runtimeEnv)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        IoLib.installInto(state, env, runtimeEnv)
 
       case Tab =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
-        DefaultTableLib.installInto(state, env)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        TableLib.installInto(state, env)
 
       case Debug =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
-        DefaultDebugLib.installInto(state, env)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        DebugLib.installInto(state, env)
 
       case Full =>
-        DefaultBasicLib.installInto(state, env, runtimeEnv, ldr)
-        DefaultModuleLib.installInto(state, env, runtimeEnv, ldr, moduleClassLoader)
-        DefaultCoroutineLib.installInto(state, env)
-        DefaultMathLib.installInto(state, env)
-        DefaultStringLib.installInto(state, env)
-        DefaultIoLib.installInto(state, env, runtimeEnv)
-        DefaultOsLib.installInto(state, env, runtimeEnv)
-        DefaultTableLib.installInto(state, env)
-        DefaultUtf8Lib.installInto(state, env)
-        DefaultDebugLib.installInto(state, env)
+        BasicLib.installInto(state, env, runtimeEnv, ldr)
+        ModuleLib.installInto(state, env, runtimeEnv, ldr, moduleClassLoader)
+        CoroutineLib.installInto(state, env)
+        MathLib.installInto(state, env)
+        StringLib.installInto(state, env)
+        IoLib.installInto(state, env, runtimeEnv)
+        OsLib.installInto(state, env, runtimeEnv)
+        TableLib.installInto(state, env)
+        Utf8Lib.installInto(state, env)
+        DebugLib.installInto(state, env)
     }
 
     env

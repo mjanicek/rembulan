@@ -17,4 +17,4 @@
 /**
  * The default implementation of the I/O library.
  */
-package net.sandius.rembulan.lib.impl.io;
+package net.sandius.rembulan.lib.io;

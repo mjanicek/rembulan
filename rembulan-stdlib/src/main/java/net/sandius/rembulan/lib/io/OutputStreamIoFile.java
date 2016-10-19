@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl.io;
+package net.sandius.rembulan.lib.io;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.lib.impl.IoFile;
+import net.sandius.rembulan.lib.IoFile;
 import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;

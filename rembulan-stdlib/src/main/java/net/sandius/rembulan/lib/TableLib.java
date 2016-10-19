@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.ByteStringBuilder;
@@ -24,8 +24,6 @@ import net.sandius.rembulan.Ordering;
 import net.sandius.rembulan.PlainValueTypeNamer;
 import net.sandius.rembulan.StateContext;
 import net.sandius.rembulan.Table;
-import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.Dispatch;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -43,7 +41,7 @@ import java.util.ArrayList;
  * sequence or have a {@code __len} metamethod (see §3.4.7 of the Lua Reference Manual).
  * All functions ignore non-numeric keys in the tables given as arguments.</p>
  */
-public final class DefaultTableLib {
+public final class TableLib {
 
 	// Functions defined in this class are among the ugliest pieces of code ever written.
 	// This is because we must assume that any operation that may suspend will -- and
@@ -139,7 +137,7 @@ public final class DefaultTableLib {
 	 */
 	public static final LuaFunction UNPACK = new Unpack();
 
-	private DefaultTableLib() {
+	private TableLib() {
 		// not to be instantiated
 	}
 

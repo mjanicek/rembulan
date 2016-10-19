@@ -14,15 +14,13 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.ValueTypeNamer;
-import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.UnexpectedArgumentException;
 import net.sandius.rembulan.runtime.Coroutine;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.util.Check;

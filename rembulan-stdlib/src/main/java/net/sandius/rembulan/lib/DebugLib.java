@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.LuaRuntimeException;
 import net.sandius.rembulan.StateContext;
@@ -22,8 +22,6 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.BadArgumentException;
-import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
@@ -43,7 +41,7 @@ import java.util.Objects;
  * that operate over a thread have an optional first argument which is the thread to operate
  * over. The default is always the current thread.</p>
  */
-public final class DefaultDebugLib {
+public final class DebugLib {
 
 	/**
 	 * {@code debug.debug ()}
@@ -252,7 +250,7 @@ public final class DefaultDebugLib {
 	 */
 	public static final LuaFunction UPVALUEJOIN = new UpvalueJoin();
 
-	private DefaultDebugLib() {
+	private DebugLib() {
 		// not to be instantiated
 	}
 

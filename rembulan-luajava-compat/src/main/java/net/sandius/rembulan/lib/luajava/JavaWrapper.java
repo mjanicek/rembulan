@@ -21,7 +21,7 @@ import net.sandius.rembulan.Conversions;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.Userdata;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
-import net.sandius.rembulan.lib.impl.NameMetamethodValueTypeNamer;
+import net.sandius.rembulan.lib.NameMetamethodValueTypeNamer;
 import net.sandius.rembulan.runtime.AbstractFunction1;
 import net.sandius.rembulan.runtime.AbstractFunction2;
 import net.sandius.rembulan.runtime.ExecutionContext;

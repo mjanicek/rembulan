@@ -14,7 +14,14 @@
  * limitations under the License.
  */
 
-/**
- * The default implementation of the standard library.
- */
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib.io;
+
+public interface SeekableStream {
+
+	long getPosition();
+
+	long setPosition(long newPosition);
+
+	long addPosition(long offset);
+
+}

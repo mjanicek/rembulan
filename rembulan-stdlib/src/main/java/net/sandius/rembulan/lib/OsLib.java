@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.sandius.rembulan.lib.impl;
+package net.sandius.rembulan.lib;
 
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.StateContext;
@@ -22,7 +22,6 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.env.RuntimeEnvironment;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.impl.UnimplementedFunction;
-import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.runtime.AbstractFunction0;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
@@ -32,9 +31,9 @@ import java.util.Objects;
 /**
  * This library is implemented through table {@code os}.
  */
-public final class DefaultOsLib {
+public final class OsLib {
 
-	private DefaultOsLib() {
+	private OsLib() {
 		// not to be instantiated
 	}
 
