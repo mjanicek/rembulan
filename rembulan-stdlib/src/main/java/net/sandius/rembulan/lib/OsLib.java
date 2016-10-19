@@ -87,7 +87,7 @@ public final class OsLib {
 	 * string format.</p>
 	 *
 	 * <p>If the time argument is present, this is the time to be formatted (see the
-	 * {@link Time) {@code os.time}} function for a description of this value).
+	 * {@link Time {@code os.time}} function for a description of this value).
 	 * Otherwise, {@code date} formats the current time.</p>
 	 *
 	 * <p>If format starts with '{@code !}', then the date is formatted in Coordinated Universal

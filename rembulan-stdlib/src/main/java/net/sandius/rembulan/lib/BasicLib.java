@@ -1120,7 +1120,7 @@ public final class BasicLib {
 	 * Other upvalues are initialized with <b>nil</b>. (When you load a main chunk, the resulting
 	 * function will always have exactly one upvalue, the {@code _ENV} variable
 	 * (see §2.2 of the Lua Reference Manual). However, when you load a binary chunk created
-	 * from a function (see {@link DefaultStringLib#DUMP {@code string.dump}}), the resulting
+	 * from a function (see {@link StringLib#DUMP {@code string.dump}}), the resulting
 	 * function can have an arbitrary number of upvalues.) All upvalues are fresh, that is,
 	 * they are not shared with any other function.</p>
 	 *
