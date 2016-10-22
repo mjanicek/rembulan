@@ -30,8 +30,6 @@ import net.sandius.rembulan.exec.CallException;
 import net.sandius.rembulan.exec.CallPausedException;
 import net.sandius.rembulan.exec.DirectCallExecutor;
 import net.sandius.rembulan.impl.StateContexts;
-import net.sandius.rembulan.lib.BasicLib;
-import net.sandius.rembulan.lib.ModuleLibHelper;
 import net.sandius.rembulan.lib.StandardLibrary;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.LuaFunction;
@@ -56,6 +54,7 @@ public class RembulanConsole {
 
 	private int chunkIndex;
 
+	private final LuaFunction printFunction;
 	private final LuaFunction requireFunction;
 
 	private final boolean javaTraceback;
@@ -95,7 +94,8 @@ public class RembulanConsole {
 				.withDebug(true)
 				.installInto(state);
 
-		requireFunction = ModuleLibHelper.getRequire(env);
+		printFunction = Aux.callGlobal(env, "print");
+		requireFunction = Aux.callGlobal(env, "require");
 
 		this.callExecutor = DirectCallExecutor.newExecutor();
 
@@ -189,11 +189,11 @@ public class RembulanConsole {
 	private void execute(LuaFunction fn) throws CallException {
 		Object[] results = callFunction(fn);
 		if (results.length > 0) {
-			callFunction(new BasicLib.Print(out, env), results);
+			callFunction(printFunction, results);
 		}
 	}
 
-	public boolean start() throws IOException {
+	public boolean start() throws CallException, IOException {
 		try {
 			for (CommandLineArguments.Step step : config.steps()) {
 				executeStep(step);
@@ -255,17 +255,28 @@ public class RembulanConsole {
 		}
 	}
 
-	private String getPrompt() {
-		ByteString s = Conversions.stringValueOf(env.rawget(Constants.VAR_NAME_PROMPT));
-		return s != null ? s.toString() : Constants.DEFAULT_PROMPT;
+	private String getGlobalString(String name, String defaultValue) throws CallException {
+		final Object[] result;
+		result = callFunction(Aux.index(env, name));
+
+		if (result.length > 0) {
+			ByteString s = Conversions.stringValueOf(result[0]);
+			return s != null ? s.toString() : defaultValue;
+		}
+		else {
+			return defaultValue;
+		}
 	}
 
-	private String getPrompt2() {
-		ByteString s = Conversions.stringValueOf(env.rawget(Constants.VAR_NAME_PROMPT2));
-		return s != null ? s.toString() : Constants.DEFAULT_PROMPT2;
+	private String getPrompt() throws CallException {
+		return getGlobalString(Constants.VAR_NAME_PROMPT, Constants.DEFAULT_PROMPT);
 	}
 
-	private void startInteractive() throws IOException {
+	private String getPrompt2() throws CallException {
+		return getGlobalString(Constants.VAR_NAME_PROMPT2, Constants.DEFAULT_PROMPT2);
+	}
+
+	private void startInteractive() throws CallException, IOException {
 		ConsoleReader reader = new ConsoleReader(in, out);
 
 		reader.setExpandEvents(false);
@@ -321,8 +332,9 @@ public class RembulanConsole {
 				// reset back to initial state
 				codeBuffer.setLength(0);
 
+				Object[] results = null;
 				try {
-					execute(fn);
+					results = callFunction(fn);
 				}
 				catch (CallException ex) {
 					if (!javaTraceback) {
@@ -330,6 +342,17 @@ public class RembulanConsole {
 					}
 					else {
 						ex.printStackTrace(err);
+					}
+				}
+
+				if (results != null && results.length > 0) {
+					try {
+						callFunction(printFunction, results);
+					}
+					catch (CallException ex) {
+						err.println("error calling 'print' ("
+								+ Conversions.toErrorMessage(ex.getCause())
+								+ ")");
 					}
 				}
 
@@ -359,6 +382,11 @@ public class RembulanConsole {
 		int rc;
 		try {
 			rc = console.start() ? 1 : 0;
+		}
+		catch (CallException ex) {
+			// error while retrieving _PROMPT or _PROMPT2
+			System.err.println(ex.getCause().getMessage());
+			rc = 1;
 		}
 		catch (Exception ex) {
 			System.err.println("Encountered fatal error (aborting):");

@@ -559,4 +559,26 @@ public final class Conversions {
 		}
 	}
 
+	private static final ByteString NULL_ERROR_MESSAGE = ByteString.constOf("(null)");
+
+	/**
+	 * Converts a {@code Throwable} {@code t} to an error message (a byte string).
+	 *
+	 * <p>This is equivalent to converting the error object retrieved from {@code t} by
+	 * {@link #toErrorObject(Throwable)} to a byte string using
+	 * {@link #stringValueOf(Object)}.</p>
+	 *
+	 * <p>If the error object does not have a string value, returns {@code "(null)"}.</p>
+	 *
+	 * @param t  throwable to convert to error message, must not be {@code null}
+	 * @return error message of {@code t}, or {@code "(null)"} if {@code t} does not
+	 *         have a string error message
+	 *
+	 * @throws NullPointerException  if {@code t} is {@code null}
+	 */
+	public static ByteString toErrorMessage(Throwable t) {
+		ByteString m = Conversions.stringValueOf(toErrorObject(t));
+		return m != null ? m : NULL_ERROR_MESSAGE;
+	}
+
 }
