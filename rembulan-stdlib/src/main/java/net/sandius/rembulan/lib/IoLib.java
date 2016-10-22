@@ -166,7 +166,7 @@ public final class IoLib {
 		t.rawset("stdout", l.stdOut);
 		t.rawset("stderr", l.stdErr);
 
-		ModuleLibHelper.install(env, "io", t);
+		ModuleLib.install(env, "io", t);
 	}
 
 

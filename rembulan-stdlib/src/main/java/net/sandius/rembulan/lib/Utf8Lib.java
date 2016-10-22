@@ -119,7 +119,7 @@ public final class Utf8Lib {
 		t.rawset("len", LEN);
 		t.rawset("offset", OFFSET);
 
-		ModuleLibHelper.install(env, "utf8", t);
+		ModuleLib.install(env, "utf8", t);
 	}
 
 	static class Char extends UnimplementedFunction {

@@ -396,7 +396,7 @@ public final class BasicLib {
 		env.rawset("_VERSION", _VERSION);
 		env.rawset("xpcall", XPCALL);
 
-		ModuleLibHelper.addToLoaded(env, "_G", env);
+		ModuleLib.addToLoaded(env, "_G", env);
 	}
 
 	/**

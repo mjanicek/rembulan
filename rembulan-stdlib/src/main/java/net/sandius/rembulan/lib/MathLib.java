@@ -265,7 +265,7 @@ public final class MathLib {
 		t.rawset("type", TYPE);
 		t.rawset("ult", ULT);
 		
-		ModuleLibHelper.install(env, "math", t);
+		ModuleLib.install(env, "math", t);
 	}
 
 	public static void installInto(StateContext context, Table env) {

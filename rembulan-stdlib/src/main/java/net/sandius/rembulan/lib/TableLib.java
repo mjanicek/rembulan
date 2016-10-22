@@ -152,7 +152,7 @@ public final class TableLib {
 		t.rawset("sort", SORT);
 		t.rawset("unpack", UNPACK);
 
-		ModuleLibHelper.install(env, "table", t);
+		ModuleLib.install(env, "table", t);
 	}
 
 	static long getLength(ReturnBuffer rbuf) {

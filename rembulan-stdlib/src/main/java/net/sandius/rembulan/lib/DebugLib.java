@@ -274,7 +274,7 @@ public final class DebugLib {
 		t.rawset("upvalueid", UPVALUEID);
 		t.rawset("upvaluejoin", UPVALUEJOIN);
 
-		ModuleLibHelper.install(env, "debug", t);
+		ModuleLib.install(env, "debug", t);
 	}
 
 	static class UpvalueRef {

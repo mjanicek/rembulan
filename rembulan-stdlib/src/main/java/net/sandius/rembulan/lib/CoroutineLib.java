@@ -124,7 +124,7 @@ public final class CoroutineLib {
 		t.rawset("running", RUNNING);
 		t.rawset("wrap", WRAP);
 
-		ModuleLibHelper.install(env, "coroutine", t);
+		ModuleLib.install(env, "coroutine", t);
 	}
 
 	static class Create extends AbstractLibFunction {

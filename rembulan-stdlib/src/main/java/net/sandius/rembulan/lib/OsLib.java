@@ -52,7 +52,7 @@ public final class OsLib {
 		t.rawset("time", new Time(runtimeEnvironment));
 		t.rawset("tmpname", new TmpName(runtimeEnvironment));
 
-		ModuleLibHelper.install(env, "os", t);
+		ModuleLib.install(env, "os", t);
 	}
 
 	/**

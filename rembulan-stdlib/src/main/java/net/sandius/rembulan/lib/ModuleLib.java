@@ -131,6 +131,31 @@ public final class ModuleLib {
 		searchers.rawset(searchers.rawlen() + 1, fn);
 	}
 
+	static void addToLoaded(Table env, String modName, Object value) {
+		Object pkg = env.rawget("package");
+		if (pkg instanceof Table) {
+			Object loaded = ((Table) pkg).rawget("loaded");
+			if (loaded instanceof Table) {
+				((Table) loaded).rawset(modName, value);
+			}
+		}
+	}
+
+	static void addToPreLoad(Table env, String modName, LuaFunction loader) {
+		Object pkg = env.rawget("package");
+		if (pkg instanceof Table) {
+			Object preload = ((Table) pkg).rawget("preload");
+			if (preload instanceof Table) {
+				((Table) preload).rawset(modName, loader);
+			}
+		}
+	}
+
+	static void install(Table env, String modName, Object value) {
+		env.rawset(modName, value);
+		addToLoaded(env, modName, value);
+	}
+
 	static Table searchers(Table libTable) {
 		Object o = libTable.rawget("searchers");
 		return o instanceof Table ? (Table) o : null;

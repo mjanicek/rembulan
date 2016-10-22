@@ -399,7 +399,7 @@ public final class StringLib {
 		mt.rawset(Metatables.MT_INDEX, t);
 		context.setStringMetatable(mt);
 
-		ModuleLibHelper.install(env, "string", t);
+		ModuleLib.install(env, "string", t);
 	}
 
 	private static int lowerBound(int i, int len) {
