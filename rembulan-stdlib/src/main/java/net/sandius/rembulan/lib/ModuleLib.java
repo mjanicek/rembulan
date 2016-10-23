@@ -94,6 +94,8 @@ public final class ModuleLib {
 		return new SearchPath(fileSystem);
 	}
 
+	// TODO: publish require
+
 	private ModuleLib() {
 		// not to be instantiated
 	}

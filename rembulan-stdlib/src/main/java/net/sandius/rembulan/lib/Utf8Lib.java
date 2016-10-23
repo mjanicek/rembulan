@@ -60,7 +60,8 @@ public final class Utf8Lib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.char">
 	 *     the Lua 5.3 Reference Manual entry for <code>utf8.char</code></a>
 	 */
-	public static LuaFunction charFn() {
+	// TODO: make public once implemented
+	static LuaFunction charFn() {
 		return CHAR;
 	}
 
@@ -71,7 +72,8 @@ public final class Utf8Lib {
 	 * (see §6.4.1), which matches exactly one UTF-8 byte sequence, assuming that the subject is
 	 * a valid UTF-8 string.</p>
 	 */
-	public static final ByteString CHARPATTERN = null;  // TODO
+	// TODO: make public once implemented
+	static final ByteString CHARPATTERN = null;  // TODO
 
 	/**
 	 * Returns the function {@code utf8.codes}.
@@ -97,7 +99,8 @@ public final class Utf8Lib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.codes">
 	 *     the Lua 5.3 Reference Manual entry for <code>utf8.codes</code></a>
 	 */
-	public static LuaFunction codes() {
+	// TODO: make public once implemented
+	static LuaFunction codes() {
 		return CODES;
 	}
 
@@ -120,7 +123,8 @@ public final class Utf8Lib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.codepoint">
 	 *     the Lua 5.3 Reference Manual entry for <code>utf8.codepoint</code></a>
 	 */
-	public static LuaFunction codepoint() {
+	// TODO: make public once implemented
+	static LuaFunction codepoint() {
 		return CODEPOINT;
 	}
 
@@ -143,7 +147,8 @@ public final class Utf8Lib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.len">
 	 *     the Lua 5.3 Reference Manual entry for <code>utf8.len</code></a>
 	 */
-	public static LuaFunction len() {
+	// TODO: make public once implemented
+	static LuaFunction len() {
 		return LEN;
 	}
 
@@ -174,7 +179,8 @@ public final class Utf8Lib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.offset">
 	 *     the Lua 5.3 Reference Manual entry for <code>utf8.offset</code></a>
 	 */
-	public static LuaFunction offset() {
+	// TODO: make public once implemented
+	static LuaFunction offset() {
 		return OFFSET;
 	}
 

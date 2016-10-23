@@ -289,7 +289,7 @@ public final class IoLib {
 	 *
 	 * @return  the {@code file:tostring} method
 	 */
-	static LuaFunction file_tostring() {
+	public static LuaFunction file_tostring() {
 		return FILE_TOSTRING;
 	}
 

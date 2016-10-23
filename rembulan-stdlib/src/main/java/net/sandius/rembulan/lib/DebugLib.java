@@ -83,7 +83,8 @@ public final class DebugLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.debug">
 	 *     the Lua 5.3 Reference Manual entry for <code>debug.debug</code></a>
 	 */
-	public static LuaFunction debug() {
+	// TODO: make public once implemented
+	static LuaFunction debug() {
 		return DEBUG;
 	}
 
@@ -105,7 +106,8 @@ public final class DebugLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.gethook">
 	 *     the Lua 5.3 Reference Manual entry for <code>debug.gethook</code></a>
 	 */
-	public static LuaFunction gethook() {
+	// TODO: make public once implemented
+	static LuaFunction gethook() {
 		return GETHOOK;
 	}
 
@@ -143,7 +145,8 @@ public final class DebugLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getinfo">
 	 *     the Lua 5.3 Reference Manual entry for <code>debug.getinfo</code></a>
 	 */
-	public static LuaFunction getinfo() {
+	// TODO: make public once implemented
+	static LuaFunction getinfo() {
 		return GETINFO;
 	}
 
@@ -180,7 +183,8 @@ public final class DebugLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getlocal">
 	 *     the Lua 5.3 Reference Manual entry for <code>debug.getlocal</code></a>
 	 */
-	public static LuaFunction getlocal() {
+	// TODO: make public once implemented
+	static LuaFunction getlocal() {
 		return GETLOCAL;
 	}
 
@@ -221,7 +225,8 @@ public final class DebugLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getregistry">
 	 *     the Lua 5.3 Reference Manual entry for <code>debug.getregistry</code></a>
 	 */
-	public static LuaFunction getregistry() {
+	// TODO: make public once implemented
+	static LuaFunction getregistry() {
 		return GETREGISTRY;
 	}
 
@@ -307,7 +312,8 @@ public final class DebugLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.sethook">
 	 *     the Lua 5.3 Reference Manual entry for <code>debug.sethook</code></a>
 	 */
-	public static LuaFunction sethook() {
+	// TODO: make public once implemented
+	static LuaFunction sethook() {
 		return SETHOOK;
 	}
 
@@ -335,7 +341,8 @@ public final class DebugLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.setlocal">
 	 *     the Lua 5.3 Reference Manual entry for <code>debug.setlocal</code></a>
 	 */
-	public static LuaFunction setlocal() {
+	// TODO: make public once implemented
+	static LuaFunction setlocal() {
 		return SETLOCAL;
 	}
 
@@ -425,7 +432,8 @@ public final class DebugLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.traceback">
 	 *     the Lua 5.3 Reference Manual entry for <code>debug.traceback</code></a>
 	 */
-	public static LuaFunction traceback() {
+	// TODO: make public once implemented
+	static LuaFunction traceback() {
 		return TRACEBACK;
 	}
 

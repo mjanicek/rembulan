@@ -464,7 +464,8 @@ public final class StringLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.pack">
 	 *     the Lua 5.3 Reference Manual entry for <code>string.pack</code></a>
 	 */
-	public static LuaFunction pack() {
+	// TODO: make public once implemented
+	static LuaFunction pack() {
 		return PACK;
 	}
 
@@ -486,7 +487,8 @@ public final class StringLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.packsize">
 	 *     the Lua 5.3 Reference Manual entry for <code>string.packsize</code></a>
 	 */
-	public static LuaFunction packsize() {
+	// TODO: make public once implemented
+	static LuaFunction packsize() {
 		return PACKSIZE;
 	}
 
@@ -584,7 +586,8 @@ public final class StringLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.unpack">
 	 *     the Lua 5.3 Reference Manual entry for <code>string.unpack</code></a>
 	 */
-	public static LuaFunction unpack() {
+	// TODO: make public once implemented
+	static LuaFunction unpack() {
 		return UNPACK;
 	}
 

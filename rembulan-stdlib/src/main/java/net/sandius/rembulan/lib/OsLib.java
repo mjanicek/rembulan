@@ -103,6 +103,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.date</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction date(RuntimeEnvironment runtimeEnvironment) {
 		return new Date(runtimeEnvironment);
 	}
@@ -125,6 +126,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.difftime</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction difftime() {
 		return DIFFTIME;
 	}
@@ -160,6 +162,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.execute</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction execute(RuntimeEnvironment runtimeEnvironment) {
 		return new Execute(runtimeEnvironment);
 	}
@@ -190,6 +193,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.exit</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction exit(RuntimeEnvironment runtimeEnvironment) {
 		return new Exit(runtimeEnvironment);
 	}
@@ -241,6 +245,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.remove</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction remove(RuntimeEnvironment runtimeEnvironment) {
 		return new Remove(runtimeEnvironment);
 	}
@@ -266,6 +271,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.rename</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction rename(RuntimeEnvironment runtimeEnvironment) {
 		return new Rename(runtimeEnvironment);
 	}
@@ -305,6 +311,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.setlocale</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction setlocale(RuntimeEnvironment runtimeEnvironment) {
 		return new SetLocale(runtimeEnvironment);
 	}
@@ -345,6 +352,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.time</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction time(RuntimeEnvironment runtimeEnvironment) {
 		return new Time(runtimeEnvironment);
 	}
@@ -379,6 +387,7 @@ public final class OsLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.create">
 	 *     the Lua 5.3 Reference Manual entry for <code>os.tmpname</code></a>
 	 */
+	// TODO: make public once implemented
 	static LuaFunction tmpname(RuntimeEnvironment runtimeEnvironment) {
 		return new TmpName(runtimeEnvironment);
 	}

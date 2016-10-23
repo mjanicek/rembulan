@@ -170,7 +170,8 @@ public final class BasicLib {
 	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-collectgarbage">
 	 *     the Lua 5.3 Reference Manual entry for <code>collectgarbage</code></a>
 	 */
-	public static LuaFunction collectgarbage() {
+	// TODO: make public once implemented
+	static LuaFunction collectgarbage() {
 		return COLLECTGARBAGE;
 	}
 
