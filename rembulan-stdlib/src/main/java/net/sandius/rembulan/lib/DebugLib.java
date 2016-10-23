@@ -43,7 +43,29 @@ import java.util.Objects;
  */
 public final class DebugLib {
 
+	static final LuaFunction DEBUG = new Debug();
+	static final LuaFunction GETHOOK = new GetHook();
+	static final LuaFunction GETINFO = new GetInfo();
+	static final LuaFunction GETLOCAL = new GetLocal();
+	static final LuaFunction GETMETATABLE = new GetMetatable();
+	static final LuaFunction GETREGISTRY = new GetRegistry();
+	static final LuaFunction GETUPVALUE = new GetUpvalue();
+	static final LuaFunction GETUSERVALUE = new GetUserValue();
+	static final LuaFunction SETHOOK = new SetHook();
+	static final LuaFunction SETLOCAL = new SetLocal();
+	static final LuaFunction SETMETATABLE = new SetMetatable();
+	static final LuaFunction SETUPVALUE = new SetUpvalue();
+	static final LuaFunction SETUSERVALUE = new SetUserValue();
+	static final LuaFunction TRACEBACK = new Traceback();
+	static final LuaFunction UPVALUEID = new UpvalueId();
+	static final LuaFunction UPVALUEJOIN = new UpvalueJoin();
+	
 	/**
+	 * Returns the function {@code debug.debug}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.debug ()}
 	 *
 	 * <p>Enters an interactive mode with the user, running each string that the user enters.
@@ -54,19 +76,45 @@ public final class DebugLib {
 	 *
 	 * <p>Note that commands for {@code debug.debug} are not lexically nested within any
 	 * function and so have no direct access to local variables.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.debug} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.debug">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.debug</code></a>
 	 */
-	public static final LuaFunction DEBUG = new Debug();
+	public static LuaFunction debug() {
+		return DEBUG;
+	}
 
 	/**
+	 * Returns the function {@code debug.gethook}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.gethook ([thread])}
 	 *
 	 * <p>Returns the current hook settings of the thread, as three values: the current hook
 	 * function, the current hook mask, and the current hook count (as set by
 	 * the {@link #SETHOOK {@code debug.sethook}} function).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.gethook} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.gethook">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.gethook</code></a>
 	 */
-	public static final LuaFunction GETHOOK = new GetHook();
+	public static LuaFunction gethook() {
+		return GETHOOK;
+	}
 
 	/**
+	 * Returns the function {@code debug.getinfo}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.getinfo ([thread,] f [, what])}
 	 *
 	 * <p>Returns a table with information about a function. You can give the function directly
@@ -88,10 +136,23 @@ public final class DebugLib {
 	 * the current function, if a reasonable name can be found, and the expression
 	 * {@code debug.getinfo(print)} returns a table with all available information about
 	 * the {@code print} function.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.getinfo} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getinfo">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.getinfo</code></a>
 	 */
-	public static final LuaFunction GETINFO = new GetInfo();
+	public static LuaFunction getinfo() {
+		return GETINFO;
+	}
 
 	/**
+	 * Returns the function {@code debug.getlocal}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.getlocal ([thread,] f, local)}
 	 *
 	 * <p>This function returns the name and the value of the local variable with index local
@@ -112,25 +173,64 @@ public final class DebugLib {
 	 *
 	 * <p>The parameter {@code f} may also be a function. In that case, {@code getlocal}
 	 * returns only the name of function parameters.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.getlocal} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getlocal">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.getlocal</code></a>
 	 */
-	public static final LuaFunction GETLOCAL = new GetLocal();
+	public static LuaFunction getlocal() {
+		return GETLOCAL;
+	}
 
 	/**
+	 * Returns the function {@code debug.getmetatable}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.getmetatable (value)}
 	 *
 	 * <p>Returns the metatable of the given {@code value} or <b>nil</b> if it does not have
 	 * a metatable.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.getmetatable} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getmetatable">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.getmetatable</code></a>
 	 */
-	public static final LuaFunction GETMETATABLE = new GetMetatable();
+	public static LuaFunction getmetatable() {
+		return GETMETATABLE;
+	}
 
 	/**
+	 * Returns the function {@code debug.getregistry}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.getregistry ()}
 	 *
 	 * <p>Returns the registry table (see §4.5 of the Lua Reference Manual).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.getregistry} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getregistry">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.getregistry</code></a>
 	 */
-	public static final LuaFunction GETREGISTRY = new GetRegistry();
+	public static LuaFunction getregistry() {
+		return GETREGISTRY;
+	}
 
 	/**
+	 * Returns the function {@code debug.getupvalue}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.getupvalue (f, up)}
 	 *
 	 * <p>This function returns the name and the value of the upvalue with index {@code up}
@@ -139,18 +239,44 @@ public final class DebugLib {
 	 *
 	 * <p>Variable names starting with {@code '('} (open parenthesis) represent variables with
 	 * no known names (variables from chunks saved without debug information).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.getupvalue} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getupvalue">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.getupvalue</code></a>
 	 */
-	public static final LuaFunction GETUPVALUE = new GetUpvalue();
+	public static LuaFunction getupvalue() {
+		return GETUPVALUE;
+	}
 
 	/**
+	 * Returns the function {@code debug.getuservalue}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.getuservalue (u)}
 	 *
 	 * <p>Returns the Lua value associated to {@code u}. If {@code u} is not a userdata,
 	 * returns <b>nil</b>.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.getuservalue} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.getuservalue">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.getuservalue</code></a>
 	 */
-	public static final LuaFunction GETUSERVALUE = new GetUserValue();
+	public static LuaFunction getuservalue() {
+		return GETUSERVALUE;
+	}
 
 	/**
+	 * Returns the function {@code debug.sethook}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.sethook ([thread,] hook, mask [, count])}
 	 *
 	 * <p>Sets the given function as a hook. The string {@code mask} and the number {@code count}
@@ -174,10 +300,23 @@ public final class DebugLib {
 	 * number as its second parameter. Inside a hook, you can call {@code getinfo} with level 2
 	 * to get more information about the running function (level 0 is the {@code getinfo}
 	 * function, and level 1 is the hook function).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.sethook} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.sethook">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.sethook</code></a>
 	 */
-	public static final LuaFunction SETHOOK = new SetHook();
+	public static LuaFunction sethook() {
+		return SETHOOK;
+	}
 
 	/**
+	 * Returns the function {@code debug.setlocal}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.setlocal ([thread,] level, local, value)}
 	 *
 	 * <p>This function assigns the value {@code value} to the local variable with index
@@ -189,37 +328,89 @@ public final class DebugLib {
 	 *
 	 * <p>See {@link #GETLOCAL {@code debug.getlocal}} for more information about variable
 	 * indices and names.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.setlocal} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.setlocal">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.setlocal</code></a>
 	 */
-	public static final LuaFunction SETLOCAL = new SetLocal();
+	public static LuaFunction setlocal() {
+		return SETLOCAL;
+	}
 
 	/**
+	 * Returns the function {@code debug.setmetatable}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.setmetatable (value, table)}
 	 *
 	 * <p>Sets the metatable for the given {@code value} to the given {@code table} (which can
 	 * be <b>nil</b>). Returns {@code value}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.setmetatable} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.setmetatable">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.setmetatable</code></a>
 	 */
-	public static final LuaFunction SETMETATABLE = new SetMetatable();
+	public static LuaFunction setmetatable() {
+		return SETMETATABLE;
+	}
 
 	/**
+	 * Returns the function {@code debug.setupvalue}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.setupvalue (f, up, value)}
 	 *
 	 * <p>This function assigns the value {@code value} to the upvalue with index {@code up}
 	 * of the function f. The function returns <b>nil</b> if there is no upvalue with the given
 	 * index. Otherwise, it returns the name of the upvalue.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.setupvalue} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.setupvalue">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.setupvalue</code></a>
 	 */
-	public static final LuaFunction SETUPVALUE = new SetUpvalue();
+	public static LuaFunction setupvalue() {
+		return SETUPVALUE;
+	}
 
 	/**
+	 * Returns the function {@code debug.setuservalue}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.setuservalue (udata, value)}
 	 *
 	 * <p>Sets the given {@code value} as the Lua value associated to the given {@code udata}.
 	 * udata must be a full userdata.</p>
 	 *
 	 * <p>Returns {@code udata}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.setuservalue} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.setuservalue">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.setuservalue</code></a>
 	 */
-	public static final LuaFunction SETUSERVALUE = new SetUserValue();
+	public static LuaFunction setuservalue() {
+		return SETUSERVALUE;
+	}
 
 	/**
+	 * Returns the function {@code debug.traceback}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.traceback ([thread,] [message [, level]])}
 	 *
 	 * <p>If {@code message} is present but is neither a string nor <b>nil</b>, this function
@@ -227,10 +418,23 @@ public final class DebugLib {
 	 * a traceback of the call stack. The optional {@code message} string is appended at
 	 * the beginning of the traceback. An optional {@code level} number tells at which level
 	 * to start the traceback (default is 1, the function calling {@code traceback}).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.traceback} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.traceback">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.traceback</code></a>
 	 */
-	public static final LuaFunction TRACEBACK = new Traceback();
+	public static LuaFunction traceback() {
+		return TRACEBACK;
+	}
 
 	/**
+	 * Returns the function {@code debug.upvalueid}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.upvalueid (f, n)}
 	 *
 	 * <p>Returns a unique identifier (as a light userdata) for the upvalue numbered {@code n}
@@ -239,40 +443,74 @@ public final class DebugLib {
 	 * <p>These unique identifiers allow a program to check whether different closures share
 	 * upvalues. Lua closures that share an upvalue (that is, that access a same external
 	 * local variable) will return identical ids for those upvalue indices.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.upvalueid} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.upvalueid">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.upvalueid</code></a>
 	 */
-	public static final LuaFunction UPVALUEID = new UpvalueId();
+	public static LuaFunction upvalueid() {
+		return UPVALUEID;
+	}
 
 	/**
+	 * Returns the function {@code debug.upvaluejoin}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code debug.upvaluejoin (f1, n1, f2, n2)}
 	 *
 	 * <p>Make the {@code n1}-th upvalue of the Lua closure {@code f1} refer to
 	 * the {@code n2}-th upvalue of the Lua closure {@code f2}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code debug.upvaluejoin} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-debug.upvaluejoin">
+	 *     the Lua 5.3 Reference Manual entry for <code>debug.upvaluejoin</code></a>
 	 */
-	public static final LuaFunction UPVALUEJOIN = new UpvalueJoin();
+	public static LuaFunction upvaluejoin() {
+		return UPVALUEJOIN;
+	}
 
+	
 	private DebugLib() {
 		// not to be instantiated
 	}
 
+	/**
+	 * Installs the debug library to the global environment {@code env} in the state
+	 * context {@code context}.
+	 *
+	 * @param context  the state context, must not be {@code null}
+	 * @param env  the global environment, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code env} is {@code null}
+	 */
 	public static void installInto(StateContext context, Table env) {
+		Objects.requireNonNull(context);
+		Objects.requireNonNull(env);
+
 		Table t = context.newTable();
 
-		t.rawset("debug", DEBUG);
-		t.rawset("gethook", GETHOOK);
-		t.rawset("getinfo", GETINFO);
-		t.rawset("getlocal", GETLOCAL);
-		t.rawset("getmetatable", GETMETATABLE);
-		t.rawset("getregistry", GETREGISTRY);
-		t.rawset("getupvalue", GETUPVALUE);
-		t.rawset("getuservalue", GETUSERVALUE);
-		t.rawset("sethook", SETHOOK);
-		t.rawset("setlocal", SETLOCAL);
-		t.rawset("setmetatable", SETMETATABLE);
-		t.rawset("setupvalue", SETUPVALUE);
-		t.rawset("setuservalue", SETUSERVALUE);
-		t.rawset("traceback", TRACEBACK);
-		t.rawset("upvalueid", UPVALUEID);
-		t.rawset("upvaluejoin", UPVALUEJOIN);
+		t.rawset("debug", debug());
+		t.rawset("gethook", gethook());
+		t.rawset("getinfo", getinfo());
+		t.rawset("getlocal", getlocal());
+		t.rawset("getmetatable", getmetatable());
+		t.rawset("getregistry", getregistry());
+		t.rawset("getupvalue", getupvalue());
+		t.rawset("getuservalue", getuservalue());
+		t.rawset("sethook", sethook());
+		t.rawset("setlocal", setlocal());
+		t.rawset("setmetatable", setmetatable());
+		t.rawset("setupvalue", setupvalue());
+		t.rawset("setuservalue", setuservalue());
+		t.rawset("traceback", traceback());
+		t.rawset("upvalueid", upvalueid());
+		t.rawset("upvaluejoin", upvaluejoin());
 
 		ModuleLib.install(env, "debug", t);
 	}

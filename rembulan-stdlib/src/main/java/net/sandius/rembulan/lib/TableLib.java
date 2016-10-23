@@ -32,6 +32,7 @@ import net.sandius.rembulan.runtime.ReturnBuffer;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * <p>This library provides generic functions for table manipulation. It provides all its functions
@@ -50,27 +51,66 @@ public final class TableLib {
 	// is involved, this becomes extremely hairy -- table.sort is a particularly juicy
 	// example.
 
+	static final LuaFunction CONCAT = new Concat();
+	static final LuaFunction INSERT = new Insert();
+	static final LuaFunction MOVE = new Move();
+	static final LuaFunction PACK = new Pack();
+	static final LuaFunction REMOVE = new Remove();
+	static final LuaFunction SORT = new Sort();
+	static final LuaFunction UNPACK = new Unpack();
+
 	/**
+	 * Returns the function {@code table.concat}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code table.concat (list [, sep [, i [, j]]])}
 	 *
 	 * <p>Given a list where all elements are strings or numbers, returns the string
 	 * {@code list[i]..sep..list[i+1] ··· sep..list[j]}. The default value for {@code sep}
 	 * is the empty string, the default for {@code i} is 1, and the default for {@code j}
 	 * is {@code #list}. If {@code i} is greater than {@code j}, returns the empty string.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code table.concat} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-table.concat">
+	 *     the Lua 5.3 Reference Manual entry for <code>table.concat</code></a>
 	 */
-	public static final LuaFunction CONCAT = new Concat();
+	public static LuaFunction concat() {
+		return CONCAT;
+	}
 
 	/**
+	 * Returns the function {@code table.insert}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code table.insert (list, [pos,] value)}
 	 *
 	 * <p>Inserts element value at position {@code pos} in {@code list}, shifting up the elements
 	 * {@code list[pos], list[pos+1], ···, list[#list]}. The default value for {@code pos}
 	 * is {@code #list+1}, so that a call {@code table.insert(t,x)} inserts {@code x}
 	 * at the end of list {@code t}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code table.insert} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-table.insert">
+	 *     the Lua 5.3 Reference Manual entry for <code>table.insert</code></a>
 	 */
-	public static final LuaFunction INSERT = new Insert();
+	public static LuaFunction insert() {
+		return INSERT;
+	}
 
 	/**
+	 * Returns the function {@code table.move}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code table.move (a1, f, e, t [,a2])}
 	 *
 	 * <p>Moves elements from table {@code a1} to table {@code a2}. This function performs
@@ -78,19 +118,45 @@ public final class TableLib {
 	 * {@code a2[t],··· = a1[f],···,a1[e]}. The default for {@code a2} is {@code a1}.
 	 * The destination range can overlap with the source range. The number of elements
 	 * to be moved must fit in a Lua integer.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code table.move} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-table.move">
+	 *     the Lua 5.3 Reference Manual entry for <code>table.move</code></a>
 	 */
-	public static final LuaFunction MOVE = new Move();
+	public static LuaFunction move() {
+		return MOVE;
+	}
 
 	/**
+	 * Returns the function {@code table.pack}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code table.pack (···)}
 	 *
 	 * <p>Returns a new table with all parameters stored into keys 1, 2, etc. and with
 	 * a field {@code "n"} with the total number of parameters. Note that the resulting table
 	 * may not be a sequence.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code table.pack} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-table.pack">
+	 *     the Lua 5.3 Reference Manual entry for <code>table.pack</code></a>
 	 */
-	public static final LuaFunction PACK = new Pack();
+	public static LuaFunction pack() {
+		return PACK;
+	}
 
 	/**
+	 * Returns the function {@code table.remove}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code table.remove (list [, pos])}
 	 *
 	 * <p>Removes from {@code list} the element at position {@code pos}, returning the value
@@ -102,10 +168,23 @@ public final class TableLib {
 	 *
 	 * <p>The default value for {@code pos} is {@code #list}, so that a call
 	 * {@code table.remove(l)} removes the last element of list {@code l}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code table.remove} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-table.remove">
+	 *     the Lua 5.3 Reference Manual entry for <code>table.remove</code></a>
 	 */
-	public static final LuaFunction REMOVE = new Remove();
+	public static LuaFunction remove() {
+		return REMOVE;
+	}
 
 	/**
+	 * Returns the function {@code table.sort}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code table.sort (list [, comp])}
 	 *
 	 * <p>Sorts list elements in a given order, in-place, from {@code list[1]}
@@ -121,10 +200,23 @@ public final class TableLib {
 	 *
 	 * <p>The sort algorithm is not stable; that is, elements not comparable by the given order
 	 * (e.g., equal elements) may have their relative positions changed by the sort.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code table.sort} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-table.sort">
+	 *     the Lua 5.3 Reference Manual entry for <code>table.sort</code></a>
 	 */
-	public static final LuaFunction SORT = new Sort();
+	public static LuaFunction sort() {
+		return SORT;
+	}
 
 	/**
+	 * Returns the function {@code table.unpack}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code table.unpack (list [, i [, j]])}
 	 *
 	 * <p>Returns the elements from the given list. This function is equivalent to</p>
@@ -134,23 +226,44 @@ public final class TableLib {
 	 * </blockquote>
 	 *
 	 * <p>By default, {@code i} is 1 and {@code j} is {@code #list}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code table.unpack} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-table.unpack">
+	 *     the Lua 5.3 Reference Manual entry for <code>table.unpack</code></a>
 	 */
-	public static final LuaFunction UNPACK = new Unpack();
+	public static LuaFunction unpack() {
+		return UNPACK;
+	}
+
 
 	private TableLib() {
 		// not to be instantiated
 	}
 
+	/**
+	 * Installs the table library to the global environment {@code env} in the state
+	 * context {@code context}.
+	 *
+	 * @param context  the state context, must not be {@code null}
+	 * @param env  the global environment, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code env} is {@code null}
+	 */
 	public static void installInto(StateContext context, Table env) {
+		Objects.requireNonNull(context);
+		Objects.requireNonNull(env);
+
 		Table t = context.newTable();
 
-		t.rawset("concat", CONCAT);
-		t.rawset("insert", INSERT);
-		t.rawset("move", MOVE);
-		t.rawset("pack", PACK);
-		t.rawset("remove", REMOVE);
-		t.rawset("sort", SORT);
-		t.rawset("unpack", UNPACK);
+		t.rawset("concat", concat());
+		t.rawset("insert", insert());
+		t.rawset("move", move());
+		t.rawset("pack", pack());
+		t.rawset("remove", remove());
+		t.rawset("sort", sort());
+		t.rawset("unpack", unpack());
 
 		ModuleLib.install(env, "table", t);
 	}

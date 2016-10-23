@@ -39,28 +39,95 @@ import java.util.Random;
  */
 public final class MathLib {
 
+	static final LuaFunction ABS = new Abs();
+	static final LuaFunction ACOS = new ACos();
+	static final LuaFunction ASIN = new ASin();
+	static final LuaFunction ATAN = new ATan();
+	static final LuaFunction CEIL = new Ceil();
+	static final LuaFunction COS = new Cos();
+	static final LuaFunction DEG = new Deg();
+	static final LuaFunction EXP = new Exp();
+	static final LuaFunction FLOOR = new Floor();
+	static final LuaFunction FMOD = new FMod();
+	static final LuaFunction LOG = new Log();
+	static final LuaFunction MAX = new MaxMin(true);
+	static final LuaFunction MIN = new MaxMin(false);
+	static final LuaFunction MODF = new ModF();
+	static final LuaFunction RAD = new Rad();
+	static final LuaFunction SIN = new Sin();
+	static final LuaFunction SQRT = new Sqrt();
+	static final LuaFunction TAN = new Tan();
+	static final LuaFunction TOINTEGER = new ToInteger();
+	static final LuaFunction TYPE = new Type();
+	static final LuaFunction ULT = new ULt();
+	
+	
 	/**
+	 * Returns the function {@code math.abs}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.abs (x)}
 	 *
 	 * <p>Returns the absolute value of {@code x}. (integer/float)</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.abs} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.abs">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.abs</code></a>
 	 */
-	public static final LuaFunction ABS = new Abs();
+	public static LuaFunction abs() {
+		return ABS;
+	}
 
 	/**
+	 * Returns the function {@code math.acos}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.acos (x)}
 	 *
 	 * <p>Returns the arc cosine of {@code x} (in radians).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.acos} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.acos">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.acos</code></a>
 	 */
-	public static final LuaFunction ACOS = new ACos();
+	public static LuaFunction acos() {
+		return ACOS;
+	}
 
 	/**
+	 * Returns the function {@code math.asin}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.asin (x)}
 	 *
 	 * <p>Returns the arc sine of {@code x} (in radians).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.asin} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.asin">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.asin</code></a>
 	 */
-	public static final LuaFunction ASIN = new ASin();
+	public static LuaFunction asin() {
+		return ASIN;
+	}
 
 	/**
+	 * Returns the function {@code math.atan}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.atan (x)}
 	 *
 	 * <p>Returns the arc tangent of {@code y/x} (in radians), but uses the signs of both
@@ -69,52 +136,138 @@ public final class MathLib {
 	 *
 	 * <p>The default value for {@code x} is 1, so that the call {@code math.atan(y)} returns
 	 * the arc tangent of {@code y}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.atan} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.atan">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.atan</code></a>
 	 */
-	public static final LuaFunction ATAN = new ATan();
+	public static LuaFunction atan() {
+		return ATAN;
+	}
 
 	/**
+	 * Returns the function {@code math.ceil}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.ceil (x)}
 	 *
 	 * <p>Returns the smallest integer larger than or equal to {@code x}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.ceil} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.ceil">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.ceil</code></a>
 	 */
-	public static final LuaFunction CEIL = new Ceil();
+	public static LuaFunction ceil() {
+		return CEIL;
+	}
 
 	/**
+	 * Returns the function {@code math.cos}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.cos (x)}
 	 *
 	 * <p>Returns the cosine of {@code x} (assumed to be in radians).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.cos} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.cos">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.cos</code></a>
 	 */
-	public static final LuaFunction COS = new Cos();
+	public static LuaFunction cos() {
+		return COS;
+	}
 
 	/**
+	 * Returns the function {@code math.deg}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.deg (x)}
 	 *
 	 * <p>Returns the angle {@code x} (given in radians) in degrees.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.deg} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.deg">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.deg</code></a>
 	 */
-	public static final LuaFunction DEG = new Deg();
+	public static LuaFunction deg() {
+		return DEG;
+	}
 
 	/**
+	 * Returns the function {@code math.exp}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.exp (x)}
 	 *
 	 * <p>Returns the value <i>e</i><sup>{@code x}</sup> (where <i>e</i> is the base
 	 * of natural logarithms).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.exp} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.exp">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.exp</code></a>
 	 */
-	public static final LuaFunction EXP = new Exp();
+	public static LuaFunction exp() {
+		return EXP;
+	}
 
 	/**
+	 * Returns the function {@code math.floor}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.floor (x)}
 	 *
 	 * <p>Returns the largest integral value smaller than or equal to {@code x}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.floor} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.floor">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.floor</code></a>
 	 */
-	public static final LuaFunction FLOOR = new Floor();
+	public static LuaFunction floor() {
+		return FLOOR;
+	}
 
 	/**
+	 * Returns the function {@code math.fmod}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.fmod (x, y)}
 	 *
 	 * <p>Returns the remainder of the division of {@code x} by {@code y} that rounds
 	 * the quotient towards zero. (integer/float)</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.fmod} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.fmod">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.fmod</code></a>
 	 */
-	public static final LuaFunction FMOD = new FMod();
+	public static LuaFunction fmod() {
+		return FMOD;
+	}
 
 	/**
 	 * {@code math.huge}
@@ -125,20 +278,46 @@ public final class MathLib {
 	public static final Double HUGE = Double.POSITIVE_INFINITY;
 
 	/**
+	 * Returns the function {@code math.log}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.log (x [, base])}
 	 *
 	 * <p>Returns the logarithm of {@code x} in the given base. The default for {@code base}
 	 * is <i>e</i> (so that the function returns the natural logarithm of {@code x}).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.log} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.log">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.log</code></a>
 	 */
-	public static final LuaFunction LOG = new Log();
+	public static LuaFunction log() {
+		return LOG;
+	}
 
 	/**
+	 * Returns the function {@code math.max}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.max (x, ···)}
 	 *
 	 * <p>Returns the argument with the maximum value, according to the Lua operator &lt;.
 	 * (integer/float)</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.max} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.max">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.max</code></a>
 	 */
-	public static final LuaFunction MAX = new MaxMin(true);
+	public static LuaFunction max() {
+		return MAX;
+	}
 
 	/**
 	 * An integer with the maximum value for an integer.
@@ -146,12 +325,25 @@ public final class MathLib {
 	public static final Long MAXINTEGER = Long.MAX_VALUE;
 
 	/**
+	 * Returns the function {@code math.min}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.min (x, ···)}
 	 *
 	 * <p>Returns the argument with the minimum value, according to the Lua operator &lt;.
 	 * (integer/float)</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.min} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.min">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.min</code></a>
 	 */
-	public static final LuaFunction MIN = new MaxMin(false);
+	public static LuaFunction min() {
+		return MIN;
+	}
 
 	/**
 	 * An integer with the minimum value for an integer.
@@ -159,12 +351,25 @@ public final class MathLib {
 	public static final Long MININTEGER = Long.MIN_VALUE;
 
 	/**
+	 * Returns the function {@code math.modf}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.modf (x)}
 	 *
 	 * <p>Returns the integral part of {@code x} and the fractional part of {@code x}.
 	 * Its second result is always a float.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.modf} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.modf">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.modf</code></a>
 	 */
-	public static final LuaFunction MODF = new ModF();
+	public static LuaFunction modf() {
+		return MODF;
+	}
 
 	/**
 	 * {@code math.pi}
@@ -174,100 +379,274 @@ public final class MathLib {
 	public static final Double PI = Math.PI;
 
 	/**
+	 * Returns the function {@code math.rad}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.rad (x)}
 	 *
 	 * <p>Returns the angle {@code x} (given in degrees) in radians.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.rad} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.rad">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.rad</code></a>
 	 */
-	public static final LuaFunction RAD = new Rad();
+	public static LuaFunction rad() {
+		return RAD;
+	}
 
 	/**
+	 * Returns a function {@code math.random} that uses the argument {@code random}
+	 * as a random number generator.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
+	 * {@code math.random ([m [, n]])}
+	 *
+	 * <p>When called without arguments, returns a uniform pseudo-random real number
+	 * in the range <i>[0,1)</i>. When called with an integer number {@code m},
+	 * {@code math.random} returns a uniform pseudo-random integer in the range
+	 * <i>[1, m]</i>. When called with two integer numbers {@code m} and {@code n},
+	 * {@code math.random} returns a uniform pseudo-random integer in the range
+	 * <i>[m, n]</i>.</p>
+	 *
+	 * <p>This function is an interface to the simple pseudo-random generator function
+	 * {@code rand} provided by Standard C. (No guarantees can be given for its statistical
+	 * properties.)</p>
+	 * </blockquote>
+	 *
+	 * @param random  the random number generator, must not be {@code null}
+	 * @return  the {@code math.random} function
+	 *
+	 * @throws NullPointerException  if {@code random} is {@code null}
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.random">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.random</code></a>
+	 */
+	public static LuaFunction random(Random random) {
+		return new Rand(random);
+	}
+
+	/**
+	 * Returns a function {@code math.randomseed} that sets the seed of the random
+	 * generator {@code random}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
+	 * {@code math.randomseed (x)}
+	 *
+	 * <p>Sets {@code x} as the "seed" for the pseudo-random generator: equal seeds produce
+	 * equal sequences of numbers.</p>
+	 * </blockquote>
+	 *
+	 * @param random  the random number generator, must not be {@code null}
+	 * @return  the {@code math.randomseed} function
+	 *
+	 * @throws NullPointerException  if {@code random} is {@code null}
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.randomseed">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.randomseed</code></a>
+	 */
+	public static LuaFunction randomseed(Random random) {
+		return new RandSeed(random);
+	}
+
+	/**
+	 * Returns the function {@code math.sin}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.sin (x)}
 	 *
 	 * <p>Returns the sine of {@code x} (assumed to be in radians).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.sin} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.sin">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.sin</code></a>
 	 */
-	public static final LuaFunction SIN = new Sin();
+	public static LuaFunction sin() {
+		return SIN;
+	}
 
 	/**
+	 * Returns the function {@code math.sqrt}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.sqrt (x)}
 	 *
 	 * <p>Returns the square root of {@code x}. (You can also use the expression {@code x^0.5}
 	 * to compute this value.)</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.sqrt} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.sqrt">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.sqrt</code></a>
 	 */
-	public static final LuaFunction SQRT = new Sqrt();
+	public static LuaFunction sqrt() {
+		return SQRT;
+	}
 
 	/**
+	 * Returns the function {@code math.tan}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.tan (x)}
 	 *
 	 * <p>Returns the tangent of {@code x} (assumed to be in radians).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.tan} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.tan">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.tan</code></a>
 	 */
-	public static final LuaFunction TAN = new Tan();
+	public static LuaFunction tan() {
+		return TAN;
+	}
 
 	/**
+	 * Returns the function {@code math.tointeger}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.tointeger (x)}
 	 *
 	 * <p>If the value {@code x} is convertible to an integer, returns that integer.
 	 * Otherwise, returns <b>nil</b>.</p>
-	*/
-	public static final LuaFunction TOINTEGER = new ToInteger();
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.tointeger} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.tointeger">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.tointeger</code></a>
+	 */
+	public static LuaFunction tointeger() {
+		return TOINTEGER;
+	}
 
 	/**
+	 * Returns the function {@code math.type}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.type (x)}
 	 *
 	 * <p>Returns {@code "integer"} if {@code x} is an integer, {@code "float"} if it is a float,
 	 * or <b>nil</b> if {@code x} is not a number.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.type} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.type">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.type</code></a>
 	 */
-	public static final LuaFunction TYPE = new Type();
+	public static LuaFunction type() {
+		return TYPE;
+	}
 
 	/**
+	 * Returns the function {@code math.ult}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code math.ult (m, n)}
 	 *
 	 * <p>Returns a boolean, <b>true</b> if integer {@code m} is below integer {@code n} when
 	 * they are compared as unsigned integers.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code math.ult} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-math.ult">
+	 *     the Lua 5.3 Reference Manual entry for <code>math.ult</code></a>
 	 */
-	public static final LuaFunction ULT = new ULt();
+	public static LuaFunction ult() {
+		return ULT;
+	}
+
 
 	private MathLib() {
 		// not to be instantiated
 	}
 
+	/**
+	 * Installs the math library to the global environment {@code env} in the state
+	 * context {@code context}, with the random number generator {@code random}.
+	 *
+	 * <p>{@code random} may be {@code null}, in which case the functions {@code random}
+	 * and {@code randomseed} will not be installed.</p>
+	 *
+	 * @param context  the state context, must not be {@code null}
+	 * @param env  the global environment, must not be {@code null}
+	 * @param random  the random number generator, may be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code env} is {@code null}
+	 */
 	public static void installInto(StateContext context, Table env, Random random) {
-
-		LuaFunction rand = new Rand(random);
-		LuaFunction randSeed = new RandSeed(random);
+		Objects.requireNonNull(context);
+		Objects.requireNonNull(env);
 
 		Table t = context.newTable();
 
-		t.rawset("abs", ABS);
-		t.rawset("acos", ACOS);
-		t.rawset("asin", ASIN);
-		t.rawset("atan", ATAN);
-		t.rawset("ceil", CEIL);
-		t.rawset("cos", COS);
-		t.rawset("deg", DEG);
-		t.rawset("exp", EXP);
-		t.rawset("floor", FLOOR);
-		t.rawset("fmod", FMOD);
+		t.rawset("abs", abs());
+		t.rawset("acos", acos());
+		t.rawset("asin", asin());
+		t.rawset("atan", atan());
+		t.rawset("ceil", ceil());
+		t.rawset("cos", cos());
+		t.rawset("deg", deg());
+		t.rawset("exp", exp());
+		t.rawset("floor", floor());
+		t.rawset("fmod", fmod());
 		t.rawset("huge", HUGE);
-		t.rawset("log", LOG);
-		t.rawset("max", MAX);
+		t.rawset("log", log());
+		t.rawset("max", max());
 		t.rawset("maxinteger", MAXINTEGER);
-		t.rawset("min", MIN);
+		t.rawset("min", min());
 		t.rawset("mininteger", MININTEGER);
-		t.rawset("modf", MODF);
+		t.rawset("modf", modf());
 		t.rawset("pi", PI);
-		t.rawset("rad", RAD);
-		t.rawset("random", rand);
-		t.rawset("randomseed", randSeed);
-		t.rawset("sin", SIN);
-		t.rawset("sqrt", SQRT);
-		t.rawset("tan", TAN);
-		t.rawset("tointeger", TOINTEGER);
-		t.rawset("type", TYPE);
-		t.rawset("ult", ULT);
+		t.rawset("rad", rad());
+		if (random != null) t.rawset("random", MathLib.random(random));
+		if (random != null) t.rawset("randomseed", randomseed(random));
+		t.rawset("sin", sin());
+		t.rawset("sqrt", sqrt());
+		t.rawset("tan", tan());
+		t.rawset("tointeger", tointeger());
+		t.rawset("type", type());
+		t.rawset("ult", ult());
 		
 		ModuleLib.install(env, "math", t);
 	}
 
+	/**
+	 * Installs the math library to the global environment {@code env} in the state
+	 * context {@code context}, with a new random number generator of class {@link Random}.
+	 *
+	 * <p>To specify the random number generator or exclude random-related functions,
+	 * use {@link #installInto(StateContext, Table, Random)}.</p>
+	 *
+	 * @param context  the state context, must not be {@code null}
+	 * @param env  the global environment, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code env} is {@code null}
+	 */
 	public static void installInto(StateContext context, Table env) {
 		installInto(context, env, new Random());
 	}
@@ -629,21 +1008,7 @@ public final class MathLib {
 
 	}
 
-	/**
-	 * {@code math.random ([m [, n]])}
-	 *
-	 * <p>When called without arguments, returns a uniform pseudo-random real number
-	 * in the range <i>[0,1)</i>. When called with an integer number {@code m},
-	 * {@code math.random} returns a uniform pseudo-random integer in the range
-	 * <i>[1, m]</i>. When called with two integer numbers {@code m} and {@code n},
-	 * {@code math.random} returns a uniform pseudo-random integer in the range
-	 * <i>[m, n]</i>.</p>
-	 *
-	 * <p>This function is an interface to the simple pseudo-random generator function
-	 * {@code rand} provided by Standard C. (No guarantees can be given for its statistical
-	 * properties.)</p>
-	 */
-	public static class Rand extends AbstractLibFunction {
+	static class Rand extends AbstractLibFunction {
 
 		/**
 		 * The random number generator used by this function.
@@ -730,13 +1095,7 @@ public final class MathLib {
 
 	}
 
-	/**
-	 * {@code math.randomseed (x)}
-	 *
-	 * <p>Sets {@code x} as the "seed" for the pseudo-random generator: equal seeds produce
-	 * equal sequences of numbers.</p>
-	 */
-	public static class RandSeed extends AbstractLibFunction {
+	static class RandSeed extends AbstractLibFunction {
 
 		/**
 		 * The random number generator used by this function.

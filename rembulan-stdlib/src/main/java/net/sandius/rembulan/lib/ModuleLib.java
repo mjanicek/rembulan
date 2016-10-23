@@ -54,17 +54,89 @@ public final class ModuleLib {
 	static final byte WIN_DIRECTORY_PLACEHOLDER = (byte) '!';  // FIXME: not used in Rembulan
 	static final byte LUAOPEN_IGNORE = (byte) '-';  // FIXME: not used in Rembulan!
 
+	/**
+	 * Returns a function {@code package.searchpath} that uses {@code fileSystem}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
+	 * {@code package.searchpath (name, path [, sep [, rep]])}
+	 *
+	 * <p>Searches for the given name in the given path.</p>
+	 *
+	 * <p>A path is a string containing a sequence of templates separated by semicolons.
+	 * For each template, the function replaces each interrogation mark (if any) in the template
+	 * with a copy of name wherein all occurrences of {@code sep} (a dot, by default) were
+	 * replaced by {@code rep} (the system's directory separator, by default), and then tries
+	 * to open the resulting file name.</p>
+	 *
+	 * <p>For instance, if the path is the string</p>
+	 * <pre>
+	 *   "./?.lua;./?.lc;/usr/local/?/init.lua"
+	 * </pre>
+	 * <p>the search for the name {@code foo.a} will try to open the files {@code ./foo/a.lua},
+	 * {@code ./foo/a.lc}, and {@code /usr/local/foo/a/init.lua}, in that order.</p>
+	 *
+	 * <p>Returns the resulting name of the first file that it can open in read mode (after closing
+	 * the file), or <b>nil</b> plus an error message if none succeeds. (This error message
+	 * lists all file names it tried to open.)</p>
+	 * </blockquote>
+	 *
+	 * @param fileSystem  the filesystem, must not be {@code null}
+	 * @return  the function {@code package.searchpath}
+	 *
+	 * @throws NullPointerException  if {@code fileSystem} is {@code null}
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-coroutine.yield">
+	 *     the Lua 5.3 Reference Manual entry for <code>coroutine.yield</code></a>
+	 */
+	public static LuaFunction searchpath(FileSystem fileSystem) {
+		return new SearchPath(fileSystem);
+	}
+
 	private ModuleLib() {
 		// not to be instantiated
 	}
 
+
+	/**
+	 * Installs the package library to the global environment {@code env} in the state
+	 * context {@code context}. The package functions will use the runtime environment
+	 * {@code runtimeEnvironment}, and load modules using {@code chunkLoader} (for Lua
+	 * scripts), and {@code classLoader} (for Java libraries).
+	 *
+	 * <p>The nullity of {@code runtimeEnvironment}, {@code runtimeEnvironment.fileSystem()},
+	 * {@code chunkLoader} and {@code classLoader} determines the configuration in which
+	 * the package library will be installed:</p>
+	 * <ul>
+	 *   <li>if {@code runtimeEnvironment == null || runtimeEnvironment.fileSystem() == null},
+	 *     then no {@code package.config}, {@code package.path} and {@code package.searchpath}
+	 *     will be provided, and the searchers will not include any searchers or loaders
+	 *     that require access to a filesystem;</li>
+	 *   <li>if {@code chunkLoader == null}, then no searchers and loaders that load
+	 *     Lua chunks will be installed;</li>
+	 *   <li>if {@code classLoader == null}, then no searchers and loaders that load
+	 *     Java modules by examining the classpath of the virtual machine will be installed.</li>
+	 * </ul>
+	 *
+	 * <p>For instance, if {@code runtimeEnvironment}, {@code chunkLoader}
+	 * and {@code classLoader} are all {@code null}, then the only way for a module to be
+	 * installed using the {@code require} function will be by adding a loader to
+	 * {@code package.preload}.</p>
+	 *
+	 * @param context  the state context, must not be {@code null}
+	 * @param env  the global environment, must not be {@code null}
+	 * @param runtimeEnvironment  the runtime environment, may be {@code null}
+	 * @param chunkLoader  the chunk loader, may be {@code null}
+	 * @param classLoader  the class loader for Java modules, may be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code env} is {@code null}
+	 */
 	public static void installInto(StateContext context, Table env, RuntimeEnvironment runtimeEnvironment, ChunkLoader chunkLoader, ClassLoader classLoader) {
 		Objects.requireNonNull(context);
 		Objects.requireNonNull(env);
-		Objects.requireNonNull(runtimeEnvironment);
-		Objects.requireNonNull(classLoader);
 
-		FileSystem fileSystem = runtimeEnvironment.fileSystem();
+		FileSystem fileSystem = runtimeEnvironment != null ? runtimeEnvironment.fileSystem() : null;
 
 		Table t = context.newTable();
 
@@ -73,20 +145,24 @@ public final class ModuleLib {
 		Table preload = context.newTable();
 		final ByteString path;
 		Table searchers = context.newTable();
-		LuaFunction searchpath = new SearchPath(fileSystem);
 		LuaFunction require = new Require(t, loaded);
 
 		// package.config
 		{
-			ByteStringBuilder builder = new ByteStringBuilder();
+			if (fileSystem != null) {
+				ByteStringBuilder builder = new ByteStringBuilder();
 
-			builder.append(fileSystem.getSeparator()).append((byte) '\n');
-			builder.append(PATH_SEPARATOR).append((byte) '\n');
-			builder.append(PATH_TEMPLATE_PLACEHOLDER).append((byte) '\n');
-			builder.append(WIN_DIRECTORY_PLACEHOLDER).append((byte) '\n');
-			builder.append(LUAOPEN_IGNORE).append((byte) '\n');
+				builder.append(fileSystem.getSeparator()).append((byte) '\n');
+				builder.append(PATH_SEPARATOR).append((byte) '\n');
+				builder.append(PATH_TEMPLATE_PLACEHOLDER).append((byte) '\n');
+				builder.append(WIN_DIRECTORY_PLACEHOLDER).append((byte) '\n');
+				builder.append(LUAOPEN_IGNORE).append((byte) '\n');
 
-			config = builder.toByteString();
+				config = builder.toByteString();
+			}
+			else {
+				config = null;
+			}
 		}
 
 		// package.loaded
@@ -97,12 +173,17 @@ public final class ModuleLib {
 
 		// package.path
 		{
-			String envPath = runtimeEnvironment.getEnv("LUA_PATH_5_3");
-			if (envPath == null) {
-				envPath = runtimeEnvironment.getEnv("LUA_PATH");
-			}
+			if (runtimeEnvironment != null) {
+				String envPath = runtimeEnvironment.getEnv("LUA_PATH_5_3");
+				if (envPath == null) {
+					envPath = runtimeEnvironment.getEnv("LUA_PATH");
+				}
 
-			path = getPath(envPath, defaultPath(runtimeEnvironment.fileSystem()));
+				path = getPath(envPath, defaultPath(runtimeEnvironment.fileSystem()));
+			}
+			else {
+				path = null;
+			}
 		}
 
 		// package.searchers
@@ -111,7 +192,9 @@ public final class ModuleLib {
 			if (chunkLoader != null) {
 				addSearcher(searchers, new ChunkLoadPathSearcher(fileSystem, t, chunkLoader, env));
 			}
-			addSearcher(searchers, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
+			if (classLoader != null) {
+				addSearcher(searchers, new LoaderProviderServiceLoaderSearcher(runtimeEnvironment, env, classLoader));
+			}
 		}
 
 		t.rawset("config", config);
@@ -119,7 +202,7 @@ public final class ModuleLib {
 		t.rawset("loadlib", new UnimplementedFunction("package.loadlib"));
 		t.rawset("preload", preload);
 		t.rawset("searchers", searchers);
-		t.rawset("searchpath", searchpath);
+		if (fileSystem != null) t.rawset("searchpath", searchpath(fileSystem));
 		t.rawset("path", path);
 
 		// install into the global environment

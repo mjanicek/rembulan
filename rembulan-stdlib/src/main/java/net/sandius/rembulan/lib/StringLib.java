@@ -40,6 +40,7 @@ import net.sandius.rembulan.util.Check;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -58,7 +59,31 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class StringLib {
 
+	static final LuaFunction BYTE = new Byte();
+	static final LuaFunction CHAR = new Char();
+	static final LuaFunction DUMP = new Dump();
+	static final LuaFunction FIND = new Find();
+	static final LuaFunction FORMAT = new Format();
+	static final LuaFunction GMATCH = new GMatch();
+	static final LuaFunction GSUB = new GSub();
+	static final LuaFunction LEN = new Len();
+	static final LuaFunction LOWER = new Lower();
+	static final LuaFunction MATCH = new Match();
+	static final LuaFunction PACK = new Pack();
+	static final LuaFunction PACKSIZE = new PackSize();
+	static final LuaFunction REP = new Rep();
+	static final LuaFunction REVERSE = new Reverse();
+	static final LuaFunction SUB = new Sub();
+	static final LuaFunction UNPACK = new Unpack();
+	static final LuaFunction UPPER = new Upper();
+
+
 	/**
+	 * Returns the function {@code string.byte}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.byte (s [, i [, j]])}
 	 *
 	 * <p>Returns the internal numeric codes of the characters
@@ -67,10 +92,23 @@ public final class StringLib {
 	 * the same rules of function {@link #SUB {@code string.sub}}.</p>
 	 *
 	 * <p>Numeric codes are not necessarily portable across platforms.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.byte} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.byte">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.byte</code></a>
 	 */
-	public static final LuaFunction BYTE = new Byte();
+	public static LuaFunction byteFn() {
+		return BYTE;
+	}
 
 	/**
+	 * Returns the function {@code string.char}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.char (···)}
 	 *
 	 * <p>Receives zero or more integers. Returns a string with length equal to the number
@@ -78,10 +116,23 @@ public final class StringLib {
 	 * to its corresponding argument.</p>
 	 *
 	 * <p>Numeric codes are not necessarily portable across platforms.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.char} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.char">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.char</code></a>
 	 */
-	public static final LuaFunction CHAR = new Char();
+	public static LuaFunction charFn() {
+		return CHAR;
+	}
 
 	/**
+	 * Returns the function {@code string.dump}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.dump (function [, strip])}
 	 *
 	 * <p>Returns a string containing a binary representation (a binary chunk) of the given
@@ -94,10 +145,23 @@ public final class StringLib {
 	 * those upvalues receive fresh instances containing <b>nil</b>. (You can use the debug
 	 * library to serialize and reload the upvalues of a function in a way adequate
 	 * to your needs.)</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.dump} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.dump">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.dump</code></a>
 	 */
-	public static final LuaFunction DUMP = new Dump();
+	public static LuaFunction dump() {
+		return DUMP;
+	}
 
 	/**
+	 * Returns the function {@code string.find}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.find (s, pattern [, init [, plain]])}
 	 *
 	 * <p>Looks for the first match of {@code pattern} (see §6.4.1) in the string {@code s}.
@@ -111,10 +175,23 @@ public final class StringLib {
 	 *
 	 * <p>If the {@code pattern} has captures, then in a successful match the captured values
 	 * are also returned, after the two indices.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.find} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.find">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.find</code></a>
 	 */
-	public static final LuaFunction FIND = new Find();
+	public static LuaFunction find() {
+		return FIND;
+	}
 
 	/**
+	 * Returns the function {@code string.format}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.format (formatstring, ···)}
 	 *
 	 * <p>Returns a formatted version of its variable number of arguments following
@@ -150,10 +227,23 @@ public final class StringLib {
 	 * not contain embedded zeros. When Lua is compiled with a non-C99 compiler, options
 	 * {@code A} and {@code a} (hexadecimal floats) do not support any modifier (flags, width,
 	 * length).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.format} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.format">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.format</code></a>
 	 */
-	public static final LuaFunction FORMAT = new Format();
+	public static LuaFunction format() {
+		return FORMAT;
+	}
 
 	/**
+	 * Returns the function {@code string.gmatch}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.gmatch (s, pattern)}
 	 *
 	 * <p>Returns an iterator function that, each time it is called, returns the next captures
@@ -187,10 +277,23 @@ public final class StringLib {
 	 *
 	 * <p>For this function, a caret '{@code ^}' at the start of a pattern does not work as
 	 * an anchor, as this would prevent the iteration.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.gmatch} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.gmatch">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.gmatch</code></a>
 	 */
-	public static final LuaFunction GMATCH = new GMatch();
+	public static LuaFunction gmatch() {
+		return GMATCH;
+	}
 
 	/**
+	 * Returns the function {@code string.gsub}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.gsub (s, pattern, repl [, n])}
 	 *
 	 * <p>Returns a copy of {@code s} in which all (or the first {@code n}, if given) occurrences
@@ -265,27 +368,66 @@ public final class StringLib {
 	 * --> x="lua-5.3.tar.gz"
 	 * }
 	 * </pre>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.gsub} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.gsub">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.gsub</code></a>
 	 */
-	public static final LuaFunction GSUB = new GSub();
+	public static LuaFunction gsub() {
+		return GSUB;
+	}
 
 	/**
+	 * Returns the function {@code string.len}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.len (s)}
 	 *
 	 * <p>Receives a string and returns its length. The empty string {@code ""} has length 0.
 	 * Embedded zeros are counted, so {@code "a\000bc\000"} has length 5.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.len} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.len">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.len</code></a>
 	 */
-	public static final LuaFunction LEN = new Len();
+	public static LuaFunction len() {
+		return LEN;
+	}
 
 	/**
+	 * Returns the function {@code string.lower}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.lower (s)}
 	 *
 	 * <p>Receives a string and returns a copy of this string with all uppercase letters changed
 	 * to lowercase. All other characters are left unchanged. The definition of what an uppercase
 	 * letter is depends on the current locale.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.lower} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.lower">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.lower</code></a>
 	 */
-	public static final LuaFunction LOWER = new Lower();
+	public static LuaFunction lower() {
+		return LOWER;
+	}
 
 	/**
+	 * Returns the function {@code string.match}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.match (s, pattern [, init])}
 	 *
 	 * <p>Looks for the first match of {@code pattern} (see §6.4.1) in the string {@code s}.
@@ -293,28 +435,67 @@ public final class StringLib {
 	 * it returns <b>nil</b>. If {@code pattern} specifies no captures, then the whole match
 	 * is returned. A third, optional numeric argument {@code init} specifies where to start
 	 * the search; its default value is 1 and can be negative.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.match} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.match">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.match</code></a>
 	 */
-	public static final LuaFunction MATCH = new Match();
+	public static LuaFunction match() {
+		return MATCH;
+	}
 
 	/**
+	 * Returns the function {@code string.pack}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.pack (fmt, v1, v2, ···)}
 	 *
 	 * <p>Returns a binary string containing the values {@code v1}, {@code v2}, etc. packed
 	 * (that is, serialized in binary form) according to the format string {@code fmt}
 	 * (see §6.4.2).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.pack} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.pack">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.pack</code></a>
 	 */
-	public static final LuaFunction PACK = new Pack();
+	public static LuaFunction pack() {
+		return PACK;
+	}
 
 	/**
+	 * Returns the function {@code string.packsize}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.packsize (fmt)}
 	 *
 	 * <p>Returns the size of a string resulting from {@link #PACK {@code string.pack}}
 	 * with the given format. The format string cannot have the variable-length options
 	 * '{@code s}' or '{@code z}' (see §6.4.2).</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.packsize} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.packsize">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.packsize</code></a>
 	 */
-	public static final LuaFunction PACKSIZE = new PackSize();
+	public static LuaFunction packsize() {
+		return PACKSIZE;
+	}
 
 	/**
+	 * Returns the function {@code string.rep}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.rep (s, n [, sep])}
 	 *
 	 * <p>Returns a string that is the concatenation of {@code n} copies of the string {@code s}
@@ -323,17 +504,43 @@ public final class StringLib {
 	 *
 	 * <p>(Note that it is very easy to exhaust the memory of your machine with a single call
 	 * to this function.)</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.rep} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.rep">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.rep</code></a>
 	 */
-	public static final LuaFunction REP = new Rep();
+	public static LuaFunction rep() {
+		return REP;
+	}
 
 	/**
+	 * Returns the function {@code string.reverse}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.reverse (s)}
 	 *
 	 * <p>Returns a string that is the string {@code s} reversed.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.reverse} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.reverse">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.reverse</code></a>
 	 */
-	public static final LuaFunction REVERSE = new Reverse();
+	public static LuaFunction reverse() {
+		return REVERSE;
+	}
 
 	/**
+	 * Returns the function {@code string.sub}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.sub (s, i [, j])}
 	 *
 	 * <p>Returns the substring of {@code s} that starts at {@code i} and continues until
@@ -346,10 +553,23 @@ public final class StringLib {
 	 * it is corrected to 1. If {@code j} is greater than the string length, it is corrected
 	 * to that length. If, after these corrections, {@code i} is greater than {@code j},
 	 * the function returns the empty string.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.sub} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.sub">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.sub</code></a>
 	 */
-	public static final LuaFunction SUB = new Sub();
+	public static LuaFunction sub() {
+		return SUB;
+	}
 
 	/**
+	 * Returns the function {@code string.unpack}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.unpack (fmt, s [, pos])}
 	 *
 	 * <p>Returns the values packed in string {@code s} (see
@@ -357,42 +577,76 @@ public final class StringLib {
 	 * (see §6.4.2). An optional {@code pos} marks where to start reading in {@code s}
 	 * (default is 1). After the read values, this function also returns the index of the first
 	 * unread byte in {@code s}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.unpack} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.unpack">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.unpack</code></a>
 	 */
-	public static final LuaFunction UNPACK = new Unpack();
+	public static LuaFunction unpack() {
+		return UNPACK;
+	}
 
 	/**
+	 * Returns the function {@code string.upper}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code string.upper (s)}
 	 *
 	 * <p>Receives a string and returns a copy of this string with all lowercase letters changed
 	 * to uppercase. All other characters are left unchanged. The definition of what a lowercase
 	 * letter is depends on the current locale.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code string.upper} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-string.upper">
+	 *     the Lua 5.3 Reference Manual entry for <code>string.upper</code></a>
 	 */
-	public static final LuaFunction UPPER = new Upper();
+	public static LuaFunction upper() {
+		return UPPER;
+	}
+
 
 	private StringLib() {
 		// not to be instantiated
 	}
 
+	/**
+	 * Installs the string library to the global environment {@code env} in the state
+	 * context {@code context}.
+	 *
+	 * @param context  the state context, must not be {@code null}
+	 * @param env  the global environment, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code env} is {@code null}
+	 */
 	public static void installInto(StateContext context, Table env) {
+		Objects.requireNonNull(context);
+		Objects.requireNonNull(env);
+
 		Table t = context.newTable();
 
-		t.rawset("byte", BYTE);
-		t.rawset("char", CHAR);
-		t.rawset("dump", DUMP);
-		t.rawset("find", FIND);
-		t.rawset("format", FORMAT);
-		t.rawset("gmatch", GMATCH);
-		t.rawset("gsub", GSUB);
-		t.rawset("len", LEN);
-		t.rawset("lower", LOWER);
-		t.rawset("match", MATCH);
-		t.rawset("pack", PACK);
-		t.rawset("packsize", PACKSIZE);
-		t.rawset("rep", REP);
-		t.rawset("reverse", REVERSE);
-		t.rawset("sub", SUB);
-		t.rawset("unpack", UNPACK);
-		t.rawset("upper", UPPER);
+		t.rawset("byte", byteFn());
+		t.rawset("char", charFn());
+		t.rawset("dump", dump());
+		t.rawset("find", find());
+		t.rawset("format", format());
+		t.rawset("gmatch", gmatch());
+		t.rawset("gsub", gsub());
+		t.rawset("len", len());
+		t.rawset("lower", lower());
+		t.rawset("match", match());
+		t.rawset("pack", pack());
+		t.rawset("packsize", packsize());
+		t.rawset("rep", rep());
+		t.rawset("reverse", reverse());
+		t.rawset("sub", sub());
+		t.rawset("unpack", unpack());
+		t.rawset("upper", upper());
 
 		// set metatable for the string type
 		Table mt = context.newTable();

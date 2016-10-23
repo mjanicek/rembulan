@@ -22,6 +22,8 @@ import net.sandius.rembulan.Table;
 import net.sandius.rembulan.impl.UnimplementedFunction;
 import net.sandius.rembulan.runtime.LuaFunction;
 
+import java.util.Objects;
+
 /**
  * <p>This library provides basic support for UTF-8 encoding. It provides all its functions
  * inside the table {@code utf8}. This library does not provide any support for Unicode other
@@ -35,13 +37,32 @@ import net.sandius.rembulan.runtime.LuaFunction;
  */
 public final class Utf8Lib {
 
+	static final LuaFunction CHAR = new Char();
+	static final LuaFunction CODES = new Codes();
+	static final LuaFunction CODEPOINT = new CodePoint();
+	static final LuaFunction LEN = new Len();
+	static final LuaFunction OFFSET = new Offset();
+
 	/**
+	 * Returns the function {@code utf8.char}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code utf8.char (···)}
 	 *
 	 * <p>Receives zero or more integers, converts each one to its corresponding UTF-8
 	 * byte sequence and returns a string with the concatenation of all these sequences.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code utf8.char} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.char">
+	 *     the Lua 5.3 Reference Manual entry for <code>utf8.char</code></a>
 	 */
-	public static final LuaFunction CHAR = new Char();
+	public static LuaFunction charFn() {
+		return CHAR;
+	}
 
 	/**
 	 * {@code utf8.charpattern}
@@ -53,6 +74,11 @@ public final class Utf8Lib {
 	public static final ByteString CHARPATTERN = null;  // TODO
 
 	/**
+	 * Returns the function {@code utf8.codes}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code utf8.codes (s)}
 	 *
 	 * <p>Returns values so that the construction</p>
@@ -64,30 +90,69 @@ public final class Utf8Lib {
 	 * <p>will iterate over all characters in string {@code s}, with {@code p} being the position
 	 * (in bytes) and {@code c} the code point of each character. It raises an error if it meets
 	 * any invalid byte sequence.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code utf8.codes} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.codes">
+	 *     the Lua 5.3 Reference Manual entry for <code>utf8.codes</code></a>
 	 */
-	public static final LuaFunction CODES = new Codes();
+	public static LuaFunction codes() {
+		return CODES;
+	}
 
 	/**
+	 * Returns the function {@code utf8.codepoint}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code utf8.codepoint (s [, i [, j]])}
 	 *
 	 * <p>Returns the codepoints (as integers) from all characters in {@code s} that start between
 	 * byte position {@code i} and {@code j} (both included). The default for {@code i} is 1
 	 * and for {@code j} is {@code i}. It raises an error if it meets any invalid byte
 	 * sequence.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code utf8.XXX} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.codepoint">
+	 *     the Lua 5.3 Reference Manual entry for <code>utf8.codepoint</code></a>
 	 */
-	public static final LuaFunction CODEPOINT = new CodePoint();
+	public static LuaFunction codepoint() {
+		return CODEPOINT;
+	}
 
 	/**
+	 * Returns the function {@code utf8.len}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code utf8.len (s [, i [, j]])}
 	 *
 	 * <p>Returns the number of UTF-8 characters in string {@code s} that start between positions
 	 * {@code i} and {@code j} (both inclusive). The default for {@code i} is 1
 	 * and for {@code j} is -1. If it finds any invalid byte sequence, returns a <b>false</b>
 	 * value plus the position of the first invalid byte.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code utf8.len} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.len">
+	 *     the Lua 5.3 Reference Manual entry for <code>utf8.len</code></a>
 	 */
-	public static final LuaFunction LEN = new Len();
+	public static LuaFunction len() {
+		return LEN;
+	}
 
 	/**
+	 * Returns the function {@code utf8.offset}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code utf8.offset (s, n [, i])}
 	 *
 	 * <p>Returns the position (in bytes) where the encoding of the {@code n}-th character
@@ -102,22 +167,42 @@ public final class Utf8Lib {
 	 * of the character that contains the {@code i}-th byte of {@code s}.</p>
 	 *
 	 * <p>This function assumes that {@code s} is a valid UTF-8 string.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code utf8.offset} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-utf8.offset">
+	 *     the Lua 5.3 Reference Manual entry for <code>utf8.offset</code></a>
 	 */
-	public static final LuaFunction OFFSET = new Offset();
+	public static LuaFunction offset() {
+		return OFFSET;
+	}
 
 	private Utf8Lib() {
 		// not to be instantiated
 	}
 
+	/**
+	 * Installs the UTF-8 library to the global environment {@code env} in the state
+	 * context {@code context}.
+	 *
+	 * @param context  the state context, must not be {@code null}
+	 * @param env  the global environment, must not be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code env} is {@code null}
+	 */
 	public static void installInto(StateContext context, Table env) {
+		Objects.requireNonNull(context);
+		Objects.requireNonNull(env);
+
 		Table t = context.newTable();
 
-		t.rawset("char", CHAR);
+		t.rawset("char", charFn());
 		t.rawset("charpattern", CHARPATTERN);
-		t.rawset("codes", CODES);
-		t.rawset("codepoint", CODEPOINT);
-		t.rawset("len", LEN);
-		t.rawset("offset", OFFSET);
+		t.rawset("codes", codes());
+		t.rawset("codepoint", codepoint());
+		t.rawset("len", len());
+		t.rawset("offset", offset());
 
 		ModuleLib.install(env, "utf8", t);
 	}

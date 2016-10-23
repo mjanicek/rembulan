@@ -28,11 +28,9 @@ import net.sandius.rembulan.runtime.ProtectedResumable;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.ReturnBuffer;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
-import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -82,17 +80,56 @@ public final class BasicLib {
 	 */
 	public static final ByteString TYPENAME_LIGHT_USERDATA = ByteString.constOf("light userdata");
 
+
+	static final LuaFunction ASSERT = new Assert();
+	static final LuaFunction COLLECTGARBAGE = new CollectGarbage();
+	static final LuaFunction ERROR = new Error();
+	static final LuaFunction GETMETATABLE = new GetMetatable();
+	static final LuaFunction IPAIRS = new IPairs();
+	static final LuaFunction NEXT = new Next();
+	static final LuaFunction PAIRS = new Pairs();
+	static final LuaFunction PCALL = new PCall();
+	static final LuaFunction RAWEQUAL = new RawEqual();
+	static final LuaFunction RAWGET = new RawGet();
+	static final LuaFunction RAWLEN = new RawLen();
+	static final LuaFunction RAWSET = new RawSet();
+	static final LuaFunction SELECT = new Select();
+	static final LuaFunction SETMETATABLE = new SetMetatable();
+	static final LuaFunction TONUMBER = new ToNumber();
+	static final LuaFunction TOSTRING = new ToString();
+	static final LuaFunction TYPE = new Type();
+	static final LuaFunction XPCALL = new XPCall();
+
+
 	/**
+	 * Returns the {@code assert} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code assert (v [, message])}
 	 *
 	 * <p>Calls {@link #ERROR {@code error}} if the value of its argument {@code v}
 	 * is false (i.e., <b>nil</b> or <b>false</b>); otherwise, returns all its arguments.
 	 * In case of error, {@code message} is the error object; when absent, it defaults
 	 * to {@code "assertion failed!"}</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code assert} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-assert">
+	 *     the Lua 5.3 Reference Manual entry for <code>assert</code></a>
 	 */
-	public static final LuaFunction ASSERT = new Assert();
+	public static LuaFunction assertFn() {
+		return ASSERT;
+	}
 
 	/**
+	 * Returns the {@code collectgarbage} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code collectgarbage ([opt [, arg]])}
 	 *
 	 * <p>This function is a generic interface to the garbage collector. It performs different
@@ -126,10 +163,57 @@ public final class BasicLib {
 	 *     returns a boolean that tells whether the collector is running
 	 *     (i.e., not stopped).</li>
 	 * </ul>
+	 * </blockquote>
+	 *
+	 * @return  the {@code collectgarbage} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-collectgarbage">
+	 *     the Lua 5.3 Reference Manual entry for <code>collectgarbage</code></a>
 	 */
-	public static final LuaFunction COLLECTGARBAGE = new CollectGarbage();
+	public static LuaFunction collectgarbage() {
+		return COLLECTGARBAGE;
+	}
 
 	/**
+	 * Returns a {@code dofile} function that uses the specified chunk loader {@code loader}
+	 * and {@code env} as the default global environment for loaded chunks, and opens files
+	 * in the specified {@code fileSystem}.
+	 *
+	 * <p><b>Note:</b> the {@code loadfile} function returned by this method does not
+	 * support loading from standard input.</p>
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
+	 * {@code dofile ([filename])}
+	 *
+	 * <p>Opens the named file and executes its contents as a Lua chunk. When called without
+	 * arguments, {@code dofile} executes the contents of the standard input
+	 * ({@code stdin}). Returns all values returned by the chunk. In case of errors,
+	 * {@code dofile} propagates the error to its caller (that is, {@code dofile}
+	 * does not run in protected mode).</p>
+	 * </blockquote>
+	 *
+	 * @param env  the default global environment for loaded chunks, may be {@code null}
+	 * @param loader  the chunk loader to use, must not be {@code null}
+	 * @param fileSystem  the file system to use, must not be {@code null}
+	 * @return  the {@code dofile} function
+	 *
+	 * @throws NullPointerException  if {@code fileSystem} or {@code loader} is {@code null}
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-dofile">
+	 *     the Lua 5.3 Reference Manual entry for <code>dofile</code></a>
+	 */
+	public static LuaFunction dofile(Object env, ChunkLoader loader, FileSystem fileSystem) {
+		return new DoFile(fileSystem, loader, env);
+	}
+
+	/**
+	 * Returns the {@code error} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code error (message [, level])}
 	 *
 	 * <p>Terminates the last protected function called and returns {@code message}
@@ -141,19 +225,45 @@ public final class BasicLib {
 	 * the error position is where the {@code error} function was called. Level 2 points
 	 * the error to where the function that called {@code error} was called; and so on.
 	 * Passing a level 0 avoids the addition of error position information to the message.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code error} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-error">
+	 *     the Lua 5.3 Reference Manual entry for <code>error</code></a>
 	 */
-	public static final LuaFunction ERROR = new Error();
+	public static LuaFunction error() {
+		return ERROR;
+	}
 
 	/**
+	 * Returns the {@code getmetatable} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code getmetatable (object)}
 	 *
 	 * <p>If {@code object} does not have a metatable, returns <b>nil</b>. Otherwise,
 	 * if the object's metatable has a {@link #MT_METATABLE {@code "__metatable"}} field,
 	 * returns the associated value. Otherwise, returns the metatable of the given object.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code getmetatable} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-getmetatable">
+	 *     the Lua 5.3 Reference Manual entry for <code>getmetatable</code></a>
 	 */
-	public static final LuaFunction GETMETATABLE = new GetMetatable();
+	public static LuaFunction getmetatable() {
+		return GETMETATABLE;
+	}
 
 	/**
+	 * Returns the {@code ipairs} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code ipairs (t)}
 	 *
 	 * <p>Returns three values (an iterator function, the table {@code t}, and 0) so that
@@ -163,10 +273,108 @@ public final class BasicLib {
 	 *
 	 * <p>will iterate over the key–value pairs {@code (1,t[1])}, {@code (2,t[2])}, ...,
 	 * up to the first <b>nil</b> value.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code ipairs} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-ipairs">
+	 *     the Lua 5.3 Reference Manual entry for <code>ipairs</code></a>
 	 */
-	public static final LuaFunction IPAIRS = new IPairs();
+	public static LuaFunction ipairs() {
+		return IPAIRS;
+	}
 
 	/**
+	 * Returns a {@code load} function that uses the specified chunk loader {@code loader}
+	 * and {@code env} as the default global environment for loaded chunks.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
+	 * {@code load (chunk [, chunkname [, mode [, env]]])}
+	 *
+	 * <p>Loads a chunk.</p>
+	 *
+	 * <p>If chunk is a string, the chunk is this string. If {@code chunk} is a function,
+	 * {@code load} calls it repeatedly to get the chunk pieces. Each call to chunk must
+	 * return a string that concatenates with previous results. A return of an empty string,
+	 * <b>nil</b>, or no value signals the end of the chunk.</p>
+	 *
+	 * <p>If there are no syntactic errors, returns the compiled chunk as a function; otherwise,
+	 * returns <b>nil</b> plus the error message.</p>
+	 *
+	 * <p>If the resulting function has upvalues, the first upvalue is set to the value
+	 * of {@code env}, if that parameter is given, or to the value of the global environment.
+	 * Other upvalues are initialized with <b>nil</b>. (When you load a main chunk, the resulting
+	 * function will always have exactly one upvalue, the {@code _ENV} variable
+	 * (see §2.2 of the Lua Reference Manual). However, when you load a binary chunk created
+	 * from a function (see {@link StringLib#DUMP {@code string.dump}}), the resulting
+	 * function can have an arbitrary number of upvalues.) All upvalues are fresh, that is,
+	 * they are not shared with any other function.</p>
+	 *
+	 * <p>{@code chunkname} is used as the name of the chunk for error messages and debug
+	 * information (see §4.9 of the Lua Reference Manual). When absent, it defaults
+	 * to {@code chunk}, if chunk is a string, or to {@code "=(load)"} otherwise.</p>
+	 *
+	 * <p>The string {@code mode} controls whether the chunk can be text or binary
+	 * (that is, a precompiled chunk). It may be the string {@code "b"} (only binary chunks),
+	 * {@code "t"} (only text chunks), or {@code "bt"} (both binary and text).
+	 * The default is {@code "bt"}.</p>
+	 *
+	 * <p>Lua does not check the consistency of binary chunks. Maliciously crafted binary
+	 * chunks can crash the interpreter.</p>
+	 * </blockquote>
+	 *
+	 * @param env  the default global environment for loaded chunks, may be {@code null}
+	 * @param loader  the chunk loader to use, must not be {@code null}
+	 * @return  the {@code load} function
+	 *
+	 * @throws NullPointerException  if {@code loader} is {@code null}
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-load">
+	 *     the Lua 5.3 Reference Manual entry for <code>load</code></a>
+	 */
+	public static LuaFunction load(Object env, ChunkLoader loader) {
+		return new Load(loader, env);
+	}
+
+	/**
+	 * Returns a {@code loadfile} function that uses the specified chunk loader {@code loader}
+	 * and {@code env} as the default global environment for loaded chunks, and opens files
+	 * in the specified {@code fileSystem}.
+	 *
+	 * <p><b>Note:</b> the {@code loadfile} function returned by this method does not
+	 * support loading from standard input.</p>
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
+	 * {@code loadfile ([filename [, mode [, env]]])}
+	 *
+	 * <p>Similar to {@link Load {@code load}}, but gets the chunk from file
+	 * {@code filename} or from the standard input, if no file name is given.</p>
+	 * </blockquote>
+	 *
+	 * @param env  the default global environment for loaded chunks, may be {@code null}
+	 * @param loader  the chunk loader to use, must not be {@code null}
+	 * @param fileSystem  the file system to use, must not be {@code null}
+	 * @return  the {@code loadfile} function
+	 *
+	 * @throws NullPointerException  if {@code fileSystem} or {@code loader} is {@code null}
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-loadfile">
+	 *     the Lua 5.3 Reference Manual entry for <code>loadfile</code></a>
+	 */
+	public static LuaFunction loadfile(Object env, ChunkLoader loader, FileSystem fileSystem) {
+		return new LoadFile(fileSystem, loader, env);
+	}
+
+	/**
+	 * Returns the {@code next} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code next (table [, index])}
 	 *
 	 * <p>Allows a program to traverse all fields of a table. Its first argument is a table
@@ -183,10 +391,23 @@ public final class BasicLib {
 	 * <p>The behavior of {@code next} is undefined if, during the traversal, you assign
 	 * any value to a non-existent field in the table. You may however modify existing fields.
 	 * In particular, you may clear existing fields.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code next} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-next">
+	 *     the Lua 5.3 Reference Manual entry for <code>next</code></a>
 	 */
-	public static final LuaFunction NEXT = new Next();
+	public static LuaFunction next() {
+		return NEXT;
+	}
 
 	/**
+	 * Returns the {@code pairs} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code pairs (t)}
 	 *
 	 * <p>If {@code t} has a metamethod {@link #MT_PAIRS {@code "__pairs"}}, calls it with
@@ -201,10 +422,23 @@ public final class BasicLib {
 	 *
 	 * <p>See function {@link #NEXT {@code next}} for the caveats of modifying the table
 	 * during its traversal.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code pairs} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-pairs">
+	 *     the Lua 5.3 Reference Manual entry for <code>pairs</code></a>
 	 */
-	public static final LuaFunction PAIRS = new Pairs();
+	public static LuaFunction pairs() {
+		return PAIRS;
+	}
 
 	/**
+	 * Returns the {@code pcall} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code pcall (f [, arg1, ···])}
 	 *
 	 * <p>Calls function {@code f} with the given arguments in protected mode. This means
@@ -213,34 +447,122 @@ public final class BasicLib {
 	 * (a boolean), which is <b>true</b> if the call succeeds without errors. In such case,
 	 * {@code pcall} also returns all results from the call, after this first result.
 	 * In case of any error, {@code pcall} returns <b>false</b> plus the error message.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code pcall} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-pcall">
+	 *     the Lua 5.3 Reference Manual entry for <code>pcall</code></a>
 	 */
-	public static final LuaFunction PCALL = new PCall();
+	public static LuaFunction pcall() {
+		return PCALL;
+	}
 
 	/**
+	 * Returns a {@code print} function that writes its output to the output stream {@code out}
+	 * and looks up the {@code tostring} function in the supplied environment {@code env}.
+	 *
+	 * <p><b>Note:</b> the function returned by this method looks up {@code tostring} by
+	 * evaluating the Lua expression {@code env["tostring"]} every time it is invoked. It does
+	 * <i>not</i> call {@link #tostring()} directly. This is the (undocumented) behaviour
+	 * of the {@code print} function provided by PUC-Lua 5.3.3.</p>
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
+	 * {@code print (···)}
+	 *
+	 * <p>Receives any number of arguments and prints their values to {@code stdout},
+	 * using the {@link #TOSTRING {@code tostring}} function to convert each argument
+	 * to a string. {@code print} is not intended for formatted output, but only as
+	 * a quick way to show a value, for instance for debugging. For complete control over
+	 * the output, use {@link StringLib#FORMAT {@code string.format}}
+	 * and {@code io.write}.</p>
+	 * </blockquote>
+	 *
+	 * @param out  the output stream, must not be {@code null}
+	 * @param env  the environment for looking up the global function {@code tostring},
+	 *             may be {@code null}
+	 * @return  the {@code print} function
+	 *
+	 * @throws NullPointerException  if {@code out} is {@code null}
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-print">
+	 *     the Lua 5.3 Reference Manual entry for <code>print</code></a>
+	 */
+	public static LuaFunction print(OutputStream out, Object env) {
+		return new Print(out, env);
+	}
+
+	/**
+	 * Returns the {@code rawequal} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code rawequal (v1, v2)}
 	 *
 	 * <p>Checks whether {@code v1} is equal to {@code v2}, without invoking any
 	 * metamethod. Returns a boolean.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code rawequal} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-rawequal">
+	 *     the Lua 5.3 Reference Manual entry for <code>rawequal</code></a>
 	 */
-	public static final LuaFunction RAWEQUAL = new RawEqual();
+	public static LuaFunction rawequal() {
+		return RAWEQUAL;
+	}
 
 	/**
+	 * Returns the {@code rawget} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code rawget (table, index)}
 	 *
 	 * <p>Gets the real value of {@code table[index]}, without invoking any metamethod.
 	 * {@code table} must be a table; {@code index} may be any value.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code rawget} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-rawget">
+	 *     the Lua 5.3 Reference Manual entry for <code>rawget</code></a>
 	 */
-	public static final LuaFunction RAWGET = new RawGet();
+	public static LuaFunction rawget() {
+		return RAWGET;
+	}
 
 	/**
+	 * Returns the {@code rawlen} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code rawlen (v)}
 	 *
 	 * <p>Returns the length of the object {@code v}, which must be a table or a string,
 	 * without invoking any metamethod. Returns an integer.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code rawlen} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-rawlen">
+	 *     the Lua 5.3 Reference Manual entry for <code>rawlen</code></a>
 	 */
-	public static final LuaFunction RAWLEN = new RawLen();
+	public static LuaFunction rawlen() {
+		return RAWLEN;
+	}
 
 	/**
+	 * Returns the {@code rawset} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code rawset (table, index, value)}
 	 *
 	 * <p>Sets the real value of {@code table[index]} to {@code value}, without
@@ -248,20 +570,46 @@ public final class BasicLib {
 	 * different from <b>nil</b> and NaN, and {@code value} any Lua value.</p>
 	 *
 	 * <p>This function returns {@code table}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code rawset} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-rawset">
+	 *     the Lua 5.3 Reference Manual entry for <code>rawset</code></a>
 	 */
-	public static final LuaFunction RAWSET = new RawSet();
+	public static LuaFunction rawset() {
+		return RAWSET;
+	}
 
 	/**
+	 * Returns the {@code select} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code select (index, ···)}
 	 *
 	 * <p>If {@code index} is a number, returns all arguments after argument number index;
 	 * a negative number indexes from the end (-1 is the last argument). Otherwise, index must
 	 * be the string {@code "#"}, and select returns the total number of extra arguments
 	 * it received.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code select} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-select">
+	 *     the Lua 5.3 Reference Manual entry for <code>select</code></a>
 	 */
-	public static final LuaFunction SELECT = new Select();
+	public static LuaFunction select() {
+		return SELECT;
+	}
 
 	/**
+	 * Returns the {@code setmetatable} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code setmetatable (table, metatable)}
 	 *
 	 * <p>Sets the metatable for the given {@code table}. (To change the metatable of other
@@ -271,10 +619,23 @@ public final class BasicLib {
 	 * field, raises an error.</p>
 	 *
 	 * <p>This function returns {@code table}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code setmetatable} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-setmetatable">
+	 *     the Lua 5.3 Reference Manual entry for <code>setmetatable</code></a>
 	 */
-	public static final LuaFunction SETMETATABLE = new SetMetatable();
+	public static LuaFunction setmetatable() {
+		return SETMETATABLE;
+	}
 
 	/**
+	 * Returns the {@code tonumber} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code tonumber (e [, base])}
 	 *
 	 * <p>When called with no {@code base}, {@code tonumber} tries to convert
@@ -288,10 +649,23 @@ public final class BasicLib {
 	 * represents 10, 'B' represents 11, and so forth, with 'Z' representing 35. If the string
 	 * {@code e} is not a valid numeral in the given base, the function returns
 	 * <b>nil</b>.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code tonumber} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-tonumber">
+	 *     the Lua 5.3 Reference Manual entry for <code>tonumber</code></a>
 	 */
-	public static final LuaFunction TONUMBER = new ToNumber();
+	public static LuaFunction tonumber() {
+		return TONUMBER;
+	}
 
 	/**
+	 * Returns the {@code tostring} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code tostring (v)}
 	 *
 	 * <p>Receives a value of any type and converts it to a string in a human-readable format.
@@ -300,10 +674,23 @@ public final class BasicLib {
 	 * of {@code v} has a {@link #MT_TOSTRING {@code "__tostring"}} field,
 	 * then {@code tostring} calls the corresponding value with {@code v} as argument, and uses
 	 * the result of the call as its result.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code tostring} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-tostring">
+	 *     the Lua 5.3 Reference Manual entry for <code>tostring</code></a>
 	 */
-	public static final LuaFunction TOSTRING = new ToString();
+	public static LuaFunction tostring() {
+		return TOSTRING;
+	}
 
 	/**
+	 * Returns the {@code type} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code type (v)}
 	 *
 	 * <p>Returns the type of its only argument, coded as a string. The possible results of this
@@ -311,105 +698,120 @@ public final class BasicLib {
 	 * {@code "number"}, {@code "string"}, {@code "boolean"},
 	 * {@code "table"}, {@code "function"}, {@code "thread"},
 	 * and {@code "userdata"}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code type} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-type">
+	 *     the Lua 5.3 Reference Manual entry for <code>type</code></a>
 	 */
-	public static final LuaFunction TYPE = new Type();
+	public static LuaFunction type() {
+		return TYPE;
+	}
 
 	/**
+	 * The global variable {@code _VERSION}.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code _VERSION}
 	 *
 	 * <p>A global variable (not a function) that holds a string containing the running Lua
 	 * version. The current value of this variable (in PUC-Lua 5.3.x)
 	 * is {@code "Lua 5.3"}.</p>
+	 * </blockquote>
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-_VERSION">
+	 *     the Lua 5.3 Reference Manual entry for <code>_VERSION</code></a>
 	 */
 	public static final ByteString _VERSION = ByteString.constOf("Lua 5.3");
 
 	/**
+	 * Returns the {@code xpcall} function.
+	 *
+	 * <p>The following is the corresponding entry from the Lua Reference Manual:</p>
+	 *
+	 * <blockquote>
 	 * {@code xpcall (f, msgh [, arg1, ···])}
 	 *
 	 * <p>This function is similar to {@link #PCALL {@code pcall}}, except that it sets
 	 * a new message handler {@code msgh}.</p>
+	 * </blockquote>
+	 *
+	 * @return  the {@code xpcall} function
+	 *
+	 * @see <a href="http://www.lua.org/manual/5.3/manual.html#pdf-xpcall">
+	 *     the Lua 5.3 Reference Manual entry for <code>xpcall</code></a>
 	 */
-	public static final LuaFunction XPCALL = new XPCall();
+	public static LuaFunction xpcall() {
+		return XPCALL;
+	}
+
 
 	private BasicLib() {
 		// not to be instantiated
 	}
 
+	/**
+	 * Installs the basic library into the specified table {@code env} in the state context
+	 * {@code context}. Uses {@code runtimeEnvironment} for I/O facilities and {@code loader}
+	 * for chunk loading.
+	 *
+	 * <p>The following functions are only installed if the conditions are satisfied:</p>
+	 * <ul>
+	 *     <li>{@code dofile}: if {@code runtimeEnvironment != null
+	 *       && runtimeEnvironment.fileSystem() != null && loader != null};</li>
+	 *     <li>{@code load}: if {@code loader != null};</li>
+	 *     <li>{@code loadfile}: if {@code runtimeEnvironment != null
+	 *       && runtimeEnvironment.fileSystem() != null && loader != null};</li>
+	 *     <li>{@code print}: if {@code runtimeEnvironment != null
+	 *       && runtimeEnvironment.standardOutput() != null};</li>
+	 * </ul>
+	 *
+	 * @param context  the state context, must not be {@code null}
+	 * @param env  the global environment, must not be {@code null}
+	 * @param runtimeEnvironment  the runtime environment to use, may be {@code null}
+	 * @param loader  the chunk loader to use, may be {@code null}
+	 *
+	 * @throws NullPointerException  if {@code context} or {@code env} is {@code null}
+	 */
 	public static void installInto(StateContext context, Table env, RuntimeEnvironment runtimeEnvironment, ChunkLoader loader) {
-		final OutputStream out;
-		final FileSystem fileSystem;
+		Objects.requireNonNull(context);  // not needed, but included for consistency
+		Objects.requireNonNull(env);
 
-		if (runtimeEnvironment != null) {
-			out = runtimeEnvironment.standardOutput() != null ? new PrintStream(runtimeEnvironment.standardOutput()) : null;
-			fileSystem = runtimeEnvironment.fileSystem();
-		}
-		else {
-			out = null;
-			fileSystem = null;
-		}
+		OutputStream out = runtimeEnvironment != null ? runtimeEnvironment.standardOutput() : null;
+		FileSystem fileSystem = runtimeEnvironment != null ? runtimeEnvironment.fileSystem() : null;
 
-		LuaFunction print = out != null ? new Print(out, env) : null;
-
-		final LuaFunction load;
-		final LuaFunction loadfile;
-		final LuaFunction dofile;
-
-		if (loader != null) {
-			load = new Load(loader, env);
-		}
-		else {
-			// no loader supplied
-			load = null;
-		}
-
-		if (loader != null && fileSystem != null) {
-			loadfile = new LoadFile(fileSystem, loader, env);
-			dofile = new DoFile(fileSystem, loader, env);
-		}
-		else {
-			loadfile = null;
-			dofile = null;
-		}
-
-		env.rawset("assert", ASSERT);
-		env.rawset("collectgarbage", COLLECTGARBAGE);
-		env.rawset("dofile", dofile);
-		env.rawset("error", ERROR);
+		env.rawset("assert", assertFn());
+		env.rawset("collectgarbage", collectgarbage());
+		if (loader != null && fileSystem != null) env.rawset("dofile", dofile(env, loader, fileSystem));
+		env.rawset("error", error());
 		env.rawset("_G", env);
-		env.rawset("getmetatable", GETMETATABLE);
-		env.rawset("ipairs", IPAIRS);
-		env.rawset("load", load);
-		env.rawset("loadfile", loadfile);
-		env.rawset("next", NEXT);
-		env.rawset("pairs", PAIRS);
-		env.rawset("pcall", PCALL);
-		env.rawset("print", print);
-		env.rawset("rawequal", RAWEQUAL);
-		env.rawset("rawget", RAWGET);
-		env.rawset("rawlen", RAWLEN);
-		env.rawset("rawset", RAWSET);
-		env.rawset("select", SELECT);
-		env.rawset("setmetatable", SETMETATABLE);
-		env.rawset("tostring", TOSTRING);
-		env.rawset("tonumber", TONUMBER);
-		env.rawset("type", TYPE);
+		env.rawset("getmetatable", getmetatable());
+		env.rawset("ipairs", ipairs());
+		if (loader != null) env.rawset("load", load(env, loader));
+		if (loader != null && fileSystem != null) env.rawset("loadfile", loadfile(env, loader, fileSystem));
+		env.rawset("next", next());
+		env.rawset("pairs", pairs());
+		env.rawset("pcall", pcall());
+		if (out != null) env.rawset("print", print(out, env));
+		env.rawset("rawequal", rawequal());
+		env.rawset("rawget", rawget());
+		env.rawset("rawlen", rawlen());
+		env.rawset("rawset", rawset());
+		env.rawset("select", select());
+		env.rawset("setmetatable", setmetatable());
+		env.rawset("tostring", tostring());
+		env.rawset("tonumber", tonumber());
+		env.rawset("type", type());
 		env.rawset("_VERSION", _VERSION);
-		env.rawset("xpcall", XPCALL);
+		env.rawset("xpcall", xpcall());
 
 		ModuleLib.addToLoaded(env, "_G", env);
 	}
 
-	/**
-	 * {@code print (···)}
-	 *
-	 * <p>Receives any number of arguments and prints their values to {@code stdout},
-	 * using the {@link #TOSTRING {@code tostring}} function to convert each argument
-	 * to a string. {@code print} is not intended for formatted output, but only as
-	 * a quick way to show a value, for instance for debugging. For complete control over
-	 * the output, use {@link StringLib#FORMAT {@code string.format}}
-	 * and {@code io.write}.</p>
-	 */
-	public static class Print extends AbstractLibFunction {
+	static class Print extends AbstractLibFunction {
 
 		static class SuspendedState {
 
@@ -426,9 +828,9 @@ public final class BasicLib {
 		}
 
 		private final OutputStream out;
-		private final Table envTable;
+		private final Object envTable;
 
-		public Print(OutputStream out, Table envTable) {
+		public Print(OutputStream out, Object envTable) {
 			this.out = Objects.requireNonNull(out);
 			this.envTable = Objects.requireNonNull(envTable);
 		}
@@ -1132,41 +1534,7 @@ public final class BasicLib {
 
 	}
 
-	/**
-	 * {@code load (chunk [, chunkname [, mode [, env]]])}
-	 *
-	 * <p>Loads a chunk.</p>
-	 *
-	 * <p>If chunk is a string, the chunk is this string. If {@code chunk} is a function,
-	 * {@code load} calls it repeatedly to get the chunk pieces. Each call to chunk must
-	 * return a string that concatenates with previous results. A return of an empty string,
-	 * <b>nil</b>, or no value signals the end of the chunk.</p>
-	 *
-	 * <p>If there are no syntactic errors, returns the compiled chunk as a function; otherwise,
-	 * returns <b>nil</b> plus the error message.</p>
-	 *
-	 * <p>If the resulting function has upvalues, the first upvalue is set to the value
-	 * of {@code env}, if that parameter is given, or to the value of the global environment.
-	 * Other upvalues are initialized with <b>nil</b>. (When you load a main chunk, the resulting
-	 * function will always have exactly one upvalue, the {@code _ENV} variable
-	 * (see §2.2 of the Lua Reference Manual). However, when you load a binary chunk created
-	 * from a function (see {@link StringLib#DUMP {@code string.dump}}), the resulting
-	 * function can have an arbitrary number of upvalues.) All upvalues are fresh, that is,
-	 * they are not shared with any other function.</p>
-	 *
-	 * <p>{@code chunkname} is used as the name of the chunk for error messages and debug
-	 * information (see §4.9 of the Lua Reference Manual). When absent, it defaults
-	 * to {@code chunk}, if chunk is a string, or to {@code "=(load)"} otherwise.</p>
-	 *
-	 * <p>The string {@code mode} controls whether the chunk can be text or binary
-	 * (that is, a precompiled chunk). It may be the string {@code "b"} (only binary chunks),
-	 * {@code "t"} (only text chunks), or {@code "bt"} (both binary and text).
-	 * The default is {@code "bt"}.</p>
-	 *
-	 * <p>Lua does not check the consistency of binary chunks. Maliciously crafted binary
-	 * chunks can crash the interpreter.</p>
-	 */
-	public static class Load extends AbstractLibFunction {
+	static class Load extends AbstractLibFunction {
 
 		static final ByteString DEFAULT_MODE = ByteString.constOf("bt");
 
@@ -1174,7 +1542,7 @@ public final class BasicLib {
 		private final Object defaultEnv;
 
 		public Load(ChunkLoader loader, Object env) {
-			this.loader = Check.notNull(loader);
+			this.loader = Objects.requireNonNull(loader);
 			this.defaultEnv = env;
 		}
 
@@ -1314,13 +1682,7 @@ public final class BasicLib {
 
 	}
 
-	/**
-	 * {@code loadfile ([filename [, mode [, env]]])}
-	 *
-	 * <p>Similar to {@link Load {@code load}}, but gets the chunk from file
-	 * {@code filename} or from the standard input, if no file name is given.</p>
-	 */
-	public static class LoadFile extends AbstractLibFunction {
+	static class LoadFile extends AbstractLibFunction {
 
 		private final FileSystem fileSystem;
 		private final ChunkLoader loader;
@@ -1399,16 +1761,7 @@ public final class BasicLib {
 		return fn;
 	}
 
-	/**
-	 * {@code dofile ([filename])}
-	 *
-	 * <p>Opens the named file and executes its contents as a Lua chunk. When called without
-	 * arguments, {@code dofile} executes the contents of the standard input
-	 * ({@code stdin}). Returns all values returned by the chunk. In case of errors,
-	 * {@code dofile} propagates the error to its caller (that is, {@code dofile}
-	 * does not run in protected mode).</p>
-	 */
-	public static class DoFile extends AbstractLibFunction {
+	static class DoFile extends AbstractLibFunction {
 
 		private final FileSystem fileSystem;
 		private final ChunkLoader loader;
