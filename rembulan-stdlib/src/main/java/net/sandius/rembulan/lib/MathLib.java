@@ -33,8 +33,8 @@ import java.util.Random;
  * This library provides basic mathematical functions. It provides all its functions and constants
  * inside the table {@code math}. Functions with the annotation "integer/float" give integer
  * results for integer arguments and float results for float (or mixed) arguments. Rounding
- * functions ({@link #CEIL {@code math.ceil}}, {@link #FLOOR {@code math.floor}},
- * and {@link #MODF {@code math.modf}}) return an integer when the result fits
+ * functions ({@link #ceil() <code>math.ceil</code>}, {@link #floor() <code>math.floor</code>},
+ * and {@link #modf() <code>math.modf</code>}) return an integer when the result fits
  * in the range of an integer, or a float otherwise.
  */
 public final class MathLib {

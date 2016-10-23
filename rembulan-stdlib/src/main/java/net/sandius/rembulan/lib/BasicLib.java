@@ -48,8 +48,8 @@ public final class BasicLib {
 
 	/**
 	 * The metatable key {@code "__metatable"}. When defined, customises the behaviour
-	 * of {@link #GETMETATABLE {@code getmetatable}}
-	 * and {@link #SETMETATABLE {@code setmetatable}}.
+	 * of {@link #getmetatable() <code>getmetatable</code>}
+	 * and {@link #setmetatable() <code>setmetatable</code>}.
 	 */
 	public static final ByteString MT_METATABLE = ByteString.constOf("__metatable");
 
@@ -63,13 +63,13 @@ public final class BasicLib {
 
 	/**
 	 * The metatable key {@code "__pairs"}. When defined, customises the behaviour
-	 * of {@link #PAIRS {@code pairs}}.
+	 * of {@link #pairs() <code>pairs</code>}.
 	 */
 	public static final ByteString MT_PAIRS = ByteString.constOf("__pairs");
 
 	/**
 	 * The metatable key {@code "__tostring"}. When defined, customises the behaviour
-	 * of {@link #TOSTRING {@code tostring}}.
+	 * of {@link #tostring() <code>tostring</code>}.
 	 */
 	public static final ByteString MT_TOSTRING = ByteString.constOf("__tostring");
 
@@ -109,7 +109,7 @@ public final class BasicLib {
 	 * <blockquote>
 	 * {@code assert (v [, message])}
 	 *
-	 * <p>Calls {@link #ERROR {@code error}} if the value of its argument {@code v}
+	 * <p>Calls {@link #error() <code>error</code>} if the value of its argument {@code v}
 	 * is false (i.e., <b>nil</b> or <b>false</b>); otherwise, returns all its arguments.
 	 * In case of error, {@code message} is the error object; when absent, it defaults
 	 * to {@code "assertion failed!"}</p>
@@ -246,7 +246,7 @@ public final class BasicLib {
 	 * {@code getmetatable (object)}
 	 *
 	 * <p>If {@code object} does not have a metatable, returns <b>nil</b>. Otherwise,
-	 * if the object's metatable has a {@link #MT_METATABLE {@code "__metatable"}} field,
+	 * if the object's metatable has a {@link #MT_METATABLE <code>"__metatable"</code>} field,
 	 * returns the associated value. Otherwise, returns the metatable of the given object.</p>
 	 * </blockquote>
 	 *
@@ -309,7 +309,7 @@ public final class BasicLib {
 	 * Other upvalues are initialized with <b>nil</b>. (When you load a main chunk, the resulting
 	 * function will always have exactly one upvalue, the {@code _ENV} variable
 	 * (see §2.2 of the Lua Reference Manual). However, when you load a binary chunk created
-	 * from a function (see {@link StringLib#DUMP {@code string.dump}}), the resulting
+	 * from a function (see {@link StringLib#dump() <code>string.dump</code>}), the resulting
 	 * function can have an arbitrary number of upvalues.) All upvalues are fresh, that is,
 	 * they are not shared with any other function.</p>
 	 *
@@ -352,7 +352,7 @@ public final class BasicLib {
 	 * <blockquote>
 	 * {@code loadfile ([filename [, mode [, env]]])}
 	 *
-	 * <p>Similar to {@link Load {@code load}}, but gets the chunk from file
+	 * <p>Similar to {@link Load <code>load</code>}, but gets the chunk from file
 	 * {@code filename} or from the standard input, if no file name is given.</p>
 	 * </blockquote>
 	 *
@@ -411,17 +411,17 @@ public final class BasicLib {
 	 * <blockquote>
 	 * {@code pairs (t)}
 	 *
-	 * <p>If {@code t} has a metamethod {@link #MT_PAIRS {@code "__pairs"}}, calls it with
+	 * <p>If {@code t} has a metamethod {@link #MT_PAIRS <code>"__pairs"</code>}, calls it with
 	 * {@code t} as argument and returns the first three results from the call.</p>
 	 *
-	 * <p>Otherwise, returns three values: the {@link #NEXT {@code next}} function,
+	 * <p>Otherwise, returns three values: the {@link #next() <code>next</code>} function,
 	 * the table {@code t}, and <b>nil</b>, so that the construction</p>
 	 *
 	 *   <blockquote>{@code for k,v in pairs(t) do body end}</blockquote>
 	 *
 	 * <p>will iterate over all key–value pairs of table {@code t}.</p>
 	 *
-	 * <p>See function {@link #NEXT {@code next}} for the caveats of modifying the table
+	 * <p>See function {@link #next() <code>next</code>} for the caveats of modifying the table
 	 * during its traversal.</p>
 	 * </blockquote>
 	 *
@@ -474,10 +474,10 @@ public final class BasicLib {
 	 * {@code print (···)}
 	 *
 	 * <p>Receives any number of arguments and prints their values to {@code stdout},
-	 * using the {@link #TOSTRING {@code tostring}} function to convert each argument
+	 * using the {@link #tostring() <code>tostring</code>} function to convert each argument
 	 * to a string. {@code print} is not intended for formatted output, but only as
 	 * a quick way to show a value, for instance for debugging. For complete control over
-	 * the output, use {@link StringLib#FORMAT {@code string.format}}
+	 * the output, use {@link StringLib#format() <code>string.format</code>}
 	 * and {@code io.write}.</p>
 	 * </blockquote>
 	 *
@@ -616,7 +616,7 @@ public final class BasicLib {
 	 * <p>Sets the metatable for the given {@code table}. (To change the metatable of other
 	 * types from Lua code, you must use the debug library (see §6.10 of the Lua Reference
 	 * Manual).) If {@code metatable} is <b>nil</b>, removes the metatable of the given
-	 * table. If the original metatable has a {@link #MT_METATABLE {@code "__metatable"}}
+	 * table. If the original metatable has a {@link #MT_METATABLE <code>"__metatable"</code>}
 	 * field, raises an error.</p>
 	 *
 	 * <p>This function returns {@code table}.</p>
@@ -671,8 +671,8 @@ public final class BasicLib {
 	 *
 	 * <p>Receives a value of any type and converts it to a string in a human-readable format.
 	 * (For complete control of how numbers are converted,
-	 * use {@link StringLib#FORMAT {@code string.format}}.) If the metatable
-	 * of {@code v} has a {@link #MT_TOSTRING {@code "__tostring"}} field,
+	 * use {@link StringLib#format() <code>string.format</code>}.) If the metatable
+	 * of {@code v} has a {@link #MT_TOSTRING <code>"__tostring"</code>} field,
 	 * then {@code tostring} calls the corresponding value with {@code v} as argument, and uses
 	 * the result of the call as its result.</p>
 	 * </blockquote>
@@ -736,7 +736,7 @@ public final class BasicLib {
 	 * <blockquote>
 	 * {@code xpcall (f, msgh [, arg1, ···])}
 	 *
-	 * <p>This function is similar to {@link #PCALL {@code pcall}}, except that it sets
+	 * <p>This function is similar to {@link #pcall() <code>pcall</code>}, except that it sets
 	 * a new message handler {@code msgh}.</p>
 	 * </blockquote>
 	 *

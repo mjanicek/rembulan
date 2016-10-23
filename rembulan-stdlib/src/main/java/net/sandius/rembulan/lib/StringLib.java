@@ -89,7 +89,7 @@ public final class StringLib {
 	 * <p>Returns the internal numeric codes of the characters
 	 * {@code s[i]}, {@code s[i+1]}, ..., {@code s[j]}. The default value for {@code i} is 1;
 	 * the default value for {@code j} is {@code i}. These indices are corrected following
-	 * the same rules of function {@link #SUB {@code string.sub}}.</p>
+	 * the same rules of function {@link #sub() <code>string.sub</code>}.</p>
 	 *
 	 * <p>Numeric codes are not necessarily portable across platforms.</p>
 	 * </blockquote>
@@ -136,7 +136,7 @@ public final class StringLib {
 	 * {@code string.dump (function [, strip])}
 	 *
 	 * <p>Returns a string containing a binary representation (a binary chunk) of the given
-	 * function, so that a later {@link BasicLib.Load {@code load}} on this string
+	 * function, so that a later {@link BasicLib.Load <code>load</code>} on this string
 	 * returns a copy of the function (but with new upvalues). If {@code strip} is a true value,
 	 * the binary representation may not include all debug information about the function,
 	 * to save space.</p>
@@ -222,7 +222,7 @@ public final class StringLib {
 	 * all expect a number as argument. Options {@code c}, {@code d}, {@code i}, {@code o},
 	 * {@code u}, {@code X}, and {@code x} expect an integer. Option {@code q} expects a string.
 	 * Option {@code s} expects a string; if its argument is not a string, it is converted
-	 * to one following the same rules of {@link BasicLib#TOSTRING {@code tostring}}.
+	 * to one following the same rules of {@link BasicLib#tostring() <code>tostring</code>}.
 	 * If the option has any modifier (flags, width, length), the string argument should
 	 * not contain embedded zeros. When Lua is compiled with a non-C99 compiler, options
 	 * {@code A} and {@code a} (hexadecimal floats) do not support any modifier (flags, width,
@@ -477,7 +477,7 @@ public final class StringLib {
 	 * <blockquote>
 	 * {@code string.packsize (fmt)}
 	 *
-	 * <p>Returns the size of a string resulting from {@link #PACK {@code string.pack}}
+	 * <p>Returns the size of a string resulting from {@link #pack() <code>string.pack</code>}
 	 * with the given format. The format string cannot have the variable-length options
 	 * '{@code s}' or '{@code z}' (see §6.4.2).</p>
 	 * </blockquote>
@@ -575,7 +575,7 @@ public final class StringLib {
 	 * {@code string.unpack (fmt, s [, pos])}
 	 *
 	 * <p>Returns the values packed in string {@code s} (see
-	 * {@link #PACK {@code string.pack}}) according to the format string {@code fmt}
+	 * {@link #pack() <code>string.pack</code>}) according to the format string {@code fmt}
 	 * (see §6.4.2). An optional {@code pos} marks where to start reading in {@code s}
 	 * (default is 1). After the read values, this function also returns the index of the first
 	 * unread byte in {@code s}.</p>

@@ -98,7 +98,7 @@ public final class DebugLib {
 	 *
 	 * <p>Returns the current hook settings of the thread, as three values: the current hook
 	 * function, the current hook mask, and the current hook count (as set by
-	 * the {@link #SETHOOK {@code debug.sethook}} function).</p>
+	 * the {@link #sethook() <code>debug.sethook</code>} function).</p>
 	 * </blockquote>
 	 *
 	 * @return  the {@code debug.gethook} function
@@ -167,7 +167,7 @@ public final class DebugLib {
 	 * the current scope of the function. Negative indices refer to vararg parameters;
 	 * -1 is the first vararg parameter. The function returns <b>nil</b> if there is no variable
 	 * with the given index, and raises an error when called with a level out of range.
-	 * (You can call {@link #GETINFO {@code debug.getinfo}} to check whether the level
+	 * (You can call {@link #getinfo() <code>debug.getinfo</code>} to check whether the level
 	 * is valid.)</p>
 	 *
 	 * <p>Variable names starting with {@code '('} (open parenthesis) represent variables with
@@ -328,11 +328,11 @@ public final class DebugLib {
 	 * <p>This function assigns the value {@code value} to the local variable with index
 	 * {@code local} of the function at {@code level} level of the stack. The function returns
 	 * <b>nil</b> if there is no local variable with the given index, and raises an error when
-	 * called with a level out of range. (You can call {@link #GETINFO {@code getinfo}}
+	 * called with a level out of range. (You can call {@link #getinfo() <code>getinfo</code>}
 	 * to check whether the level is valid.) Otherwise, it returns the name of the local
 	 * variable.</p>
 	 *
-	 * <p>See {@link #GETLOCAL {@code debug.getlocal}} for more information about variable
+	 * <p>See {@link #getlocal() <code>debug.getlocal</code>} for more information about variable
 	 * indices and names.</p>
 	 * </blockquote>
 	 *

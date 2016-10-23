@@ -73,7 +73,7 @@ public final class OsLib {
 	 * string format.</p>
 	 *
 	 * <p>If the time argument is present, this is the time to be formatted (see the
-	 * {@link Time {@code os.time}} function for a description of this value).
+	 * {@link #time(RuntimeEnvironment) <code>os.time</code>} function for a description of this value).
 	 * Otherwise, {@code date} formats the current time.</p>
 	 *
 	 * <p>If format starts with '{@code !}', then the date is formatted in Coordinated Universal
@@ -330,7 +330,7 @@ public final class OsLib {
 	 * {@code year}, {@code month}, and {@code day}, and may have fields {@code hour}
 	 * (default is 12), {@code min} (default is 0), {@code sec} (default is 0), and {@code isdst}
 	 * (default is <b>nil</b>). Other fields are ignored. For a description of these fields,
-	 * see the {@link Date) {@code os.date}} function.</p>
+	 * see the {@link Date) <code>os.date</code>} function.</p>
 	 *
 	 * <p>The values in these fields do not need to be inside their valid ranges. For instance,
 	 * if {@code sec} is -10, it means -10 seconds from the time specified by the other fields;
@@ -340,8 +340,8 @@ public final class OsLib {
 	 * <p>The returned value is a number, whose meaning depends on your system. In POSIX, Windows,
 	 * and some other systems, this number counts the number of seconds since some given start
 	 * time (the "epoch"). In other systems, the meaning is not specified, and the number returned
-	 * by {@code time} can be used only as an argument to {@link Date) {@code os.date}}
-	 * and {@link DiffTime) {@code os.difftime}}.</p>
+	 * by {@code time} can be used only as an argument to {@link Date) <code>os.date</code>}
+	 * and {@link DiffTime) <code>os.difftime</code>}.</p>
 	 * </blockquote>
 	 *
 	 * @param runtimeEnvironment  the runtime environment, must not be {@code null}
