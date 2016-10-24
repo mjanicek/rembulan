@@ -114,7 +114,7 @@ class CommandLineArguments {
 	}
 
 	public boolean ignoreEnvVars() {
-		return ignoreEnvVars();
+		return ignoreEnvVars;
 	}
 
 	public Iterable<Step> steps() {
