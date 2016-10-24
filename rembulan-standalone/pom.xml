@@ -64,12 +64,6 @@
     </dependency>
 
     <dependency>
-      <groupId>net.sandius.rembulan</groupId>
-      <artifactId>rembulan-luajava-compat</artifactId>
-      <version>${project.parent.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>jline</groupId>
       <artifactId>jline</artifactId>
       <version>2.14.2</version>
@@ -106,7 +100,7 @@
               <appClass>net.sandius.rembulan.standalone.RembulanConsole</appClass>
               <chmod>true</chmod>
               <includeApp>true</includeApp>
-              <includeCompileDep>false</includeCompileDep>
+              <includeCompileDep>true</includeCompileDep>
               <includeRuntimeDep>true</includeRuntimeDep>
               <includeTransitiveDep>true</includeTransitiveDep>
             </configuration>
