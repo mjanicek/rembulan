@@ -26,38 +26,6 @@ public final class Check {
 	}
 
 	/**
-	 * Throws an {@link IllegalArgumentException} if the argument {@code o} is {@code null};
-	 * otherwise, returns {@code o}.
-	 *
-	 * @param o  the argument to be checked for being {@code null}
-	 * @param <T>  the type of {@code o}
-	 * @return  {@code o} if {@code o} is not {@code null}
-	 *
-	 * @throws IllegalArgumentException  if {@code o} is {@code null}
-	 */
-	@Deprecated
-	public static <T> T notNull(T o) {
-		if (o == null) {
-			throw new IllegalArgumentException("argument is null");
-		}
-		return o;
-	}
-
-	/**
-	 * Throws an {@link IllegalArgumentException} if the argument {@code o} is not {@code null}.
-	 *
-	 * @param o  the argument to be checked for being {@code null}
-	 *
-	 * @throws IllegalArgumentException  if {@code o} is not {@code null}
-	 */
-	@Deprecated
-	public static void isNull(Object o) {
-		if (o != null) {
-			throw new IllegalArgumentException("argument is not null: " + o);
-		}
-	}
-
-	/**
 	 * Throws an {@link IllegalArgumentException} if {@code a != b}; otherwise, returns
 	 * {@code a}.
 	 *
