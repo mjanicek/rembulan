@@ -19,12 +19,14 @@ package net.sandius.rembulan.standalone;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
 
-abstract class Utils {
+final class Utils {
 
 	private Utils() {
 		// not to be instantiated or extended
@@ -65,6 +67,27 @@ abstract class Utils {
 		}
 		else {
 			return s;
+		}
+	}
+
+	public static boolean isVerbose() {
+		return System.getenv(Constants.ENV_VERBOSE) != null;
+	}
+
+	public static void logClassPath(ClassLoader cl, String name) {
+		if (isVerbose()) {
+			System.err.println(name + ":");
+			if (cl instanceof URLClassLoader) {
+				for (URL url : ((URLClassLoader) cl).getURLs()) {
+					System.err.println("\t" + url);
+				}
+			}
+			else if (cl == null) {
+				System.err.println("\t(none)");
+			}
+			else {
+				System.err.println("\t(unknown)");
+			}
 		}
 	}
 

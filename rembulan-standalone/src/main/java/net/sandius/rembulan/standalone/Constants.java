@@ -82,6 +82,23 @@ abstract class Constants {
 	public static final String ENV_CPU_ACCOUNTING = "REMBULAN_CPU_ACCOUNTING";
 
 	/**
+	 * Name of the environment variable used by the module library to load Java modules.
+	 *
+	 * <p>When the variable is defined, it is split into URLs around the character
+	 * {@code ':'}. The URLs are then used to initialise a module class loader.
+	 * Otherwise, no module class loader will be used.</p>
+	 */
+	public static final String ENV_MODULE_CLASSPATH = "CLASSPATH";
+
+	/**
+	 * Name of the environment variable used to control the REPL verbosity.
+	 *
+	 * <p>When the variable is defined, the console will print diagnostic messages to
+	 * standard error.</p>
+	 */
+	public static final String ENV_VERBOSE = "REMBULAN_VERBOSE";
+
+	/**
 	 * File name used for chunks read from the standard input.
 	 */
 	public static final String SOURCE_STDIN = "stdin";

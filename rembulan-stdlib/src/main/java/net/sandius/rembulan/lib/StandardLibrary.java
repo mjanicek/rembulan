@@ -34,24 +34,28 @@ public class StandardLibrary {
 
 	private final RuntimeEnvironment environment;
 
-	private final ChunkLoader loader;
+	private final ChunkLoader chunkLoader;
+	private final ClassLoader moduleLoader;
 	private final boolean withDebug;
 
 	private StandardLibrary(RuntimeEnvironment environment,
-							ChunkLoader loader, boolean withDebug) {
+							ChunkLoader chunkLoader, ClassLoader moduleLoader,
+							boolean withDebug) {
 
 		this.environment = Objects.requireNonNull(environment);
-		this.loader = loader;
+		this.chunkLoader = chunkLoader;
+		this.moduleLoader = moduleLoader;
 		this.withDebug = withDebug;
 	}
 
 	private StandardLibrary(RuntimeEnvironment environment) {
-		this(environment, null, false);
+		this(environment, null, null, false);
 	}
 
 	/**
 	 * Returns a default configuration for the specified environment.
-	 * The default configuration does not include the Debug library and has no chunk loader.
+	 * The default configuration does not include the Debug library, has no chunk loader
+	 * and has no module loader.
 	 *
 	 * <p>If any of the standard streams defined by the runtime environment is {@code null},
 	 * the corresponding file in the I/O library (such as {@code io.stdin}) will be undefined.
@@ -69,14 +73,30 @@ public class StandardLibrary {
 
 	/**
 	 * Returns a configuration that differs from this configuration in that
-	 * it uses the chunk loader {@code loader}. If {@code loader} is {@code null}, no
-	 * chunk loader is used.
+	 * it uses the chunk loader {@code chunkLoader}. If {@code chunkLoader} is {@code null},
+	 * no chunk loader is used.
 	 *
-	 * @param loader  the chunk loader, may be {@code null}
+	 * @param chunkLoader  the chunk loader, may be {@code null}
 	 * @return  a configuration that uses {@code loader} as its chunk loader
 	 */
-	public StandardLibrary withLoader(ChunkLoader loader) {
-		return new StandardLibrary(environment, loader, withDebug);
+	public StandardLibrary withLoader(ChunkLoader chunkLoader) {
+		return this.chunkLoader != chunkLoader
+				? new StandardLibrary(environment, chunkLoader, moduleLoader, withDebug)
+				: this;
+	}
+
+	/**
+	 * Returns a configuration that differs from this configuration in that
+	 * it uses the module loader {@code moduleLoader}. If {@code moduleLoader} is {@code null},
+	 * no module loader is used.
+	 *
+	 * @param moduleLoader  the chunk loader, may be {@code null}
+	 * @return  a configuration that uses {@code loader} as its chunk loader
+	 */
+	public StandardLibrary withModuleLoader(ClassLoader moduleLoader) {
+		return this.moduleLoader != moduleLoader
+				? new StandardLibrary(environment, chunkLoader, moduleLoader, withDebug)
+				: this;
 	}
 
 	/**
@@ -89,7 +109,7 @@ public class StandardLibrary {
 	 */
 	public StandardLibrary withDebug(boolean hasDebug) {
 		return this.withDebug != hasDebug
-				? new StandardLibrary(environment, loader, hasDebug)
+				? new StandardLibrary(environment, chunkLoader, moduleLoader, hasDebug)
 				: this;
 	}
 
@@ -103,14 +123,13 @@ public class StandardLibrary {
 	 * @return  a new table containing the standard library
 	 *
 	 * @throws NullPointerException  if {@code state is null}
-	 * @throws IllegalStateException  if the configuration is invalid
 	 */
 	public Table installInto(StateContext state) {
 		Objects.requireNonNull(state);
 		Table env = state.newTable();
 
-		BasicLib.installInto(state, env, environment, loader);
-		ModuleLib.installInto(state, env, environment, loader, ClassLoader.getSystemClassLoader());
+		BasicLib.installInto(state, env, environment, chunkLoader);
+		ModuleLib.installInto(state, env, environment, chunkLoader, moduleLoader);
 		CoroutineLib.installInto(state, env);
 		StringLib.installInto(state, env);
 		MathLib.installInto(state, env);

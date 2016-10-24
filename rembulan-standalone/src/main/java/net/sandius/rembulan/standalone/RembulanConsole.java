@@ -34,9 +34,15 @@ import net.sandius.rembulan.lib.StandardLibrary;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.LuaFunction;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class RembulanConsole {
@@ -86,11 +92,16 @@ public class RembulanConsole {
 				.defaultSettings()
 				.withCPUAccountingMode(cpuAccountingMode);
 
+		ClassLoader moduleClassLoader = newModuleClassLoader();
+		Utils.logClassPath(ClassLoader.getSystemClassLoader(), "System classpath");
+		Utils.logClassPath(moduleClassLoader, "Module classpath");
+
 		this.state = StateContexts.newDefaultInstance();
 		this.loader = CompilerChunkLoader.of(compilerSettings, "rembulan_repl_");
 		RuntimeEnvironment runtimeEnv = RuntimeEnvironments.system(in, out, err);
 		this.env = StandardLibrary.in(runtimeEnv)
 				.withLoader(loader)
+				.withModuleLoader(moduleClassLoader)
 				.withDebug(true)
 				.installInto(state);
 
@@ -102,6 +113,33 @@ public class RembulanConsole {
 		// command-line arguments
 		env.rawset("arg", cmdLineArgs.toArgTable(state));
 
+	}
+
+	private static URLClassLoader newModuleClassLoader() {
+		String cp = System.getenv(Constants.ENV_MODULE_CLASSPATH);
+		if (cp != null) {
+			List<URL> urls = new ArrayList<>();
+			for (String s : cp.split(File.pathSeparator)) {
+				s = s.trim();
+				if (!s.isEmpty()) {
+					URL url = null;
+					try {
+						url = new File(s).toURI().toURL();
+					}
+					catch (MalformedURLException e) {
+						System.err.println(e.getMessage());
+					}
+					if (url != null) {
+						urls.add(url);
+					}
+				}
+			}
+
+			return URLClassLoader.newInstance(urls.toArray(new URL[urls.size()]));
+		}
+		else {
+			return null;
+		}
 	}
 
 	private void printVersion() {
