@@ -273,6 +273,9 @@ public final class TableLib {
 	 * Installs the table library to the global environment {@code env} in the state
 	 * context {@code context}.
 	 *
+	 * <p>If {@code env.package.loaded} is a table, adds the library table
+	 * to it with the key {@code "table"}, using raw access.</p>
+	 *
 	 * @param context  the state context, must not be {@code null}
 	 * @param env  the global environment, must not be {@code null}
 	 *

@@ -153,6 +153,9 @@ public final class ModuleLib {
 	 * installed using the {@code require} function will be by adding a loader to
 	 * {@code package.preload}.</p>
 	 *
+	 * <p>Installs {@code env} and the module library table to {@code env.package.loaded}
+	 * with the keys {@code "_G"} and {@code "package"}, respectively.</p>
+	 *
 	 * @param context  the state context, must not be {@code null}
 	 * @param env  the global environment, must not be {@code null}
 	 * @param runtimeEnvironment  the runtime environment, may be {@code null}

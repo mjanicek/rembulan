@@ -619,6 +619,9 @@ public final class MathLib {
 	 * <p>{@code random} may be {@code null}, in which case the functions {@code random}
 	 * and {@code randomseed} will not be installed.</p>
 	 *
+	 * <p>If {@code env.package.loaded} is a table, adds the library table
+	 * to it with the key {@code "math"}, using raw access.</p>
+	 *
 	 * @param context  the state context, must not be {@code null}
 	 * @param env  the global environment, must not be {@code null}
 	 * @param random  the random number generator, may be {@code null}

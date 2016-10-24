@@ -432,6 +432,9 @@ public final class OsLib {
 	 * <p>If {@code runtimeEnvironment} is {@code null}, then no functions will be installed
 	 * by this method (i.e., the global table {@code os} will be empty).</p>
 	 *
+	 * <p>If {@code env.package.loaded} is a table, adds the library table
+	 * to it with the key {@code "os"}, using raw access.</p>
+	 *
 	 * @param context  the state context, must not be {@code null}
 	 * @param env  the global environment, must not be {@code null}
 	 * @param runtimeEnvironment  the runtime environment, may be {@code null}

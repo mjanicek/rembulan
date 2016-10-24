@@ -797,6 +797,9 @@ public final class BasicLib {
 	 *       && runtimeEnvironment.standardOutput() != null};</li>
 	 * </ul>
 	 *
+	 * <p>If {@code env.package.loaded} is a table, adds {@code env} to it with the key
+	 * {@code "_G"}, using raw access.</p>
+	 *
 	 * @param context  the state context, must not be {@code null}
 	 * @param env  the global environment, must not be {@code null}
 	 * @param runtimeEnvironment  the runtime environment to use, may be {@code null}
