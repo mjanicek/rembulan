@@ -89,6 +89,7 @@ public class Cons<T> {
 	 * @throws NullPointerException  if {@code elems} is {@code null}, or any element
 	 *                               in {@code elems} is {@code null}
 	 */
+	@SafeVarargs
 	public static <T> Cons<T> fromArgs(T... elems) {
 		return fromArray(elems);
 	}
