@@ -20,8 +20,6 @@ import net.sandius.rembulan.runtime.AbstractFunction0;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
-import java.util.Objects;
-
 /**
  * A function that throws an {@link UnsupportedOperationException} when invoked,
  * for use as a placeholder for unimplemented functions.
@@ -32,19 +30,26 @@ public class UnimplementedFunction extends AbstractFunction0 {
 
 	/**
 	 * Constructs a new instance of {@code UnimplementedFunction} with the given name
-	 * for error reporting.
+	 * for error reporting. {@code name} may be {@code null}, in which case no name will
+	 * be included in error messages.
 	 *
-	 * @param name  function name for error reporting, must not be {@code null}
-	 *
-	 * @throws NullPointerException  if {@code name} is {@code null}
+	 * @param name  function name for error reporting, may be {@code null}
 	 */
 	public UnimplementedFunction(String name) {
-		this.name = Objects.requireNonNull(name);
+		this.name = name;
+	}
+
+	/**
+	 * Constructs a new instance of {@code UnimplementedFunction} without a name for error
+	 * reporting. Equivalent to {@link #UnimplementedFunction(String) UnimplementedFunction(null)}.
+	 */
+	public UnimplementedFunction() {
+		this(null);
 	}
 
 	@Override
 	public void invoke(ExecutionContext context) throws ResolvedControlThrowable {
-		throw new UnsupportedOperationException("function not implemented: " + name);
+		throw new UnsupportedOperationException("function not implemented" + (name != null ? ": " + name : ""));
 	}
 
 	@Override
