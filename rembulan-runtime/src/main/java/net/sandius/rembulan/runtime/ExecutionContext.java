@@ -47,10 +47,10 @@ public interface ExecutionContext extends StateContext {
 	 * also be stored in a return buffer accessible by this method (e.g. by
 	 * {@link ReturnBuffer#getAsArray()} or {@link ReturnBuffer#get(int)}).</p>
 	 *
-	 * <p><b>Note</b>: As with {@link ExecutionContext}, the return buffer instance may
-	 * change between subsequent invokes and resumes of the same function. The reference
-	 * to the {@code ReturnBuffer} instance should therefore not be retained by the executed
-	 * function beyond the scope of a single invoke or resume.</p>
+	 * <p><b>Note</b>: the return buffer instance may change between subsequent invokes
+	 * and resumes of the same function. The reference to the {@code ReturnBuffer} instance
+	 * should therefore not be retained by the executed function beyond the scope of a single
+	 * invoke or resume.</p>
 	 *
 	 * @return  the return buffer used in this execution context
 	 */
