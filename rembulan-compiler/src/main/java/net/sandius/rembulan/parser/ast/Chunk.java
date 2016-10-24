@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class Chunk {
 
@@ -24,8 +24,8 @@ public class Chunk {
 	private final Block block;
 
 	public Chunk(Attributes attr, Block block) {
-		this.attr = Check.notNull(attr);
-		this.block = Check.notNull(block);
+		this.attr = Objects.requireNonNull(attr);
+		this.block = Objects.requireNonNull(block);
 	}
 
 	public Chunk(Block block) {

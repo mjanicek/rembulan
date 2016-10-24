@@ -17,10 +17,10 @@
 package net.sandius.rembulan.parser;
 
 import net.sandius.rembulan.parser.ast.*;
-import net.sandius.rembulan.util.Check;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public abstract class Statements {
 
@@ -57,7 +57,7 @@ public abstract class Statements {
 	}
 
 	public static LocalDeclStatement localDeclStatement(SourceInfo src, Name n) {
-		return localDeclStatement(src, Collections.singletonList(Check.notNull(n)));
+		return localDeclStatement(src, Collections.singletonList(Objects.requireNonNull(n)));
 	}
 
 	public static CallStatement callStatement(SourceInfo src, CallExpr callExpr) {

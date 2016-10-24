@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
+import java.util.Objects;
 
 public class VList {
 
@@ -26,7 +25,7 @@ public class VList {
 	private final MultiVal suffix;  // may be null
 
 	public VList(List<Val> addrs, MultiVal suffix) {
-		this.addrs = Check.notNull(addrs);
+		this.addrs = Objects.requireNonNull(addrs);
 		this.suffix = suffix;
 	}
 

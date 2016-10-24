@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +25,7 @@ public class TableConstructorExpr extends Expr {
 
 	public TableConstructorExpr(Attributes attr, List<FieldInitialiser> fields) {
 		super(attr);
-		this.fields = Check.notNull(fields);
+		this.fields = Objects.requireNonNull(fields);
 	}
 
 	public static class FieldInitialiser {
@@ -37,7 +35,7 @@ public class TableConstructorExpr extends Expr {
 
 		public FieldInitialiser(Expr keyExpr, Expr valueExpr) {
 			this.keyExpr = keyExpr;
-			this.valueExpr = Check.notNull(valueExpr);
+			this.valueExpr = Objects.requireNonNull(valueExpr);
 		}
 
 		public Expr key() {

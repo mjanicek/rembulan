@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Objects;
 
 public class NumericForStatement extends BodyStatement {
@@ -30,11 +28,11 @@ public class NumericForStatement extends BodyStatement {
 
 	public NumericForStatement(Attributes attr, Name name, Expr init, Expr limit, Expr step, Block block) {
 		super(attr);
-		this.name = Check.notNull(name);
-		this.init = Check.notNull(init);
-		this.limit = Check.notNull(limit);
+		this.name = Objects.requireNonNull(name);
+		this.init = Objects.requireNonNull(init);
+		this.limit = Objects.requireNonNull(limit);
 		this.step = step;
-		this.block = Check.notNull(block);
+		this.block = Objects.requireNonNull(block);
 	}
 
 	public Name name() {

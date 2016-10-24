@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class VarExpr extends LValueExpr {
 
@@ -24,7 +24,7 @@ public class VarExpr extends LValueExpr {
 
 	public VarExpr(Attributes attr, Name name) {
 		super(attr);
-		this.name = Check.notNull(name);
+		this.name = Objects.requireNonNull(name);
 	}
 
 	public Name name() {

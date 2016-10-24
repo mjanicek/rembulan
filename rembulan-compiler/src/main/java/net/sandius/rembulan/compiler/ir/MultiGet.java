@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class MultiGet extends BodyNode {
 
@@ -25,8 +25,8 @@ public class MultiGet extends BodyNode {
 	private final int idx;
 
 	public MultiGet(Val dest, MultiVal src, int idx) {
-		this.dest = Check.notNull(dest);
-		this.src = Check.notNull(src);
+		this.dest = Objects.requireNonNull(dest);
+		this.src = Objects.requireNonNull(src);
 		this.idx = idx;
 	}
 

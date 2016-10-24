@@ -19,7 +19,6 @@ package net.sandius.rembulan.compiler;
 import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.UpVar;
 import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.util.Check;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,11 +32,11 @@ public class IRFunc {
 	private final Code code;
 
 	public IRFunc(FunctionId id, List<Var> params, boolean vararg, List<UpVar> upvals, Code code) {
-		this.id = Check.notNull(id);
-		this.params = Check.notNull(params);
+		this.id = Objects.requireNonNull(id);
+		this.params = Objects.requireNonNull(params);
 		this.vararg = vararg;
-		this.upvals = Check.notNull(upvals);
-		this.code = Check.notNull(code);
+		this.upvals = Objects.requireNonNull(upvals);
+		this.code = Objects.requireNonNull(code);
 	}
 
 	@Override

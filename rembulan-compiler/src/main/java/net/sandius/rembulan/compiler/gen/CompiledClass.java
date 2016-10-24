@@ -17,7 +17,8 @@
 package net.sandius.rembulan.compiler.gen;
 
 import net.sandius.rembulan.util.ByteVector;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 public class CompiledClass {
 
@@ -25,8 +26,8 @@ public class CompiledClass {
 	protected final ByteVector bytes;
 
 	public CompiledClass(String name, ByteVector bytes) {
-		this.name = Check.notNull(name);
-		this.bytes = Check.notNull(bytes);
+		this.name = Objects.requireNonNull(name);
+		this.bytes = Objects.requireNonNull(bytes);
 	}
 
 	@Override

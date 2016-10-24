@@ -25,6 +25,8 @@ import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
+import java.util.Objects;
+
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
 public abstract class ConversionMethods {
@@ -34,7 +36,7 @@ public abstract class ConversionMethods {
 	}
 
 	public static InsnList toNumericalValue(String what) {
-		Check.notNull(what);
+		Objects.requireNonNull(what);
 		InsnList il = new InsnList();
 
 		il.add(new LdcInsnNode(what));

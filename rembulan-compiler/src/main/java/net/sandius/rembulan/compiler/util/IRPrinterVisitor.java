@@ -19,16 +19,16 @@ package net.sandius.rembulan.compiler.util;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.parser.util.Util;
-import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
+import java.util.Objects;
 
 public class IRPrinterVisitor extends CodeVisitor {
 
 	private final PrintWriter ps;
 
 	public IRPrinterVisitor(PrintWriter ps) {
-		this.ps = Check.notNull(ps);
+		this.ps = Objects.requireNonNull(ps);
 	}
 
 	@Override

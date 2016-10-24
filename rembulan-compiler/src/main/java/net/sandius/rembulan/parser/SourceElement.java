@@ -17,7 +17,8 @@
 package net.sandius.rembulan.parser;
 
 import net.sandius.rembulan.parser.ast.SourceInfo;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 class SourceElement<T> {
 
@@ -25,8 +26,8 @@ class SourceElement<T> {
 	public final T elem;
 
 	public SourceElement(SourceInfo src, T elem) {
-		this.src = Check.notNull(src);
-		this.elem = Check.notNull(elem);
+		this.src = Objects.requireNonNull(src);
+		this.elem = Objects.requireNonNull(elem);
 	}
 
 	public static <T> SourceElement<T> of(SourceInfo src, T elem) {

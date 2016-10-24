@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class Call extends BodyNode {
 
@@ -25,9 +25,9 @@ public class Call extends BodyNode {
 	private final VList args;
 
 	public Call(MultiVal dest, Val fn, VList args) {
-		this.dest = Check.notNull(dest);
-		this.fn = Check.notNull(fn);
-		this.args = Check.notNull(args);
+		this.dest = Objects.requireNonNull(dest);
+		this.fn = Objects.requireNonNull(fn);
+		this.args = Objects.requireNonNull(args);
 	}
 
 	public MultiVal dest() {

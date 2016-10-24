@@ -40,7 +40,6 @@ import net.sandius.rembulan.parser.TokenMgrError;
 import net.sandius.rembulan.parser.analysis.NameResolver;
 import net.sandius.rembulan.parser.ast.Chunk;
 import net.sandius.rembulan.util.ByteVector;
-import net.sandius.rembulan.util.Check;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayDeque;
@@ -136,10 +135,10 @@ public class LuaCompiler {
 		public final DependencyInfo deps;
 
 		private ProcessedFunc(IRFunc fn, SlotAllocInfo slots, TypeInfo types, DependencyInfo deps) {
-			this.fn = Check.notNull(fn);
-			this.slots = Check.notNull(slots);
-			this.types = Check.notNull(types);
-			this.deps = Check.notNull(deps);
+			this.fn = Objects.requireNonNull(fn);
+			this.slots = Objects.requireNonNull(slots);
+			this.types = Objects.requireNonNull(types);
+			this.deps = Objects.requireNonNull(deps);
 		}
 
 	}
@@ -213,7 +212,7 @@ public class LuaCompiler {
 	public CompiledModule compile(String sourceText, String sourceFileName, String rootClassName)
 			throws ParseException, TokenMgrError {
 
-		Check.notNull(sourceText);
+		Objects.requireNonNull(sourceText);
 		Chunk ast = parse(sourceText);
 		Module module = translate(ast);
 

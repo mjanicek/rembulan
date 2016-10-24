@@ -16,10 +16,9 @@
 
 package net.sandius.rembulan.lib.io;
 
-import net.sandius.rembulan.util.Check;
-
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Objects;
 
 public class SeekableOutputStream extends OutputStream implements SeekableStream {
 
@@ -27,7 +26,7 @@ public class SeekableOutputStream extends OutputStream implements SeekableStream
 	private long position;
 
 	public SeekableOutputStream(OutputStream out) {
-		this.out = Check.notNull(out);
+		this.out = Objects.requireNonNull(out);
 		this.position = 0L;
 	}
 

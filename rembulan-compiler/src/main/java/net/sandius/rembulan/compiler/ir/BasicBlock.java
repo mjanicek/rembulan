@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -28,9 +26,9 @@ public class BasicBlock {
 	private final BlockTermNode end;
 
 	public BasicBlock(Label label, List<BodyNode> body, BlockTermNode end) {
-		this.label = Check.notNull(label);
-		this.body = Check.notNull(body);
-		this.end = Check.notNull(end);
+		this.label = Objects.requireNonNull(label);
+		this.body = Objects.requireNonNull(body);
+		this.end = Objects.requireNonNull(end);
 	}
 
 	@Override

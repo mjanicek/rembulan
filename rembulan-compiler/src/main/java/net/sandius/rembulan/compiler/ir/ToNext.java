@@ -16,16 +16,15 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Collections;
+import java.util.Objects;
 
 public class ToNext extends BlockTermNode {
 
 	private final Label label;
 
 	public ToNext(Label label) {
-		this.label = Check.notNull(label);
+		this.label = Objects.requireNonNull(label);
 	}
 
 	public Label label() {

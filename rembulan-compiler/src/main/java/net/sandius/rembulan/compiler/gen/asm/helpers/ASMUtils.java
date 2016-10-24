@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FrameNode;
@@ -27,6 +26,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -41,7 +41,7 @@ public abstract class ASMUtils {
 	}
 
 	public static Type arrayTypeFor(Class<?> clazz, int dimensions) {
-		Check.notNull(clazz);
+		Objects.requireNonNull(clazz);
 		if (dimensions < 1) {
 			throw new IllegalArgumentException("dimensions must be at least 1");
 		}
@@ -53,7 +53,7 @@ public abstract class ASMUtils {
 	}
 
 	public static Type typeForClassName(String className) {
-		Check.notNull(className);
+		Objects.requireNonNull(className);
 		return Type.getType("L" + className.replace(".", "/") + ";");
 	}
 

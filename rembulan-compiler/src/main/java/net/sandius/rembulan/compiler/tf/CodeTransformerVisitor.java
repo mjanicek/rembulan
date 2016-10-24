@@ -23,11 +23,11 @@ import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.CodeVisitor;
 import net.sandius.rembulan.compiler.ir.IRVisitor;
 import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 class CodeTransformerVisitor extends CodeVisitor {
 
@@ -83,7 +83,7 @@ class CodeTransformerVisitor extends CodeVisitor {
 	}
 
 	protected void setLabel(Label l) {
-		Check.notNull(l);
+		Objects.requireNonNull(l);
 		label = l;
 	}
 
@@ -96,7 +96,7 @@ class CodeTransformerVisitor extends CodeVisitor {
 	}
 
 	protected void setEnd(BlockTermNode node) {
-		Check.notNull(node);
+		Objects.requireNonNull(node);
 		end = node;
 	}
 

@@ -17,14 +17,15 @@
 package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.ByteString;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 public abstract class LoadConst extends BodyNode {
 
 	private final Val dest;
 
 	private LoadConst(Val dest) {
-		this.dest = Check.notNull(dest);
+		this.dest = Objects.requireNonNull(dest);
 	}
 
 	public Val dest() {
@@ -110,7 +111,7 @@ public abstract class LoadConst extends BodyNode {
 
 		public Str(Val dest, ByteString value) {
 			super(dest);
-			this.value = Check.notNull(value);
+			this.value = Objects.requireNonNull(value);
 		}
 
 		@Override

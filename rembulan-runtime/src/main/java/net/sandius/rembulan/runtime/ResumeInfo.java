@@ -17,7 +17,8 @@
 package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.Conversions;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 class ResumeInfo {
 
@@ -25,7 +26,7 @@ class ResumeInfo {
 	public final Object savedState;
 
 	public ResumeInfo(Resumable resumable, Object savedState) {
-		this.resumable = Check.notNull(resumable);
+		this.resumable = Objects.requireNonNull(resumable);
 		this.savedState = savedState;
 	}
 

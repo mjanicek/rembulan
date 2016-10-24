@@ -16,17 +16,16 @@
 
 package net.sandius.rembulan.parser.analysis;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class VarMapping {
 
 	private final List<Variable> vars;
 
 	public VarMapping(List<Variable> vars) {
-		Check.notNull(vars);
+		Objects.requireNonNull(vars);
 		if (vars.isEmpty()) {
 			throw new IllegalArgumentException("variable list is empty");
 		}
@@ -34,7 +33,7 @@ public class VarMapping {
 	}
 
 	public VarMapping(Variable v) {
-		this(Collections.singletonList(Check.notNull(v)));
+		this(Collections.singletonList(Objects.requireNonNull(v)));
 	}
 
 	public List<Variable> vars() {

@@ -19,7 +19,6 @@ package net.sandius.rembulan.compiler.gen;
 import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class SegmentedCode {
 
@@ -41,7 +41,7 @@ public class SegmentedCode {
 		public final int idx;
 
 		public LabelEntry(Label label, int segmentIdx, int idx) {
-			this.label = Check.notNull(label);
+			this.label = Objects.requireNonNull(label);
 			this.segmentIdx = segmentIdx;
 			this.idx = idx;
 		}
@@ -49,8 +49,8 @@ public class SegmentedCode {
 	}
 
 	private SegmentedCode(List<List<BasicBlock>> segments, Map<Label, LabelEntry> index) {
-		this.segments = Check.notNull(segments);
-		this.index = Check.notNull(index);
+		this.segments = Objects.requireNonNull(segments);
+		this.index = Objects.requireNonNull(index);
 	}
 
 	public static SegmentedCode singleton(Code code) {
@@ -87,7 +87,7 @@ public class SegmentedCode {
 	}
 
 	public LabelEntry labelEntry(Label l) {
-		LabelEntry le = index.get(Check.notNull(l));
+		LabelEntry le = index.get(Objects.requireNonNull(l));
 		if (le == null) {
 			throw new IllegalStateException("Label not found: " + l);
 		}

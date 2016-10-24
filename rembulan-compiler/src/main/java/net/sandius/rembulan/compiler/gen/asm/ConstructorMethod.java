@@ -18,7 +18,6 @@ package net.sandius.rembulan.compiler.gen.asm;
 
 import net.sandius.rembulan.Variable;
 import net.sandius.rembulan.compiler.ir.UpVar;
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -30,6 +29,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.ACC_PUBLIC;
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -43,8 +43,8 @@ class ConstructorMethod {
 	private final RunMethod runMethod;
 
 	public ConstructorMethod(ASMBytecodeEmitter context, RunMethod runMethod) {
-		this.context = Check.notNull(context);
-		this.runMethod = Check.notNull(runMethod);
+		this.context = Objects.requireNonNull(context);
+		this.runMethod = Objects.requireNonNull(runMethod);
 	}
 
 	public Type methodType() {

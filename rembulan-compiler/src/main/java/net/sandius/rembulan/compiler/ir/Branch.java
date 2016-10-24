@@ -16,11 +16,10 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class Branch extends BlockTermNode implements JmpNode {
 
@@ -29,9 +28,9 @@ public class Branch extends BlockTermNode implements JmpNode {
 	private final Label next;
 
 	public Branch(Condition condition, Label branch, Label next) {
-		this.condition = Check.notNull(condition);
-		this.branch = Check.notNull(branch);
-		this.next = Check.notNull(next);
+		this.condition = Objects.requireNonNull(condition);
+		this.branch = Objects.requireNonNull(branch);
+		this.next = Objects.requireNonNull(next);
 	}
 
 	public Condition condition() {
@@ -73,7 +72,7 @@ public class Branch extends BlockTermNode implements JmpNode {
 			private final Val addr;
 
 			public Nil(Val addr) {
-				this.addr = Check.notNull(addr);
+				this.addr = Objects.requireNonNull(addr);
 			}
 
 			public Val addr() {
@@ -93,7 +92,7 @@ public class Branch extends BlockTermNode implements JmpNode {
 			private final boolean expected;
 
 			public Bool(Val addr, boolean expected) {
-				this.addr = Check.notNull(addr);
+				this.addr = Objects.requireNonNull(addr);
 				this.expected = expected;
 			}
 
@@ -119,9 +118,9 @@ public class Branch extends BlockTermNode implements JmpNode {
 			private final Val step;
 
 			public NumLoopEnd(Val var, Val limit, Val step) {
-				this.var = Check.notNull(var);
-				this.limit = Check.notNull(limit);
-				this.step = Check.notNull(step);
+				this.var = Objects.requireNonNull(var);
+				this.limit = Objects.requireNonNull(limit);
+				this.step = Objects.requireNonNull(step);
 			}
 
 			public Val var() {

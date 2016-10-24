@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class FunctionId {
 
@@ -51,7 +52,7 @@ public class FunctionId {
 	};
 
 	private FunctionId(List<Integer> indices) {
-		this.indices = Check.notNull(indices);
+		this.indices = Objects.requireNonNull(indices);
 	}
 
 	@Override
@@ -76,7 +77,7 @@ public class FunctionId {
 	}
 
 	public static FunctionId fromIndices(List<Integer> indices) {
-		Check.notNull(indices);
+		Objects.requireNonNull(indices);  // FIXME: make a copy?
 		return indices.isEmpty() ? root() : new FunctionId(indices);
 	}
 
@@ -122,7 +123,7 @@ public class FunctionId {
 	}
 
 	public String toClassName(ClassNameTranslator tr) {
-		Check.notNull(tr);
+		Objects.requireNonNull(tr);
 		for (Integer index : indices) {
 			tr = tr.child(index);
 		}

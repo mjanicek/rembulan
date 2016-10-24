@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class ParenExpr extends Expr {
 
@@ -24,7 +24,7 @@ public class ParenExpr extends Expr {
 
 	public ParenExpr(Attributes attr, MultiExpr multiExpr) {
 		super(attr);
-		this.multiExpr = Check.notNull(multiExpr);
+		this.multiExpr = Objects.requireNonNull(multiExpr);
 	}
 
 	public MultiExpr multiExpr() {

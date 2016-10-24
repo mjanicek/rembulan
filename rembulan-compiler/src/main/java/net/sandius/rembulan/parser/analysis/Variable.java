@@ -17,7 +17,8 @@
 package net.sandius.rembulan.parser.analysis;
 
 import net.sandius.rembulan.parser.ast.Name;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 public class Variable {
 
@@ -28,7 +29,7 @@ public class Variable {
 	private final Ref ref;
 
 	public Variable(Name name) {
-		this.name = Check.notNull(name);
+		this.name = Objects.requireNonNull(name);
 		this.ref = new Ref(this);
 	}
 
@@ -45,7 +46,7 @@ public class Variable {
 		private final Variable var;
 
 		public Ref(Variable var) {
-			this.var = Check.notNull(var);
+			this.var = Objects.requireNonNull(var);
 		}
 
 		public Variable var() {

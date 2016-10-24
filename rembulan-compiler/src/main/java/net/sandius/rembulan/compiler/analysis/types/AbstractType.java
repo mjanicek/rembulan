@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class AbstractType extends Type {
 
@@ -25,7 +25,7 @@ public class AbstractType extends Type {
 
 	protected AbstractType(AbstractType supertype, String name) {
 		this.supertype = supertype;
-		this.name = Check.notNull(name);
+		this.name = Objects.requireNonNull(name);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class AbstractType extends Type {
 
 	@Override
 	public Type join(Type that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		if (that.isSubtypeOf(this)) return this;
 		else if (this.supertype() != null) return this.supertype().join(that);
@@ -58,7 +58,7 @@ public class AbstractType extends Type {
 
 	@Override
 	public Type meet(Type that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		if (this.isSubtypeOf(that)) return this;
 		else if (that.isSubtypeOf(this)) return that;

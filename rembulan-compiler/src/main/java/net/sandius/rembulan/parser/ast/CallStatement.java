@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class CallStatement extends BodyStatement {
 
@@ -24,7 +24,7 @@ public class CallStatement extends BodyStatement {
 
 	public CallStatement(Attributes attr, CallExpr callExpr) {
 		super(attr);
-		this.callExpr = Check.notNull(callExpr);
+		this.callExpr = Objects.requireNonNull(callExpr);
 	}
 
 	public CallExpr callExpr() {

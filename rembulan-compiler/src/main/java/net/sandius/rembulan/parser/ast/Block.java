@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -27,7 +25,7 @@ public class Block {
 	private final ReturnStatement ret;  // may be null
 
 	public Block(List<BodyStatement> statements, ReturnStatement ret) {
-		this.statements = Check.notNull(statements);
+		this.statements = Objects.requireNonNull(statements);
 		this.ret = ret;
 	}
 

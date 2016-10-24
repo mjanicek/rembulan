@@ -26,13 +26,13 @@ import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.Resumable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -62,7 +62,7 @@ class RunMethod {
 	}
 
 	public RunMethod(ASMBytecodeEmitter context) {
-		this.context = Check.notNull(context);
+		this.context = Objects.requireNonNull(context);
 
 		final SegmentedCode segmentedCode = CodeSegmenter.segment(
 				context.fn.code(),
@@ -345,8 +345,8 @@ class RunMethod {
 		private final InsnList instantiateInsns;
 
 		public ClosureFieldInstance(FieldNode fieldNode, InsnList instantiateInsns) {
-			this.fieldNode = Check.notNull(fieldNode);
-			this.instantiateInsns = Check.notNull(instantiateInsns);
+			this.fieldNode = Objects.requireNonNull(fieldNode);
+			this.instantiateInsns = Objects.requireNonNull(instantiateInsns);
 		}
 
 		public FieldNode fieldNode() {
@@ -371,10 +371,10 @@ class RunMethod {
 		private final Type fieldType;
 
 		public ConstFieldInstance(Object value, String fieldName, Type ownerClassType, Type fieldType) {
-			this.value = Check.notNull(value);
-			this.fieldName = Check.notNull(fieldName);
-			this.ownerClassType = Check.notNull(ownerClassType);
-			this.fieldType = Check.notNull(fieldType);
+			this.value = Objects.requireNonNull(value);
+			this.fieldName = Objects.requireNonNull(fieldName);
+			this.ownerClassType = Objects.requireNonNull(ownerClassType);
+			this.fieldType = Objects.requireNonNull(fieldType);
 		}
 
 		public Object value() {

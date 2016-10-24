@@ -24,7 +24,6 @@ import net.sandius.rembulan.parser.analysis.VarMapping;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
 import net.sandius.rembulan.parser.ast.util.AttributeUtils;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -34,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 class IRTranslatorTransformer extends Transformer {
 
@@ -63,8 +63,8 @@ class IRTranslatorTransformer extends Transformer {
 	private int nextNestedFnIdx;
 
 	private IRTranslatorTransformer(ModuleBuilder moduleBuilder, FunctionId id) {
-		this.moduleBuilder = Check.notNull(moduleBuilder);
-		this.id = Check.notNull(id);
+		this.moduleBuilder = Objects.requireNonNull(moduleBuilder);
+		this.id = Objects.requireNonNull(id);
 
 		this.provider = new RegProvider();
 
@@ -761,7 +761,7 @@ class IRTranslatorTransformer extends Transformer {
 	}
 
 	private void condBlock(ConditionalBlock cb, Label l_else, Label l_done) {
-		Check.notNull(l_done);
+		Objects.requireNonNull(l_done);
 
 		insns.atLine(cb.condition().line());
 

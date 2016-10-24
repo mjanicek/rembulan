@@ -20,7 +20,8 @@ import net.sandius.rembulan.parser.ast.LValueExpr;
 import net.sandius.rembulan.parser.ast.Name;
 import net.sandius.rembulan.parser.ast.SourceInfo;
 import net.sandius.rembulan.parser.ast.StringLiteral;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 class FunctionNameBuilder {
 
@@ -28,14 +29,14 @@ class FunctionNameBuilder {
 	private boolean method;
 
 	public FunctionNameBuilder(SourceElement<Name> srcName) {
-		Check.notNull(srcName);
+		Objects.requireNonNull(srcName);
 		this.lv = Exprs.var(srcName.sourceInfo(), srcName.element());
 		this.method = false;
 	}
 
 	public void addDotName(SourceInfo srcDot, SourceElement<Name> srcName) {
-		Check.notNull(srcDot);
-		Check.notNull(srcName);
+		Objects.requireNonNull(srcDot);
+		Objects.requireNonNull(srcName);
 		lv = Exprs.index(srcDot, lv, Exprs.literal(srcName.sourceInfo(), StringLiteral.fromName(srcName.element())));
 	}
 

@@ -16,11 +16,10 @@
 
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class ModuleBuilder {
 
@@ -31,7 +30,7 @@ public class ModuleBuilder {
 	}
 
 	public void add(IRFunc fn) {
-		fns.add(Check.notNull(fn));
+		fns.add(Objects.requireNonNull(fn));
 	}
 
 	public Module build() {

@@ -17,7 +17,6 @@
 package net.sandius.rembulan.parser.analysis;
 
 import net.sandius.rembulan.parser.ast.*;
-import net.sandius.rembulan.util.Check;
 
 import java.util.*;
 
@@ -179,7 +178,7 @@ class LabelResolutionTransformer extends Transformer {
 
 		private LabelDef(int line, ResolvedLabel labelObject) {
 			this.line = line;
-			this.labelObject = Check.notNull(labelObject);
+			this.labelObject = Objects.requireNonNull(labelObject);
 		}
 
 	}
@@ -190,7 +189,7 @@ class LabelResolutionTransformer extends Transformer {
 		private final List<Name> localsSince;
 
 		private PendingGoto(GotoStatement statement) {
-			this.statement = Check.notNull(statement);
+			this.statement = Objects.requireNonNull(statement);
 			this.localsSince = new ArrayList<>();
 		}
 

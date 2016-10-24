@@ -16,14 +16,13 @@
 
 package net.sandius.rembulan.standalone;
 
-import net.sandius.rembulan.util.Check;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 abstract class Utils {
 
@@ -38,7 +37,7 @@ abstract class Utils {
 	}
 
 	public static String readFile(String fileName) throws IOException {
-		Check.notNull(fileName);
+		Objects.requireNonNull(fileName);
 		return bytesToString(Files.readAllBytes(Paths.get(fileName)));
 	}
 

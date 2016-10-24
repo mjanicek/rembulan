@@ -17,7 +17,6 @@
 package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.parser.util.Util;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +24,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class CodeBuilder {
@@ -85,7 +85,7 @@ public class CodeBuilder {
 	}
 
 	public void add(Label label) {
-		Check.notNull(label);
+		Objects.requireNonNull(label);
 		pending.remove(label);
 
 		if (!visited.add(label)) {
@@ -105,7 +105,7 @@ public class CodeBuilder {
 	}
 
 	public void add(BodyNode node) {
-		Check.notNull(node);
+		Objects.requireNonNull(node);
 
 		if (node instanceof JmpNode) {
 			useLabel(((JmpNode) node).jmpDest());
@@ -115,7 +115,7 @@ public class CodeBuilder {
 	}
 
 	public void add(BlockTermNode node) {
-		Check.notNull(node);
+		Objects.requireNonNull(node);
 
 		if (node instanceof JmpNode) {
 			useLabel(((JmpNode) node).jmpDest());
@@ -143,13 +143,13 @@ public class CodeBuilder {
 	}
 
 	private int uses(Label l) {
-		Check.notNull(l);
+		Objects.requireNonNull(l);
 		Integer n = uses.get(l);
 		return n != null ? n : 0;
 	}
 
 	private void useLabel(Label l) {
-		Check.notNull(l);
+		Objects.requireNonNull(l);
 		uses.put(l, uses(l) + 1);
 		if (!visited.contains(l)) {
 			pending.add(l);

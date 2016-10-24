@@ -18,11 +18,12 @@ package net.sandius.rembulan.compiler.tf;
 
 import net.sandius.rembulan.compiler.analysis.TypeInfo;
 import net.sandius.rembulan.compiler.analysis.types.LuaTypes;
+import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.ir.Branch;
 import net.sandius.rembulan.compiler.ir.Jmp;
 import net.sandius.rembulan.compiler.ir.ToNext;
-import net.sandius.rembulan.compiler.analysis.types.Type;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 class BranchInlinerVisitor extends CodeTransformerVisitor {
 
@@ -30,7 +31,7 @@ class BranchInlinerVisitor extends CodeTransformerVisitor {
 	private Boolean inline;
 
 	public BranchInlinerVisitor(TypeInfo types) {
-		this.types = Check.notNull(types);
+		this.types = Objects.requireNonNull(types);
 	}
 
 	@Override

@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class TabNew extends BodyNode {
 
@@ -26,7 +26,7 @@ public class TabNew extends BodyNode {
 	// TODO: dynamic size of array part when multi-vals are used
 
 	public TabNew(Val dest, int array, int hash) {
-		this.dest = Check.notNull(dest);
+		this.dest = Objects.requireNonNull(dest);
 		this.array = array;
 		this.hash = hash;
 	}

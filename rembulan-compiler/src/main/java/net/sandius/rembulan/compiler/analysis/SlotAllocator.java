@@ -18,7 +18,6 @@ package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.ir.*;
-import net.sandius.rembulan.util.Check;
 
 import java.util.*;
 
@@ -32,7 +31,7 @@ public class SlotAllocator {
 	private IRNode currentNode;
 
 	public SlotAllocator(IRFunc fn) {
-		this.fn = Check.notNull(fn);
+		this.fn = Objects.requireNonNull(fn);
 		this.valSlots = new HashMap<>();
 		this.varSlots = new HashMap<>();
 	}
@@ -50,15 +49,15 @@ public class SlotAllocator {
 	}
 
 	private boolean hasSlot(Var v) {
-		return varSlots.get(Check.notNull(v)) != null;
+		return varSlots.get(Objects.requireNonNull(v)) != null;
 	}
 
 	private boolean hasSlot(AbstractVal v) {
-		return valSlots.get(Check.notNull(v)) != null;
+		return valSlots.get(Objects.requireNonNull(v)) != null;
 	}
 
 	private int slotOf(Var v) {
-		Check.notNull(v);
+		Objects.requireNonNull(v);
 		Integer idx = varSlots.get(v);
 		if (idx == null) {
 			throw new NoSuchElementException("Slot not defined for variable " + v);
@@ -69,7 +68,7 @@ public class SlotAllocator {
 	}
 
 	private int slotOf(AbstractVal v) {
-		Check.notNull(v);
+		Objects.requireNonNull(v);
 		Integer idx = valSlots.get(v);
 		if (idx == null) {
 			throw new NoSuchElementException("Slot not defined for value " + v);
@@ -184,7 +183,7 @@ public class SlotAllocator {
 		private final LivenessInfo liveness;
 
 		AllocatorVisitor(LivenessInfo liveness) {
-			this.liveness = Check.notNull(liveness);
+			this.liveness = Objects.requireNonNull(liveness);
 		}
 
 		@Override

@@ -22,7 +22,6 @@ import net.sandius.rembulan.compiler.ir.BodyNode;
 import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.ToNext;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -31,6 +30,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public abstract class CodeSimplifier {
@@ -70,7 +70,7 @@ public abstract class CodeSimplifier {
 	}
 
 	static Code pruneUnreachableCode(Code code) {
-		Check.notNull(code);
+		Objects.requireNonNull(code);
 
 		Set<Label> reachable = uses(code).keySet();
 
@@ -91,8 +91,8 @@ public abstract class CodeSimplifier {
 	}
 
 	private static BasicBlock merge(BasicBlock a, BasicBlock b) {
-		Check.notNull(a);
-		Check.notNull(b);
+		Objects.requireNonNull(a);
+		Objects.requireNonNull(b);
 
 		if (a.end() instanceof ToNext) {
 			List<BodyNode> body = new ArrayList<>();
@@ -110,7 +110,7 @@ public abstract class CodeSimplifier {
 	}
 
 	static Code mergeBlocks(Code code) {
-		Check.notNull(code);
+		Objects.requireNonNull(code);
 
 		Map<Label, Integer> uses = uses(code);
 		List<BasicBlock> result = new ArrayList<>();

@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public abstract class Type implements GradualTypeLike<Type> {
 
@@ -64,7 +64,7 @@ public abstract class Type implements GradualTypeLike<Type> {
 	//   GREATER_THAN if that.isSubtypeOf(this) && !this.equals(that);
 	//   NOT_COMPARABLE if !this.isSubtypeOf(that) && !that.isSubtypeOf(that).
 	public PartialOrderComparisonResult compareTo(Type that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		if (this.isSubtypeOf(that)) {
 			if (this.equals(that)) {

@@ -16,14 +16,14 @@
 
 package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public final class DynamicType extends Type {
 
 	private final String name;
 
 	public DynamicType(String name) {
-		this.name = Check.notNull(name);
+		this.name = Objects.requireNonNull(name);
 	}
 
 	@Override

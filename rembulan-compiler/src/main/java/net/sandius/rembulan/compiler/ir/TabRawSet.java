@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 // FIXME: remove code duplication
 public class TabRawSet extends BodyNode {
@@ -26,9 +26,9 @@ public class TabRawSet extends BodyNode {
 	private final Val value;
 
 	public TabRawSet(Val obj, Val key, Val value) {
-		this.obj = Check.notNull(obj);
-		this.key = Check.notNull(key);
-		this.value = Check.notNull(value);
+		this.obj = Objects.requireNonNull(obj);
+		this.key = Objects.requireNonNull(key);
+		this.value = Objects.requireNonNull(value);
 	}
 
 	public Val obj() {

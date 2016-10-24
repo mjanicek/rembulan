@@ -19,6 +19,8 @@ package net.sandius.rembulan.parser.ast;
 import net.sandius.rembulan.LuaFormat;
 import net.sandius.rembulan.util.Check;
 
+import java.util.Objects;
+
 public abstract class Numeral extends Literal {
 
 	private Numeral() {
@@ -26,7 +28,7 @@ public abstract class Numeral extends Literal {
 	}
 
 	public static Numeral fromString(String s) {
-		Check.notNull(s);
+		Objects.requireNonNull(s);
 		Number n = LuaFormat.tryParseNumeral(s);
 		if (n == null) {
 			throw new IllegalArgumentException("not a number: " + s);

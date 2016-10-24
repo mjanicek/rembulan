@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class ConcreteType extends Type {
 
@@ -24,8 +24,8 @@ public class ConcreteType extends Type {
 	protected final String name;
 
 	protected ConcreteType(AbstractType supertype, String name) {
-		this.supertype = Check.notNull(supertype);
-		this.name = Check.notNull(name);
+		this.supertype = Objects.requireNonNull(supertype);
+		this.name = Objects.requireNonNull(name);
 	}
 
 	@Override
@@ -49,7 +49,7 @@ public class ConcreteType extends Type {
 
 	@Override
 	public Type join(Type that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		if (that.isSubtypeOf(this)) return this;
 		else return this.supertype().join(that);
@@ -57,7 +57,7 @@ public class ConcreteType extends Type {
 
 	@Override
 	public Type meet(Type that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		if (this.isSubtypeOf(that)) return this;
 		else if (that.isSubtypeOf(this)) return that;

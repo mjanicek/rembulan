@@ -19,12 +19,12 @@ package net.sandius.rembulan.compiler.analysis;
 import net.sandius.rembulan.compiler.ir.AbstractVal;
 import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.util.Check;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 public class LivenessInfo {
@@ -32,7 +32,7 @@ public class LivenessInfo {
 	private final Map<IRNode, Entry> entries;
 	
 	public LivenessInfo(Map<IRNode, Entry> entries) {
-		this.entries = Check.notNull(entries);
+		this.entries = Objects.requireNonNull(entries);
 	}
 
 	public static class Entry {
@@ -43,10 +43,10 @@ public class LivenessInfo {
 		private final Set<AbstractVal> val_out;
 
 		Entry(Set<Var> var_in, Set<Var> var_out, Set<AbstractVal> val_in, Set<AbstractVal> val_out) {
-			this.var_in = Check.notNull(var_in);
-			this.var_out = Check.notNull(var_out);
-			this.val_in = Check.notNull(val_in);
-			this.val_out = Check.notNull(val_out);
+			this.var_in = Objects.requireNonNull(var_in);
+			this.var_out = Objects.requireNonNull(var_out);
+			this.val_in = Objects.requireNonNull(val_in);
+			this.val_out = Objects.requireNonNull(val_out);
 		}
 
 		public Entry immutableCopy() {
@@ -76,7 +76,7 @@ public class LivenessInfo {
 	}
 
 	public Entry entry(IRNode node) {
-		Check.notNull(node);
+		Objects.requireNonNull(node);
 		Entry e = entries.get(node);
 		if (e == null) {
 			throw new NoSuchElementException("No liveness information for " + node);

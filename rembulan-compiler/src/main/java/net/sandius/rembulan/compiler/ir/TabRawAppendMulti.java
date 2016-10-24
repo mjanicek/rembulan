@@ -18,6 +18,8 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.Objects;
+
 public class TabRawAppendMulti extends BodyNode {
 
 	private final Val obj;
@@ -25,9 +27,9 @@ public class TabRawAppendMulti extends BodyNode {
 	private final MultiVal src;
 
 	public TabRawAppendMulti(Val obj, int firstIdx, MultiVal src) {
-		this.obj = Check.notNull(obj);
+		this.obj = Objects.requireNonNull(obj);
 		this.firstIdx = Check.positive(firstIdx);
-		this.src = Check.notNull(src);
+		this.src = Objects.requireNonNull(src);
 	}
 
 	public Val obj() {

@@ -16,16 +16,15 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Collections;
+import java.util.Objects;
 
 public class Ret extends BlockTermNode {
 
 	private final VList args;
 
 	public Ret(VList args) {
-		this.args = Check.notNull(args);
+		this.args = Objects.requireNonNull(args);
 	}
 
 	public VList args() {

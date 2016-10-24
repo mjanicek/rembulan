@@ -17,14 +17,15 @@
 package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.parser.ast.Name;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 public class UpVar extends AbstractVar {
 
 	private final Name name;
 
 	public UpVar(Name name) {
-		this.name = Check.notNull(name);
+		this.name = Objects.requireNonNull(name);
 	}
 
 	public Name name() {

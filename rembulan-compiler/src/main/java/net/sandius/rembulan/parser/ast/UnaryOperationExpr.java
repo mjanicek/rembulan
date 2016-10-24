@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class UnaryOperationExpr extends Expr {
 
@@ -25,8 +25,8 @@ public class UnaryOperationExpr extends Expr {
 
 	public UnaryOperationExpr(Attributes attr, Operator.Unary op, Expr arg) {
 		super(attr);
-		this.op = Check.notNull(op);
-		this.arg = Check.notNull(arg);
+		this.op = Objects.requireNonNull(op);
+		this.arg = Objects.requireNonNull(arg);
 	}
 
 	public Operator.Unary op() {

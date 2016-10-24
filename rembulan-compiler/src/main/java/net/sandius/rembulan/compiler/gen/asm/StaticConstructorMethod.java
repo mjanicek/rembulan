@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.compiler.gen.asm;
 
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -24,6 +23,8 @@ import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.ACC_STATIC;
 import static org.objectweb.asm.Opcodes.DUP;
@@ -39,9 +40,9 @@ class StaticConstructorMethod {
 	private final RunMethod runMethod;
 
 	public StaticConstructorMethod(ASMBytecodeEmitter context, ConstructorMethod ctorMethod, RunMethod runMethod) {
-		this.context = Check.notNull(context);
-		this.ctorMethod = Check.notNull(ctorMethod);
-		this.runMethod = Check.notNull(runMethod);
+		this.context = Objects.requireNonNull(context);
+		this.ctorMethod = Objects.requireNonNull(ctorMethod);
+		this.runMethod = Objects.requireNonNull(runMethod);
 	}
 
 	public boolean isEmpty() {

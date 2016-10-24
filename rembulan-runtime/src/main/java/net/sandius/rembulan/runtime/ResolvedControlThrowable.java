@@ -16,10 +16,10 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * A throwable used for non-local control flow changes, containing a complete
@@ -47,7 +47,7 @@ public final class ResolvedControlThrowable extends Throwable {
 
 	ResolvedControlThrowable(ControlThrowablePayload payload, Cons<ResumeInfo> resumeStack) {
 		super(null, null, true, false);
-		this.payload = Check.notNull(payload);
+		this.payload = Objects.requireNonNull(payload);
 		this.resumeStack = resumeStack;
 	}
 

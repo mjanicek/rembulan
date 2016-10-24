@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.analysis;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class ResolvedVariable {
 
@@ -25,7 +25,7 @@ public class ResolvedVariable {
 
 	private ResolvedVariable(boolean upvalue, Variable var) {
 		this.upvalue = upvalue;
-		this.var = Check.notNull(var);
+		this.var = Objects.requireNonNull(var);
 	}
 
 	public static ResolvedVariable local(Variable v) {

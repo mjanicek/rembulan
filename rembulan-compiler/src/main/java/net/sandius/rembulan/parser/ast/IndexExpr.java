@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class IndexExpr extends LValueExpr {
 
@@ -25,8 +25,8 @@ public class IndexExpr extends LValueExpr {
 
 	public IndexExpr(Attributes attr, Expr object, Expr key) {
 		super(attr);
-		this.object = Check.notNull(object);
-		this.key = Check.notNull(key);
+		this.object = Objects.requireNonNull(object);
+		this.key = Objects.requireNonNull(key);
 	}
 
 	public Expr object() {

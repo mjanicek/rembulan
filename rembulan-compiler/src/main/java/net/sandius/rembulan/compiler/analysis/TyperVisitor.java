@@ -23,12 +23,12 @@ import net.sandius.rembulan.compiler.analysis.types.ReturnType;
 import net.sandius.rembulan.compiler.analysis.types.Type;
 import net.sandius.rembulan.compiler.analysis.types.TypeSeq;
 import net.sandius.rembulan.compiler.ir.*;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 
@@ -116,7 +116,7 @@ class TyperVisitor extends CodeVisitor {
 		private final Map<Var, Type> types;
 
 		private VarState(Map<Var, Type> types) {
-			this.types = Check.notNull(types);
+			this.types = Objects.requireNonNull(types);
 		}
 
 		public VarState() {
@@ -128,15 +128,15 @@ class TyperVisitor extends CodeVisitor {
 		}
 
 		public void store(Var v, Type t) {
-			Check.notNull(v);
+			Objects.requireNonNull(v);
 			allVars.add(v);
-			types.put(v, Check.notNull(t));
+			types.put(v, Objects.requireNonNull(t));
 		}
 
 		public Type load(Var v) {
-			Check.notNull(v);
+			Objects.requireNonNull(v);
 			allVars.add(v);
-			Type t = types.get(Check.notNull(v));
+			Type t = types.get(Objects.requireNonNull(v));
 			if (t == null) {
 				throw new IllegalStateException(v + " used before stored into");
 			}
@@ -146,16 +146,16 @@ class TyperVisitor extends CodeVisitor {
 		}
 
 		public boolean joinWith(VarState that) {
-			Check.notNull(that);
+			Objects.requireNonNull(that);
 
 			Map<Var, Type> result = new HashMap<>();
 			for (Var v : this.types.keySet()) {
 				Type t = joinTypes(types.get(v), that.types.get(v));
-				result.put(v, Check.notNull(t));
+				result.put(v, Objects.requireNonNull(t));
 			}
 			for (Var v : that.types.keySet()) {
 				Type t = joinTypes(types.get(v), that.types.get(v));
-				result.put(v, Check.notNull(t));
+				result.put(v, Objects.requireNonNull(t));
 			}
 			if (!result.equals(types)) {
 				types.clear();
@@ -207,8 +207,8 @@ class TyperVisitor extends CodeVisitor {
 	}
 
 	private void assign(Val v, Type t) {
-		Check.notNull(v);
-		Check.notNull(t);
+		Objects.requireNonNull(v);
+		Objects.requireNonNull(t);
 
 		Type ot = valTypes.put(v, t);
 		if (t.equals(ot)) {
@@ -225,8 +225,8 @@ class TyperVisitor extends CodeVisitor {
 	}
 
 	private void assign(PhiVal pv, Type t) {
-		Check.notNull(pv);
-		Check.notNull(t);
+		Objects.requireNonNull(pv);
+		Objects.requireNonNull(t);
 
 		Type ot = phiValTypes.get(pv);
 		if (ot != null) {
@@ -247,8 +247,8 @@ class TyperVisitor extends CodeVisitor {
 	}
 
 	private void assign(MultiVal mv, TypeSeq ts) {
-		Check.notNull(mv);
-		Check.notNull(ts);
+		Objects.requireNonNull(mv);
+		Objects.requireNonNull(ts);
 
 		TypeSeq ots = multiValTypes.put(mv, ts);
 		if (ts.equals(ots)) {

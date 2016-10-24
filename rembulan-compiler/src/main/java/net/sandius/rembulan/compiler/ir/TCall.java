@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Collections;
+import java.util.Objects;
 
 public class TCall extends BlockTermNode {
 
@@ -26,8 +25,8 @@ public class TCall extends BlockTermNode {
 	private final VList args;
 
 	public TCall(Val target, VList args) {
-		this.target = Check.notNull(target);
-		this.args = Check.notNull(args);
+		this.target = Objects.requireNonNull(target);
+		this.args = Objects.requireNonNull(args);
 	}
 
 	public Val target() {

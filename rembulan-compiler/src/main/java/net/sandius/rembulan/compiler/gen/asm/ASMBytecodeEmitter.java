@@ -34,7 +34,6 @@ import net.sandius.rembulan.compiler.ir.UpVar;
 import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.impl.DefaultSavedState;
 import net.sandius.rembulan.util.ByteVector;
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.ClassWriter;
@@ -51,6 +50,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.ACC_FINAL;
 import static org.objectweb.asm.Opcodes.ACC_PROTECTED;
@@ -88,14 +88,14 @@ public class ASMBytecodeEmitter extends BytecodeEmitter {
 			ClassNameTranslator classNameTranslator,
 			String sourceFile) {
 
-		this.fn = Check.notNull(fn);
-		this.slots = Check.notNull(slots);
-		this.types = Check.notNull(types);
-		this.deps = Check.notNull(deps);
+		this.fn = Objects.requireNonNull(fn);
+		this.slots = Objects.requireNonNull(slots);
+		this.types = Objects.requireNonNull(types);
+		this.deps = Objects.requireNonNull(deps);
 
-		this.compilerSettings = Check.notNull(compilerSettings);
-		this.classNameTranslator = Check.notNull(classNameTranslator);
-		this.sourceFile = Check.notNull(sourceFile);
+		this.compilerSettings = Objects.requireNonNull(compilerSettings);
+		this.classNameTranslator = Objects.requireNonNull(classNameTranslator);
+		this.sourceFile = Objects.requireNonNull(sourceFile);
 
 		classNode = new ClassNode();
 

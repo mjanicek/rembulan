@@ -19,10 +19,10 @@ package net.sandius.rembulan.lib.io;
 import net.sandius.rembulan.ByteString;
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.lib.IoFile;
-import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 public class InputStreamIoFile extends IoFile {
 
@@ -30,7 +30,7 @@ public class InputStreamIoFile extends IoFile {
 
 	public InputStreamIoFile(InputStream in, Table metatable, Object userValue) {
 		super(metatable, userValue);
-		this.in = new SeekableInputStream(Check.notNull(in));
+		this.in = new SeekableInputStream(Objects.requireNonNull(in));
 	}
 
 	@Override

@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class BinaryOperationExpr extends Expr {
 
@@ -26,9 +26,9 @@ public class BinaryOperationExpr extends Expr {
 
 	public BinaryOperationExpr(Attributes attr, Operator.Binary op, Expr left, Expr right) {
 		super(attr);
-		this.op = Check.notNull(op);
-		this.left = Check.notNull(left);
-		this.right = Check.notNull(right);
+		this.op = Objects.requireNonNull(op);
+		this.left = Objects.requireNonNull(left);
+		this.right = Objects.requireNonNull(right);
 	}
 
 	public Operator.Binary op() {

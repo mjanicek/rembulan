@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
+import java.util.Objects;
 
 public class LocalDeclStatement extends BodyStatement {
 
@@ -27,11 +26,11 @@ public class LocalDeclStatement extends BodyStatement {
 
 	public LocalDeclStatement(Attributes attr, List<Name> names, List<Expr> initialisers) {
 		super(attr);
-		this.names = Check.notNull(names);
+		this.names = Objects.requireNonNull(names);
 		if (names.isEmpty()) {
 			throw new IllegalArgumentException("name list must not be empty");
 		}
-		this.initialisers = Check.notNull(initialisers);
+		this.initialisers = Objects.requireNonNull(initialisers);
 	}
 
 	public List<Name> names() {

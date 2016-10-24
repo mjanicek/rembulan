@@ -62,7 +62,6 @@ import net.sandius.rembulan.runtime.LuaFunction;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
 import net.sandius.rembulan.util.ByteIterator;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1371,8 +1370,8 @@ public final class StringLib {
 			private final AtomicInteger index;
 
 			public IteratorFunction(String string, StringPattern pattern) {
-				this.string = Check.notNull(string);
-				this.pattern = Check.notNull(pattern);
+				this.string = Objects.requireNonNull(string);
+				this.pattern = Objects.requireNonNull(pattern);
 				this.index = new AtomicInteger(0);
 			}
 

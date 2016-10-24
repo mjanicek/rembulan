@@ -20,7 +20,6 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.impl.DefaultSavedState;
 import net.sandius.rembulan.impl.NonsuspendableFunctionException;
 import net.sandius.rembulan.runtime.ExecutionContext;
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -32,6 +31,7 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -41,8 +41,8 @@ class ResumeMethod {
 	private final RunMethod runMethod;
 
 	public ResumeMethod(ASMBytecodeEmitter context, RunMethod runMethod) {
-		this.context = Check.notNull(context);
-		this.runMethod = Check.notNull(runMethod);
+		this.context = Objects.requireNonNull(context);
+		this.runMethod = Objects.requireNonNull(runMethod);
 	}
 
 	public MethodNode methodNode() {

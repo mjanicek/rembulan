@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class DoStatement extends BodyStatement {
 
@@ -24,7 +24,7 @@ public class DoStatement extends BodyStatement {
 
 	public DoStatement(Attributes attr, Block block) {
 		super(attr);
-		this.block = Check.notNull(block);
+		this.block = Objects.requireNonNull(block);
 	}
 
 	public Block block() {

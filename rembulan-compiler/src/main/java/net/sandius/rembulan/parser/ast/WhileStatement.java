@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class WhileStatement extends BodyStatement {
 
@@ -25,8 +25,8 @@ public class WhileStatement extends BodyStatement {
 
 	public WhileStatement(Attributes attr, Expr condition, Block block) {
 		super(attr);
-		this.condition = Check.notNull(condition);
-		this.block = Check.notNull(block);
+		this.condition = Objects.requireNonNull(condition);
+		this.block = Objects.requireNonNull(block);
 	}
 
 	public Expr condition() {

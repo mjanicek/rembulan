@@ -19,7 +19,8 @@ package net.sandius.rembulan.impl;
 import net.sandius.rembulan.runtime.AbstractFunction0;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 /**
  * A function that throws an {@link UnsupportedOperationException} when invoked,
@@ -35,10 +36,10 @@ public class UnimplementedFunction extends AbstractFunction0 {
 	 *
 	 * @param name  function name for error reporting, must not be {@code null}
 	 *
-	 * @throws IllegalArgumentException  if {@code name} is {@code null}
+	 * @throws NullPointerException  if {@code name} is {@code null}
 	 */
 	public UnimplementedFunction(String name) {
-		this.name = Check.notNull(name);
+		this.name = Objects.requireNonNull(name);
 	}
 
 	@Override

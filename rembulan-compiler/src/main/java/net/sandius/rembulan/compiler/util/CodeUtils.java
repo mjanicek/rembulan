@@ -20,7 +20,6 @@ import net.sandius.rembulan.compiler.ir.BasicBlock;
 import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.IRNode;
 import net.sandius.rembulan.compiler.ir.Label;
-import net.sandius.rembulan.util.Check;
 
 import java.util.*;
 
@@ -40,7 +39,7 @@ public abstract class CodeUtils {
 		private Iterator<IRNode> blockNodeIterator;
 
 		public NodeIterator(Iterator<BasicBlock> blockIterator) {
-			this.blockIterator = Check.notNull(blockIterator);
+			this.blockIterator = Objects.requireNonNull(blockIterator);
 			this.blockNodeIterator = null;
 		}
 
@@ -83,7 +82,7 @@ public abstract class CodeUtils {
 		private int idx;
 
 		public BlockNodeIterator(BasicBlock block) {
-			this.block = Check.notNull(block);
+			this.block = Objects.requireNonNull(block);
 			this.idx = 0;
 		}
 
@@ -115,7 +114,7 @@ public abstract class CodeUtils {
 	}
 
 	public static Iterable<Label> labelsBreadthFirst(Code code) {
-		Check.notNull(code);
+		Objects.requireNonNull(code);
 
 		ArrayList<Label> result = new ArrayList<>();
 		Set<Label> visited = new HashSet<>();
@@ -139,7 +138,7 @@ public abstract class CodeUtils {
 	}
 
 	public static Map<Label, Set<Label>> inLabels(Code code) {
-		Check.notNull(code);
+		Objects.requireNonNull(code);
 
 		Map<Label, Set<Label>> result = new HashMap<>();
 

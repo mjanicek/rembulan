@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
+import java.util.Objects;
 
 public class ReturnStatement extends Statement {
 
@@ -26,7 +25,7 @@ public class ReturnStatement extends Statement {
 
 	public ReturnStatement(Attributes attr, List<Expr> exprs) {
 		super(attr);
-		this.exprs = Check.notNull(exprs);
+		this.exprs = Objects.requireNonNull(exprs);
 	}
 
 	public List<Expr> exprs() {

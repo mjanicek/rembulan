@@ -16,12 +16,12 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
@@ -38,10 +38,10 @@ public class ReflectionUtils {
 		public final Class<?>[] args;
 
 		public Method(Class<?> owner, String name, boolean isStatic, Class<?> returnType, Class<?>[] args) {
-			this.owner = Check.notNull(owner);
+			this.owner = Objects.requireNonNull(owner);
 			this.name = name;
 			this.isStatic = isStatic;
-			this.returnType = Check.notNull(returnType);
+			this.returnType = Objects.requireNonNull(returnType);
 			this.args = args != null ? args : new Class[0];
 		}
 

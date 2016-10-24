@@ -17,13 +17,13 @@
 package net.sandius.rembulan.parser.analysis;
 
 import net.sandius.rembulan.parser.ast.Name;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
+import java.util.Objects;
 
 class FunctionVarInfoBuilder {
 
@@ -170,8 +170,8 @@ class FunctionVarInfoBuilder {
 		public final Variable var;
 
 		public Local(Name name, Variable var) {
-			this.name = Check.notNull(name);
-			this.var = Check.notNull(var);
+			this.name = Objects.requireNonNull(name);
+			this.var = Objects.requireNonNull(var);
 		}
 
 	}

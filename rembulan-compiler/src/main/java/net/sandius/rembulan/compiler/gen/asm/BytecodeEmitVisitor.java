@@ -35,7 +35,6 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ReturnBuffer;
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -46,6 +45,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static net.sandius.rembulan.compiler.gen.asm.helpers.DispatchMethods.*;
 import static org.objectweb.asm.Opcodes.*;
@@ -81,13 +81,13 @@ class BytecodeEmitVisitor extends CodeVisitor {
 			int segmentIdx,
 			RunMethod.LabelResolver resolver) {
 
-		this.context = Check.notNull(context);
-		this.runMethod = Check.notNull(runMethod);
-		this.slots = Check.notNull(slots);
-		this.types = Check.notNull(types);
+		this.context = Objects.requireNonNull(context);
+		this.runMethod = Objects.requireNonNull(runMethod);
+		this.slots = Objects.requireNonNull(slots);
+		this.types = Objects.requireNonNull(types);
 
 		this.segmentIdx = segmentIdx;
-		this.resolver = Check.notNull(resolver);
+		this.resolver = Objects.requireNonNull(resolver);
 
 		this.labels = new HashMap<>();
 		this.resumptionPoints = new ArrayList<>();
@@ -95,8 +95,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		this.il = new InsnList();
 		this.locals = new ArrayList<>();
 
-		this.instanceLevelClosures = Check.notNull(instanceLevelClosures);
-		this.constFields = Check.notNull(constFields);
+		this.instanceLevelClosures = Objects.requireNonNull(instanceLevelClosures);
+		this.constFields = Objects.requireNonNull(constFields);
 	}
 
 	private boolean isSub() {
@@ -145,7 +145,7 @@ class BytecodeEmitVisitor extends CodeVisitor {
 	}
 
 	private RunMethod.ConstFieldInstance newConstFieldInstance(final Object constValue, int idx) {
-		Check.notNull(constValue);
+		Objects.requireNonNull(constValue);
 
 		String fieldName = "_k_" + idx;
 
@@ -846,8 +846,8 @@ class BytecodeEmitVisitor extends CodeVisitor {
 		private final String fieldName;  // may be null
 
 		private ClosureUse(FunctionId id, List<AbstractVar> upvals, int idx) {
-			this.id = Check.notNull(id);
-			this.upvals = Check.notNull(upvals);
+			this.id = Objects.requireNonNull(id);
+			this.upvals = Objects.requireNonNull(upvals);
 
 			if (isClosed() && !isPure()) {
 				this.fieldName = context.addFieldName("c_" + idx);

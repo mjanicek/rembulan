@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class UnOp extends BodyNode {
 
@@ -32,9 +32,9 @@ public class UnOp extends BodyNode {
 	private final Val arg;
 
 	public UnOp(Op op, Val dest, Val arg) {
-		this.op = Check.notNull(op);
-		this.dest = Check.notNull(dest);
-		this.arg = Check.notNull(arg);
+		this.op = Objects.requireNonNull(op);
+		this.dest = Objects.requireNonNull(dest);
+		this.arg = Objects.requireNonNull(arg);
 	}
 
 	public Op op() {

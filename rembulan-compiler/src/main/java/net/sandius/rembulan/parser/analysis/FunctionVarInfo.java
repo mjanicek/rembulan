@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.parser.analysis;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
+import java.util.Objects;
 
 public class FunctionVarInfo {
 
@@ -28,9 +27,9 @@ public class FunctionVarInfo {
 	private final boolean vararg;
 
 	public FunctionVarInfo(List<Variable> params, List<Variable> locals, List<Variable.Ref> upvalues, boolean vararg) {
-		this.params = Check.notNull(params);
-		this.locals = Check.notNull(locals);
-		this.upvalues = Check.notNull(upvalues);
+		this.params = Objects.requireNonNull(params);
+		this.locals = Objects.requireNonNull(locals);
+		this.upvalues = Objects.requireNonNull(upvalues);
 		this.vararg = vararg;
 	}
 

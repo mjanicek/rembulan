@@ -23,11 +23,11 @@ import net.sandius.rembulan.parser.analysis.ResolvedVariable;
 import net.sandius.rembulan.parser.analysis.VarMapping;
 import net.sandius.rembulan.parser.analysis.Variable;
 import net.sandius.rembulan.parser.ast.*;
-import net.sandius.rembulan.util.Check;
 
 import java.io.PrintWriter;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class FormattingPrinterVisitor extends Visitor {
 
@@ -38,8 +38,8 @@ public class FormattingPrinterVisitor extends Visitor {
 	private final boolean withResolvedNames;
 
 	FormattingPrinterVisitor(PrintWriter out, String indentString, int indent, boolean withResolvedNames) {
-		this.out = Check.notNull(out);
-		this.indentString = Check.notNull(indentString);
+		this.out = Objects.requireNonNull(out);
+		this.indentString = Objects.requireNonNull(indentString);
 		this.indent = indent;
 		this.withResolvedNames = withResolvedNames;
 	}

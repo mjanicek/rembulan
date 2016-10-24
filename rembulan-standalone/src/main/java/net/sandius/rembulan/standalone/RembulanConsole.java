@@ -33,11 +33,11 @@ import net.sandius.rembulan.impl.StateContexts;
 import net.sandius.rembulan.lib.StandardLibrary;
 import net.sandius.rembulan.load.LoaderException;
 import net.sandius.rembulan.runtime.LuaFunction;
-import net.sandius.rembulan.util.Check;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Objects;
 
 public class RembulanConsole {
 
@@ -72,11 +72,11 @@ public class RembulanConsole {
 		};
 		stackTraceForCompileErrors = javaTraceback;
 
-		this.config = Check.notNull(cmdLineArgs);
+		this.config = Objects.requireNonNull(cmdLineArgs);
 
-		this.in = Check.notNull(in);
-		this.out = Check.notNull(out);
-		this.err = Check.notNull(err);
+		this.in = Objects.requireNonNull(in);
+		this.out = Objects.requireNonNull(out);
+		this.err = Objects.requireNonNull(err);
 
 		CompilerSettings.CPUAccountingMode cpuAccountingMode =
 				System.getenv(Constants.ENV_CPU_ACCOUNTING) != null
@@ -141,9 +141,9 @@ public class RembulanConsole {
 	private void executeProgram(String sourceText, String sourceFileName, String[] args)
 			throws LoaderException, CallException {
 
-		Check.notNull(sourceText);
-		Check.notNull(sourceFileName);
-		Check.notNull(args);
+		Objects.requireNonNull(sourceText);
+		Objects.requireNonNull(sourceFileName);
+		Objects.requireNonNull(args);
 
 		LuaFunction fn = loader.loadTextChunk(new Variable(env), sourceFileName, sourceText);
 
@@ -156,7 +156,7 @@ public class RembulanConsole {
 	private void executeFile(String fileName, String[] args)
 			throws LoaderException, CallException  {
 
-		Check.notNull(fileName);
+		Objects.requireNonNull(fileName);
 		final String source;
 		try {
 			source = Utils.readFile(fileName);
@@ -165,7 +165,7 @@ public class RembulanConsole {
 			throw new LoaderException(ex, fileName);
 		}
 
-		executeProgram(Utils.skipLeadingShebang(source), fileName, Check.notNull(args));
+		executeProgram(Utils.skipLeadingShebang(source), fileName, Objects.requireNonNull(args));
 	}
 
 	private void executeStdin(String[] args)
@@ -179,11 +179,11 @@ public class RembulanConsole {
 			throw new LoaderException(ex, Constants.SOURCE_STDIN);
 		}
 
-		executeProgram(Utils.skipLeadingShebang(source), Constants.SOURCE_STDIN, Check.notNull(args));
+		executeProgram(Utils.skipLeadingShebang(source), Constants.SOURCE_STDIN, Objects.requireNonNull(args));
 	}
 
 	private void requireModule(String moduleName) throws CallException {
-		callFunction(requireFunction, Check.notNull(moduleName));
+		callFunction(requireFunction, Objects.requireNonNull(moduleName));
 	}
 
 	private void execute(LuaFunction fn) throws CallException {
@@ -228,7 +228,7 @@ public class RembulanConsole {
 	private void executeStep(CommandLineArguments.Step s)
 			throws LoaderException, CallException  {
 
-		Check.notNull(s);
+		Objects.requireNonNull(s);
 
 		switch (s.what()) {
 

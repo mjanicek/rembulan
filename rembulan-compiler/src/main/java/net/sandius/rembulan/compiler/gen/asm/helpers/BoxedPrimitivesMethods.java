@@ -16,7 +16,6 @@
 
 package net.sandius.rembulan.compiler.gen.asm.helpers;
 
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.FieldInsnNode;
@@ -25,6 +24,8 @@ import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.LdcInsnNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.TypeInsnNode;
+
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
@@ -145,7 +146,7 @@ public class BoxedPrimitivesMethods {
 		}
 
 		if (castTo != null) {
-			Check.notNull(k);
+			Objects.requireNonNull(k);
 			if (!castTo.isAssignableFrom(k.getClass())) {
 				il.add(new TypeInsnNode(CHECKCAST, Type.getInternalName(castTo)));
 			}

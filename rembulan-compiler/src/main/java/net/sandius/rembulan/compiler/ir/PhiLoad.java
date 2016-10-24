@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class PhiLoad extends BodyNode {
 
@@ -24,8 +24,8 @@ public class PhiLoad extends BodyNode {
 	private final PhiVal src;
 
 	public PhiLoad(Val dest, PhiVal src) {
-		this.dest = Check.notNull(dest);
-		this.src = Check.notNull(src);
+		this.dest = Objects.requireNonNull(dest);
+		this.src = Objects.requireNonNull(src);
 	}
 
 	public Val dest() {

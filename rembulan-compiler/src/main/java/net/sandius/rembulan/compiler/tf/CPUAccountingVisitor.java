@@ -22,6 +22,7 @@ import net.sandius.rembulan.util.Check;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
 
 class CPUAccountingVisitor extends CodeTransformerVisitor {
@@ -110,7 +111,7 @@ class CPUAccountingVisitor extends CodeTransformerVisitor {
 		private final Set<Label> visitedLabels;
 
 		public Visitor(Account account) {
-			this.account = Check.notNull(account);
+			this.account = Objects.requireNonNull(account);
 			this.visitedLabels = new HashSet<>();
 		}
 
@@ -212,7 +213,7 @@ class CPUAccountingVisitor extends CodeTransformerVisitor {
 
 	public CPUAccountingVisitor(Account acc) {
 		super(new Visitor(acc));
-		this.acc = Check.notNull(acc);
+		this.acc = Objects.requireNonNull(acc);
 	}
 
 	private static void removeCPUNodes(Iterable<BodyNode> nodes) {

@@ -19,7 +19,6 @@ package net.sandius.rembulan.compiler.analysis;
 import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.ir.*;
 import net.sandius.rembulan.compiler.util.CodeUtils;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -27,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 public class LivenessAnalyser {
@@ -40,7 +40,7 @@ public class LivenessAnalyser {
 	private Map<Label, Set<AbstractVal>> endValLiveIn;
 
 	private LivenessAnalyser(IRFunc fn) {
-		this.fn = Check.notNull(fn);
+		this.fn = Objects.requireNonNull(fn);
 
 		this.varLiveIn = new HashMap<>();
 		this.valLiveIn = new HashMap<>();
@@ -170,7 +170,7 @@ public class LivenessAnalyser {
 	}
 
 	private boolean processNode(LivenessVisitor visitor, IRNode node) {
-		Check.notNull(node);
+		Objects.requireNonNull(node);
 
 		final Set<Var> varLive_in = varLiveIn.get(node);
 		final Set<AbstractVal> valLive_in = valLiveIn.get(node);
@@ -199,8 +199,8 @@ public class LivenessAnalyser {
 		private Set<AbstractVal> currentValLiveIn;
 
 		public LivenessVisitor(Set<Var> currentVarLiveIn, Set<AbstractVal> currentValLiveIn) {
-			this.currentVarLiveIn = new HashSet<>(Check.notNull(currentVarLiveIn));
-			this.currentValLiveIn = new HashSet<>(Check.notNull(currentValLiveIn));
+			this.currentVarLiveIn = new HashSet<>(Objects.requireNonNull(currentVarLiveIn));
+			this.currentValLiveIn = new HashSet<>(Objects.requireNonNull(currentValLiveIn));
 		}
 
 		public Set<Var> currentVarLiveIn() {

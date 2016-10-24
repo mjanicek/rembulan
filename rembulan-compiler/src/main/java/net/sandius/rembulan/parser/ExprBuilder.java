@@ -19,10 +19,10 @@ package net.sandius.rembulan.parser;
 import net.sandius.rembulan.parser.ast.Expr;
 import net.sandius.rembulan.parser.ast.Operator;
 import net.sandius.rembulan.parser.ast.SourceInfo;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Objects;
 
 class ExprBuilder {
 
@@ -40,8 +40,8 @@ class ExprBuilder {
 
 	// true iff a takes precedence over b
 	private static boolean hasLesserPrecedence(Operator newOp, Operator top) {
-		Check.notNull(newOp);
-		Check.notNull(top);
+		Objects.requireNonNull(newOp);
+		Objects.requireNonNull(top);
 
 		return !(newOp instanceof Operator.Unary)
 				&& (isRightAssociative(newOp)
@@ -68,8 +68,8 @@ class ExprBuilder {
 	}
 
 	public void addOp(SourceInfo src, Operator op) {
-		Check.notNull(src);
-		Check.notNull(op);
+		Objects.requireNonNull(src);
+		Objects.requireNonNull(op);
 
 		while (!operatorStack.isEmpty() && hasLesserPrecedence(op, operatorStack.peek().element())) {
 			makeOp(operatorStack.pop());
@@ -78,7 +78,7 @@ class ExprBuilder {
 	}
 
 	public void addExpr(Expr expr) {
-		Check.notNull(expr);
+		Objects.requireNonNull(expr);
 		operandStack.push(expr);
 	}
 

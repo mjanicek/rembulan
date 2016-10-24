@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class BinOp extends BodyNode {
 
@@ -46,10 +46,10 @@ public class BinOp extends BodyNode {
 	private final Val right;
 
 	public BinOp(Op op, Val dest, Val left, Val right) {
-		this.op = Check.notNull(op);
-		this.dest = Check.notNull(dest);
-		this.left = Check.notNull(left);
-		this.right = Check.notNull(right);
+		this.op = Objects.requireNonNull(op);
+		this.dest = Objects.requireNonNull(dest);
+		this.left = Objects.requireNonNull(left);
+		this.right = Objects.requireNonNull(right);
 	}
 
 	public Op op() {

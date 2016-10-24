@@ -16,10 +16,9 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class FunctionDefExpr extends Expr {
 
@@ -28,8 +27,8 @@ public class FunctionDefExpr extends Expr {
 
 	public FunctionDefExpr(Attributes attr, Params params, Block block) {
 		super(attr);
-		this.params = Check.notNull(params);
-		this.block = Check.notNull(block);
+		this.params = Objects.requireNonNull(params);
+		this.block = Objects.requireNonNull(block);
 	}
 
 	public Params params() {
@@ -69,7 +68,7 @@ public class FunctionDefExpr extends Expr {
 		private final boolean vararg;
 
 		public Params(List<Name> names, boolean vararg) {
-			this.names = Check.notNull(names);
+			this.names = Objects.requireNonNull(names);
 			this.vararg = vararg;
 		}
 

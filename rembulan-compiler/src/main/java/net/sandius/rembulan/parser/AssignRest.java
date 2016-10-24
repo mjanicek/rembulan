@@ -20,11 +20,11 @@ import net.sandius.rembulan.parser.ast.AssignStatement;
 import net.sandius.rembulan.parser.ast.Expr;
 import net.sandius.rembulan.parser.ast.LValueExpr;
 import net.sandius.rembulan.parser.ast.SourceInfo;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 class AssignRest {
 
@@ -34,9 +34,9 @@ class AssignRest {
 	public final List<Expr> exprs;
 
 	AssignRest(SourceInfo src, List<LValueExpr> vars, List<Expr> exprs) {
-		this.src = Check.notNull(src);
-		this.vars = Check.notNull(vars);
-		this.exprs = Check.notNull(exprs);
+		this.src = Objects.requireNonNull(src);
+		this.vars = Objects.requireNonNull(vars);
+		this.exprs = Objects.requireNonNull(exprs);
 	}
 
 	AssignRest(SourceInfo src, List<Expr> exprs) {
@@ -44,7 +44,7 @@ class AssignRest {
 	}
 
 	AssignStatement prepend(LValueExpr v) {
-		Check.notNull(v);
+		Objects.requireNonNull(v);
 		List<LValueExpr> vs = new ArrayList<>();
 		vs.add(v);
 		vs.addAll(vars);

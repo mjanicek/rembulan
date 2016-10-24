@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class VarLoad extends BodyNode {
 
@@ -24,8 +24,8 @@ public class VarLoad extends BodyNode {
 	private final Var var;
 
 	public VarLoad(Val dest, Var var) {
-		this.dest = Check.notNull(dest);
-		this.var = Check.notNull(var);
+		this.dest = Objects.requireNonNull(dest);
+		this.var = Objects.requireNonNull(var);
 	}
 
 	public Val dest() {

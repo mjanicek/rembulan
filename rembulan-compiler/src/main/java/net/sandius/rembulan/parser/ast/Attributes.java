@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +28,7 @@ public final class Attributes {
 	private static final Attributes EMPTY = new Attributes(Collections.<Class<?>, Object>emptyMap());
 
 	private Attributes(Map<Class<?>, Object> attribs) {
-		this.attribs = Check.notNull(attribs);
+		this.attribs = Objects.requireNonNull(attribs);
 	}
 
 	public static Attributes empty() {
@@ -51,7 +49,7 @@ public final class Attributes {
 	}
 
 	public Attributes with(Object o) {
-		Check.notNull(o);
+		Objects.requireNonNull(o);
 		Class<?> clazz = o.getClass();
 
 		if (Objects.equals(attribs.get(clazz), o)) {
@@ -66,7 +64,7 @@ public final class Attributes {
 	}
 
 	public <T> T get(Class<T> clazz) {
-		Check.notNull(clazz);
+		Objects.requireNonNull(clazz);
 		Object result = attribs.get(clazz);
 
 		if (result != null) {

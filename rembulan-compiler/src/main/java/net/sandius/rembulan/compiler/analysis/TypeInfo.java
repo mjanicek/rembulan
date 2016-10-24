@@ -23,11 +23,11 @@ import net.sandius.rembulan.compiler.ir.MultiVal;
 import net.sandius.rembulan.compiler.ir.PhiVal;
 import net.sandius.rembulan.compiler.ir.Val;
 import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.util.Check;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 public class TypeInfo {
@@ -43,10 +43,10 @@ public class TypeInfo {
 			Map<Var, Boolean> vars,
 			TypeSeq returnType) {
 
-		this.types = Check.notNull(types);
-		this.multiTypes = Check.notNull(multiTypes);
-		this.vars = Check.notNull(vars);
-		this.returnType = Check.notNull(returnType);
+		this.types = Objects.requireNonNull(types);
+		this.multiTypes = Objects.requireNonNull(multiTypes);
+		this.vars = Objects.requireNonNull(vars);
+		this.returnType = Objects.requireNonNull(returnType);
 	}
 
 	public static TypeInfo of(
@@ -93,7 +93,7 @@ public class TypeInfo {
 	}
 
 	public Type typeOf(AbstractVal v) {
-		Check.notNull(v);
+		Objects.requireNonNull(v);
 
 		Type t = types.get(v);
 		if (t == null) {
@@ -105,7 +105,7 @@ public class TypeInfo {
 	}
 
 	public TypeSeq typeOf(MultiVal mv) {
-		Check.notNull(mv);
+		Objects.requireNonNull(mv);
 
 		TypeSeq tseq = multiTypes.get(mv);
 		if (tseq == null) {
@@ -121,7 +121,7 @@ public class TypeInfo {
 	}
 
 	public boolean isReified(Var v) {
-		Check.notNull(v);
+		Objects.requireNonNull(v);
 
 		Boolean r = vars.get(v);
 		if (r != null) {

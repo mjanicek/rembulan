@@ -16,14 +16,14 @@
 
 package net.sandius.rembulan.compiler.gen;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class SuffixingClassNameTranslator implements ClassNameTranslator {
 
 	private final String base;
 
 	public SuffixingClassNameTranslator(String base) {
-		this.base = Check.notNull(base);
+		this.base = Objects.requireNonNull(base);
 	}
 
 	@Override

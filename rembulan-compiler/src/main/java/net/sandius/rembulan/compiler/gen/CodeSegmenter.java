@@ -22,12 +22,12 @@ import net.sandius.rembulan.compiler.ir.Code;
 import net.sandius.rembulan.compiler.ir.Label;
 import net.sandius.rembulan.compiler.ir.Line;
 import net.sandius.rembulan.compiler.ir.ToNext;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public final class CodeSegmenter {
 
@@ -45,8 +45,8 @@ public final class CodeSegmenter {
 		final BasicBlock succ;
 
 		private BlockSplit(BasicBlock pred, BasicBlock succ) {
-			this.pred = Check.notNull(pred);
-			this.succ = Check.notNull(succ);
+			this.pred = Objects.requireNonNull(pred);
+			this.succ = Objects.requireNonNull(succ);
 		}
 
 	}

@@ -21,9 +21,9 @@ import net.sandius.rembulan.parser.ast.Expr;
 import net.sandius.rembulan.parser.ast.IndexExpr;
 import net.sandius.rembulan.parser.ast.Name;
 import net.sandius.rembulan.parser.ast.SourceInfo;
-import net.sandius.rembulan.util.Check;
 
 import java.util.List;
+import java.util.Objects;
 
 abstract class PostfixOp {
 
@@ -35,8 +35,8 @@ abstract class PostfixOp {
 		private final Expr keyExpr;
 
 		public FieldAccess(SourceInfo src, Expr keyExpr) {
-			this.src = Check.notNull(src);
-			this.keyExpr = Check.notNull(keyExpr);
+			this.src = Objects.requireNonNull(src);
+			this.keyExpr = Objects.requireNonNull(keyExpr);
 		}
 
 		public Expr keyExpr() {
@@ -56,7 +56,7 @@ abstract class PostfixOp {
 		private final SourceElement<List<Expr>> args;
 
 		public Invoke(SourceElement<List<Expr>> args, Name method) {
-			this.args = Check.notNull(args);
+			this.args = Objects.requireNonNull(args);
 			this.method = method;
 		}
 

@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class LabelStatement extends BodyStatement {
 
@@ -24,7 +24,7 @@ public class LabelStatement extends BodyStatement {
 
 	public LabelStatement(Attributes attr, Name labelName) {
 		super(attr);
-		this.labelName = Check.notNull(labelName);
+		this.labelName = Objects.requireNonNull(labelName);
 	}
 
 	public Name labelName() {

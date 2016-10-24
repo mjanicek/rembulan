@@ -27,7 +27,8 @@ import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.compiler.ir.VarInit;
 import net.sandius.rembulan.compiler.ir.VarLoad;
 import net.sandius.rembulan.compiler.ir.VarStore;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 public class DeadCodePrunerVisitor extends CodeTransformerVisitor {
 
@@ -35,8 +36,8 @@ public class DeadCodePrunerVisitor extends CodeTransformerVisitor {
 	private final LivenessInfo liveness;
 
 	public DeadCodePrunerVisitor(TypeInfo types, LivenessInfo liveness) {
-		this.types = Check.notNull(types);
-		this.liveness = Check.notNull(liveness);
+		this.types = Objects.requireNonNull(types);
+		this.liveness = Objects.requireNonNull(liveness);
 	}
 
 	protected void skip(BodyNode node) {

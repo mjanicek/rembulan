@@ -16,16 +16,15 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.Collections;
+import java.util.Objects;
 
 public class Jmp extends BlockTermNode implements JmpNode {
 
 	private final Label jmpDest;
 
 	public Jmp(Label jmpDest) {
-		this.jmpDest = Check.notNull(jmpDest);
+		this.jmpDest = Objects.requireNonNull(jmpDest);
 	}
 
 	@Override

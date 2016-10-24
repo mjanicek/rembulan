@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class TabGet extends BodyNode {
 
@@ -25,9 +25,9 @@ public class TabGet extends BodyNode {
 	private final Val key;
 
 	public TabGet(Val dest, Val obj, Val key) {
-		this.dest = Check.notNull(dest);
-		this.obj = Check.notNull(obj);
-		this.key = Check.notNull(key);
+		this.dest = Objects.requireNonNull(dest);
+		this.obj = Objects.requireNonNull(obj);
+		this.key = Objects.requireNonNull(key);
 	}
 
 	public Val dest() {

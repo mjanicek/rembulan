@@ -17,9 +17,9 @@
 package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.compiler.FunctionId;
-import net.sandius.rembulan.util.Check;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Closure extends BodyNode {
 
@@ -28,9 +28,9 @@ public class Closure extends BodyNode {
 	private final List<AbstractVar> args;
 
 	public Closure(Val dest, FunctionId id, List<AbstractVar> args) {
-		this.dest = Check.notNull(dest);
-		this.id = Check.notNull(id);
-		this.args = Check.notNull(args);
+		this.dest = Objects.requireNonNull(dest);
+		this.id = Objects.requireNonNull(id);
+		this.args = Objects.requireNonNull(args);
 	}
 
 	public Val dest() {

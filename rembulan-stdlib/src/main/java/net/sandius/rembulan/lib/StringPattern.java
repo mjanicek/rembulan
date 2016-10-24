@@ -50,6 +50,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -173,7 +174,7 @@ public class StringPattern {
 			List<PI> items,
 			int numCaptures) {
 
-		this.items = Check.notNull(items);
+		this.items = Objects.requireNonNull(items);
 		this.numCaptures = Check.nonNegative(numCaptures);
 	}
 
@@ -192,10 +193,10 @@ public class StringPattern {
 		private final List<Object> captures;
 
 		protected Match(String originalString, int beginIndex, int endIndex, List<Object> captures) {
-			this.originalString = Check.notNull(originalString);
+			this.originalString = Objects.requireNonNull(originalString);
 			this.beginIndex = beginIndex;
 			this.endIndex = endIndex;
-			this.captures = Check.notNull(captures);
+			this.captures = Objects.requireNonNull(captures);
 		}
 
 		public String originalString() {
@@ -245,7 +246,7 @@ public class StringPattern {
 		private final List<SetElement> elements;
 
 		CharacterSet(List<SetElement> elements) {
-			this.elements = Check.notNull(elements);
+			this.elements = Objects.requireNonNull(elements);
 		}
 
 		@Override
@@ -299,7 +300,7 @@ public class StringPattern {
 			private final CC ccl;
 
 			CharacterClassSetElement(CC ccl) {
-				this.ccl = Check.notNull(ccl);
+				this.ccl = Objects.requireNonNull(ccl);
 			}
 
 			@Override
@@ -376,7 +377,7 @@ public class StringPattern {
 
 		CC_spec(ClassDesc desc, boolean complement) {
 			Check.isFalse(desc == ClassDesc.ALL && complement);
-			this.desc = Check.notNull(desc);
+			this.desc = Objects.requireNonNull(desc);
 			this.complement = complement;
 		}
 
@@ -435,7 +436,7 @@ public class StringPattern {
 		private final boolean complement;
 
 		CC_set(CharacterSet cs, boolean complement) {
-			this.cs = Check.notNull(cs);
+			this.cs = Objects.requireNonNull(cs);
 			this.complement = complement;
 		}
 
@@ -591,8 +592,8 @@ public class StringPattern {
 		private final Repeat mod;
 
 		PI_cc(CC ccl, Repeat mod) {
-			this.ccl = Check.notNull(ccl);
-			this.mod = Check.notNull(mod);
+			this.ccl = Objects.requireNonNull(ccl);
+			this.mod = Objects.requireNonNull(mod);
 		}
 
 		@Override
@@ -811,7 +812,7 @@ public class StringPattern {
 		private final CharacterSet cs;
 
 		PI_frontier(CharacterSet cs) {
-			this.cs = Check.notNull(cs);
+			this.cs = Objects.requireNonNull(cs);
 		}
 
 		@Override
@@ -928,7 +929,7 @@ public class StringPattern {
 				anchoredBegin = false;
 			}
 
-			this.pattern = Check.notNull(pattern);
+			this.pattern = Objects.requireNonNull(pattern);
 			this.anchoredBegin = anchoredBegin;
 
 			this.index = 0;

@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
+import java.util.Objects;
 
 public class AssignStatement extends BodyStatement {
 
@@ -27,8 +26,8 @@ public class AssignStatement extends BodyStatement {
 
 	public AssignStatement(Attributes attr, List<LValueExpr> vars, List<Expr> exprs) {
 		super(attr);
-		this.vars = Check.notNull(vars);
-		this.exprs = Check.notNull(exprs);
+		this.vars = Objects.requireNonNull(vars);
+		this.exprs = Objects.requireNonNull(exprs);
 	}
 
 	public List<LValueExpr> vars() {

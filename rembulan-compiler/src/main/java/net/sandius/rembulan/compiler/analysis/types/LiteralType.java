@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class LiteralType<T> extends Type {
 
@@ -24,8 +24,8 @@ public class LiteralType<T> extends Type {
 	private final T value;
 
 	public LiteralType(ConcreteType type, T value) {
-		this.type = Check.notNull(type);
-		this.value = Check.notNull(value);
+		this.type = Objects.requireNonNull(type);
+		this.value = Objects.requireNonNull(value);
 	}
 
 	@Override
@@ -71,7 +71,7 @@ public class LiteralType<T> extends Type {
 
 	@Override
 	public Type join(Type that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		if (that.isSubtypeOf(this)) return this;
 		else return this.type().join(that);
@@ -79,7 +79,7 @@ public class LiteralType<T> extends Type {
 
 	@Override
 	public Type meet(Type that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		if (this.isSubtypeOf(that)) return this;
 		else if (that.isSubtypeOf(this)) return that;

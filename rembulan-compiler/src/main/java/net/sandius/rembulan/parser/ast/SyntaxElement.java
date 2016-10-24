@@ -16,14 +16,14 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public abstract class SyntaxElement {
 
 	private final Attributes attr;
 
 	protected SyntaxElement(Attributes attr) {
-		this.attr = Check.notNull(attr);
+		this.attr = Objects.requireNonNull(attr);
 	}
 
 	public SourceInfo sourceInfo() {

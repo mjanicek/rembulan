@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class UpLoad extends BodyNode {
 
@@ -24,8 +24,8 @@ public class UpLoad extends BodyNode {
 	private final UpVar uv;
 
 	public UpLoad(Val dest, UpVar uv) {
-		this.dest = Check.notNull(dest);
-		this.uv = Check.notNull(uv);
+		this.dest = Objects.requireNonNull(dest);
+		this.uv = Objects.requireNonNull(uv);
 	}
 
 	public Val dest() {

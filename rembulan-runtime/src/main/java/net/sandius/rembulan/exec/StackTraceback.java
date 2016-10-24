@@ -18,7 +18,6 @@ package net.sandius.rembulan.exec;
 
 import net.sandius.rembulan.load.ChunkClassLoader;
 import net.sandius.rembulan.runtime.Dispatch;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.Collection;
@@ -34,11 +33,11 @@ class StackTraceback {
 	private final Entry[] entries;
 
 	StackTraceback(Entry[] entries) {
-		this.entries = Check.notNull(entries);
+		this.entries = Objects.requireNonNull(entries);
 	}
 
 	private static StackTraceback fromCollection(Collection<Entry> entries) {
-		return new StackTraceback(Check.notNull(entries.toArray(new Entry[entries.size()])));
+		return new StackTraceback(Objects.requireNonNull(entries.toArray(new Entry[entries.size()])));
 	}
 
 	@Override
@@ -178,7 +177,7 @@ class StackTraceback {
 		private final StackTraceElement stackTraceElement;
 
 		JavaCallEntry(StackTraceElement stackTraceElement) {
-			this.stackTraceElement = Check.notNull(stackTraceElement);
+			this.stackTraceElement = Objects.requireNonNull(stackTraceElement);
 		}
 
 		public static JavaCallEntry fromStackTraceElement(StackTraceElement element) {
@@ -197,7 +196,7 @@ class StackTraceback {
 		private final String s;
 
 		MiscJavaEntry(String s) {
-			this.s = Check.notNull(s);
+			this.s = Objects.requireNonNull(s);
 		}
 
 		public static MiscJavaEntry suppressedOrOmitted(int suppressed, int omitted) {
@@ -239,7 +238,7 @@ class StackTraceback {
 		LuaCallEntry(String sourceFileName, int sourceLine, String functionName) {
 			this.sourceFileName = sourceFileName;  // may be null
 			this.sourceLine = sourceLine;
-			this.functionName = Check.notNull(functionName);
+			this.functionName = Objects.requireNonNull(functionName);
 		}
 
 		public static LuaCallEntry of(String sourceFileName, int sourceLine, String functionName) {
@@ -252,7 +251,7 @@ class StackTraceback {
 					+  ":"
 					+ (sourceLine >= 0 ? sourceLine : "?")
 					+ ": "
-					+ "in function <" + Check.notNull(functionName) + ">";
+					+ "in function <" + functionName + ">";
 		}
 
 	}
@@ -262,7 +261,7 @@ class StackTraceback {
 		private final String s;
 
 		MiscEntry(String s) {
-			this.s = Check.notNull(s);
+			this.s = Objects.requireNonNull(s);
 		}
 
 		public static MiscEntry fromString(String s) {

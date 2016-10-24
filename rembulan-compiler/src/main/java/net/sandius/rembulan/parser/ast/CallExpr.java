@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
+import java.util.Objects;
 
 public abstract class CallExpr extends MultiExpr {
 
@@ -26,7 +25,7 @@ public abstract class CallExpr extends MultiExpr {
 
 	protected CallExpr(Attributes attr, List<Expr> args) {
 		super(attr);
-		this.args = Check.notNull(args);
+		this.args = Objects.requireNonNull(args);
 	}
 
 	public List<Expr> args() {
@@ -39,7 +38,7 @@ public abstract class CallExpr extends MultiExpr {
 
 		public FunctionCallExpr(Attributes attr, Expr fn, List<Expr> args) {
 			super(attr, args);
-			this.fn = Check.notNull(fn);
+			this.fn = Objects.requireNonNull(fn);
 		}
 
 		public Expr fn() {
@@ -69,8 +68,8 @@ public abstract class CallExpr extends MultiExpr {
 
 		public MethodCallExpr(Attributes attr, Expr target, Name methodName, List<Expr> args) {
 			super(attr, args);
-			this.target = Check.notNull(target);
-			this.methodName = Check.notNull(methodName);
+			this.target = Objects.requireNonNull(target);
+			this.methodName = Objects.requireNonNull(methodName);
 		}
 
 		public Expr target() {

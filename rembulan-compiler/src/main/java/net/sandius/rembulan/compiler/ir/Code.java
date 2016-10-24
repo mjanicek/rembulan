@@ -17,17 +17,8 @@
 package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.parser.util.Util;
-import net.sandius.rembulan.util.Check;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 
 public class Code {
 
@@ -37,13 +28,13 @@ public class Code {
 
 	private Code(List<BasicBlock> blocks) {
 		verify(blocks);
-		this.blocks = Check.notNull(blocks);
+		this.blocks = Objects.requireNonNull(blocks);
 		this.index = index(blocks);
 	}
 
 	public static Code of(List<BasicBlock> blocks) {
 		return new Code(
-				new ArrayList<>(Check.notNull(blocks)));
+				new ArrayList<>(Objects.requireNonNull(blocks)));
 	}
 
 	@Override
@@ -60,7 +51,7 @@ public class Code {
 	}
 
 	private static List<BasicBlock> verify(List<BasicBlock> blocks) {
-		Check.notNull(blocks);
+		Objects.requireNonNull(blocks);
 		if (blocks.isEmpty()) {
 			throw new IllegalArgumentException("Empty block sequence");
 		}
@@ -106,7 +97,7 @@ public class Code {
 	}
 
 	public BasicBlock block(Label label) {
-		Check.notNull(label);
+		Objects.requireNonNull(label);
 		BasicBlock result = index.get(label);
 		if (result != null) {
 			return result;

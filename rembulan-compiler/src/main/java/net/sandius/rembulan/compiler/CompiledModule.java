@@ -18,9 +18,9 @@ package net.sandius.rembulan.compiler;
 
 import net.sandius.rembulan.load.CompiledChunk;
 import net.sandius.rembulan.util.ByteVector;
-import net.sandius.rembulan.util.Check;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class CompiledModule implements CompiledChunk {
 
@@ -28,8 +28,8 @@ public class CompiledModule implements CompiledChunk {
 	private final String mainClassName;
 
 	public CompiledModule(Map<String, ByteVector> classMap, String mainClassName) {
-		this.classMap = Check.notNull(classMap);
-		this.mainClassName = Check.notNull(mainClassName);
+		this.classMap = Objects.requireNonNull(classMap);
+		this.mainClassName = Objects.requireNonNull(mainClassName);
 
 		if (!classMap.containsKey(mainClassName)) {
 			throw new IllegalStateException("No main class in class map");

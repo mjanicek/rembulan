@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 
 public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
@@ -30,8 +31,8 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	protected final Type tailType;
 
 	TypeSeq(List<Type> fixed, Type tailType) {
-		this.fixed = Check.notNull(fixed);
-		this.tailType = Check.notNull(tailType);
+		this.fixed = Objects.requireNonNull(fixed);
+		this.tailType = Objects.requireNonNull(tailType);
 	}
 
 //	private static final TypeSeq EMPTY_FIXED = new TypeSeq(ReadOnlyArray.wrap(new Type[0]), false);
@@ -116,7 +117,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	}
 
 	public TypeSeq prefixedBy(Type[] types) {
-		Check.notNull(types);
+		Objects.requireNonNull(types);
 		List<Type> ts = new ArrayList<>(types.length + fixed.size());
 		ts.addAll(Arrays.asList(types));
 		ts.addAll(fixed);
@@ -124,7 +125,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	}
 
 	public boolean isSubsumedBy(TypeSeq that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		// that is more general than this
 
@@ -138,7 +139,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	}
 
 	public TypeSeq join(TypeSeq that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		ArrayList<Type> fix = new ArrayList<>();
 
@@ -164,7 +165,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
 	// returns null to indicate that no meet exists
 	public TypeSeq meet(TypeSeq that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		ArrayList<Type> fix = new ArrayList<>();
 
@@ -203,7 +204,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	// If this.isSubsumedBy(that) then this.comparePointwiseTo(that) == EQUAL || this.comparePointwiseTo(that) == LESSER_THAN;
 	// Please note that this is an implication: the opposite direction does *not* in general hold.
 	public PartialOrderComparisonResult comparePointwiseTo(TypeSeq that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		int len = Math.max(this.fixed().size(), that.fixed().size());
 
@@ -234,7 +235,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
 	@Override
 	public boolean isConsistentWith(TypeSeq that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		for (int i = 0; i < Math.max(this.fixed().size(), that.fixed().size()); i++) {
 			if (!this.get(i).isConsistentWith(that.get(i))) {
@@ -246,7 +247,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 	}
 
 	public TypeSeq restrict(TypeSeq that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		ArrayList<Type> ts = new ArrayList<>();
 
@@ -259,7 +260,7 @@ public class TypeSeq implements GradualTypeLike<TypeSeq> {
 
 	@Override
 	public boolean isConsistentSubtypeOf(TypeSeq that) {
-		Check.notNull(that);
+		Objects.requireNonNull(that);
 
 		for (int i = 0; i < Math.max(this.fixed().size(), that.fixed().size()); i++) {
 			if (!this.get(i).isConsistentSubtypeOf(that.get(i))) {

@@ -16,8 +16,6 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
 import java.util.Objects;
 
@@ -29,8 +27,8 @@ public class IfStatement extends BodyStatement {
 
 	public IfStatement(Attributes attr, ConditionalBlock main, List<ConditionalBlock> elifs, Block elseBlock) {
 		super(attr);
-		this.main = Check.notNull(main);
-		this.elifs = Check.notNull(elifs);
+		this.main = Objects.requireNonNull(main);
+		this.elifs = Objects.requireNonNull(elifs);
 		this.elseBlock = elseBlock;
 	}
 

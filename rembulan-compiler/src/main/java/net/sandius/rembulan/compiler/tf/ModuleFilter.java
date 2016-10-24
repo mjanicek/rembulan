@@ -21,13 +21,13 @@ import net.sandius.rembulan.compiler.IRFunc;
 import net.sandius.rembulan.compiler.Module;
 import net.sandius.rembulan.compiler.analysis.DependencyAnalyser;
 import net.sandius.rembulan.compiler.analysis.DependencyInfo;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public abstract class ModuleFilter {
@@ -37,7 +37,7 @@ public abstract class ModuleFilter {
 	}
 
 	private static Set<FunctionId> reachableFromMain(Module m) {
-		Check.notNull(m);
+		Objects.requireNonNull(m);
 
 		Set<FunctionId> visited = new HashSet<>();
 		Deque<IRFunc> open = new ArrayDeque<>();
@@ -57,7 +57,7 @@ public abstract class ModuleFilter {
 	}
 
 	public static Module prune(Module m) {
-		Check.notNull(m);
+		Objects.requireNonNull(m);
 
 		Set<FunctionId> reachable = reachableFromMain(m);
 

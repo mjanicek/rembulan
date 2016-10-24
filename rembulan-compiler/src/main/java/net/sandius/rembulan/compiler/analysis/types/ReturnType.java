@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.analysis.types;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public abstract class ReturnType {
 
@@ -29,7 +29,7 @@ public abstract class ReturnType {
 		public final TypeSeq typeSeq;
 
 		public ConcreteReturnType(TypeSeq typeSeq) {
-			this.typeSeq = Check.notNull(typeSeq);
+			this.typeSeq = Objects.requireNonNull(typeSeq);
 		}
 
 		@Override
@@ -60,8 +60,8 @@ public abstract class ReturnType {
 		public final TypeSeq typeSeq;
 
 		public TailCallReturnType(Type target, TypeSeq typeSeq) {
-			this.target = Check.notNull(target);
-			this.typeSeq = Check.notNull(typeSeq);
+			this.target = Objects.requireNonNull(target);
+			this.typeSeq = Objects.requireNonNull(typeSeq);
 		}
 
 		@Override

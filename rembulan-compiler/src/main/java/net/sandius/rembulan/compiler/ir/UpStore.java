@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class UpStore extends BodyNode {
 
@@ -24,8 +24,8 @@ public class UpStore extends BodyNode {
 	private final Val src;
 
 	public UpStore(UpVar uv, Val src) {
-		this.uv = Check.notNull(uv);
-		this.src = Check.notNull(src);
+		this.uv = Objects.requireNonNull(uv);
+		this.src = Objects.requireNonNull(src);
 	}
 
 	public UpVar upval() {

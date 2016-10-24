@@ -16,11 +16,10 @@
 
 package net.sandius.rembulan.compiler;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 public class Module {
@@ -28,7 +27,7 @@ public class Module {
 	private final List<IRFunc> fns;
 
 	public Module(List<IRFunc> fns) {
-		this.fns = Check.notNull(fns);
+		this.fns = Objects.requireNonNull(fns);
 		verify();
 	}
 
@@ -53,7 +52,7 @@ public class Module {
 	}
 
 	public IRFunc get(FunctionId id) {
-		Check.notNull(id);
+		Objects.requireNonNull(id);
 
 		for (IRFunc fn : fns) {
 			if (fn.id().equals(id)) {

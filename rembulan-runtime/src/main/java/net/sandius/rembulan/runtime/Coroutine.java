@@ -17,8 +17,9 @@
 package net.sandius.rembulan.runtime;
 
 import net.sandius.rembulan.Ordering;
-import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
+
+import java.util.Objects;
 
 /**
  * A Lua coroutine.
@@ -97,9 +98,9 @@ public final class Coroutine {
 
 	// (RUNNING, SUSPENDED) -> (NORMAL, RUNNING)
 	static Cons<ResumeInfo> _resume(final Coroutine a, final Coroutine b, Cons<ResumeInfo> cs) {
-		Check.notNull(a);
-		Check.notNull(b);
-		Check.notNull(cs);
+		Objects.requireNonNull(a);
+		Objects.requireNonNull(b);
+		Objects.requireNonNull(cs);
 
 		synchronized (a) {
 			if (a.status == Status.RUNNING) {

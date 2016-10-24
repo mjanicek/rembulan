@@ -21,13 +21,13 @@ import net.sandius.rembulan.compiler.gen.asm.helpers.ASMUtils;
 import net.sandius.rembulan.compiler.gen.asm.helpers.VariableMethods;
 import net.sandius.rembulan.compiler.ir.Var;
 import net.sandius.rembulan.runtime.ExecutionContext;
-import net.sandius.rembulan.util.Check;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -37,8 +37,8 @@ class InvokeMethod {
 	private final RunMethod runMethod;
 
 	public InvokeMethod(ASMBytecodeEmitter context, RunMethod runMethod) {
-		this.context = Check.notNull(context);
-		this.runMethod = Check.notNull(runMethod);
+		this.context = Objects.requireNonNull(context);
+		this.runMethod = Objects.requireNonNull(runMethod);
 	}
 
 	public MethodNode methodNode() {

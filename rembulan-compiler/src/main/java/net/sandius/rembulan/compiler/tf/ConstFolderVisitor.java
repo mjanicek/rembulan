@@ -26,18 +26,19 @@ import net.sandius.rembulan.compiler.ir.LoadConst;
 import net.sandius.rembulan.compiler.ir.ToNumber;
 import net.sandius.rembulan.compiler.ir.UnOp;
 import net.sandius.rembulan.compiler.ir.Val;
-import net.sandius.rembulan.util.Check;
+
+import java.util.Objects;
 
 public class ConstFolderVisitor extends CodeTransformerVisitor {
 
 	private final TypeInfo typeInfo;
 
 	public ConstFolderVisitor(TypeInfo typeInfo) {
-		this.typeInfo = Check.notNull(typeInfo);
+		this.typeInfo = Objects.requireNonNull(typeInfo);
 	}
 
 	private static LoadConst objectToLoadConstNode(Val dest, Object o) {
-		Check.notNull(dest);
+		Objects.requireNonNull(dest);
 
 		if (o instanceof Number) {
 			Number n = (Number) o;
@@ -60,8 +61,8 @@ public class ConstFolderVisitor extends CodeTransformerVisitor {
 	}
 
 	private void replace(BodyNode oldNode, BodyNode newNode) {
-		Check.notNull(oldNode);
-		Check.notNull(newNode);
+		Objects.requireNonNull(oldNode);
+		Objects.requireNonNull(newNode);
 
 		int idx = currentBody().indexOf(oldNode);
 		if (idx < 0) {

@@ -16,9 +16,8 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
-
 import java.util.List;
+import java.util.Objects;
 
 public class GenericForStatement extends BodyStatement {
 
@@ -28,9 +27,9 @@ public class GenericForStatement extends BodyStatement {
 
 	public GenericForStatement(Attributes attr, List<Name> names, List<Expr> exprs, Block block) {
 		super(attr);
-		this.names = Check.notNull(names);
-		this.exprs = Check.notNull(exprs);
-		this.block = Check.notNull(block);
+		this.names = Objects.requireNonNull(names);
+		this.exprs = Objects.requireNonNull(exprs);
+		this.block = Objects.requireNonNull(block);
 	}
 
 	public List<Name> names() {

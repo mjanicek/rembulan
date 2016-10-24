@@ -18,6 +18,8 @@ package net.sandius.rembulan.compiler.ir;
 
 import net.sandius.rembulan.util.Check;
 
+import java.util.Objects;
+
 public class TabRawSetInt extends BodyNode {
 
 	private final Val obj;
@@ -25,9 +27,9 @@ public class TabRawSetInt extends BodyNode {
 	private final Val value;
 
 	public TabRawSetInt(Val obj, long idx, Val value) {
-		this.obj = Check.notNull(obj);
+		this.obj = Objects.requireNonNull(obj);
 		this.idx = Check.positive(idx);
-		this.value = Check.notNull(value);
+		this.value = Objects.requireNonNull(value);
 	}
 
 	public Val obj() {

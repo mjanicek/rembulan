@@ -53,7 +53,6 @@ import net.sandius.rembulan.runtime.ProtectedResumable;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 import net.sandius.rembulan.runtime.ReturnBuffer;
 import net.sandius.rembulan.runtime.UnresolvedControlThrowable;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -428,8 +427,8 @@ public final class CoroutineLib {
 		private final Coroutine coroutine;
 
 		public WrappedCoroutine(LuaFunction function, ExecutionContext context) {
-			Check.notNull(function);
-			Check.notNull(context);
+			Objects.requireNonNull(function);
+			Objects.requireNonNull(context);
 			this.coroutine = context.newCoroutine(function);
 		}
 

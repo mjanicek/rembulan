@@ -17,7 +17,6 @@ PARSER_BEGIN(Parser)
 package net.sandius.rembulan.parser;
 
 import net.sandius.rembulan.parser.ast.*;
-import net.sandius.rembulan.util.Check;
 
 import java.util.*;
 
@@ -58,8 +57,8 @@ public class Parser {
 
 	private static List<Name> prependName(Name n, List<Name> names) {
 		List<Name> ns = new ArrayList<Name>();
-		ns.add(Check.notNull(n));
-		ns.addAll(Check.notNull(names));
+		ns.add(Objects.requireNonNull(n));
+		ns.addAll(Objects.requireNonNull(names));
 		return Collections.unmodifiableList(ns);
 	}
 

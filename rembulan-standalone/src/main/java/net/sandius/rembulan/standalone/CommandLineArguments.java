@@ -18,10 +18,10 @@ package net.sandius.rembulan.standalone;
 
 import net.sandius.rembulan.Table;
 import net.sandius.rembulan.TableFactory;
-import net.sandius.rembulan.util.Check;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 class CommandLineArguments {
 
@@ -40,13 +40,13 @@ class CommandLineArguments {
 			boolean ignoreEnvVars,
 			Iterable<Step> steps) {
 
-		this.args = Check.notNull(args);
+		this.args = Objects.requireNonNull(args);
 		this.scriptIndex = scriptIndex;
 
 		this.interactive = interactive;
 		this.ignoreEnvVars = ignoreEnvVars;
 
-		this.steps = Check.notNull(steps);
+		this.steps = Objects.requireNonNull(steps);
 	}
 
 	static class Step {
@@ -65,7 +65,7 @@ class CommandLineArguments {
 		private final String[] argArray;
 
 		private Step(What what, String arg0, String arg1, String[] argArray) {
-			this.what = Check.notNull(what);
+			this.what = Objects.requireNonNull(what);
 			this.arg0 = arg0;  // may be null
 			this.arg1 = arg1;  // may be null
 			this.argArray = argArray;  // may be null
@@ -92,19 +92,19 @@ class CommandLineArguments {
 		}
 
 		public static Step executeString(String program, String origin) {
-			return new Step(What.EXECUTE_STRING, Check.notNull(program), origin, null);
+			return new Step(What.EXECUTE_STRING, Objects.requireNonNull(program), origin, null);
 		}
 
 		public static Step executeFile(String fileName, String[] arguments) {
-			return new Step(What.EXECUTE_FILE, Check.notNull(fileName), null, Check.notNull(arguments));
+			return new Step(What.EXECUTE_FILE, Objects.requireNonNull(fileName), null, Objects.requireNonNull(arguments));
 		}
 
 		public static Step executeStdin(String[] arguments) {
-			return new Step(What.EXECUTE_STDIN, null, null, Check.notNull(arguments));
+			return new Step(What.EXECUTE_STDIN, null, null, Objects.requireNonNull(arguments));
 		}
 
 		public static Step require(String moduleName) {
-			return new Step(What.REQUIRE_MODULE, Check.notNull(moduleName), null, null);
+			return new Step(What.REQUIRE_MODULE, Objects.requireNonNull(moduleName), null, null);
 		}
 
 	}
@@ -135,7 +135,7 @@ class CommandLineArguments {
 	}
 
 	public static CommandLineArguments parseArguments(String[] args, boolean inTty) {
-		Check.notNull(args);
+		Objects.requireNonNull(args);
 
 		boolean explicitPrintVersion = false;
 		boolean interactive = false;
@@ -150,7 +150,7 @@ class CommandLineArguments {
 		// handle options
 
 		for ( ; i < args.length; i++) {
-			String arg = Check.notNull(args[i]);
+			String arg = Objects.requireNonNull(args[i]);
 
 			// -v       show version information
 			if (arg.equals("-v")) {

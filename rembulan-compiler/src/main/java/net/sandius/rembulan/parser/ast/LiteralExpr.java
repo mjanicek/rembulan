@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.parser.ast;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class LiteralExpr extends Expr {
 
@@ -24,7 +24,7 @@ public class LiteralExpr extends Expr {
 
 	public LiteralExpr(Attributes attr, Literal value) {
 		super(attr);
-		this.value = Check.notNull(value);
+		this.value = Objects.requireNonNull(value);
 	}
 
 	public Literal value() {

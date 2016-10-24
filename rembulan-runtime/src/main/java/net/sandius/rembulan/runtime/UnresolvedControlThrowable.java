@@ -16,8 +16,9 @@
 
 package net.sandius.rembulan.runtime;
 
-import net.sandius.rembulan.util.Check;
 import net.sandius.rembulan.util.Cons;
+
+import java.util.Objects;
 
 /**
  * A throwable used for non-local control flow changes, containing an incomplete
@@ -49,7 +50,7 @@ public final class UnresolvedControlThrowable extends Throwable {
 
 	UnresolvedControlThrowable(ControlThrowablePayload payload, Cons<ResumeInfo> resumeStack) {
 		super(null, null, true, false);
-		this.payload = Check.notNull(payload);
+		this.payload = Objects.requireNonNull(payload);
 		this.resumeStack = resumeStack;
 	}
 

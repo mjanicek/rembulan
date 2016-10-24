@@ -18,10 +18,10 @@ package net.sandius.rembulan.compiler.analysis;
 
 import net.sandius.rembulan.compiler.ir.AbstractVal;
 import net.sandius.rembulan.compiler.ir.Var;
-import net.sandius.rembulan.util.Check;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 
 public class SlotAllocInfo {
 
@@ -30,8 +30,8 @@ public class SlotAllocInfo {
 	private final int numSlots;
 
 	public SlotAllocInfo(Map<AbstractVal, Integer> valSlots, Map<Var, Integer> varSlots) {
-		this.valSlots = Check.notNull(valSlots);
-		this.varSlots = Check.notNull(varSlots);
+		this.valSlots = Objects.requireNonNull(valSlots);
+		this.varSlots = Objects.requireNonNull(varSlots);
 
 		int n = 0;
 		for (Integer i : varSlots.values()) {
@@ -44,7 +44,7 @@ public class SlotAllocInfo {
 	}
 
 	public int slotOf(AbstractVal v) {
-		Integer idx = valSlots.get(Check.notNull(v));
+		Integer idx = valSlots.get(Objects.requireNonNull(v));
 		if (idx != null) {
 			return idx;
 		}
@@ -54,7 +54,7 @@ public class SlotAllocInfo {
 	}
 
 	public int slotOf(Var v) {
-		Integer idx = varSlots.get(Check.notNull(v));
+		Integer idx = varSlots.get(Objects.requireNonNull(v));
 		if (idx != null) {
 			return idx;
 		}

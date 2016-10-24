@@ -16,7 +16,7 @@
 
 package net.sandius.rembulan.compiler.ir;
 
-import net.sandius.rembulan.util.Check;
+import java.util.Objects;
 
 public class VarInit extends BodyNode {
 
@@ -24,8 +24,8 @@ public class VarInit extends BodyNode {
 	private final Val src;
 
 	public VarInit(Var var, Val src) {
-		this.var = Check.notNull(var);
-		this.src = Check.notNull(src);
+		this.var = Objects.requireNonNull(var);
+		this.src = Objects.requireNonNull(src);
 	}
 
 	public Var var() {
