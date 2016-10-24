@@ -925,7 +925,7 @@ public final class BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			run(context, 0, null, args.getAll());
+			run(context, 0, null, args.copyAll());
 		}
 
 		@Override
@@ -961,7 +961,7 @@ public final class BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table table = args.nextTable();
-			Object index = args.optNextAny();
+			Object index = args.nextOptionalAny(null);
 
 			final Object nxt;
 
@@ -1157,7 +1157,7 @@ public final class BasicLib {
 				args.nextInteger();
 				args.rewind();
 				ByteString s = args.nextStrictString();
-				int base = args.nextIntRange("base", Character.MIN_RADIX, Character.MAX_RADIX);
+				int base = args.nextIntRange(Character.MIN_RADIX, Character.MAX_RADIX, "base");
 
 				context.getReturnBuffer().setTo(toNumber(s, base));
 
@@ -1195,10 +1195,19 @@ public final class BasicLib {
 			return "setmetatable";
 		}
 
+		private Table nilOrTable(ArgumentIterator args) {
+			if (args.hasNext()) {
+				Object o = args.peek();
+				if (o instanceof Table) return (Table) o;
+				else if (o == null) return null;
+			}
+			throw new BadArgumentException(2, name(), "nil or table expected");
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Table t = args.nextTable();
-			Table mt = args.nextTableOrNil();
+			Table mt = nilOrTable(args);
 
 			if (Metatables.getMetamethod(context, MT_METATABLE, t) != null) {
 				throw new IllegalOperationAttemptException("cannot change a protected metatable");
@@ -1221,7 +1230,7 @@ public final class BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			// TODO: handle levels
-			Object arg1 = args.optNextAny();
+			Object arg1 = args.nextOptionalAny(null);
 			throw new LuaRuntimeException(arg1);
 		}
 
@@ -1237,7 +1246,7 @@ public final class BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (Conversions.booleanValueOf(args.nextAny())) {
-				context.getReturnBuffer().setToContentsOf(args.getAll());
+				context.getReturnBuffer().setToContentsOf(args.copyAll());
 			}
 			else {
 				final AssertionFailedException ex;
@@ -1274,7 +1283,7 @@ public final class BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object callTarget = args.nextAny();
-			Object[] callArgs = args.getTail();
+			Object[] callArgs = args.copyRemaining();
 
 			try {
 				Dispatch.call(context, callTarget, callArgs);
@@ -1371,10 +1380,10 @@ public final class BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Object callTarget = args.peekOrNil();
+			Object callTarget = args.hasNext() ? args.peek() : null;
 			args.skip();
 			LuaFunction handler = args.nextFunction();
-			Object[] callArgs = args.getTail();
+			Object[] callArgs = args.copyRemaining();
 
 			Object errorObject = null;
 			boolean isError = false;  // need to distinguish nil error objects from no-error
@@ -1480,7 +1489,7 @@ public final class BasicLib {
 			final long result;
 
 			// no need to distinguish missing value vs nil
-			Object arg1 = args.optNextAny();
+			Object arg1 = args.nextOptionalAny(null);
 
 			if (arg1 instanceof Table) {
 				Table table = (Table) arg1;
@@ -1518,7 +1527,7 @@ public final class BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Object index = args.peekOrNil();
+			Object index = args.hasNext() ? args.peek() : null;
 
 			if (isHash(index)) {
 				// return the number of remaining args
@@ -1526,7 +1535,7 @@ public final class BasicLib {
 				context.getReturnBuffer().setTo((long) count);
 			}
 			else {
-				int idx = args.nextIntRange("index", -args.size() + 1, Integer.MAX_VALUE);
+				int idx = args.nextIntRange(-args.size() + 1, Integer.MAX_VALUE, "index");
 
 				int from = idx >= 0
 						? idx  // from the beginning
@@ -1536,7 +1545,7 @@ public final class BasicLib {
 					throw new BadArgumentException(1, name(), "index out of range");
 				}
 
-				Object[] r = args.getAll();
+				Object[] r = args.copyAll();
 				final Object[] result;
 				result = from > r.length ? new Object[0] : Arrays.copyOfRange(r, from, r.length);
 				context.getReturnBuffer().setToContentsOf(result);
@@ -1601,14 +1610,8 @@ public final class BasicLib {
 						: "=(load)";
 			}
 
-			// mode
-			final ByteString modeString = args.hasNext() && args.peek() != null
-					? args.nextString()
-					: DEFAULT_MODE;
-
-			final Object env = args.hasNext()
-					? args.nextAny()
-					: defaultEnv;
+			final ByteString modeString = args.nextOptionalString(DEFAULT_MODE);
+			final Object env = args.nextOptionalAny(defaultEnv);
 
 			// TODO: binary chunks
 
@@ -1730,9 +1733,9 @@ public final class BasicLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 
-			final ByteString fileName = args.hasNext() ? args.nextString() : null;
-			final ByteString modeString = args.hasNext() ? args.nextString() : Load.DEFAULT_MODE;
-			final Object env = args.hasNext() ? args.nextAny() : defaultEnv;
+			final ByteString fileName = args.nextOptionalString(null);
+			final ByteString modeString = args.nextOptionalString(Load.DEFAULT_MODE);
+			final Object env = args.nextOptionalAny(defaultEnv);
 
 			boolean isStdin = fileName == null;
 
@@ -1808,7 +1811,7 @@ public final class BasicLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			final ByteString fileName = args.hasNext() ? args.nextString() : null;
+			final ByteString fileName = args.nextOptionalString(null);
 
 			if (fileName == null) {
 				throw new UnsupportedOperationException("not supported: 'dofile' from stdin");

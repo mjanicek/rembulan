@@ -161,11 +161,11 @@ public abstract class IoFile extends DefaultUserdata {
 				String s = args.nextString().toString();  // FIXME
 				Whence w = stringToWhence(s);
 				if (w == null) {
-					throw args.badArgument(1, "invalid option '" + s + "'");
+					throw new BadArgumentException(1, name(), "invalid option '" + s + "'");
 				}
 
 				whence = w;
-				offset = args.hasNext() ? args.nextInteger() : 0L;
+				offset = args.nextOptionalInteger(0L);
 			}
 			else {
 				whence = Whence.CURRENT_POSITION;

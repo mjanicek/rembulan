@@ -656,7 +656,7 @@ public final class IoLib {
 			}
 
 			if (mode == null) {
-				throw args.badArgument(1, "invalid mode");
+				throw new BadArgumentException(1, name(), "invalid mode");
 			}
 
 			IoFile file = null;
@@ -733,7 +733,7 @@ public final class IoLib {
 
 			ArrayList<Object> callArgs = new ArrayList<>();
 			callArgs.add(file);
-			callArgs.addAll(Arrays.asList(args.getAll()));
+			callArgs.addAll(Arrays.asList(args.copyAll()));
 
 			try {
 				Dispatch.call(context, file_read(), callArgs.toArray());
@@ -804,7 +804,7 @@ public final class IoLib {
 
 			ArrayList<Object> callArgs = new ArrayList<>();
 			callArgs.add(file);
-			callArgs.addAll(Arrays.asList(args.getAll()));
+			callArgs.addAll(Arrays.asList(args.copyAll()));
 
 			try {
 				Dispatch.call(context, file_write(), callArgs.toArray());

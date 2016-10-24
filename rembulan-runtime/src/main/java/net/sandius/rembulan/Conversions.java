@@ -448,6 +448,23 @@ public final class Conversions {
 	}
 
 	/**
+	 * Returns the float value of the object {@code o}, or {@code null} if {@code o}
+	 * does not have a float value.
+	 *
+	 * <p>The float value of {@code o} is the {@linkplain #floatValueOf(Number) float value}
+	 * of its numerical value (see {@link #numericalValueOf(Object)}), when {@code o}
+	 * has a numerical value.</p>
+	 *
+	 * @param o  the object to be converted to float, may be {@code null}
+	 * @return a {@code Double} representing the float value of {@code o},
+	 *         or {@code null} if {@code o} does not have a float value
+	 */
+	public static Double floatValueOf(Object o) {
+		Number n = numericalValueOf(o);
+		return n != null ? floatValueOf(n) : null;
+	}
+
+	/**
 	 * Returns the boolean value of the object {@code o}.
 	 *
 	 * <p>The boolean value of {@code o} is {@code false} if and only if {@code o} is <b>nil</b>

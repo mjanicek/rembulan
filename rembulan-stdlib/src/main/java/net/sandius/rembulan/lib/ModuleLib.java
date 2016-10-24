@@ -675,9 +675,8 @@ public final class ModuleLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			ByteString name = args.nextString();
 			ByteString path = args.nextString();
-
-			ByteString sep = args.hasNext() && args.peek() != null ? args.nextString() : DEFAULT_SEP;
-			ByteString rep = args.hasNext() && args.peek() != null ? args.nextString() : defaultDirSeparator;
+			ByteString sep = args.nextOptionalString(DEFAULT_SEP);
+			ByteString rep = args.nextOptionalString(defaultDirSeparator);
 
 			ByteStringBuilder msgBuilder = new ByteStringBuilder();
 

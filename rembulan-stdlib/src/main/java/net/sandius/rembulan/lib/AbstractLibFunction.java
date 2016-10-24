@@ -21,21 +21,41 @@ import net.sandius.rembulan.runtime.AbstractFunctionAnyArg;
 import net.sandius.rembulan.runtime.ExecutionContext;
 import net.sandius.rembulan.runtime.ResolvedControlThrowable;
 
-import java.util.Arrays;
-
+/**
+ * An abstract function that takes an arbitrary number of arguments passed wrapped
+ * in an {@link ArgumentIterator} object.
+ */
 public abstract class AbstractLibFunction extends AbstractFunctionAnyArg {
 
+	/**
+	 * Returns the name of the function for error-reporting.
+	 *
+	 * @return  the function name
+	 */
 	protected abstract String name();
 
 	@Override
 	public void invoke(ExecutionContext context, Object[] args) throws ResolvedControlThrowable {
-		ArgumentIterator callArgs = new ArgumentIterator(
-				new NameMetamethodValueTypeNamer(context),
-				name(),
-				Arrays.copyOf(args, args.length));
-		invoke(context, callArgs);
+		invoke(context, ArgumentIterator.of(context, name(), args));
 	}
 
+	/**
+	 * Invokes the function in the context {@code context} with arguments passed in
+	 * the iterator {@code args}.
+	 *
+	 * <p>This is the method that is meant to be implemented by the function implementation.
+	 * The function should not retain a reference to {@code context} or {@code args}
+	 * beyond the scope of its invocation. In particular, {@code context} and {@code args}
+	 * should not be part of suspended state if this method throws a control throwable.</p>
+	 *
+	 * <p>{@code context} and {@code args} are guaranteed to be non-{@code null} when
+	 * the function is invoked via {@link net.sandius.rembulan.runtime.Dispatch Dispatch}.</p>
+	 *
+	 * @param context  execution context, must not be {@code null}
+	 * @param args  call arguments, must not be {@code null}
+	 *
+	 * @throws ResolvedControlThrowable  if the call initiates a non-local control change
+	 */
 	protected abstract void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable;
 
 	@Override

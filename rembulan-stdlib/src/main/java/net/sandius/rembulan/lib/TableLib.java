@@ -390,9 +390,11 @@ public final class TableLib {
 						k = 0;  // clear k
 
 						// process arguments
-						sep = args.hasNext() && args.peek() != null ? args.nextString() : ByteString.empty();
-						i = args.optNextInt(1);
-						j = args.hasNext() && args.peek() != null ? args.nextInteger() : len;
+						sep = args.nextOptionalString(ByteString.empty());
+						args.goTo(2);
+						i = args.nextOptionalInteger(1);
+						args.goTo(3);
+						j = args.nextOptionalInteger(len);
 
 						// don't need the args any more
 						args = null;
@@ -752,20 +754,14 @@ public final class TableLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			if (args.size() < 2) {
-				throw args.badArgument(2, "number expected, got no value");
+				throw new BadArgumentException(2, name(), "number expected, got no value");
 			}
 			args.goTo(1);
 			long f = args.nextInteger();
 			long e = args.nextInteger();
 			long t = args.nextInteger();
 
-			final Table dest;
-			if (args.hasNext() && args.peek() != null) {
-				dest = args.nextTable();
-			}
-			else {
-				dest = null;
-			}
+			final Table dest = args.nextOptionalTable(null);
 
 			args.goTo(0);
 			final Table a1 = args.nextTable();
@@ -1234,7 +1230,7 @@ public final class TableLib {
 			throws ResolvedControlThrowable {
 
 			if (len >= Integer.MAX_VALUE) {
-				throw args.badArgument(1, "array too big");
+				throw new BadArgumentException(1, name(), "array too big");
 			}
 
 			if (len < 2) {
@@ -1242,7 +1238,7 @@ public final class TableLib {
 				return;
 			}
 			else {
-				LuaFunction comp = args.hasNext() && args.peek() != null ? args.nextFunction() : null;
+				LuaFunction comp = args.nextOptionalFunction(null);
 
 				// can we sort it using a raw ordering?
 				Ordering<Object> rawOrdering = comp == null
@@ -1677,9 +1673,9 @@ public final class TableLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Object obj = args.peekOrNil();
+			Object obj = args.hasNext() ? args.peek() : null;
 			args.skip();
-			long i = args.hasNext() && args.peek() != null ? args.nextInteger() : 1;
+			long i = args.nextOptionalInteger(1);
 
 			final int state;
 			final long j;

@@ -961,7 +961,7 @@ public final class MathLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Object initial = args.nextAny();
-			run(context, args.getAll(), 1, initial);
+			run(context, args.copyAll(), 1, initial);
 		}
 
 		@Override

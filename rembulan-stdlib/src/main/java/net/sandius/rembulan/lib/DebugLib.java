@@ -676,11 +676,21 @@ public final class DebugLib {
 			return "setmetatable";
 		}
 
+		// FIXME: duplicating code from BasicLib.SetMetatable
+		private Table nilOrTable(ArgumentIterator args) {
+			if (args.hasNext()) {
+				Object o = args.peek();
+				if (o instanceof Table) return (Table) o;
+				else if (o == null) return null;
+			}
+			throw new BadArgumentException(2, name(), "nil or table expected");
+		}
+
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Object value = args.peekOrNil();
+			Object value = args.hasNext() ? args.peek() : null;
 			args.skip();
-			Table mt = args.nextTableOrNil();
+			Table mt = nilOrTable(args);
 
 			// set the new metatable
 			context.setMetatable(value, mt);
@@ -858,7 +868,7 @@ public final class DebugLib {
 
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
-			Object o = args.peekOrNil();
+			Object o = args.hasNext() ? args.peek() : null;
 
 			Object result = o instanceof Userdata ? ((Userdata) o).getUserValue() : null;
 			context.getReturnBuffer().setTo(result);

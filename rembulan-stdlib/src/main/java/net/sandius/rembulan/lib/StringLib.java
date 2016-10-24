@@ -748,8 +748,8 @@ public final class StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			ByteString s = args.nextString();
-			int i = args.optNextInt(1);
-			int j = args.optNextInt(i);
+			int i = args.nextOptionalInt(1);
+			int j = args.nextOptionalInt(i);
 
 			int len = s.length();
 
@@ -778,7 +778,7 @@ public final class StringLib {
 			byte[] bytes = new byte[args.size()];
 
 			for (int i = 0; i < bytes.length; i++) {
-				bytes[i] = (byte) args.nextIntRange("value", 0, 255);
+				bytes[i] = (byte) args.nextIntRange(0, 255);
 			}
 
 			ByteString s = ByteString.copyOf(bytes);
@@ -797,7 +797,7 @@ public final class StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			LuaFunction f = args.nextFunction();
-			boolean strip = args.optNextBoolean(false);
+			boolean strip = args.hasNext() && args.nextBoolean();
 
 			throw new IllegalOperationAttemptException("unable to dump given function");
 		}
@@ -815,8 +815,8 @@ public final class StringLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString().toString();  // FIXME
 			String pattern = args.nextString().toString();  // FIXME
-			int init = args.optNextInt(1);
-			boolean plain = args.optNextBoolean(false);
+			int init = args.nextOptionalInt(1);
+			boolean plain = args.nextOptionalBoolean(false);
 
 			init = lowerBound(init, s.length());
 
@@ -1158,7 +1158,7 @@ public final class StringLib {
 			else if (o instanceof ByteString) s = LuaFormat.escape(((ByteString) o).toString());
 			else if (o instanceof Number) s = Conversions.stringValueOf((Number) o).toString();
 			else {
-				throw new BadArgumentException(args.at(), name(), "value has no literal form");
+				throw new BadArgumentException(args.position(), name(), "value has no literal form");
 			}
 
 			bld.append(s);
@@ -1451,7 +1451,7 @@ public final class StringLib {
 
 			final Object repl;
 			if (!args.hasNext()) {
-				throw args.badArgument(3, ARG3_ERROR_MESSAGE);
+				throw new BadArgumentException(3, name(), ARG3_ERROR_MESSAGE);
 			}
 			else {
 				Object o = args.nextAny();
@@ -1465,11 +1465,11 @@ public final class StringLib {
 					repl = o;
 				}
 				else {
-					throw args.badArgument(3, ARG3_ERROR_MESSAGE);
+					throw new BadArgumentException(3, name(), ARG3_ERROR_MESSAGE);
 				}
 			}
 
-			int n = args.optNextInt(Integer.MAX_VALUE);
+			int n = args.nextOptionalInt(Integer.MAX_VALUE);
 
 			StringPattern pat = StringPattern.fromString(pattern);
 
@@ -1690,7 +1690,7 @@ public final class StringLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			String s = args.nextString().toString();  // FIXME
 			String pattern = args.nextString().toString();  // FIXME
-			int init = args.optNextInt(1);
+			int init = args.nextOptionalInt(1);
 
 			init = lowerBound(init, s.length());
 
@@ -1744,7 +1744,7 @@ public final class StringLib {
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			ByteString s = args.nextString();
 			int n = args.nextInt();
-			ByteString sep = args.hasNext() ? args.nextString() : ByteString.empty();
+			ByteString sep = args.nextOptionalString(ByteString.empty());
 
 			final ByteString result;
 			if (n > 0) {
@@ -1805,8 +1805,8 @@ public final class StringLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			ByteString s = args.nextString();
-			int i = args.nextInt();
-			int j = args.optNextInt(-1);
+			int i = (int) args.nextInteger();
+			int j = (int) args.nextOptionalInteger(-1);
 
 			int len = s.length();
 			i = lowerBound(i, len) - 1;

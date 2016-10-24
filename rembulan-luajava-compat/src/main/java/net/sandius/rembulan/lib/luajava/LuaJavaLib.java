@@ -112,7 +112,7 @@ public final class LuaJavaLib {
 				throws ResolvedControlThrowable {
 
 			String className = args.nextString().toString();
-			Object[] ctorArgs = args.getTail();
+			Object[] ctorArgs = args.copyRemaining();
 
 			final ObjectWrapper instance;
 			try {

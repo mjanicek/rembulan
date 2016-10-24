@@ -293,7 +293,7 @@ public final class CoroutineLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			Coroutine coroutine = args.nextCoroutine();
-			Object[] resumeArgs = args.getTail();
+			Object[] resumeArgs = args.copyRemaining();
 
 			context.getReturnBuffer().setTo();
 
@@ -331,7 +331,7 @@ public final class CoroutineLib {
 		@Override
 		protected void invoke(ExecutionContext context, ArgumentIterator args) throws ResolvedControlThrowable {
 			try {
-				context.yield(args.getAll());
+				context.yield(args.copyAll());
 			}
 			catch (UnresolvedControlThrowable ct) {
 				throw ct.resolve(this, null);
