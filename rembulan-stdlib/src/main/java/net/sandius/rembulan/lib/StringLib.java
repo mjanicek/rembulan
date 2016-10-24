@@ -1223,7 +1223,7 @@ public final class StringLib {
 					}
 
 					if (c >= '0' && c <= '9') {
-						width = Math.max(0, width) * 10 + (c - '0');
+						width = Math.max(0, width) * 10 + ((int) c - (int) '0');
 						if (width >= 100) {
 							throw new IllegalArgumentException("illegal format (width or precision too long)");
 						}
@@ -1255,7 +1255,7 @@ public final class StringLib {
 						}
 
 						if (c >= '0' && c <= '9') {
-							precision = precision * 10 + (c - '0');
+							precision = precision * 10 + ((int) c - (int) '0');
 							if (precision >= 100) {
 								throw new IllegalArgumentException("illegal format (width or precision too long)");
 							}

@@ -96,7 +96,7 @@ public abstract class ByteString implements Comparable<ByteString> {
 	public static ByteString fromRaw(String s) {
 		byte[] bytes = new byte[s.length()];
 		for (int i = 0; i < bytes.length; i++) {
-			bytes[i] = (byte) (s.charAt(i) & 0xff);
+			bytes[i] = (byte) ((int) s.charAt(i) & 0xff);
 		}
 		return wrap(bytes);
 	}

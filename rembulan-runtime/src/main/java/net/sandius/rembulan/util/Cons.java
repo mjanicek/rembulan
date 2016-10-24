@@ -110,7 +110,7 @@ public class Cons<T> {
 
 	private static <T> Cons<T> fromIterator(Iterator<T> iterator) {
 		if (iterator.hasNext()) {
-			return new Cons<T>(iterator.next(), fromIterator(iterator));
+			return new Cons<>(iterator.next(), fromIterator(iterator));
 		}
 		else {
 			return null;
@@ -194,10 +194,10 @@ public class Cons<T> {
 			return this;
 		}
 		else if (prefix.cdr == null) {
-			return new Cons<T>(prefix.car, this);
+			return new Cons<>(prefix.car, this);
 		}
 		else {
-			return new Cons<T>(prefix.car, prepend(prefix.cdr));
+			return new Cons<>(prefix.car, prepend(prefix.cdr));
 		}
 	}
 
@@ -307,7 +307,7 @@ public class Cons<T> {
 	 * @return  a cons list obtained by flattening {@code original}
 	 */
 	public static <T> Cons<T> flatten(Cons<Cons<T>> original) {
-		ArrayList<T> tmp = new ArrayList<T>();
+		List<T> tmp = new ArrayList<T>();
 		Cons<Cons<T>> p = original;
 		while (p != null) {
 			Cons<T> q = p.car;
