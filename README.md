@@ -97,18 +97,31 @@ Maven repository.
 
 #### Standalone REPL
 
-Much like PUC-Lua, Rembulan contains a standalone REPL. This is packaged in the module
-`rembulan-standalone`. To build the REPL, first run
+Much like PUC-Lua, Rembulan contains a standalone REPL. This is provided in the module
+`rembulan-standalone`. To build the REPL, run
 
 ```sh
-mvn package
+mvn package -DskipTests -Dmaven.javadoc.skip=true -DstandaloneFinalName=rembulan
 ```
 
-Next, to run the REPL:
+The standalone REPL is packaged as a self-contained, executable [Capsule](http://www.capsule.io)
+and is placed in the directory `rembulan-standalone/target`.
+ 
+To run the REPL:
 
 ```sh
-cd rembulan-standalone/target/appassembler/bin
-./rembulan
+cd rembulan-standalone/target
+./rembulan-capsule.x
+```
+
+The standalone REPL mimics the behaviour or the standalone PUC-Lua interpreter and may be
+used as its drop-in replacement.
+
+```
+$ ./rembulan-capsule.x
+Rembulan 0.1-SNAPSHOT (Java HotSpot(TM) 64-Bit Server VM, Java 1.8.0_60)
+> print("hello world!")
+hello world!
 ```
 
 ### Using Rembulan from Maven
